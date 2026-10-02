@@ -306,6 +306,11 @@ input:focus,select:focus,textarea:focus{outline:3px solid #3B82F6;outline-offset
   .doc{border:0;padding:0}
   dialog::backdrop{display:none}
 }
+/* Identifiants longs (cartes CNAPS…) : retour à la ligne dans les tableaux empilés sur mobile. */
+td .num,td{overflow-wrap:anywhere;min-width:0}
+td .num{white-space:normal;text-align:right}
+/* Conteneurs défilants positionnés : un élément en absolu à l'intérieur ne doit pas élargir la page. */
+.tabs,.tbl-wrap,.table-wrap{position:relative}
 </style>
 </head>
 <body>
