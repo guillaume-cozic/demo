@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Atelier réparation boîtes auto</title>
+<meta name="description" content="Plateforme de réparation électronique automobile à distance : catalogue de prestations TCU et mécatroniques, commande et paiement Stripe en mode test, espace client avec devis complémentaires, back-office atelier en Kanban, réception des pièces, factures et avoirs, garanties et SAV.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4F6;--panel:#FFFFFF;--panel-2:#F7F8FA;--ink:#14191F;--muted:#4F5966;--line:#DFE3E8;--line-2:#C3CAD3;
+  --accent:#0B5C7A;--accent-ink:#FFFFFF;--accent-soft:#E0EDF2;--accent-text:#084A63;
+  --ok:#17683F;--ok-soft:#DDF1E5;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#AE2430;--bad-soft:#FBE1E3;--info:#24548F;--info-soft:#E0EAF7;--vio:#5B3F9E;--vio-soft:#ECE6F8;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 3px 10px rgba(16,24,40,.05);
+  --font:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0D1013;--panel:#151A1F;--panel-2:#1B2127;--ink:#E5E9ED;--muted:#9DA7B3;--line:#29313A;--line-2:#3B4550;
+  --accent:#5DB7D7;--accent-ink:#06222D;--accent-soft:#12313D;--accent-text:#8FD0E7;
+  --ok:#6FD39E;--ok-soft:#14301F;--warn:#F2B661;--warn-soft:#352612;--bad:#FF8E97;--bad-soft:#3A1A1E;--info:#93BFF2;--info-soft:#172A40;--vio:#C1AEF2;--vio-soft:#2A2340;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3,h4{margin:0;letter-spacing:-.01em;line-height:1.25}
+p{margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.92em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stack{display:grid;gap:14px}
+.r{text-align:right}
+
+/* Bandeau démo */
+.demo-band{background:var(--warn-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600}
+
+/* En-tête */
+.top{display:flex;align-items:center;gap:10px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);letter-spacing:0}
+.brand-mark{width:36px;height:36px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current]{background:var(--accent-soft);color:var(--accent-text)}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px}
+.who label{font-size:13px;color:var(--muted);white-space:nowrap}
+.who select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px;max-width:290px}
+.cart-btn{position:relative}
+.cart-btn .cnt{position:absolute;top:2px;right:2px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px}
+main{padding:20px clamp(16px,2vw,32px) 56px}
+@media (max-width:760px){.who{margin-left:0;width:100%}.who select{flex:1;max-width:none}#nav{order:3;width:100%}}
+
+/* Boutons, champs */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.req{color:var(--bad)}
+.field input,.field select,.field textarea,.input{min-height:44px;padding:9px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);width:100%}
+.field input[type=file]{padding:8px}
+.field textarea{min-height:80px;resize:vertical}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 3px var(--bad-soft)}
+.err{color:var(--bad);font-size:13px}
+.err:empty{display:none}
+.hint{color:var(--muted);font-size:13px}
+.row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;min-height:32px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:none}
+.radio-cards{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.radio-cards label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;cursor:pointer;font-size:14px}
+.radio-cards label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.radio-cards input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent)}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:13px;color:var(--muted)}
+.search input{padding-left:38px!important}
+
+/* Cartes, badges */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.card-h h2,.card-h h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-b{padding:14px 16px}
+.empty{color:var(--muted);text-align:center;padding:24px 12px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;line-height:1.6}
+.b-n{background:var(--panel-2);color:var(--muted);border:1px solid var(--line-2)}
+.b-info{background:var(--info-soft);color:var(--info)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.b-vio{background:var(--vio-soft);color:var(--vio)}
+.tag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent-text)}
+.tag.ghost{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.chip{min-height:36px;border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:0 12px;cursor:pointer;font-size:13px;font-family:var(--mono)}
+.chip:hover{border-color:var(--accent);color:var(--accent-text)}
+.refs{display:flex;flex-wrap:wrap;gap:6px}
+.refs span{font-family:var(--mono);font-size:12.5px;padding:3px 8px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line)}
+.note{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;font-size:13.5px;background:var(--info-soft);color:var(--ink)}
+.note svg{color:var(--info);margin-top:2px}
+.note.warn{background:var(--warn-soft)}.note.warn svg{color:var(--warn)}
+.note.bad{background:var(--bad-soft)}.note.bad svg{color:var(--bad)}
+.note.ok{background:var(--ok-soft)}.note.ok svg{color:var(--ok)}
+.tip{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;border:1px dashed var(--line-2);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted)}
+.dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0;font-size:14px}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.avatar{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:800;background:var(--accent-soft);color:var(--accent-text);flex:none}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--panel-2)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl.compact td{padding:6px 0}
+.tbl tfoot td{border-top:1px solid var(--line-2);font-weight:600}
+.tbl .r{text-align:right;white-space:nowrap}
+
+/* Boutique */
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px 32px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:18px}
+.eyebrow{font-size:12.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text);font-weight:700;margin-bottom:6px}
+.hero h1{font-size:clamp(20px,2.1vw,28px);font-weight:800}
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:13.5px}
+.how li{display:flex;flex-direction:column;gap:6px;border-left:2px solid var(--accent);padding:2px 0 2px 10px}
+.how .num{color:var(--accent-text);font-weight:600}
+.shop{display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;align-items:start}
+.filters{padding:16px;display:grid;gap:14px;position:sticky;top:76px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.svc{padding:16px;display:flex;flex-direction:column;gap:10px}
+.svc h3{font-size:16px;font-weight:700}
+.svc-top{display:flex;gap:6px;flex-wrap:wrap}
+.svc-meta{display:flex;gap:18px;margin:0;font-size:13px}
+.svc-meta dt{color:var(--muted)}.svc-meta dd{margin:0;font-weight:600}
+.svc-foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:10px;border-top:1px solid var(--line)}
+.price{font-size:20px;font-weight:600;color:var(--ink)}
+.price small{font-size:12px;color:var(--muted);font-family:var(--font)}
+.match{font-size:12.5px;color:var(--ok)}
+.list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.svc-page{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.svc-page h1{font-size:clamp(22px,2.4vw,30px);font-weight:800;margin:8px 0}
+.sec{margin-top:18px}
+.sec h2{font-size:15px;font-weight:700;margin-bottom:8px}
+.ticks{list-style:none;padding:0;margin:0;display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.ticks li{display:flex;gap:8px;font-size:14px}
+.ticks svg{color:var(--accent);margin-top:2px}
+.buy{padding:18px;display:grid;gap:12px;position:sticky;top:76px}
+.buy .price{font-size:30px}
+.steps6{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;counter-reset:s}
+.steps6 li{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13.5px;counter-increment:s}
+.steps6 li::before{content:counter(s);display:block;font-family:var(--mono);color:var(--accent-text);font-weight:600}
+@media (max-width:980px){.shop,.svc-page,.hero{grid-template-columns:1fr}.filters,.buy{position:static}.how{grid-template-columns:repeat(2,1fr)}}
+
+/* Stepper */
+.stepper{list-style:none;margin:0;padding:0;display:flex;gap:0;overflow-x:auto;scrollbar-width:thin}
+.stepper li{flex:1 0 92px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:12px;color:var(--muted);position:relative;padding:0 4px 4px}
+.stepper li::before{content:"";position:absolute;top:13px;left:-50%;right:50%;height:2px;background:var(--line-2)}
+.stepper li:first-child::before{display:none}
+.stepper li.done::before,.stepper li.cur::before{background:var(--accent)}
+.stepper .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:2px solid var(--line-2);font-family:var(--mono);font-size:12px;position:relative;z-index:1}
+.stepper .dot svg{width:14px;height:14px}
+.stepper li.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stepper li.cur .dot{border-color:var(--accent);color:var(--accent-text);box-shadow:0 0 0 4px var(--accent-soft)}
+.stepper li.cur{color:var(--ink);font-weight:700}
+
+/* Espace client */
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.subtabs button{min-height:44px;border:0;background:transparent;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;display:inline-flex;gap:8px;align-items:center;white-space:nowrap}
+.subtabs button[aria-current]{color:var(--accent-text);border-bottom-color:var(--accent)}
+.page-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.page-head h1{font-size:24px;font-weight:800}
+.split{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
+.dlist{display:grid;gap:8px}
+.ditem{display:grid;gap:4px;text-align:left;width:100%;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 13px;cursor:pointer;min-height:44px}
+.ditem:hover{border-color:var(--line-2)}
+.ditem[aria-current]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.ditem .l1{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:16px;align-items:start}
+.dmain,.dside{display:grid;gap:16px;align-content:start;min-width:0}
+@media (min-width:1500px){.dgrid.wide2{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}.dgrid.wide2 .dside{grid-template-columns:1fr 1fr}}
+@media (max-width:1100px){.split,.dgrid{grid-template-columns:1fr}}
+.quote{border:1px solid var(--line-2);border-radius:12px;padding:14px;display:grid;gap:10px}
+.quote.sent{border-color:var(--warn);background:var(--warn-soft)}
+.quote-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+details summary{cursor:pointer;font-size:13px;color:var(--muted);min-height:32px;display:flex;align-items:center}
+.mini-log{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px;font-size:13px}
+.mini-log .num{color:var(--muted);margin-right:6px}
+.thread{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;padding:2px}
+.msg{max-width:88%;padding:8px 11px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);font-size:14px}
+.msg.mine{align-self:flex-end;background:var(--accent-soft);border-color:transparent}
+.msg .meta{font-size:11.5px;color:var(--muted);margin-bottom:2px}
+.msgform{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+.msgform .field{flex:1}
+.msgform textarea{min-height:44px!important}
+.files{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.files li{display:flex;align-items:center;gap:10px;font-size:13.5px;padding:6px 8px;border:1px solid var(--line);border-radius:9px}
+.files .fn{flex:1;min-width:0;overflow-wrap:anywhere}
+.files .fn small{display:block;color:var(--muted)}
+.upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.upload input{position:absolute;opacity:0;width:1px;height:1px}
+.upload label{cursor:pointer}
+.upload input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:13px;max-height:320px;overflow-y:auto}
+.timeline li{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;border-left:2px solid var(--line-2);padding-left:10px}
+.timeline .w{grid-column:1/-1;color:var(--muted);font-size:12px}
+
+/* Back-office */
+.bo{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:start}
+.bonav{display:grid;gap:3px;position:sticky;top:76px}
+.bonav button{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;text-align:left;width:100%}
+.bonav button:hover{background:var(--panel);color:var(--ink)}
+.bonav button[aria-current]{background:var(--panel);color:var(--accent-text);box-shadow:var(--shadow),inset 3px 0 0 var(--accent)}
+.bonav .cnt{margin-left:auto;font-size:12px;background:var(--bad);color:#fff;border-radius:999px;padding:0 7px;font-weight:700}
+.bonav .lk{margin-left:auto;width:15px;height:15px}
+.bonav h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:12px 12px 4px}
+@media (max-width:900px){.bo{grid-template-columns:1fr}.bonav{position:static;display:flex;overflow-x:auto;scrollbar-width:none;gap:4px}.bonav button{white-space:nowrap;width:auto}.bonav h4{display:none}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.kpi b{display:block;font-size:22px;font-family:var(--mono);font-weight:600}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.toolbar .field{min-width:200px}
+.toolbar .grow{flex:1}
+.kb{display:grid;grid-template-columns:repeat(9,minmax(178px,1fr));gap:8px;overflow-x:auto;padding-bottom:8px}
+.kcol{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:340px;min-width:0}
+.kcol h3{font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.03em}
+.kcol h3 span{font-family:var(--mono);color:var(--muted)}
+.kcards{display:flex;flex-direction:column;gap:7px;padding:7px}
+.kcard{text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:13px;width:100%}
+.kcard:hover{border-color:var(--accent)}
+.kcard .kid{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between}
+.kcard .kt{font-weight:700}
+.kcard .kf{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.kcard .kf .avatar{margin-left:auto;width:22px;height:22px;font-size:10px}
+@media (max-width:760px){.kb{grid-template-columns:repeat(9,80vw);scroll-snap-type:x mandatory}.kcol{scroll-snap-align:start}}
+.lockcard{display:grid;place-items:center;text-align:center;gap:10px;padding:48px 20px}
+.lockcard svg{width:36px;height:36px;color:var(--muted)}
+.wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+
+/* Dialog */
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.wide{width:min(860px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(10,14,20,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dlg-h h2{font-size:17px;font-weight:800}
+.dlg-b{padding:18px 20px;display:grid;gap:14px}
+.stripe{display:grid;gap:12px}
+.stripe-top{display:flex;justify-content:space-between;align-items:center}
+.stripe-logo{font-weight:800;font-size:20px;letter-spacing:-.04em;color:#635BFF}
+@media (prefers-color-scheme:dark){.stripe-logo{color:#A39EFF}}
+.stripe-amt{font-size:28px;font-weight:600}
+.wh-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.wh-steps li{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted)}
+.wh-steps li.done{color:var(--ok)}
+.wh-steps li.run{color:var(--ink)}
+.spin{width:18px;height:18px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.cart-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+
+/* Documents imprimables */
+.doc{background:#fff;color:#111;border:1px solid #ddd;border-radius:8px;padding:28px;font-size:13px;line-height:1.45}
+.doc h2{font-size:22px;margin:0 0 4px}
+.doc .dh{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+.doc table{width:100%;border-collapse:collapse;margin:14px 0}
+.doc th,.doc td{border-bottom:1px solid #ddd;padding:7px 4px;text-align:left}
+.doc .r{text-align:right}
+.doc .tot td{font-weight:700;border-top:2px solid #111}
+.doc .foot{margin-top:18px;font-size:11.5px;color:#444;border-top:1px solid #ddd;padding-top:10px}
+.doc .big{font-family:var(--mono);font-size:34px;font-weight:600;border:3px solid #111;padding:10px 16px;display:inline-block;margin:10px 0}
+#print{display:none}
+@media print{body>*:not(#print){display:none!important}#print{display:block}#print .doc{border:0}body{background:#fff}}
+
+/* Toasts */
+#toasts{position:fixed;bottom:16px;right:16px;display:grid;gap:8px;z-index:100;max-width:min(420px,calc(100vw - 32px))}
+.toast{display:flex;gap:10px;align-items:flex-start;background:var(--ink);color:var(--bg);padding:11px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow)}
+.toast.bad svg{color:#FF8E97}
+</style>
+</head>
+<body>
+<div class="demo-band" role="region" aria-label="Bandeau de démonstration"><span><b>Démonstration</b> — données fictives, paiements Stripe en mode test, emails simulés.</span><button type="button" data-a="reset">Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="brand-mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4"/></svg></span><span>TCU Lab<small>Réparation électronique auto</small></span></div>
+  <nav id="nav" aria-label="Espaces"></nav>
+  <div class="who"><label for="persona">Voir en tant que</label><select id="persona"></select>
+    <button class="icon-btn cart-btn" id="cartBtn" data-a="cart" aria-label="Panier"></button></div>
+</header>
+<main id="main"></main>
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
+<div id="print"></div>
+<script>
+"use strict";
+/* ---------- Icônes ---------- */
+const P={search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 8H6.2"/>',box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/>',wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',print:'<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>',truck:'<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',plus:'<path d="M12 5v14M5 12h14"/>',back:'<path d="M19 12H5M12 19l-7-7 7-7"/>',alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',clip:'<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',board:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/>',building:'<rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z"/>',send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',history:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/>',info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',swap:'<path d="M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
+const spin='<span class="spin" aria-hidden="true"></span>';
+
+/* ---------- Utilitaires ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=n=>(+n).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const r2=n=>Math.round(n*100)/100;
+const ttc=ht=>r2(ht*1.2);
+const DAY=864e5;
+const iso=(off=0,h=9,m=0)=>{const d=new Date(Date.now()+off*DAY);d.setHours(h,m,0,0);return d.toISOString()};
+const now=()=>new Date().toISOString();
+const fd=s=>new Date(s).toLocaleDateString('fr-FR');
+const fdt=s=>new Date(s).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const rid=(n=10)=>Array.from({length:n},()=>'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*56)]).join('');
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[\s.\-\/()]/g,'');
+const g=(fd,k)=>String(fd.get(k)??'').trim();
+const pad=(n,l)=>String(n).padStart(l,'0');
+const initials=n=>String(n||'?').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
+const fmtSiret=s=>String(s||'').replace(/(\d{3})(\d{3})(\d{3})(\d{5})/,'$1 $2 $3 $4');
+const localDT=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+const luhn=n=>{let s=0;[...n].reverse().forEach((c,i)=>{let x=+c;if(i%2){x*=2;if(x>9)x-=9}s+=x});return s%10===0};
+const days=s=>Math.max(0,Math.floor((Date.now()-new Date(s))/DAY));
+
+/* ---------- Référentiel ---------- */
+const STAGES=['Colis attendu','Réception','Diagnostic','En attente client','Réparation','Tests','Prêt à expédier','Expédié','Terminé'];
+const CL_STAGES=['Envoi de la pièce','Pièce reçue','Diagnostic','Votre décision','Réparation','Tests','Prêt à expédier','Expédié','Terminé'];
+const SAVSTEPS=['Demande SAV','Analyse','Demande d’informations','Autorisation de retour','Réception','Inspection','Décision','Tests','Expédition','Clôture'];
+const TECHS=['Karim Benali','Léa Fontaine','Hugo Marchetti'];
+const EXT=['jpg','jpeg','png','webp','pdf','bin','log','txt','data'];
+const ADDR='TCU Lab — Atelier · 14 rue des Frères Lumière · 69800 Saint-Priest';
+const SV=[
+ {id:'m7229',short:'TCU 722.9',name:'Réparation TCU Mercedes 722.9 (VGS2 / VGS3)',brand:'Mercedes',box:'722.9 7G-Tronic',type:'TCU / platine',ht:325,delay:'3 à 5 jours ouvrés',war:24,refs:['A0034460310','A0335457332','A0044460310','A0335458832'],veh:['Classe C W204','Classe E W212','Sprinter 906','Vito W639','ML W164'],sym:['Mode dégradé, boîte bloquée en 2e ou 3e','Codes 0717 / 0718 capteurs de régime','Message « Visiter atelier » au combiné','À-coups au passage des rapports']},
+ {id:'m7228',short:'TCU 722.8',name:'Réparation TCU Mercedes 722.8 Autotronic (CVT)',brand:'Mercedes',box:'722.8 Autotronic',type:'TCU / platine',ht:290,delay:'4 à 6 jours ouvrés',war:12,refs:['A1695451162','A1695450062'],veh:['Classe A W169','Classe B W245'],sym:['Voyant boîte et mode secours','Perte de traction à chaud','Code P2715 pression']},
+ {id:'b7229',short:'Boîte 722.9',name:'Remise en état boîte 722.9 (échange standard)',brand:'Mercedes',box:'722.9 7G-Tronic',type:'Boîte automatique',ht:1490,delay:'8 à 12 jours ouvrés',war:24,refs:['A2212701100','A2212702600','A2042701000'],veh:['Classe C W204','Classe E W212','Classe S W221'],sym:['Patinage généralisé','Bruit de roulement','Limaille dans le carter']},
+ {id:'dq200',short:'Méca DQ200',name:'Réparation mécatronique DSG7 DQ200 (0AM)',brand:'Volkswagen / Audi',box:'DQ200 0AM',type:'Mécatronique',ht:450,delay:'5 à 7 jours ouvrés',war:24,refs:['0AM927769D','0AM325025D','0AM927769F','0AM325065S'],veh:['Golf VII 1.4 TSI','Polo 6R','Audi A3 8V','Skoda Octavia III','Seat Leon III'],sym:['Clignotement « PRNDS » au combiné','Perte de pression accumulateur (P189C)','Marche arrière impossible à engager','Pompe hydraulique qui tourne en continu']},
+ {id:'dq250',short:'Méca DQ250',name:'Réparation mécatronique DSG6 DQ250 (02E)',brand:'Volkswagen / Audi',box:'DQ250 02E',type:'Mécatronique',ht:520,delay:'5 à 7 jours ouvrés',war:24,refs:['02E927770AL','02E927770AJ','02E927770AE'],veh:['Golf VI GTI','Passat B7','Audi TT 8J','Skoda Superb II'],sym:['Patinage embrayage K1/K2','Code P17BF capteur de pression','Mode dégradé aléatoire']},
+ {id:'dq381',short:'Platine DQ381',name:'Réparation platine TCU DQ381 (0GC)',brand:'Volkswagen / Audi',box:'DQ381 0GC',type:'TCU / platine',ht:480,delay:'6 à 8 jours ouvrés',war:12,refs:['0GC927711G','0GC927711P'],veh:['Tiguan II 2.0 TDI','Passat B8','Arteon'],sym:['Défaut capteur de vitesse arbre','À-coups en 2e / 3e','Code P0716']},
+ {id:'dq500',short:'TCU DQ500',name:'Réparation TCU DSG7 DQ500 (0BH)',brand:'Volkswagen / Audi',box:'DQ500 0BH',type:'TCU / platine',ht:560,delay:'6 à 8 jours ouvrés',war:24,refs:['0BH927711C','0BH927711D'],veh:['Transporter T6','Tiguan 2.0 TDI 4Motion','Audi Q3 8U'],sym:['Boîte bloquée en N','Code P0705 contacteur de position','Témoin de défaut moteur allumé']},
+ {id:'zf6hp',short:'Méca ZF 6HP',name:'Réparation mécatronique ZF 6HP (GS19)',brand:'BMW / ZF',box:'ZF 6HP',type:'Mécatronique',ht:540,delay:'5 à 8 jours ouvrés',war:24,refs:['7519199','7568221','0260550002'],veh:['BMW Série 3 E90','Série 5 E60','X3 E83','Jaguar XF'],sym:['Message « Transmission défaillante »','Codes 4F1C / 5065 capteurs','Patinage en 3e']},
+ {id:'zf8hp',short:'EGS ZF 8HP',name:'Réparation unité EGS ZF 8HP',brand:'BMW / ZF',box:'ZF 8HP',type:'Mécatronique',ht:590,delay:'6 à 9 jours ouvrés',war:24,refs:['0260550043','24359904567','24357634592'],veh:['BMW Série 3 F30','Série 5 F10','X5 F15'],sym:['Boîte qui reste en P','Code 420710 alimentation','Vibrations au rétrogradage']},
+ {id:'edc17',short:'ECU EDC17',name:'Réparation calculateur moteur Bosch EDC17 / MED17',brand:'Multi-marques',box:'',type:'Calculateur moteur',ht:380,delay:'4 à 6 jours ouvrés',war:12,refs:['0281015029','0281016374','0261S07383'],veh:['Peugeot 308 1.6 HDi','Renault Mégane III dCi','BMW 320d E90','VW Passat B7 TDI'],sym:['Pas de communication avec la valise','Démarrage impossible','Défaut alimentation injecteurs']},
+];
+const svc=id=>SV.find(s=>s.id===id);
+
+/* ---------- État ---------- */
+const KEY='tculab-demo-v1';
+let S;
+function mk(o){return Object.assign({stage:0,tech:'',since:o.created,rec:null,diag:null,quotes:[],work:[],tests:null,ship:null,invoice:null,war:null,msgs:[],files:[],notes:[],paid:[],flag:null},o)}
+function mkInv(no,type,cid,did,at,lines,extra={}){const ht=r2(lines.reduce((a,l)=>a+l.ht,0)),tva=r2(ht*.2);return Object.assign({no,type,cid,did,at,lines,ht,tva,ttc:r2(ht+tva)},extra)}
+function seed(){
+ const customers=[
+  {id:'c1',type:'part',name:'Julien Marchand',email:'julien.marchand@exemple.fr',phone:'06 41 22 87 15',city:'Villeurbanne (69)'},
+  {id:'c2',type:'pro',name:'Nadia Ferreira',company:'Garage des Tilleuls SARL',siret:'81234567800021',tva:'FR42812345678',email:'atelier@garage-tilleuls.exemple',phone:'02 40 18 63 90',city:'Rezé (44)',users:['Nadia Ferreira (administratrice société)','Paul Girard (mécanicien)']},
+  {id:'c3',type:'part',name:'Thomas Lebrun',email:'t.lebrun@exemple.fr',phone:'06 72 10 45 33',city:'Rennes (35)'},
+  {id:'c4',type:'pro',name:'Marc Aubert',company:'Autos Prestige 33',siret:'90122233300014',tva:'FR17901222333',email:'contact@autosprestige33.exemple',phone:'05 56 44 20 11',city:'Mérignac (33)',users:['Marc Aubert (administrateur société)']},
+  {id:'c5',type:'part',name:'Claire Dumont',email:'claire.dumont@exemple.fr',phone:'07 81 56 02 98',city:'Annecy (74)'}];
+ const rec=(off,ref,serial,extra={})=>Object.assign({at:iso(off,9,40),colis:'Bon état',piece:'Bon état',ref,serial,rem:'',photos:['colis.jpg','piece_face.jpg'],issue:'conforme'},extra);
+ const okTests=off=>({bench:true,codes:true,adapt:true,endurance:true,c:'Banc 3 h sans défaut, aucun code mémorisé.',at:iso(off,15)});
+ const D=[
+  mk({id:'REP-2026-0141',cid:'c1',sid:'dq200',stage:3,created:iso(-9,10,12),since:iso(-1,16,5),tech:'Karim Benali',veh:{model:'Volkswagen Golf VII 1.4 TSI',vin:'WVWZZZAUZFW412873',plate:'FG-418-KT',box:'DQ200 (0AM)'},
+   paid:[{l:'Forfait réparation mécatronique DQ200',a:540,ref:'pi_3QfA81LkTx',at:iso(-9,10,12)}],
+   rec:rec(-6,'0AM927769D','TSL4291-0087',{rem:'Connecteur légèrement oxydé.'}),
+   diag:{codes:[{c:'P189C',l:'Pression accumulateur insuffisante'},{c:'P0841',l:'Capteur pression huile — plage / performance'}],notes:'Accumulateur fissuré, fuite interne. Platine électronique saine au banc.'},
+   quotes:[{id:'DC-2026-0031',lines:[{l:'Remplacement accumulateur de pression',a:95},{l:'Kit joints et vis du corps hydraulique',a:45}],status:'sent',sent:iso(-1,16,5),due:iso(4,18,0),reminders:0,hist:[{at:iso(-1,16,5),t:'Devis envoyé au client (email + espace client)'}]}],
+   msgs:[{f:'client',who:'Julien Marchand',at:iso(-7,18,20),t:'Bonjour, colis déposé ce soir en point relais.'},{f:'atelier',who:'Karim Benali',at:iso(-1,16,6),t:'Bonjour, le diagnostic révèle un accumulateur fissuré en plus du défaut prévu. Un devis complémentaire vous attend dans votre espace.'}],
+   files:[{n:'diag_banc_0141.log',s:'48 Ko',by:'Karim Benali',at:iso(-2)},{n:'lecture_defauts_0141.pdf',s:'212 Ko',by:'Karim Benali',at:iso(-2)},{n:'photo_piece_0141.jpg',s:'1,2 Mo',by:'Karim Benali',at:iso(-6)}]}),
+  mk({id:'REP-2026-0118',cid:'c1',sid:'m7229',stage:8,created:iso(-44,14,2),since:iso(-32),tech:'Karim Benali',veh:{model:'Mercedes Classe C 220 CDI (W204)',vin:'WDD2040021A583920',plate:'DX-207-PL',box:'722.9 (7G-Tronic)'},
+   paid:[{l:'Forfait réparation TCU 722.9',a:390,ref:'pi_3P8kd2LkQa',at:iso(-44,14,2)}],rec:rec(-40,'A0034460310','VGS3-77812'),
+   diag:{codes:[{c:'0717',l:'Capteur de régime turbine — signal absent'}],notes:'Capteur N2 interne défaillant, réparation dans le forfait.'},
+   work:[{l:'Remplacement capteur de régime N2/N3',p:'Capteur Hall 722.9',q:1},{l:'Reprogrammation et adaptation',p:'',q:1}],tests:okTests(-34),ship:{carrier:'Colissimo',num:'6A20391840271',at:iso(-33)},invoice:'FA-2026-00072',war:{start:iso(-32),end:iso(-32+730)},
+   files:[{n:'rapport_tests_0118.pdf',s:'180 Ko',by:'Karim Benali',at:iso(-34)}]}),
+  mk({id:'REP-2026-0144',cid:'c2',sid:'zf6hp',stage:4,created:iso(-7,9,5),since:iso(-1,11),tech:'Léa Fontaine',veh:{model:'BMW 320d (E90)',vin:'WBAPN71040A891432',plate:'EM-554-RB',box:'ZF 6HP19'},
+   paid:[{l:'Forfait réparation mécatronique ZF 6HP',a:648,ref:'pi_3QgB02LkRm',at:iso(-7,9,5)}],rec:rec(-4,'7519199','GS19-2231876'),
+   diag:{codes:[{c:'4F1C',l:'Capteur de vitesse de sortie — plausibilité'}],notes:'Capteur de sortie HS, couvert par le forfait.'},work:[{l:'Remplacement capteur de vitesse de sortie',p:'Capteur GS19 sortie',q:1}]}),
+  mk({id:'REP-2026-0139',cid:'c2',sid:'m7229',stage:7,created:iso(-12,8,30),since:iso(-1,16),tech:'Karim Benali',veh:{model:'Mercedes Sprinter 316 CDI (906)',vin:'WDB9066331S772104',plate:'FH-903-ZC',box:'722.9'},
+   paid:[{l:'Forfait réparation TCU 722.9',a:390,ref:'pi_3QdZ71LkUe',at:iso(-12,8,30)}],rec:rec(-9,'A0335457332','VGS2-55102'),diag:{codes:[{c:'0718',l:'Capteur de régime N3 — signal absent'}],notes:''},
+   work:[{l:'Remplacement capteur N3',p:'Capteur Hall 722.9',q:1}],tests:okTests(-2),ship:{carrier:'Chronopost',num:'XY482019375FR',at:iso(-1,16)}}),
+  mk({id:'REP-2026-0102',cid:'c2',sid:'dq250',stage:8,created:iso(-55,10),since:iso(-40),tech:'Hugo Marchetti',veh:{model:'Volkswagen Golf VI GTI',vin:'WVWZZZ1KZBW301877',plate:'BK-662-FD',box:'DQ250 (02E)'},
+   paid:[{l:'Forfait réparation mécatronique DQ250',a:624,ref:'pi_3OzK19LkPb',at:iso(-55,10)},{l:'Complément DC-2026-0019',a:132,ref:'pi_3P1aa4LkVv',at:iso(-49,12)}],rec:rec(-51,'02E927770AL','DQ250-08812'),
+   diag:{codes:[{c:'P17BF',l:'Capteur de pression embrayage K2'}],notes:'Deux capteurs de pression à remplacer.'},
+   quotes:[{id:'DC-2026-0019',lines:[{l:'Remplacement capteurs de pression K1/K2',a:110}],status:'paid',sent:iso(-50,15),due:iso(-47,18),reminders:1,hist:[{at:iso(-50,15),t:'Devis envoyé au client'},{at:iso(-49,9),t:'Relance automatique J+1'},{at:iso(-49,12),t:'Devis accepté et payé (webhook confirmé)'}]}],
+   work:[{l:'Remplacement capteurs de pression K1/K2',p:'Capteur pression 02E (×2)',q:2}],tests:okTests(-42),ship:{carrier:'DPD',num:'05009871234567',at:iso(-41)},invoice:'FA-2026-00071',war:{start:iso(-40),end:iso(-40+730)}}),
+  mk({id:'REP-2026-0145',cid:'c2',sid:'dq200',stage:0,created:iso(-1,15,40),veh:{model:'Skoda Octavia III 1.4 TSI',vin:'TMBJG7NE5F0218843',plate:'FT-120-AS',box:'DQ200 (0AM)'},paid:[{l:'Forfait réparation mécatronique DQ200',a:540,ref:'pi_3QhC44LkWd',at:iso(-1,15,40)}]}),
+  mk({id:'REP-2026-0146',cid:'c3',sid:'dq381',stage:0,created:iso(0,8,12),veh:{model:'Volkswagen Tiguan II 2.0 TDI',vin:'WVGZZZ5NZJW084521',plate:'FR-771-HN',box:'DQ381 (0GC)'},paid:[{l:'Forfait réparation platine DQ381',a:576,ref:'pi_3QhH90LkYc',at:iso(0,8,12)}]}),
+  mk({id:'REP-2026-0142',cid:'c4',sid:'dq500',stage:1,created:iso(-6,11),since:iso(0,8,55),flag:'endommagee',veh:{model:'Volkswagen Transporter T6 2.0 TDI 4Motion',vin:'WV1ZZZ7HZJH114209',plate:'FB-845-QE',box:'DQ500 (0BH)'},
+   paid:[{l:'Forfait réparation TCU DQ500',a:672,ref:'pi_3QfQ12LkZt',at:iso(-6,11)}],rec:rec(0,'0BH927711C','0BH-44190',{at:iso(0,8,55),colis:'Carton abîmé',piece:'Connecteur endommagé',issue:'endommagee',rem:'Carton écrasé côté connecteur, deux broches tordues. Photos jointes.'})}),
+  mk({id:'REP-2026-0143',cid:'c4',sid:'zf8hp',stage:2,created:iso(-6,9),since:iso(-1,10),tech:'Léa Fontaine',veh:{model:'BMW 530d (F10)',vin:'WBAFW51070C649305',plate:'EK-318-MT',box:'ZF 8HP70'},
+   paid:[{l:'Forfait réparation unité EGS ZF 8HP',a:708,ref:'pi_3QfP77LkAa',at:iso(-6,9)}],rec:rec(-2,'0260550043','EGS8-110293'),diag:{codes:[{c:'420710',l:'Alimentation électrique EGS — sous-tension'}],notes:''}}),
+  mk({id:'REP-2026-0140',cid:'c5',sid:'edc17',stage:5,created:iso(-10,14),since:iso(0,9),tech:'Hugo Marchetti',veh:{model:'Peugeot 308 1.6 HDi',vin:'VF34C9HR8CS120944',plate:'CL-490-WS',box:'Calculateur moteur'},
+   paid:[{l:'Forfait réparation calculateur EDC17',a:456,ref:'pi_3QeA55LkBb',at:iso(-10,14)}],rec:rec(-7,'0281015029','EDC17-90021'),diag:{codes:[{c:'U0100',l:'Perte de communication CAN'}],notes:'Régulateur d’alimentation à remplacer.'},work:[{l:'Remplacement régulateur d’alimentation',p:'Régulateur 5 V',q:1}]}),
+  mk({id:'REP-2026-0137',cid:'c5',sid:'m7228',stage:6,created:iso(-14,10),since:iso(0,10),tech:'Karim Benali',veh:{model:'Mercedes Classe B 180 (W245)',vin:'WDD2452321J402715',plate:'BZ-118-GT',box:'722.8 Autotronic'},
+   paid:[{l:'Forfait réparation TCU 722.8',a:348,ref:'pi_3QcR33LkCc',at:iso(-14,10)}],rec:rec(-11,'A1695451162','CVT-30018'),diag:{codes:[{c:'P2715',l:'Électrovanne de pression — plage'}],notes:''},work:[{l:'Reconditionnement platine et soudures',p:'',q:1}],tests:okTests(0)}),
+ ];
+ const invoices=[
+  mkInv('FA-2026-00069','facture','c5','REP-2026-0097',iso(-60,17),[{l:'Forfait réparation TCU Mercedes 722.8 Autotronic',ht:290}]),
+  mkInv('FA-2026-00070','facture','c4','REP-2026-0105',iso(-48,17),[{l:'Forfait réparation mécatronique ZF 6HP (GS19)',ht:540}]),
+  mkInv('FA-2026-00071','facture','c2','REP-2026-0102',iso(-40,17),[{l:'Forfait réparation mécatronique DSG6 DQ250',ht:520},{l:'Remplacement capteurs de pression K1/K2 (DC-2026-0019)',ht:110}]),
+  {no:'AV-2026-00001',type:'avoir',cid:'c2',did:'REP-2026-0102',at:iso(-35,11),origin:'FA-2026-00071',motif:'Geste commercial — retard d’expédition',lines:[{l:'Avoir partiel sur FA-2026-00071',ht:50}],ht:50,tva:10,ttc:60,refund:true},
+  mkInv('FA-2026-00072','facture','c1','REP-2026-0118',iso(-32,17),[{l:'Forfait réparation TCU Mercedes 722.9 (VGS2 / VGS3)',ht:325}])];
+ const events=[];
+ D.forEach(d=>d.paid.forEach((p,i)=>events.push({id:'evt_'+rid(14),type:i?'payment_intent.succeeded':'checkout.session.completed',amount:p.a,ref:d.id,obj:p.ref,at:p.at,status:'traité'})));
+ events.push({id:'evt_'+rid(14),type:'charge.refunded',amount:60,ref:'REP-2026-0102',obj:'re_3P4Lk02Xa',at:iso(-35,11),status:'traité'});
+ const dup=events.find(e=>e.ref==='REP-2026-0145');events.push(Object.assign({},dup,{at:new Date(new Date(dup.at).getTime()+42000).toISOString(),status:'doublon ignoré'}));
+ events.sort((a,b)=>b.at.localeCompare(a.at));
+ const audit=[];const A=(at,who,ref,t)=>audit.push({at,who,ref,t});
+ D.forEach(d=>{A(d.created,'Système (webhook Stripe)',d.id,'Commande payée — confirmée par webhook Stripe');if(d.rec)A(d.rec.at,d.tech||'Karim Benali',d.id,'Réception enregistrée'+(d.rec.issue!=='conforme'?' — anomalie signalée':''));if(d.diag)A(iso(-2),d.tech,d.id,'Diagnostic saisi ('+d.diag.codes.map(c=>c.c).join(', ')+')');d.quotes.forEach(q=>A(q.sent,d.tech,d.id,`Devis complémentaire ${q.id} envoyé`));if(d.ship)A(d.ship.at,d.tech,d.id,`Expédition ${d.ship.carrier} ${d.ship.num}`);if(d.invoice)A(d.war.start,'Système',d.id,`Facture ${d.invoice} émise et verrouillée`)});
+ A(iso(-35,11),'Sophie Renaud (admin)','FA-2026-00071','Avoir AV-2026-00001 émis — remboursement partiel 60,00 €');
+ A(iso(0,8,50),'Karim Benali','COL-2026-0007','Colis sans numéro de dossier enregistré');
+ audit.sort((a,b)=>b.at.localeCompare(a.at));
+ return {persona:'c:c1',view:'shop',mfa:false,cart:[],customers,dossiers:D,invoices,events,audit,
+  orphans:[{id:'COL-2026-0007',at:iso(0,8,50),carrier:'Colissimo',track:'6A21948573201',sender:'M. R. Petit — Tours (37)',ref:'0AM325025D',rem:'Aucun bon de commande ni numéro de dossier dans le colis.',status:'open',did:null}],
+  savs:[{id:'SAV-2026-0012',did:'REP-2026-0102',cid:'c2',step:3,at:iso(-3,10),motif:'Symptôme réapparu',desc:'Patinage de nouveau perceptible au démarrage à froid depuis une semaine.',decision:null,rma:'RMA-0012',hist:[{at:iso(-3,10),t:'Demande SAV ouverte par le client'},{at:iso(-2,9),t:'Analyse : défaut plausible, retour autorisé'}]}],
+  seq:{rep:147,fa:72,av:1,dc:31,sav:12,col:7},
+  ui:{shop:{q:'',brand:'',box:'',type:'',svc:null},cl:{tab:'dossiers',sel:null,q:''},bo:{tab:'kanban',sel:null,q:'',tech:'',sav:'SAV-2026-0012',ft:'',fq:'',aq:'',ct:''}}};
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);return}}catch(e){}S=seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const cust=id=>S.customers.find(c=>c.id===id);
+const dos=id=>S.dossiers.find(d=>d.id===id);
+const cname=c=>c?(c.type==='pro'?c.company:c.name):'—';
+const qHT=q=>q.lines.reduce((a,l)=>a+ +l.a,0);
+const role=()=>S.persona.startsWith('c:')?'client':S.persona;
+const me=()=>role()==='client'?cust(S.persona.slice(2)):null;
+const actor=()=>{const r=role();return r==='tech'?'Karim Benali':r==='admin'?'Sophie Renaud (admin)':r==='client'?cname(me())+' (client)':'Visiteur'};
+const isPro=()=>role()==='client'&&me().type==='pro';
+const priceLbl=ht=>isPro()?`${eur(ht)} <small>HT</small>`:`${eur(ttc(ht))} <small>TTC</small>`;
+const next=(k,p,l)=>`${p}-2026-${pad(++S.seq[k],l)}`;
+function log(ref,t,who){S.audit.unshift({at:now(),who:who||actor(),ref,t})}
+function setStage(d,s){d.stage=s;d.since=now()}
+const openSav=d=>S.savs.find(x=>x.did===d.id&&x.step<9);
+const wst=d=>!d.war?null:openSav(d)?['SAV en cours','b-warn']:new Date(d.war.end)>new Date()?['Active','b-ok']:['Expirée','b-n'];
+function stageBadge(s){const c=['b-n','b-info','b-info','b-warn','b-acc','b-vio','b-acc','b-info','b-ok'][s];return `<span class="badge ${c}">${role()==='client'?CL_STAGES[s]:STAGES[s]}</span>`}
+function qBadge(q){if(q.status==='sent')return new Date(q.due)<new Date()?'<span class="badge b-bad">Délai dépassé</span>':'<span class="badge b-warn">En attente de réponse</span>';return {accepted:'<span class="badge b-info">Accepté — paiement en attente</span>',paid:'<span class="badge b-ok">Accepté et payé</span>',refused:'<span class="badge b-n">Refusé</span>'}[q.status]||''}
+function addEvt(type,amount,ref,obj,status='traité'){const e={id:'evt_'+rid(14),type,amount,ref,obj,at:now(),status};S.events.unshift(e);return e}
+
+/* ---------- Champs et validation ---------- */
+let uidc=0;
+function fld(o){const id='f'+(++uidc),req=o.req?' required aria-required="true"':'',de=` aria-describedby="${id}-e"`;let inp;
+ if(o.type==='select')inp=`<select id="${id}" name="${o.name}"${req}${de} ${o.attrs||''}>${o.opts.map(x=>{const[v,l]=Array.isArray(x)?x:[x,x];return `<option value="${esc(v)}"${String(o.val??'')===String(v)?' selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+ else if(o.type==='textarea')inp=`<textarea id="${id}" name="${o.name}"${req}${de} placeholder="${esc(o.ph||'')}" ${o.attrs||''}>${esc(o.val||'')}</textarea>`;
+ else inp=`<input id="${id}" name="${o.name}" type="${o.type||'text'}" value="${esc(o.val??'')}"${req}${de} placeholder="${esc(o.ph||'')}" ${o.attrs||''}>`;
+ return `<div class="field ${o.cls||''}"><label for="${id}">${esc(o.label)}${o.req?' <span class="req" aria-hidden="true">*</span>':''}</label>${inp}${o.hint?`<p class="hint">${o.hint}</p>`:''}<p class="err" id="${id}-e" data-err="${o.name}"></p></div>`}
+function vErr(f,errs){f.querySelectorAll('[aria-invalid]').forEach(x=>x.removeAttribute('aria-invalid'));f.querySelectorAll('[data-err]').forEach(x=>x.textContent='');let first=null;
+ for(const[k,m]of Object.entries(errs)){const e=f.querySelector(`[data-err="${k}"]`);if(e)e.textContent=m;const i=f.elements[k];if(i&&i.setAttribute){i.setAttribute('aria-invalid','true');first=first||i}}
+ if(first)first.focus();return !Object.keys(errs).length}
+
+/* ---------- Dialogue, toasts, impression ---------- */
+const dlg=()=>$('#dlg');
+const dlgHead=t=>`<div class="dlg-h"><h2 id="dlgTitle">${t}</h2><button type="button" class="icon-btn dlg-x" data-a="close" aria-label="Fermer">${ic('x')}</button></div>`;
+function openDlg(html,wide){const d=dlg();d.className=wide?'wide':'';d.innerHTML=html;if(!d.open)d.showModal();const f=d.querySelector('.dlg-b input:not([type=hidden]):not([readonly]),.dlg-b select,.dlg-b textarea,.dlg-b button');if(f)f.focus()}
+function closeDlg(){const d=dlg();if(d.open)d.close()}
+function toast(t,kind=''){const el=document.createElement('div');el.className='toast '+kind;el.innerHTML=ic(kind==='mail'?'send':kind==='bad'?'alert':'check')+`<span>${t}</span>`;$('#toasts').append(el);setTimeout(()=>el.remove(),4800)}
+function printHTML(h){$('#print').innerHTML=h;window.print()}
+const ISSUER=`<strong>TCU Lab SAS</strong><br>14 rue des Frères Lumière, 69800 Saint-Priest<br>SIRET 900 000 000 00012 · TVA FR00900000000<br>Données fictives de démonstration`;
+function invDoc(inv){const c=cust(inv.cid),av=inv.type==='avoir';
+ return `<div class="doc"><div class="dh"><div>${ISSUER}</div><div style="text-align:right"><h2>${av?'Avoir':'Facture'} ${inv.no}</h2>Date d’émission : ${fd(inv.at)}<br>Dossier : ${inv.did}${av?`<br>Facture d’origine : ${inv.origin}`:''}</div></div>
+ <div><strong>${esc(cname(c))}</strong><br>${c.type==='pro'?`${esc(c.name)}<br>SIRET ${fmtSiret(c.siret)} · TVA ${esc(c.tva)}<br>`:''}${esc(c.email)}<br>${esc(c.city)}</div>
+ <table><thead><tr><th>Désignation</th><th class="r">Montant HT</th></tr></thead><tbody>${inv.lines.map(l=>`<tr><td>${esc(l.l)}</td><td class="r">${av?'−':''}${eur(l.ht)}</td></tr>`).join('')}</tbody>
+ <tfoot><tr><td class="r">Total HT</td><td class="r">${av?'−':''}${eur(inv.ht)}</td></tr><tr><td class="r">TVA 20 %</td><td class="r">${av?'−':''}${eur(inv.tva)}</td></tr><tr class="tot"><td class="r">Total TTC</td><td class="r">${av?'−':''}${eur(inv.ttc)}</td></tr></tfoot></table>
+ ${av?`<p>Motif : ${esc(inv.motif)}${inv.refund?' — remboursé sur la carte d’origine via Stripe.':''}</p>`:'<p>Réglée par carte bancaire (Stripe). Garantie selon conditions de la prestation.</p>'}
+ <p class="foot">${c.type==='pro'?'Facture B2B. ':''}Document émis et verrouillé : toute correction fait l’objet d’un avoir. Numérotation chronologique continue. Données structurées Factur-X (profil EN 16931) prêtes pour transmission à une Plateforme Agréée.</p></div>`}
+function showInv(no){const inv=S.invoices.find(i=>i.no===no);if(!inv)return;openDlg(dlgHead((inv.type==='avoir'?'Avoir ':'Facture ')+inv.no)+`<div class="dlg-b">${invDoc(inv)}<div class="actions"><button class="btn primary" data-a="printInv" data-no="${inv.no}">${ic('print')} Imprimer / enregistrer en PDF</button></div></div>`,true)}
+
+/* ---------- Rendu global ---------- */
+function personaOpts(){const o=[['visiteur','Visiteur non connecté']];S.customers.forEach(c=>o.push(['c:'+c.id,(c.type==='pro'?'Pro — ':'Client — ')+cname(c)]));o.push(['tech','Technicien — Karim Benali'],['admin','Administratrice — Sophie Renaud']);return o.map(([v,l])=>`<option value="${v}"${S.persona===v?' selected':''}>${esc(l)}</option>`).join('')}
+function renderTop(){const r=role(),t=[['shop','Boutique','search']];
+ if(r==='visiteur'||r==='client')t.push(['client','Espace client','user']);
+ if(r==='tech'||r==='admin')t.push(['bo','Logiciel atelier','board']);
+ $('#nav').innerHTML=t.map(([v,l,i])=>`<button class="tab" data-a="go" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(i)}<span>${l}</span></button>`).join('');
+ $('#persona').innerHTML=personaOpts();
+ const cb=$('#cartBtn');cb.hidden=!(r==='visiteur'||r==='client');cb.innerHTML=ic('cart')+(S.cart.length?`<span class="cnt">${S.cart.length}</span>`:'');cb.setAttribute('aria-label',`Panier (${S.cart.length} article${S.cart.length>1?'s':''})`)}
+function render(){renderTop();const m=$('#main');m.innerHTML=S.view==='shop'?vShop():S.view==='client'?vClient():vBO();save()}
+
+/* ---------- Boutique ---------- */
+function filteredSvcs(){const u=S.ui.shop,q=norm(u.q);return SV.filter(s=>(!u.brand||s.brand===u.brand)&&(!u.type||s.type===u.type)&&(!u.box||s.box===u.box)&&(!q||norm([s.name,s.box,s.brand,s.type,...s.refs,...s.veh].join('|')).includes(q)))}
+function svcCards(){const l=filteredSvcs(),q=norm(S.ui.shop.q);
+ if(!l.length)return `<div class="card empty"><p><strong>Aucune prestation ne correspond.</strong></p><p class="small">Votre référence n’apparaît pas ? Envoyez-la à l’atelier, nous vérifions la compatibilité sous 24 h.</p><p style="margin-top:10px"><button class="btn sm" data-a="askRef">${ic('send')} Demander une étude de compatibilité</button></p></div>`;
+ return `<div class="svc-grid">${l.map(s=>{const hit=q&&s.refs.find(r=>norm(r).includes(q));return `<article class="card svc"><div class="svc-top"><span class="tag">${s.type}</span><span class="tag ghost">${s.brand}</span>${s.box?`<span class="tag ghost num">${s.box}</span>`:''}</div><h3>${s.name}</h3>${hit?`<p class="match">${ic('check')} Référence compatible : <span class="num">${hit}</span></p>`:''}<p class="muted small">${s.veh.slice(0,4).join(' · ')}</p><dl class="svc-meta"><div><dt>Délai atelier</dt><dd>${s.delay}</dd></div><div><dt>Garantie</dt><dd>${s.war} mois</dd></div></dl><div class="svc-foot"><span class="price num">${priceLbl(s.ht)}</span><button class="btn sm" data-a="svc" data-id="${s.id}" aria-label="Voir la prestation ${esc(s.name)}">Voir la prestation</button></div></article>`}).join('')}</div>`}
+function shopList(){$('#svcList').innerHTML=svcCards();$('#svcCount').textContent=countLbl()}
+const countLbl=()=>{const n=filteredSvcs().length;return `${n} prestation${n>1?'s':''}`};
+function vShop(){const u=S.ui.shop;if(u.svc)return vSvc(svc(u.svc));
+ const uniq=a=>[...new Set(a)].filter(Boolean);
+ const sel=(k,l,opts,all)=>fld({name:k,label:l,type:'select',val:u[k],opts:[['',all],...opts],attrs:`data-ch="shopf" data-k="${k}"`});
+ return `<section class="hero"><div><p class="eyebrow">Réparation électronique automobile à distance</p><h1>Calculateurs, TCU et mécatroniques réparés en atelier, testés au banc et renvoyés sous garantie.</h1></div>
+ <ol class="how">${['Commandez et payez en ligne','Envoyez la pièce avec le bordereau','Diagnostic et devis si nécessaire','Réparation, tests, retour garanti'].map((t,i)=>`<li><span class="num">0${i+1}</span>${t}</li>`).join('')}</ol></section>
+ <div class="shop"><aside class="card filters" aria-label="Recherche et filtres">
+  <div class="field"><label for="sq">Rechercher</label><div class="search">${ic('search')}<input id="sq" class="input" type="search" data-in="shopq" value="${esc(u.q)}" placeholder="Référence, véhicule ou boîte"></div></div>
+  <div><p class="flabel" style="margin-bottom:6px">Exemples</p><div class="quick">${['DQ200','722.9','0AM927769D','Golf VII','7519199'].map(q=>`<button class="chip" data-a="quick" data-q="${q}">${q}</button>`).join('')}</div></div>
+  ${sel('brand','Marque',uniq(SV.map(s=>s.brand)),'Toutes les marques')}
+  ${sel('box','Transmission / boîte',uniq(SV.map(s=>s.box)),'Toutes les boîtes')}
+  ${sel('type','Type de pièce',uniq(SV.map(s=>s.type)),'Tous les types')}
+  <button class="btn sm ghost" data-a="clearF">Effacer les filtres</button>
+ </aside><section aria-label="Prestations"><div class="list-head"><h2 style="font-size:18px">Catalogue des prestations</h2><span class="muted small" id="svcCount" aria-live="polite">${countLbl()}</span></div><div id="svcList">${svcCards()}</div></section></div>`}
+function vSvc(s){return `<nav aria-label="Fil d’Ariane" style="margin-bottom:10px"><button class="btn ghost sm" data-a="svcBack">${ic('back')} Catalogue</button></nav>
+ <div class="svc-page"><article class="card card-b" style="padding:20px 22px"><div class="svc-top"><span class="tag">${s.type}</span><span class="tag ghost">${s.brand}</span>${s.box?`<span class="tag ghost num">${s.box}</span>`:''}</div>
+ <h1>${s.name}</h1><p class="muted">Réparation de votre pièce d’origine en atelier : diagnostic au banc, remplacement des composants défaillants, tests finaux puis retour sous ${s.war} mois de garantie. Pas de reprogrammation à prévoir dans la majorité des cas.</p>
+ <div class="sec"><h2>Symptômes traités</h2><ul class="ticks">${s.sym.map(x=>`<li>${ic('check')}${x}</li>`).join('')}</ul></div>
+ <div class="sec"><h2>Références compatibles</h2><div class="refs">${s.refs.map(r=>`<span>${r}</span>`).join('')}</div></div>
+ <div class="sec"><h2>Véhicules concernés</h2><p>${s.veh.join(' · ')}</p></div>
+ <div class="sec"><h2>Déroulement</h2><ol class="steps6"><li>Commande et paiement sécurisé</li><li>Envoi de la pièce avec le bordereau imprimé</li><li>Réception et photos à l’atelier</li><li>Diagnostic, devis complémentaire si nécessaire</li><li>Réparation et tests au banc</li><li>Retour suivi, facture et garantie</li></ol></div></article>
+ <aside class="card buy" aria-label="Commander"><span class="price num">${priceLbl(s.ht)}</span><p class="hint">${isPro()?`Soit ${eur(ttc(s.ht))} TTC — facture B2B avec TVA.`:'TVA 20 % incluse. Retour inclus en France métropolitaine.'}</p>
+ <dl class="dl"><dt>Délai atelier</dt><dd>${s.delay}</dd><dt>Garantie</dt><dd>${s.war} mois pièces et main-d’œuvre</dd><dt>Paiement</dt><dd>Carte bancaire via Stripe</dd></dl>
+ <button class="btn primary block" data-a="add" data-id="${s.id}">${ic('cart')} Ajouter au panier</button>
+ <button class="btn block" data-a="buyNow" data-id="${s.id}">Commander maintenant</button>
+ <p class="note">${ic('info')}<span>Si le diagnostic révèle un défaut supplémentaire, un devis complémentaire vous est proposé dans votre espace : vous restez libre de l’accepter.</span></p></aside></div>`}
+
+/* ---------- Panier et commande ---------- */
+function cartDlg(){const items=S.cart.map((id,i)=>{const s=svc(id);return `<div class="cart-line"><div><strong>${s.name}</strong><br><span class="hint">${s.delay} · garantie ${s.war} mois</span></div><div class="actions"><span class="num">${eur(ttc(s.ht))}</span><button class="icon-btn" data-a="rmCart" data-i="${i}" aria-label="Retirer ${esc(s.name)}">${ic('trash')}</button></div></div>`}).join('');
+ const tot=S.cart.reduce((a,id)=>a+ttc(svc(id).ht),0);
+ openDlg(dlgHead('Panier')+`<div class="dlg-b">${S.cart.length?items+`<div class="cart-line"><strong>Total TTC</strong><strong class="num">${eur(tot)}</strong></div><p class="hint">Un dossier de réparation est ouvert par pièce commandée.</p><div class="actions"><button class="btn primary" data-a="checkout">${ic('lock')} Commander</button><button class="btn" data-a="close">Continuer mes achats</button></div>`:`<p class="empty">Votre panier est vide.</p>`}</div>`)}
+let AFTER_ACC=null;
+function accountDlg(after){AFTER_ACC=after;openDlg(dlgHead('Créer un compte')+`<div class="dlg-b"><form data-f="account" novalidate class="stack">
+ <fieldset class="radio-cards" style="border:0;padding:0;margin:0"><legend class="flabel" style="margin-bottom:6px">Type de compte</legend><label><input type="radio" name="type" value="part" checked data-ch="acctype"> Particulier</label><label><input type="radio" name="type" value="pro" data-ch="acctype"> Professionnel (garage, flotte)</label></fieldset>
+ <div id="proF" class="stack" hidden><div class="row">${fld({name:'company',label:'Raison sociale',req:1})}${fld({name:'siret',label:'SIRET (14 chiffres)',req:1,attrs:'inputmode="numeric"'})}</div></div>
+ <div class="row">${fld({name:'name',label:'Nom et prénom',req:1,attrs:'autocomplete="name"'})}${fld({name:'email',label:'Email',type:'email',req:1,attrs:'autocomplete="email"'})}</div>
+ <div class="row">${fld({name:'phone',label:'Téléphone',type:'tel',attrs:'autocomplete="tel"'})}${fld({name:'pwd',label:'Mot de passe (8 caractères min.)',type:'password',req:1,attrs:'autocomplete="new-password"'})}</div>
+ <label class="check"><input type="checkbox" name="cgv"> J’accepte les conditions générales de vente et de réparation.</label><p class="err" data-err="cgv"></p>
+ <button class="btn primary" type="submit">Créer mon compte</button><p class="hint">Email de vérification envoyé à l’inscription (simulation).</p></form></div>`)}
+function vehDlg(){openDlg(dlgHead('Votre véhicule')+`<div class="dlg-b"><p class="hint">Ces informations aident l’atelier à identifier la pièce. Seul le modèle est obligatoire.</p><form data-f="veh" novalidate class="stack">
+ ${fld({name:'model',label:'Marque et modèle',req:1,ph:'ex. Volkswagen Golf VII 1.4 TSI'})}
+ <div class="row">${fld({name:'vin',label:'VIN (17 caractères)',ph:'WVWZZZ…',attrs:'autocapitalize="characters"'})}${fld({name:'plate',label:'Immatriculation',ph:'AB-123-CD',attrs:'autocapitalize="characters"'})}</div>
+ ${fld({name:'desc',label:'Symptômes constatés',type:'textarea',ph:'ex. boîte en mode dégradé, voyant allumé…'})}
+ <button class="btn primary" type="submit">Continuer vers le paiement</button></form></div>`)}
+
+/* Paiement Stripe simulé */
+let PAY=null;
+function pay(o){PAY=o;openDlg(dlgHead('Paiement sécurisé')+`<div class="dlg-b"><div class="stripe"><div class="stripe-top"><span class="stripe-logo" aria-label="Stripe">stripe</span><span class="badge b-warn">Mode test</span></div>
+ <p class="muted small">${esc(o.desc)}</p><p class="stripe-amt num">${eur(o.amount)}</p>
+ <form data-f="pay" novalidate class="stack">${fld({name:'email',label:'Email',type:'email',val:o.cust.email,req:1})}
+ ${fld({name:'card',label:'Numéro de carte',req:1,ph:'1234 1234 1234 1234',attrs:'inputmode="numeric" autocomplete="cc-number"'})}
+ <div class="row">${fld({name:'exp',label:'Expiration (MM/AA)',req:1,ph:'MM/AA',attrs:'inputmode="numeric" autocomplete="cc-exp"'})}${fld({name:'cvc',label:'CVC',req:1,ph:'123',attrs:'inputmode="numeric" autocomplete="cc-csc"'})}</div>
+ <div class="tip"><span>Carte de test <span class="num">4242 4242 4242 4242</span> · refus : <span class="num">4000 0000 0000 0002</span></span><button type="button" class="btn sm" data-a="fillCard">Remplir</button></div>
+ <button class="btn primary block" type="submit">${ic('lock')} Payer ${eur(o.amount)}</button>
+ <p class="hint">Saisie hébergée par Stripe : aucune donnée bancaire ne transite ni n’est stockée sur la plateforme. Stripe Radar actif.</p></form></div></div>`)}
+
+/* ---------- Espace client ---------- */
+function vClient(){if(role()!=='client')return `<div class="card lockcard" style="max-width:none">${ic('user')}<h1 style="font-size:22px">Espace client</h1><p class="muted">Suivez vos réparations, devis, factures, garanties et SAV.</p><div class="actions" style="justify-content:center"><button class="btn primary" data-a="persona" data-p="c:c1">Se connecter (compte particulier de démo)</button><button class="btn" data-a="persona" data-p="c:c2">Compte professionnel de démo</button><button class="btn" data-a="newAcc">Créer un compte</button></div></div>`;
+ const c=me(),u=S.ui.cl,mine=S.dossiers.filter(d=>d.cid===c.id),wait=mine.filter(d=>d.quotes.some(q=>q.status==='sent'||q.status==='accepted')).length;
+ const tabs=[['dossiers','Mes dossiers','wrench',wait],['factures','Factures et avoirs','file'],['garanties','Garanties et SAV','shield'],['compte',c.type==='pro'?'Société et flotte':'Mon compte',c.type==='pro'?'building':'user']];
+ let body='';
+ if(u.tab==='dossiers')body=clDossiers(c,mine);else if(u.tab==='factures')body=clFactures(c);else if(u.tab==='garanties')body=clGaranties(c,mine);else body=clCompte(c,mine);
+ return `<div class="page-head"><div><h1>${c.type==='pro'?esc(c.company):'Bonjour '+esc(c.name.split(' ')[0])}</h1><p class="muted small">${ic('lock')} Vous ne voyez que les données de ${c.type==='pro'?'votre société':'votre compte'} : isolation appliquée en base par les politiques RLS.</p></div><button class="btn" data-a="go" data-v="shop">${ic('plus')} Nouvelle réparation</button></div>
+ <nav class="subtabs" aria-label="Sections de l’espace client">${tabs.map(([k,l,i,n])=>`<button data-a="clTab" data-t="${k}"${u.tab===k?' aria-current="page"':''}>${ic(i)}${l}${n?` <span class="badge b-warn">${n}</span>`:''}</button>`).join('')}</nav>${body}`}
+function clListHTML(){const c=me(),q=norm(S.ui.cl.q);const l=S.dossiers.filter(d=>d.cid===c.id&&(!q||norm([d.id,d.veh.model,d.veh.plate,d.veh.vin,svc(d.sid).name].join('|')).includes(q)));
+ if(!l.length)return '<p class="empty">Aucun dossier.</p>';
+ return l.map(d=>{const s=svc(d.sid),pend=d.quotes.some(q=>q.status==='sent'||q.status==='accepted');return `<button class="ditem" data-a="clSel" data-id="${d.id}"${S.ui.cl.sel===d.id?' aria-current="true"':''}><span class="l1"><span class="num">${d.id}</span>${stageBadge(d.stage)}</span><strong>${s.short} — ${esc(d.veh.model)}</strong><span class="hint">${esc(d.veh.plate||'')} · ouvert le ${fd(d.created)}${pend?' · <b style="color:var(--warn)">action requise</b>':''}</span></button>`}).join('')}
+function clDossiers(c,mine){const u=S.ui.cl;if(!u.sel||!mine.find(d=>d.id===u.sel))u.sel=mine[0]?.id||null;
+ return `<div class="split"><div class="dlist" aria-label="Mes dossiers">${c.type==='pro'?`<div class="field"><label for="clq">Rechercher (plaque, VIN, dossier)</label><input id="clq" class="input" type="search" data-in="clq" value="${esc(u.q)}"></div>`:''}<div class="dlist" id="clList">${clListHTML()}</div></div>
+ <div>${u.sel?clDetail(dos(u.sel)):'<div class="card empty">Aucun dossier pour le moment. Commandez une prestation dans la boutique.</div>'}</div></div>`}
+function payLines(d){const avs=S.invoices.filter(i=>i.type==='avoir'&&i.did===d.id);return `<table class="tbl compact"><tbody>${d.paid.map(p=>`<tr><td>${esc(p.l)}<br><span class="hint">${fdt(p.at)} · <span class="num">${p.ref}</span></span></td><td class="r num">${eur(p.a)}</td></tr>`).join('')}${avs.map(a=>`<tr><td>Remboursement — ${a.no}<br><span class="hint">${esc(a.motif)}</span></td><td class="r num">−${eur(a.ttc)}</td></tr>`).join('')}</tbody></table>`}
+function thread(d,mineSide){return `<div class="thread" aria-label="Messages du dossier">${d.msgs.length?d.msgs.map(m=>`<div class="msg${m.f===mineSide?' mine':''}"><div class="meta">${esc(m.who)} · ${fdt(m.at)}</div>${esc(m.t)}</div>`).join(''):'<p class="hint">Aucun message.</p>'}</div>
+ <form class="msgform" data-f="msg" data-id="${d.id}" novalidate>${fld({name:'t',label:'Votre message',type:'textarea',ph:'Écrire un message…'})}<button class="btn primary" type="submit" aria-label="Envoyer le message">${ic('send')}</button></form>`}
+function filesBox(d){return `<ul class="files">${d.files.length?d.files.map((f,i)=>`<li>${ic(/\.(jpe?g|png|webp)$/i.test(f.n)?'clip':'file')}<span class="fn">${esc(f.n)}<small>${f.s} · ${esc(f.by)} · ${fd(f.at)}</small></span><button class="icon-btn" data-a="dl" data-n="${esc(f.n)}" aria-label="Télécharger ${esc(f.n)}">${ic('download')}</button></li>`).join(''):'<li class="hint">Aucun document.</li>'}</ul>
+ <div class="upload"><input type="file" id="up-${d.id}" data-up="${d.id}" multiple><label for="up-${d.id}" class="btn sm">${ic('plus')} Ajouter des fichiers</label><span class="hint">Photos, PDF, .bin, .log, .txt, .data — 20 Mo max</span></div>`}
+function clDetail(d){const s=svc(d.sid),c=cust(d.cid);let act='';
+ if(d.stage===0)act=`<div class="note warn">${ic('box')}<div><strong>Envoyez votre pièce à l’atelier</strong><br>${ADDR}<br>Emballez la pièce dans un sachet antistatique, calée dans un carton rigide, et joignez le bordereau imprimé. Ne démontez pas le connecteur.</div></div><div class="actions"><button class="btn primary" data-a="bordereau" data-id="${d.id}">${ic('print')} Imprimer le bordereau d’envoi</button></div>`;
+ if(d.rec&&d.rec.issue!=='conforme'&&d.stage<=1)act+=`<div class="note bad">${ic('alert')}<div><strong>${d.rec.issue==='mauvaise'?'La pièce reçue ne correspond pas à la commande':'Pièce endommagée pendant le transport'}</strong><br>${esc(d.rec.rem)}</div></div>`;
+ const qs=d.quotes.map(q=>quoteCard(d,q,true)).join('');
+ if(d.stage===7&&d.ship)act=`<div class="note">${ic('truck')}<div><strong>Pièce expédiée le ${fd(d.ship.at)}</strong><br>${esc(d.ship.carrier)} — suivi <span class="num">${esc(d.ship.num)}</span></div></div>`;
+ if(d.stage===8){const w=wst(d);act=`<div class="note ok">${ic('shield')}<div><strong>Réparation terminée — garantie ${w[0].toLowerCase()}</strong><br>Du ${fd(d.war.start)} au ${fd(d.war.end)}</div></div><div class="actions"><button class="btn" data-a="inv" data-no="${d.invoice}">${ic('file')} Facture ${d.invoice}</button><button class="btn" data-a="savNew" data-id="${d.id}"${openSav(d)||w[0]==='Expirée'?' disabled':''}>${ic('shield')} Ouvrir un SAV</button></div>`}
+ return `<div class="dmain"><section class="card"><div class="card-h"><h2><span class="num">${d.id}</span></h2>${stageBadge(d.stage)}</div><div class="card-b stack"><div><strong>${s.name}</strong><p class="hint">${esc(d.veh.model)} · ${esc(d.veh.plate||'—')} · VIN <span class="num">${esc(d.veh.vin||'—')}</span></p></div>${stepper(d.stage,CL_STAGES)}${act}${qs?`<div class="stack"><h3 style="font-size:15px">Devis complémentaires</h3>${qs}</div>`:''}
+ <div class="tip"><span>Démo : passez côté atelier pour faire avancer ce dossier.</span><button class="btn sm" data-a="asTech" data-id="${d.id}">${ic('swap')} Voir dans le logiciel atelier</button></div></div></section>
+ <div class="dgrid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))"><section class="card"><div class="card-h"><h3>${ic('chat')} Messages</h3></div><div class="card-b">${thread(d,'client')}</div></section>
+ <div class="dmain"><section class="card"><div class="card-h"><h3>${ic('card')} Paiements</h3></div><div class="card-b">${payLines(d)}</div></section>
+ <section class="card"><div class="card-h"><h3>${ic('file')} Documents</h3></div><div class="card-b">${filesBox(d)}</div></section></div></div></div>`}
+function stepper(cur,labels){const last=cur===labels.length-1;return `<ol class="stepper" aria-label="Avancement">${labels.map((l,i)=>{const done=i<cur||last;return `<li class="${done?'done':i===cur?'cur':''}"${i===cur?' aria-current="step"':''}><span class="dot">${done?ic('check'):i+1}</span><span class="lbl">${l}</span></li>`}).join('')}</ol>`}
+function quoteCard(d,q,client){const t=ttc(qHT(q));
+ return `<div class="quote ${q.status}"><div class="quote-h"><strong>Devis <span class="num">${q.id}</span></strong>${qBadge(q)}</div>
+ <table class="tbl compact"><tbody>${q.lines.map(l=>`<tr><td>${esc(l.l)}</td><td class="r num">${eur(l.a)} HT</td></tr>`).join('')}</tbody><tfoot><tr><td>Total TTC (TVA 20 %)</td><td class="r num">${eur(t)}</td></tr></tfoot></table>
+ ${q.status==='sent'?`<p class="hint">Réponse attendue avant le ${fdt(q.due)} · ${q.reminders} relance${q.reminders>1?'s':''} envoyée${q.reminders>1?'s':''}</p>`:''}
+ ${client&&q.status==='sent'?`<div class="actions"><button class="btn primary" data-a="qAccept" data-id="${d.id}" data-q="${q.id}">${ic('card')} Accepter et payer ${eur(t)}</button><button class="btn" data-a="qRefuse" data-id="${d.id}" data-q="${q.id}">Refuser</button></div>`:''}
+ ${client&&q.status==='accepted'?`<div class="actions"><button class="btn primary" data-a="qPay" data-id="${d.id}" data-q="${q.id}">${ic('card')} Payer ${eur(t)}</button></div>`:''}
+ <details><summary>Historique du devis (${q.hist.length})</summary><ul class="mini-log">${q.hist.map(h=>`<li><span class="num">${fdt(h.at)}</span>${esc(h.t)}</li>`).join('')}</ul></details></div>`}
+function invTable(list,admin){if(!list.length)return '<p class="empty">Aucun document.</p>';
+ return `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Numéro</th><th>Type</th><th>Date</th>${admin?'<th>Client</th>':''}<th>Dossier</th><th class="r">HT</th><th class="r">TVA</th><th class="r">TTC</th><th>Statut</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${list.map(i=>{const rem=remaining(i);return `<tr><td class="num">${i.no}</td><td>${i.type==='avoir'?'<span class="badge b-vio">Avoir</span>':'<span class="badge b-acc">Facture</span>'}${cust(i.cid).type==='pro'?' <span class="badge b-n">B2B</span>':''}</td><td>${fd(i.at)}</td>${admin?`<td>${esc(cname(cust(i.cid)))}</td>`:''}<td class="num">${i.did}</td><td class="r num">${i.type==='avoir'?'−':''}${eur(i.ht)}</td><td class="r num">${i.type==='avoir'?'−':''}${eur(i.tva)}</td><td class="r num">${i.type==='avoir'?'−':''}${eur(i.ttc)}</td>
+ <td>${i.type==='avoir'?`<span class="hint">sur ${i.origin}</span>`:rem<i.ttc?`<span class="badge b-warn">${rem<=0?'Annulée par avoir':'Avoir partiel'}</span>`:`<span class="badge b-ok">${ic('lock')} Émise</span>`}</td>
+ <td><div class="actions" style="flex-wrap:nowrap"><button class="btn sm" data-a="inv" data-no="${i.no}">${ic('print')} Aperçu</button>${admin&&i.type==='facture'?`<button class="btn sm" data-a="avoir" data-no="${i.no}"${rem<=0?' disabled':''}>Avoir</button><button class="btn sm ghost" data-a="fx" data-no="${i.no}">Factur-X</button>`:''}</div></td></tr>`}).join('')}</tbody></table></div>`}
+const remaining=i=>r2(i.ttc-S.invoices.filter(a=>a.type==='avoir'&&a.origin===i.no).reduce((s,a)=>s+a.ttc,0));
+function clFactures(c){const l=S.invoices.filter(i=>i.cid===c.id).sort((a,b)=>b.at.localeCompare(a.at));return `<section class="card"><div class="card-h"><h2>${ic('file')} Factures et avoirs</h2><span class="hint">Les factures sont émises à la clôture de chaque réparation.</span></div>${invTable(l,false)}</section>`}
+function clGaranties(c,mine){const w=mine.filter(d=>d.war),sv=S.savs.filter(x=>x.cid===c.id);
+ return `<section class="stack"><h2 style="font-size:17px">Garanties</h2>${w.length?`<div class="wcards">${w.map(d=>{const st=wst(d),s=svc(d.sid);return `<article class="card card-b stack"><div class="quote-h"><strong>${s.short} — ${esc(d.veh.model)}</strong><span class="badge ${st[1]}">${st[0]}</span></div><dl class="dl"><dt>Dossier</dt><dd class="num">${d.id}</dd><dt>Période</dt><dd>${fd(d.war.start)} → ${fd(d.war.end)}</dd><dt>Durée</dt><dd>${s.war} mois</dd></dl><button class="btn" data-a="savNew" data-id="${d.id}"${openSav(d)||st[0]==='Expirée'?' disabled':''}>${ic('shield')} Ouvrir un SAV</button></article>`}).join('')}</div>`:'<p class="card empty">Aucune garantie active : elles sont créées à la fin de chaque réparation.</p>'}
+ <h2 style="font-size:17px;margin-top:8px">Mes demandes SAV</h2>${sv.length?sv.map(x=>`<article class="card"><div class="card-h"><h3><span class="num">${x.id}</span> · dossier d’origine <span class="num">${x.did}</span></h3><span class="badge ${x.step===9?'b-ok':'b-warn'}">${SAVSTEPS[x.step]}</span></div><div class="card-b stack">${stepper(x.step,SAVSTEPS)}<p><strong>${esc(x.motif)}</strong> — ${esc(x.desc)}</p>${x.rma&&x.step===3?`<div class="note">${ic('box')}<span>Retour autorisé : renvoyez la pièce avec la référence <strong class="num">${x.rma}</strong> à l’adresse de l’atelier.</span></div>`:''}${x.decision?`<p class="note ${x.decision==='refus'?'bad':''}">${ic('info')}<span>Décision : ${savDec(x)}</span></p>`:''}
+ ${x.step===2?`<form data-f="savReply" data-id="${x.id}" novalidate class="stack">${fld({name:'t',label:'Votre réponse à l’atelier',type:'textarea',req:1})}<div class="actions"><button class="btn primary" type="submit">Envoyer</button></div></form>`:''}
+ <details><summary>Historique (${x.hist.length})</summary><ul class="mini-log">${x.hist.map(h=>`<li><span class="num">${fdt(h.at)}</span>${esc(h.t)}</li>`).join('')}</ul></details></div></article>`).join(''):'<p class="card empty">Aucune demande SAV.</p>'}</section>`}
+const savDec=x=>x.decision==='garantie'?'réparation sous garantie':x.decision==='hors'?`devis hors garantie (${eur(x.amount||0)} TTC)`:`refus motivé — ${esc(x.dmotif)}`;
+function clCompte(c,mine){const veh={};mine.forEach(d=>{const k=d.veh.plate||d.veh.vin;(veh[k]=veh[k]||{v:d.veh,n:0}).n++});
+ return `<div class="dgrid"><section class="card"><div class="card-h"><h2>${ic(c.type==='pro'?'building':'user')} ${c.type==='pro'?'Société':'Profil'}</h2></div><div class="card-b"><form data-f="profile" novalidate class="stack">
+ ${c.type==='pro'?`<dl class="dl"><dt>Raison sociale</dt><dd>${esc(c.company)}</dd><dt>SIRET</dt><dd class="num">${fmtSiret(c.siret)}</dd><dt>TVA intracom.</dt><dd class="num">${esc(c.tva||'—')}</dd></dl>`:''}
+ <div class="row">${fld({name:'name',label:c.type==='pro'?'Contact principal':'Nom et prénom',val:c.name,req:1})}${fld({name:'email',label:'Email',type:'email',val:c.email,req:1})}</div>
+ <div class="row">${fld({name:'phone',label:'Téléphone',type:'tel',val:c.phone})}${fld({name:'city',label:'Ville',val:c.city})}</div>
+ <div class="actions"><button class="btn primary" type="submit">Enregistrer</button></div></form></div></section>
+ <div class="dmain">${c.type==='pro'?`<section class="card"><div class="card-h"><h2>${ic('user')} Utilisateurs de la société</h2></div><div class="card-b"><ul class="mini-log">${(c.users||[c.name]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="hint" style="margin-top:8px">Chaque utilisateur accède à tous les dossiers de la société, jamais à ceux d’une autre.</p></div></section>`:''}
+ <section class="card"><div class="card-h"><h2>${ic('truck')} ${c.type==='pro'?'Flotte et historique':'Mes véhicules'}</h2></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Véhicule</th><th>Immat.</th><th>VIN</th><th class="r">Dossiers</th></tr></thead><tbody>${Object.values(veh).map(x=>`<tr><td>${esc(x.v.model)}</td><td class="num">${esc(x.v.plate||'—')}</td><td class="num">${esc(x.v.vin||'—')}</td><td class="r">${x.n}</td></tr>`).join('')||'<tr><td colspan="4" class="hint">Aucun véhicule.</td></tr>'}</tbody></table></div></section></div></div>`}
+
+/* ---------- Logiciel atelier ---------- */
+const BOT=[['kanban','Dossiers atelier','board'],['colis','Colis non rattachés','inbox'],['sav','SAV','shield'],['clients','Clients et véhicules','building'],['factures','Factures et avoirs','file',1],['stripe','Paiements Stripe','card',1],['audit','Journal d’audit','history',1]];
+function vBO(){const u=S.ui.bo,adm=role()==='admin';
+ const cnt={colis:S.orphans.filter(o=>o.status==='open').length,sav:S.savs.filter(x=>x.step<9).length};
+ const nav=BOT.map(([k,l,i,a],n)=>`${n===4?'<h4>Administration</h4>':n===0?'<h4>Atelier</h4>':''}<button data-a="boTab" data-t="${k}"${u.tab===k?' aria-current="page"':''}>${ic(i)}${l}${a&&!adm?ic('lock').replace('class="i"','class="i lk"'):''}${cnt[k]?`<span class="cnt">${cnt[k]}</span>`:''}</button>`).join('');
+ let body;const admOnly=BOT.find(b=>b[0]===u.tab)[3];
+ if(admOnly&&!adm)body=`<div class="card lockcard">${ic('lock')}<h2>Accès réservé au rôle Administrateur</h2><p class="muted">Les techniciens n’ont pas accès à la facturation, aux paiements ni au journal d’audit. Connexion administrateur protégée par MFA.</p><button class="btn" data-a="persona" data-p="admin">Passer en administratrice</button></div>`;
+ else body={kanban:()=>u.sel&&dos(u.sel)?boDetail(dos(u.sel)):boKanban(),colis:boColis,sav:boSav,clients:boClients,factures:boFactures,stripe:boStripe,audit:boAudit}[u.tab]();
+ return `<div class="bo"><nav class="bonav" aria-label="Menu du logiciel atelier">${nav}</nav><div style="min-width:0">${body}</div></div>`}
+function kbFiltered(){const u=S.ui.bo,q=norm(u.q);return S.dossiers.filter(d=>{const c=cust(d.cid),s=svc(d.sid);return (!u.tech||d.tech===u.tech||(u.tech==='-'&&!d.tech))&&(!q||norm([d.id,cname(c),c.name,d.veh.model,d.veh.vin,d.veh.plate,s.short,s.box,d.rec?.ref,d.rec?.serial].join('|')).includes(q))})}
+function kbCols(){const l=kbFiltered();return STAGES.map((st,i)=>{const cards=l.filter(d=>d.stage===i);return `<section class="kcol" aria-label="${st}"><h3>${st}<span>${cards.length}</span></h3><div class="kcards">${cards.map(kcard).join('')}</div></section>`}).join('')}
+function kcard(d){const c=cust(d.cid),s=svc(d.sid),b=[];
+ if(d.flag)b.push(`<span class="badge b-bad">${d.flag==='mauvaise'?'Mauvaise pièce':'Pièce endommagée'}</span>`);
+ const q=d.quotes.find(q=>q.status==='sent'||q.status==='accepted');if(q)b.push(`<span class="badge b-warn">Devis ${q.status==='sent'?'envoyé':'à payer'}</span>`);
+ if(openSav(d))b.push('<span class="badge b-vio">SAV</span>');if(c.type==='pro')b.push('<span class="badge b-n">Pro</span>');
+ return `<button class="kcard" data-a="boOpen" data-id="${d.id}"><span class="kid"><span>${d.id.slice(4)}</span><span>J+${days(d.since)}</span></span><span class="kt">${s.short}</span><span>${esc(cname(c))}</span><span class="hint">${esc(d.veh.model.split(' (')[0])}</span><span class="kf">${b.join('')}${d.tech?`<span class="avatar" title="${esc(d.tech)}">${initials(d.tech)}</span>`:''}</span></button>`}
+function boKanban(){const u=S.ui.bo,D=S.dossiers,month=S.events.filter(e=>e.status==='traité'&&e.type!=='charge.refunded'&&e.type!=='payment_intent.payment_failed'&&days(e.at)<=30).reduce((a,e)=>a+e.amount,0);
+ return `<div class="page-head"><div><h1>Dossiers de réparation</h1><p class="muted small">Kanban compact — cliquez sur une carte pour ouvrir le dossier.</p></div><div class="actions"><button class="btn" data-a="boTab" data-t="colis">${ic('inbox')} Colis sans dossier</button></div></div>
+ <div class="kpis"><div class="kpi"><b>${D.filter(d=>d.stage<8).length}</b><span>Dossiers actifs</span></div><div class="kpi"><b>${D.filter(d=>d.stage===0).length}</b><span>Colis attendus</span></div><div class="kpi"><b>${D.filter(d=>d.stage===3).length}</b><span>En attente client</span></div><div class="kpi"><b>${D.filter(d=>d.flag).length}</b><span>Anomalies réception</span></div><div class="kpi"><b>${S.savs.filter(x=>x.step<9).length}</b><span>SAV ouverts</span></div><div class="kpi"><b>${eur(month).replace(',00','')}</b><span>Encaissé sur 30 jours</span></div></div>
+ <div class="toolbar"><div class="field grow"><label for="kbq">Rechercher</label><div class="search">${ic('search')}<input id="kbq" class="input" type="search" data-in="kbq" value="${esc(u.q)}" placeholder="Dossier, client, VIN, immatriculation, référence, n° de série"></div></div>
+ ${fld({name:'tech',label:'Technicien',type:'select',val:u.tech,opts:[['','Tous'],...TECHS,['-','Non assigné']],attrs:'data-ch="kbtech"'})}</div>
+ <div class="kb" id="kb">${kbCols()}</div>`}
+function boDetail(d){const c=cust(d.cid),s=svc(d.sid),sv=openSav(d);
+ return `<div class="page-head"><div><button class="btn ghost sm" data-a="boBack">${ic('back')} Kanban</button><h1 style="margin-top:6px"><span class="num">${d.id}</span> · ${s.short}</h1><p class="muted small">${esc(cname(c))} · ouvert le ${fd(d.created)} · ${stageBadge(d.stage)} depuis ${days(d.since)} j${sv?` · <span class="badge b-vio">${sv.id}</span>`:''}</p></div>
+ <div class="actions">${fld({name:'tech',label:'Technicien',type:'select',val:d.tech,opts:[['','Non assigné'],...TECHS],attrs:`data-ch="setTech" data-id="${d.id}"`})}<button class="btn" data-a="asClient" data-id="${d.id}" style="align-self:flex-end">${ic('swap')} Vue client</button></div></div>
+ <section class="card" style="margin-bottom:16px"><div class="card-b">${stepper(d.stage,STAGES)}</div></section>
+ <div class="dgrid wide2"><div class="dmain"><section class="card"><div class="card-h"><h2>${ic('wrench')} Étape en cours : ${STAGES[d.stage]}</h2></div><div class="card-b stack">${boAction(d)}</div></section>${boRecap(d)}</div>
+ <div class="dside"><section class="card"><div class="card-h"><h3>${ic('user')} Client et véhicule</h3></div><div class="card-b"><dl class="dl"><dt>Client</dt><dd>${esc(cname(c))}${c.type==='pro'?`<br><span class="hint">${esc(c.name)} · SIRET ${fmtSiret(c.siret)}</span>`:''}</dd><dt>Contact</dt><dd>${esc(c.email)}<br>${esc(c.phone||'')}</dd><dt>Véhicule</dt><dd>${esc(d.veh.model)}</dd><dt>VIN</dt><dd class="num">${esc(d.veh.vin||'—')}</dd><dt>Immat.</dt><dd class="num">${esc(d.veh.plate||'—')}</dd><dt>Boîte</dt><dd>${esc(d.veh.box||s.box||'—')}</dd>${d.veh.desc?`<dt>Symptômes</dt><dd>${esc(d.veh.desc)}</dd>`:''}</dl></div></section>
+ <section class="card"><div class="card-h"><h3>${ic('chat')} Messages client</h3></div><div class="card-b">${thread(d,'atelier')}</div></section>
+ <section class="card"><div class="card-h"><h3>${ic('clip')} Photos et fichiers techniques</h3></div><div class="card-b">${filesBox(d)}</div></section>
+ <section class="card"><div class="card-h"><h3>${ic('lock')} Notes internes</h3><span class="hint">Jamais visibles du client</span></div><div class="card-b"><ul class="mini-log">${d.notes.map(n=>`<li><span class="num">${fdt(n.at)}</span><b>${esc(n.who)}</b> — ${esc(n.t)}</li>`).join('')||'<li class="hint">Aucune note.</li>'}</ul><form data-f="note" data-id="${d.id}" novalidate class="msgform">${fld({name:'t',label:'Ajouter une note',type:'textarea'})}<button class="btn" type="submit" aria-label="Ajouter la note">${ic('plus')}</button></form></div></section>
+ <section class="card"><div class="card-h"><h3>${ic('history')} Historique</h3></div><div class="card-b"><ul class="timeline">${S.audit.filter(a=>a.ref===d.id).map(a=>`<li><span class="num">${fdt(a.at)}</span><span>${esc(a.t)}</span><span class="w">${esc(a.who)}</span></li>`).join('')}</ul></div></section></div></div>`}
+function boRecap(d){const r=d.rec,parts=[];
+ if(r)parts.push(`<section class="card"><div class="card-h"><h3>${ic('inbox')} Réception</h3>${r.issue==='conforme'?'<span class="badge b-ok">Conforme</span>':`<span class="badge b-bad">${r.issue==='mauvaise'?'Mauvaise pièce':'Pièce endommagée'}</span>`}</div><div class="card-b"><dl class="dl"><dt>Reçu le</dt><dd>${fdt(r.at)}</dd><dt>Colis</dt><dd>${esc(r.colis)}</dd><dt>Pièce</dt><dd>${esc(r.piece)}</dd><dt>Référence</dt><dd class="num">${esc(r.ref)}</dd><dt>N° de série</dt><dd class="num">${esc(r.serial)}</dd><dt>Photos</dt><dd>${r.photos.length?r.photos.map(esc).join(', '):'—'}</dd>${r.rem?`<dt>Remarques</dt><dd>${esc(r.rem)}</dd>`:''}</dl></div></section>`);
+ if(d.diag&&d.stage>2)parts.push(`<section class="card"><div class="card-h"><h3>${ic('alert')} Diagnostic</h3></div><div class="card-b">${codesTable(d,false)}${d.diag.notes?`<p style="margin-top:8px">${esc(d.diag.notes)}</p>`:''}</div></section>`);
+ if(d.quotes.length&&d.stage!==3)parts.push(`<section class="card"><div class="card-h"><h3>${ic('file')} Devis complémentaires</h3></div><div class="card-b stack">${d.quotes.map(q=>quoteCard(d,q,false)).join('')}</div></section>`);
+ if(d.work.length&&d.stage!==4)parts.push(`<section class="card"><div class="card-h"><h3>${ic('wrench')} Interventions et pièces</h3></div><div class="card-b">${workTable(d,false)}</div></section>`);
+ if(d.tests&&d.stage>5)parts.push(`<section class="card"><div class="card-h"><h3>${ic('check')} Tests finaux</h3><span class="badge b-ok">Validés</span></div><div class="card-b"><p>${esc(d.tests.c||'Tests conformes.')}</p><p class="hint">${fdt(d.tests.at)}</p></div></section>`);
+ parts.push(`<section class="card"><div class="card-h"><h3>${ic('card')} Paiements</h3><span class="hint">Confirmés par webhook</span></div><div class="card-b">${payLines(d)}</div></section>`);
+ return parts.join('')}
+function codesTable(d,edit){return d.diag.codes.length?`<table class="tbl compact"><tbody>${d.diag.codes.map((c,i)=>`<tr><td class="num" style="width:90px">${esc(c.c)}</td><td>${esc(c.l)}</td>${edit?`<td class="r"><button class="icon-btn" data-a="rmCode" data-id="${d.id}" data-i="${i}" aria-label="Supprimer le code ${esc(c.c)}">${ic('trash')}</button></td>`:''}</tr>`).join('')}</tbody></table>`:'<p class="hint">Aucun code défaut saisi.</p>'}
+function workTable(d,edit){return d.work.length?`<table class="tbl compact"><tbody>${d.work.map((w,i)=>`<tr><td>${esc(w.l)}${w.p?`<br><span class="hint">Pièce : ${esc(w.p)} × ${w.q}</span>`:''}</td>${edit?`<td class="r"><button class="icon-btn" data-a="rmWork" data-id="${d.id}" data-i="${i}" aria-label="Supprimer l’intervention">${ic('trash')}</button></td>`:''}</tr>`).join('')}</tbody></table>`:'<p class="hint">Aucune intervention saisie.</p>'}
+function boAction(d){const s=svc(d.sid),id=d.id;
+ switch(d.stage){
+ case 0:return `<p class="hint">La pièce n’est pas encore arrivée. Enregistrez le colis à réception.</p><form data-f="rec" data-id="${id}" novalidate class="stack">
+  <div class="row">${fld({name:'at',label:'Date et heure',type:'datetime-local',val:localDT(),req:1})}${fld({name:'colis',label:'État du colis',type:'select',opts:['Bon état','Carton abîmé','Colis ouvert','Colis humide']})}${fld({name:'piece',label:'État de la pièce',type:'select',opts:['Bon état','Rayures / traces','Connecteur endommagé','Boîtier fissuré']})}</div>
+  <div class="row">${fld({name:'ref',label:'Référence constatée',req:1,hint:'Compatibles : '+s.refs.join(', ')})}${fld({name:'serial',label:'Numéro de série',req:1})}${fld({name:'issue',label:'Conformité',type:'select',opts:[['conforme','Conforme à la commande'],['mauvaise','Mauvaise pièce envoyée'],['endommagee','Pièce endommagée']]})}</div>
+  <div class="field"><label for="ph-${id}">Photos du colis et de la pièce</label><input id="ph-${id}" name="photos" type="file" accept="image/*" multiple><p class="hint">JPG, PNG ou WEBP — 20 Mo max par fichier.</p><p class="err" data-err="photos"></p></div>
+  ${fld({name:'rem',label:'Remarques',type:'textarea',ph:'Obligatoire en cas d’anomalie'})}
+  <div class="actions"><button class="btn primary" type="submit">${ic('inbox')} Valider la réception</button><button type="button" class="btn ghost" data-a="fillRec" data-id="${id}">Pré-remplir (démo)</button></div></form>`;
+ case 1:{const r=d.rec;let h='';
+  if(d.flag==='mauvaise')h=`<div class="note bad">${ic('alert')}<span>Mauvaise pièce reçue (réf. <span class="num">${esc(r.ref)}</span>). Demandez au client d’envoyer la bonne pièce ; celle-ci lui sera retournée.</span></div><div class="actions"><button class="btn danger" data-a="askRight" data-id="${id}">${ic('send')} Demander la bonne pièce au client</button></div>`;
+  if(d.flag==='endommagee')h=`<div class="note bad">${ic('alert')}<span>Pièce endommagée pendant le transport. Prévenez le client (réserves transporteur) puis poursuivez le diagnostic si la réparation reste possible.</span></div><div class="actions"><button class="btn" data-a="informDamage" data-id="${id}">${ic('send')} Informer le client</button></div>`;
+  return h+`<form data-f="startDiag" data-id="${id}" novalidate class="stack"><div class="row">${fld({name:'tech',label:'Technicien affecté',type:'select',val:d.tech,req:1,opts:[['','Choisir…'],...TECHS]})}</div><div class="actions"><button class="btn primary" type="submit">${ic('wrench')} Démarrer le diagnostic</button></div></form>`}
+ case 2:return `<h3 style="font-size:14px">Codes défaut</h3>${codesTable(d,true)}
+  <form data-f="code" data-id="${id}" novalidate class="row" style="align-items:end">${fld({name:'c',label:'Code',req:1,ph:'P0841'})}${fld({name:'l',label:'Libellé',req:1,ph:'Capteur pression…'})}<button class="btn" type="submit">${ic('plus')} Ajouter</button></form>
+  <form data-f="dnotes" data-id="${id}" novalidate class="stack">${fld({name:'notes',label:'Conclusions du diagnostic',type:'textarea',val:d.diag?.notes||''})}<div class="actions"><button class="btn" type="submit">Enregistrer les conclusions</button><button type="button" class="btn primary" data-a="diagOk" data-id="${id}">${ic('check')} Conforme au forfait → réparation</button></div></form>
+  <details class="quote" open><summary style="font-size:14px;color:var(--ink);font-weight:700">Envoyer un devis complémentaire</summary><form data-f="quote" data-id="${id}" novalidate class="stack" style="margin-top:8px">
+  ${[0,1,2].map(i=>`<div class="row">${fld({name:'l'+i,label:'Ligne '+(i+1)+' — libellé',req:!i,ph:i?'Optionnel':'ex. Remplacement accumulateur'})}${fld({name:'a'+i,label:'Montant HT (€)',type:'number',req:!i,attrs:'min="1" step="0.01" inputmode="decimal"'})}</div>`).join('')}
+  ${fld({name:'due',label:'Délai de réponse',type:'select',val:'3',opts:[['2','48 heures'],['3','3 jours'],['5','5 jours'],['7','7 jours']],hint:'Relance automatique à mi-délai, dossier signalé à échéance.'})}
+  <div class="actions"><button class="btn primary" type="submit">${ic('send')} Envoyer le devis au client</button></div></form></details>`;
+ case 3:{const q=d.quotes[d.quotes.length-1];return `${quoteCard(d,q,false)}<div class="actions"><button class="btn" data-a="remind" data-id="${id}" data-q="${q.id}"${q.status!=='sent'?' disabled':''}>${ic('send')} Relancer le client</button></div><div class="tip"><span>Démo : répondez au devis côté client (acceptation et paiement Stripe).</span><button class="btn sm" data-a="asClient" data-id="${id}">${ic('swap')} Ouvrir la vue client</button></div>`}
+ case 4:return `${workTable(d,true)}<form data-f="work" data-id="${id}" novalidate class="row" style="align-items:end">${fld({name:'l',label:'Intervention',req:1,ph:'ex. Remplacement capteur N2'})}${fld({name:'p',label:'Pièce utilisée',ph:'Optionnel'})}${fld({name:'q',label:'Qté',type:'number',val:1,attrs:'min="1" max="99"'})}<button class="btn" type="submit">${ic('plus')} Ajouter</button></form><p class="err" data-err="work-${id}"></p><div class="actions"><button class="btn primary" data-a="toTests" data-id="${id}">${ic('check')} Passer aux tests</button></div>`;
+ case 5:return `<form data-f="tests" data-id="${id}" novalidate class="stack"><fieldset style="border:0;padding:0;margin:0;display:grid;gap:6px"><legend class="flabel" style="margin-bottom:6px">Contrôles obligatoires</legend>${[['bench','Test au banc (3 h, cycles chaud/froid)'],['codes','Lecture des codes défaut : aucun code présent'],['adapt','Adaptations et apprentissage effectués'],['endurance','Contrôle visuel final et étanchéité']].map(([k,l])=>`<label class="check"><input type="checkbox" name="${k}"> ${l}</label>`).join('')}</fieldset><p class="err" data-err="checks"></p>
+  ${fld({name:'c',label:'Commentaire de test',type:'textarea',ph:'Résultats, valeurs mesurées…'})}<div class="actions"><button class="btn primary" type="submit">${ic('check')} Valider les tests</button><button type="button" class="btn danger" data-a="testFail" data-id="${id}">Échec → retour en réparation</button></div></form>`;
+ case 6:return `<form data-f="ship" data-id="${id}" novalidate class="stack"><div class="row">${fld({name:'carrier',label:'Transporteur',type:'select',opts:['Colissimo','Chronopost','DPD','UPS']})}${fld({name:'num',label:'Numéro de suivi',req:1,ph:'ex. 6A12345678901',hint:'Saisie manuelle au lancement, intégration transporteur ensuite.'})}</div><div class="actions"><button class="btn primary" type="submit">${ic('truck')} Marquer comme expédié</button></div></form>`;
+ case 7:return `<div class="note">${ic('truck')}<span>${esc(d.ship.carrier)} — <span class="num">${esc(d.ship.num)}</span>, expédié le ${fd(d.ship.at)}.</span></div><p class="hint">La clôture émet la facture définitive (numéro chronologique) et démarre la garantie de ${s.war} mois.</p><div class="actions"><button class="btn primary" data-a="close8" data-id="${id}">${ic('check')} Confirmer la livraison et clôturer</button></div>`;
+ default:{const w=wst(d);return `<div class="note ok">${ic('shield')}<span>Garantie ${w[0].toLowerCase()} du ${fd(d.war.start)} au ${fd(d.war.end)}.</span></div><div class="actions"><button class="btn" data-a="inv" data-no="${d.invoice}">${ic('file')} Facture ${d.invoice}</button>${openSav(d)?`<button class="btn" data-a="openSavBo" data-s="${openSav(d).id}">${ic('shield')} Voir le SAV</button>`:''}</div>`}}}
+function boColis(){const l=S.orphans,open=S.dossiers.filter(d=>d.stage===0);
+ return `<div class="page-head"><div><h1>Colis non rattachés</h1><p class="muted small">Colis reçus sans numéro de dossier : enregistrez-les puis rattachez-les à une commande en attente.</p></div></div>
+ <div class="dgrid"><div class="dmain">${l.length?l.map(o=>`<section class="card"><div class="card-h"><h3><span class="num">${o.id}</span></h3>${o.status==='open'?'<span class="badge b-warn">À rattacher</span>':`<span class="badge b-ok">Rattaché à ${o.did}</span>`}</div><div class="card-b stack"><dl class="dl"><dt>Reçu le</dt><dd>${fdt(o.at)}</dd><dt>Transporteur</dt><dd>${esc(o.carrier)} <span class="num">${esc(o.track)}</span></dd><dt>Expéditeur</dt><dd>${esc(o.sender)}</dd><dt>Réf. pièce</dt><dd class="num">${esc(o.ref)}</dd><dt>Remarques</dt><dd>${esc(o.rem)}</dd></dl>
+ ${o.status==='open'?`<form data-f="link" data-id="${o.id}" novalidate class="row" style="align-items:end">${fld({name:'did',label:'Rattacher au dossier',type:'select',req:1,opts:[['','Choisir un dossier en attente de colis…'],...open.map(d=>[d.id,`${d.id} — ${cname(cust(d.cid))} — ${svc(d.sid).short}`])]})}<button class="btn primary" type="submit">Rattacher</button></form>`:''}</div></section>`).join(''):'<p class="card empty">Aucun colis non rattaché.</p>'}</div>
+ <section class="card"><div class="card-h"><h2>${ic('plus')} Enregistrer un colis sans dossier</h2></div><div class="card-b"><form data-f="orphan" novalidate class="stack">${fld({name:'sender',label:'Expéditeur (nom, ville)',req:1})}<div class="row">${fld({name:'carrier',label:'Transporteur',type:'select',opts:['Colissimo','Chronopost','DPD','UPS','Dépôt en main propre']})}${fld({name:'track',label:'N° de suivi'})}</div>${fld({name:'ref',label:'Référence lue sur la pièce',req:1})}${fld({name:'rem',label:'Remarques',type:'textarea'})}<button class="btn primary" type="submit">Enregistrer le colis</button></form></div></section></div>`}
+function boSav(){const u=S.ui.bo,l=S.savs;const x=l.find(s=>s.id===u.sav)||l[0];
+ return `<div class="page-head"><div><h1>SAV et garanties</h1><p class="muted small">Chaque demande reste liée au dossier et à la garantie d’origine.</p></div></div>
+ <div class="split"><div class="dlist">${l.length?l.map(s=>`<button class="ditem" data-a="savSel" data-s="${s.id}"${x&&x.id===s.id?' aria-current="true"':''}><span class="l1"><span class="num">${s.id}</span><span class="badge ${s.step===9?'b-ok':'b-warn'}">${SAVSTEPS[s.step]}</span></span><strong>${esc(cname(cust(s.cid)))}</strong><span class="hint">Dossier ${s.did} · ${esc(s.motif)}</span></button>`).join(''):'<p class="card empty">Aucun SAV.</p>'}</div><div>${x?savDetail(x):''}</div></div>`}
+function savDetail(x){const d=dos(x.did),s=svc(d.sid),w=d.war;let act='';const id=x.id;
+ const go=(to,t,l,cls='primary')=>`<button class="btn ${cls}" data-a="savGo" data-s="${id}" data-to="${to}" data-t="${esc(t)}">${l}</button>`;
+ switch(x.step){
+  case 0:act=go(1,'Prise en charge — analyse en cours','Prendre en charge (analyse)');break;
+  case 1:act=`<form data-f="savAnalyse" data-id="${id}" novalidate class="stack">${fld({name:'t',label:'Message au client',type:'textarea',ph:'Requis pour demander des informations'})}<div class="actions"><button class="btn" type="submit" name="act" value="info">Demander des informations</button><button class="btn primary" type="submit" name="act" value="rma">Autoriser le retour</button></div></form>`;break;
+  case 2:act=go(3,'Informations reçues — retour autorisé','Informations reçues → autoriser le retour');break;
+  case 3:act=go(4,'Colis SAV réceptionné','Colis SAV reçu');break;
+  case 4:act=go(5,'Inspection démarrée','Démarrer l’inspection');break;
+  case 5:act=`<form data-f="savDecide" data-id="${id}" novalidate class="stack"><fieldset class="radio-cards" style="border:0;padding:0;margin:0"><legend class="flabel" style="margin-bottom:6px">Décision après inspection</legend><label><input type="radio" name="dec" value="garantie" checked> Réparation sous garantie</label><label><input type="radio" name="dec" value="hors"> Devis hors garantie</label><label><input type="radio" name="dec" value="refus"> Refus motivé</label></fieldset>
+   <div class="row">${fld({name:'amount',label:'Montant TTC du devis (€)',type:'number',attrs:'min="1" step="0.01"'})}</div>${fld({name:'motif',label:'Motif / constat',type:'textarea',ph:'Obligatoire en cas de refus'})}<button class="btn primary" type="submit">Enregistrer la décision</button></form>`;break;
+  case 6:act=x.decision==='refus'?go(8,'Pièce réexpédiée sans réparation (refus motivé)','Réexpédier la pièce'):go(7,'Réparation effectuée — tests en cours','Réparation effectuée → tests');break;
+  case 7:act=go(8,'Tests SAV validés','Tests validés');break;
+  case 8:act=`<form data-f="savShip" data-id="${id}" novalidate class="row" style="align-items:end">${fld({name:'num',label:'N° de suivi retour',req:1})}<button class="btn primary" type="submit">${ic('truck')} Expédier et clôturer</button></form>`;break;
+  default:act=`<div class="note ok">${ic('check')}<span>SAV clôturé.</span></div>`}
+ return `<section class="card"><div class="card-h"><h2><span class="num">${x.id}</span></h2><span class="badge ${x.step===9?'b-ok':'b-warn'}">${SAVSTEPS[x.step]}</span></div><div class="card-b stack">${stepper(x.step,SAVSTEPS)}
+ <dl class="dl"><dt>Client</dt><dd>${esc(cname(cust(x.cid)))}</dd><dt>Dossier d’origine</dt><dd><button class="btn sm" data-a="boOpenFrom" data-id="${d.id}">${d.id} — ${s.short}</button></dd><dt>Garantie</dt><dd>${fd(w.start)} → ${fd(w.end)} ${new Date(w.end)>new Date()?'<span class="badge b-ok">Couverte</span>':'<span class="badge b-bad">Hors garantie</span>'}</dd><dt>Motif</dt><dd><strong>${esc(x.motif)}</strong> — ${esc(x.desc)}</dd>${x.rma?`<dt>Autorisation</dt><dd class="num">${x.rma}</dd>`:''}${x.decision?`<dt>Décision</dt><dd>${savDec(x)}</dd>`:''}</dl>
+ <div class="stack">${act}</div><h3 style="font-size:14px">Historique</h3><ul class="mini-log">${x.hist.map(h=>`<li><span class="num">${fdt(h.at)}</span>${esc(h.t)}</li>`).join('')}</ul></div></section>`}
+function boClients(){const u=S.ui.bo;const l=S.customers.filter(c=>!u.ct||c.type===u.ct);
+ return `<div class="page-head"><div><h1>Clients et sociétés</h1><p class="muted small">Particuliers et professionnels, véhicules et historique centralisé.</p></div>${fld({name:'ct',label:'Type',type:'select',val:u.ct,opts:[['','Tous'],['part','Particuliers'],['pro','Professionnels']],attrs:'data-ch="ctype"'})}</div>
+ <section class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Client</th><th>Type</th><th>SIRET</th><th>Contact</th><th>Ville</th><th class="r">Dossiers</th><th class="r">Véhicules</th><th class="r">Encaissé TTC</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${l.map(c=>{const ds=S.dossiers.filter(d=>d.cid===c.id),veh=new Set(ds.map(d=>d.veh.plate||d.veh.vin)).size,tot=ds.reduce((a,d)=>a+d.paid.reduce((x,p)=>x+p.a,0),0)-S.invoices.filter(i=>i.type==='avoir'&&i.cid===c.id&&i.refund).reduce((a,i)=>a+i.ttc,0);
+ return `<tr><td><strong>${esc(cname(c))}</strong>${c.type==='pro'?`<br><span class="hint">${esc(c.name)}</span>`:''}</td><td>${c.type==='pro'?'<span class="badge b-acc">Professionnel</span>':'<span class="badge b-n">Particulier</span>'}</td><td class="num">${c.siret?fmtSiret(c.siret):'—'}</td><td>${esc(c.email)}<br><span class="hint">${esc(c.phone||'')}</span></td><td>${esc(c.city||'')}</td><td class="r">${ds.length}</td><td class="r">${veh}</td><td class="r num">${eur(tot)}</td><td><button class="btn sm" data-a="kbFilter" data-q="${esc(cname(c))}">Dossiers</button></td></tr>`}).join('')}</tbody></table></div></section>`}
+function faList(){const u=S.ui.bo,q=norm(u.fq);return S.invoices.filter(i=>(!u.ft||i.type===u.ft)&&(!q||norm([i.no,i.did,cname(cust(i.cid))].join('|')).includes(q))).sort((a,b)=>b.no.localeCompare(a.no)||b.at.localeCompare(a.at))}
+function boFactures(){const u=S.ui.bo,f=S.invoices.filter(i=>i.type==='facture'),a=S.invoices.filter(i=>i.type==='avoir');
+ return `<div class="page-head"><div><h1>Factures et avoirs</h1><p class="muted small">Numérotation chronologique continue · documents verrouillés après émission · corrections par avoir uniquement.</p></div><button class="btn" data-a="fxAll">${ic('download')} Export Factur-X (lot)</button></div>
+ <div class="kpis"><div class="kpi"><b>${f.length}</b><span>Factures émises</span></div><div class="kpi"><b>${eur(f.reduce((s,i)=>s+i.ttc,0))}</b><span>Facturé TTC</span></div><div class="kpi"><b>${a.length}</b><span>Avoirs</span></div><div class="kpi"><b>${eur(f.reduce((s,i)=>s+i.tva,0)-a.reduce((s,i)=>s+i.tva,0))}</b><span>TVA collectée nette</span></div></div>
+ <div class="toolbar"><div class="field grow"><label for="faq">Rechercher</label><input id="faq" class="input" type="search" data-in="faq" value="${esc(u.fq)}" placeholder="Numéro, dossier, client"></div>${fld({name:'ft',label:'Type',type:'select',val:u.ft,opts:[['','Tous'],['facture','Factures'],['avoir','Avoirs']],attrs:'data-ch="ftype"'})}</div>
+ <section class="card" id="faBody">${invTable(faList(),true)}</section>`}
+function boStripe(){const E=S.events,ok=E.filter(e=>e.status==='traité');const inn=ok.filter(e=>e.type==='checkout.session.completed'||e.type==='payment_intent.succeeded').reduce((s,e)=>s+e.amount,0),out=ok.filter(e=>e.type==='charge.refunded').reduce((s,e)=>s+e.amount,0);
+ return `<div class="page-head"><div><h1>Paiements et webhooks Stripe</h1><p class="muted small">Chaque commande est validée côté serveur à réception du webhook signé. Les événements sont dédupliqués par identifiant (idempotence).</p></div><span class="badge b-warn">Mode test</span></div>
+ <div class="kpis"><div class="kpi"><b>${eur(inn)}</b><span>Encaissé</span></div><div class="kpi"><b>${eur(out)}</b><span>Remboursé</span></div><div class="kpi"><b>${ok.length}</b><span>Événements traités</span></div><div class="kpi"><b>${E.filter(e=>e.status==='doublon ignoré').length}</b><span>Doublons ignorés</span></div><div class="kpi"><b>0</b><span>Alertes Radar</span></div></div>
+ <section class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Reçu le</th><th>Événement</th><th>Type</th><th>Dossier</th><th class="r">Montant</th><th>Traitement</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${E.map((e,i)=>`<tr><td>${fdt(e.at)}</td><td class="num">${e.id}</td><td class="num">${e.type}</td><td class="num">${esc(e.ref)}</td><td class="r num">${e.type==='charge.refunded'?'−':''}${eur(e.amount)}</td><td>${e.status==='traité'?'<span class="badge b-ok">Traité</span>':e.status==='échec'?'<span class="badge b-bad">Paiement refusé</span>':'<span class="badge b-n">Doublon ignoré</span>'}</td><td>${e.status==='traité'?`<button class="btn sm" data-a="replay" data-i="${i}">${ic('history')} Rejouer</button>`:''}</td></tr>`).join('')}</tbody></table></div></section>`}
+function auRows(){const q=norm(S.ui.bo.aq);return S.audit.filter(a=>!q||norm([a.who,a.ref,a.t].join('|')).includes(q)).slice(0,150).map(a=>`<tr><td>${fdt(a.at)}</td><td>${esc(a.who)}</td><td class="num">${esc(a.ref)}</td><td>${esc(a.t)}</td></tr>`).join('')}
+function boAudit(){return `<div class="page-head"><div><h1>Journal d’audit</h1><p class="muted small">Toutes les actions sensibles sont tracées (utilisateur, horodatage, objet). Journal en ajout seul.</p></div></div>
+ <div class="toolbar"><div class="field grow"><label for="auq">Filtrer</label><input id="auq" class="input" type="search" data-in="auq" value="${esc(S.ui.bo.aq)}" placeholder="Utilisateur, dossier, action"></div></div>
+ <section class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Utilisateur</th><th>Objet</th><th>Action</th></tr></thead><tbody id="auBody">${auRows()}</tbody></table></div></section>`}
+
+/* ---------- Actions ---------- */
+function setPersona(p){S.persona=p;const r=role();
+ if((r==='tech'||r==='admin')&&S.view==='client')S.view='bo';
+ if((r==='visiteur'||r==='client')&&S.view==='bo')S.view='client';
+ S.ui.cl.sel=null;S.ui.cl.q='';render();toast(`Vous naviguez en tant que : ${esc(actor())}`)}
+const A={
+ reset(){if(!confirm('Réinitialiser toutes les données de la démo ?'))return;try{localStorage.removeItem(KEY)}catch(e){}S=seed();closeDlg();render();toast('Démo réinitialisée')},
+ close:closeDlg,
+ go(ds){S.view=ds.v;if(ds.v==='shop')S.ui.shop.svc=null;if(ds.v==='bo')S.ui.bo.sel=null;render();window.scrollTo(0,0)},
+ persona(ds){if(ds.p==='admin'&&!S.mfa)return mfaDlg();setPersona(ds.p)},
+ newAcc(){accountDlg(null)},
+ quick(ds){S.ui.shop.q=ds.q;render();$('#sq').focus()},
+ clearF(){Object.assign(S.ui.shop,{q:'',brand:'',box:'',type:''});render()},
+ svc(ds){S.ui.shop.svc=ds.id;render();window.scrollTo(0,0)},
+ svcBack(){S.ui.shop.svc=null;render()},
+ askRef(){toast('Demande d’étude envoyée à l’atelier (simulation)','mail')},
+ add(ds){S.cart.push(ds.id);renderTop();save();toast('Ajouté au panier');},
+ buyNow(ds){S.cart.push(ds.id);renderTop();save();A.checkout()},
+ cart:cartDlg,
+ rmCart(ds){S.cart.splice(+ds.i,1);renderTop();save();cartDlg()},
+ checkout(){if(!S.cart.length)return;if(role()==='visiteur')return accountDlg('checkout');if(role()!=='client'){closeDlg();return toast('Passez sur un compte client pour commander','bad')}vehDlg()},
+ fillCard(){const f=dlg().querySelector('form[data-f=pay]');f.card.value='4242 4242 4242 4242';f.exp.value='12/29';f.cvc.value='123';f.querySelector('[type=submit]').focus()},
+ clTab(ds){S.ui.cl.tab=ds.t;render()},
+ clSel(ds){S.ui.cl.sel=ds.id;render()},
+ bordereau(ds){const d=dos(ds.id),c=cust(d.cid);printHTML(`<div class="doc"><div class="dh"><div>${ISSUER}</div><div><h2>Bordereau d’envoi</h2>${fd(now())}</div></div><p>À coller sur le carton et à joindre à l’intérieur du colis.</p><div class="big">${d.id}</div><p><strong>Destinataire :</strong> ${ADDR}</p><p><strong>Expéditeur :</strong> ${esc(cname(c))} — ${esc(c.city)}</p><p><strong>Pièce :</strong> ${esc(svc(d.sid).name)}<br><strong>Véhicule :</strong> ${esc(d.veh.model)} ${esc(d.veh.plate||'')}</p><p class="foot">Emballage antistatique obligatoire. Ne pas joindre le faisceau ni le support. Envoi suivi recommandé.</p></div>`)},
+ inv(ds){showInv(ds.no)},
+ printInv(ds){printHTML(invDoc(S.invoices.find(i=>i.no===ds.no)))},
+ dl(ds){toast(`Lien de téléchargement signé généré pour ${esc(ds.n)} (expire dans 5 min)`)},
+ asTech(ds){S.persona='tech';S.view='bo';S.ui.bo.tab='kanban';S.ui.bo.sel=ds.id;render();window.scrollTo(0,0);toast('Vous naviguez en tant que : Karim Benali (technicien)')},
+ asClient(ds){const d=dos(ds.id);S.persona='c:'+d.cid;S.view='client';S.ui.cl={tab:'dossiers',sel:d.id,q:''};render();window.scrollTo(0,0);toast(`Vous naviguez en tant que : ${esc(cname(cust(d.cid)))}`)},
+ qAccept(ds){const d=dos(ds.id),q=d.quotes.find(x=>x.id===ds.q);if(q.status==='sent'){q.status='accepted';q.hist.push({at:now(),t:'Devis accepté par le client depuis son espace'});log(d.id,`Devis ${q.id} accepté par le client`);render()}payQuote(d,q)},
+ qPay(ds){const d=dos(ds.id);payQuote(d,d.quotes.find(x=>x.id===ds.q))},
+ qRefuse(ds){openDlg(dlgHead('Refuser le devis '+ds.q)+`<div class="dlg-b"><form data-f="qRefuse" data-id="${ds.id}" data-q="${ds.q}" novalidate class="stack"><fieldset class="radio-cards" style="border:0;padding:0;margin:0;grid-template-columns:1fr"><legend class="flabel" style="margin-bottom:6px">Que souhaitez-vous faire ?</legend><label><input type="radio" name="opt" value="forfait" checked> Réparer uniquement selon le forfait initial</label><label><input type="radio" name="opt" value="retour"> Récupérer la pièce sans réparation</label></fieldset>${fld({name:'why',label:'Commentaire (facultatif)',type:'textarea'})}<div class="actions"><button class="btn danger" type="submit">Confirmer le refus</button><button type="button" class="btn" data-a="close">Annuler</button></div></form></div>`)},
+ savNew(ds){const d=dos(ds.id);openDlg(dlgHead('Ouvrir un SAV')+`<div class="dlg-b"><p class="hint">Dossier d’origine <span class="num">${d.id}</span> · garantie jusqu’au ${fd(d.war.end)}</p><form data-f="savNew" data-id="${d.id}" novalidate class="stack">${fld({name:'motif',label:'Motif',type:'select',opts:['Symptôme réapparu','Nouveau défaut','Bruit ou comportement anormal','Autre']})}${fld({name:'desc',label:'Description du problème (20 caractères min.)',type:'textarea',req:1})}<button class="btn primary" type="submit">Envoyer la demande</button></form></div>`)},
+ boTab(ds){S.ui.bo.tab=ds.t;S.ui.bo.sel=null;render()},
+ boOpen(ds){S.ui.bo.sel=ds.id;render();window.scrollTo(0,0)},
+ boOpenFrom(ds){S.ui.bo.tab='kanban';A.boOpen(ds)},
+ boBack(){S.ui.bo.sel=null;render()},
+ kbFilter(ds){S.ui.bo.tab='kanban';S.ui.bo.sel=null;S.ui.bo.q=ds.q;render()},
+ fillRec(ds){const d=dos(ds.id),f=$('form[data-f=rec]');f.ref.value=svc(d.sid).refs[0];f.serial.value='SN-'+rid(6).toUpperCase();f.rem.value='Colis reçu en bon état.'},
+ askRight(ds){const d=dos(ds.id);d.msgs.push({f:'atelier',who:'Karim Benali',at:now(),t:`La pièce reçue (réf. ${d.rec.ref}) ne correspond pas à votre commande. Merci d’envoyer la bonne pièce ; celle reçue vous sera retournée avec le bon de retour.`});d.flag=null;d.rec=null;setStage(d,0);log(d.id,'Mauvaise pièce : renvoi demandé au client, dossier repassé en attente de colis');render();toast('Email envoyé au client (simulation)','mail')},
+ informDamage(ds){const d=dos(ds.id);d.msgs.push({f:'atelier',who:'Karim Benali',at:now(),t:'Votre colis est arrivé endommagé (photos jointes au dossier). Nous poursuivons le diagnostic et vous tenons informé ; pensez à émettre des réserves auprès du transporteur.'});log(d.id,'Client informé de la pièce endommagée');render();toast('Email envoyé au client (simulation)','mail')},
+ rmCode(ds){const d=dos(ds.id);d.diag.codes.splice(+ds.i,1);render()},
+ rmWork(ds){dos(ds.id).work.splice(+ds.i,1);render()},
+ diagOk(ds){const d=dos(ds.id);if(!d.diag||!d.diag.codes.length)return toast('Saisissez au moins un code défaut ou une conclusion','bad');setStage(d,4);log(d.id,'Diagnostic conforme au forfait — réparation lancée');d.msgs.push({f:'atelier',who:actor(),at:now(),t:'Diagnostic terminé : la réparation est couverte par votre forfait. Nous lançons l’intervention.'});render();toast('Client notifié par email (simulation)','mail')},
+ remind(ds){const d=dos(ds.id),q=d.quotes.find(x=>x.id===ds.q);q.reminders++;q.hist.push({at:now(),t:`Relance n°${q.reminders} envoyée par email`});log(d.id,`Relance devis ${q.id} n°${q.reminders}`);render();toast('Relance envoyée au client (simulation)','mail')},
+ toTests(ds){const d=dos(ds.id);if(!d.work.length){const e=$(`[data-err="work-${d.id}"]`);e.textContent='Ajoutez au moins une intervention avant les tests.';return}setStage(d,5);log(d.id,'Réparation terminée — passage aux tests');render()},
+ testFail(ds){const d=dos(ds.id);setStage(d,4);log(d.id,'Tests en échec — retour en réparation');render();toast('Dossier renvoyé en réparation')},
+ close8(ds){const d=dos(ds.id),s=svc(d.sid);const lines=[{l:'Forfait '+s.name,ht:s.ht},...d.quotes.filter(q=>q.status==='paid').flatMap(q=>q.lines.map(x=>({l:`${x.l} (${q.id})`,ht:+x.a})))];
+  const inv=mkInv(next('fa','FA',5),'facture',d.cid,d.id,now(),lines);S.invoices.push(inv);d.invoice=inv.no;const e=new Date();e.setMonth(e.getMonth()+s.war);d.war={start:now(),end:e.toISOString()};setStage(d,8);
+  d.files.push({n:inv.no+'.pdf',s:'64 Ko',by:'Système',at:now()});log(d.id,`Dossier clôturé — facture ${inv.no} émise et verrouillée, garantie ${s.war} mois`);render();toast(`Facture ${inv.no} émise et envoyée au client (simulation)`,'mail')},
+ openSavBo(ds){S.ui.bo.tab='sav';S.ui.bo.sav=ds.s;S.ui.bo.sel=null;render()},
+ savSel(ds){S.ui.bo.sav=ds.s;render()},
+ savGo(ds){const x=S.savs.find(s=>s.id===ds.s);x.step=+ds.to;x.hist.push({at:now(),t:ds.t});log(x.id,ds.t);render();toast('Étape SAV mise à jour — client notifié (simulation)','mail')},
+ avoir(ds){const i=S.invoices.find(x=>x.no===ds.no),rem=remaining(i);openDlg(dlgHead('Émettre un avoir sur '+i.no)+`<div class="dlg-b"><p class="hint">Facture de ${eur(i.ttc)} TTC — reste remboursable : <strong>${eur(rem)}</strong>. La facture d’origine n’est pas modifiée.</p><form data-f="avoir" data-no="${i.no}" novalidate class="stack"><fieldset class="radio-cards" style="border:0;padding:0;margin:0"><legend class="flabel" style="margin-bottom:6px">Type</legend><label><input type="radio" name="kind" value="total" checked data-ch="avkind"> Avoir total (${eur(rem)})</label><label><input type="radio" name="kind" value="partiel" data-ch="avkind"> Avoir partiel</label></fieldset>${fld({name:'amount',label:'Montant TTC (€)',type:'number',val:rem,attrs:`min="0.01" max="${rem}" step="0.01" readonly`})}${fld({name:'motif',label:'Motif',req:1,ph:'ex. Geste commercial, erreur de prestation…'})}<label class="check"><input type="checkbox" name="refund" checked> Rembourser la carte d’origine via Stripe (Refund API)</label><button class="btn primary" type="submit">Émettre l’avoir</button></form></div>`)},
+ fx(ds){toast(`${ds.no} : PDF/A-3 + XML CII Factur-X généré, prêt pour la Plateforme Agréée (simulation)`)},
+ fxAll(){toast(`${S.invoices.length} documents exportés au format Factur-X (simulation)`)},
+ replay(ds){const e=S.events[+ds.i];S.events.unshift(Object.assign({},e,{at:now(),status:'doublon ignoré'}));log(e.id,'Webhook rejoué — déjà traité, ignoré (idempotence)','Système (webhook Stripe)');render();toast('Événement déjà traité : ignoré sans double écriture')},
+};
+function payQuote(d,q){const amt=ttc(qHT(q));pay({amount:amt,desc:`Paiement complémentaire ${q.id} — dossier ${d.id}`,cust:cust(d.cid),evt:'payment_intent.succeeded',ref:d.id,ok:pi=>{q.status='paid';q.hist.push({at:now(),t:`Paiement de ${eur(amt)} confirmé par webhook Stripe`});d.paid.push({l:'Complément '+q.id,a:amt,ref:pi,at:now()});if(d.stage===3)setStage(d,4);log(d.id,`Paiement complémentaire ${eur(amt)} confirmé par webhook — dossier passé en réparation`,'Système (webhook Stripe)');return 'Paiement reçu : l’atelier lance la réparation'}})}
+function mfaDlg(){$('#persona').value=S.persona;openDlg(dlgHead('Authentification à deux facteurs')+`<div class="dlg-b"><p>L’accès administrateur exige un code TOTP à 6 chiffres.</p><form data-f="mfa" novalidate class="stack">${fld({name:'code',label:'Code de l’application d’authentification',req:1,ph:'123456',attrs:'inputmode="numeric" autocomplete="one-time-code" maxlength="6"',hint:'Démo : saisissez n’importe quels 6 chiffres.'})}<button class="btn primary" type="submit">${ic('lock')} Vérifier</button></form></div>`)}
+
+/* ---------- Formulaires ---------- */
+const F={
+ mfa(f,fd){if(!/^\d{6}$/.test(g(fd,'code')))return vErr(f,{code:'Code à 6 chiffres attendu.'});S.mfa=true;closeDlg();log('auth','Connexion administrateur avec MFA','Sophie Renaud (admin)');S.view='bo';setPersona('admin')},
+ account(f,fd){const e={},pro=g(fd,'type')==='pro';
+  if(g(fd,'name').length<3)e.name='Nom requis.';if(!/^\S+@\S+\.\S+$/.test(g(fd,'email')))e.email='Adresse email invalide.';else if(S.customers.some(c=>c.email===g(fd,'email')))e.email='Un compte existe déjà avec cet email.';
+  if(g(fd,'pwd').length<8)e.pwd='8 caractères minimum.';if(g(fd,'phone')&&!/^[+\d][\d .]{8,}$/.test(g(fd,'phone')))e.phone='Numéro invalide.';
+  if(pro){if(g(fd,'company').length<2)e.company='Raison sociale requise.';const s=g(fd,'siret').replace(/\s/g,'');if(!/^\d{14}$/.test(s))e.siret='Le SIRET comporte 14 chiffres.'}
+  if(!fd.get('cgv'))e.cgv='Vous devez accepter les conditions.';if(!vErr(f,e))return;
+  const c={id:'c'+rid(6),type:pro?'pro':'part',name:g(fd,'name'),email:g(fd,'email'),phone:g(fd,'phone'),city:'—'};if(pro){c.company=g(fd,'company');c.siret=g(fd,'siret').replace(/\s/g,'');c.tva='';c.users=[c.name+' (administrateur société)']}
+  S.customers.push(c);S.persona='c:'+c.id;log(c.id,'Compte créé ('+(pro?'professionnel':'particulier')+')',cname(c));toast('Compte créé — email de bienvenue envoyé (simulation)','mail');
+  if(AFTER_ACC==='checkout'){renderTop();save();vehDlg()}else{closeDlg();S.view='client';render()}},
+ veh(f,fd){const e={},vin=g(fd,'vin').toUpperCase(),pl=g(fd,'plate').toUpperCase();if(g(fd,'model').length<3)e.model='Indiquez la marque et le modèle.';
+  if(vin&&!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin))e.vin='Le VIN comporte 17 caractères (sans I, O ni Q).';if(pl&&!/^[A-Z]{2}-?\d{3}-?[A-Z]{2}$/.test(pl))e.plate='Format attendu : AB-123-CD.';if(!vErr(f,e))return;
+  const c=me(),items=[...S.cart],amt=r2(items.reduce((a,id)=>a+ttc(svc(id).ht),0)),veh={model:g(fd,'model'),vin,plate:pl.replace(/^([A-Z]{2})-?(\d{3})-?([A-Z]{2})$/,'$1-$2-$3'),box:'',desc:g(fd,'desc')};
+  pay({amount:amt,desc:items.map(id=>svc(id).name).join(' + '),cust:c,evt:'checkout.session.completed',ref:'commande',ok:pi=>{let first;items.forEach(sid=>{const s=svc(sid),id=next('rep','REP',4);first=first||id;S.dossiers.unshift(mk({id,cid:c.id,sid,stage:0,created:now(),veh:Object.assign({},veh,{box:s.box}),paid:[{l:'Forfait '+s.name,a:ttc(s.ht),ref:pi,at:now()}],msgs:[{f:'atelier',who:'Atelier',at:now(),t:'Merci pour votre commande. Imprimez le bordereau et envoyez votre pièce à l’atelier.'}]}));log(id,'Commande payée — confirmée par webhook Stripe','Système (webhook Stripe)')});
+   S.events[0].ref=first;S.cart=[];S.view='client';S.ui.cl={tab:'dossiers',sel:first,q:''};return 'Commande confirmée — email de confirmation envoyé (simulation)'}})},
+ pay(f,fd){const n=g(fd,'card').replace(/\s/g,''),e={};if(!/^\d{16}$/.test(n)||!luhn(n))e.card='Numéro de carte invalide.';
+  const m=/^(\d{2})\s*\/\s*(\d{2})$/.exec(g(fd,'exp'));if(!m||+m[1]<1||+m[1]>12)e.exp='Format attendu : MM/AA.';else if(new Date(2000+ +m[2],+m[1])<new Date())e.exp='Carte expirée.';
+  if(!/^\d{3,4}$/.test(g(fd,'cvc')))e.cvc='CVC invalide.';if(!/^\S+@\S+\.\S+$/.test(g(fd,'email')))e.email='Email invalide.';if(!vErr(f,e))return;
+  const o=PAY;if(n==='4000000000000002'){addEvt('payment_intent.payment_failed',o.amount,o.ref,'pi_'+rid(12),'échec');save();return vErr(f,{card:'Paiement refusé par la banque (card_declined). Aucune commande n’a été validée.'})}
+  const pi='pi_'+rid(12),b=dlg().querySelector('.dlg-b');
+  b.innerHTML=`<div aria-live="polite" class="stack"><ol class="wh-steps"><li class="done">${ic('check')} Paiement autorisé par Stripe (retour navigateur)</li><li class="run" id="wh2">${spin} Attente du webhook <span class="num">${o.evt}</span>…</li><li id="wh3">${ic('lock')} Validation côté serveur</li></ol><p class="hint">La commande n’est confirmée qu’à réception du webhook signé, jamais sur le seul retour navigateur.</p></div>`;
+  setTimeout(()=>{const ev=addEvt(o.evt,o.amount,o.ref,pi);const w=$('#wh2');if(w){w.className='done';w.innerHTML=`${ic('check')} Webhook reçu, signature vérifiée — <span class="num">${ev.id}</span> enregistré`}const w3=$('#wh3');if(w3){w3.className='run';w3.innerHTML=spin+' Validation côté serveur…'}},1100);
+  setTimeout(()=>{const msg=o.ok(pi);const w3=$('#wh3');if(w3){w3.className='done';w3.innerHTML=ic('check')+' Validé côté serveur'}save();setTimeout(()=>{closeDlg();render();window.scrollTo(0,0);toast(msg,'mail')},700)},1900)},
+ qRefuse(f,fd){const d=dos(f.dataset.id),q=d.quotes.find(x=>x.id===f.dataset.q),opt=g(fd,'opt'),why=g(fd,'why');q.status='refused';q.hist.push({at:now(),t:'Devis refusé par le client'+(why?' : '+why:'')});
+  if(opt==='forfait'){setStage(d,4);log(d.id,`Devis ${q.id} refusé — réparation limitée au forfait`)}else{setStage(d,6);log(d.id,`Devis ${q.id} refusé — retour de la pièce sans réparation`)}
+  d.msgs.push({f:'client',who:cname(cust(d.cid)),at:now(),t:opt==='forfait'?'Je refuse le devis complémentaire : merci de réparer selon le forfait initial.':'Je refuse le devis : merci de me retourner la pièce.'});closeDlg();render();toast('Réponse transmise à l’atelier')},
+ msg(f,fd){const t=g(fd,'t');if(t.length<2)return vErr(f,{t:'Message vide.'});const d=dos(f.dataset.id),cl=role()==='client';d.msgs.push({f:cl?'client':'atelier',who:cl?cname(me()):actor(),at:now(),t});log(d.id,'Message '+(cl?'du client':'de l’atelier'));render();toast(cl?'Message envoyé à l’atelier':'Message envoyé — email de notification au client (simulation)',cl?'':'mail')},
+ note(f,fd){const t=g(fd,'t');if(!t)return vErr(f,{t:'Note vide.'});const d=dos(f.dataset.id);d.notes.push({at:now(),who:actor(),t});log(d.id,'Note interne ajoutée');render()},
+ profile(f,fd){const e={};if(g(fd,'name').length<3)e.name='Nom requis.';if(!/^\S+@\S+\.\S+$/.test(g(fd,'email')))e.email='Email invalide.';if(g(fd,'phone')&&!/^[+\d][\d .]{8,}$/.test(g(fd,'phone')))e.phone='Numéro invalide.';if(!vErr(f,e))return;const c=me();Object.assign(c,{name:g(fd,'name'),email:g(fd,'email'),phone:g(fd,'phone'),city:g(fd,'city')});log(c.id,'Profil mis à jour');render();toast('Profil enregistré')},
+ rec(f,fd){const d=dos(f.dataset.id),s=svc(d.sid),e={},issue=g(fd,'issue'),ref=g(fd,'ref');
+  if(!g(fd,'at'))e.at='Date requise.';if(!ref)e.ref='Référence requise.';if(!g(fd,'serial'))e.serial='Numéro de série requis.';
+  if(ref&&issue==='conforme'&&!s.refs.some(r=>norm(r)===norm(ref)))e.ref='Référence non compatible avec la prestation : corrigez-la ou choisissez « Mauvaise pièce envoyée ».';
+  if(issue!=='conforme'&&g(fd,'rem').length<5)e.rem='Décrivez l’anomalie constatée.';
+  const ph=[...(f.photos.files||[])],bad=ph.filter(x=>!/\.(jpe?g|png|webp)$/i.test(x.name)||x.size>20*1048576);if(bad.length)e.photos='Fichier refusé : '+bad.map(x=>x.name).join(', ');
+  if(!vErr(f,e))return;
+  d.rec={at:new Date(g(fd,'at')).toISOString(),colis:g(fd,'colis'),piece:g(fd,'piece'),ref,serial:g(fd,'serial'),rem:g(fd,'rem'),photos:ph.map(x=>x.name),issue};
+  ph.forEach(x=>d.files.push({n:x.name,s:fsize(x.size),by:actor(),at:now()}));d.flag=issue==='conforme'?null:issue;setStage(d,1);
+  d.msgs.push({f:'atelier',who:'Atelier',at:now(),t:issue==='conforme'?'Votre pièce est bien arrivée à l’atelier. Le diagnostic va débuter.':'Votre colis est arrivé ; une anomalie a été constatée à la réception. Un technicien revient vers vous.'});
+  log(d.id,'Réception enregistrée'+(issue!=='conforme'?' — anomalie : '+(issue==='mauvaise'?'mauvaise pièce':'pièce endommagée'):''));render();toast('Réception enregistrée — email « pièce reçue » envoyé (simulation)','mail')},
+ startDiag(f,fd){if(!g(fd,'tech'))return vErr(f,{tech:'Affectez un technicien.'});const d=dos(f.dataset.id);d.tech=g(fd,'tech');d.diag=d.diag||{codes:[],notes:''};d.flag=null;setStage(d,2);log(d.id,'Diagnostic démarré par '+d.tech);render()},
+ code(f,fd){const e={},c=g(fd,'c').toUpperCase();if(!/^[A-Z0-9]{3,8}$/.test(c))e.c='Code de 3 à 8 caractères.';if(g(fd,'l').length<3)e.l='Libellé requis.';if(!vErr(f,e))return;const d=dos(f.dataset.id);d.diag=d.diag||{codes:[],notes:''};d.diag.codes.push({c,l:g(fd,'l')});log(d.id,'Code défaut ajouté : '+c);render()},
+ dnotes(f,fd){const d=dos(f.dataset.id);d.diag=d.diag||{codes:[],notes:''};d.diag.notes=g(fd,'notes');log(d.id,'Conclusions du diagnostic enregistrées');render();toast('Conclusions enregistrées')},
+ quote(f,fd){const e={},lines=[];[0,1,2].forEach(i=>{const l=g(fd,'l'+i),a=parseFloat(g(fd,'a'+i).replace(',','.'));if(!l&&!g(fd,'a'+i))return;if(l.length<3)e['l'+i]='Libellé requis.';if(!(a>0))e['a'+i]='Montant positif requis.';lines.push({l,a:r2(a)})});
+  if(!lines.length)e.l0='Au moins une ligne est requise.';if(!vErr(f,e))return;const d=dos(f.dataset.id),q={id:next('dc','DC',4),lines,status:'sent',sent:now(),due:new Date(Date.now()+ +g(fd,'due')*DAY).toISOString(),reminders:0,hist:[{at:now(),t:'Devis envoyé au client (email + espace client)'}]};
+  d.quotes.push(q);setStage(d,3);d.msgs.push({f:'atelier',who:actor(),at:now(),t:`Un devis complémentaire ${q.id} de ${eur(ttc(qHT(q)))} TTC est disponible dans votre espace. Vous pouvez l’accepter et le régler en ligne.`});log(d.id,`Devis complémentaire ${q.id} envoyé (${eur(qHT(q))} HT)`);render();toast(`Devis ${q.id} envoyé au client (simulation)`,'mail')},
+ work(f,fd){const e={};if(g(fd,'l').length<3)e.l='Intervention requise.';const q=parseInt(g(fd,'q'))||0;if(q<1||q>99)e.q='1 à 99.';if(!vErr(f,e))return;const d=dos(f.dataset.id);d.work.push({l:g(fd,'l'),p:g(fd,'p'),q});log(d.id,'Intervention ajoutée : '+g(fd,'l'));render()},
+ tests(f,fd){const all=['bench','codes','adapt','endurance'].every(k=>fd.get(k));if(!all){f.querySelector('[data-err=checks]').textContent='Tous les contrôles doivent être validés.';return}const d=dos(f.dataset.id);d.tests={bench:true,codes:true,adapt:true,endurance:true,c:g(fd,'c'),at:now()};setStage(d,6);d.files.push({n:`rapport_tests_${d.id.slice(-4)}.pdf`,s:'96 Ko',by:actor(),at:now()});log(d.id,'Tests finaux validés — prêt à expédier');render();toast('Rapport de tests ajouté au dossier')},
+ ship(f,fd){const n=g(fd,'num').toUpperCase().replace(/\s/g,'');if(!/^[A-Z0-9]{8,20}$/.test(n))return vErr(f,{num:'8 à 20 caractères alphanumériques.'});const d=dos(f.dataset.id);d.ship={carrier:g(fd,'carrier'),num:n,at:now()};setStage(d,7);d.msgs.push({f:'atelier',who:'Atelier',at:now(),t:`Votre pièce a été expédiée (${d.ship.carrier}, suivi ${n}).`});log(d.id,`Expédition ${d.ship.carrier} ${n}`);render();toast('Email d’expédition avec suivi envoyé (simulation)','mail')},
+ orphan(f,fd){const e={};if(g(fd,'sender').length<3)e.sender='Expéditeur requis.';if(g(fd,'ref').length<4)e.ref='Référence requise.';if(!vErr(f,e))return;const o={id:next('col','COL',4),at:now(),carrier:g(fd,'carrier'),track:g(fd,'track')||'—',sender:g(fd,'sender'),ref:g(fd,'ref'),rem:g(fd,'rem')||'—',status:'open',did:null};S.orphans.unshift(o);log(o.id,'Colis sans numéro de dossier enregistré');render();toast('Colis enregistré en attente de rattachement')},
+ link(f,fd){const did=g(fd,'did');if(!did)return vErr(f,{did:'Choisissez un dossier.'});const o=S.orphans.find(x=>x.id===f.dataset.id),d=dos(did),ok=svc(d.sid).refs.some(r=>norm(r)===norm(o.ref));o.status='linked';o.did=did;
+  d.rec={at:o.at,colis:'Bon état',piece:'Bon état',ref:o.ref,serial:'À relever',rem:'Colis reçu sans numéro de dossier, rattaché manuellement. '+o.rem,photos:[],issue:ok?'conforme':'mauvaise'};d.flag=ok?null:'mauvaise';setStage(d,1);log(d.id,`Colis ${o.id} rattaché au dossier`+(ok?'':' — référence non compatible'));render();toast(ok?`Colis rattaché à ${did}`:`Rattaché à ${did} — référence incompatible signalée`,ok?'':'bad')},
+ savNew(f,fd){const desc=g(fd,'desc');if(desc.length<20)return vErr(f,{desc:'Décrivez le problème (20 caractères minimum).'});const d=dos(f.dataset.id),x={id:next('sav','SAV',4),did:d.id,cid:d.cid,step:0,at:now(),motif:g(fd,'motif'),desc,decision:null,hist:[{at:now(),t:'Demande SAV ouverte par le client'}]};S.savs.unshift(x);log(d.id,`SAV ${x.id} ouvert sur la garantie`);closeDlg();S.ui.cl.tab='garanties';render();toast(`Demande ${x.id} envoyée à l’atelier`,'mail')},
+ savReply(f,fd){const t=g(fd,'t');if(t.length<5)return vErr(f,{t:'Réponse trop courte.'});const x=S.savs.find(s=>s.id===f.dataset.id);x.hist.push({at:now(),t:'Réponse du client : '+t});log(x.id,'Informations complémentaires transmises par le client');render();toast('Réponse transmise à l’atelier')},
+ savAnalyse(f,fd,sub){const x=S.savs.find(s=>s.id===f.dataset.id),t=g(fd,'t'),act=sub&&sub.value;if(act==='info'){if(t.length<5)return vErr(f,{t:'Précisez les informations demandées.'});x.step=2;x.hist.push({at:now(),t:'Demande d’informations : '+t})}else{x.step=3;x.rma='RMA-'+x.id.slice(-4);x.hist.push({at:now(),t:`Retour autorisé (${x.rma})`+(t?' : '+t:'')})}log(x.id,'Analyse SAV : '+(act==='info'?'informations demandées':'retour autorisé'));render();toast('Client notifié par email (simulation)','mail')},
+ savDecide(f,fd){const x=S.savs.find(s=>s.id===f.dataset.id),dec=g(fd,'dec'),e={},amt=parseFloat(g(fd,'amount'));if(dec==='refus'&&g(fd,'motif').length<10)e.motif='Un refus doit être motivé (10 caractères min.).';if(dec==='hors'&&!(amt>0))e.amount='Montant requis pour un devis hors garantie.';if(!vErr(f,e))return;
+  x.decision=dec;x.dmotif=g(fd,'motif');x.amount=amt||0;x.step=6;x.hist.push({at:now(),t:'Décision : '+savDec(x)});log(x.id,'Décision SAV : '+dec);render();toast(dec==='hors'?'Devis hors garantie envoyé au client (simulation)':'Décision notifiée au client (simulation)','mail')},
+ savShip(f,fd){const n=g(fd,'num').toUpperCase();if(!/^[A-Z0-9]{8,20}$/.test(n))return vErr(f,{num:'8 à 20 caractères alphanumériques.'});const x=S.savs.find(s=>s.id===f.dataset.id);x.step=9;x.hist.push({at:now(),t:`Expédié (suivi ${n}) — SAV clôturé`});log(x.id,'SAV expédié et clôturé');render();toast('SAV clôturé — client notifié (simulation)','mail')},
+ avoir(f,fd){const i=S.invoices.find(x=>x.no===f.dataset.no),rem=remaining(i),amt=r2(parseFloat(g(fd,'amount').replace(',','.'))),e={};if(!(amt>0)||amt>rem)e.amount=`Montant entre 0,01 € et ${eur(rem)}.`;if(g(fd,'motif').length<4)e.motif='Motif requis.';if(!vErr(f,e))return;
+  const ht=r2(amt/1.2),refund=!!fd.get('refund'),av={no:next('av','AV',5),type:'avoir',cid:i.cid,did:i.did,at:now(),origin:i.no,motif:g(fd,'motif'),lines:[{l:`Avoir ${amt>=rem?'total':'partiel'} sur ${i.no}`,ht}],ht,tva:r2(amt-ht),ttc:amt,refund};
+  S.invoices.push(av);if(refund)addEvt('charge.refunded',amt,i.did,'re_'+rid(12));log(i.no,`Avoir ${av.no} émis (${eur(amt)})${refund?' — remboursement Stripe':''}`);closeDlg();render();toast(`Avoir ${av.no} émis${refund?', remboursement Stripe initié':''}`)},
+};
+const fsize=b=>b>1048576?(b/1048576).toFixed(1).replace('.',',')+' Mo':Math.max(1,Math.round(b/1024))+' Ko';
+function upload(inp){const d=dos(inp.dataset.up),ok=[],ko=[];[...inp.files].forEach(f=>{const ext=f.name.split('.').pop().toLowerCase();if(!EXT.includes(ext))ko.push(`${f.name} (type non autorisé)`);else if(f.size>20*1048576)ko.push(`${f.name} (plus de 20 Mo)`);else ok.push(f)});
+ ok.forEach(f=>d.files.push({n:f.name,s:fsize(f.size),by:role()==='client'?cname(me()):actor(),at:now()}));
+ if(ok.length){log(d.id,`${ok.length} fichier(s) ajouté(s) : ${ok.map(f=>f.name).join(', ')}`);render();toast(`${ok.length} fichier(s) contrôlé(s) et stocké(s) dans l’espace privé du dossier`)}
+ if(ko.length)toast('Refusé : '+esc(ko.join(', ')),'bad')}
+
+/* ---------- Écouteurs ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=A[b.dataset.a];if(f){e.preventDefault();f(b.dataset,b)}});
+document.addEventListener('submit',e=>{const f=e.target,h=F[f.dataset.f];if(h){e.preventDefault();h(f,new FormData(f),e.submitter)}});
+document.addEventListener('input',e=>{const t=e.target,k=t.dataset.in;if(!k)return;
+ if(k==='shopq'){S.ui.shop.q=t.value;shopList()}else if(k==='kbq'){S.ui.bo.q=t.value;$('#kb').innerHTML=kbCols()}else if(k==='clq'){S.ui.cl.q=t.value;$('#clList').innerHTML=clListHTML()}else if(k==='auq'){S.ui.bo.aq=t.value;$('#auBody').innerHTML=auRows()}else if(k==='faq'){S.ui.bo.fq=t.value;$('#faBody').innerHTML=invTable(faList(),true)}save()});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.id==='persona'){if(t.value==='admin'&&!S.mfa)return mfaDlg();return setPersona(t.value)}
+ if(t.dataset.up)return upload(t);
+ const k=t.dataset.ch;if(!k)return;
+ if(k==='shopf'){S.ui.shop[t.dataset.k]=t.value;shopList();save()}
+ else if(k==='kbtech'){S.ui.bo.tech=t.value;$('#kb').innerHTML=kbCols();save()}
+ else if(k==='setTech'){const d=dos(t.dataset.id);d.tech=t.value;log(d.id,'Technicien affecté : '+(t.value||'aucun'));render();toast('Affectation mise à jour')}
+ else if(k==='ctype'){S.ui.bo.ct=t.value;render()}
+ else if(k==='ftype'){S.ui.bo.ft=t.value;$('#faBody').innerHTML=invTable(faList(),true);save()}
+ else if(k==='acctype'){$('#proF').hidden=t.value!=='pro'}
+ else if(k==='avkind'){const f=t.form,a=f.amount;if(t.value==='total'){a.value=remaining(S.invoices.find(x=>x.no===f.dataset.no));a.readOnly=true}else{a.readOnly=false;a.value='';a.focus()}}});
+dlg().addEventListener('close',()=>{dlg().innerHTML=''});
+load();render();
+</script>
+</body>
+</html>
