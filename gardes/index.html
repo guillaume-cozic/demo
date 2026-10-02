@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Tableau des gardes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Mise en page : barre d'application + onglets, contenu en colonne unique, tiroirs et modales en surimpression. */
+:root {
+  --bg: #EEF1F2; --panel: #FFFFFF; --ink: #142128; --muted: #4D5D66; --line: #D5DCDF; --line-strong: #B4C0C6;
+  --accent: #0F5C6E; --accent-ink: #FFFFFF; --accent-soft: #DCEEF1;
+  --duty: #B4570F; --duty-soft: #FBE9D9;
+  --ok: #1D6E43; --ok-soft: #DDF1E5; --warn: #9A5B00; --warn-soft: #FDF0D2; --bad: #A3242E; --bad-soft: #F9E0E2;
+  --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1518; --panel: #162126; --ink: #E3EAED; --muted: #9BAAB1; --line: #283840; --line-strong: #3C4F58;
+    --accent: #5DB8CB; --accent-ink: #08262E; --accent-soft: #173B44;
+    --duty: #F0A15E; --duty-soft: #3A2A1B;
+    --ok: #6CCB95; --ok-soft: #173426; --warn: #E9B44C; --warn-soft: #3A2E14; --bad: #F08A92; --bad-soft: #3E1D21;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1518; --panel: #162126; --ink: #E3EAED; --muted: #9BAAB1; --line: #283840; --line-strong: #3C4F58;
+  --accent: #5DB8CB; --accent-ink: #08262E; --accent-soft: #173B44;
+  --duty: #F0A15E; --duty-soft: #3A2A1B;
+  --ok: #6CCB95; --ok-soft: #173426; --warn: #E9B44C; --warn-soft: #3A2E14; --bad: #F08A92; --bad-soft: #3E1D21;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.demo-band { background: var(--duty-soft); color: var(--ink); padding: 8px 16px; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: center; align-items: center; text-align: center; }
+.demo-band b { color: var(--duty); }
+.demo-band button { background: transparent; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 4px; font-size: 13px; }
+
+.appbar { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; }
+.appbar-inner { max-width: 1240px; margin: 0 auto; padding: 12px 16px 0; display: flex; flex-direction: column; gap: 10px; }
+.brand-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 17px; }
+.brand h1 { margin: 0; font-family: var(--display); font-size: 20px; letter-spacing: -.01em; }
+.brand small { display: block; color: var(--muted); font-size: 12px; }
+.role { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; }
+.role button { border: 0; background: transparent; padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.role button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs button { border: 0; background: transparent; padding: 10px 12px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; display: flex; gap: 6px; align-items: center; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.count { font-family: var(--mono); font-size: 11px; background: var(--duty); color: var(--panel); border-radius: 999px; padding: 1px 6px; }
+
+main { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 64px; display: flex; flex-direction: column; gap: 20px; }
+.page-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.page-head h2 { margin: 0; font-family: var(--display); font-size: 28px; letter-spacing: -.015em; text-wrap: balance; }
+.page-head p { margin: 4px 0 0; color: var(--muted); max-width: 70ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.btn { min-height: 40px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--panel); cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.duty { background: var(--duty); border-color: var(--duty); color: var(--panel); }
+.btn.small { min-height: 32px; padding: 0 10px; font-size: 13px; }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer; }
+.kpi b { font-family: var(--mono); font-size: 28px; font-weight: 600; line-height: 1.2; }
+.kpi span { color: var(--muted); font-size: 13px; }
+.kpi.alert b { color: var(--duty); }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 16px; }
+.panel .hint { color: var(--muted); font-size: 13px; margin: 0; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+
+.todo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.todo li { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); }
+.todo li:first-child { border-top: 0; }
+.todo .what { display: flex; flex-direction: column; min-width: 0; }
+.todo .what small { color: var(--muted); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.field { min-height: 40px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--panel); }
+.field.search { flex: 1 1 220px; max-width: 360px; }
+label.stack { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th button { border: 0; background: transparent; padding: 0; cursor: pointer; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+tbody tr.clickable { cursor: pointer; }
+tbody tr.clickable:hover { background: var(--accent-soft); }
+.pager { display: flex; gap: 8px; align-items: center; justify-content: flex-end; color: var(--muted); font-size: 13px; }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.info { background: var(--accent-soft); color: var(--accent); }
+.pill.duty { background: var(--duty-soft); color: var(--duty); }
+.pill.mute { background: var(--bg); color: var(--muted); }
+
+/* Planning : une colonne par jour de garde, une ligne par secteur. */
+.plan-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.plan { border-collapse: separate; border-spacing: 0; min-width: 760px; }
+.plan th, .plan td { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+.plan th:last-child, .plan td:last-child { border-right: 0; }
+.plan thead th { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--ink); background: var(--bg); }
+.plan thead th small { display: block; color: var(--muted); font-weight: 500; }
+.plan thead th.holiday { background: var(--duty-soft); }
+.plan td.sector { font-weight: 600; white-space: nowrap; position: sticky; left: 0; background: var(--panel); z-index: 1; }
+.slot { width: 100%; text-align: left; border: 0; background: transparent; padding: 0; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+.slot strong { font-size: 14px; }
+.slot .reason { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.slot.empty { color: var(--bad); font-weight: 600; font-size: 13px; }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.rule { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.rule input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent); }
+.rule span { font-size: 14px; }
+.rule small { display: block; color: var(--muted); font-size: 12px; }
+
+.mine { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.duty-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); }
+.duty-card .date { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -.01em; }
+.duty-card .date small { display: block; font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--muted); }
+
+.log { list-style: none; margin: 0; padding: 0; }
+.log li { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.log li:first-child { border-top: 0; }
+.log time { color: var(--muted); font-family: var(--mono); font-size: 12px; padding-top: 2px; }
+.log .who { font-weight: 600; }
+
+.overlay { position: fixed; inset: 0; background: rgba(10, 20, 24, .45); z-index: 40; display: flex; justify-content: flex-end; }
+.overlay.center { justify-content: center; align-items: center; padding: 16px; }
+.sheet { background: var(--panel); width: min(460px, 100%); height: 100%; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 16px; border-left: 1px solid var(--line); }
+.dialog { background: var(--panel); width: min(480px, 100%); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px; border: 1px solid var(--line); max-height: 100%; overflow-y: auto; }
+.sheet h3, .dialog h3 { margin: 0; font-family: var(--display); font-size: 22px; }
+.kv { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 6px 12px; font-size: 14px; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--panel); padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; z-index: 60; max-width: calc(100% - 32px); }
+textarea.export { width: 100%; min-height: 160px; font-family: var(--mono); font-size: 12px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 8px; background: var(--bg); }
+
+@media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .log li { grid-template-columns: 1fr; gap: 2px; } .page-head h2 { font-size: 24px; } .kv { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="demo-band" role="note">
+  <span><b>Prototype de démonstration</b> · données fictives · date simulée : vendredi 2 octobre 2026</span>
+  <span>Vos actions restent dans votre navigateur. <button type="button" id="reset">Réinitialiser la démo</button></span>
+</div>
+
+<header class="appbar">
+  <div class="appbar-inner">
+    <div class="brand-row">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">G</div>
+        <div><h1>Tableau des gardes</h1><small>Gardes des dimanches et jours fériés · 8 secteurs</small></div>
+      </div>
+      <div class="role" role="group" aria-label="Vue">
+        <button type="button" data-role="staff">Secrétariat</button>
+        <button type="button" data-role="doc">Espace praticien</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist"></nav>
+  </div>
+</header>
+
+<main id="main"></main>
+<div id="layer"></div>
+
+<script>
+// ---------- Données de démonstration (déterministes) ----------
+const TODAY = "2026-10-02";
+const SECTORS = ["Toulon Ouest", "Toulon Est", "La Seyne – Six-Fours", "Hyères – La Crau", "Fréjus – Saint-Raphaël", "Draguignan", "Brignoles", "Golfe de Saint-Tropez"];
+const TOWNS = {
+  "Toulon Ouest": ["Toulon", "Ollioules", "Le Revest-les-Eaux"], "Toulon Est": ["Toulon", "La Valette-du-Var", "La Garde", "Le Pradet"],
+  "La Seyne – Six-Fours": ["La Seyne-sur-Mer", "Six-Fours-les-Plages", "Sanary-sur-Mer", "Bandol"], "Hyères – La Crau": ["Hyères", "La Crau", "Carqueiranne", "La Londe-les-Maures"],
+  "Fréjus – Saint-Raphaël": ["Fréjus", "Saint-Raphaël", "Puget-sur-Argens", "Roquebrune-sur-Argens"], "Draguignan": ["Draguignan", "Trans-en-Provence", "Lorgues", "Vidauban"],
+  "Brignoles": ["Brignoles", "Saint-Maximin", "Le Val", "Tourves"], "Golfe de Saint-Tropez": ["Saint-Tropez", "Sainte-Maxime", "Cogolin", "Grimaud"],
+};
+const SECTOR_SIZE = [58, 54, 50, 44, 46, 36, 30, 32]; // 350 praticiens
+const FIRST = ["Camille", "Julien", "Sophie", "Thomas", "Claire", "Nicolas", "Laura", "Mathieu", "Émilie", "Antoine", "Sarah", "Pierre", "Marion", "Hugo", "Céline", "Romain", "Aurélie", "Maxime", "Julie", "Alexandre", "Léa", "Vincent", "Manon", "Olivier", "Chloé", "Guillaume", "Inès", "Florian", "Anaïs", "Benoît", "Pauline", "Damien", "Elsa", "Kévin", "Margaux", "Sébastien", "Lucie", "Yann", "Nadia", "François"];
+const LAST = ["Martin", "Bernard", "Roux", "Fabre", "Giraud", "Blanc", "Garnier", "Chabert", "Michel", "Arnaud", "Mercier", "Fournier", "Bonnet", "Lambert", "Faure", "Rousseau", "Vincent", "Guérin", "Muller", "Henry", "Bertrand", "Morel", "Girard", "André", "Lefèvre", "Mathieu", "Clément", "Gauthier", "Perrin", "Robin", "Masson", "Sanchez", "Ferrand", "Barbier", "Brun", "Aubert", "Pons", "Reynaud", "Gilles", "Imbert", "Castel", "Olivier", "Marchetti", "Roche", "Bouvier", "Maurin", "Audibert", "Rey", "Lombard", "Ricard"];
+const HOLIDAYS = { "2026-11-01": "Toussaint", "2026-11-11": "Armistice", "2026-12-25": "Noël", "2027-01-01": "Jour de l'an" };
+const MONTHS = [["2026-09", "Septembre 2026"], ["2026-10", "Octobre 2026"], ["2026-11", "Novembre 2026"], ["2026-12", "Décembre 2026"], ["2027-01", "Janvier 2027"]];
+const STATUS = {
+  brouillon: ["Brouillon", "mute"], a_confirmer: ["À confirmer", "warn"], confirmee: ["Confirmée", "info"], echange: ["Échange demandé", "duty"],
+  effectuee: ["Effectuée", "ok"], remplacee: ["Effectuée (remplaçant)", "ok"], non_effectuee: ["Non effectuée", "bad"],
+};
+const PSTATUS = { actif: ["Actif", "ok"], nouveau: ["Nouvel inscrit", "info"], exempte: ["Exempté", "mute"], radie: ["Radié", "bad"] };
+const STAFF = "Secrétariat (M. Ferri)";
+
+function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+const pad = (n) => String(n).padStart(2, "0");
+const iso = (d) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+const parse = (s) => new Date(s + "T00:00:00Z");
+const addDays = (s, n) => { const d = parse(s); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 86400000);
+const fmt = (s, opts = { weekday: "short", day: "numeric", month: "short" }) => parse(s).toLocaleDateString("fr-FR", { timeZone: "UTC", ...opts });
+const fmtLong = (s) => fmt(s, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+function dutyDays(month) {
+  const [y, m] = month.split("-").map(Number);
+  const out = [];
+  for (let d = new Date(Date.UTC(y, m - 1, 1)); d.getUTCMonth() === m - 1; d.setUTCDate(d.getUTCDate() + 1)) {
+    const s = iso(d);
+    if (d.getUTCDay() === 0 || HOLIDAYS[s]) out.push(s);
+  }
+  return out;
+}
+
+function seed() {
+  const r = rng(83);
+  const pick = (list) => list[Math.floor(r() * list.length)];
+  const people = [];
+  let id = 1;
+  SECTORS.forEach((sector, si) => {
+    for (let i = 0; i < SECTOR_SIZE[si]; i++) {
+      const prenom = pick(FIRST), nom = pick(LAST);
+      const roll = r();
+      const statut = roll < 0.05 ? "nouveau" : roll < 0.08 ? "exempte" : roll < 0.095 ? "radie" : "actif";
+      const year = statut === "nouveau" ? 2026 : 1990 + Math.floor(r() * 35);
+      const inscrit = statut === "nouveau" ? `2026-${pad(6 + Math.floor(r() * 3))}-${pad(1 + Math.floor(r() * 27))}` : `${year}-${pad(1 + Math.floor(r() * 12))}-01`;
+      // Dernière garde antérieure à septembre 2026 (historique repris de l'ancien tableur).
+      const lastBefore = statut === "actif" ? addDays("2026-08-30", -7 * (1 + Math.floor(r() * 46))) : null;
+      people.push({
+        id: id++, prenom, nom, secteur: sector, ville: pick(TOWNS[sector]), statut, inscrit, lastBefore,
+        email: `${prenom}.${nom}`.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z.]/g, "") + `@cabinet-demo.fr`,
+        tel: `04 94 ${pad(Math.floor(r() * 100))} ${pad(Math.floor(r() * 100))} ${pad(Math.floor(r() * 100))}`,
+        rattrapageSeed: 0,
+      });
+    }
+  });
+  // Quelques gardes non effectuées avant la reprise : à rattraper en priorité.
+  for (const n of [7, 66, 131, 190]) people[n].rattrapageSeed = 1;
+  const db = { people, gardes: [], exchanges: [], indispos: [], log: [], rules: { rattrapage: true, nouveaux: true, delai: true, indispo: true }, published: {} };
+  const t = (at, who, what) => db.log.push({ at, who, what });
+  t("2026-08-31T09:12", STAFF, "Import Excel « praticiens_2026.xlsx » : 350 praticiens, 8 secteurs");
+
+  // Septembre : publié, gardes passées. Octobre : publié, en cours de confirmation.
+  generate(db, "2026-09"); publish(db, "2026-09", "2026-08-31T10:05");
+  generate(db, "2026-10"); publish(db, "2026-10", "2026-09-21T14:30");
+  for (const g of db.gardes) {
+    if (g.date < "2026-09-27") g.status = "effectuee";
+    else if (g.date < TODAY) g.status = "confirmee"; // à vérifier
+    else g.status = r() < 0.72 ? "confirmee" : "a_confirmer";
+  }
+  const swap = db.gardes.find((g) => g.date === "2026-09-13" && g.secteur === "Hyères – La Crau");
+  const sub = people.find((p) => p.secteur === swap.secteur && p.statut === "actif" && p.id !== swap.pid);
+  Object.assign(swap, { status: "remplacee", doneBy: sub.id });
+  const missed = db.gardes.find((g) => g.date === "2026-09-20" && g.secteur === "Brignoles");
+  missed.status = "non_effectuee";
+  t("2026-09-22T08:40", STAFF, `Vérification du 20 sept. (Brignoles) : garde non effectuée par ${name(db, missed.pid)} → à rattraper`);
+
+  // Un échange en attente sur Toulon Est et une indisponibilité déclarée.
+  const mineGarde = db.gardes.find((g) => g.date === "2026-10-18" && g.secteur === "Toulon Est");
+  mineGarde.status = "echange";
+  const colleague = db.gardes.find((g) => g.date === "2026-10-25" && g.secteur === "Toulon Est");
+  db.exchanges.push({ id: 1, gid: mineGarde.id, from: mineGarde.pid, to: colleague.pid, type: "echange", at: "2026-09-30T18:02", status: "en_attente", note: "Congrès à Lyon ce week-end." });
+  t("2026-09-30T18:02", name(db, mineGarde.pid), `Demande d'échange : garde du 18 oct. contre celle de ${name(db, colleague.pid)} (25 oct.)`);
+  db.indispos.push({ pid: mineGarde.pid, date: "2026-11-15", motif: "Formation implantologie" });
+  t("2026-09-30T18:05", name(db, mineGarde.pid), "Indisponibilité déclarée : dimanche 15 novembre 2026");
+  db.me = mineGarde.pid;
+  db.log.sort((a, b) => a.at.localeCompare(b.at));
+  return db;
+}
+
+// ---------- Moteur de rotation ----------
+// Pour chaque jour de garde et chaque secteur, on retient le praticien en tête de file :
+// 1. gardes à rattraper, 2. nouveaux inscrits sans première garde, 3. dernière garde la plus ancienne.
+// Exclus : radiés, exemptés, indisponibles ce jour-là, et (règle « délai ») une garde dans les 28 jours.
+function lastGarde(db, pid, exceptMonth) {
+  let last = db.people[pid - 1].lastBefore;
+  for (const g of db.gardes) {
+    const who = g.status === "remplacee" ? g.doneBy : g.pid;
+    if (who === pid && g.status !== "non_effectuee" && (!last || g.date > last)) last = g.date;
+  }
+  return last;
+}
+function rattrapageDue(db, pid) {
+  const p = db.people[pid - 1];
+  const missed = db.gardes.filter((g) => g.pid === pid && g.status === "non_effectuee").length;
+  const made = db.gardes.filter((g) => g.pid === pid && g.kind === "rattrapage").length;
+  return Math.max(0, p.rattrapageSeed + missed - made);
+}
+function generate(db, month) {
+  db.gardes = db.gardes.filter((g) => !(g.date.startsWith(month) && g.status === "brouillon"));
+  const taken = new Set(db.gardes.filter((g) => g.date.startsWith(month)).map((g) => `${g.date}|${g.secteur}`));
+  let nextId = Math.max(0, ...db.gardes.map((g) => g.id)) + 1;
+  for (const date of dutyDays(month)) {
+    for (const secteur of SECTORS) {
+      if (taken.has(`${date}|${secteur}`)) continue;
+      const pool = db.people.filter((p) => p.secteur === secteur && (p.statut === "actif" || p.statut === "nouveau"));
+      const ranked = pool.map((p) => {
+        const last = lastGarde(db, p.id);
+        const due = db.rules.rattrapage ? rattrapageDue(db, p.id) : 0;
+        const fresh = db.rules.nouveaux && p.statut === "nouveau" && !last;
+        const busy = db.rules.indispo && db.indispos.some((i) => i.pid === p.id && i.date === date);
+        const tooSoon = db.rules.delai && last && daysBetween(last, date) < 28;
+        return { p, last, due, fresh, excluded: busy || tooSoon };
+      }).filter((c) => !c.excluded);
+      ranked.sort((a, b) => (b.due - a.due) || (Number(b.fresh) - Number(a.fresh)) || ((a.last || "0000") .localeCompare(b.last || "0000")) || a.p.id - b.p.id);
+      const top = ranked[0];
+      if (!top) { db.gardes.push({ id: nextId++, date, secteur, pid: null, status: "brouillon", reason: "Aucun praticien disponible : à attribuer à la main" }); continue; }
+      const reason = top.due ? "Garde à rattraper (garde précédente non effectuée)"
+        : top.fresh ? `Nouvel inscrit (${fmt(top.p.inscrit, { month: "short", year: "numeric" })}) : première garde`
+        : top.last ? `Dernière garde la plus ancienne du secteur : ${fmt(top.last, { day: "numeric", month: "short", year: "numeric" })}`
+        : "Jamais de garde enregistrée";
+      db.gardes.push({ id: nextId++, date, secteur, pid: top.p.id, status: "brouillon", reason, kind: top.due ? "rattrapage" : "rotation" });
+    }
+  }
+}
+function publish(db, month, at) {
+  const list = db.gardes.filter((g) => g.date.startsWith(month) && g.status === "brouillon" && g.pid);
+  list.forEach((g) => { g.status = "a_confirmer"; });
+  db.published[month] = at;
+  const people = new Set(list.map((g) => g.pid)).size;
+  db.log.push({ at, who: STAFF, what: `Planning ${monthLabel(month).toLowerCase()} validé et publié : ${list.length} gardes` });
+  db.log.push({ at, who: "Notifications", what: `Email « Votre garde à confirmer » envoyé à ${people} praticiens`, mail: true });
+}
+
+// ---------- État ----------
+const KEY = "tableau-gardes-demo-v1";
+let db;
+try { db = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { db = null; }
+if (!db || !db.people) db = seed();
+const ui = { role: "staff", tab: "dashboard", month: "2026-11", sector: "Tous", q: "", fsector: "Tous", fstatus: "Tous", sort: "nom", dir: 1, page: 0, toast: null };
+try { Object.assign(ui, JSON.parse(localStorage.getItem(KEY + "-ui") || "{}"), { toast: null }); } catch (e) {}
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); localStorage.setItem(KEY + "-ui", JSON.stringify({ role: ui.role, tab: ui.tab, month: ui.month, sector: ui.sector })); } catch (e) {}
+}
+function name(d, pid) { if (!pid) return "—"; const p = d.people[pid - 1]; return `Dr ${p.prenom} ${p.nom}`; }
+function monthLabel(m) { return (MONTHS.find((x) => x[0] === m) || [m, m])[1]; }
+function nowStamp() { const d = new Date(); return `${TODAY}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function log(who, what, mail) { db.log.push({ at: nowStamp(), who, what, mail }); }
+function toast(msg) { ui.toast = msg; renderToast(); clearTimeout(toast.t); toast.t = setTimeout(() => { ui.toast = null; renderToast(); }, 3200); }
+
+const toVerify = () => db.gardes.filter((g) => g.date < TODAY && ["confirmee", "a_confirmer", "echange"].includes(g.status));
+const pendingEx = () => db.exchanges.filter((e) => e.status === "en_attente");
+const unconfirmed = () => db.gardes.filter((g) => g.date >= TODAY && g.status === "a_confirmer");
+
+// ---------- Rendu ----------
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n[k] = v; else if (k === "html") n.innerHTML = v;
+    else if (v === true) n.setAttribute(k, ""); else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) n.append(k);
+  return n;
+};
+const pill = (status, map = STATUS) => el("span", { class: `pill ${map[status][1]}` }, map[status][0]);
+const btn = (label, onclick, cls = "") => el("button", { type: "button", class: `btn ${cls}`, onclick }, label);
+
+const TABS = {
+  staff: [["dashboard", "Tableau de bord"], ["planning", "Planning"], ["people", "Praticiens"], ["exchanges", "Échanges", () => pendingEx().length], ["verify", "Vérification", () => toVerify().length], ["history", "Historique"]],
+  doc: [["mine", "Mes gardes"], ["sector", "Planning du secteur"], ["dispo", "Indisponibilités"]],
+};
+
+function render() {
+  document.querySelectorAll(".role button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.role === ui.role)));
+  const tabs = TABS[ui.role];
+  if (!tabs.some((t) => t[0] === ui.tab)) ui.tab = tabs[0][0];
+  document.getElementById("tabs").replaceChildren(...tabs.map(([key, label, count]) => {
+    const c = count ? count() : 0;
+    return el("button", { type: "button", role: "tab", "aria-selected": String(ui.tab === key), onclick: () => { ui.tab = key; render(); } }, label, c ? el("span", { class: "count" }, String(c)) : null);
+  }));
+  const view = { dashboard, planning, people, exchanges, verify, history, mine, sector: sectorView, dispo }[ui.tab];
+  document.getElementById("main").replaceChildren(...view());
+  save();
+}
+function head(title, text, ...actions) {
+  return el("div", { class: "page-head" }, el("div", {}, el("h2", {}, title), text ? el("p", {}, text) : null), actions.length ? el("div", { class: "actions" }, actions) : null);
+}
+
+function dashboard() {
+  const next = db.gardes.filter((g) => g.date >= TODAY && g.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
+  const nextDay = next[0]?.date;
+  const go = (tab, extra = {}) => () => { Object.assign(ui, { tab, ...extra }); render(); };
+  const k = (n, label, onclick, alert) => el("button", { type: "button", class: `kpi${alert && n ? " alert" : ""}`, onclick }, el("b", {}, String(n)), el("span", {}, label));
+  const novPlanned = db.gardes.some((g) => g.date.startsWith("2026-11"));
+  const todo = [
+    ...toVerify().slice(0, 3).map((g) => [`Vérifier la garde du ${fmt(g.date)} · ${g.secteur}`, name(db, g.pid), "Vérifier", go("verify")]),
+    ...pendingEx().map((e) => [`Échange demandé par ${name(db, e.from)}`, `Garde du ${fmt(gardeById(e.gid).date)} · ${gardeById(e.gid).secteur}`, "Traiter", go("exchanges")]),
+    ...(novPlanned && db.published["2026-11"] ? [] : [["Planning de novembre à générer et valider", "Toussaint et Armistice inclus", "Ouvrir", go("planning", { month: "2026-11" })]]),
+    ...(unconfirmed().length ? [[`${unconfirmed().length} gardes encore à confirmer`, "Relance automatique J-7 par email", "Voir", go("planning", { month: "2026-10" })]] : []),
+  ];
+  const rows = next.filter((g) => g.date === nextDay);
+  return [
+    head("Bonjour", "Ce qui demande votre attention aujourd'hui."),
+    el("section", { class: "kpis", "aria-label": "Indicateurs" },
+      k(db.people.filter((p) => p.statut !== "radie").length, "praticiens inscrits", go("people")),
+      k(unconfirmed().length, "gardes à confirmer", go("planning", { month: "2026-10" }), true),
+      k(pendingEx().length, "échanges en attente", go("exchanges"), true),
+      k(toVerify().length, "gardes à vérifier", go("verify"), true),
+      k(db.people.filter((p) => rattrapageDue(db, p.id)).length, "rattrapages dus", go("people"), true)),
+    el("div", { class: "grid2" },
+      el("section", { class: "panel" }, el("h3", {}, "À traiter"),
+        todo.length ? el("ul", { class: "todo" }, todo.map(([what, sub, label, fn]) => el("li", {}, el("div", { class: "what" }, el("span", {}, what), el("small", {}, sub)), btn(label, fn, "small"))))
+          : el("p", { class: "hint" }, "Rien à traiter. Bonne journée.")),
+      el("section", { class: "panel" }, el("h3", {}, nextDay ? `Prochaine garde : ${fmtLong(nextDay)}` : "Aucune garde à venir"),
+        el("ul", { class: "todo" }, rows.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, g.secteur), el("small", {}, name(db, g.pid))), pill(g.status)))))),
+  ];
+}
+
+function gardeById(id) { return db.gardes.find((g) => g.id === id); }
+
+function planning() {
+  const days = dutyDays(ui.month);
+  const list = db.gardes.filter((g) => g.date.startsWith(ui.month));
+  const drafts = list.filter((g) => g.status === "brouillon");
+  const sectors = ui.sector === "Tous" ? SECTORS : [ui.sector];
+  const published = db.published[ui.month];
+  const rule = (key, label, sub) => el("label", { class: "rule" },
+    el("input", { type: "checkbox", id: `rule-${key}`, checked: db.rules[key], onchange: (e) => { db.rules[key] = e.target.checked; save(); } }),
+    el("span", {}, label, el("small", {}, sub)));
+  const cell = (date, secteur) => {
+    const g = list.find((x) => x.date === date && x.secteur === secteur);
+    if (!g) return el("td", {}, el("span", { class: "reason", style: "color:var(--muted);font-size:12px" }, "Non généré"));
+    if (!g.pid) return el("td", {}, el("button", { type: "button", class: "slot empty", onclick: () => assignDialog(g) }, "À attribuer"));
+    return el("td", {}, el("button", { type: "button", class: "slot", onclick: () => gardeSheet(g) },
+      el("strong", {}, name(db, g.pid).replace("Dr ", "")), pill(g.status), g.status === "brouillon" ? el("span", { class: "reason" }, g.reason) : null));
+  };
+  return [
+    head("Planning des gardes", published ? `Publié le ${fmt(published.slice(0, 10), { day: "numeric", month: "long" })}. Cliquez sur une garde pour la modifier.` : "Générez une proposition, ajustez-la, puis validez : les praticiens reçoivent un email pour confirmer.",
+      drafts.length ? btn("Régénérer", () => { generate(db, ui.month); log(STAFF, `Planning ${monthLabel(ui.month).toLowerCase()} régénéré`); render(); }) : null,
+      !list.length || (!published && !drafts.length) ? btn("Générer le planning", () => { generate(db, ui.month); log(STAFF, `Proposition de planning générée pour ${monthLabel(ui.month).toLowerCase()}`); toast("Proposition générée : vérifiez-la avant de valider."); render(); }, "primary") : null,
+      drafts.length ? btn(`Valider et publier (${drafts.filter((g) => g.pid).length})`, () => confirmDialog("Publier le planning ?", `${drafts.filter((g) => g.pid).length} gardes seront publiées et chaque praticien recevra un email pour confirmer la sienne.`, "Publier", () => { publish(db, ui.month, nowStamp()); toast("Planning publié, emails envoyés."); render(); }), "duty") : null,
+      list.length ? btn("Exporter (CSV)", () => exportDialog(`planning-${ui.month}.csv`, planningCsv(list))) : null),
+    el("div", { class: "filters" },
+      el("select", { class: "field", id: "plan-month", "aria-label": "Mois", onchange: (e) => { ui.month = e.target.value; render(); } }, MONTHS.map(([v, l]) => el("option", { value: v, selected: v === ui.month }, l))),
+      el("select", { class: "field", id: "plan-sector", "aria-label": "Secteur", onchange: (e) => { ui.sector = e.target.value; render(); } }, ["Tous", ...SECTORS].map((s) => el("option", { value: s, selected: s === ui.sector }, s === "Tous" ? "Tous les secteurs" : s)))),
+    !published ? el("section", { class: "panel" }, el("h3", {}, "Règles de rotation appliquées"),
+      el("p", { class: "hint" }, "Règles d'exemple : elles seront remplacées par celles de votre cahier des charges (priorités, nouveaux praticiens, échanges, rattrapages)."),
+      el("div", { class: "rules" },
+        rule("rattrapage", "Gardes à rattraper en priorité", "Un praticien qui n'a pas assuré sa garde passe en tête de file."),
+        rule("nouveaux", "Première garde des nouveaux inscrits", "Un nouvel inscrit est appelé avant les praticiens déjà de garde."),
+        rule("delai", "28 jours minimum entre deux gardes", "Évite qu'un même praticien enchaîne les gardes."),
+        rule("indispo", "Respect des indisponibilités", "Les dates déclarées par les praticiens sont exclues."))) : null,
+    el("div", { class: "plan-wrap" }, el("table", { class: "plan" },
+      el("thead", {}, el("tr", {}, el("th", {}, "Secteur"), days.map((d) => el("th", { class: HOLIDAYS[d] ? "holiday" : "" }, fmt(d, { weekday: "short", day: "numeric" }), el("small", {}, HOLIDAYS[d] || "Dimanche"))))),
+      el("tbody", {}, sectors.map((s) => el("tr", {}, el("td", { class: "sector" }, s), days.map((d) => cell(d, s))))))),
+  ];
+}
+function planningCsv(list) {
+  return ["date;secteur;praticien;email;statut", ...list.sort((a, b) => a.date.localeCompare(b.date) || a.secteur.localeCompare(b.secteur))
+    .map((g) => [g.date, g.secteur, name(db, g.pid), g.pid ? db.people[g.pid - 1].email : "", STATUS[g.status][0]].join(";"))].join("\n");
+}
+
+function people() {
+  const q = ui.q.trim().toLowerCase();
+  let rows = db.people.filter((p) => (ui.fsector === "Tous" || p.secteur === ui.fsector) && (ui.fstatus === "Tous" || p.statut === ui.fstatus)
+    && (!q || `${p.prenom} ${p.nom} ${p.ville} ${p.email}`.toLowerCase().includes(q)));
+  const val = { nom: (p) => p.nom + p.prenom, secteur: (p) => p.secteur, last: (p) => lastGarde(db, p.id) || "", count: (p) => db.gardes.filter((g) => g.pid === p.id && g.status !== "brouillon").length };
+  rows = rows.map((p) => ({ p, k: val[ui.sort](p) })).sort((a, b) => (a.k > b.k ? 1 : a.k < b.k ? -1 : 0) * ui.dir).map((x) => x.p);
+  const per = 25, pages = Math.max(1, Math.ceil(rows.length / per));
+  ui.page = Math.min(ui.page, pages - 1);
+  const shown = rows.slice(ui.page * per, ui.page * per + per);
+  const sortBtn = (key, label) => el("button", { type: "button", onclick: () => { ui.dir = ui.sort === key ? -ui.dir : 1; ui.sort = key; render(); } }, label + (ui.sort === key ? (ui.dir > 0 ? " ↑" : " ↓") : ""));
+  const importInput = el("input", { type: "file", id: "import-file", accept: ".csv,text/csv", hidden: true, onchange: (e) => importCsv(e.target.files[0]) });
+  return [
+    head("Praticiens", `${db.people.filter((p) => p.statut !== "radie").length} inscrits, ${db.people.filter((p) => p.statut === "radie").length} radiés. Cliquez sur une ligne pour modifier la fiche.`,
+      importInput, btn("Importer (CSV / Excel)", () => importInput.click()),
+      btn("Exporter (CSV)", () => exportDialog("praticiens.csv", ["nom;prenom;secteur;ville;statut;email;telephone", ...rows.map((p) => [p.nom, p.prenom, p.secteur, p.ville, PSTATUS[p.statut][0], p.email, p.tel].join(";"))].join("\n"))),
+      btn("Inscrire un praticien", () => personSheet(null), "primary")),
+    el("div", { class: "filters" },
+      el("input", { class: "field search", type: "search", id: "people-q", placeholder: "Nom, ville, email…", value: ui.q, "aria-label": "Rechercher", oninput: (e) => { ui.q = e.target.value; ui.page = 0; const pos = e.target.selectionStart; render(); const f = document.getElementById("people-q"); f.focus(); f.setSelectionRange(pos, pos); } }),
+      el("select", { class: "field", id: "people-sector", "aria-label": "Secteur", onchange: (e) => { ui.fsector = e.target.value; ui.page = 0; render(); } }, ["Tous", ...SECTORS].map((s) => el("option", { value: s, selected: s === ui.fsector }, s === "Tous" ? "Tous les secteurs" : s))),
+      el("select", { class: "field", id: "people-status", "aria-label": "Statut", onchange: (e) => { ui.fstatus = e.target.value; ui.page = 0; render(); } }, [["Tous", "Tous les statuts"], ...Object.entries(PSTATUS).map(([k, v]) => [k, v[0]])].map(([k, l]) => el("option", { value: k, selected: k === ui.fstatus }, l)))),
+    el("div", { class: "table-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, el("th", {}, sortBtn("nom", "Praticien")), el("th", {}, sortBtn("secteur", "Secteur")), el("th", {}, "Statut"), el("th", {}, sortBtn("last", "Dernière garde")), el("th", {}, sortBtn("count", "Gardes 2026")), el("th", {}, "Rattrapage"))),
+      el("tbody", {}, shown.length ? shown.map((p) => {
+        const last = lastGarde(db, p.id), due = rattrapageDue(db, p.id);
+        return el("tr", { class: "clickable", tabindex: "0", onclick: () => personSheet(p), onkeydown: (e) => { if (e.key === "Enter") personSheet(p); } },
+          el("td", {}, el("div", { style: "font-weight:600" }, `${p.nom} ${p.prenom}`), el("small", { style: "color:var(--muted)" }, p.ville)),
+          el("td", {}, p.secteur), el("td", {}, pill(p.statut, PSTATUS)),
+          el("td", { class: "num" }, last ? fmt(last, { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"),
+          el("td", { class: "num" }, String(val.count(p))),
+          el("td", {}, due ? el("span", { class: "pill bad" }, `${due} à rattraper`) : ""));
+      }) : el("tr", {}, el("td", { colspan: "6", style: "text-align:center;color:var(--muted);padding:24px" }, "Aucun praticien ne correspond à ces filtres."))))),
+    el("div", { class: "pager" }, el("span", {}, `${rows.length} résultat${rows.length > 1 ? "s" : ""} · page ${ui.page + 1}/${pages}`),
+      el("button", { type: "button", class: "btn small", disabled: ui.page === 0, onclick: () => { ui.page--; render(); } }, "Précédente"),
+      el("button", { type: "button", class: "btn small", disabled: ui.page >= pages - 1, onclick: () => { ui.page++; render(); } }, "Suivante")),
+  ];
+}
+
+function exchanges() {
+  const all = [...db.exchanges].sort((a, b) => b.at.localeCompare(a.at));
+  return [
+    head("Échanges et remplacements", "Les praticiens proposent un échange depuis leur espace ; vous le validez ici. Le planning et les deux praticiens sont mis à jour automatiquement."),
+    all.length ? el("div", { class: "table-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, el("th", {}, "Demande"), el("th", {}, "Garde"), el("th", {}, "Contre"), el("th", {}, "Motif"), el("th", {}, "Statut"), el("th", {}, ""))),
+      el("tbody", {}, all.map((e) => {
+        const g = gardeById(e.gid), other = e.type === "echange" ? db.gardes.find((x) => x.pid === e.to && x.secteur === g.secteur && x.date >= TODAY && x.id !== g.id && x.date.startsWith(g.date.slice(0, 7))) : null;
+        return el("tr", {},
+          el("td", {}, el("div", { style: "font-weight:600" }, name(db, e.from)), el("small", { style: "color:var(--muted)" }, `${e.type === "echange" ? "Échange" : "Remplacement"} · ${fmt(e.at.slice(0, 10))}`)),
+          el("td", {}, fmt(g.date), el("br"), el("small", { style: "color:var(--muted)" }, g.secteur)),
+          el("td", {}, name(db, e.to), other ? el("small", { style: "display:block;color:var(--muted)" }, `sa garde du ${fmt(other.date)}`) : null),
+          el("td", {}, e.note || "—"),
+          el("td", {}, el("span", { class: `pill ${e.status === "en_attente" ? "duty" : e.status === "accepte" ? "ok" : "bad"}` }, { en_attente: "En attente", accepte: "Validé", refuse: "Refusé" }[e.status])),
+          el("td", {}, e.status === "en_attente" ? el("div", { class: "actions" }, btn("Valider", () => decide(e, true), "small primary"), btn("Refuser", () => decide(e, false), "small")) : ""));
+      })))) : el("p", { class: "panel hint" }, "Aucune demande d'échange."),
+  ];
+}
+function decide(e, ok) {
+  const g = gardeById(e.gid);
+  e.status = ok ? "accepte" : "refuse";
+  if (ok) {
+    const other = e.type === "echange" ? db.gardes.find((x) => x.pid === e.to && x.secteur === g.secteur && x.date >= TODAY && x.id !== g.id && x.date.startsWith(g.date.slice(0, 7))) : null;
+    g.pid = e.to; g.status = "confirmee"; g.reason = `Échange validé avec ${name(db, e.from)}`;
+    if (other) { other.pid = e.from; other.status = "confirmee"; other.reason = `Échange validé avec ${name(db, e.to)}`; }
+    log(STAFF, `Échange validé : ${name(db, e.to)} assure le ${fmt(g.date)}${other ? `, ${name(db, e.from)} le ${fmt(other.date)}` : ""}`);
+    log("Notifications", `Email « Échange validé » envoyé à ${name(db, e.from)} et ${name(db, e.to)}`, true);
+  } else {
+    g.status = "confirmee";
+    log(STAFF, `Échange refusé pour la garde du ${fmt(g.date)} (${name(db, e.from)})`);
+  }
+  toast(ok ? "Échange validé, planning mis à jour." : "Échange refusé.");
+  render();
+}
+
+function verify() {
+  const list = toVerify().sort((a, b) => a.date.localeCompare(b.date));
+  const done = db.gardes.filter((g) => ["effectuee", "remplacee", "non_effectuee"].includes(g.status) && g.date >= "2026-09-01").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
+  return [
+    head("Vérification après garde", "Indiquez qui a réellement assuré chaque garde passée. Une garde non effectuée est automatiquement ajoutée aux rattrapages du praticien."),
+    list.length ? el("div", { class: "table-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, el("th", {}, "Garde"), el("th", {}, "Prévu"), el("th", {}, "Résultat"))),
+      el("tbody", {}, list.map((g) => el("tr", {},
+        el("td", {}, fmt(g.date), el("br"), el("small", { style: "color:var(--muted)" }, g.secteur)),
+        el("td", {}, name(db, g.pid)),
+        el("td", {}, el("div", { class: "actions" },
+          btn("Effectuée", () => { g.status = "effectuee"; log(STAFF, `Vérification du ${fmt(g.date)} (${g.secteur}) : effectuée par ${name(db, g.pid)}`); render(); }, "small primary"),
+          btn("Par un remplaçant…", () => replacedDialog(g), "small"),
+          btn("Non effectuée", () => confirmDialog("Garde non effectuée ?", `${name(db, g.pid)} sera placé en tête de file pour une garde à rattraper.`, "Confirmer", () => { g.status = "non_effectuee"; log(STAFF, `Vérification du ${fmt(g.date)} (${g.secteur}) : non effectuée par ${name(db, g.pid)} → à rattraper`); render(); }), "small")))))))) : el("p", { class: "panel hint" }, "Toutes les gardes passées sont vérifiées."),
+    el("section", { class: "panel" }, el("h3", {}, "Dernières vérifications"),
+      el("ul", { class: "todo" }, done.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, `${fmt(g.date)} · ${g.secteur}`),
+        el("small", {}, g.status === "remplacee" ? `${name(db, g.doneBy)} a remplacé ${name(db, g.pid)}` : name(db, g.pid))), pill(g.status))))),
+  ];
+}
+
+function history() {
+  const entries = [...db.log].sort((a, b) => b.at.localeCompare(a.at));
+  return [
+    head("Historique", "Toutes les modifications sont tracées : qui, quoi, quand. Les emails envoyés figurent aussi ici."),
+    el("section", { class: "panel" }, el("ul", { class: "log" }, entries.map((e) => el("li", {},
+      el("time", { datetime: e.at }, `${fmt(e.at.slice(0, 10), { day: "2-digit", month: "2-digit" })} ${e.at.slice(11)}`),
+      el("div", {}, el("span", { class: "who" }, e.who), " · ", e.what, e.mail ? el("span", { class: "pill info", style: "margin-left:6px" }, "email") : null))))),
+  ];
+}
+
+// ---------- Espace praticien ----------
+function me() { return db.people[db.me - 1]; }
+function mine() {
+  const p = me();
+  const upcoming = db.gardes.filter((g) => g.pid === p.id && g.date >= TODAY && g.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
+  const past = db.gardes.filter((g) => (g.pid === p.id || g.doneBy === p.id) && g.date < TODAY).sort((a, b) => b.date.localeCompare(a.date));
+  return [
+    head(`Bonjour Dr ${p.nom}`, `${p.secteur} · ${p.ville}. Confirmez vos gardes ou proposez un échange à un confrère de votre secteur.`, docPicker()),
+    upcoming.length ? el("div", { class: "mine" }, upcoming.map((g) => {
+      const ex = db.exchanges.find((e) => e.gid === g.id && e.status === "en_attente");
+      return el("article", { class: "duty-card" },
+        el("div", { class: "date" }, fmt(g.date, { weekday: "long", day: "numeric", month: "long" }), el("small", {}, HOLIDAYS[g.date] ? `${HOLIDAYS[g.date]} · ${g.secteur}` : g.secteur)),
+        pill(g.status),
+        ex ? el("p", { class: "hint", style: "margin:0;color:var(--muted);font-size:13px" }, `Échange proposé à ${name(db, ex.to)}, en attente de validation par le secrétariat.`) : null,
+        el("div", { class: "actions" },
+          g.status === "a_confirmer" ? btn("Confirmer ma garde", () => { g.status = "confirmee"; log(name(db, p.id), `Garde du ${fmt(g.date)} confirmée`); toast("Garde confirmée."); render(); }, "primary small") : null,
+          !ex ? btn("Proposer un échange", () => exchangeDialog(g), "small") : null));
+    })) : el("p", { class: "panel hint" }, "Aucune garde à venir pour l'instant."),
+    el("section", { class: "panel" }, el("h3", {}, "Mes gardes passées"),
+      past.length ? el("ul", { class: "todo" }, past.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, fmt(g.date, { day: "numeric", month: "long", year: "numeric" })), el("small", {}, g.secteur)), pill(g.status)))) : el("p", { class: "hint" }, "Aucune garde passée en 2026.")),
+  ];
+}
+function docPicker() {
+  const p = me();
+  return el("select", { class: "field", id: "doc-picker", "aria-label": "Se connecter en tant que", onchange: (e) => { db.me = Number(e.target.value); render(); } },
+    db.people.filter((x) => x.secteur === p.secteur && x.statut !== "radie").map((x) => el("option", { value: x.id, selected: x.id === p.id }, `Démo : Dr ${x.nom} ${x.prenom}`)));
+}
+function sectorView() {
+  const p = me();
+  const list = db.gardes.filter((g) => g.secteur === p.secteur && g.date >= "2026-10-01" && g.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
+  return [
+    head(`Planning · ${p.secteur}`, "Gardes publiées de votre secteur, avec les coordonnées du praticien de garde."),
+    el("div", { class: "table-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Date"), el("th", {}, "Praticien de garde"), el("th", {}, "Téléphone"), el("th", {}, "Statut"))),
+      el("tbody", {}, list.map((g) => el("tr", { style: g.pid === p.id ? "background:var(--duty-soft)" : "" },
+        el("td", {}, fmt(g.date, { weekday: "short", day: "numeric", month: "long" })), el("td", {}, name(db, g.pid) + (g.pid === p.id ? " (vous)" : "")),
+        el("td", { class: "num" }, g.pid ? db.people[g.pid - 1].tel : "—"), el("td", {}, pill(g.status))))))),
+  ];
+}
+function dispo() {
+  const p = me();
+  const list = db.indispos.filter((i) => i.pid === p.id).sort((a, b) => a.date.localeCompare(b.date));
+  const date = el("input", { type: "date", class: "field", id: "dispo-date", min: TODAY, max: "2027-01-31", value: "2026-12-25" });
+  const motif = el("input", { type: "text", class: "field", id: "dispo-motif", placeholder: "Motif (facultatif)" });
+  return [
+    head("Mes indisponibilités", "Les dates déclarées sont exclues lors de la génération des prochains plannings."),
+    el("form", { class: "panel", onsubmit: (e) => {
+      e.preventDefault();
+      if (!date.value) return;
+      db.indispos.push({ pid: p.id, date: date.value, motif: motif.value });
+      log(name(db, p.id), `Indisponibilité déclarée : ${fmtLong(date.value)}`);
+      toast("Indisponibilité enregistrée."); render();
+    } }, el("h3", {}, "Déclarer une indisponibilité"),
+      el("div", { class: "filters" }, el("label", { class: "stack" }, "Date", date), el("label", { class: "stack", style: "flex:1 1 200px" }, "Motif", motif),
+        el("button", { type: "submit", class: "btn primary", style: "align-self:flex-end" }, "Déclarer"))),
+    el("section", { class: "panel" }, el("h3", {}, "Déjà déclarées"),
+      list.length ? el("ul", { class: "todo" }, list.map((i) => el("li", {}, el("div", { class: "what" }, el("span", {}, fmtLong(i.date)), el("small", {}, i.motif || "Sans motif")),
+        btn("Retirer", () => { db.indispos.splice(db.indispos.indexOf(i), 1); log(name(db, p.id), `Indisponibilité retirée : ${fmtLong(i.date)}`); render(); }, "small")))) : el("p", { class: "hint" }, "Aucune indisponibilité déclarée.")),
+  ];
+}
+
+// ---------- Tiroirs et dialogues ----------
+function overlay(content, center) {
+  const layer = document.getElementById("layer");
+  const close = () => { layer.replaceChildren(); document.removeEventListener("keydown", esc); };
+  const esc = (e) => { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", esc);
+  const o = el("div", { class: `overlay${center ? " center" : ""}`, onclick: (e) => { if (e.target === o) close(); } }, content(close));
+  layer.replaceChildren(o);
+  o.querySelector("button, input, select")?.focus();
+}
+function confirmDialog(title, text, label, fn) {
+  overlay((close) => el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, title), el("p", { style: "margin:0" }, text),
+    el("div", { class: "actions" }, btn(label, () => { close(); fn(); }, "primary"), btn("Annuler", close))), true);
+}
+function exportDialog(file, csv) {
+  overlay((close) => {
+    const area = el("textarea", { class: "export", readonly: true }, csv);
+    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Export CSV"),
+      el("p", { class: "hint", style: "margin:0;color:var(--muted)" }, `Dans l'application, « ${file} » se télécharge directement (compatible Excel). Ici, copiez le contenu.`), area,
+      el("div", { class: "actions" }, btn("Copier", async () => { try { await navigator.clipboard.writeText(csv); toast("Export copié."); } catch (e) { area.select(); } }, "primary"), btn("Fermer", close)));
+  }, true);
+}
+function gardeSheet(g) {
+  overlay((close) => {
+    const sel = el("select", { class: "field", id: "garde-pid" }, db.people.filter((p) => p.secteur === g.secteur && ["actif", "nouveau"].includes(p.statut))
+      .sort((a, b) => a.nom.localeCompare(b.nom)).map((p) => el("option", { value: p.id, selected: p.id === g.pid }, `${p.nom} ${p.prenom}`)));
+    return el("aside", { class: "sheet", role: "dialog", "aria-modal": "true" }, el("h3", {}, `${fmtLong(g.date)}`),
+      el("dl", { class: "kv" }, el("dt", {}, "Secteur"), el("dd", {}, g.secteur), el("dt", {}, "Praticien"), el("dd", {}, name(db, g.pid)), el("dt", {}, "Statut"), el("dd", {}, pill(g.status)), el("dt", {}, "Pourquoi lui"), el("dd", {}, g.reason || "—")),
+      el("label", { class: "stack" }, "Attribuer à un autre praticien", sel),
+      el("div", { class: "actions" }, btn("Enregistrer", () => {
+        const pid = Number(sel.value);
+        if (pid !== g.pid) { log(STAFF, `Garde du ${fmt(g.date)} (${g.secteur}) réattribuée : ${name(db, g.pid)} → ${name(db, pid)}`); g.pid = pid; g.reason = "Attribution manuelle par le secrétariat"; if (g.status !== "brouillon") g.status = "a_confirmer"; }
+        close(); render();
+      }, "primary"), btn("Fermer", close)));
+  });
+}
+function assignDialog(g) { gardeSheet(g); }
+function replacedDialog(g) {
+  overlay((close) => {
+    const sel = el("select", { class: "field", id: "replaced-by" }, db.people.filter((p) => p.secteur === g.secteur && p.id !== g.pid && p.statut !== "radie").sort((a, b) => a.nom.localeCompare(b.nom)).map((p) => el("option", { value: p.id }, `${p.nom} ${p.prenom}`)));
+    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Garde assurée par un remplaçant"),
+      el("p", { style: "margin:0" }, `${fmtLong(g.date)} · ${g.secteur}, prévue pour ${name(db, g.pid)}.`), el("label", { class: "stack" }, "Assurée par", sel),
+      el("div", { class: "actions" }, btn("Enregistrer", () => { g.status = "remplacee"; g.doneBy = Number(sel.value); log(STAFF, `Vérification du ${fmt(g.date)} (${g.secteur}) : ${name(db, g.doneBy)} a remplacé ${name(db, g.pid)}`); close(); render(); }, "primary"), btn("Annuler", close)));
+  }, true);
+}
+function exchangeDialog(g) {
+  const p = me();
+  overlay((close) => {
+    const colleagues = db.gardes.filter((x) => x.secteur === g.secteur && x.pid && x.pid !== p.id && x.date >= TODAY && x.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
+    const sel = el("select", { class: "field", id: "exchange-with" }, colleagues.map((x) => el("option", { value: x.id }, `${fmt(x.date)} · ${name(db, x.pid)}`)));
+    const note = el("input", { type: "text", class: "field", id: "exchange-note", placeholder: "Motif (facultatif)" });
+    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Proposer un échange"),
+      el("p", { style: "margin:0" }, `Votre garde du ${fmtLong(g.date)} contre celle d'un confrère du secteur.`),
+      el("label", { class: "stack" }, "Garde du confrère", sel), el("label", { class: "stack" }, "Motif", note),
+      el("div", { class: "actions" }, btn("Envoyer la demande", () => {
+        const other = gardeById(Number(sel.value));
+        db.exchanges.push({ id: db.exchanges.length + 1, gid: g.id, from: p.id, to: other.pid, type: "echange", at: nowStamp(), status: "en_attente", note: note.value });
+        g.status = "echange";
+        log(name(db, p.id), `Demande d'échange : garde du ${fmt(g.date)} contre celle de ${name(db, other.pid)} (${fmt(other.date)})`);
+        log("Notifications", `Email « Demande d'échange » envoyé au secrétariat et à ${name(db, other.pid)}`, true);
+        close(); toast("Demande envoyée au secrétariat."); render();
+      }, "primary"), btn("Annuler", close)));
+  }, true);
+}
+function personSheet(p) {
+  const isNew = !p;
+  const data = p ? { ...p } : { prenom: "", nom: "", secteur: SECTORS[0], ville: TOWNS[SECTORS[0]][0], statut: "nouveau", email: "", tel: "" };
+  overlay((close) => {
+    const f = (key, label, type = "text") => el("label", { class: "stack" }, label, el("input", { class: "field", id: `person-${key}`, type, value: data[key] || "", oninput: (e) => { data[key] = e.target.value; } }));
+    const secteur = el("select", { class: "field", id: "person-secteur", onchange: (e) => { data.secteur = e.target.value; } }, SECTORS.map((s) => el("option", { value: s, selected: s === data.secteur }, s)));
+    const statut = el("select", { class: "field", id: "person-statut", onchange: (e) => { data.statut = e.target.value; } }, Object.entries(PSTATUS).map(([k, v]) => el("option", { value: k, selected: k === data.statut }, v[0])));
+    const due = p ? rattrapageDue(db, p.id) : 0;
+    return el("aside", { class: "sheet", role: "dialog", "aria-modal": "true" }, el("h3", {}, isNew ? "Inscrire un praticien" : `Dr ${p.prenom} ${p.nom}`),
+      !isNew ? el("dl", { class: "kv" }, el("dt", {}, "Inscrit le"), el("dd", {}, fmt(p.inscrit, { day: "numeric", month: "long", year: "numeric" })), el("dt", {}, "Dernière garde"), el("dd", {}, lastGarde(db, p.id) ? fmtLong(lastGarde(db, p.id)) : "—"), el("dt", {}, "Rattrapages"), el("dd", {}, due ? `${due} garde à rattraper` : "Aucun")) : null,
+      f("prenom", "Prénom"), f("nom", "Nom"), f("ville", "Commune du cabinet"), el("label", { class: "stack" }, "Secteur de garde", secteur), el("label", { class: "stack" }, "Statut", statut), f("email", "Email", "email"), f("tel", "Téléphone", "tel"),
+      el("div", { class: "actions" }, btn(isNew ? "Inscrire" : "Enregistrer", () => {
+        if (!data.nom.trim() || !data.prenom.trim()) { toast("Le nom et le prénom sont obligatoires."); return; }
+        if (isNew) {
+          db.people.push({ ...data, id: db.people.length + 1, inscrit: TODAY, lastBefore: null, rattrapageSeed: 0 });
+          log(STAFF, `Inscription : Dr ${data.prenom} ${data.nom} (${data.secteur})`);
+        } else {
+          const changes = ["secteur", "statut", "ville", "email", "tel", "nom", "prenom"].filter((k) => data[k] !== p[k]);
+          if (changes.length) log(STAFF, `Fiche Dr ${p.prenom} ${p.nom} modifiée : ${changes.map((k) => k === "statut" ? `statut → ${PSTATUS[data.statut][0].toLowerCase()}` : k === "secteur" ? `secteur → ${data.secteur}` : k).join(", ")}`);
+          Object.assign(p, data);
+        }
+        close(); toast(isNew ? "Praticien inscrit." : "Fiche enregistrée."); render();
+      }, "primary"), btn("Fermer", close)));
+  });
+}
+function importCsv(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const lines = String(reader.result).split(/\r?\n/).filter((l) => l.trim());
+    const sep = lines[0]?.includes(";") ? ";" : ",";
+    const header = lines.shift().toLowerCase().split(sep).map((h) => h.trim());
+    const col = (row, key) => row[header.indexOf(key)]?.trim() || "";
+    let added = 0;
+    for (const line of lines) {
+      const row = line.split(sep);
+      if (!col(row, "nom")) continue;
+      const secteur = SECTORS.find((s) => s.toLowerCase() === col(row, "secteur").toLowerCase()) || SECTORS[0];
+      db.people.push({ id: db.people.length + 1, prenom: col(row, "prenom"), nom: col(row, "nom"), secteur, ville: col(row, "ville"), statut: "nouveau", inscrit: TODAY, lastBefore: null, rattrapageSeed: 0, email: col(row, "email"), tel: col(row, "telephone") });
+      added++;
+    }
+    log(STAFF, `Import « ${file.name} » : ${added} praticien(s) ajouté(s)`);
+    toast(added ? `${added} praticien(s) importé(s).` : "Aucune ligne reconnue : colonnes attendues nom;prenom;secteur;ville;email;telephone.");
+    render();
+  };
+  reader.readAsText(file);
+}
+function renderToast() {
+  const old = document.querySelector(".toast"); if (old) old.remove();
+  if (ui.toast) document.body.append(el("div", { class: "toast", role: "status" }, ui.toast));
+}
+
+document.querySelectorAll(".role button").forEach((b) => { b.onclick = () => { ui.role = b.dataset.role; ui.tab = TABS[ui.role][0][0]; render(); }; });
+document.getElementById("reset").onclick = () => { db = seed(); Object.assign(ui, { tab: ui.role === "staff" ? "dashboard" : "mine", month: "2026-11" }); render(); toast("Démo réinitialisée."); };
+render();
+</script>
+</body>
+</html>
