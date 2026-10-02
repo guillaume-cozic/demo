@@ -108,7 +108,9 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 th{text-align:left;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
 tr:last-child td{border-bottom:0}
-.tbl-wrap{overflow-x:auto}
+.tbl-wrap{overflow-x:auto;max-width:100%;position:relative}
+/* Les enfants de grille gardent leur colonne : un tableau large défile dans .tbl-wrap au lieu d'élargir la page. */
+.grid>*,.redir>*,.assist>*,.seo>*,.board>*{min-width:0}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 
 /* Vue d'ensemble */
@@ -228,7 +230,7 @@ dialog::backdrop{background:rgba(25,15,12,.55)}
 .toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:600;font-size:14px;animation:tin .2s ease-out}
 @keyframes tin{from{transform:translateY(8px);opacity:0}}
 
-@media (max-width:1100px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.redir{grid-template-columns:1fr}}
+@media (max-width:1100px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.redir{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:900px){.assist,.seo{grid-template-columns:1fr}}
 @media (max-width:640px){
   .board{grid-template-columns:1fr}
