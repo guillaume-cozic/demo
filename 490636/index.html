@@ -116,9 +116,9 @@ h1,h2,h3{margin:0;letter-spacing:-.015em}
 .avatar{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font-size:11.5px;font-weight:800;flex:none;color:#fff}
 .main{padding:24px clamp(16px,2.2vw,32px) 48px;min-width:0}
 @media (max-width:900px){
-  .shell{grid-template-columns:1fr}
+  .shell{grid-template-columns:minmax(0,1fr)}
   .side{height:auto;position:sticky;top:0;z-index:20;flex-direction:row;flex-wrap:wrap;align-items:center;padding:8px 12px;gap:8px}
-  .side nav{grid-auto-flow:column;overflow-x:auto;order:3;width:100%;scrollbar-width:none}
+  .side nav{grid-auto-flow:column;overflow-x:auto;order:3;width:100%;min-width:0;scrollbar-width:none}
   .nav-btn{white-space:nowrap;padding:0 12px}
   .nav-btn[aria-current="page"]{box-shadow:inset 0 -3px 0 #8C9BFF}
   .side-foot{margin:0 0 0 auto}
