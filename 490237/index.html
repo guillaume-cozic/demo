@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Annuaire pâtissiers Next.js</title>
+<meta name="description" content="Console de projet d'une plateforme d'annuaire de pâtissiers sous Next.js : assistant IA avec quota gratuit, journal des questions et base de connaissances, plan de redirections 301, audit SEO et performance, suivi de recette.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF6F2;--panel:#FFFFFF;--panel-2:#F5EEE8;--ink:#2B1E19;--muted:#6A5850;--line:#E9DED6;--line-strong:#CDBDB2;
+  --accent:#A61E50;--accent-ink:#FFFFFF;--accent-soft:#FBE5EC;--accent-text:#8E1944;
+  --cacao:#3A2620;--cacao-ink:#F3E6DE;
+  --ok:#1C6B45;--ok-soft:#DDF1E6;--warn:#8A5300;--warn-soft:#FBEDD3;--bad:#B0262F;--bad-soft:#FBE2E3;--info:#245A94;--info-soft:#DFEBF7;
+  --shadow:0 1px 2px rgba(43,30,25,.06),0 6px 18px rgba(43,30,25,.06);
+  --font:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--title:"Fraunces",Georgia,serif;--mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#16100E;--panel:#201815;--panel-2:#2A201C;--ink:#F3E9E4;--muted:#BCA99F;--line:#3A2D28;--line-strong:#57453D;
+  --accent:#F28AB0;--accent-ink:#2A0B17;--accent-soft:#3F1D2A;--accent-text:#F7A8C5;
+  --cacao:#0F0A09;--cacao-ink:#EADBD2;
+  --ok:#73D3A1;--ok-soft:#173226;--warn:#F0BC62;--warn-soft:#3A2B12;--bad:#FF959B;--bad-soft:#3F1D21;--info:#91C1F2;--info-soft:#1A2B3F;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+h1,h2,h3{margin:0;letter-spacing:-.01em}
+h2{font-family:var(--title);font-size:22px;font-weight:600}
+h3{font-size:15.5px;font-weight:700}
+p{margin:0}
+.mono{font-family:var(--mono);font-size:13px}
+.muted{color:var(--muted)}
+
+.demo-band{background:var(--warn-soft);font-size:13px;padding:6px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-strong);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600}
+
+header.top{background:var(--cacao);color:var(--cacao-ink);padding:0 clamp(16px,2.5vw,32px)}
+.top-row{display:flex;align-items:center;gap:14px;min-height:62px;flex-wrap:wrap;padding:8px 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--title);font-size:20px;color:#fff}
+.brand .logo{width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+.brand small{display:block;font-family:var(--font);font-size:12.5px;color:var(--cacao-ink);opacity:.85;font-weight:500}
+.top-meta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;font-size:13px}
+.pill{border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px 10px;color:var(--cacao-ink)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin}
+nav.tabs button{min-height:46px;padding:0 14px;border:0;background:transparent;color:var(--cacao-ink);cursor:pointer;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent;display:flex;align-items:center;gap:8px;opacity:.82}
+nav.tabs button:hover{opacity:1}
+nav.tabs button[aria-current="page"]{opacity:1;color:#fff;border-bottom-color:var(--accent)}
+nav.tabs .count{background:rgba(255,255,255,.16);border-radius:999px;font-size:12px;padding:0 7px}
+
+main{padding:22px clamp(16px,2.5vw,32px) 48px}
+.view-head{display:flex;gap:12px 20px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+.view-head p{color:var(--muted);max-width:75ch;margin-top:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--panel);font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;color:var(--muted)}
+.icon-btn:hover{color:var(--ink);background:var(--panel-2)}
+.icon-btn:disabled{opacity:.35;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.lbl{font-weight:600;font-size:13.5px}
+.field input,.field select,.field textarea,.input{min-height:44px;padding:9px 12px;border:1px solid var(--line-strong);border-radius:10px;background:var(--panel);width:100%}
+.field textarea{min-height:110px;resize:vertical}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 3px var(--bad-soft)}
+.err{color:var(--bad);font-size:13px}
+.err:empty{display:none}
+.hint{color:var(--muted);font-size:13px}
+.row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.filters .field{flex:1 1 170px}
+.filters .field.grow{flex:3 1 240px}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.b-info{background:var(--info-soft);color:var(--info)}
+.b-neutral{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+.b-accent{background:var(--accent-soft);color:var(--accent-text)}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi span{color:var(--muted);font-size:13px;font-weight:600}
+.kpi strong{display:block;font-size:26px;font-family:var(--title);font-weight:600;margin-top:2px}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.bar.ok i{background:var(--ok)}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tbl-wrap{overflow-x:auto}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+
+/* Vue d'ensemble */
+.lots{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.lot{display:flex;flex-direction:column;gap:10px}
+.lot .num{font-family:var(--title);color:var(--accent-text);font-size:14px;font-weight:700}
+.lot p{color:var(--muted);font-size:14px}
+.lot .btn{margin-top:auto;align-self:flex-start}
+.gantt{display:grid;grid-template-columns:minmax(150px,1.3fr) repeat(4,minmax(60px,1fr));gap:6px 4px;align-items:center;font-size:14px}
+.gantt .wk{font-weight:700;color:var(--muted);font-size:12.5px;text-align:center}
+.gantt .seg{height:26px;border-radius:7px;background:var(--accent-soft);border:1px solid var(--accent);color:var(--accent-text);font-size:12px;font-weight:700;display:flex;align-items:center;padding:0 8px;overflow:hidden;white-space:nowrap}
+.gantt .seg.opt{background:var(--panel-2);border-style:dashed;border-color:var(--line-strong);color:var(--muted)}
+.principles{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.principles li{display:flex;gap:10px;align-items:flex-start}
+.principles svg{color:var(--ok);margin-top:2px}
+
+/* Assistant */
+.assist{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+@media (min-width:1400px){.assist{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,.9fr)}}
+.chat{display:flex;flex-direction:column;padding:0;overflow:hidden;min-height:600px}
+.chat-h{background:var(--cacao);color:var(--cacao-ink);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.chat-h strong{color:#fff;display:block}
+.chat-h .av{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.seg-ctl{display:inline-flex;border:1px solid rgba(255,255,255,.3);border-radius:10px;overflow:hidden;margin-left:auto}
+.seg-ctl button{min-height:40px;padding:0 12px;border:0;background:transparent;color:var(--cacao-ink);cursor:pointer;font-weight:600;font-size:14px}
+.seg-ctl button[aria-pressed="true"]{background:#fff;color:#2B1E19}
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;max-height:470px;min-height:320px}
+.msg{max-width:85%;padding:10px 13px;border-radius:14px;font-size:14.5px;white-space:pre-line}
+.msg.bot{background:var(--panel-2);border:1px solid var(--line);border-bottom-left-radius:4px;align-self:flex-start}
+.msg.me{background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px;align-self:flex-end}
+.msg.limit{background:var(--warn-soft);border-color:var(--warn);color:var(--ink)}
+.msg .src{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12.5px;color:var(--muted);white-space:normal}
+.typing{display:inline-flex;gap:4px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.sugg{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 10px}
+.chip{min-height:36px;border:1px solid var(--line-strong);border-radius:999px;background:var(--panel);padding:4px 12px;cursor:pointer;font-size:13.5px;text-align:left}
+.chip:hover{border-color:var(--accent);color:var(--accent-text)}
+.chat-f{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.chat-f form{display:flex;gap:8px}
+.chat-f input{flex:1}
+.quota{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.quota .bar{flex:1}
+.trace{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.trace li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:start;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.trace li .d{color:var(--muted);font-size:13px;grid-column:2/4}
+.trace .st{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+.trace .ok .st{background:var(--ok-soft);color:var(--ok)}
+.trace .warn .st{background:var(--warn-soft);color:var(--warn)}
+.trace .bad .st{background:var(--bad-soft);color:var(--bad)}
+.trace .st svg{width:13px;height:13px}
+.switch{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:14px}
+.switch input{width:20px;height:20px;accent-color:var(--accent)}
+.mini-log{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.mini-log li{border-bottom:1px solid var(--line);padding-bottom:8px;font-size:14px}
+.mini-log li:last-child{border:0}
+
+/* KB */
+.kb-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.kb-card{display:flex;flex-direction:column;gap:8px}
+.kb-card.off{opacity:.6}
+.kb-card p.body{color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.kw{display:flex;flex-wrap:wrap;gap:4px}
+.kw span{font-size:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--muted)}
+.kb-actions{display:flex;gap:6px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+
+/* Redirections */
+.redir{grid-template-columns:minmax(0,2.2fr) minmax(300px,1fr)}
+.cover{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.cover strong{font-family:var(--title);font-size:30px}
+.tester-out{margin-top:10px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);font-size:14px}
+.tester-out:empty{display:none}
+code{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:0 5px;word-break:break-all}
+pre{font-family:var(--mono);font-size:12.5px;line-height:1.55;background:var(--cacao);color:#F3E6DE;padding:14px;border-radius:10px;overflow:auto;max-height:440px;margin:0;white-space:pre}
+
+/* SEO */
+.seo{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (min-width:1400px){.seo{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr)}}
+.chk{list-style:none;padding:0;margin:0;display:grid;gap:4px}
+.chk label{display:flex;gap:10px;align-items:flex-start;padding:9px 8px;border-radius:9px;cursor:pointer;min-height:44px}
+.chk label:hover{background:var(--panel-2)}
+.chk input{width:20px;height:20px;margin-top:1px;accent-color:var(--accent);flex:none}
+.chk small{display:block;color:var(--muted);font-size:12.5px}
+.gauges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}
+.gauge{--v:0;--c:var(--bad);width:76px;height:76px;margin:0 auto 6px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--v)*1%),var(--panel-2) 0);display:grid;place-items:center;position:relative}
+.gauge::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--panel)}
+.gauge b{position:relative;z-index:1;font-size:20px;color:var(--c)}
+.gauge.g-ok{--c:var(--ok)}.gauge.g-warn{--c:var(--warn)}
+.gauges small{font-size:12.5px;color:var(--muted);display:block;line-height:1.3}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.metrics div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.metrics strong{display:block;font-size:17px}
+.subtabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.subtabs button{min-height:38px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:600;font-size:13.5px}
+.subtabs button[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+
+/* Recette */
+.board{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.col{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.col-h{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.tk{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow)}
+.tk.high{border-left:4px solid var(--bad)}
+.tk .meta{display:flex;gap:5px;flex-wrap:wrap}
+.tk .commit{font-family:var(--mono);font-size:12px;color:var(--muted);word-break:break-word}
+.tk .mv{display:flex;justify-content:space-between;gap:6px}
+.golive{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:14px;font-weight:600}
+.golive.no{background:var(--bad-soft);color:var(--bad)}
+.golive.yes{background:var(--ok-soft);color:var(--ok)}
+
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(620px,calc(100vw - 24px));box-shadow:0 20px 50px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(25,15,12,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.dlg-b{padding:18px;display:grid;gap:14px;max-height:70vh;overflow:auto}
+.dlg-f{display:flex;gap:8px;justify-content:flex-end;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
+#toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:50;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:600;font-size:14px;animation:tin .2s ease-out}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+
+@media (max-width:1100px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}.redir{grid-template-columns:1fr}}
+@media (max-width:900px){.assist,.seo{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .board{grid-template-columns:1fr}
+  .top-meta{display:none}
+  .gauges{grid-template-columns:repeat(2,1fr)}
+  .msg{max-width:94%}
+  .chat-h .seg-ctl{margin-left:0;width:100%}.seg-ctl button{flex:1}
+  .hide-sm{display:none}
+  .gantt{grid-template-columns:110px repeat(4,1fr);font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cake" viewBox="0 0 24 24"><path d="M4 21h16M5 21v-7h14v7M5 14c1.5 1.3 3 1.3 4.5 0s3-1.3 4.5 0 3 1.3 5 0M8 14V10h8v4M12 10V6M12 6c-1-1-1-2.5 0-3.5 1 1 1 2.5 0 3.5z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol>
+  <symbol id="i-redir" viewBox="0 0 24 24"><path d="M4 7h11a5 5 0 0 1 0 10H9M4 7l4-4M4 7l4 4"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-4M3.5 18a10 10 0 1 1 17 0"/></symbol>
+  <symbol id="i-bug" viewBox="0 0 24 24"><path d="M8 8a4 4 0 0 1 8 0v1H8zM6 9h12v5a6 6 0 0 1-12 0zM12 13v7M3 13h3M18 13h3M4 7l2 2M20 7l-2 2M4 20l2.5-2M20 20l-2.5-2"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9v12h14V9"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M9 9h11v11H9zM5 15H4V4h11v1"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></symbol>
+</svg>
+
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="resetDemo">Réinitialiser la démo</button></div>
+
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="logo"><svg class="i" aria-hidden="true"><use href="#i-cake"/></svg></span><div>Douce Adresse<small>Console de projet · refonte Next.js</small></div></div>
+    <div class="top-meta"><span class="pill">Next.js 16 · TypeScript</span><span class="pill">Préproduction</span><span class="pill">Semaine 2 / 4</span></div>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <button type="button" data-tab="overview"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Vue d'ensemble</button>
+    <button type="button" data-tab="assistant"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg>Assistant IA</button>
+    <button type="button" data-tab="journal"><svg class="i" aria-hidden="true"><use href="#i-list"/></svg>Journal <span class="count" id="cntLog"></span></button>
+    <button type="button" data-tab="kb"><svg class="i" aria-hidden="true"><use href="#i-book"/></svg>Base de connaissances</button>
+    <button type="button" data-tab="redirects"><svg class="i" aria-hidden="true"><use href="#i-redir"/></svg>Redirections</button>
+    <button type="button" data-tab="seo"><svg class="i" aria-hidden="true"><use href="#i-gauge"/></svg>SEO &amp; performance</button>
+    <button type="button" data-tab="recette"><svg class="i" aria-hidden="true"><use href="#i-bug"/></svg>Recette <span class="count" id="cntBug"></span></button>
+  </nav>
+</header>
+
+<main id="main">
+  <!-- Vue d'ensemble -->
+  <section data-view="overview" aria-labelledby="h-ov">
+    <div class="view-head"><div><h2 id="h-ov">Ce qu'il reste à livrer</h2><p>La base Next.js existante (maquette intégrée, SQLite, recherche par ville, formulaires, back-office, carte sous consentement) est conservée telle quelle. Chaque lot ci-dessous est manipulable dans son onglet.</p></div></div>
+    <div class="grid lots" id="lots"></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));margin-top:16px">
+      <div class="card"><div class="card-h"><h3>Planning sur 4 semaines</h3><span class="badge b-info">Forfait</span></div><div class="gantt" id="gantt"></div></div>
+      <div class="card"><div class="card-h"><h3>Règles du chantier</h3></div>
+        <ul class="principles">
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span><b>Maquette intouchée</b> : aucun changement graphique ; le widget de l'assistant reprend la charte existante.</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span><b>Aucune clé côté navigateur</b> : l'appel au modèle passe par une route serveur (<code>/api/chat</code>), clé en variable d'environnement.</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span><b>Validation serveur systématique</b> : schémas Zod partagés, revalidés dans chaque Server Action et route API.</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span><b>TypeScript strict</b>, commits <code>feat:</code> / <code>fix:</code> / <code>perf:</code> au format Conventional Commits.</span></li>
+          <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span><b>Référencement préservé</b> : chaque URL qui reçoit du trafic a sa règle 301 avant la bascule.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assistant -->
+  <section data-view="assistant" aria-labelledby="h-as" hidden>
+    <div class="view-head"><div><h2 id="h-as">Assistant IA</h2><p>Testez le widget comme un particulier ou un professionnel. Les réponses proviennent uniquement de la base de connaissances ; au-delà de la limite gratuite, l'assistant invite à créer un compte.</p></div></div>
+    <div class="grid assist">
+      <div class="card chat">
+        <div class="chat-h">
+          <span class="av"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg></span>
+          <div><strong>Assistant Douce Adresse</strong><span style="font-size:13px">Répond à partir de la base validée</span></div>
+          <div class="seg-ctl" role="group" aria-label="Profil du visiteur">
+            <button type="button" data-aud="part">Particulier</button>
+            <button type="button" data-aud="pro">Professionnel</button>
+          </div>
+        </div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="sugg" id="sugg" aria-label="Questions suggérées"></div>
+        <div class="chat-f">
+          <form id="chatForm" novalidate>
+            <label for="chatIn" class="sr">Votre question</label>
+            <input id="chatIn" class="input" maxlength="320" autocomplete="off" placeholder="Posez votre question…">
+            <button class="btn primary" type="submit" id="chatSend"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg><span class="hide-sm">Envoyer</span></button>
+          </form>
+          <p class="err" id="chatErr" role="alert"></p>
+          <div class="quota" id="quota"></div>
+        </div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card">
+          <div class="card-h"><h3>Réglages de l'usage gratuit</h3></div>
+          <div class="row">
+            <div class="field"><label for="qLimit">Questions gratuites / 24 h</label><input id="qLimit" type="number" min="1" max="20"></div>
+            <div class="field"><span class="lbl">Nouveau jour</span><button type="button" class="btn" id="qReset">Remettre le compteur à zéro</button></div>
+          </div>
+          <label class="switch"><input type="checkbox" id="qPremium"> Le pro connecté a une formule payante (questions illimitées)</label>
+          <p class="hint">Compteur stocké côté serveur (clé visiteur hachée, Redis ou SQLite) : vider le navigateur ne le contourne pas.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Trace serveur de la dernière question</h3><span class="badge b-neutral"><svg class="i" style="width:14px;height:14px" aria-hidden="true"><use href="#i-lock"/></svg>Route API</span></div>
+          <ol class="trace" id="trace"></ol>
+        </div>
+      </div>
+      <div class="card" id="miniLogCard">
+        <div class="card-h"><h3>Dernières questions</h3><button type="button" class="btn sm" data-go="journal">Tout le journal</button></div>
+        <ul class="mini-log" id="miniLog"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Journal -->
+  <section data-view="journal" aria-labelledby="h-jo" hidden>
+    <div class="view-head"><div><h2 id="h-jo">Journal des questions</h2><p>Toutes les questions posées à l'assistant, avec l'article utilisé. Les questions sans réponse deviennent de nouveaux articles en un clic.</p></div>
+      <button type="button" class="btn" id="csvBtn"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg>Exporter en CSV</button></div>
+    <div class="kpis" id="jKpis"></div>
+    <div class="card">
+      <div class="filters">
+        <div class="field grow"><label for="jq">Rechercher</label><input id="jq" type="search" placeholder="Mot de la question…"></div>
+        <div class="field"><label for="jaud">Profil</label><select id="jaud"><option value="">Tous</option><option value="part">Particulier</option><option value="pro">Professionnel</option></select></div>
+        <div class="field"><label for="jst">Statut</label><select id="jst"><option value="">Tous</option><option value="ok">Répondue</option><option value="none">Sans réponse</option><option value="limit">Bloquée (quota)</option></select></div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Profil</th><th>Question</th><th>Article utilisé</th><th>Statut</th><th><span class="sr">Actions</span></th></tr></thead><tbody id="jBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- KB -->
+  <section data-view="kb" aria-labelledby="h-kb" hidden>
+    <div class="view-head"><div><h2 id="h-kb">Base de connaissances</h2><p>Contenu fourni par le client, éditable sans développeur. Un article modifié est utilisé par l'assistant dès l'enregistrement.</p></div>
+      <button type="button" class="btn primary" id="kbNew"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Nouvel article</button></div>
+    <div class="filters">
+      <div class="field grow"><label for="kq">Rechercher</label><input id="kq" type="search" placeholder="Titre, mot-clé…"></div>
+      <div class="field"><label for="kaud">Public</label><select id="kaud"><option value="">Tous</option><option value="part">Particuliers</option><option value="pro">Professionnels</option><option value="tous">Les deux</option></select></div>
+    </div>
+    <div class="kb-grid" id="kbGrid"></div>
+  </section>
+
+  <!-- Redirections -->
+  <section data-view="redirects" aria-labelledby="h-rd" hidden>
+    <div class="view-head"><div><h2 id="h-rd">Plan de redirections</h2><p>Inventaire des URL actuelles (logs Apache + Search Console, 12 mois) et leur devenir. Objectif : 100 % du trafic couvert avant la bascule.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="rdExport"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg>Générer les règles</button><button type="button" class="btn primary" id="rdNew"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter une URL</button></div></div>
+    <div class="grid redir">
+      <div class="card">
+        <div class="filters">
+          <div class="field grow"><label for="rq">Rechercher une URL</label><input id="rq" type="search" placeholder="/annuaire/…"></div>
+          <div class="field"><label for="rst">Traitement</label><select id="rst"><option value="">Tous</option><option value="todo">À mapper</option><option value="301">301</option><option value="php">Conservée (PHP)</option><option value="410">410 supprimée</option></select></div>
+        </div>
+        <div class="tbl-wrap"><table><thead><tr><th>URL actuelle</th><th>Sessions / mois</th><th>Traitement</th><th>Destination</th><th><span class="sr">Actions</span></th></tr></thead><tbody id="rdBody"></tbody></table></div>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card">
+          <h3>Trafic couvert</h3>
+          <div class="cover"><strong id="covPct"></strong><span class="muted" id="covTxt"></span></div>
+          <div class="bar" id="covBar"><i></i></div>
+          <p class="hint" style="margin-top:8px" id="covHint"></p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px">Tester une URL</h3>
+          <form id="testForm" class="grid" style="gap:8px" novalidate>
+            <div class="field"><label for="testIn">Ancienne URL</label><input id="testIn" placeholder="/annuaire/patissiers-rennes.html"></div>
+            <button type="submit" class="btn"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg>Tester</button>
+          </form>
+          <div class="tester-out" id="testOut" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEO -->
+  <section data-view="seo" aria-labelledby="h-seo" hidden>
+    <div class="view-head"><div><h2 id="h-seo">SEO &amp; performance</h2><p>Cochez les chantiers livrés puis relancez l'audit Lighthouse simulé sur la préproduction. Les fichiers générés sont visibles à droite.</p></div>
+      <button type="button" class="btn primary" id="auditBtn"><svg class="i" aria-hidden="true"><use href="#i-play"/></svg>Lancer l'audit</button></div>
+    <div class="grid seo">
+      <div class="card"><div class="card-h"><h3>Chantiers</h3><span class="badge b-accent" id="chkCount"></span></div><ul class="chk" id="chk"></ul></div>
+      <div class="card">
+        <div class="card-h"><h3>Lighthouse (mobile)</h3><span class="hint" id="auditWhen"></span></div>
+        <p class="lbl" style="margin-bottom:8px">Site actuel</p>
+        <div class="gauges" id="gOld"></div>
+        <p class="lbl" style="margin:18px 0 8px">Préproduction Next.js</p>
+        <div class="gauges" id="gNew"></div>
+        <div class="metrics" id="metrics"></div>
+        <p class="err" id="auditStale" style="margin-top:10px"></p>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Fichiers générés</h3></div>
+        <div class="subtabs" role="tablist" aria-label="Fichiers">
+          <button type="button" role="tab" data-file="sitemap">sitemap.xml</button>
+          <button type="button" role="tab" data-file="robots">robots.txt</button>
+          <button type="button" role="tab" data-file="headers">En-têtes HTTP</button>
+        </div>
+        <pre id="filePre" tabindex="0" aria-label="Contenu du fichier"></pre>
+        <p class="hint" style="margin-top:8px" id="fileHint"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recette -->
+  <section data-view="recette" aria-labelledby="h-re" hidden>
+    <div class="view-head"><div><h2 id="h-re">Recette avant mise en ligne</h2><p>Chaque anomalie avance jusqu'à « Validé ». Le passage en « Corrigé » rattache le commit correspondant.</p></div></div>
+    <div class="golive" id="golive"></div>
+    <form class="card" id="tkForm" novalidate style="margin-bottom:16px">
+      <div class="row" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+        <div class="field" style="grid-column:span 2;min-width:min(100%,280px)"><label for="tkTitle">Anomalie constatée</label><input id="tkTitle" placeholder="Ex. le bouton « Demander un devis » ne répond pas"><p class="err" id="tkErr"></p></div>
+        <div class="field"><label for="tkPage">Page</label><select id="tkPage"><option>Accueil</option><option>Recherche</option><option>Fiche pro</option><option>Formulaires</option><option>Assistant</option><option>Back-office</option></select></div>
+        <div class="field"><label for="tkPrio">Priorité</label><select id="tkPrio"><option value="haute">Haute (bloquante)</option><option value="moyenne" selected>Moyenne</option><option value="basse">Basse</option></select></div>
+        <div class="field"><label for="tkNav">Navigateur</label><select id="tkNav"><option>Chrome</option><option>Safari iOS</option><option>Firefox</option><option>Edge</option><option>Chrome Android</option></select></div>
+        <div class="field"><span class="lbl" aria-hidden="true">&nbsp;</span><button class="btn primary" type="submit"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Ajouter</button></div>
+      </div>
+    </form>
+    <div class="board" id="board"></div>
+  </section>
+</main>
+
+<dialog id="kbDlg" aria-labelledby="kbDlgT">
+  <form id="kbForm" novalidate>
+    <div class="dlg-h"><h3 id="kbDlgT">Article</h3><button type="button" class="icon-btn" data-close aria-label="Fermer"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-b">
+      <div class="field"><label for="kbTitle">Titre (question type)</label><input id="kbTitle"><p class="err" id="kbTitleErr"></p></div>
+      <div class="row">
+        <div class="field"><label for="kbAud">Public</label><select id="kbAud"><option value="part">Particuliers</option><option value="pro">Professionnels</option><option value="tous">Les deux</option></select></div>
+      </div>
+      <div class="field"><label for="kbKw">Mots-clés (séparés par des virgules)</label><input id="kbKw" placeholder="livraison, livrer, transport"><p class="err" id="kbKwErr"></p></div>
+      <div class="field"><label for="kbBody">Réponse</label><textarea id="kbBody"></textarea><p class="err" id="kbBodyErr"></p></div>
+    </div>
+    <div class="dlg-f"><button type="button" class="btn" data-close>Annuler</button><button type="submit" class="btn primary">Enregistrer</button></div>
+  </form>
+</dialog>
+
+<dialog id="rdDlg" aria-labelledby="rdDlgT">
+  <form id="rdForm" novalidate>
+    <div class="dlg-h"><h3 id="rdDlgT">URL</h3><button type="button" class="icon-btn" data-close aria-label="Fermer"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-b">
+      <div class="field"><label for="rdFrom">URL actuelle</label><input id="rdFrom" placeholder="/ancienne-page.html"><p class="hint">Un <code>*</code> remplace un segment variable, réutilisable avec <code>$1</code> dans la destination.</p><p class="err" id="rdFromErr"></p></div>
+      <div class="row">
+        <div class="field"><label for="rdType">Traitement</label><select id="rdType"><option value="301">Redirection 301</option><option value="php">Conservée (site PHP)</option><option value="410">410 supprimée</option><option value="todo">À mapper</option></select></div>
+        <div class="field"><label for="rdTraffic">Sessions / mois</label><input id="rdTraffic" type="number" min="0" inputmode="numeric"><p class="err" id="rdTrafficErr"></p></div>
+      </div>
+      <div class="field" id="rdToWrap"><label for="rdTo">Destination</label><input id="rdTo" placeholder="/patissiers/lyon"><p class="err" id="rdToErr"></p></div>
+    </div>
+    <div class="dlg-f"><button type="button" class="btn danger" id="rdDel">Supprimer</button><span style="flex:1"></span><button type="button" class="btn" data-close>Annuler</button><button type="submit" class="btn primary">Enregistrer</button></div>
+  </form>
+</dialog>
+
+<dialog id="exDlg" aria-labelledby="exDlgT" style="width:min(860px,calc(100vw - 24px))">
+  <div class="dlg-h"><h3 id="exDlgT">Règles générées</h3><button type="button" class="icon-btn" data-close aria-label="Fermer"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="dlg-b">
+    <div class="subtabs" role="tablist" aria-label="Format">
+      <button type="button" role="tab" data-ex="apache">Apache (vhost)</button>
+      <button type="button" role="tab" data-ex="next">next.config.ts</button>
+    </div>
+    <pre id="exPre" tabindex="0"></pre>
+    <p class="hint" id="exHint"></p>
+  </div>
+  <div class="dlg-f"><button type="button" class="btn" id="exCopy"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copier</button><button type="button" class="btn primary" data-close>Fermer</button></div>
+</dialog>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Number(n).toLocaleString('fr-FR');
+const uid=()=>Math.random().toString(36).slice(2,9);
+const KEY='douce-adresse-console-v1';
+const H=36e5, D=864e5;
+const ico=(id,st='')=>`<svg class="i" ${st?`style="${st}"`:''} aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const AUD={part:'Particulier',pro:'Professionnel',tous:'Les deux'};
+
+function seed(){
+  const now=Date.now();
+  const kb=[
+    {id:'k1',aud:'part',title:'Comment trouver un pâtissier ou un cake designer près de chez moi ?',kw:'trouver, chercher, recherche, proximité, près de chez moi, annuaire, cake designer, pâtissier, ville',body:"Saisissez votre ville dans la barre de recherche : les professionnels s'affichent du plus proche au plus éloigné. Affinez ensuite avec le filtre « Prestation » (wedding cake, pièce montée, atelier…). La carte s'active après acceptation des cookies.",active:true,hits:42},
+    {id:'k2',aud:'part',title:'Combien coûte un gâteau personnalisé ?',kw:'prix, tarif, tarifs, coût, coûte, combien, budget, part, parts, gâteau personnalisé',body:"Les prix sont fixés librement par chaque professionnel. En moyenne, comptez 5 à 9 € la part pour un gâteau personnalisé et 8 à 15 € la part pour un wedding cake en sucre modelé. Le plus simple : envoyer une demande de devis depuis la fiche du pro.",active:true,hits:57},
+    {id:'k3',aud:'part',title:'Quel délai prévoir pour commander un wedding cake ?',kw:'délai, mariage, wedding, wedding cake, commander, commande, avance, semaines, pièce montée',body:"Pour un mariage, contactez les cake designers 3 à 6 mois à l'avance, surtout entre mai et septembre. Pour un gâteau d'anniversaire, 2 à 3 semaines suffisent généralement.",active:true,hits:31},
+    {id:'k4',aud:'part',title:'Comment demander un devis ?',kw:'devis, demande, demander, contacter, contact, réserver',body:"Ouvrez la fiche du professionnel et cliquez sur « Demander un devis ». Indiquez la date, le nombre de parts et vos envies : le pro reçoit votre demande par e-mail et vous répond directement.",active:true,hits:24},
+    {id:'k5',aud:'part',title:'Je cherche un gâteau sans gluten ou sans allergènes',kw:'allergie, allergies, allergène, gluten, sans gluten, lactose, vegan, végétalien, intolérance',body:"Utilisez le filtre « Régimes spécifiques » dans la recherche. Précisez toujours l'allergie dans votre demande de devis : chaque professionnel reste seul responsable de sa fabrication.",active:true,hits:12},
+    {id:'k6',aud:'part',title:'Le pâtissier peut-il livrer ?',kw:'livraison, livrer, livré, transport, déplacement, installer, installation',body:"La livraison dépend du professionnel : l'information figure sur sa fiche (zone et éventuels frais). Pour un wedding cake, la plupart proposent l'installation sur place.",active:true,hits:9},
+    {id:'k7',aud:'pro',title:'Comment créer ma fiche gratuitement ?',kw:'créer, création, fiche, inscription, inscrire, gratuit, gratuite, référencer, référencement',body:"Cliquez sur « Référencer mon activité », renseignez votre SIRET, vos prestations et 3 photos minimum. Votre fiche est vérifiée par l'équipe sous 48 h puis publiée gratuitement.",active:true,hits:38},
+    {id:'k8',aud:'pro',title:'Ma fiche existe déjà : comment la récupérer ?',kw:'revendiquer, revendication, existe, déjà, récupérer, réclamer, ma fiche existe',body:"Depuis votre fiche, cliquez sur « C'est mon entreprise ». Après vérification de votre SIRET et d'un justificatif, vous prenez la main sur la fiche sans perdre les avis existants.",active:true,hits:17},
+    {id:'k9',aud:'pro',title:'Quelles différences entre les formules ?',kw:'formule, formules, abonnement, premium, vitrine, essentiel, payant, payante, mise en avant, différence, avantages',body:"Essentiel (gratuit) : fiche et demandes de devis. Vitrine (19 € HT/mois) : galerie illimitée et position renforcée dans votre ville. Premium (39 € HT/mois) : tête des résultats, badge « Recommandé » et statistiques détaillées.",active:true,hits:29},
+    {id:'k10',aud:'pro',title:'Comment modifier mes photos ?',kw:'photo, photos, image, images, galerie, modifier, changer, visuel',body:"Dans votre espace pro, onglet « Galerie », glissez vos images (JPEG ou PNG, 10 Mo max). Elles sont converties automatiquement en WebP et redimensionnées pour un affichage rapide.",active:true,hits:8},
+    {id:'k11',aud:'pro',title:'Comment résilier mon abonnement ?',kw:'résilier, résiliation, annuler, arrêter, stopper, désabonner',body:"Espace pro > Abonnement > « Résilier ». La formule reste active jusqu'à la fin de la période payée, puis votre fiche repasse en Essentiel (gratuite) sans être supprimée.",active:true,hits:4},
+    {id:'k12',aud:'tous',title:'Que faites-vous de mes données personnelles ?',kw:'données, rgpd, confidentialité, supprimer, suppression, compte, cookies',body:"Vos données servent uniquement à la mise en relation. Vous pouvez demander leur suppression à tout moment depuis la page « Confidentialité ». Les questions posées à l'assistant sont conservées 12 mois, sans adresse IP en clair.",active:true,hits:6}
+  ];
+  const L=(d,h,aud,q,kb,status)=>({id:uid(),ts:now-d*D-h*H,aud,q,kb,status,treated:false});
+  const log=[
+    L(0,1,'part','Combien coûte un wedding cake pour 80 personnes ?','k2','ok'),
+    L(0,3,'pro','Comment passer en Premium ?','k9','ok'),
+    L(0,5,'part','Avez-vous des cours de pâtisserie pour enfants ?',null,'none'),
+    L(0,7,'part','Quel délai pour une pièce montée ?','k3','ok'),
+    L(1,2,'pro','Puis-je avoir deux adresses sur la même fiche ?',null,'none'),
+    L(1,4,'part','Trouver un cake designer à Nantes','k1','ok'),
+    L(1,9,'part','Est-ce que le gâteau peut être livré à la salle ?','k6','ok'),
+    L(2,1,'part','Gâteau vegan pour un anniversaire','k5','ok'),
+    L(2,6,'part','Peut-on payer en ligne un acompte ?',null,'none'),
+    L(2,8,'part','Quel prix pour un layer cake ?','k2','limit'),
+    L(3,2,'pro','Ma fiche existe déjà avec une mauvaise adresse','k8','ok'),
+    L(3,5,'pro','Comment changer les photos de ma fiche ?','k10','ok'),
+    L(4,3,'part','Comment demander un devis à plusieurs pâtissiers ?','k4','ok'),
+    L(5,4,'pro','Les avis clients sont-ils modérés ?',null,'none')
+  ];
+  const R=(from,traffic,type,to='')=>({id:uid(),from,traffic,type,to});
+  const redirects=[
+    R('/annuaire/patissiers-paris.html',18420,'301','/patissiers/paris'),
+    R('/annuaire/patissiers-*.html',31200,'301','/patissiers/$1'),
+    R('/annuaire/',8900,'301','/patissiers'),
+    R('/pro/fiche-*.html',24600,'301','/pro/$1'),
+    R('/cake-design/',7340,'301','/prestations/cake-design'),
+    R('/wedding-cake.html',6115,'301','/prestations/wedding-cake'),
+    R('/recettes/*',41800,'php'),
+    R('/forum/*',12300,'php'),
+    R('/blog/tendances-gateaux-mariage.html',5260,'todo'),
+    R('/ateliers-patisserie.html',4480,'todo'),
+    R('/inscription-professionnel.php',3980,'301','/referencer-mon-activite'),
+    R('/tarifs-referencement.html',2410,'301','/formules'),
+    R('/contact.php',1920,'301','/contact'),
+    R('/newsletter/inscription.php',610,'todo'),
+    R('/concours-2016.html',140,'410'),
+    R('/partenaires.html',85,'410')
+  ];
+  const S=(id,label,detail,cat,w,done)=>({id,label,detail,cat,w,done});
+  const seo=[
+    S('fonts','Polices auto-hébergées','next/font, woff2 sous-ensemble latin, font-display: swap','perf',6,true),
+    S('webp','42 visuels en WebP / AVIF','next/image avec srcset et dimensions explicites (CLS nul)','perf',16,false),
+    S('maps','Google Maps chargée au consentement','Script tiers différé, aucune requête avant accord','perf',8,true),
+    S('cache','En-têtes de cache','immutable sur /_next/static, stale-while-revalidate sur les pages','perf',8,false),
+    S('sitemap','sitemap.xml généré','Fiches publiées, villes et prestations depuis SQLite','seo',5,true),
+    S('robots','robots.txt généré','Exclut /admin, /api et les pages de recherche filtrées','seo',3,true),
+    S('meta','Canonical et métadonnées par page','generateMetadata : title, description, Open Graph','seo',5,false),
+    S('jsonld','Données structurées LocalBusiness','JSON-LD sur chaque fiche pro (adresse, avis)','seo',3,false),
+    S('sec','En-têtes de sécurité','CSP, HSTS, X-Content-Type-Options, Referrer-Policy','bp',12,false),
+    S('keys','Aucune clé exposée côté client','Audit du bundle : seules les NEXT_PUBLIC_ non sensibles','bp',5,true),
+    S('a11y','Libellés et contrastes des formulaires','Labels, messages d\'erreur reliés, contrastes AA','a11y',10,true),
+    S('alt','Textes alternatifs des visuels','Alt rédigés pour les 42 visuels de la maquette','a11y',8,false)
+  ];
+  const T=(title,page,prio,nav,col,commit='')=>({id:uid(),title,page,prio,nav,col,commit});
+  const tickets=[
+    T('Carte Google Maps chargée avant le consentement sur la page ville','Recherche','haute','Chrome','doing'),
+    T('Menu mobile : le focus reste piégé après fermeture','Accueil','haute','Safari iOS','todo'),
+    T('Formulaire de devis : erreur serveur non affichée à l\'utilisateur','Formulaires','moyenne','Firefox','todo'),
+    T('Revendication de fiche : e-mail de confirmation sans accents','Formulaires','moyenne','Chrome','todo'),
+    T('Newsletter : double inscription possible avec la même adresse','Formulaires','basse','Edge','todo'),
+    T('Visuel principal en JPEG de 1,2 Mo sur la fiche pro','Fiche pro','moyenne','Chrome Android','fixed','a3f91c2 perf(fiche-pro): servir le visuel principal en WebP'),
+    T('Tri : Premium classé après Vitrine à distance égale','Recherche','haute','Chrome','fixed','7be0d41 fix(recherche): trier par formule avant la distance'),
+    T('Balise canonical absente sur les pages ville','Recherche','haute','Chrome','done','e12c8a0 fix(seo): ajouter la canonical des pages ville'),
+    T('Écart de 4 px avec la maquette dans le pied de page','Accueil','basse','Firefox','done','5d6b7f3 fix(accueil): aligner le pied de page sur la maquette')
+  ];
+  return {kb,log,quota:{limit:5,used:0,premium:false},redirects,seo,audit:null,tickets,kbSeq:13};
+}
+
+let state;
+function load(){ try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.kb&&s.tickets) return s;}catch(e){} return seed(); }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){} }
+state=load();
+
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('#toasts').appendChild(t); setTimeout(()=>t.remove(),3200); }
+function dt(ts){ return new Date(ts).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}); }
+
+/* ---------- Navigation ---------- */
+const TABS=['overview','assistant','journal','kb','redirects','seo','recette'];
+function go(tab){
+  if(!TABS.includes(tab)) tab='overview';
+  $$('[data-view]').forEach(v=>v.hidden=v.dataset.view!==tab);
+  $$('nav.tabs button').forEach(b=>b.dataset.tab===tab?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+  if(location.hash!=='#'+tab) history.replaceState(null,'','#'+tab);
+  render();
+}
+$$('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.tab);window.scrollTo(0,0);}));
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]'); if(g){go(g.dataset.go);window.scrollTo(0,0);}});
+const cur=()=>($('nav.tabs [aria-current]')||{}).dataset?.tab||'overview';
+
+/* ---------- Moteur de l'assistant (simulation du RAG serveur) ---------- */
+const STOP=new Set('les des une un le la de du et ou au aux en pour par sur avec mon ma mes ton ta tes vos votre nos notre est sont quel quelle quels quelles comment que qui quoi je tu il elle on nous vous peut peux puis faire dans ce cette ces se sa son ses pas plus tres bien entre sans est-ce estce avez avoir etre suis mais donc car leur leurs chez'.split(' '));
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+const toks=s=>norm(s).split(' ').filter(t=>t.length>2&&!STOP.has(t));
+const tmatch=(a,b)=>a===b||(a.length>=5&&b.length>=5&&a.slice(0,5)===b.slice(0,5));
+function retrieve(q,aud){
+  const nq=' '+norm(q)+' ', qt=toks(q); let best=null;
+  state.kb.filter(a=>a.active&&(a.aud==='tous'||a.aud===aud)).forEach(a=>{
+    const kws=a.kw.split(',').map(k=>norm(k)).filter(Boolean);
+    let score=0;
+    kws.filter(k=>k.includes(' ')).forEach(k=>{ if(nq.includes(' '+k+' ')) score+=2; });
+    const at=kws.filter(k=>!k.includes(' '));
+    qt.forEach(t=>{ if(at.some(k=>tmatch(t,k))) score+=1; });
+    if(score>0&&(!best||score>best.score)) best={a,score};
+  });
+  return best;
+}
+
+const chat={aud:'part',msgs:{part:[],pro:[]},busy:false,trace:null};
+const GREET={part:"Bonjour ! Je peux vous aider à trouver un pâtissier, estimer un budget ou préparer une demande de devis.",pro:"Bonjour ! Je réponds à vos questions sur la fiche, les formules et votre espace professionnel."};
+const SUGG={part:['Combien coûte un gâteau de mariage ?','Quel délai pour commander un wedding cake ?','Trouver un pâtissier sans gluten à Lyon','Peut-on se faire livrer le gâteau ?'],pro:['Comment créer ma fiche gratuitement ?','Quelle différence entre les formules ?','Ma fiche existe déjà, comment la récupérer ?','Comment résilier mon abonnement ?']};
+const unlimited=()=>chat.aud==='pro'&&state.quota.premium;
+
+function renderChat(){
+  $$('.seg-ctl button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.aud===chat.aud));
+  const list=[{who:'bot',text:GREET[chat.aud]},...chat.msgs[chat.aud]];
+  let h=list.map(m=>`<div class="msg ${m.who}${m.kind?' '+m.kind:''}">${esc(m.text)}${m.src?`<div class="src">${ico('book','width:14px;height:14px')}Source : ${esc(m.src)} · confiance ${Math.round(m.conf*100)} %</div>`:''}${m.cta?`<div class="src"><button type="button" class="btn sm" data-go="kb">${esc(m.cta)}</button></div>`:''}</div>`).join('');
+  if(chat.busy) h+=`<div class="msg bot" aria-label="L'assistant rédige"><span class="typing"><i></i><i></i><i></i></span></div>`;
+  const box=$('#msgs'); box.innerHTML=h; box.scrollTop=box.scrollHeight;
+  $('#sugg').innerHTML=SUGG[chat.aud].map(s=>`<button type="button" class="chip">${esc(s)}</button>`).join('');
+  const q=state.quota, blocked=!unlimited()&&q.used>=q.limit;
+  $('#quota').innerHTML=unlimited()
+    ? `${ico('check','width:15px;height:15px;color:var(--ok)')}<span>Formule payante : questions illimitées</span>`
+    : `<span>${Math.min(q.used,q.limit)} / ${q.limit} questions gratuites aujourd'hui</span><div class="bar${blocked?'':' ok'}" aria-hidden="true"><i style="width:${Math.min(100,q.used/q.limit*100)}%"></i></div>`;
+  $('#chatIn').disabled=chat.busy; $('#chatSend').disabled=chat.busy;
+  $('#chatIn').placeholder=blocked?'Limite atteinte — voir le message ci-dessus':'Posez votre question…';
+  $('#qLimit').value=q.limit; $('#qPremium').checked=q.premium;
+  renderTrace();
+  const ml=[...state.log].sort((a,b)=>b.ts-a.ts).slice(0,6);
+  $('#miniLog').innerHTML=ml.map(l=>`<li><div style="display:flex;justify-content:space-between;gap:8px"><span class="muted" style="font-size:12.5px">${dt(l.ts)} · ${AUD[l.aud]}</span>${statusBadge(l)}</div>${esc(l.q)}</li>`).join('');
+}
+function renderTrace(){
+  const t=chat.trace;
+  if(!t){ $('#trace').innerHTML=`<li class="ok" style="display:block"><span class="muted">Posez une question pour voir le traitement côté serveur.</span></li>`; return; }
+  $('#trace').innerHTML=t.map(s=>`<li class="${s.st}"><span class="st">${ico(s.st==='ok'?'check':s.st==='warn'?'alert':'x')}</span><strong>${esc(s.l)}</strong><span class="mono muted">${s.ms} ms</span><span class="d">${esc(s.d)}</span></li>`).join('');
+}
+function addLog(q,kb,status){ state.log.push({id:uid(),ts:Date.now(),aud:chat.aud,q,kb,status,treated:false}); }
+
+function ask(raw){
+  const q=raw.trim(), errEl=$('#chatErr'); errEl.textContent='';
+  $('#chatIn').removeAttribute('aria-invalid');
+  if(q.length<3){ errEl.textContent='Saisissez une question d\'au moins 3 caractères.'; $('#chatIn').setAttribute('aria-invalid','true'); $('#chatIn').focus(); return; }
+  if(chat.busy) return;
+  const r=n=>Math.round(n*(0.7+Math.random()*0.6));
+  const msgs=chat.msgs[chat.aud]; msgs.push({who:'me',text:q}); $('#chatIn').value='';
+  const qv=state.quota;
+  if(!unlimited()&&qv.used>=qv.limit){
+    msgs.push({who:'bot',kind:'limit',text:chat.aud==='pro'
+      ?`Vous avez utilisé vos ${qv.limit} questions gratuites du jour. Les formules Vitrine et Premium donnent un accès illimité à l'assistant.`
+      :`Vous avez utilisé vos ${qv.limit} questions gratuites du jour. Créez un compte gratuit pour continuer, ou envoyez directement une demande de devis à un professionnel.`});
+    addLog(q,null,'limit');
+    chat.trace=[{l:'POST /api/chat',d:'Corps validé (Zod) : 1 à 320 caractères',ms:r(3),st:'ok'},{l:'Limite d\'usage',d:`Quota atteint (${qv.used}/${qv.limit}) : réponse 429, aucun appel au modèle`,ms:r(2),st:'bad'},{l:'Journalisation',d:'Question enregistrée avec le statut « bloquée »',ms:r(4),st:'ok'}];
+    save(); render(); return;
+  }
+  if(!unlimited()) qv.used++;
+  chat.busy=true; renderChat();
+  setTimeout(()=>{
+    const best=retrieve(q,chat.aud);
+    const nb=state.kb.filter(a=>a.active).length;
+    const steps=[{l:'POST /api/chat',d:'Corps validé (Zod) : 1 à 320 caractères, profil « '+AUD[chat.aud]+' »',ms:r(3),st:'ok'},
+      {l:'Limite d\'usage',d:unlimited()?'Pro abonné : pas de limite':`Visiteur ${qv.used}/${qv.limit} sur 24 h glissantes`,ms:r(2),st:'ok'}];
+    if(best){
+      const conf=Math.min(.97,.5+.15*best.score); best.a.hits++;
+      msgs.push({who:'bot',text:best.a.body,src:best.a.title,conf});
+      addLog(q,best.a.id,'ok');
+      steps.push({l:'Recherche dans la base',d:`${nb} articles actifs · retenu : « ${best.a.title} »`,ms:r(18),st:'ok'},
+        {l:'Appel du modèle',d:'Clé lue dans process.env côté serveur · réponse limitée à l\'article retenu',ms:r(640),st:'ok'});
+    } else {
+      msgs.push({who:'bot',text:chat.aud==='pro'
+        ?"Je n'ai pas de réponse fiable à cette question. Elle est transmise à l'équipe, qui vous répondra par e-mail sous 48 h."
+        :"Je n'ai pas de réponse fiable à cette question. Elle est transmise à l'équipe ; en attendant, un professionnel peut vous renseigner via une demande de devis.",cta:'Compléter la base (côté admin)'});
+      addLog(q,null,'none');
+      steps.push({l:'Recherche dans la base',d:`${nb} articles actifs · aucun ne correspond assez`,ms:r(18),st:'warn'},
+        {l:'Appel du modèle',d:'Évité : réponse de repli, aucune réponse inventée',ms:0,st:'ok'});
+    }
+    steps.push({l:'Journalisation',d:'Question, profil et article enregistrés · IP hachée (SHA-256 + sel)',ms:r(4),st:'ok'});
+    chat.trace=steps; chat.busy=false; save(); render(); $('#chatIn').focus();
+  },750);
+}
+$('#chatForm').addEventListener('submit',e=>{e.preventDefault();ask($('#chatIn').value);});
+$('#sugg').addEventListener('click',e=>{const c=e.target.closest('.chip'); if(c) ask(c.textContent);});
+$$('.seg-ctl button').forEach(b=>b.addEventListener('click',()=>{chat.aud=b.dataset.aud;renderChat();}));
+$('#qLimit').addEventListener('change',e=>{let v=Math.max(1,Math.min(20,parseInt(e.target.value,10)||5)); state.quota.limit=v; save(); renderChat(); toast('Limite gratuite : '+v+' questions par jour');});
+$('#qReset').addEventListener('click',()=>{state.quota.used=0; save(); renderChat(); toast('Compteur remis à zéro');});
+$('#qPremium').addEventListener('change',e=>{state.quota.premium=e.target.checked; save(); renderChat();});
+
+/* ---------- Journal ---------- */
+function statusBadge(l){
+  if(l.status==='ok') return '<span class="badge b-ok">Répondue</span>';
+  if(l.status==='limit') return '<span class="badge b-warn">Bloquée (quota)</span>';
+  return l.treated?'<span class="badge b-info">Article créé</span>':'<span class="badge b-bad">Sans réponse</span>';
+}
+function renderJournal(){
+  const lg=state.log, n=lg.length, ok=lg.filter(l=>l.status==='ok').length, none=lg.filter(l=>l.status==='none'&&!l.treated).length, lim=lg.filter(l=>l.status==='limit').length;
+  const answerable=lg.filter(l=>l.status!=='limit').length||1;
+  $('#jKpis').innerHTML=`<div class="kpi"><span>Questions (7 jours)</span><strong>${n}</strong></div><div class="kpi"><span>Taux de réponse</span><strong>${Math.round(ok/answerable*100)} %</strong></div><div class="kpi"><span>Sans réponse à traiter</span><strong>${none}</strong></div><div class="kpi"><span>Bloquées par le quota</span><strong>${lim}</strong></div>`;
+  const q=norm($('#jq').value), a=$('#jaud').value, s=$('#jst').value;
+  const rows=[...lg].sort((x,y)=>y.ts-x.ts).filter(l=>(!q||norm(l.q).includes(q))&&(!a||l.aud===a)&&(!s||l.status===s));
+  $('#jBody').innerHTML=rows.length?rows.map(l=>{const k=state.kb.find(x=>x.id===l.kb);
+    return `<tr><td style="white-space:nowrap">${dt(l.ts)}</td><td>${AUD[l.aud]}</td><td style="min-width:220px">${esc(l.q)}</td><td style="min-width:180px">${k?esc(k.title):'<span class="muted">—</span>'}</td><td>${statusBadge(l)}</td><td>${l.status==='none'&&!l.treated?`<button type="button" class="btn sm" data-fromlog="${l.id}">${ico('plus')}Créer l'article</button>`:''}</td></tr>`;}).join('')
+    :`<tr><td colspan="6" class="empty">Aucune question ne correspond à ces filtres.</td></tr>`;
+  $('#cntLog').textContent=none||'';
+}
+['#jq','#jaud','#jst'].forEach(s=>$(s).addEventListener('input',renderJournal));
+$('#jBody').addEventListener('click',e=>{const b=e.target.closest('[data-fromlog]'); if(!b) return; const l=state.log.find(x=>x.id===b.dataset.fromlog); openKb(null,l);});
+$('#csvBtn').addEventListener('click',()=>{
+  const c=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const lines=[['date','profil','question','article','statut'].join(';'),...state.log.map(l=>[new Date(l.ts).toISOString(),AUD[l.aud],l.q,(state.kb.find(k=>k.id===l.kb)||{}).title||'',l.status].map(c).join(';'))];
+  const url=URL.createObjectURL(new Blob(['﻿'+lines.join('\n')],{type:'text/csv'}));
+  const a=document.createElement('a'); a.href=url; a.download='journal-assistant.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('Export CSV téléchargé');
+});
+
+/* ---------- Base de connaissances ---------- */
+let kbEdit=null, kbFromLog=null;
+function renderKb(){
+  const q=norm($('#kq').value), a=$('#kaud').value;
+  const list=state.kb.filter(k=>(!a||k.aud===a)&&(!q||norm(k.title+' '+k.kw+' '+k.body).includes(q)));
+  $('#kbGrid').innerHTML=list.length?list.map(k=>`<article class="card kb-card${k.active?'':' off'}">
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge ${k.aud==='pro'?'b-info':k.aud==='part'?'b-accent':'b-neutral'}">${AUD[k.aud]}</span>${k.active?'':'<span class="badge b-neutral">Désactivé</span>'}<span class="badge b-neutral">Utilisé ${k.hits} fois</span></div>
+    <h3>${esc(k.title)}</h3><p class="body">${esc(k.body)}</p>
+    <div class="kw">${k.kw.split(',').map(w=>w.trim()).filter(Boolean).slice(0,8).map(w=>`<span>${esc(w)}</span>`).join('')}</div>
+    <div class="kb-actions"><button type="button" class="btn sm" data-kbedit="${k.id}">${ico('edit')}Modifier</button><button type="button" class="btn sm" data-kbtoggle="${k.id}">${k.active?'Désactiver':'Activer'}</button><button type="button" class="icon-btn" data-kbdel="${k.id}" aria-label="Supprimer l'article ${esc(k.title)}">${ico('trash')}</button></div>
+  </article>`).join(''):'<div class="card empty">Aucun article ne correspond.</div>';
+}
+['#kq','#kaud'].forEach(s=>$(s).addEventListener('input',renderKb));
+function openKb(id,fromLog){
+  kbEdit=id?state.kb.find(k=>k.id===id):null; kbFromLog=fromLog||null;
+  $('#kbDlgT').textContent=kbEdit?'Modifier l\'article':'Nouvel article';
+  $('#kbTitle').value=kbEdit?kbEdit.title:(fromLog?fromLog.q:'');
+  $('#kbAud').value=kbEdit?kbEdit.aud:(fromLog?fromLog.aud:'part');
+  $('#kbKw').value=kbEdit?kbEdit.kw:(fromLog?toks(fromLog.q).join(', '):'');
+  $('#kbBody').value=kbEdit?kbEdit.body:'';
+  $$('#kbForm .err').forEach(e=>e.textContent=''); $$('#kbForm [aria-invalid]').forEach(e=>e.removeAttribute('aria-invalid'));
+  $('#kbDlg').showModal(); (fromLog?$('#kbBody'):$('#kbTitle')).focus();
+}
+$('#kbNew').addEventListener('click',()=>openKb());
+$('#kbGrid').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-kbedit]'), tg=e.target.closest('[data-kbtoggle]'), dl=e.target.closest('[data-kbdel]');
+  if(ed) openKb(ed.dataset.kbedit);
+  if(tg){const k=state.kb.find(x=>x.id===tg.dataset.kbtoggle); k.active=!k.active; save(); renderKb(); toast(k.active?'Article activé : l\'assistant l\'utilise':'Article désactivé : l\'assistant l\'ignore');}
+  if(dl){const k=state.kb.find(x=>x.id===dl.dataset.kbdel); if(confirm('Supprimer « '+k.title+' » ?')){state.kb=state.kb.filter(x=>x!==k); save(); renderKb(); toast('Article supprimé');}}
+});
+function fieldErr(inp,errId,msg){ $('#'+errId).textContent=msg||''; msg?inp.setAttribute('aria-invalid','true'):inp.removeAttribute('aria-invalid'); return !msg; }
+$('#kbForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const t=$('#kbTitle').value.trim(), kw=$('#kbKw').value.trim(), b=$('#kbBody').value.trim();
+  const ok=[fieldErr($('#kbTitle'),'kbTitleErr',t.length<8?'Titre trop court (8 caractères minimum).':''),
+    fieldErr($('#kbKw'),'kbKwErr',kw.split(',').filter(x=>x.trim()).length<2?'Indiquez au moins 2 mots-clés.':''),
+    fieldErr($('#kbBody'),'kbBodyErr',b.length<30?'Réponse trop courte (30 caractères minimum).':'')];
+  if(ok.includes(false)){ $('#kbForm [aria-invalid="true"]').focus(); return; }
+  if(kbEdit) Object.assign(kbEdit,{title:t,kw,body:b,aud:$('#kbAud').value});
+  else state.kb.unshift({id:'k'+(state.kbSeq++),title:t,kw,body:b,aud:$('#kbAud').value,active:true,hits:0});
+  if(kbFromLog){ const l=state.log.find(x=>x.id===kbFromLog.id); if(l) l.treated=true; }
+  save(); $('#kbDlg').close(); render();
+  toast(kbEdit?'Article mis à jour':'Article publié : reposez la question à l\'assistant');
+});
+
+/* ---------- Redirections ---------- */
+let rdEdit=null, exFmt='apache';
+const TYPE={'301':['301','b-ok'],php:['Conservée (PHP)','b-info'],'410':['410 supprimée','b-neutral'],todo:['À mapper','b-bad']};
+function rdRegex(from){ return new RegExp('^'+from.replace(/[.+?^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'(.+)')+'$'); }
+function renderRedirects(){
+  const q=norm($('#rq').value), s=$('#rst').value;
+  const rows=[...state.redirects].sort((a,b)=>b.traffic-a.traffic).filter(r=>(!q||norm(r.from+' '+r.to).includes(q))&&(!s||r.type===s));
+  $('#rdBody').innerHTML=rows.length?rows.map(r=>`<tr><td><code>${esc(r.from)}</code></td><td style="white-space:nowrap">${fmt(r.traffic)}</td><td><span class="badge ${TYPE[r.type][1]}">${TYPE[r.type][0]}</span></td><td>${r.type==='301'?`<code>${esc(r.to)}</code>`:r.type==='php'?'<span class="muted">Servie par Apache / PHP</span>':r.type==='410'?'<span class="muted">Contenu retiré</span>':'<span class="muted">À définir</span>'}</td><td><button type="button" class="btn sm" data-rdedit="${r.id}">${r.type==='todo'?'Mapper':'Modifier'}</button></td></tr>`).join('')
+    :`<tr><td colspan="5" class="empty">Aucune URL ne correspond.</td></tr>`;
+  const tot=state.redirects.reduce((a,r)=>a+r.traffic,0)||1, cov=state.redirects.filter(r=>r.type!=='todo').reduce((a,r)=>a+r.traffic,0);
+  const pct=Math.round(cov/tot*1000)/10, todo=state.redirects.filter(r=>r.type==='todo');
+  $('#covPct').textContent=pct.toLocaleString('fr-FR')+' %';
+  $('#covTxt').textContent=fmt(cov)+' / '+fmt(tot)+' sessions';
+  $('#covBar').className='bar'+(todo.length?'':' ok'); $('#covBar i').style.width=pct+'%';
+  $('#covHint').textContent=todo.length?todo.length+' URL encore à mapper, dont « '+todo.sort((a,b)=>b.traffic-a.traffic)[0].from+' ».':'Toutes les URL ayant du trafic sont traitées : bascule possible.';
+}
+['#rq','#rst'].forEach(s=>$(s).addEventListener('input',renderRedirects));
+function openRd(id){
+  rdEdit=id?state.redirects.find(r=>r.id===id):null;
+  $('#rdDlgT').textContent=rdEdit?'Modifier l\'URL':'Ajouter une URL';
+  $('#rdFrom').value=rdEdit?rdEdit.from:''; $('#rdTraffic').value=rdEdit?rdEdit.traffic:'';
+  $('#rdType').value=rdEdit?(rdEdit.type==='todo'?'301':rdEdit.type):'301'; $('#rdTo').value=rdEdit?rdEdit.to:'';
+  $('#rdDel').hidden=!rdEdit; syncRdType();
+  $$('#rdForm .err').forEach(e=>e.textContent=''); $$('#rdForm [aria-invalid]').forEach(e=>e.removeAttribute('aria-invalid'));
+  $('#rdDlg').showModal(); (rdEdit?$('#rdTo'):$('#rdFrom')).focus();
+}
+function syncRdType(){ $('#rdToWrap').hidden=$('#rdType').value!=='301'; }
+$('#rdType').addEventListener('change',syncRdType);
+$('#rdNew').addEventListener('click',()=>openRd());
+$('#rdBody').addEventListener('click',e=>{const b=e.target.closest('[data-rdedit]'); if(b) openRd(b.dataset.rdedit);});
+$('#rdDel').addEventListener('click',()=>{ if(rdEdit&&confirm('Supprimer cette URL de l\'inventaire ?')){state.redirects=state.redirects.filter(r=>r!==rdEdit); save(); $('#rdDlg').close(); render(); toast('URL supprimée');}});
+$('#rdForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const from=$('#rdFrom').value.trim(), type=$('#rdType').value, to=$('#rdTo').value.trim(), tr=$('#rdTraffic').value.trim();
+  const dup=state.redirects.find(r=>r.from===from&&r!==rdEdit);
+  const ok=[fieldErr($('#rdFrom'),'rdFromErr',!from.startsWith('/')?'L\'URL doit commencer par « / ».':dup?'Cette URL est déjà dans l\'inventaire.':''),
+    fieldErr($('#rdTraffic'),'rdTrafficErr',tr===''||isNaN(+tr)||+tr<0?'Indiquez un nombre de sessions (0 ou plus).':''),
+    type!=='301'?fieldErr($('#rdTo'),'rdToErr',''):fieldErr($('#rdTo'),'rdToErr',!to.startsWith('/')?'La destination doit commencer par « / ».':to===from?'La destination ne peut pas être l\'URL elle-même.':(to.includes('$1')&&!from.includes('*'))?'« $1 » nécessite un « * » dans l\'URL actuelle.':'')];
+  if(ok.includes(false)){ $('#rdForm [aria-invalid="true"]').focus(); return; }
+  const data={from,type,to:type==='301'?to:'',traffic:Math.round(+tr)};
+  if(rdEdit) Object.assign(rdEdit,data); else state.redirects.push({id:uid(),...data});
+  save(); $('#rdDlg').close(); render(); toast(rdEdit?'Règle mise à jour':'URL ajoutée à l\'inventaire');
+});
+$('#testForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  let p=$('#testIn').value.trim(); const out=$('#testOut');
+  if(!p){ out.innerHTML='<span class="err">Saisissez une URL à tester.</span>'; return; }
+  try{ if(/^https?:/i.test(p)) p=new URL(p).pathname; }catch(err){}
+  if(!p.startsWith('/')) p='/'+p;
+  const exact=state.redirects.find(r=>r.from===p);
+  const hit=exact?{r:exact,m:null}:state.redirects.filter(r=>r.from.includes('*')).map(r=>({r,m:p.match(rdRegex(r.from))})).find(x=>x.m);
+  if(!hit){ out.innerHTML=`<span class="badge b-bad">404</span> <code>${esc(p)}</code> ne correspond à aucune règle. Ajoutez-la à l'inventaire si elle reçoit du trafic.`; return; }
+  const r=hit.r;
+  if(r.type==='301'){ const dest=hit.m?r.to.replace('$1',hit.m[1]):r.to; out.innerHTML=`<span class="badge b-ok">301</span> <code>${esc(p)}</code> → <code>${esc(dest)}</code><p class="hint" style="margin-top:6px">Règle : <code>${esc(r.from)}</code></p>`; }
+  else if(r.type==='php') out.innerHTML=`<span class="badge b-info">200</span> Servie par le site PHP conservé (exclue du proxy Next.js).`;
+  else if(r.type==='410') out.innerHTML=`<span class="badge b-neutral">410</span> Contenu supprimé volontairement : Google la désindexe proprement.`;
+  else out.innerHTML=`<span class="badge b-bad">À mapper</span> URL inventoriée mais sans destination : elle renverrait une 404 aujourd'hui.`;
+});
+function genRules(){
+  const rs=[...state.redirects].sort((a,b)=>(a.from.includes('*')-b.from.includes('*'))||b.traffic-a.traffic);
+  const todo=rs.filter(r=>r.type==='todo').length;
+  if(exFmt==='apache'){
+    const rx=f=>'^'+f.slice(1).replace(/[.+?^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'(.+)')+'$';
+    let o=`# vhost douceadresse.example — généré le ${new Date().toLocaleDateString('fr-FR')}\n# ${rs.length} URL inventoriées${todo?` · ${todo} encore à mapper (ignorées)`:''}\nRewriteEngine On\n\n# Redirections permanentes (exactes puis motifs)\n`;
+    rs.filter(r=>r.type==='301').forEach(r=>o+=`RewriteRule ${rx(r.from)} ${r.to} [R=301,L]\n`);
+    o+=`\n# Contenus supprimés\n`; rs.filter(r=>r.type==='410').forEach(r=>o+=`RewriteRule ${rx(r.from)} - [G,L]\n`);
+    o+=`\n# Site PHP conservé : servi directement par Apache\n`; rs.filter(r=>r.type==='php').forEach(r=>o+=`ProxyPass ${r.from.replace(/\*$/,'')} !\n`);
+    o+=`\n# Tout le reste : application Next.js (PM2 / systemd)\nProxyPreserveHost On\nProxyPass        / http://127.0.0.1:3000/\nProxyPassReverse / http://127.0.0.1:3000/\n`;
+    return o;
+  }
+  const lines=rs.filter(r=>r.type==='301').map(r=>{ const src=r.from.replace('*',':slug'), dst=r.to.replace('$1',':slug'); return `    { source: '${src}', destination: '${dst}', permanent: true },`; });
+  return `// next.config.ts — redirections servies par Next.js (alternative au vhost)\nimport type { NextConfig } from 'next';\n\nconst config: NextConfig = {\n  async redirects() {\n    return [\n${lines.join('\n')}\n    ];\n  },\n};\n\nexport default config;\n`;
+}
+function renderEx(){
+  $$('[data-ex]').forEach(b=>b.setAttribute('aria-selected',b.dataset.ex===exFmt));
+  $('#exPre').textContent=genRules();
+  $('#exHint').textContent=exFmt==='apache'?'Recommandé : les 301 sont servies par Apache avant même d\'atteindre Node, et les sections PHP restent intactes.':'Les URL PHP conservées et les 410 restent gérées par Apache.';
+}
+$('#rdExport').addEventListener('click',()=>{renderEx(); $('#exDlg').showModal();});
+$$('[data-ex]').forEach(b=>b.addEventListener('click',()=>{exFmt=b.dataset.ex; renderEx();}));
+$('#exCopy').addEventListener('click',async()=>{ try{ await navigator.clipboard.writeText($('#exPre').textContent); toast('Règles copiées'); }catch(e){ toast('Copie impossible : sélectionnez le texte manuellement'); } });
+
+/* ---------- SEO & performance ---------- */
+const BASE={perf:60,a11y:82,bp:83,seo:84}, OLD={perf:38,a11y:71,bp:67,seo:79};
+const LBL={perf:'Performance',a11y:'Accessibilité',bp:'Bonnes pratiques',seo:'SEO'};
+let fileTab='sitemap';
+function scores(){ const s={...BASE}; state.seo.forEach(i=>{ if(i.done) s[i.cat]+=i.w; }); Object.keys(s).forEach(k=>s[k]=Math.min(100,s[k])); return s; }
+function gauges(s){ return Object.keys(LBL).map(k=>{const v=s?s[k]:0; const c=!s?'':v>=90?'g-ok':v>=50?'g-warn':''; return `<div><div class="gauge ${c}" style="--v:${v}"><b>${s?v:'–'}</b></div><small>${LBL[k]}</small></div>`;}).join(''); }
+function renderSeo(){
+  $('#chk').innerHTML=state.seo.map(i=>`<li><label><input type="checkbox" data-seo="${i.id}" ${i.done?'checked':''}><span>${esc(i.label)}<small>${esc(i.detail)}</small></span></label></li>`).join('');
+  $('#chkCount').textContent=state.seo.filter(i=>i.done).length+' / '+state.seo.length+' livrés';
+  $('#gOld').innerHTML=gauges(OLD);
+  const a=state.audit; $('#gNew').innerHTML=gauges(a&&a.s);
+  $('#auditWhen').textContent=a?'Audit du '+dt(a.ts):'Pas encore audité';
+  if(a){ const p=a.s.perf, lcp=(4.6-(p-60)/40*3.2).toFixed(1), tbt=Math.round(480-(p-60)*11), cls=state.seo.find(i=>i.id==='webp').done?'0,00':'0,14';
+    $('#metrics').innerHTML=`<div>LCP<strong>${lcp.replace('.',',')} s</strong></div><div>TBT<strong>${Math.max(30,tbt)} ms</strong></div><div>CLS<strong>${cls}</strong></div>`;
+  } else $('#metrics').innerHTML='';
+  const cur=JSON.stringify(scores());
+  $('#auditStale').textContent=a&&JSON.stringify(a.s)!==cur?'Les chantiers ont changé depuis cet audit : relancez-le.':'';
+  renderFile();
+}
+const VILLES=['paris','lyon','marseille','bordeaux','lille','nantes','toulouse','strasbourg'], PRESTA=['cake-design','wedding-cake','pieces-montees','ateliers','macarons'];
+const PROS=['maison-berenice-paris','atelier-pate-a-sucre-lyon','les-delices-de-lou-nantes','sucre-et-nuage-bordeaux','cake-studio-margaux-lille','patisserie-olivane-toulouse'];
+function renderFile(){
+  $$('[data-file]').forEach(b=>b.setAttribute('aria-selected',b.dataset.file===fileTab));
+  const done=id=>state.seo.find(i=>i.id===id).done, d=new Date().toISOString().slice(0,10), U='https://douceadresse.example';
+  let txt='', hint='';
+  if(fileTab==='sitemap'){
+    if(!done('sitemap')){ txt='# app/sitemap.ts non livré\n# Cochez « sitemap.xml généré » pour le voir.'; }
+    else { const u=(p,f,pr)=>`  <url><loc>${U}${p}</loc><lastmod>${d}</lastmod><changefreq>${f}</changefreq><priority>${pr}</priority></url>`;
+      txt=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[u('/','daily','1.0'),u('/formules','monthly','0.6'),u('/referencer-mon-activite','monthly','0.6'),...VILLES.map(v=>u('/patissiers/'+v,'daily','0.9')),...PRESTA.map(p=>u('/prestations/'+p,'weekly','0.8')),...PROS.map(p=>u('/pro/'+p,'weekly','0.7'))].join('\n')}\n  <!-- … 1 828 autres fiches publiées -->\n</urlset>`;
+      hint='Généré à chaque build et revalidé toutes les heures depuis SQLite : seules les fiches validées en back-office apparaissent.'; }
+  } else if(fileTab==='robots'){
+    txt=done('robots')?`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /*?tri=\nDisallow: /*?prestation=*&\n\nSitemap: ${U}/sitemap.xml`:'# app/robots.ts non livré';
+    hint='Les combinaisons de filtres sont exclues pour éviter le contenu dupliqué.';
+  } else {
+    const h=[];
+    if(done('cache')) h.push(`  { source: '/_next/static/:path*', headers: [\n      { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' } ] },\n  { source: '/:path*', headers: [\n      { key: 'Cache-Control', value: 'public, s-maxage=300, stale-while-revalidate=86400' } ] },`);
+    if(done('sec')) h.push(`  { source: '/:path*', headers: [\n      { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },\n      { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'nonce-…' maps.googleapis.com; img-src 'self' data: *.gstatic.com *.googleapis.com" },\n      { key: 'X-Content-Type-Options', value: 'nosniff' },\n      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },\n      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' } ] },`);
+    txt=h.length?`// next.config.ts → async headers()\nreturn [\n${h.join('\n')}\n];`:'// Aucun en-tête configuré pour l\'instant.\n// Cochez « En-têtes de cache » ou « En-têtes de sécurité ».';
+    hint='La CSP autorise uniquement Google Maps, chargé après consentement.';
+  }
+  $('#filePre').textContent=txt; $('#fileHint').textContent=hint;
+}
+$('#chk').addEventListener('change',e=>{const c=e.target.closest('[data-seo]'); if(!c) return; state.seo.find(i=>i.id===c.dataset.seo).done=c.checked; save(); renderSeo(); renderOverview();});
+$$('[data-file]').forEach(b=>b.addEventListener('click',()=>{fileTab=b.dataset.file; renderFile();}));
+$('#auditBtn').addEventListener('click',()=>{
+  const b=$('#auditBtn'); b.disabled=true; b.lastChild.textContent=' Audit en cours…';
+  setTimeout(()=>{ state.audit={s:scores(),ts:Date.now()}; save(); b.disabled=false; b.lastChild.textContent='Lancer l\'audit'; renderSeo(); const s=state.audit.s; toast('Audit terminé : performance '+s.perf+', SEO '+s.seo); },1300);
+});
+
+/* ---------- Recette ---------- */
+const COLS=[['todo','À corriger'],['doing','En cours'],['fixed','Corrigé, à revalider'],['done','Validé']];
+const PRIO={haute:['Haute','b-bad'],moyenne:['Moyenne','b-warn'],basse:['Basse','b-neutral']};
+const scope=p=>norm(p).replace(/ /g,'-');
+function renderRecette(){
+  $('#board').innerHTML=COLS.map(([c,l],ci)=>{const ts=state.tickets.filter(t=>t.col===c);
+    return `<section class="col" aria-label="${l}"><div class="col-h"><span>${l}</span><span class="badge b-neutral">${ts.length}</span></div>${ts.map(t=>`<article class="tk${t.prio==='haute'&&c!=='done'?' high':''}">
+      <strong style="font-size:14.5px">${esc(t.title)}</strong>
+      <div class="meta"><span class="badge ${PRIO[t.prio][1]}">${PRIO[t.prio][0]}</span><span class="badge b-neutral">${esc(t.page)}</span><span class="badge b-neutral">${esc(t.nav)}</span></div>
+      ${t.commit?`<span class="commit">${esc(t.commit)}</span>`:''}
+      <div class="mv"><button type="button" class="icon-btn" data-mv="${t.id}" data-d="-1" ${ci===0?'disabled':''} aria-label="Reculer : ${esc(t.title)}">${ico('left')}</button><button type="button" class="btn sm" data-mv="${t.id}" data-d="1" ${ci===3?'disabled':''}>${ci===3?'Terminé':COLS[ci+1][1].split(',')[0]}${ci<3?ico('right'):''}</button></div>
+    </article>`).join('')||'<p class="hint">Aucun ticket.</p>'}</section>`;}).join('');
+  const blk=state.tickets.filter(t=>t.prio==='haute'&&t.col!=='done').length, open=state.tickets.filter(t=>t.col!=='done').length;
+  $('#golive').className='golive '+(blk?'no':'yes');
+  $('#golive').innerHTML=blk?`${ico('alert')}Mise en ligne bloquée : ${blk} anomalie${blk>1?'s':''} haute${blk>1?'s':''} non validée${blk>1?'s':''}.`:`${ico('check')}Feu vert pour la mise en ligne : aucune anomalie bloquante${open?` (${open} mineure${open>1?'s':''} restante${open>1?'s':''})`:''}.`;
+  $('#cntBug').textContent=open||'';
+}
+$('#board').addEventListener('click',e=>{
+  const b=e.target.closest('[data-mv]'); if(!b) return;
+  const t=state.tickets.find(x=>x.id===b.dataset.mv), i=COLS.findIndex(c=>c[0]===t.col), ni=i+(+b.dataset.d);
+  if(ni<0||ni>3) return;
+  t.col=COLS[ni][0];
+  if(t.col==='fixed'&&!t.commit){ const type=/lent|mo|jpeg|poids|charg/i.test(t.title)?'perf':'fix'; t.commit=Math.random().toString(16).slice(2,9)+' '+type+'('+scope(t.page)+'): '+t.title.charAt(0).toLowerCase()+t.title.slice(1).replace(/[.!]+$/,''); toast('Commit rattaché au ticket'); }
+  if(ni<2) t.commit='';
+  save(); render();
+  const f=$(`[data-mv="${t.id}"][data-d="${b.dataset.d}"]`); if(f&&!f.disabled) f.focus();
+});
+$('#tkForm').addEventListener('submit',e=>{
+  e.preventDefault(); const v=$('#tkTitle').value.trim();
+  if(!fieldErr($('#tkTitle'),'tkErr',v.length<10?'Décrivez l\'anomalie en 10 caractères minimum.':'')){ $('#tkTitle').focus(); return; }
+  state.tickets.unshift({id:uid(),title:v,page:$('#tkPage').value,prio:$('#tkPrio').value,nav:$('#tkNav').value,col:'todo',commit:''});
+  $('#tkTitle').value=''; save(); render(); toast('Anomalie ajoutée — notification envoyée au développeur (simulation)');
+});
+
+/* ---------- Vue d'ensemble ---------- */
+function renderOverview(){
+  const lg=state.log, ans=lg.filter(l=>l.status!=='limit'), rate=ans.length?ans.filter(l=>l.status==='ok').length/ans.length:0;
+  const seoDone=state.seo.filter(i=>i.done).length/state.seo.length;
+  const tot=state.redirects.reduce((a,r)=>a+r.traffic,0)||1, cov=state.redirects.filter(r=>r.type!=='todo').reduce((a,r)=>a+r.traffic,0)/tot;
+  const val=state.tickets.filter(t=>t.col==='done').length/(state.tickets.length||1), blk=state.tickets.filter(t=>t.prio==='haute'&&t.col!=='done').length;
+  const P=v=>Math.round(v*100);
+  const lots=[
+    ['Lot 1','Assistant IA','Particuliers et pros, limite d\'usage gratuit, journal des questions, base de connaissances du client.',`Taux de réponse : ${P(rate)} % · ${state.kb.filter(k=>k.active).length} articles actifs`,rate,'assistant'],
+    ['Lot 2','Performance et SEO','Polices auto-hébergées, WebP, sitemap et robots générés, en-têtes de cache et de sécurité.',`${state.seo.filter(i=>i.done).length} / ${state.seo.length} chantiers livrés`,seoDone,'seo'],
+    ['Lot 3','Plan de redirections','Inventaire des URL et de leur trafic, règles 301, cohabitation avec le site PHP.',`${P(cov)} % du trafic couvert`,cov,'redirects'],
+    ['Lot 4','Recette et corrections','Suivi des anomalies jusqu\'à validation, feu vert de mise en ligne.',`${state.tickets.filter(t=>t.col==='done').length} / ${state.tickets.length} validés · ${blk} bloquante${blk>1?'s':''}`,val,'recette'],
+  ];
+  $('#lots').innerHTML=lots.map(([n,t,d,m,v,g])=>`<article class="card lot"><span class="num">${n}</span><h3>${t}</h3><p>${d}</p><div><div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:5px"><span>${m}</span><span>${P(v)} %</span></div><div class="bar${v>=1?' ok':''}"><i style="width:${P(v)}%"></i></div></div><button type="button" class="btn sm" data-go="${g}">Ouvrir${ico('right')}</button></article>`).join('')
+   +`<article class="card lot" style="border-style:dashed"><span class="num">Option</span><h3>Déploiement</h3><p>Serveur Linux existant derrière Apache : reverse proxy vers Next.js, site PHP conservé à côté, service systemd et bascule DNS sans coupure.</p><span class="badge b-neutral" style="align-self:flex-start">Chiffré à part</span><button type="button" class="btn sm" data-go="redirects">Voir le vhost${ico('right')}</button></article>`;
+  const rows=[['Inventaire URL + règles 301',[1,1]],['Polices, WebP, en-têtes',[1,1]],['API chat, quota, journal',[2,3]],['Base de connaissances + admin',[3,3]],['Sitemap, métadonnées, JSON-LD',[3,3]],['Recette et corrections',[4,4]],['Déploiement (option)',[4,4],1]];
+  $('#gantt').innerHTML='<span></span>'+[1,2,3,4].map(w=>`<span class="wk">S${w}</span>`).join('')+rows.map(([l,[a,b],o])=>`<span>${l}</span>`+(a>1?`<span style="grid-column:span ${a-1}"></span>`:'')+`<span class="seg${o?' opt':''}" style="grid-column:span ${b-a+1}">${o?'option':'S'+a+(b>a?'–S'+b:'')}</span>`+(b<4?`<span style="grid-column:span ${4-b}"></span>`:'')).join('');
+}
+
+/* ---------- Dialogues & global ---------- */
+$$('dialog').forEach(d=>d.addEventListener('click',e=>{ if(e.target.closest('[data-close]')||e.target===d) d.close(); }));
+$('#resetDemo').addEventListener('click',()=>{ try{localStorage.removeItem(KEY);}catch(e){} state=seed(); chat.msgs={part:[],pro:[]}; chat.trace=null; render(); toast('Démo réinitialisée'); });
+
+function render(){
+  const v=cur();
+  if(v==='overview') renderOverview();
+  if(v==='assistant') renderChat();
+  if(v==='journal') renderJournal();
+  if(v==='kb') renderKb();
+  if(v==='redirects') renderRedirects();
+  if(v==='seo') renderSeo();
+  if(v==='recette') renderRecette();
+  $('#cntLog').textContent=state.log.filter(l=>l.status==='none'&&!l.treated).length||'';
+  $('#cntBug').textContent=state.tickets.filter(t=>t.col!=='done').length||'';
+}
+go((location.hash||'#overview').slice(1));
+})();
+</script>
+</body>
+</html>
