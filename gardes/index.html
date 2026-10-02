@@ -159,13 +159,46 @@ textarea.export { width: 100%; min-height: 160px; font-family: var(--mono); font
 @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .log li { grid-template-columns: 1fr; gap: 2px; } .page-head h2 { font-size: 24px; } .kv { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.demo-band .tour-btn { background: var(--duty); color: var(--panel); text-decoration: none; border-radius: 8px; padding: 6px 12px; font-weight: 600; }
+.whoami { color: var(--muted); font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel); cursor: pointer; font-size: 13px; font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.sub-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.section-title { margin: 8px 0 0; font-family: var(--display); font-size: 20px; }
+.tour { display: flex; flex-direction: column; gap: 18px; }
+.tour h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.tour ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tour li { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line); }
+.tour li:first-child { border-top: 0; }
+.tour .item { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+.tour .tick { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; font-size: 12px; font-weight: 700; margin-top: 2px; }
+.tour .item small { display: block; color: var(--muted); font-size: 12px; }
+.dialog.wide { width: min(720px, 100%); }
+.matrix td, .matrix th { text-align: center; }
+.matrix td:first-child, .matrix th:first-child { text-align: left; }
+.yes { color: var(--ok); font-weight: 700; }
+.no { color: var(--muted); }
+.rank { display: flex; flex-direction: column; gap: 8px; }
+.rank li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.rank li .n { font-family: var(--mono); font-weight: 600; color: var(--accent); width: 20px; }
+.rank li .txt { flex: 1; min-width: 0; }
+.rank li .txt small { display: block; color: var(--muted); font-size: 12px; }
+.rank li.off .txt { opacity: .5; }
+.bar { height: 8px; border-radius: 4px; background: var(--bg); overflow: hidden; min-width: 80px; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.mail { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.mail header { background: var(--bg); padding: 10px 14px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.mail pre { margin: 0; padding: 14px; white-space: pre-wrap; font: inherit; font-size: 14px; }
+.issues { list-style: none; margin: 0; padding: 0; font-size: 13px; display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+.log li.clickable { cursor: pointer; }
+.log li.clickable:hover { background: var(--accent-soft); }
 </style>
 </head>
 <body>
-
 <div class="demo-band" role="note">
   <span><b>Prototype de démonstration</b> · données fictives · date simulée : vendredi 2 octobre 2026</span>
-  <span>Vos actions restent dans votre navigateur. <button type="button" id="reset">Réinitialiser la démo</button></span>
+  <span><button type="button" class="tour-btn" id="tour">Les points de votre annonce</button> <button type="button" id="reset">Réinitialiser la démo</button></span>
 </div>
 
 <header class="appbar">
@@ -175,9 +208,13 @@ textarea.export { width: 100%; min-height: 160px; font-family: var(--mono); font
         <div class="brand-mark" aria-hidden="true">G</div>
         <div><h1>Tableau des gardes</h1><small>Gardes des dimanches et jours fériés · 8 secteurs</small></div>
       </div>
-      <div class="role" role="group" aria-label="Vue">
-        <button type="button" data-role="staff">Secrétariat</button>
-        <button type="button" data-role="doc">Espace praticien</button>
+      <div class="actions">
+        <span class="whoami" id="whoami"></span>
+        <div class="role" role="group" aria-label="Se connecter en tant que">
+          <button type="button" data-role="admin">Administrateur</button>
+          <button type="button" data-role="staff">Secrétariat</button>
+          <button type="button" data-role="doc">Praticien</button>
+        </div>
       </div>
     </div>
     <nav class="tabs" id="tabs" role="tablist"></nav>
@@ -187,6 +224,7 @@ textarea.export { width: 100%; min-height: 160px; font-family: var(--mono); font
 <main id="main"></main>
 <div id="layer"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ---------- Données de démonstration (déterministes) ----------
 const TODAY = "2026-10-02";
@@ -200,14 +238,32 @@ const TOWNS = {
 const SECTOR_SIZE = [58, 54, 50, 44, 46, 36, 30, 32]; // 350 praticiens
 const FIRST = ["Camille", "Julien", "Sophie", "Thomas", "Claire", "Nicolas", "Laura", "Mathieu", "Émilie", "Antoine", "Sarah", "Pierre", "Marion", "Hugo", "Céline", "Romain", "Aurélie", "Maxime", "Julie", "Alexandre", "Léa", "Vincent", "Manon", "Olivier", "Chloé", "Guillaume", "Inès", "Florian", "Anaïs", "Benoît", "Pauline", "Damien", "Elsa", "Kévin", "Margaux", "Sébastien", "Lucie", "Yann", "Nadia", "François"];
 const LAST = ["Martin", "Bernard", "Roux", "Fabre", "Giraud", "Blanc", "Garnier", "Chabert", "Michel", "Arnaud", "Mercier", "Fournier", "Bonnet", "Lambert", "Faure", "Rousseau", "Vincent", "Guérin", "Muller", "Henry", "Bertrand", "Morel", "Girard", "André", "Lefèvre", "Mathieu", "Clément", "Gauthier", "Perrin", "Robin", "Masson", "Sanchez", "Ferrand", "Barbier", "Brun", "Aubert", "Pons", "Reynaud", "Gilles", "Imbert", "Castel", "Olivier", "Marchetti", "Roche", "Bouvier", "Maurin", "Audibert", "Rey", "Lombard", "Ricard"];
+const STREETS = ["avenue de la République", "boulevard de Strasbourg", "rue Jean Jaurès", "avenue du Général de Gaulle", "place de la Liberté", "rue Victor Hugo", "chemin des Oliviers", "avenue des Pins", "boulevard Foch", "rue de la Paix"];
+const SITUATIONS = ["Libéral", "Libéral", "Libéral", "Libéral temps partiel", "Collaborateur", "Centre de santé"];
 const HOLIDAYS = { "2026-11-01": "Toussaint", "2026-11-11": "Armistice", "2026-12-25": "Noël", "2027-01-01": "Jour de l'an" };
 const MONTHS = [["2026-09", "Septembre 2026"], ["2026-10", "Octobre 2026"], ["2026-11", "Novembre 2026"], ["2026-12", "Décembre 2026"], ["2027-01", "Janvier 2027"]];
 const STATUS = {
-  brouillon: ["Brouillon", "mute"], a_confirmer: ["À confirmer", "warn"], confirmee: ["Confirmée", "info"], echange: ["Échange demandé", "duty"],
-  effectuee: ["Effectuée", "ok"], remplacee: ["Effectuée (remplaçant)", "ok"], non_effectuee: ["Non effectuée", "bad"],
+  brouillon: ["Brouillon", "mute"], a_confirmer: ["À confirmer", "warn"], confirmee: ["Confirmée", "info"], echange: ["Échange en cours", "duty"],
+  effectuee: ["Effectuée", "ok"], remplacee: ["Effectuée (remplaçant)", "ok"], non_effectuee: ["Non effectuée", "bad"], a_attribuer: ["À réattribuer", "bad"],
 };
 const PSTATUS = { actif: ["Actif", "ok"], nouveau: ["Nouvel inscrit", "info"], exempte: ["Exempté", "mute"], radie: ["Radié", "bad"] };
-const STAFF = "Secrétariat (M. Ferri)";
+const XSTATUS = { attente_confrere: ["Attente du confrère", "warn"], attente_secretariat: ["À valider", "duty"], accepte: ["Validé", "ok"], refuse: ["Refusé", "bad"] };
+const RULES = {
+  rattrapage: ["Gardes à rattraper", "Un praticien qui n'a pas assuré sa garde passe en tête de file."],
+  prioritaire: ["Praticiens prioritaires", "Volontaires, retours d'exemption… selon les règles de votre cahier des charges."],
+  nouveaux: ["Nouveaux inscrits", "Un nouvel inscrit fait sa première garde avant les autres."],
+  anciennete: ["Dernière garde la plus ancienne", "Règle de base : chacun son tour, dans l'ordre des dernières gardes."],
+};
+const ADMIN = "Dr Hélène Vidal (admin)";
+const STAFF = "Sandrine Ferri (secrétariat)";
+const TEMPLATES = {
+  publication: ["Planning publié : votre garde à confirmer", "Bonjour Dr {nom},\n\nLe planning de {mois} est publié. Vous êtes de garde le {date} pour le secteur {secteur}.\n\nMerci de confirmer votre garde depuis votre espace : {lien}\nEn cas d'empêchement, proposez un échange à un confrère depuis ce même espace.\n\nLe secrétariat des gardes"],
+  relance: ["Rappel : garde du {date} à confirmer", "Bonjour Dr {nom},\n\nVotre garde du {date} ({secteur}) n'est pas encore confirmée.\nMerci de la confirmer depuis votre espace : {lien}\n\nLe secrétariat des gardes"],
+  veille: ["Votre garde demain", "Bonjour Dr {nom},\n\nPour rappel, vous êtes de garde demain, {date}, pour le secteur {secteur}.\n\nLe secrétariat des gardes"],
+  demande: ["Demande d'échange de garde", "Bonjour Dr {nom},\n\nDr {demandeur} vous propose {objet} pour le {date} ({secteur}).\nMotif : {motif}\n\nRépondez depuis votre espace : {lien}\n\nLe secrétariat des gardes"],
+  valide: ["Échange de garde validé", "Bonjour Dr {nom},\n\nL'échange concernant la garde du {date} ({secteur}) a été validé par le secrétariat. Le planning est à jour.\n\nLe secrétariat des gardes"],
+};
+const LINK = "https://gardes.exemple.fr/mon-espace";
 
 function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
 const pad = (n) => String(n).padStart(2, "0");
@@ -217,6 +273,8 @@ const addDays = (s, n) => { const d = parse(s); d.setUTCDate(d.getUTCDate() + n)
 const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 86400000);
 const fmt = (s, opts = { weekday: "short", day: "numeric", month: "short" }) => parse(s).toLocaleDateString("fr-FR", { timeZone: "UTC", ...opts });
 const fmtLong = (s) => fmt(s, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const fmtShort = (s) => fmt(s, { day: "2-digit", month: "2-digit", year: "numeric" });
+const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
 
 function dutyDays(month) {
   const [y, m] = month.split("-").map(Number);
@@ -226,6 +284,22 @@ function dutyDays(month) {
     if (d.getUTCDay() === 0 || HOLIDAYS[s]) out.push(s);
   }
   return out;
+}
+function monthLabel(m) { return (MONTHS.find((x) => x[0] === m) || [m, m])[1]; }
+function person(d, pid) { return pid ? d.people[pid - 1] : null; }
+function name(d, pid) { const p = person(d, pid); return p ? `Dr ${p.prenom} ${p.nom}` : "—"; }
+
+// Journal : chaque entrée a une catégorie (filtre de l'historique) et éventuellement un praticien et un email.
+function addLog(d, at, who, what, extra = {}) { d.log.push({ at, who, what, cat: "planning", ...extra }); }
+function fill(text, vars) { return text.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? ""); }
+function sendMail(d, at, key, pids, vars = {}) {
+  const [subject, body] = TEMPLATES[key];
+  const list = [...new Set(pids.filter(Boolean))];
+  if (!list.length) return;
+  const first = person(d, list[0]);
+  const v = { nom: first.nom, lien: LINK, ...vars };
+  addLog(d, at, "Notifications", `Email « ${fill(subject, v)} » envoyé à ${list.length > 1 ? `${list.length} praticiens` : name(d, list[0])}`,
+    { cat: "email", pid: list.length === 1 ? list[0] : undefined, mail: { to: list.length > 1 ? `${list.length} praticiens (ex. ${first.email})` : first.email, subject: fill(subject, v), body: fill(body, v) } });
 }
 
 function seed() {
@@ -240,130 +314,160 @@ function seed() {
       const statut = roll < 0.05 ? "nouveau" : roll < 0.08 ? "exempte" : roll < 0.095 ? "radie" : "actif";
       const year = statut === "nouveau" ? 2026 : 1990 + Math.floor(r() * 35);
       const inscrit = statut === "nouveau" ? `2026-${pad(6 + Math.floor(r() * 3))}-${pad(1 + Math.floor(r() * 27))}` : `${year}-${pad(1 + Math.floor(r() * 12))}-01`;
-      // Dernière garde antérieure à septembre 2026 (historique repris de l'ancien tableur).
       const lastBefore = statut === "actif" ? addDays("2026-08-30", -7 * (1 + Math.floor(r() * 46))) : null;
+      const prio = statut === "actif" && r() < 0.015 ? pick(["Volontaire pour des gardes supplémentaires", "Retour d'exemption : gardes à reprendre"]) : "";
       people.push({
-        id: id++, prenom, nom, secteur: sector, ville: pick(TOWNS[sector]), statut, inscrit, lastBefore,
-        email: `${prenom}.${nom}`.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z.]/g, "") + `@cabinet-demo.fr`,
+        id: id++, prenom, nom, secteur: sector, ville: pick(TOWNS[sector]), adresse: `${1 + Math.floor(r() * 120)} ${pick(STREETS)}`,
+        situation: pick(SITUATIONS), statut, inscrit, lastBefore, priorite: prio,
+        radiation: statut === "radie" ? { date: `2025-${pad(1 + Math.floor(r() * 12))}-15`, motif: pick(["Départ à la retraite", "Départ hors département", "Cessation d'activité"]) } : null,
+        email: `${norm(prenom)}.${norm(nom)}`.replace(/[^a-z.]/g, "") + `@cabinet-demo.fr`,
         tel: `04 94 ${pad(Math.floor(r() * 100))} ${pad(Math.floor(r() * 100))} ${pad(Math.floor(r() * 100))}`,
         rattrapageSeed: 0,
       });
     }
   });
-  // Quelques gardes non effectuées avant la reprise : à rattraper en priorité.
   for (const n of [7, 66, 131, 190]) people[n].rattrapageSeed = 1;
-  const db = { people, gardes: [], exchanges: [], indispos: [], log: [], rules: { rattrapage: true, nouveaux: true, delai: true, indispo: true }, published: {} };
-  const t = (at, who, what) => db.log.push({ at, who, what });
-  t("2026-08-31T09:12", STAFF, "Import Excel « praticiens_2026.xlsx » : 350 praticiens, 8 secteurs");
+  const d = {
+    people, gardes: [], exchanges: [], indispos: [], log: [], published: {},
+    rules: { order: ["rattrapage", "prioritaire", "nouveaux", "anciennete"], on: { rattrapage: true, prioritaire: true, nouveaux: true, anciennete: true }, delai: 28, indispo: true },
+  };
+  addLog(d, "2026-08-31T09:12", STAFF, "Import Excel « praticiens_2026.xlsx » : 350 praticiens, 8 secteurs", { cat: "praticiens" });
+  addLog(d, "2026-08-31T09:40", ADMIN, "Règles de rotation définies : rattrapages, prioritaires, nouveaux inscrits, ancienneté ; 28 jours minimum entre deux gardes", { cat: "admin" });
 
-  // Septembre : publié, gardes passées. Octobre : publié, en cours de confirmation.
-  generate(db, "2026-09"); publish(db, "2026-09", "2026-08-31T10:05");
-  generate(db, "2026-10"); publish(db, "2026-10", "2026-09-21T14:30");
-  for (const g of db.gardes) {
+  generate(d, "2026-09"); publish(d, "2026-09", "2026-08-31T10:05");
+  generate(d, "2026-10"); publish(d, "2026-10", "2026-09-21T14:30");
+  for (const g of d.gardes) {
     if (g.date < "2026-09-27") g.status = "effectuee";
-    else if (g.date < TODAY) g.status = "confirmee"; // à vérifier
+    else if (g.date < TODAY) g.status = "confirmee";
     else g.status = r() < 0.72 ? "confirmee" : "a_confirmer";
   }
-  const swap = db.gardes.find((g) => g.date === "2026-09-13" && g.secteur === "Hyères – La Crau");
+  const swap = d.gardes.find((g) => g.date === "2026-09-13" && g.secteur === "Hyères – La Crau");
   const sub = people.find((p) => p.secteur === swap.secteur && p.statut === "actif" && p.id !== swap.pid);
   Object.assign(swap, { status: "remplacee", doneBy: sub.id });
-  const missed = db.gardes.find((g) => g.date === "2026-09-20" && g.secteur === "Brignoles");
+  addLog(d, "2026-09-14T09:02", STAFF, `Vérification du 13 sept. (Hyères – La Crau) : ${name(d, sub.id)} a remplacé ${name(d, swap.pid)}`, { cat: "verification", pid: swap.pid });
+  const missed = d.gardes.find((g) => g.date === "2026-09-20" && g.secteur === "Brignoles");
   missed.status = "non_effectuee";
-  t("2026-09-22T08:40", STAFF, `Vérification du 20 sept. (Brignoles) : garde non effectuée par ${name(db, missed.pid)} → à rattraper`);
+  addLog(d, "2026-09-22T08:40", STAFF, `Vérification du 20 sept. (Brignoles) : garde non effectuée par ${name(d, missed.pid)} → à rattraper`, { cat: "verification", pid: missed.pid });
 
-  // Un échange en attente sur Toulon Est et une indisponibilité déclarée.
-  const mineGarde = db.gardes.find((g) => g.date === "2026-10-18" && g.secteur === "Toulon Est");
-  mineGarde.status = "echange";
-  const colleague = db.gardes.find((g) => g.date === "2026-10-25" && g.secteur === "Toulon Est");
-  db.exchanges.push({ id: 1, gid: mineGarde.id, from: mineGarde.pid, to: colleague.pid, type: "echange", at: "2026-09-30T18:02", status: "en_attente", note: "Congrès à Lyon ce week-end." });
-  t("2026-09-30T18:02", name(db, mineGarde.pid), `Demande d'échange : garde du 18 oct. contre celle de ${name(db, colleague.pid)} (25 oct.)`);
-  db.indispos.push({ pid: mineGarde.pid, date: "2026-11-15", motif: "Formation implantologie" });
-  t("2026-09-30T18:05", name(db, mineGarde.pid), "Indisponibilité déclarée : dimanche 15 novembre 2026");
-  db.me = mineGarde.pid;
-  db.log.sort((a, b) => a.at.localeCompare(b.at));
-  return db;
+  // Espace praticien de démonstration (Toulon Est) : sa garde du 18 oct. à confirmer, une demande de remplacement reçue.
+  // Ailleurs dans le secteur, un échange déjà accepté par le confrère attend la validation du secrétariat.
+  const mine = d.gardes.find((g) => g.date === "2026-10-18" && g.secteur === "Toulon Est");
+  mine.status = "a_confirmer";
+  const a = d.gardes.find((g) => g.date === "2026-10-04" && g.secteur === "Toulon Est");
+  const b = d.gardes.find((g) => g.date === "2026-10-25" && g.secteur === "Toulon Est");
+  a.status = "echange"; b.status = "confirmee";
+  d.exchanges.push({ id: 1, type: "echange", gid: a.id, otherGid: b.id, from: a.pid, to: b.pid, at: "2026-09-30T18:02", status: "attente_secretariat", note: "Congrès à Lyon ce week-end." });
+  addLog(d, "2026-09-30T18:02", name(d, a.pid), `Propose d'échanger sa garde du 4 oct. contre celle de ${name(d, b.pid)} (25 oct.)`, { cat: "echanges", pid: a.pid });
+  sendMail(d, "2026-09-30T18:02", "demande", [b.pid], { demandeur: `${person(d, a.pid).prenom} ${person(d, a.pid).nom}`, objet: "un échange de garde", date: fmtLong(b.date), secteur: "Toulon Est", motif: "Congrès à Lyon ce week-end." });
+  addLog(d, "2026-10-01T08:15", name(d, b.pid), `Accepte l'échange proposé par ${name(d, a.pid)} : en attente de validation du secrétariat`, { cat: "echanges", pid: b.pid });
+  const asker = d.gardes.find((g) => g.date === "2026-10-11" && g.secteur === "Toulon Est");
+  asker.status = "echange";
+  d.exchanges.push({ id: 2, type: "remplacement", gid: asker.id, from: asker.pid, to: mine.pid, at: "2026-10-01T21:10", status: "attente_confrere", note: "Mariage familial ce week-end." });
+  addLog(d, "2026-10-01T21:10", name(d, asker.pid), `Demande à ${name(d, mine.pid)} de le remplacer le 11 oct.`, { cat: "echanges", pid: asker.pid });
+  sendMail(d, "2026-10-01T21:10", "demande", [mine.pid], { demandeur: `${person(d, asker.pid).prenom} ${person(d, asker.pid).nom}`, objet: "de le remplacer", date: fmtLong(asker.date), secteur: "Toulon Est", motif: "Mariage familial ce week-end." });
+  d.indispos.push({ pid: mine.pid, date: "2026-11-15", motif: "Formation implantologie" });
+  addLog(d, "2026-09-30T18:05", name(d, mine.pid), "Indisponibilité déclarée : dimanche 15 novembre 2026", { cat: "praticiens", pid: mine.pid });
+  const radie = people.find((p) => p.statut === "radie");
+  addLog(d, `${radie.radiation.date}T10:00`, STAFF, `Radiation de ${name(d, radie.id)} : ${radie.radiation.motif.toLowerCase()}`, { cat: "praticiens", pid: radie.id });
+  d.me = mine.pid;
+  d.log.sort((a, b) => a.at.localeCompare(b.at));
+  return d;
 }
 
 // ---------- Moteur de rotation ----------
-// Pour chaque jour de garde et chaque secteur, on retient le praticien en tête de file :
-// 1. gardes à rattraper, 2. nouveaux inscrits sans première garde, 3. dernière garde la plus ancienne.
-// Exclus : radiés, exemptés, indisponibles ce jour-là, et (règle « délai ») une garde dans les 28 jours.
-function lastGarde(db, pid, exceptMonth) {
-  let last = db.people[pid - 1].lastBefore;
-  for (const g of db.gardes) {
+// Pour chaque jour de garde et chaque secteur, on classe les praticiens éligibles selon les règles,
+// dans l'ordre défini par l'administrateur. Exclus : radiés, exemptés, indisponibles ce jour-là,
+// et ceux qui ont eu une garde depuis moins de `delai` jours.
+function lastGarde(d, pid) {
+  let last = person(d, pid).lastBefore;
+  for (const g of d.gardes) {
     const who = g.status === "remplacee" ? g.doneBy : g.pid;
-    if (who === pid && g.status !== "non_effectuee" && (!last || g.date > last)) last = g.date;
+    if (who === pid && !["non_effectuee", "brouillon"].includes(g.status) && (!last || g.date > last)) last = g.date;
   }
   return last;
 }
-function rattrapageDue(db, pid) {
-  const p = db.people[pid - 1];
-  const missed = db.gardes.filter((g) => g.pid === pid && g.status === "non_effectuee").length;
-  const made = db.gardes.filter((g) => g.pid === pid && g.kind === "rattrapage").length;
-  return Math.max(0, p.rattrapageSeed + missed - made);
+function lastPlanned(d, pid) {
+  let last = lastGarde(d, pid);
+  for (const g of d.gardes) if (g.pid === pid && g.status === "brouillon" && (!last || g.date > last)) last = g.date;
+  return last;
 }
-function generate(db, month) {
-  db.gardes = db.gardes.filter((g) => !(g.date.startsWith(month) && g.status === "brouillon"));
-  const taken = new Set(db.gardes.filter((g) => g.date.startsWith(month)).map((g) => `${g.date}|${g.secteur}`));
-  let nextId = Math.max(0, ...db.gardes.map((g) => g.id)) + 1;
+function rattrapageDue(d, pid) {
+  const missed = d.gardes.filter((g) => g.pid === pid && g.status === "non_effectuee").length;
+  const made = d.gardes.filter((g) => g.pid === pid && g.kind === "rattrapage").length;
+  return Math.max(0, person(d, pid).rattrapageSeed + missed - made);
+}
+function generate(d, month) {
+  d.gardes = d.gardes.filter((g) => !(g.date.startsWith(month) && g.status === "brouillon"));
+  const taken = new Set(d.gardes.filter((g) => g.date.startsWith(month)).map((g) => `${g.date}|${g.secteur}`));
+  let nextId = Math.max(0, ...d.gardes.map((g) => g.id)) + 1;
+  const { order, on, delai, indispo } = d.rules;
+  const active = order.filter((k) => on[k]);
   for (const date of dutyDays(month)) {
     for (const secteur of SECTORS) {
       if (taken.has(`${date}|${secteur}`)) continue;
-      const pool = db.people.filter((p) => p.secteur === secteur && (p.statut === "actif" || p.statut === "nouveau"));
-      const ranked = pool.map((p) => {
-        const last = lastGarde(db, p.id);
-        const due = db.rules.rattrapage ? rattrapageDue(db, p.id) : 0;
-        const fresh = db.rules.nouveaux && p.statut === "nouveau" && !last;
-        const busy = db.rules.indispo && db.indispos.some((i) => i.pid === p.id && i.date === date);
-        const tooSoon = db.rules.delai && last && daysBetween(last, date) < 28;
-        return { p, last, due, fresh, excluded: busy || tooSoon };
+      const ranked = d.people.filter((p) => p.secteur === secteur && (p.statut === "actif" || p.statut === "nouveau")).map((p) => {
+        const last = lastPlanned(d, p.id);
+        return { p, last, rattrapage: rattrapageDue(d, p.id), prioritaire: p.priorite ? 1 : 0, nouveaux: p.statut === "nouveau" && !last ? 1 : 0,
+          excluded: (indispo && d.indispos.some((i) => i.pid === p.id && i.date === date)) || (last && daysBetween(last, date) < delai) };
       }).filter((c) => !c.excluded);
-      ranked.sort((a, b) => (b.due - a.due) || (Number(b.fresh) - Number(a.fresh)) || ((a.last || "0000") .localeCompare(b.last || "0000")) || a.p.id - b.p.id);
+      ranked.sort((a, b) => {
+        for (const k of active) {
+          const diff = k === "anciennete" ? (a.last || "0000").localeCompare(b.last || "0000") : b[k] - a[k];
+          if (diff) return diff;
+        }
+        return a.p.id - b.p.id;
+      });
       const top = ranked[0];
-      if (!top) { db.gardes.push({ id: nextId++, date, secteur, pid: null, status: "brouillon", reason: "Aucun praticien disponible : à attribuer à la main" }); continue; }
-      const reason = top.due ? "Garde à rattraper (garde précédente non effectuée)"
-        : top.fresh ? `Nouvel inscrit (${fmt(top.p.inscrit, { month: "short", year: "numeric" })}) : première garde`
-        : top.last ? `Dernière garde la plus ancienne du secteur : ${fmt(top.last, { day: "numeric", month: "short", year: "numeric" })}`
-        : "Jamais de garde enregistrée";
-      db.gardes.push({ id: nextId++, date, secteur, pid: top.p.id, status: "brouillon", reason, kind: top.due ? "rattrapage" : "rotation" });
+      if (!top) { d.gardes.push({ id: nextId++, date, secteur, pid: null, status: "brouillon", reason: "Aucun praticien disponible : à attribuer à la main" }); continue; }
+      const rule = active.find((k) => k !== "anciennete" && top[k]) || "anciennete";
+      const reason = {
+        rattrapage: "Garde à rattraper (garde précédente non effectuée)",
+        prioritaire: `Prioritaire : ${top.p.priorite.toLowerCase()}`,
+        nouveaux: `Nouvel inscrit (${fmt(top.p.inscrit, { month: "short", year: "numeric" })}) : première garde`,
+        anciennete: top.last ? `Dernière garde la plus ancienne du secteur : ${fmt(top.last, { day: "numeric", month: "short", year: "numeric" })}` : "Aucune garde enregistrée",
+      }[rule];
+      d.gardes.push({ id: nextId++, date, secteur, pid: top.p.id, status: "brouillon", reason, kind: rule === "rattrapage" ? "rattrapage" : "rotation" });
     }
   }
 }
-function publish(db, month, at) {
-  const list = db.gardes.filter((g) => g.date.startsWith(month) && g.status === "brouillon" && g.pid);
+function publish(d, month, at) {
+  const list = d.gardes.filter((g) => g.date.startsWith(month) && g.status === "brouillon" && g.pid);
   list.forEach((g) => { g.status = "a_confirmer"; });
-  db.published[month] = at;
-  const people = new Set(list.map((g) => g.pid)).size;
-  db.log.push({ at, who: STAFF, what: `Planning ${monthLabel(month).toLowerCase()} validé et publié : ${list.length} gardes` });
-  db.log.push({ at, who: "Notifications", what: `Email « Votre garde à confirmer » envoyé à ${people} praticiens`, mail: true });
+  d.published[month] = at;
+  addLog(d, at, at.startsWith(TODAY) ? currentUser() : STAFF, `Planning ${monthLabel(month).toLowerCase()} validé et publié : ${list.length} gardes`);
+  const g = list[0];
+  if (g) sendMail(d, at, "publication", list.map((x) => x.pid), { mois: monthLabel(month).toLowerCase(), date: fmtLong(g.date), secteur: g.secteur });
 }
 
 // ---------- État ----------
-const KEY = "tableau-gardes-demo-v1";
+const KEY = "tableau-gardes-demo-v2";
 let db;
 try { db = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { db = null; }
-if (!db || !db.people) db = seed();
-const ui = { role: "staff", tab: "dashboard", month: "2026-11", sector: "Tous", q: "", fsector: "Tous", fstatus: "Tous", sort: "nom", dir: 1, page: 0, toast: null };
+const ui = { role: "staff", tab: "dashboard", month: "2026-11", sector: "Tous", q: "", fsector: "Tous", fstatus: "Tous", sort: "nom", dir: 1, page: 0, hcat: "Tous", hq: "", admin: "access", toast: null };
 try { Object.assign(ui, JSON.parse(localStorage.getItem(KEY + "-ui") || "{}"), { toast: null }); } catch (e) {}
+if (!db || !db.people) db = seed();
 
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(db)); localStorage.setItem(KEY + "-ui", JSON.stringify({ role: ui.role, tab: ui.tab, month: ui.month, sector: ui.sector })); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify(db)); localStorage.setItem(KEY + "-ui", JSON.stringify({ role: ui.role, tab: ui.tab, month: ui.month, sector: ui.sector, admin: ui.admin })); } catch (e) {}
 }
-function name(d, pid) { if (!pid) return "—"; const p = d.people[pid - 1]; return `Dr ${p.prenom} ${p.nom}`; }
-function monthLabel(m) { return (MONTHS.find((x) => x[0] === m) || [m, m])[1]; }
-function nowStamp() { const d = new Date(); return `${TODAY}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
-function log(who, what, mail) { db.log.push({ at: nowStamp(), who, what, mail }); }
+function currentUser() { return ui.role === "admin" ? ADMIN : ui.role === "doc" ? name(db, db.me) : STAFF; }
+function nowStamp() { const t = new Date(); return `${TODAY}T${pad(t.getHours())}:${pad(t.getMinutes())}`; }
+function log(what, extra) { addLog(db, nowStamp(), currentUser(), what, extra); }
+function mail(key, pids, vars) { sendMail(db, nowStamp(), key, pids, vars); }
 function toast(msg) { ui.toast = msg; renderToast(); clearTimeout(toast.t); toast.t = setTimeout(() => { ui.toast = null; renderToast(); }, 3200); }
+function gardeById(id) { return db.gardes.find((g) => g.id === id); }
 
 const toVerify = () => db.gardes.filter((g) => g.date < TODAY && ["confirmee", "a_confirmer", "echange"].includes(g.status));
-const pendingEx = () => db.exchanges.filter((e) => e.status === "en_attente");
+const toValidate = () => db.exchanges.filter((e) => e.status === "attente_secretariat");
 const unconfirmed = () => db.gardes.filter((g) => g.date >= TODAY && g.status === "a_confirmer");
+const toReassign = () => db.gardes.filter((g) => g.date >= TODAY && g.status === "a_attribuer");
+const owing = () => db.people.filter((p) => rattrapageDue(db, p.id));
 
 // ---------- Rendu ----------
 const el = (tag, props = {}, ...kids) => {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
-    if (k === "class") n.className = v; else if (k.startsWith("on")) n[k] = v; else if (k === "html") n.innerHTML = v;
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n[k] = v;
     else if (v === true) n.setAttribute(k, ""); else if (v !== false && v != null) n.setAttribute(k, v);
   }
   for (const k of kids.flat()) if (k != null && k !== false) n.append(k);
@@ -371,59 +475,109 @@ const el = (tag, props = {}, ...kids) => {
 };
 const pill = (status, map = STATUS) => el("span", { class: `pill ${map[status][1]}` }, map[status][0]);
 const btn = (label, onclick, cls = "") => el("button", { type: "button", class: `btn ${cls}`, onclick }, label);
+const muted = (text) => el("small", { style: "display:block;color:var(--muted)" }, text);
 
+const STAFF_TABS = [["dashboard", "Tableau de bord"], ["planning", "Planning"], ["people", "Praticiens"], ["exchanges", "Échanges", () => toValidate().length], ["verify", "Vérification", () => toVerify().length], ["history", "Historique"]];
 const TABS = {
-  staff: [["dashboard", "Tableau de bord"], ["planning", "Planning"], ["people", "Praticiens"], ["exchanges", "Échanges", () => pendingEx().length], ["verify", "Vérification", () => toVerify().length], ["history", "Historique"]],
-  doc: [["mine", "Mes gardes"], ["sector", "Planning du secteur"], ["dispo", "Indisponibilités"]],
+  admin: [...STAFF_TABS, ["settings", "Administration"]],
+  staff: STAFF_TABS,
+  doc: [["mine", "Mes gardes", () => db.exchanges.filter((e) => e.to === db.me && e.status === "attente_confrere").length], ["sector", "Planning du secteur"], ["dispo", "Indisponibilités"]],
 };
 
 function render() {
   document.querySelectorAll(".role button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.role === ui.role)));
+  document.getElementById("whoami").textContent = `Connecté : ${currentUser()}`;
   const tabs = TABS[ui.role];
   if (!tabs.some((t) => t[0] === ui.tab)) ui.tab = tabs[0][0];
   document.getElementById("tabs").replaceChildren(...tabs.map(([key, label, count]) => {
     const c = count ? count() : 0;
     return el("button", { type: "button", role: "tab", "aria-selected": String(ui.tab === key), onclick: () => { ui.tab = key; render(); } }, label, c ? el("span", { class: "count" }, String(c)) : null);
   }));
-  const view = { dashboard, planning, people, exchanges, verify, history, mine, sector: sectorView, dispo }[ui.tab];
+  const view = { dashboard, planning, people, exchanges, verify, history, settings, mine, sector: sectorView, dispo }[ui.tab];
   document.getElementById("main").replaceChildren(...view());
   save();
 }
 function head(title, text, ...actions) {
-  return el("div", { class: "page-head" }, el("div", {}, el("h2", {}, title), text ? el("p", {}, text) : null), actions.length ? el("div", { class: "actions" }, actions) : null);
+  return el("div", { class: "page-head" }, el("div", {}, el("h2", {}, title), text ? el("p", {}, text) : null), actions.filter(Boolean).length ? el("div", { class: "actions" }, actions) : null);
+}
+function go(role, tab, extra = {}) { Object.assign(ui, { role, tab, ...extra }); render(); window.scrollTo(0, 0); }
+
+// ---------- Exports ----------
+function download(filename, rows) {
+  if (window.XLSX && filename.endsWith(".xlsx")) {
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), "Export");
+    XLSX.writeFile(wb, filename);
+  } else {
+    const csv = "﻿" + rows.map((r) => r.map((c) => /[;"\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(";")).join("\n");
+    saveBlob(filename.replace(/\.xlsx$/, ".csv"), new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  }
+  toast(`Export « ${filename} » téléchargé.`);
+}
+function saveBlob(filename, blob) {
+  const a = el("a", { href: URL.createObjectURL(blob), download: filename });
+  document.body.append(a); a.click(); a.remove();
+}
+function exportPlanning(list) {
+  download(`planning-${ui.month}.xlsx`, [["Date", "Jour", "Secteur", "Praticien", "Téléphone", "Email", "Statut"],
+    ...list.sort((a, b) => a.date.localeCompare(b.date) || SECTORS.indexOf(a.secteur) - SECTORS.indexOf(b.secteur))
+      .map((g) => [g.date, HOLIDAYS[g.date] || "Dimanche", g.secteur, name(db, g.pid), person(db, g.pid)?.tel || "", person(db, g.pid)?.email || "", STATUS[g.status][0]])]);
 }
 
+// ---------- Secrétariat ----------
 function dashboard() {
   const next = db.gardes.filter((g) => g.date >= TODAY && g.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
   const nextDay = next[0]?.date;
-  const go = (tab, extra = {}) => () => { Object.assign(ui, { tab, ...extra }); render(); };
   const k = (n, label, onclick, alert) => el("button", { type: "button", class: `kpi${alert && n ? " alert" : ""}`, onclick }, el("b", {}, String(n)), el("span", {}, label));
-  const novPlanned = db.gardes.some((g) => g.date.startsWith("2026-11"));
   const todo = [
-    ...toVerify().slice(0, 3).map((g) => [`Vérifier la garde du ${fmt(g.date)} · ${g.secteur}`, name(db, g.pid), "Vérifier", go("verify")]),
-    ...pendingEx().map((e) => [`Échange demandé par ${name(db, e.from)}`, `Garde du ${fmt(gardeById(e.gid).date)} · ${gardeById(e.gid).secteur}`, "Traiter", go("exchanges")]),
-    ...(novPlanned && db.published["2026-11"] ? [] : [["Planning de novembre à générer et valider", "Toussaint et Armistice inclus", "Ouvrir", go("planning", { month: "2026-11" })]]),
-    ...(unconfirmed().length ? [[`${unconfirmed().length} gardes encore à confirmer`, "Relance automatique J-7 par email", "Voir", go("planning", { month: "2026-10" })]] : []),
+    ...toReassign().map((g) => [`Garde du ${fmt(g.date)} à réattribuer`, `${g.secteur} · praticien radié`, "Attribuer", () => gardeSheet(g)]),
+    ...toVerify().slice(0, 3).map((g) => [`Vérifier la garde du ${fmt(g.date)} · ${g.secteur}`, name(db, g.pid), "Vérifier", () => go(ui.role, "verify")]),
+    ...toValidate().map((e) => [`${e.type === "echange" ? "Échange" : "Remplacement"} à valider`, `${name(db, e.from)} ↔ ${name(db, e.to)} · ${fmt(gardeById(e.gid).date)}`, "Traiter", () => go(ui.role, "exchanges")]),
+    ...(db.published["2026-11"] ? [] : [["Planning de novembre à générer et valider", "Toussaint et Armistice inclus", "Ouvrir", () => go(ui.role, "planning", { month: "2026-11" })]]),
+    ...(unconfirmed().length ? [[`${unconfirmed().length} gardes encore à confirmer`, "Relance automatique à J-7, ou manuelle", "Relancer", relaunch]] : []),
   ];
   const rows = next.filter((g) => g.date === nextDay);
   return [
-    head("Bonjour", "Ce qui demande votre attention aujourd'hui."),
+    head("Tableau de bord", "Ce qui demande votre attention aujourd'hui, puis l'équilibre des gardes entre secteurs."),
     el("section", { class: "kpis", "aria-label": "Indicateurs" },
-      k(db.people.filter((p) => p.statut !== "radie").length, "praticiens inscrits", go("people")),
-      k(unconfirmed().length, "gardes à confirmer", go("planning", { month: "2026-10" }), true),
-      k(pendingEx().length, "échanges en attente", go("exchanges"), true),
-      k(toVerify().length, "gardes à vérifier", go("verify"), true),
-      k(db.people.filter((p) => rattrapageDue(db, p.id)).length, "rattrapages dus", go("people"), true)),
+      k(db.people.filter((p) => p.statut !== "radie").length, "praticiens inscrits", () => go(ui.role, "people")),
+      k(unconfirmed().length, "gardes à confirmer", () => go(ui.role, "planning", { month: "2026-10" }), true),
+      k(toValidate().length, "échanges à valider", () => go(ui.role, "exchanges"), true),
+      k(toVerify().length, "gardes à vérifier", () => go(ui.role, "verify"), true),
+      k(owing().length, "rattrapages dus", () => go(ui.role, "verify"), true)),
     el("div", { class: "grid2" },
       el("section", { class: "panel" }, el("h3", {}, "À traiter"),
         todo.length ? el("ul", { class: "todo" }, todo.map(([what, sub, label, fn]) => el("li", {}, el("div", { class: "what" }, el("span", {}, what), el("small", {}, sub)), btn(label, fn, "small"))))
-          : el("p", { class: "hint" }, "Rien à traiter. Bonne journée.")),
+          : el("p", { class: "hint" }, "Rien à traiter.")),
       el("section", { class: "panel" }, el("h3", {}, nextDay ? `Prochaine garde : ${fmtLong(nextDay)}` : "Aucune garde à venir"),
-        el("ul", { class: "todo" }, rows.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, g.secteur), el("small", {}, name(db, g.pid))), pill(g.status)))))),
+        el("ul", { class: "todo" }, rows.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, g.secteur), el("small", {}, `${name(db, g.pid)} · ${person(db, g.pid)?.tel || ""}`)), pill(g.status)))))),
+    equity(),
   ];
 }
-
-function gardeById(id) { return db.gardes.find((g) => g.id === id); }
+function equity() {
+  const perMonth = 62 / 12; // 52 dimanches + jours fériés hors dimanche, par an
+  const stats = SECTORS.map((s) => {
+    const pool = db.people.filter((p) => p.secteur === s && ["actif", "nouveau"].includes(p.statut));
+    const oct = db.gardes.filter((g) => g.secteur === s && g.date.startsWith("2026-10"));
+    const conf = oct.filter((g) => ["confirmee", "effectuee", "remplacee"].includes(g.status)).length;
+    return { s, n: pool.length, months: pool.length / perMonth, rate: oct.length ? conf / oct.length : 0 };
+  });
+  const max = Math.max(...stats.map((x) => x.months));
+  return el("section", { class: "panel" }, el("h3", {}, "Équilibre entre secteurs"),
+    el("p", { class: "hint" }, "Un secteur avec peu de praticiens les met de garde plus souvent : à surveiller lors des radiations et des nouvelles inscriptions."),
+    el("div", { class: "table-wrap" }, el("table", {},
+      el("thead", {}, el("tr", {}, el("th", {}, "Secteur"), el("th", {}, "Praticiens de garde"), el("th", {}, "Une garde tous les"), el("th", {}, ""), el("th", {}, "Confirmées (oct.)"))),
+      el("tbody", {}, stats.map((x) => el("tr", {}, el("td", {}, x.s), el("td", { class: "num" }, String(x.n)), el("td", { class: "num" }, `${x.months.toFixed(1).replace(".", ",")} mois`),
+        el("td", {}, el("div", { class: "bar", "aria-hidden": "true" }, el("i", { style: `width:${Math.round((x.months / max) * 100)}%` }))),
+        el("td", { class: "num" }, `${Math.round(x.rate * 100)} %`)))))));
+}
+function relaunch() {
+  const list = unconfirmed();
+  list.forEach((g) => mail("relance", [g.pid], { date: fmtLong(g.date), secteur: g.secteur }));
+  log(`Relance manuelle : ${list.length} gardes non confirmées`);
+  toast(`${list.length} relances envoyées par email.`);
+  render();
+}
 
 function planning() {
   const days = dutyDays(ui.month);
@@ -431,73 +585,64 @@ function planning() {
   const drafts = list.filter((g) => g.status === "brouillon");
   const sectors = ui.sector === "Tous" ? SECTORS : [ui.sector];
   const published = db.published[ui.month];
-  const rule = (key, label, sub) => el("label", { class: "rule" },
-    el("input", { type: "checkbox", id: `rule-${key}`, checked: db.rules[key], onchange: (e) => { db.rules[key] = e.target.checked; save(); } }),
-    el("span", {}, label, el("small", {}, sub)));
+  const pending = list.filter((g) => g.status === "a_confirmer").length;
+  const activeRules = db.rules.order.filter((k) => db.rules.on[k]).map((k) => RULES[k][0].toLowerCase());
   const cell = (date, secteur) => {
     const g = list.find((x) => x.date === date && x.secteur === secteur);
-    if (!g) return el("td", {}, el("span", { class: "reason", style: "color:var(--muted);font-size:12px" }, "Non généré"));
-    if (!g.pid) return el("td", {}, el("button", { type: "button", class: "slot empty", onclick: () => assignDialog(g) }, "À attribuer"));
+    if (!g) return el("td", {}, el("span", { style: "color:var(--muted);font-size:12px" }, "Non généré"));
+    if (!g.pid) return el("td", {}, el("button", { type: "button", class: "slot empty", onclick: () => gardeSheet(g) }, "À attribuer"));
     return el("td", {}, el("button", { type: "button", class: "slot", onclick: () => gardeSheet(g) },
       el("strong", {}, name(db, g.pid).replace("Dr ", "")), pill(g.status), g.status === "brouillon" ? el("span", { class: "reason" }, g.reason) : null));
   };
   return [
-    head("Planning des gardes", published ? `Publié le ${fmt(published.slice(0, 10), { day: "numeric", month: "long" })}. Cliquez sur une garde pour la modifier.` : "Générez une proposition, ajustez-la, puis validez : les praticiens reçoivent un email pour confirmer.",
-      drafts.length ? btn("Régénérer", () => { generate(db, ui.month); log(STAFF, `Planning ${monthLabel(ui.month).toLowerCase()} régénéré`); render(); }) : null,
-      !list.length || (!published && !drafts.length) ? btn("Générer le planning", () => { generate(db, ui.month); log(STAFF, `Proposition de planning générée pour ${monthLabel(ui.month).toLowerCase()}`); toast("Proposition générée : vérifiez-la avant de valider."); render(); }, "primary") : null,
+    head("Planning des gardes", published ? `Publié le ${fmt(published.slice(0, 10), { day: "numeric", month: "long" })}. Cliquez sur une garde pour voir pourquoi ce praticien a été choisi ou la réattribuer.` : "Générez une proposition, ajustez-la à la main si besoin, puis validez : chaque praticien reçoit un email pour confirmer sa garde.",
+      drafts.length ? btn("Régénérer", () => { generate(db, ui.month); log(`Planning ${monthLabel(ui.month).toLowerCase()} régénéré`); render(); }) : null,
+      !list.length ? btn("Générer le planning", () => { generate(db, ui.month); log(`Proposition de planning générée pour ${monthLabel(ui.month).toLowerCase()}`); toast("Proposition générée : vérifiez-la avant de valider."); render(); }, "primary") : null,
       drafts.length ? btn(`Valider et publier (${drafts.filter((g) => g.pid).length})`, () => confirmDialog("Publier le planning ?", `${drafts.filter((g) => g.pid).length} gardes seront publiées et chaque praticien recevra un email pour confirmer la sienne.`, "Publier", () => { publish(db, ui.month, nowStamp()); toast("Planning publié, emails envoyés."); render(); }), "duty") : null,
-      list.length ? btn("Exporter (CSV)", () => exportDialog(`planning-${ui.month}.csv`, planningCsv(list))) : null),
+      published && pending ? btn(`Relancer (${pending})`, relaunch) : null,
+      list.length ? btn("Exporter (Excel)", () => exportPlanning(list)) : null),
     el("div", { class: "filters" },
       el("select", { class: "field", id: "plan-month", "aria-label": "Mois", onchange: (e) => { ui.month = e.target.value; render(); } }, MONTHS.map(([v, l]) => el("option", { value: v, selected: v === ui.month }, l))),
       el("select", { class: "field", id: "plan-sector", "aria-label": "Secteur", onchange: (e) => { ui.sector = e.target.value; render(); } }, ["Tous", ...SECTORS].map((s) => el("option", { value: s, selected: s === ui.sector }, s === "Tous" ? "Tous les secteurs" : s)))),
-    !published ? el("section", { class: "panel" }, el("h3", {}, "Règles de rotation appliquées"),
-      el("p", { class: "hint" }, "Règles d'exemple : elles seront remplacées par celles de votre cahier des charges (priorités, nouveaux praticiens, échanges, rattrapages)."),
-      el("div", { class: "rules" },
-        rule("rattrapage", "Gardes à rattraper en priorité", "Un praticien qui n'a pas assuré sa garde passe en tête de file."),
-        rule("nouveaux", "Première garde des nouveaux inscrits", "Un nouvel inscrit est appelé avant les praticiens déjà de garde."),
-        rule("delai", "28 jours minimum entre deux gardes", "Évite qu'un même praticien enchaîne les gardes."),
-        rule("indispo", "Respect des indisponibilités", "Les dates déclarées par les praticiens sont exclues."))) : null,
+    el("p", { class: "hint", style: "margin:0;color:var(--muted);font-size:14px" }, `Règles appliquées, dans l'ordre : ${activeRules.join(", ")} ; ${db.rules.delai} jours minimum entre deux gardes${db.rules.indispo ? ", indisponibilités respectées" : ""}. `,
+      ui.role === "admin" ? el("button", { type: "button", class: "btn ghost small", onclick: () => go("admin", "settings", { admin: "rules" }) }, "Modifier les règles") : "Modifiables par l'administrateur."),
     el("div", { class: "plan-wrap" }, el("table", { class: "plan" },
       el("thead", {}, el("tr", {}, el("th", {}, "Secteur"), days.map((d) => el("th", { class: HOLIDAYS[d] ? "holiday" : "" }, fmt(d, { weekday: "short", day: "numeric" }), el("small", {}, HOLIDAYS[d] || "Dimanche"))))),
       el("tbody", {}, sectors.map((s) => el("tr", {}, el("td", { class: "sector" }, s), days.map((d) => cell(d, s))))))),
   ];
 }
-function planningCsv(list) {
-  return ["date;secteur;praticien;email;statut", ...list.sort((a, b) => a.date.localeCompare(b.date) || a.secteur.localeCompare(b.secteur))
-    .map((g) => [g.date, g.secteur, name(db, g.pid), g.pid ? db.people[g.pid - 1].email : "", STATUS[g.status][0]].join(";"))].join("\n");
-}
 
 function people() {
-  const q = ui.q.trim().toLowerCase();
-  let rows = db.people.filter((p) => (ui.fsector === "Tous" || p.secteur === ui.fsector) && (ui.fstatus === "Tous" || p.statut === ui.fstatus)
-    && (!q || `${p.prenom} ${p.nom} ${p.ville} ${p.email}`.toLowerCase().includes(q)));
-  const val = { nom: (p) => p.nom + p.prenom, secteur: (p) => p.secteur, last: (p) => lastGarde(db, p.id) || "", count: (p) => db.gardes.filter((g) => g.pid === p.id && g.status !== "brouillon").length };
+  const q = norm(ui.q);
+  let rows = db.people.filter((p) => (ui.fsector === "Tous" || p.secteur === ui.fsector) && (ui.fstatus === "Tous" || p.statut === ui.fstatus || (ui.fstatus === "prioritaire" && p.priorite))
+    && (!q || norm(`${p.prenom} ${p.nom} ${p.ville} ${p.email} ${p.adresse}`).includes(q)));
+  const val = { nom: (p) => norm(p.nom + p.prenom), secteur: (p) => p.secteur, last: (p) => lastGarde(db, p.id) || "", count: (p) => db.gardes.filter((g) => g.pid === p.id && g.status !== "brouillon").length };
   rows = rows.map((p) => ({ p, k: val[ui.sort](p) })).sort((a, b) => (a.k > b.k ? 1 : a.k < b.k ? -1 : 0) * ui.dir).map((x) => x.p);
   const per = 25, pages = Math.max(1, Math.ceil(rows.length / per));
   ui.page = Math.min(ui.page, pages - 1);
   const shown = rows.slice(ui.page * per, ui.page * per + per);
   const sortBtn = (key, label) => el("button", { type: "button", onclick: () => { ui.dir = ui.sort === key ? -ui.dir : 1; ui.sort = key; render(); } }, label + (ui.sort === key ? (ui.dir > 0 ? " ↑" : " ↓") : ""));
-  const importInput = el("input", { type: "file", id: "import-file", accept: ".csv,text/csv", hidden: true, onchange: (e) => importCsv(e.target.files[0]) });
   return [
-    head("Praticiens", `${db.people.filter((p) => p.statut !== "radie").length} inscrits, ${db.people.filter((p) => p.statut === "radie").length} radiés. Cliquez sur une ligne pour modifier la fiche.`,
-      importInput, btn("Importer (CSV / Excel)", () => importInput.click()),
-      btn("Exporter (CSV)", () => exportDialog("praticiens.csv", ["nom;prenom;secteur;ville;statut;email;telephone", ...rows.map((p) => [p.nom, p.prenom, p.secteur, p.ville, PSTATUS[p.statut][0], p.email, p.tel].join(";"))].join("\n"))),
+    head("Praticiens", `${db.people.filter((p) => p.statut !== "radie").length} inscrits, ${db.people.filter((p) => p.statut === "radie").length} radiés. Cliquez sur une ligne pour modifier la fiche, radier ou voir son historique.`,
+      btn("Importer (Excel / CSV)", importDialog),
+      btn("Exporter (Excel)", () => download("praticiens.xlsx", [["Nom", "Prénom", "Secteur", "Adresse", "Commune", "Situation", "Statut", "Priorité", "Email", "Téléphone", "Inscrit le", "Dernière garde"],
+        ...rows.map((p) => [p.nom, p.prenom, p.secteur, p.adresse, p.ville, p.situation, PSTATUS[p.statut][0], p.priorite, p.email, p.tel, p.inscrit, lastGarde(db, p.id) || ""])])),
       btn("Inscrire un praticien", () => personSheet(null), "primary")),
     el("div", { class: "filters" },
-      el("input", { class: "field search", type: "search", id: "people-q", placeholder: "Nom, ville, email…", value: ui.q, "aria-label": "Rechercher", oninput: (e) => { ui.q = e.target.value; ui.page = 0; const pos = e.target.selectionStart; render(); const f = document.getElementById("people-q"); f.focus(); f.setSelectionRange(pos, pos); } }),
+      el("input", { class: "field search", type: "search", id: "people-q", placeholder: "Nom, commune, adresse, email…", value: ui.q, "aria-label": "Rechercher", oninput: (e) => { ui.q = e.target.value; ui.page = 0; const pos = e.target.selectionStart; render(); const f = document.getElementById("people-q"); f.focus(); f.setSelectionRange(pos, pos); } }),
       el("select", { class: "field", id: "people-sector", "aria-label": "Secteur", onchange: (e) => { ui.fsector = e.target.value; ui.page = 0; render(); } }, ["Tous", ...SECTORS].map((s) => el("option", { value: s, selected: s === ui.fsector }, s === "Tous" ? "Tous les secteurs" : s))),
-      el("select", { class: "field", id: "people-status", "aria-label": "Statut", onchange: (e) => { ui.fstatus = e.target.value; ui.page = 0; render(); } }, [["Tous", "Tous les statuts"], ...Object.entries(PSTATUS).map(([k, v]) => [k, v[0]])].map(([k, l]) => el("option", { value: k, selected: k === ui.fstatus }, l)))),
+      el("select", { class: "field", id: "people-status", "aria-label": "Statut", onchange: (e) => { ui.fstatus = e.target.value; ui.page = 0; render(); } }, [["Tous", "Tous les statuts"], ...Object.entries(PSTATUS).map(([k, v]) => [k, v[0]]), ["prioritaire", "Prioritaires"]].map(([k, l]) => el("option", { value: k, selected: k === ui.fstatus }, l)))),
     el("div", { class: "table-wrap" }, el("table", {},
-      el("thead", {}, el("tr", {}, el("th", {}, sortBtn("nom", "Praticien")), el("th", {}, sortBtn("secteur", "Secteur")), el("th", {}, "Statut"), el("th", {}, sortBtn("last", "Dernière garde")), el("th", {}, sortBtn("count", "Gardes 2026")), el("th", {}, "Rattrapage"))),
+      el("thead", {}, el("tr", {}, el("th", {}, sortBtn("nom", "Praticien")), el("th", {}, sortBtn("secteur", "Secteur")), el("th", {}, "Situation"), el("th", {}, "Statut"), el("th", {}, sortBtn("last", "Dernière garde")), el("th", {}, sortBtn("count", "Gardes 2026")), el("th", {}, "Suivi"))),
       el("tbody", {}, shown.length ? shown.map((p) => {
         const last = lastGarde(db, p.id), due = rattrapageDue(db, p.id);
         return el("tr", { class: "clickable", tabindex: "0", onclick: () => personSheet(p), onkeydown: (e) => { if (e.key === "Enter") personSheet(p); } },
-          el("td", {}, el("div", { style: "font-weight:600" }, `${p.nom} ${p.prenom}`), el("small", { style: "color:var(--muted)" }, p.ville)),
-          el("td", {}, p.secteur), el("td", {}, pill(p.statut, PSTATUS)),
-          el("td", { class: "num" }, last ? fmt(last, { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"),
+          el("td", {}, el("div", { style: "font-weight:600" }, `${p.nom} ${p.prenom}`), muted(`${p.adresse}, ${p.ville}`)),
+          el("td", {}, p.secteur), el("td", {}, p.situation), el("td", {}, pill(p.statut, PSTATUS)),
+          el("td", { class: "num" }, last ? fmtShort(last) : "—"),
           el("td", { class: "num" }, String(val.count(p))),
-          el("td", {}, due ? el("span", { class: "pill bad" }, `${due} à rattraper`) : ""));
-      }) : el("tr", {}, el("td", { colspan: "6", style: "text-align:center;color:var(--muted);padding:24px" }, "Aucun praticien ne correspond à ces filtres."))))),
+          el("td", {}, el("div", { class: "chips" }, due ? el("span", { class: "pill bad" }, `${due} à rattraper`) : null, p.priorite ? el("span", { class: "pill duty", title: p.priorite }, "Prioritaire") : null)));
+      }) : el("tr", {}, el("td", { colspan: "7", style: "text-align:center;color:var(--muted);padding:24px" }, "Aucun praticien ne correspond à ces filtres."))))),
     el("div", { class: "pager" }, el("span", {}, `${rows.length} résultat${rows.length > 1 ? "s" : ""} · page ${ui.page + 1}/${pages}`),
       el("button", { type: "button", class: "btn small", disabled: ui.page === 0, onclick: () => { ui.page--; render(); } }, "Précédente"),
       el("button", { type: "button", class: "btn small", disabled: ui.page >= pages - 1, onclick: () => { ui.page++; render(); } }, "Suivante")),
@@ -505,96 +650,215 @@ function people() {
 }
 
 function exchanges() {
-  const all = [...db.exchanges].sort((a, b) => b.at.localeCompare(a.at));
+  const all = [...db.exchanges].sort((a, b) => (a.status === "attente_secretariat" ? -1 : 0) - (b.status === "attente_secretariat" ? -1 : 0) || b.at.localeCompare(a.at));
   return [
-    head("Échanges et remplacements", "Les praticiens proposent un échange depuis leur espace ; vous le validez ici. Le planning et les deux praticiens sont mis à jour automatiquement."),
+    head("Échanges et remplacements", "Le praticien propose, le confrère accepte depuis son espace, puis vous validez : le planning et les deux praticiens sont mis à jour et prévenus par email."),
     all.length ? el("div", { class: "table-wrap" }, el("table", {},
-      el("thead", {}, el("tr", {}, el("th", {}, "Demande"), el("th", {}, "Garde"), el("th", {}, "Contre"), el("th", {}, "Motif"), el("th", {}, "Statut"), el("th", {}, ""))),
+      el("thead", {}, el("tr", {}, el("th", {}, "Demande"), el("th", {}, "Garde concernée"), el("th", {}, "Confrère"), el("th", {}, "Motif"), el("th", {}, "Statut"), el("th", {}, ""))),
       el("tbody", {}, all.map((e) => {
-        const g = gardeById(e.gid), other = e.type === "echange" ? db.gardes.find((x) => x.pid === e.to && x.secteur === g.secteur && x.date >= TODAY && x.id !== g.id && x.date.startsWith(g.date.slice(0, 7))) : null;
+        const g = gardeById(e.gid), other = e.otherGid ? gardeById(e.otherGid) : null;
         return el("tr", {},
-          el("td", {}, el("div", { style: "font-weight:600" }, name(db, e.from)), el("small", { style: "color:var(--muted)" }, `${e.type === "echange" ? "Échange" : "Remplacement"} · ${fmt(e.at.slice(0, 10))}`)),
-          el("td", {}, fmt(g.date), el("br"), el("small", { style: "color:var(--muted)" }, g.secteur)),
-          el("td", {}, name(db, e.to), other ? el("small", { style: "display:block;color:var(--muted)" }, `sa garde du ${fmt(other.date)}`) : null),
+          el("td", {}, el("div", { style: "font-weight:600" }, name(db, e.from)), muted(`${e.type === "echange" ? "Échange" : "Remplacement"} · ${fmt(e.at.slice(0, 10))}`)),
+          el("td", {}, fmt(g.date), muted(g.secteur)),
+          el("td", {}, name(db, e.to), other ? muted(`en échange de sa garde du ${fmt(other.date)}`) : muted("assure la garde")),
           el("td", {}, e.note || "—"),
-          el("td", {}, el("span", { class: `pill ${e.status === "en_attente" ? "duty" : e.status === "accepte" ? "ok" : "bad"}` }, { en_attente: "En attente", accepte: "Validé", refuse: "Refusé" }[e.status])),
-          el("td", {}, e.status === "en_attente" ? el("div", { class: "actions" }, btn("Valider", () => decide(e, true), "small primary"), btn("Refuser", () => decide(e, false), "small")) : ""));
-      })))) : el("p", { class: "panel hint" }, "Aucune demande d'échange."),
+          el("td", {}, pill(e.status, XSTATUS)),
+          el("td", {}, e.status === "attente_secretariat" ? el("div", { class: "actions" }, btn("Valider", () => decide(e, true), "small primary"), btn("Refuser", () => decide(e, false), "small")) : ""));
+      })))) : el("p", { class: "panel hint" }, "Aucune demande."),
   ];
 }
 function decide(e, ok) {
-  const g = gardeById(e.gid);
+  const g = gardeById(e.gid), other = e.otherGid ? gardeById(e.otherGid) : null;
   e.status = ok ? "accepte" : "refuse";
   if (ok) {
-    const other = e.type === "echange" ? db.gardes.find((x) => x.pid === e.to && x.secteur === g.secteur && x.date >= TODAY && x.id !== g.id && x.date.startsWith(g.date.slice(0, 7))) : null;
-    g.pid = e.to; g.status = "confirmee"; g.reason = `Échange validé avec ${name(db, e.from)}`;
     if (other) { other.pid = e.from; other.status = "confirmee"; other.reason = `Échange validé avec ${name(db, e.to)}`; }
-    log(STAFF, `Échange validé : ${name(db, e.to)} assure le ${fmt(g.date)}${other ? `, ${name(db, e.from)} le ${fmt(other.date)}` : ""}`);
-    log("Notifications", `Email « Échange validé » envoyé à ${name(db, e.from)} et ${name(db, e.to)}`, true);
+    g.pid = e.to; g.status = "confirmee"; g.reason = `${e.type === "echange" ? "Échange" : "Remplacement"} validé avec ${name(db, e.from)}`;
+    log(`${e.type === "echange" ? "Échange" : "Remplacement"} validé : ${name(db, e.to)} assure le ${fmt(g.date)}${other ? `, ${name(db, e.from)} le ${fmt(other.date)}` : ""}`, { cat: "echanges", pid: e.from });
+    mail("valide", [e.from], { date: fmtLong(g.date), secteur: g.secteur });
+    mail("valide", [e.to], { date: fmtLong(g.date), secteur: g.secteur });
   } else {
     g.status = "confirmee";
-    log(STAFF, `Échange refusé pour la garde du ${fmt(g.date)} (${name(db, e.from)})`);
+    log(`Demande refusée pour la garde du ${fmt(g.date)} (${name(db, e.from)})`, { cat: "echanges", pid: e.from });
   }
-  toast(ok ? "Échange validé, planning mis à jour." : "Échange refusé.");
+  toast(ok ? "Validé : planning mis à jour, praticiens prévenus." : "Demande refusée.");
   render();
 }
 
 function verify() {
   const list = toVerify().sort((a, b) => a.date.localeCompare(b.date));
-  const done = db.gardes.filter((g) => ["effectuee", "remplacee", "non_effectuee"].includes(g.status) && g.date >= "2026-09-01").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
+  const done = db.gardes.filter((g) => ["effectuee", "remplacee", "non_effectuee"].includes(g.status) && g.date >= "2026-09-01").sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
   return [
-    head("Vérification après garde", "Indiquez qui a réellement assuré chaque garde passée. Une garde non effectuée est automatiquement ajoutée aux rattrapages du praticien."),
+    head("Vérification après garde", "Indiquez qui a réellement assuré chaque garde passée. Une garde non effectuée devient une garde à rattraper : le praticien passe en tête de file au prochain planning."),
     list.length ? el("div", { class: "table-wrap" }, el("table", {},
-      el("thead", {}, el("tr", {}, el("th", {}, "Garde"), el("th", {}, "Prévu"), el("th", {}, "Résultat"))),
+      el("thead", {}, el("tr", {}, el("th", {}, "Garde"), el("th", {}, "Prévu"), el("th", {}, "Qui l'a réellement assurée ?"))),
       el("tbody", {}, list.map((g) => el("tr", {},
-        el("td", {}, fmt(g.date), el("br"), el("small", { style: "color:var(--muted)" }, g.secteur)),
+        el("td", {}, fmt(g.date), muted(g.secteur)),
         el("td", {}, name(db, g.pid)),
         el("td", {}, el("div", { class: "actions" },
-          btn("Effectuée", () => { g.status = "effectuee"; log(STAFF, `Vérification du ${fmt(g.date)} (${g.secteur}) : effectuée par ${name(db, g.pid)}`); render(); }, "small primary"),
-          btn("Par un remplaçant…", () => replacedDialog(g), "small"),
-          btn("Non effectuée", () => confirmDialog("Garde non effectuée ?", `${name(db, g.pid)} sera placé en tête de file pour une garde à rattraper.`, "Confirmer", () => { g.status = "non_effectuee"; log(STAFF, `Vérification du ${fmt(g.date)} (${g.secteur}) : non effectuée par ${name(db, g.pid)} → à rattraper`); render(); }), "small")))))))) : el("p", { class: "panel hint" }, "Toutes les gardes passées sont vérifiées."),
-    el("section", { class: "panel" }, el("h3", {}, "Dernières vérifications"),
-      el("ul", { class: "todo" }, done.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, `${fmt(g.date)} · ${g.secteur}`),
-        el("small", {}, g.status === "remplacee" ? `${name(db, g.doneBy)} a remplacé ${name(db, g.pid)}` : name(db, g.pid))), pill(g.status))))),
+          btn("Le titulaire", () => { g.status = "effectuee"; log(`Vérification du ${fmt(g.date)} (${g.secteur}) : effectuée par ${name(db, g.pid)}`, { cat: "verification", pid: g.pid }); render(); }, "small primary"),
+          btn("Un remplaçant…", () => replacedDialog(g), "small"),
+          btn("Personne", () => confirmDialog("Garde non effectuée ?", `${name(db, g.pid)} devra rattraper cette garde : il sera placé en tête de file au prochain planning.`, "Confirmer", () => { g.status = "non_effectuee"; log(`Vérification du ${fmt(g.date)} (${g.secteur}) : non effectuée par ${name(db, g.pid)} → à rattraper`, { cat: "verification", pid: g.pid }); render(); }), "small")))))))) : el("p", { class: "panel hint" }, "Toutes les gardes passées sont vérifiées."),
+    el("div", { class: "grid2" },
+      el("section", { class: "panel" }, el("h3", {}, "Gardes à rattraper"),
+        owing().length ? el("ul", { class: "todo" }, owing().map((p) => {
+          const missed = db.gardes.filter((g) => g.pid === p.id && g.status === "non_effectuee").map((g) => fmt(g.date, { day: "numeric", month: "short" }));
+          return el("li", {}, el("div", { class: "what" }, el("span", {}, name(db, p.id)), el("small", {}, `${p.secteur}${missed.length ? ` · non effectuée le ${missed.join(", ")}` : " · reprise de l'ancien tableur"}`)),
+            el("span", { class: "pill bad" }, "En tête de file"));
+        })) : el("p", { class: "hint" }, "Aucun rattrapage en attente."),
+        el("p", { class: "hint" }, "Les rattrapages déjà planifiés apparaissent dans le planning avec la mention « Garde à rattraper ».")),
+      el("section", { class: "panel" }, el("h3", {}, "Dernières vérifications"),
+        el("ul", { class: "todo" }, done.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, `${fmt(g.date)} · ${g.secteur}`),
+          el("small", {}, g.status === "remplacee" ? `${name(db, g.doneBy)} a remplacé ${name(db, g.pid)}` : name(db, g.pid))), pill(g.status)))))),
   ];
 }
 
+const HCATS = [["Tous", "Tout"], ["planning", "Planning"], ["praticiens", "Praticiens"], ["echanges", "Échanges"], ["verification", "Vérifications"], ["email", "Emails"], ["admin", "Administration"]];
 function history() {
-  const entries = [...db.log].sort((a, b) => b.at.localeCompare(a.at));
+  const q = norm(ui.hq);
+  const entries = [...db.log].filter((e) => (ui.hcat === "Tous" || e.cat === ui.hcat) && (!q || norm(`${e.who} ${e.what}`).includes(q))).sort((a, b) => b.at.localeCompare(a.at));
   return [
-    head("Historique", "Toutes les modifications sont tracées : qui, quoi, quand. Les emails envoyés figurent aussi ici."),
-    el("section", { class: "panel" }, el("ul", { class: "log" }, entries.map((e) => el("li", {},
-      el("time", { datetime: e.at }, `${fmt(e.at.slice(0, 10), { day: "2-digit", month: "2-digit" })} ${e.at.slice(11)}`),
-      el("div", {}, el("span", { class: "who" }, e.who), " · ", e.what, e.mail ? el("span", { class: "pill info", style: "margin-left:6px" }, "email") : null))))),
+    head("Historique", "Chaque modification est tracée : qui, quoi, quand. Les emails envoyés figurent aussi ici ; cliquez sur un email pour le lire.",
+      btn("Exporter (Excel)", () => download("historique.xlsx", [["Date", "Heure", "Auteur", "Catégorie", "Action"], ...entries.map((e) => [e.at.slice(0, 10), e.at.slice(11), e.who, (HCATS.find((c) => c[0] === e.cat) || ["", ""])[1], e.what])]))),
+    el("div", { class: "filters" },
+      el("div", { class: "chips", role: "group", "aria-label": "Catégorie" }, HCATS.map(([k, l]) => el("button", { type: "button", class: "chip", "aria-pressed": String(ui.hcat === k), onclick: () => { ui.hcat = k; render(); } }, l))),
+      el("input", { class: "field search", type: "search", id: "history-q", placeholder: "Praticien, date, action…", value: ui.hq, "aria-label": "Rechercher dans l'historique", oninput: (e) => { ui.hq = e.target.value; const pos = e.target.selectionStart; render(); const f = document.getElementById("history-q"); f.focus(); f.setSelectionRange(pos, pos); } })),
+    el("section", { class: "panel" }, entries.length ? logList(entries) : el("p", { class: "hint" }, "Aucune entrée.")),
   ];
+}
+function logList(entries) {
+  return el("ul", { class: "log" }, entries.map((e) => el("li", e.mail ? { class: "clickable", tabindex: "0", onclick: () => mailDialog(e), onkeydown: (ev) => { if (ev.key === "Enter") mailDialog(e); } } : {},
+    el("time", { datetime: e.at }, `${fmt(e.at.slice(0, 10), { day: "2-digit", month: "2-digit", year: "2-digit" })} ${e.at.slice(11)}`),
+    el("div", {}, el("span", { class: "who" }, e.who), " · ", e.what, e.mail ? el("span", { class: "pill info", style: "margin-left:6px" }, "lire l'email") : null))));
+}
+
+// ---------- Administration ----------
+function settings() {
+  const sections = [["access", "Comptes et rôles"], ["rules", "Règles de rotation"], ["sectors", "Secteurs"], ["mails", "Emails automatiques"], ["data", "Sécurité et données"]];
+  const body = { access: adminAccess, rules: adminRules, sectors: adminSectors, mails: adminMails, data: adminData }[ui.admin]();
+  return [
+    head("Administration", "Réservée à l'administrateur : le secrétariat n'a pas accès à cet onglet."),
+    el("div", { class: "sub-tabs", role: "group", "aria-label": "Section" }, sections.map(([k, l]) => el("button", { type: "button", class: "chip", "aria-pressed": String(ui.admin === k), onclick: () => { ui.admin = k; render(); } }, l))),
+    ...body,
+  ];
+}
+function adminAccess() {
+  const users = [[ADMIN.replace(" (admin)", ""), "h.vidal@gardes-demo.fr", "Administrateur", "02/10/2026 08:51"], ["Sandrine Ferri", "secretariat@gardes-demo.fr", "Secrétariat", "02/10/2026 09:14"], ["Julie Martel", "j.martel@gardes-demo.fr", "Secrétariat", "30/09/2026 17:02"]];
+  const perms = [["Consulter le planning de son secteur", 1, 1, 1], ["Confirmer sa garde, déclarer une indisponibilité, proposer un échange", 0, 0, 1], ["Générer, modifier et publier les plannings", 1, 1, 0],
+    ["Inscrire, modifier, radier des praticiens ; import et export", 1, 1, 0], ["Valider les échanges et vérifier les gardes", 1, 1, 0], ["Consulter l'historique complet", 1, 1, 0],
+    ["Modifier les règles de rotation et les secteurs", 1, 0, 0], ["Gérer les comptes, les sauvegardes et les exports RGPD", 1, 0, 0]];
+  return [
+    el("section", { class: "panel" }, el("h3", {}, "Comptes du secrétariat et de l'administration"),
+      el("p", { class: "hint" }, "Double authentification obligatoire pour ces comptes. Les 350 praticiens se connectent par lien de connexion envoyé par email, sans mot de passe à retenir."),
+      el("div", { class: "table-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Nom"), el("th", {}, "Email"), el("th", {}, "Rôle"), el("th", {}, "Dernière connexion"), el("th", {}, "Double authentification"))),
+        el("tbody", {}, users.map(([n, m, r, at]) => el("tr", {}, el("td", {}, n), el("td", {}, m), el("td", {}, el("span", { class: `pill ${r === "Administrateur" ? "duty" : "info"}` }, r)), el("td", { class: "num" }, at), el("td", {}, el("span", { class: "pill ok" }, "Activée")))))))),
+    el("section", { class: "panel" }, el("h3", {}, "Droits par rôle"),
+      el("div", { class: "table-wrap" }, el("table", { class: "matrix" }, el("thead", {}, el("tr", {}, el("th", {}, "Action"), el("th", {}, "Administrateur"), el("th", {}, "Secrétariat"), el("th", {}, "Praticien"))),
+        el("tbody", {}, perms.map(([a, ...r]) => el("tr", {}, el("td", {}, a), r.map((v) => el("td", { class: v ? "yes" : "no", "aria-label": v ? "Oui" : "Non" }, v ? "✓" : "—")))))))),
+  ];
+}
+function adminRules() {
+  const { order, on } = db.rules;
+  const move = (i, dir) => { const j = i + dir; [order[i], order[j]] = [order[j], order[i]]; log(`Ordre des règles modifié : ${order.map((k) => RULES[k][0].toLowerCase()).join(" > ")}`, { cat: "admin" }); render(); };
+  return [
+    el("section", { class: "panel" }, el("h3", {}, "Ordre de priorité"),
+      el("p", { class: "hint" }, "Pour chaque garde, le praticien choisi est le premier selon ces règles, dans cet ordre. Exemple de règles : elles seront remplacées par celles de votre cahier des charges."),
+      el("ol", { class: "rank", style: "list-style:none;margin:0;padding:0" }, order.map((k, i) => el("li", { class: on[k] ? "" : "off" },
+        el("span", { class: "n" }, String(i + 1)),
+        el("div", { class: "txt" }, RULES[k][0], el("small", {}, RULES[k][1])),
+        el("label", { class: "actions", style: "font-size:13px" }, el("input", { type: "checkbox", id: `rule-${k}`, checked: on[k], disabled: k === "anciennete", onchange: (e) => { on[k] = e.target.checked; log(`Règle « ${RULES[k][0]} » ${on[k] ? "activée" : "désactivée"}`, { cat: "admin" }); render(); } }), "Active"),
+        el("button", { type: "button", class: "btn small", disabled: i === 0, "aria-label": "Monter", onclick: () => move(i, -1) }, "↑"),
+        el("button", { type: "button", class: "btn small", disabled: i === order.length - 1, "aria-label": "Descendre", onclick: () => move(i, 1) }, "↓"))))),
+    el("section", { class: "panel" }, el("h3", {}, "Contraintes"),
+      el("div", { class: "filters" },
+        el("label", { class: "stack" }, "Jours minimum entre deux gardes", el("input", { type: "number", class: "field", id: "rule-delai", min: 0, max: 120, value: db.rules.delai, onchange: (e) => { db.rules.delai = Number(e.target.value) || 0; log(`Délai minimum entre deux gardes : ${db.rules.delai} jours`, { cat: "admin" }); render(); } })),
+        el("label", { class: "rule", style: "align-self:flex-end" }, el("input", { type: "checkbox", id: "rule-indispo", checked: db.rules.indispo, onchange: (e) => { db.rules.indispo = e.target.checked; log(`Respect des indisponibilités ${db.rules.indispo ? "activé" : "désactivé"}`, { cat: "admin" }); render(); } }), el("span", {}, "Respecter les indisponibilités déclarées"))),
+      el("p", { class: "hint" }, "Les modifications s'appliquent à la prochaine génération ; essayez avec le planning de décembre."),
+      btn("Générer décembre avec ces règles", () => { if (!db.gardes.some((g) => g.date.startsWith("2026-12") && g.status !== "brouillon")) { generate(db, "2026-12"); log("Proposition de planning générée pour décembre 2026"); } go("admin", "planning", { month: "2026-12" }); }, "primary")),
+  ];
+}
+function adminSectors() {
+  return [el("section", { class: "panel" }, el("h3", {}, "Secteurs géographiques"),
+    el("p", { class: "hint" }, "Chaque praticien est rattaché à un secteur selon la commune de son cabinet. Un changement d'adresse peut entraîner un changement de secteur, tracé dans l'historique."),
+    el("div", { class: "table-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Secteur"), el("th", {}, "Communes"), el("th", {}, "Praticiens de garde"), el("th", {}, "Exemptés"), el("th", {}, ""))),
+      el("tbody", {}, SECTORS.map((s) => {
+        const ps = db.people.filter((p) => p.secteur === s);
+        return el("tr", {}, el("td", { style: "font-weight:600" }, s), el("td", {}, TOWNS[s].join(", ")), el("td", { class: "num" }, String(ps.filter((p) => ["actif", "nouveau"].includes(p.statut)).length)),
+          el("td", { class: "num" }, String(ps.filter((p) => p.statut === "exempte").length)), el("td", {}, btn("Voir", () => go(ui.role, "people", { fsector: s, fstatus: "Tous", q: "", page: 0 }), "small")));
+      })))))];
+}
+function adminMails() {
+  const labels = { publication: "Publication du planning", relance: "Relance à J-7 si non confirmée", veille: "Rappel la veille de la garde", demande: "Demande d'échange ou de remplacement", valide: "Échange validé" };
+  const sample = { nom: "Martin", mois: "novembre 2026", date: "dimanche 8 novembre 2026", secteur: "Toulon Est", lien: LINK, demandeur: "Claire Fabre", objet: "un échange de garde", motif: "Congrès" };
+  return [el("section", { class: "panel" }, el("h3", {}, "Emails automatiques"),
+    el("p", { class: "hint" }, "Textes modifiables par l'administrateur. Les envois sont tracés dans l'historique."),
+    el("ul", { class: "todo" }, Object.entries(labels).map(([k, l]) => el("li", {}, el("div", { class: "what" }, el("span", {}, l), el("small", {}, `Objet : ${fill(TEMPLATES[k][0], sample)}`)),
+      btn("Aperçu", () => mailDialog({ mail: { to: "martin.julien@cabinet-demo.fr", subject: fill(TEMPLATES[k][0], sample), body: fill(TEMPLATES[k][1], sample) } }), "small")))))];
+}
+function adminData() {
+  const backups = Array.from({ length: 7 }, (_, i) => addDays(TODAY, -i));
+  const sel = el("select", { class: "field", id: "rgpd-person", "aria-label": "Praticien" }, [...db.people].sort((a, b) => a.nom.localeCompare(b.nom)).map((p) => el("option", { value: p.id }, `${p.nom} ${p.prenom}`)));
+  return [
+    el("div", { class: "grid2" },
+      el("section", { class: "panel" }, el("h3", {}, "Sauvegardes"),
+        el("p", { class: "hint" }, "Sauvegarde chiffrée chaque nuit, conservée 30 jours, copiée sur un second site. Hébergement en France."),
+        el("ul", { class: "todo" }, backups.map((d, i) => el("li", {}, el("div", { class: "what" }, el("span", {}, fmtLong(d)), el("small", {}, `03:00 · ${(4.1 + i * 0.02).toFixed(1).replace(".", ",")} Mo · vérifiée`)), el("span", { class: "pill ok" }, "OK"))))),
+      el("section", { class: "panel" }, el("h3", {}, "RGPD"),
+        el("p", { class: "hint" }, "Aucune donnée patient. Données traitées : identité, coordonnées professionnelles et gardes des praticiens. Praticiens radiés anonymisés après 3 ans (durée à définir avec vous)."),
+        el("label", { class: "stack" }, "Exporter les données d'un praticien (droit d'accès)", sel),
+        btn("Exporter ses données (JSON)", () => exportPerson(person(db, Number(sel.value)))),
+        el("h3", {}, "Réversibilité"),
+        el("p", { class: "hint" }, "À la livraison : code source sur un dépôt Git à votre nom, export complet des données, accès administrateur et documentation technique."),
+        btn("Exporter toutes les données (JSON)", () => { saveBlob("export-complet.json", new Blob([JSON.stringify({ exporte_le: nowStamp(), praticiens: db.people, gardes: db.gardes, echanges: db.exchanges, indisponibilites: db.indispos, historique: db.log }, null, 2)], { type: "application/json" })); log("Export complet des données (réversibilité)", { cat: "admin" }); toast("Export complet téléchargé."); }))),
+  ];
+}
+function exportPerson(p) {
+  const data = { praticien: p, gardes: db.gardes.filter((g) => g.pid === p.id || g.doneBy === p.id), indisponibilites: db.indispos.filter((i) => i.pid === p.id), historique: db.log.filter((e) => e.pid === p.id) };
+  saveBlob(`donnees-${norm(p.nom)}-${norm(p.prenom)}.json`, new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  log(`Export RGPD des données de ${name(db, p.id)}`, { cat: "admin", pid: p.id });
+  toast("Données du praticien exportées.");
 }
 
 // ---------- Espace praticien ----------
-function me() { return db.people[db.me - 1]; }
+function me() { return person(db, db.me); }
 function mine() {
   const p = me();
-  const upcoming = db.gardes.filter((g) => g.pid === p.id && g.date >= TODAY && g.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
+  const upcoming = db.gardes.filter((g) => g.pid === p.id && g.date >= TODAY && !["brouillon"].includes(g.status)).sort((a, b) => a.date.localeCompare(b.date));
   const past = db.gardes.filter((g) => (g.pid === p.id || g.doneBy === p.id) && g.date < TODAY).sort((a, b) => b.date.localeCompare(a.date));
+  const incoming = db.exchanges.filter((e) => e.to === p.id && e.status === "attente_confrere");
   return [
-    head(`Bonjour Dr ${p.nom}`, `${p.secteur} · ${p.ville}. Confirmez vos gardes ou proposez un échange à un confrère de votre secteur.`, docPicker()),
+    head(`Bonjour Dr ${p.nom}`, `${p.secteur} · ${p.ville}. Confirmez vos gardes, demandez à être remplacé ou proposez un échange à un confrère de votre secteur.`, docPicker()),
+    incoming.length ? el("section", { class: "panel", style: "border-color:var(--duty)" }, el("h3", {}, "Demandes reçues de confrères"),
+      el("ul", { class: "todo" }, incoming.map((e) => {
+        const g = gardeById(e.gid), other = e.otherGid ? gardeById(e.otherGid) : null;
+        return el("li", {}, el("div", { class: "what" }, el("span", {}, `${name(db, e.from)} vous demande ${other ? `d'échanger sa garde du ${fmt(g.date)} contre la vôtre du ${fmt(other.date)}` : `de le remplacer le ${fmtLong(g.date)}`}`), el("small", {}, e.note || "")),
+          el("div", { class: "actions" }, btn("Accepter", () => answer(e, true), "small primary"), btn("Refuser", () => answer(e, false), "small")));
+      }))) : null,
     upcoming.length ? el("div", { class: "mine" }, upcoming.map((g) => {
-      const ex = db.exchanges.find((e) => e.gid === g.id && e.status === "en_attente");
+      const ex = db.exchanges.find((e) => (e.gid === g.id || e.otherGid === g.id) && e.status.startsWith("attente"));
       return el("article", { class: "duty-card" },
         el("div", { class: "date" }, fmt(g.date, { weekday: "long", day: "numeric", month: "long" }), el("small", {}, HOLIDAYS[g.date] ? `${HOLIDAYS[g.date]} · ${g.secteur}` : g.secteur)),
         pill(g.status),
-        ex ? el("p", { class: "hint", style: "margin:0;color:var(--muted);font-size:13px" }, `Échange proposé à ${name(db, ex.to)}, en attente de validation par le secrétariat.`) : null,
+        ex ? el("p", { style: "margin:0;color:var(--muted);font-size:13px" }, `${ex.type === "echange" ? "Échange" : "Remplacement"} avec ${name(db, ex.from === p.id ? ex.to : ex.from)} : ${XSTATUS[ex.status][0].toLowerCase()}.`) : null,
         el("div", { class: "actions" },
-          g.status === "a_confirmer" ? btn("Confirmer ma garde", () => { g.status = "confirmee"; log(name(db, p.id), `Garde du ${fmt(g.date)} confirmée`); toast("Garde confirmée."); render(); }, "primary small") : null,
-          !ex ? btn("Proposer un échange", () => exchangeDialog(g), "small") : null));
+          g.status === "a_confirmer" ? btn("Confirmer ma garde", () => { g.status = "confirmee"; log(`Garde du ${fmt(g.date)} confirmée`, { pid: p.id }); toast("Garde confirmée."); render(); }, "primary small") : null,
+          !ex ? btn("Échanger / me faire remplacer", () => exchangeDialog(g), "small") : null));
     })) : el("p", { class: "panel hint" }, "Aucune garde à venir pour l'instant."),
     el("section", { class: "panel" }, el("h3", {}, "Mes gardes passées"),
       past.length ? el("ul", { class: "todo" }, past.map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, fmt(g.date, { day: "numeric", month: "long", year: "numeric" })), el("small", {}, g.secteur)), pill(g.status)))) : el("p", { class: "hint" }, "Aucune garde passée en 2026.")),
   ];
 }
+function answer(e, ok) {
+  const g = gardeById(e.gid);
+  e.status = ok ? "attente_secretariat" : "refuse";
+  if (!ok) g.status = "confirmee";
+  log(`${ok ? "Accepte" : "Refuse"} la demande de ${name(db, e.from)} (garde du ${fmt(g.date)})${ok ? " : en attente de validation du secrétariat" : ""}`, { cat: "echanges", pid: e.from });
+  toast(ok ? "Accepté : le secrétariat va valider." : "Demande refusée, le confrère est prévenu.");
+  render();
+}
 function docPicker() {
   const p = me();
-  return el("select", { class: "field", id: "doc-picker", "aria-label": "Se connecter en tant que", onchange: (e) => { db.me = Number(e.target.value); render(); } },
-    db.people.filter((x) => x.secteur === p.secteur && x.statut !== "radie").map((x) => el("option", { value: x.id, selected: x.id === p.id }, `Démo : Dr ${x.nom} ${x.prenom}`)));
+  return el("select", { class: "field", id: "doc-picker", "aria-label": "Praticien connecté", onchange: (e) => { db.me = Number(e.target.value); render(); } },
+    db.people.filter((x) => x.secteur === p.secteur && x.statut !== "radie").sort((a, b) => a.nom.localeCompare(b.nom)).map((x) => el("option", { value: x.id, selected: x.id === p.id }, `Démo : Dr ${x.nom} ${x.prenom}`)));
 }
 function sectorView() {
   const p = me();
@@ -604,7 +868,7 @@ function sectorView() {
     el("div", { class: "table-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Date"), el("th", {}, "Praticien de garde"), el("th", {}, "Téléphone"), el("th", {}, "Statut"))),
       el("tbody", {}, list.map((g) => el("tr", { style: g.pid === p.id ? "background:var(--duty-soft)" : "" },
         el("td", {}, fmt(g.date, { weekday: "short", day: "numeric", month: "long" })), el("td", {}, name(db, g.pid) + (g.pid === p.id ? " (vous)" : "")),
-        el("td", { class: "num" }, g.pid ? db.people[g.pid - 1].tel : "—"), el("td", {}, pill(g.status))))))),
+        el("td", { class: "num" }, person(db, g.pid)?.tel || "—"), el("td", {}, pill(g.status))))))),
   ];
 }
 function dispo() {
@@ -618,14 +882,14 @@ function dispo() {
       e.preventDefault();
       if (!date.value) return;
       db.indispos.push({ pid: p.id, date: date.value, motif: motif.value });
-      log(name(db, p.id), `Indisponibilité déclarée : ${fmtLong(date.value)}`);
+      log(`Indisponibilité déclarée : ${fmtLong(date.value)}`, { cat: "praticiens", pid: p.id });
       toast("Indisponibilité enregistrée."); render();
     } }, el("h3", {}, "Déclarer une indisponibilité"),
       el("div", { class: "filters" }, el("label", { class: "stack" }, "Date", date), el("label", { class: "stack", style: "flex:1 1 200px" }, "Motif", motif),
         el("button", { type: "submit", class: "btn primary", style: "align-self:flex-end" }, "Déclarer"))),
     el("section", { class: "panel" }, el("h3", {}, "Déjà déclarées"),
       list.length ? el("ul", { class: "todo" }, list.map((i) => el("li", {}, el("div", { class: "what" }, el("span", {}, fmtLong(i.date)), el("small", {}, i.motif || "Sans motif")),
-        btn("Retirer", () => { db.indispos.splice(db.indispos.indexOf(i), 1); log(name(db, p.id), `Indisponibilité retirée : ${fmtLong(i.date)}`); render(); }, "small")))) : el("p", { class: "hint" }, "Aucune indisponibilité déclarée.")),
+        btn("Retirer", () => { db.indispos.splice(db.indispos.indexOf(i), 1); log(`Indisponibilité retirée : ${fmtLong(i.date)}`, { cat: "praticiens", pid: p.id }); render(); }, "small")))) : el("p", { class: "hint" }, "Aucune indisponibilité déclarée.")),
   ];
 }
 
@@ -643,111 +907,226 @@ function confirmDialog(title, text, label, fn) {
   overlay((close) => el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, title), el("p", { style: "margin:0" }, text),
     el("div", { class: "actions" }, btn(label, () => { close(); fn(); }, "primary"), btn("Annuler", close))), true);
 }
-function exportDialog(file, csv) {
-  overlay((close) => {
-    const area = el("textarea", { class: "export", readonly: true }, csv);
-    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Export CSV"),
-      el("p", { class: "hint", style: "margin:0;color:var(--muted)" }, `Dans l'application, « ${file} » se télécharge directement (compatible Excel). Ici, copiez le contenu.`), area,
-      el("div", { class: "actions" }, btn("Copier", async () => { try { await navigator.clipboard.writeText(csv); toast("Export copié."); } catch (e) { area.select(); } }, "primary"), btn("Fermer", close)));
-  }, true);
+function mailDialog(e) {
+  overlay((close) => el("div", { class: "dialog wide", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Email"),
+    el("div", { class: "mail" }, el("header", {}, el("span", {}, el("b", {}, "À : "), e.mail.to), el("span", {}, el("b", {}, "Objet : "), e.mail.subject)), el("pre", {}, e.mail.body)),
+    el("div", { class: "actions" }, btn("Fermer", close))), true);
 }
 function gardeSheet(g) {
   overlay((close) => {
     const sel = el("select", { class: "field", id: "garde-pid" }, db.people.filter((p) => p.secteur === g.secteur && ["actif", "nouveau"].includes(p.statut))
       .sort((a, b) => a.nom.localeCompare(b.nom)).map((p) => el("option", { value: p.id, selected: p.id === g.pid }, `${p.nom} ${p.prenom}`)));
-    return el("aside", { class: "sheet", role: "dialog", "aria-modal": "true" }, el("h3", {}, `${fmtLong(g.date)}`),
+    return el("aside", { class: "sheet", role: "dialog", "aria-modal": "true" }, el("h3", {}, fmtLong(g.date)),
       el("dl", { class: "kv" }, el("dt", {}, "Secteur"), el("dd", {}, g.secteur), el("dt", {}, "Praticien"), el("dd", {}, name(db, g.pid)), el("dt", {}, "Statut"), el("dd", {}, pill(g.status)), el("dt", {}, "Pourquoi lui"), el("dd", {}, g.reason || "—")),
       el("label", { class: "stack" }, "Attribuer à un autre praticien", sel),
       el("div", { class: "actions" }, btn("Enregistrer", () => {
         const pid = Number(sel.value);
-        if (pid !== g.pid) { log(STAFF, `Garde du ${fmt(g.date)} (${g.secteur}) réattribuée : ${name(db, g.pid)} → ${name(db, pid)}`); g.pid = pid; g.reason = "Attribution manuelle par le secrétariat"; if (g.status !== "brouillon") g.status = "a_confirmer"; }
+        if (pid !== g.pid) {
+          log(`Garde du ${fmt(g.date)} (${g.secteur}) attribuée à ${name(db, pid)}${g.pid ? ` à la place de ${name(db, g.pid)}` : ""}`, { pid });
+          g.pid = pid; g.reason = "Attribution manuelle par le secrétariat";
+          if (g.status !== "brouillon") { g.status = "a_confirmer"; mail("publication", [pid], { mois: monthLabel(g.date.slice(0, 7)).toLowerCase(), date: fmtLong(g.date), secteur: g.secteur }); }
+        }
         close(); render();
       }, "primary"), btn("Fermer", close)));
   });
 }
-function assignDialog(g) { gardeSheet(g); }
 function replacedDialog(g) {
   overlay((close) => {
     const sel = el("select", { class: "field", id: "replaced-by" }, db.people.filter((p) => p.secteur === g.secteur && p.id !== g.pid && p.statut !== "radie").sort((a, b) => a.nom.localeCompare(b.nom)).map((p) => el("option", { value: p.id }, `${p.nom} ${p.prenom}`)));
     return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Garde assurée par un remplaçant"),
       el("p", { style: "margin:0" }, `${fmtLong(g.date)} · ${g.secteur}, prévue pour ${name(db, g.pid)}.`), el("label", { class: "stack" }, "Assurée par", sel),
-      el("div", { class: "actions" }, btn("Enregistrer", () => { g.status = "remplacee"; g.doneBy = Number(sel.value); log(STAFF, `Vérification du ${fmt(g.date)} (${g.secteur}) : ${name(db, g.doneBy)} a remplacé ${name(db, g.pid)}`); close(); render(); }, "primary"), btn("Annuler", close)));
+      el("div", { class: "actions" }, btn("Enregistrer", () => { g.status = "remplacee"; g.doneBy = Number(sel.value); log(`Vérification du ${fmt(g.date)} (${g.secteur}) : ${name(db, g.doneBy)} a remplacé ${name(db, g.pid)}`, { cat: "verification", pid: g.pid }); close(); render(); }, "primary"), btn("Annuler", close)));
   }, true);
 }
 function exchangeDialog(g) {
   const p = me();
   overlay((close) => {
-    const colleagues = db.gardes.filter((x) => x.secteur === g.secteur && x.pid && x.pid !== p.id && x.date >= TODAY && x.status !== "brouillon").sort((a, b) => a.date.localeCompare(b.date));
-    const sel = el("select", { class: "field", id: "exchange-with" }, colleagues.map((x) => el("option", { value: x.id }, `${fmt(x.date)} · ${name(db, x.pid)}`)));
+    let type = "echange";
+    const theirs = db.gardes.filter((x) => x.secteur === g.secteur && x.pid && x.pid !== p.id && x.date >= TODAY && ["a_confirmer", "confirmee"].includes(x.status)).sort((a, b) => a.date.localeCompare(b.date));
+    const colleagues = db.people.filter((x) => x.secteur === g.secteur && x.id !== p.id && ["actif", "nouveau"].includes(x.statut)).sort((a, b) => a.nom.localeCompare(b.nom));
+    const pickEx = el("select", { class: "field", id: "exchange-with" }, theirs.map((x) => el("option", { value: x.id }, `${fmt(x.date)} · ${name(db, x.pid)}`)));
+    const pickRep = el("select", { class: "field", id: "replace-by" }, colleagues.map((x) => el("option", { value: x.id }, `${x.nom} ${x.prenom}`)));
+    const exField = el("label", { class: "stack" }, "Garde du confrère à prendre en échange", pickEx);
+    const repField = el("label", { class: "stack", hidden: true }, "Confrère qui assure votre garde", pickRep);
     const note = el("input", { type: "text", class: "field", id: "exchange-note", placeholder: "Motif (facultatif)" });
-    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Proposer un échange"),
-      el("p", { style: "margin:0" }, `Votre garde du ${fmtLong(g.date)} contre celle d'un confrère du secteur.`),
-      el("label", { class: "stack" }, "Garde du confrère", sel), el("label", { class: "stack" }, "Motif", note),
+    const radio = (value, label) => el("label", { class: "rule" }, el("input", { type: "radio", name: "xtype", value, checked: value === "echange", onchange: () => { type = value; exField.hidden = value !== "echange"; repField.hidden = value === "echange"; } }), el("span", {}, label));
+    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, `Garde du ${fmt(g.date, { day: "numeric", month: "long" })}`),
+      el("div", { class: "rules" }, radio("echange", "Échanger avec un confrère"), radio("remplacement", "Me faire remplacer")),
+      exField, repField, el("label", { class: "stack" }, "Motif", note),
+      el("p", { style: "margin:0;color:var(--muted);font-size:13px" }, "Le confrère accepte depuis son espace, puis le secrétariat valide."),
       el("div", { class: "actions" }, btn("Envoyer la demande", () => {
-        const other = gardeById(Number(sel.value));
-        db.exchanges.push({ id: db.exchanges.length + 1, gid: g.id, from: p.id, to: other.pid, type: "echange", at: nowStamp(), status: "en_attente", note: note.value });
+        const other = type === "echange" ? gardeById(Number(pickEx.value)) : null;
+        const to = other ? other.pid : Number(pickRep.value);
+        db.exchanges.push({ id: db.exchanges.length + 1, type, gid: g.id, otherGid: other?.id, from: p.id, to, at: nowStamp(), status: "attente_confrere", note: note.value });
         g.status = "echange";
-        log(name(db, p.id), `Demande d'échange : garde du ${fmt(g.date)} contre celle de ${name(db, other.pid)} (${fmt(other.date)})`);
-        log("Notifications", `Email « Demande d'échange » envoyé au secrétariat et à ${name(db, other.pid)}`, true);
-        close(); toast("Demande envoyée au secrétariat."); render();
+        log(other ? `Propose d'échanger sa garde du ${fmt(g.date)} contre celle de ${name(db, to)} (${fmt(other.date)})` : `Demande à ${name(db, to)} de le remplacer le ${fmt(g.date)}`, { cat: "echanges", pid: p.id });
+        mail("demande", [to], { demandeur: `${p.prenom} ${p.nom}`, objet: other ? "un échange de garde" : "de le remplacer", date: fmtLong(other ? other.date : g.date), secteur: g.secteur, motif: note.value || "non précisé" });
+        close(); toast(`Demande envoyée à ${name(db, to)}.`); render();
       }, "primary"), btn("Annuler", close)));
   }, true);
 }
 function personSheet(p) {
   const isNew = !p;
-  const data = p ? { ...p } : { prenom: "", nom: "", secteur: SECTORS[0], ville: TOWNS[SECTORS[0]][0], statut: "nouveau", email: "", tel: "" };
+  const data = p ? { ...p } : { prenom: "", nom: "", secteur: SECTORS[0], adresse: "", ville: TOWNS[SECTORS[0]][0], situation: "Libéral", statut: "nouveau", priorite: "", email: "", tel: "" };
   overlay((close) => {
     const f = (key, label, type = "text") => el("label", { class: "stack" }, label, el("input", { class: "field", id: `person-${key}`, type, value: data[key] || "", oninput: (e) => { data[key] = e.target.value; } }));
-    const secteur = el("select", { class: "field", id: "person-secteur", onchange: (e) => { data.secteur = e.target.value; } }, SECTORS.map((s) => el("option", { value: s, selected: s === data.secteur }, s)));
-    const statut = el("select", { class: "field", id: "person-statut", onchange: (e) => { data.statut = e.target.value; } }, Object.entries(PSTATUS).map(([k, v]) => el("option", { value: k, selected: k === data.statut }, v[0])));
+    const select = (key, label, options) => el("label", { class: "stack" }, label, el("select", { class: "field", id: `person-${key}`, onchange: (e) => { data[key] = e.target.value; } }, options.map(([v, l]) => el("option", { value: v, selected: v === data[key] }, l))));
     const due = p ? rattrapageDue(db, p.id) : 0;
+    const gardes = p ? db.gardes.filter((g) => (g.pid === p.id || g.doneBy === p.id) && g.status !== "brouillon").sort((a, b) => b.date.localeCompare(a.date)) : [];
+    const own = p ? db.log.filter((e) => e.pid === p.id).sort((a, b) => b.at.localeCompare(a.at)) : [];
     return el("aside", { class: "sheet", role: "dialog", "aria-modal": "true" }, el("h3", {}, isNew ? "Inscrire un praticien" : `Dr ${p.prenom} ${p.nom}`),
-      !isNew ? el("dl", { class: "kv" }, el("dt", {}, "Inscrit le"), el("dd", {}, fmt(p.inscrit, { day: "numeric", month: "long", year: "numeric" })), el("dt", {}, "Dernière garde"), el("dd", {}, lastGarde(db, p.id) ? fmtLong(lastGarde(db, p.id)) : "—"), el("dt", {}, "Rattrapages"), el("dd", {}, due ? `${due} garde à rattraper` : "Aucun")) : null,
-      f("prenom", "Prénom"), f("nom", "Nom"), f("ville", "Commune du cabinet"), el("label", { class: "stack" }, "Secteur de garde", secteur), el("label", { class: "stack" }, "Statut", statut), f("email", "Email", "email"), f("tel", "Téléphone", "tel"),
+      !isNew ? el("dl", { class: "kv" }, el("dt", {}, "Statut"), el("dd", {}, pill(p.statut, PSTATUS)), el("dt", {}, "Inscrit le"), el("dd", {}, fmt(p.inscrit, { day: "numeric", month: "long", year: "numeric" })),
+        p.radiation ? [el("dt", {}, "Radié le"), el("dd", {}, `${fmt(p.radiation.date, { day: "numeric", month: "long", year: "numeric" })} · ${p.radiation.motif}`)] : null,
+        el("dt", {}, "Dernière garde"), el("dd", {}, lastGarde(db, p.id) ? fmtLong(lastGarde(db, p.id)) : "—"), el("dt", {}, "Rattrapages"), el("dd", {}, due ? `${due} garde à rattraper` : "Aucun")) : null,
+      f("prenom", "Prénom"), f("nom", "Nom"), f("adresse", "Adresse du cabinet"), f("ville", "Commune"),
+      select("secteur", "Secteur de garde", SECTORS.map((s) => [s, s])),
+      select("situation", "Situation", [...new Set(SITUATIONS)].map((s) => [s, s])),
+      select("statut", "Statut", Object.entries(PSTATUS).filter(([k]) => k !== "radie" || data.statut === "radie").map(([k, v]) => [k, v[0]])),
+      select("priorite", "Priorité", [["", "Aucune"], ["Volontaire pour des gardes supplémentaires", "Volontaire pour des gardes supplémentaires"], ["Retour d'exemption : gardes à reprendre", "Retour d'exemption : gardes à reprendre"]]),
+      f("email", "Email", "email"), f("tel", "Téléphone", "tel"),
       el("div", { class: "actions" }, btn(isNew ? "Inscrire" : "Enregistrer", () => {
         if (!data.nom.trim() || !data.prenom.trim()) { toast("Le nom et le prénom sont obligatoires."); return; }
         if (isNew) {
-          db.people.push({ ...data, id: db.people.length + 1, inscrit: TODAY, lastBefore: null, rattrapageSeed: 0 });
-          log(STAFF, `Inscription : Dr ${data.prenom} ${data.nom} (${data.secteur})`);
+          db.people.push({ ...data, id: db.people.length + 1, inscrit: TODAY, lastBefore: null, rattrapageSeed: 0, radiation: null });
+          log(`Inscription : Dr ${data.prenom} ${data.nom} (${data.secteur})`, { cat: "praticiens", pid: db.people.length });
         } else {
-          const changes = ["secteur", "statut", "ville", "email", "tel", "nom", "prenom"].filter((k) => data[k] !== p[k]);
-          if (changes.length) log(STAFF, `Fiche Dr ${p.prenom} ${p.nom} modifiée : ${changes.map((k) => k === "statut" ? `statut → ${PSTATUS[data.statut][0].toLowerCase()}` : k === "secteur" ? `secteur → ${data.secteur}` : k).join(", ")}`);
+          const labels = { secteur: "secteur", statut: "statut", adresse: "adresse", ville: "commune", situation: "situation", priorite: "priorité", email: "email", tel: "téléphone", nom: "nom", prenom: "prénom" };
+          const changes = Object.keys(labels).filter((k) => (data[k] || "") !== (p[k] || ""));
+          if (changes.length) log(`Fiche de Dr ${p.prenom} ${p.nom} modifiée : ${changes.map((k) => `${labels[k]} « ${p[k] || "—"} » → « ${data[k] || "—"} »`).join(", ")}`, { cat: "praticiens", pid: p.id });
           Object.assign(p, data);
         }
         close(); toast(isNew ? "Praticien inscrit." : "Fiche enregistrée."); render();
-      }, "primary"), btn("Fermer", close)));
+      }, "primary"),
+        !isNew && p.statut !== "radie" ? btn("Radier", () => radiateDialog(p)) : null,
+        !isNew ? btn("Données RGPD", () => exportPerson(p), "ghost") : null,
+        btn("Fermer", close)),
+      !isNew ? el("div", { class: "section" }, el("h3", { style: "font-size:16px;font-family:var(--body)" }, "Gardes"),
+        gardes.length ? el("ul", { class: "todo" }, gardes.slice(0, 6).map((g) => el("li", {}, el("div", { class: "what" }, el("span", {}, fmt(g.date, { day: "numeric", month: "long", year: "numeric" })), el("small", {}, g.secteur)), pill(g.status)))) : el("p", { class: "hint" }, "Aucune garde en 2026.")) : null,
+      !isNew ? el("div", { class: "section" }, el("h3", { style: "font-size:16px;font-family:var(--body)" }, "Historique de la fiche"),
+        own.length ? logList(own) : el("p", { class: "hint" }, "Aucune modification depuis l'import.")) : null);
   });
 }
-function importCsv(file) {
+function radiateDialog(p) {
+  overlay((close) => {
+    const date = el("input", { type: "date", class: "field", id: "radiation-date", value: TODAY });
+    const motif = el("select", { class: "field", id: "radiation-motif" }, ["Départ à la retraite", "Départ hors département", "Cessation d'activité", "Autre"].map((m) => el("option", { value: m }, m)));
+    const future = db.gardes.filter((g) => g.pid === p.id && g.date >= TODAY && g.status !== "brouillon");
+    return el("div", { class: "dialog", role: "dialog", "aria-modal": "true" }, el("h3", {}, `Radier Dr ${p.prenom} ${p.nom}`),
+      el("label", { class: "stack" }, "Date de radiation", date), el("label", { class: "stack" }, "Motif", motif),
+      future.length ? el("p", { style: "margin:0;color:var(--warn)" }, `${future.length} garde(s) à venir passeront « à réattribuer » : ${future.map((g) => fmt(g.date)).join(", ")}.`) : null,
+      el("div", { class: "actions" }, btn("Radier", () => {
+        p.statut = "radie"; p.radiation = { date: date.value || TODAY, motif: motif.value };
+        future.forEach((g) => { g.status = "a_attribuer"; g.reason = `${name(db, p.id)} radié : à réattribuer`; });
+        log(`Radiation de ${name(db, p.id)} : ${motif.value.toLowerCase()}${future.length ? ` ; ${future.length} garde(s) à réattribuer` : ""}`, { cat: "praticiens", pid: p.id });
+        close(); toast("Praticien radié."); render();
+      }, "primary"), btn("Annuler", close)));
+  }, true);
+}
+
+// Import : aperçu avec contrôles (colonnes, secteur inconnu, doublons) avant d'enregistrer.
+const SAMPLE = [["Nom", "Prénom", "Secteur", "Adresse", "Commune", "Email", "Téléphone"],
+  ["Lemaire", "Adrien", "Toulon Est", "4 rue Peiresc", "Toulon", "adrien.lemaire@cabinet-demo.fr", "04 94 11 22 33"],
+  ["Bastide", "Noémie", "Hyères – La Crau", "18 avenue Gambetta", "Hyères", "noemie.bastide@cabinet-demo.fr", "04 94 44 55 66"],
+  ["Orsini", "Paul", "Fréjus – Saint-Raphaël", "2 place Paul Vernet", "Fréjus", "paul.orsini@cabinet-demo.fr", "04 94 77 88 99"],
+  ["Tessier", "Marie", "Toulon Centre", "9 rue d'Alger", "Toulon", "marie.tessier@cabinet-demo.fr", "04 94 12 34 56"],
+  ["", "Luc", "Draguignan", "", "Draguignan", "", ""]];
+function importDialog() {
+  overlay((close) => {
+    const out = el("div", { class: "section" });
+    const input = el("input", { type: "file", id: "import-file", accept: ".xlsx,.xls,.csv", hidden: true, onchange: (e) => readFile(e.target.files[0], (rows, file) => preview(rows, file)) });
+    const preview = (rows, file) => {
+      const header = rows[0].map(norm);
+      const col = (r, ...keys) => { const i = header.findIndex((h) => keys.includes(h)); return i < 0 ? "" : String(r[i] ?? "").trim(); };
+      const ok = [], issues = [];
+      rows.slice(1).filter((r) => r.some((c) => String(c ?? "").trim())).forEach((r, i) => {
+        const line = i + 2, nom = col(r, "nom"), prenom = col(r, "prenom"), secteur = SECTORS.find((s) => norm(s) === norm(col(r, "secteur")));
+        if (!nom) return issues.push(`Ligne ${line} : nom manquant`);
+        if (!secteur) return issues.push(`Ligne ${line} : secteur « ${col(r, "secteur")} » inconnu (${nom} ${prenom})`);
+        if (db.people.some((p) => norm(p.nom) === norm(nom) && norm(p.prenom) === norm(prenom) && p.secteur === secteur)) return issues.push(`Ligne ${line} : ${nom} ${prenom} existe déjà`);
+        ok.push({ nom, prenom, secteur, adresse: col(r, "adresse"), ville: col(r, "commune", "ville"), email: col(r, "email"), tel: col(r, "telephone", "tel") });
+      });
+      out.replaceChildren(el("h3", { style: "font-size:16px;font-family:var(--body)" }, `${file} : ${ok.length} praticien(s) prêt(s) à importer`),
+        issues.length ? el("ul", { class: "issues" }, issues.map((t) => el("li", { style: "color:var(--warn)" }, `⚠ ${t}`))) : null,
+        el("div", { class: "actions" }, btn(`Importer ${ok.length} praticien(s)`, () => {
+          ok.forEach((x) => db.people.push({ ...x, id: db.people.length + 1, prenom: x.prenom, situation: "Libéral", statut: "nouveau", priorite: "", inscrit: TODAY, lastBefore: null, rattrapageSeed: 0, radiation: null }));
+          log(`Import « ${file} » : ${ok.length} praticien(s) ajouté(s), ${issues.length} ligne(s) écartée(s)`, { cat: "praticiens" });
+          close(); toast(`${ok.length} praticien(s) importé(s) comme nouveaux inscrits.`); render();
+        }, "primary")));
+    };
+    return el("div", { class: "dialog wide", role: "dialog", "aria-modal": "true" }, el("h3", {}, "Importer des praticiens"),
+      el("p", { style: "margin:0" }, "Fichier Excel (.xlsx) ou CSV, une ligne par praticien. Colonnes : Nom, Prénom, Secteur, Adresse, Commune, Email, Téléphone. Un aperçu signale les erreurs et les doublons avant tout enregistrement."),
+      el("div", { class: "actions" }, input, btn("Choisir un fichier", () => input.click()), btn("Essayer avec un fichier d'exemple", () => preview(SAMPLE, "exemple.xlsx"), "primary"),
+        btn("Télécharger le modèle", () => download("modele-import.xlsx", [SAMPLE[0]]), "ghost")),
+      out, el("div", { class: "actions" }, btn("Fermer", close)));
+  }, true);
+}
+function readFile(file, done) {
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
-    const lines = String(reader.result).split(/\r?\n/).filter((l) => l.trim());
-    const sep = lines[0]?.includes(";") ? ";" : ",";
-    const header = lines.shift().toLowerCase().split(sep).map((h) => h.trim());
-    const col = (row, key) => row[header.indexOf(key)]?.trim() || "";
-    let added = 0;
-    for (const line of lines) {
-      const row = line.split(sep);
-      if (!col(row, "nom")) continue;
-      const secteur = SECTORS.find((s) => s.toLowerCase() === col(row, "secteur").toLowerCase()) || SECTORS[0];
-      db.people.push({ id: db.people.length + 1, prenom: col(row, "prenom"), nom: col(row, "nom"), secteur, ville: col(row, "ville"), statut: "nouveau", inscrit: TODAY, lastBefore: null, rattrapageSeed: 0, email: col(row, "email"), tel: col(row, "telephone") });
-      added++;
-    }
-    log(STAFF, `Import « ${file.name} » : ${added} praticien(s) ajouté(s)`);
-    toast(added ? `${added} praticien(s) importé(s).` : "Aucune ligne reconnue : colonnes attendues nom;prenom;secteur;ville;email;telephone.");
-    render();
-  };
-  reader.readAsText(file);
+  if (/\.xlsx?$/i.test(file.name) && window.XLSX) {
+    reader.onload = () => { const wb = XLSX.read(reader.result, { type: "array" }); done(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 }), file.name); };
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.onload = () => { const text = String(reader.result).replace(/^﻿/, ""); const sep = text.split("\n")[0].includes(";") ? ";" : ","; done(text.split(/\r?\n/).map((l) => l.split(sep)), file.name); };
+    reader.readAsText(file);
+  }
+}
+
+// Visite guidée : chaque point de l'annonce et l'écran qui y répond.
+const TOUR = [
+  ["Praticiens", [
+    ["Base d'environ 350 praticiens", "Onglet Praticiens", () => go("staff", "people", { fsector: "Tous", fstatus: "Tous", q: "" })],
+    ["Liste interactive : recherche, filtres, classement", "Recherche, filtres par secteur et statut, tri par colonne", () => go("staff", "people")],
+    ["Inscriptions, radiations, changements d'adresse et de situation", "Cliquez sur un praticien : fiche, radiation, historique de la fiche", () => go("staff", "people")],
+    ["Répartition par secteurs géographiques", "Administration › Secteurs, et équilibre au tableau de bord", () => go("admin", "settings", { admin: "sectors" })],
+    ["Import / export Excel ou CSV", "Praticiens › Importer : essayez le fichier d'exemple", () => { go("staff", "people"); importDialog(); }],
+    ["Accès administrateur, secrétariat et praticien", "Sélecteur en haut à droite ; droits dans Administration", () => go("admin", "settings", { admin: "access" })],
+  ]],
+  ["Gardes", [
+    ["Rotation des gardes par secteur", "Planning de novembre : « Générer le planning »", () => go("staff", "planning", { month: "2026-11", sector: "Tous" })],
+    ["Praticiens prioritaires selon des règles métier", "Administration › Règles de rotation, ordre modifiable", () => go("admin", "settings", { admin: "rules" })],
+    ["Génération et validation des plannings", "Générer, ajuster à la main, valider et publier", () => go("staff", "planning", { month: "2026-11" })],
+    ["Confirmation des gardes par les praticiens", "Espace praticien › Mes gardes", () => go("doc", "mine")],
+    ["Déclaration d'indisponibilité", "Espace praticien › Indisponibilités", () => go("doc", "dispo")],
+    ["Échange de garde avec un confrère", "Espace praticien : demande reçue, et proposition d'échange", () => go("doc", "mine")],
+    ["Gestion des remplacements", "Demande de remplacement, validation par le secrétariat", () => go("staff", "exchanges")],
+    ["Gardes à rattraper", "Vérification › Gardes à rattraper", () => go("staff", "verify")],
+    ["Vérification après chaque garde", "Qui a réellement assuré la garde : titulaire, remplaçant, personne", () => go("staff", "verify")],
+  ]],
+  ["Suivi", [
+    ["Historique et traçabilité des modifications", "Onglet Historique, filtrable, et historique par fiche", () => go("staff", "history", { hcat: "Tous" })],
+    ["Notifications par email", "Historique › Emails, et modèles dans Administration", () => go("staff", "history", { hcat: "email" })],
+    ["Tableau de bord administratif", "À traiter, indicateurs, équilibre entre secteurs", () => go("staff", "dashboard")],
+    ["Exports des plannings et historiques", "Boutons « Exporter (Excel) » du planning et de l'historique", () => go("staff", "planning", { month: "2026-10" })],
+  ]],
+  ["Exigences techniques", [
+    ["Sécurisée, sauvegardes, RGPD", "Double authentification, sauvegardes, export RGPD", () => go("admin", "settings", { admin: "data" })],
+    ["Réversibilité", "Export complet des données ; code sur un Git à votre nom", () => go("admin", "settings", { admin: "data" })],
+    ["Interface responsive et simple pour le secrétariat", "Ouvrez cette démo sur un téléphone", null],
+    ["Valider les principaux écrans avant le développement", "Ce prototype sert de base à cette validation", null],
+  ]],
+];
+function tourDialog() {
+  overlay((close) => el("div", { class: "dialog wide", role: "dialog", "aria-modal": "true", "aria-label": "Les points de votre annonce" },
+    el("h3", {}, "Les points de votre annonce"),
+    el("p", { style: "margin:0;color:var(--muted)" }, "Chaque fonctionnalité demandée, et où la voir dans ce prototype. Les règles métier sont des exemples, à remplacer par celles de votre cahier des charges."),
+    el("div", { class: "tour" }, TOUR.map(([group, items]) => el("div", {}, el("h4", {}, group), el("ul", {}, items.map(([label, where, fn]) => el("li", {},
+      el("div", { class: "item" }, el("span", { class: "tick", "aria-hidden": "true" }, "✓"), el("div", {}, label, el("small", {}, where))),
+      fn ? btn("Voir", () => { close(); fn(); }, "small") : null)))))),
+    el("div", { class: "actions" }, btn("Commencer la visite", () => { close(); go("staff", "dashboard"); }, "primary"))), true);
 }
 function renderToast() {
-  const old = document.querySelector(".toast"); if (old) old.remove();
+  document.querySelector(".toast")?.remove();
   if (ui.toast) document.body.append(el("div", { class: "toast", role: "status" }, ui.toast));
 }
 
 document.querySelectorAll(".role button").forEach((b) => { b.onclick = () => { ui.role = b.dataset.role; ui.tab = TABS[ui.role][0][0]; render(); }; });
-document.getElementById("reset").onclick = () => { db = seed(); Object.assign(ui, { tab: ui.role === "staff" ? "dashboard" : "mine", month: "2026-11" }); render(); toast("Démo réinitialisée."); };
+document.getElementById("reset").onclick = () => { db = seed(); Object.assign(ui, { tab: ui.role === "doc" ? "mine" : "dashboard", month: "2026-11" }); render(); toast("Démo réinitialisée."); };
+document.getElementById("tour").onclick = tourDialog;
 render();
+let seen = null;
+try { seen = localStorage.getItem(KEY + "-tour"); localStorage.setItem(KEY + "-tour", "1"); } catch (e) {}
+if (!seen) tourDialog();
 </script>
 </body>
 </html>
