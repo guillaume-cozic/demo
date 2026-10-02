@@ -4,1212 +4,825 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>SaaS tâches et facturation</title>
-<meta name="description" content="Prototype cliquable d’un SaaS B2B : inscription et connexion, suivi de projets en listes, factures PDF et paiement par carte simulé façon Stripe en mode test.">
+<title>Tâches et facturation B2B</title>
+<meta name="description" content="MVP cliquable d'un SaaS B2B : connexion et inscription, suivi de projets en listes de tâches, génération de factures PDF et paiement Stripe en mode test.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #F4F5F8; --panel: #FFFFFF; --ink: #161A23; --muted: #555E6E; --line: #E1E4EA; --line-strong: #C3C8D2;
-  --accent: #3943B7; --accent-ink: #FFFFFF; --accent-soft: #E8EAFB; --accent-hover: #2D369C;
-  --ok: #1B7044; --ok-soft: #E1F3E8; --warn: #855600; --warn-soft: #FBF0D6; --bad: #B02A37; --bad-soft: #FBE4E6;
-  --info: #1F5F99; --info-soft: #E1EEFA;
-  --side: #14182A; --side-ink: #E6E8F2; --side-muted: #A6ACC4; --side-active: #262C48;
-  --shadow: 0 1px 2px rgba(20,24,42,.06), 0 4px 16px rgba(20,24,42,.06);
-  --font: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --r: 12px;
-  color-scheme: light;
+:root{
+  --bg:#F4F5F7;--panel:#FFFFFF;--panel-2:#F9FAFB;--ink:#161A23;--muted:#535B6B;--line:#E0E3EA;--line-strong:#C3C8D3;
+  --accent:#3B4FD8;--accent-ink:#FFFFFF;--accent-soft:#E6E9FC;--accent-text:#2F40B8;
+  --ok:#17704A;--ok-soft:#DCF2E7;--warn:#8F5600;--warn-soft:#FCEFD4;--bad:#B0262F;--bad-soft:#FBE2E3;--info:#245E9E;--info-soft:#DEEBF8;
+  --side:#14182A;--side-ink:#C9CEE0;--side-strong:#FFFFFF;--side-active:#262C47;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0E1117; --panel: #161B24; --ink: #E7EAF0; --muted: #9EA6B6; --line: #262D3A; --line-strong: #3B4453;
-    --accent: #929BFF; --accent-ink: #0E1117; --accent-soft: #23284A; --accent-hover: #AEB5FF;
-    --ok: #6FD39C; --ok-soft: #15301F; --warn: #E8B85A; --warn-soft: #33290F; --bad: #F28B95; --bad-soft: #3A1C21;
-    --info: #7DB7F0; --info-soft: #172A3E;
-    --side: #0A0D13; --side-ink: #E6E8F2; --side-muted: #9AA1BA; --side-active: #1E2338;
-    --shadow: 0 1px 2px rgba(0,0,0,.4);
-    color-scheme: dark;
-  }
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
-button, input, select, textarea { font: inherit; color: inherit; }
-a { color: var(--accent); }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-[hidden] { display: none !important; }
-.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.muted { color: var(--muted); }
-.small { font-size: 13px; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.ico { width: 18px; height: 18px; flex: none; }
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F121A;--panel:#171B26;--panel-2:#1C2130;--ink:#E7E9F0;--muted:#A0A7B8;--line:#2A3042;--line-strong:#3B4359;
+  --accent:#8C9BFF;--accent-ink:#0E1330;--accent-soft:#252C52;--accent-text:#A9B4FF;
+  --ok:#6BD3A0;--ok-soft:#163327;--warn:#F0B95A;--warn-soft:#382B12;--bad:#FF8F96;--bad-soft:#3D1C20;--info:#8EC0F5;--info-soft:#1A2B40;
+  --side:#0B0D14;--side-ink:#AEB4C8;--side-strong:#FFFFFF;--side-active:#1F2438;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+h1,h2,h3{margin:0;letter-spacing:-.015em}
 
 /* Bandeau démo */
-.demo-band { background: var(--warn-soft); color: var(--ink); padding: 6px 16px; font-size: 13px; display: flex; flex-wrap: wrap; gap: 2px 14px; justify-content: center; align-items: center; text-align: center; }
-.demo-band b { color: var(--warn); }
-.demo-band button { background: none; border: 0; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0 6px; min-height: 44px; font-size: 13px; font-weight: 600; }
+.demo-band{background:var(--warn-soft);color:var(--ink);font-size:13px;padding:6px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-strong);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600}
 
-/* Boutons */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--panel); cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; color: var(--ink); white-space: nowrap; }
-.btn:hover { border-color: var(--ink); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-.btn.danger { color: var(--bad); }
-.btn.primary.danger, .btn.primary.danger:hover { background: var(--bad); border-color: var(--bad); color: var(--panel); }
-.btn.ghost { border-color: transparent; background: transparent; }
-.btn.block { width: 100%; }
-.btn:disabled { opacity: .55; cursor: not-allowed; }
-.icon-btn { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; border: 1px solid transparent; background: transparent; cursor: pointer; color: var(--muted); }
-.icon-btn:hover { background: var(--bg); color: var(--ink); border-color: var(--line); }
-
-/* Champs */
-.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; min-width: 0; }
-.field label, .lbl { font-weight: 600; font-size: 13px; }
-.field input, .field select, .field textarea { min-height: 44px; padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--panel); width: 100%; }
-.field textarea { min-height: 90px; resize: vertical; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 0; }
-.field [aria-invalid="true"] { border-color: var(--bad); }
-.hint { font-size: 12px; color: var(--muted); margin: 0; }
-.err { font-size: 13px; color: var(--bad); margin: 0; font-weight: 600; }
-.err:empty { display: none; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; min-height: 44px; padding-top: 10px; }
-.check input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); flex: none; }
+/* Boutons et champs */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--panel);font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{min-height:36px;padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.icon-btn:disabled{opacity:.35;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-weight:600;font-size:13.5px}
+.field input,.field select,.field textarea,.input{min-height:44px;padding:9px 12px;border:1px solid var(--line-strong);border-radius:10px;background:var(--panel);width:100%}
+.field textarea{min-height:84px;resize:vertical}
+.field input[aria-invalid="true"],.field select[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 3px var(--bad-soft)}
+.err{color:var(--bad);font-size:13px;margin:0;min-height:0}
+.err:empty{display:none}
+.hint{color:var(--muted);font-size:13px;margin:0}
+.row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)}
 
 /* Badges */
-.badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-.b-draft { background: var(--bg); color: var(--muted); border: 1px solid var(--line-strong); }
-.b-sent { background: var(--info-soft); color: var(--info); }
-.b-late { background: var(--bad-soft); color: var(--bad); }
-.b-paid { background: var(--ok-soft); color: var(--ok); }
-.b-warn { background: var(--warn-soft); color: var(--warn); }
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.b-draft{background:var(--panel-2);color:var(--muted);border:1px solid var(--line-strong)}
+.b-sent{background:var(--info-soft);color:var(--info)}
+.b-late{background:var(--bad-soft);color:var(--bad)}
+.b-paid{background:var(--ok-soft);color:var(--ok)}
+.b-test{background:var(--warn-soft);color:var(--warn)}
 
-/* Authentification */
-.auth { min-height: calc(100vh - 44px); display: grid; grid-template-columns: 1.05fr 1fr; }
-.auth-side { background: var(--side); color: var(--side-ink); padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
-.auth-side h2 { font-size: 30px; line-height: 1.2; margin: 0 0 14px; letter-spacing: -.02em; max-width: 440px; }
-.auth-side p { color: var(--side-muted); max-width: 420px; margin: 0; }
-.auth-points { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 12px; }
-.auth-points li { display: flex; gap: 10px; align-items: center; }
-.auth-points .ico { color: #9FA8FF; }
-.auth-main { display: grid; place-items: center; padding: 32px 20px; }
-.auth-card { width: 100%; max-width: 400px; }
-.auth-card h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.02em; }
-.auth-card > p { margin: 0 0 22px; }
-.demo-creds { border: 1px dashed var(--line-strong); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; }
-.strength { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; margin-top: 2px; }
-.strength i { height: 4px; border-radius: 2px; background: var(--line); }
-.strength[data-s="1"] i:nth-child(-n+1), .strength[data-s="2"] i:nth-child(-n+2) { background: var(--warn); }
-.strength[data-s="3"] i:nth-child(-n+3), .strength[data-s="4"] i { background: var(--ok); }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
-.brand-mark { width: 32px; height: 32px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; color: var(--accent-ink); flex: none; }
-.auth-side .brand-mark { background: #929BFF; color: #14182A; }
+/* Auth */
+.auth{min-height:calc(100vh - 45px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.auth-side{background:var(--side);color:var(--side-ink);padding:48px clamp(24px,5vw,72px);display:flex;flex-direction:column;justify-content:space-between;gap:32px}
+.auth-side h2{color:var(--side-strong);font-size:clamp(26px,3vw,38px);line-height:1.15;max-width:18ch;margin-top:40px}
+.auth-side ul{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:14px}
+.auth-side li{display:flex;gap:12px;align-items:flex-start}
+.auth-side li svg{color:#8C9BFF;margin-top:3px}
+.auth-side small{color:#8F96AD}
+.auth-main{display:grid;place-items:center;padding:32px 20px}
+.auth-card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--shadow)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:22px}
+.seg button{min-height:40px;border:0;border-radius:9px;background:transparent;font-weight:700;cursor:pointer;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.auth-card form{display:grid;gap:14px}
+.demo-cred{background:var(--accent-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.linkbtn{background:none;border:0;color:var(--accent-text);font-weight:600;cursor:pointer;padding:8px 0;text-decoration:underline;min-height:44px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--side-strong);font-weight:800;font-size:19px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+@media (prefers-color-scheme:dark){.brand-mark{background:#5466F0;color:#fff}}
+@media (max-width:860px){.auth{grid-template-columns:1fr}.auth-side{padding:28px 20px}.auth-side h2{margin-top:16px}.auth-side ul{display:none}}
 
-/* Coquille applicative */
-.shell { display: grid; grid-template-columns: 236px 1fr; min-height: calc(100vh - 44px); }
-.side { background: var(--side); color: var(--side-ink); padding: 18px 12px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 0; height: 100vh; }
-.side .brand { padding: 0 8px; }
-.side .brand-mark { background: #929BFF; color: #14182A; }
-.nav { display: flex; flex-direction: column; gap: 2px; }
-.nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--side-muted); text-decoration: none; font-weight: 600; font-size: 14px; }
-.nav a:hover { color: var(--side-ink); background: var(--side-active); }
-.nav a[aria-current="page"] { color: var(--side-ink); background: var(--side-active); box-shadow: inset 3px 0 0 #929BFF; }
-.nav .count { margin-left: auto; font-size: 11px; background: #B02A37; color: #fff; border-radius: 999px; padding: 1px 7px; }
-.side :focus-visible { outline-color: #929BFF; }
-.me { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px 8px 0; border-top: 1px solid #2A3050; }
-.me .who { min-width: 0; flex: 1; font-size: 13px; }
-.me .who b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.me .who span { color: var(--side-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.me .icon-btn { color: var(--side-muted); }
-.me .icon-btn:hover { background: var(--side-active); color: var(--side-ink); border-color: transparent; }
-.avatar { width: 30px; height: 30px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--accent-soft); color: var(--accent); flex: none; }
-.side .avatar { background: #2A3050; color: #DDE0FF; width: 34px; height: 34px; }
-main { padding: 26px 30px 60px; min-width: 0; max-width: 1280px; width: 100%; }
-.page-head { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-.page-head h1 { margin: 0; font-size: 24px; letter-spacing: -.02em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.page-head h1:focus { outline: none; }
-.page-head .sub { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.back { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 600; font-size: 14px; min-height: 44px; margin: -10px 0 -2px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px; min-width: 0; }
-.card h2 { font-size: 15px; margin: 0 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* Shell */
+.shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:calc(100vh - 45px)}
+.side{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;gap:20px;padding:20px 14px;position:sticky;top:0;height:100vh}
+.side nav{display:grid;gap:4px}
+.nav-btn{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;border:0;background:transparent;color:var(--side-ink);font-weight:600;cursor:pointer;text-align:left;width:100%}
+.nav-btn:hover{background:var(--side-active);color:var(--side-strong)}
+.nav-btn[aria-current="page"]{background:var(--side-active);color:var(--side-strong);box-shadow:inset 3px 0 0 #8C9BFF}
+.nav-btn .count{margin-left:auto;font-size:12px;background:#B0262F;color:#fff;border-radius:999px;padding:0 7px;font-weight:700}
+.side-foot{margin-top:auto;display:grid;gap:12px}
+.plan-box{background:var(--side-active);border-radius:12px;padding:12px;font-size:13px}
+.plan-box b{color:var(--side-strong)}
+.plan-box button{margin-top:8px;width:100%;min-height:38px;border-radius:9px;border:0;background:#5466F0;color:#fff;font-weight:700;cursor:pointer}
+.me{display:flex;align-items:center;gap:10px}
+.me .who{min-width:0;flex:1}
+.me .who b{display:block;color:var(--side-strong);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me .who span{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me .icon-btn{color:var(--side-ink)}
+.me .icon-btn:hover{background:var(--side-active);color:#fff}
+.avatar{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font-size:11.5px;font-weight:800;flex:none;color:#fff}
+.main{padding:24px clamp(16px,2.2vw,32px) 48px;min-width:0}
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{height:auto;position:sticky;top:0;z-index:20;flex-direction:row;flex-wrap:wrap;align-items:center;padding:8px 12px;gap:8px}
+  .side nav{grid-auto-flow:column;overflow-x:auto;order:3;width:100%;scrollbar-width:none}
+  .nav-btn{white-space:nowrap;padding:0 12px}
+  .nav-btn[aria-current="page"]{box-shadow:inset 0 -3px 0 #8C9BFF}
+  .side-foot{margin:0 0 0 auto}
+  .plan-box,.me .who{display:none}
+}
 
-/* Tableau de bord */
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
-.kpi .lbl { color: var(--muted); font-weight: 600; font-size: 13px; }
-.kpi .val { font-size: 24px; font-weight: 600; margin: 4px 0 2px; letter-spacing: -.02em; }
-.kpi .foot { font-size: 13px; color: var(--muted); }
-.kpi.alert .val { color: var(--bad); }
-.dash { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; }
-.dash > .card { align-self: start; }
-.chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; align-items: end; height: 190px; padding-top: 10px; }
-.bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; font-size: 12px; }
-.bar i { display: block; width: 100%; max-width: 46px; background: var(--accent); border-radius: 6px 6px 2px 2px; min-height: 3px; opacity: .85; }
-.bar.cur i { opacity: 1; background: var(--ok); }
-.bar span { color: var(--muted); }
-.bar b { font-weight: 600; font-size: 11px; }
-.list { list-style: none; margin: 0; padding: 0; }
-.list > li { border-top: 1px solid var(--line); }
-.list > li:first-child { border-top: 0; }
-.row-link { display: flex; align-items: center; gap: 12px; padding: 10px 4px; min-height: 52px; text-decoration: none; color: inherit; width: 100%; background: none; border: 0; text-align: left; cursor: pointer; border-radius: 8px; }
-.row-link:hover { background: var(--bg); }
-.row-link .grow { flex: 1; min-width: 0; }
-.row-link .t { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row-link .s { font-size: 13px; color: var(--muted); display: block; }
-.progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; }
-.progress i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
-.duelist li { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
-.duelist .check { flex: 1; min-width: 0; padding-top: 12px; }
-.duelist .check span { min-width: 0; }
-.duelist .check small { display: block; color: var(--muted); }
-.log li { display: flex; gap: 10px; padding: 9px 0; font-size: 13px; align-items: flex-start; }
-.log .dot { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
-.log .dot.stripe { background: var(--ok-soft); color: var(--ok); }
-.log code { font-family: var(--mono); font-size: 12px; background: var(--bg); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
-.log time { display: block; color: var(--muted); font-size: 12px; }
+/* En-têtes de page */
+.page-head{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.page-head h1{font-size:26px;font-weight:800}
+.page-head p{margin:2px 0 0;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:16px;font-weight:800}
+.card-b{padding:14px 18px}
+.empty{color:var(--muted);text-align:center;padding:28px 12px}
+
+/* Dashboard */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:20px}
+.kpi{padding:16px 18px}
+.kpi .lbl{color:var(--muted);font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center}
+.kpi .val{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.02em}
+.kpi .sub{font-size:13px;color:var(--muted)}
+.kpi .sub.bad{color:var(--bad);font-weight:700}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:20px}
+.plist{list-style:none;margin:0;padding:0}
+.plist li+li{border-top:1px solid var(--line)}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;width:100%;padding:12px 18px;background:none;border:0;text-align:left;cursor:pointer;min-height:44px}
+.prow:hover{background:var(--panel-2)}
+.prow .t{font-weight:700}
+.prow .s{color:var(--muted);font-size:13px}
+.bar{grid-column:1/-1;height:7px;background:var(--panel-2);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
+.due-row{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 8px}
+.due-row .txt{flex:1;min-width:0}
+.due-row .txt b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.due-row .txt span{font-size:13px;color:var(--muted)}
+.tick{width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;border-radius:10px;flex:none}
+.tick span{width:22px;height:22px;border:2px solid var(--line-strong);border-radius:6px;display:grid;place-items:center}
+.tick:hover span{border-color:var(--accent);color:var(--accent)}
+.tick svg{width:14px;height:14px;opacity:0}
+.tick:hover svg{opacity:1}
+.when{font-size:12.5px;font-weight:700;white-space:nowrap}
+.when.late{color:var(--bad)}
+.when.soon{color:var(--warn)}
 
 /* Projets */
-.ptabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 18px; scrollbar-width: thin; }
-.ptabs a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); text-decoration: none; color: var(--ink); font-weight: 600; font-size: 14px; white-space: nowrap; }
-.ptabs a[aria-current="page"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-.ptabs .sw { width: 9px; height: 9px; border-radius: 50%; }
-.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
-.toolbar .field { margin: 0; }
-.search { position: relative; min-width: 220px; flex: 1; max-width: 340px; }
-.search .ico { position: absolute; left: 12px; bottom: 13px; color: var(--muted); }
-.search input { padding-left: 38px; }
-.board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
-.col { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; min-height: 140px; transition: border-color .15s; }
-.col.over { border-color: var(--accent); background: var(--accent-soft); }
-.col h2 { font-size: 14px; margin: 2px 4px 12px; display: flex; gap: 8px; align-items: center; }
-.col h2 .n { color: var(--muted); font-weight: 600; font-family: var(--mono); font-size: 12px; background: var(--bg); border-radius: 999px; padding: 1px 8px; }
-.col h2 .pip { width: 8px; height: 8px; border-radius: 50%; }
-.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.task { border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 8px 12px; background: var(--panel); cursor: grab; }
-.task.dragging { opacity: .5; }
-.task.is-late { border-left: 3px solid var(--bad); }
-.task-title { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 4px 0; font-weight: 600; cursor: pointer; min-height: 32px; }
-.task-title:hover { color: var(--accent); }
-.task-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
-.task-foot .avatar { width: 26px; height: 26px; font-size: 10px; }
-.task-foot .push { margin-left: auto; display: flex; gap: 2px; align-items: center; }
-.btn-sm { min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--panel); font-size: 13px; font-weight: 600; cursor: pointer; position: relative; }
-.btn-sm::after, .task-foot .icon-btn::after { content: ""; position: absolute; inset: -4px; }
-.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
-.task-foot .icon-btn { width: 36px; height: 36px; position: relative; }
-.quick { display: flex; gap: 6px; margin-top: 10px; }
-.quick input { flex: 1; min-width: 0; min-height: 44px; border: 1px dashed var(--line-strong); border-radius: 10px; padding: 0 12px; background: transparent; }
-.quick input:focus { border-style: solid; border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 0; }
-.proj-head { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; margin-bottom: 16px; }
-.proj-head .stat { font-size: 13px; color: var(--muted); }
-.proj-head .stat b { display: block; color: var(--ink); font-size: 16px; }
-.empty { text-align: center; color: var(--muted); padding: 18px 8px; font-size: 13px; }
+.proj-layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:20px;align-items:start}
+.proj-nav .prow[aria-current="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.board-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.board-head h2{font-size:21px;font-weight:800}
+.board-head p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+.toolbar .field{flex:1 1 180px}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{padding-left:38px}
+.addtask{display:grid;grid-template-columns:minmax(200px,2.4fr) repeat(3,minmax(120px,1fr)) auto;gap:10px;align-items:end;padding:14px;margin-bottom:16px}
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.col{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:160px}
+.col-h{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 10px;font-weight:800;font-size:14px}
+.col-h .n{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:0 8px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:8px}
+.tasks{display:grid;gap:10px}
+.task{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 10px 6px 12px;box-shadow:var(--shadow);transition:transform .15s}
+.task.flash{animation:flash 1s}
+@keyframes flash{from{box-shadow:0 0 0 3px var(--accent)}to{box-shadow:var(--shadow)}}
+.task-title{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 0;font-weight:700;cursor:pointer;min-height:32px}
+.task-title:hover{color:var(--accent-text);text-decoration:underline}
+.task-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.task-foot .avatar{width:26px;height:26px;font-size:10.5px}
+.task-foot .sp{flex:1}
+.task-foot .icon-btn{width:36px;height:36px}
+.billed{font-size:11.5px;font-weight:700;color:var(--ok);background:var(--ok-soft);padding:1px 7px;border-radius:99px}
+@media (max-width:1100px){.proj-layout{grid-template-columns:1fr}.proj-nav .plist{display:flex;overflow-x:auto}.proj-nav .plist li{flex:0 0 240px;border:0}.proj-nav .card-b{padding:0}.addtask{grid-template-columns:1fr 1fr}.addtask .f-title{grid-column:1/-1}}
+@media (max-width:760px){.board{grid-template-columns:1fr}}
 
 /* Factures */
-.chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel); cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
-.chip .n { font-family: var(--mono); font-size: 11px; opacity: .8; }
-.inv-table { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; }
-.inv-row { display: grid; grid-template-columns: 130px 1fr 110px 110px 130px 110px; gap: 12px; align-items: center; padding: 0 18px; min-height: 58px; border-top: 1px solid var(--line); text-decoration: none; color: inherit; }
-.inv-row:first-child { border-top: 0; }
-a.inv-row:hover { background: var(--bg); }
-.inv-row.head { min-height: 42px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; background: var(--bg); }
-.inv-row .amt { text-align: right; }
-.inv-row .cl { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line-strong);background:var(--panel);cursor:pointer;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:7px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.chip .n{font-family:var(--mono);font-size:12px;opacity:.8}
+.inv-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.inv-layout.split{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+@media (max-width:1250px){.inv-layout.split{grid-template-columns:minmax(0,1fr)}}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:var(--panel-2)}
+td.r,th.r{text-align:right}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel-2)}
+tbody tr[aria-selected="true"]{background:var(--accent-soft)}
+.rowlink{background:none;border:0;font-family:var(--mono);font-weight:600;cursor:pointer;color:var(--accent-text);padding:8px 0;min-height:40px;text-decoration:underline}
+@media (max-width:640px){.hide-sm{display:none}}
+.detail-actions{display:flex;flex-wrap:wrap;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center}
+.detail-actions .sp{flex:1}
+.paper-wrap{padding:20px;background:var(--panel-2);border-radius:0 0 14px 14px}
 
-.inv-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
-.inv-grid.view { grid-template-columns: minmax(0, 1fr) 320px; }
-.line { display: grid; grid-template-columns: 1fr 80px 110px 92px 44px; gap: 8px; align-items: end; padding: 10px 0; border-top: 1px solid var(--line); }
-.line .field { margin: 0; }
-.line .l-total { min-height: 44px; display: flex; align-items: center; justify-content: flex-end; font-size: 13px; }
-.totals { margin: 14px 0 0 auto; max-width: 280px; display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; font-size: 14px; }
-.totals .big { font-weight: 800; font-size: 17px; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 4px; }
-.alert { border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; background: var(--bad-soft); color: var(--bad); font-weight: 600; }
-.alert ul { margin: 4px 0 0; padding-left: 20px; }
-.note { border-radius: 10px; padding: 10px 14px; font-size: 13px; background: var(--info-soft); color: var(--info); display: flex; gap: 8px; align-items: flex-start; }
-.timeline { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
-.timeline li { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--muted); }
-.timeline li.done { color: var(--ink); }
-.timeline .tdot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; flex: none; }
-.timeline li.done .tdot { background: var(--ok); border-color: var(--ok); color: #fff; }
-.timeline .tdot .ico { width: 13px; height: 13px; }
-.aside-actions { display: grid; gap: 8px; }
-.amount-big { font-size: 28px; font-weight: 600; letter-spacing: -.02em; margin: 0 0 14px; }
-.linkbox { display: flex; gap: 6px; margin-top: 4px; }
-.linkbox input { flex: 1; min-width: 0; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; background: var(--bg); font-family: var(--mono); font-size: 12px; color: var(--muted); }
+/* Document facture (aussi utilisé à l'impression) */
+.paper{background:#fff;color:#1A1D26;border:1px solid #DADDE5;border-radius:6px;padding:clamp(18px,4vw,40px);font-size:13.5px;position:relative;max-width:820px;margin:0 auto;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.paper .top{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.paper .co{font-weight:800;font-size:17px}
+.paper .muted{color:#5A6170}
+.paper h3{font-size:22px;font-weight:800;color:#2F40B8}
+.paper .meta{text-align:right}
+.paper .addr{margin:26px 0;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.paper .to{background:#F3F4F8;border-radius:8px;padding:12px 14px;min-width:230px}
+.paper table th{background:#F3F4F8;color:#5A6170;border-bottom:1px solid #DADDE5}
+.paper table td{border-bottom:1px solid #E7E9EF;white-space:normal}
+.paper .totals{margin:16px 0 0 auto;width:min(100%,280px)}
+.paper .totals div{display:flex;justify-content:space-between;padding:5px 0}
+.paper .totals .ttc{border-top:2px solid #1A1D26;margin-top:4px;padding-top:8px;font-weight:800;font-size:16px}
+.paper .foot{margin-top:28px;font-size:12px;color:#5A6170;border-top:1px solid #E7E9EF;padding-top:12px}
+.paper .stamp{position:absolute;top:120px;right:40px;transform:rotate(-12deg);border:3px solid #17704A;color:#17704A;font-weight:800;padding:4px 14px;border-radius:8px;font-size:20px;letter-spacing:.08em;opacity:.85}
+.paper .del{width:32px;height:32px;border:0;background:none;color:#B0262F;cursor:pointer;border-radius:6px;display:inline-grid;place-items:center}
+.addline{display:grid;grid-template-columns:minmax(160px,2fr) minmax(70px,.6fr) minmax(90px,.8fr) auto;gap:10px;align-items:end;margin-top:16px;max-width:820px;margin-inline:auto}
+@media (max-width:640px){.addline{grid-template-columns:1fr 1fr}.addline .f-label{grid-column:1/-1}}
 
-/* Papier facture (toujours clair, comme un PDF) */
-.paper-wrap { position: sticky; top: 16px; }
-.paper { background: #fff; color: #1B1F29; border-radius: 6px; box-shadow: 0 2px 20px rgba(0,0,0,.12); padding: 34px 32px; font-size: 12px; line-height: 1.5; position: relative; overflow: hidden; aspect-ratio: 1 / 1.414; min-height: 0; }
-.paper .p-top { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
-.paper .p-brand { font-weight: 800; font-size: 16px; display: flex; gap: 8px; align-items: center; margin-bottom: 6px; color: #2E37A0; }
-.paper .p-small { color: #4F5767; white-space: pre-line; }
-.paper .p-right { text-align: right; }
-.paper .p-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
-.paper .p-num { font-family: var(--mono); font-weight: 600; margin-bottom: 6px; }
-.paper .p-client { margin-bottom: 22px; border-left: 3px solid #2E37A0; padding-left: 12px; white-space: pre-line; }
-.paper .p-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #4F5767; font-weight: 700; }
-.paper table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
-.paper th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #4F5767; border-bottom: 1.5px solid #1B1F29; padding: 6px 4px; }
-.paper td { border-bottom: 1px solid #E1E4EA; padding: 7px 4px; vertical-align: top; }
-.paper .r { text-align: right; white-space: nowrap; font-family: var(--mono); }
-.paper .p-tot { margin-left: auto; width: 56%; display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; }
-.paper .p-tot .g { font-weight: 800; font-size: 14px; border-top: 1.5px solid #1B1F29; padding-top: 5px; margin-top: 3px; }
-.paper .p-foot { position: absolute; left: 32px; right: 32px; bottom: 26px; color: #4F5767; font-size: 10px; border-top: 1px solid #E1E4EA; padding-top: 8px; }
-.paper .p-notes { margin-top: 16px; white-space: pre-line; }
-.paper .stamp { position: absolute; top: 120px; right: 40px; transform: rotate(-12deg); border: 3px solid #1B7044; color: #1B7044; font-weight: 800; font-size: 20px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 14px; border-radius: 8px; opacity: .85; }
-.paper .stamp.draft { border-color: #8A93A6; color: #6B7385; }
+/* Abonnement */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px}
+.plan{padding:20px;display:flex;flex-direction:column;gap:10px}
+.plan.current{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.plan .price{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.plan .price small{font-size:14px;color:var(--muted);font-weight:600}
+.plan ul{margin:0;padding:0;list-style:none;display:grid;gap:7px;flex:1}
+.plan li{display:flex;gap:8px;font-size:14px}
+.plan li svg{color:var(--ok);margin-top:2px}
 
-/* Dialogue */
-dialog { border: 0; padding: 0; border-radius: 16px; background: var(--panel); color: var(--ink); width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 24px); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
-dialog.wide { width: min(860px, calc(100vw - 24px)); }
-dialog::backdrop { background: rgba(10,13,22,.55); }
-.dlg-body { padding: 22px; position: relative; }
-.dlg-body h2 { margin: 0 0 16px; font-size: 19px; padding-right: 44px; }
-.dlg-close { position: absolute; top: 12px; right: 12px; }
-.dlg-foot { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
-.dlg-foot .left { margin-right: auto; }
-.co { display: grid; grid-template-columns: 1fr 1.1fr; position: relative; }
-.co-sum { background: var(--bg); padding: 26px; border-right: 1px solid var(--line); }
-.co-form { padding: 26px; }
-.co-form h2 { margin: 0 0 16px; font-size: 19px; }
-.co-amount { font-size: 32px; font-weight: 600; margin: 4px 0 14px; letter-spacing: -.02em; }
-.co-sum dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0 0 18px; font-size: 14px; }
-.co-sum dd { margin: 0; text-align: right; }
-.testbadge { display: inline-block; background: var(--warn-soft); color: var(--warn); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 6px; margin: 14px 0 6px; }
-.testcards { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: -4px 0 14px; }
-.success { text-align: center; padding: 34px 26px; }
-.success .big-ico { width: 60px; height: 60px; border-radius: 50%; background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; margin: 0 auto 14px; }
-.success .big-ico .ico { width: 30px; height: 30px; }
-.spin { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: sp .7s linear infinite; }
-@keyframes sp { to { transform: rotate(360deg); } }
-.brief ol, .brief ul { padding-left: 20px; margin: 6px 0 14px; }
-.brief li { margin-bottom: 6px; }
-.brief h3 { font-size: 14px; margin: 16px 0 4px; }
-.plan { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
-.plan b { font-family: var(--mono); font-weight: 600; color: var(--accent); }
+/* Dialogues */
+dialog{border:0;border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 32px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,12,20,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:18px;font-weight:800}
+.dlg-b{padding:18px 20px;display:grid;gap:14px}
+.dlg-f{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line)}
+.dlg-f .sp{flex:1}
+.stripe-h{background:var(--panel-2)}
+.stripe-amt{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.testcards{background:var(--warn-soft);border-radius:10px;padding:10px 12px;font-size:13px}
+.testcards code{font-family:var(--mono);font-weight:600}
+.card-input{position:relative}
+.spinner{width:18px;height:18px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.success{text-align:center;padding:28px 20px;display:grid;gap:10px;justify-items:center}
+.success .ok-ico{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.success .ok-ico svg{width:32px;height:32px}
+.alert{background:var(--bad-soft);color:var(--bad);border-radius:10px;padding:10px 12px;font-weight:600;font-size:14px}
 
-/* Toast */
-#toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: grid; gap: 8px; z-index: 100; width: min(440px, calc(100vw - 24px)); }
-.toast { background: var(--ink); color: var(--panel); padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); display: flex; gap: 10px; align-items: center; animation: tin .2s ease-out; }
-@keyframes tin { from { opacity: 0; transform: translateY(8px); } }
-
-.settings { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; margin: 0 0 14px; }
-.kv dt { color: var(--muted); }
-.kv dd { margin: 0; word-break: break-all; }
-
-#print { display: none; }
-
-@media (max-width: 1100px) {
-  .kpis { grid-template-columns: repeat(2, 1fr); }
-  .dash, .inv-grid, .inv-grid.view, .settings { grid-template-columns: 1fr; }
-  .paper-wrap { position: static; }
-  .inv-row { grid-template-columns: 120px 1fr 100px 120px 100px; }
-  .inv-row .c-date { display: none; }
+/* Toasts */
+#toasts{position:fixed;bottom:16px;right:16px;left:16px;display:grid;justify-items:end;gap:8px;z-index:100;pointer-events:none}
+.toast{background:var(--ink);color:var(--panel);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:600;font-size:14px;max-width:420px;display:flex;gap:10px;align-items:center;animation:tin .25s ease-out}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+#print-area{display:none}
+@media print{
+  body{background:#fff}
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block}
+  #print-area .paper{border:0;box-shadow:none;max-width:none;padding:0}
+  .no-print{display:none!important}
+  @page{margin:16mm}
 }
-@media (max-width: 860px) {
-  .shell { grid-template-columns: 1fr; }
-  .side { position: sticky; top: 0; height: auto; z-index: 20; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 10px; }
-  .side .brand { font-size: 16px; }
-  .nav { flex-direction: row; order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .nav a { padding: 0 10px; white-space: nowrap; }
-  .nav a[aria-current="page"] { box-shadow: inset 0 -3px 0 #929BFF; }
-  .me { margin: 0 0 0 auto; border: 0; padding: 0; }
-  .me .who { display: none; }
-  main { padding: 18px 14px 60px; }
-  .board { grid-template-columns: 1fr; }
-  .auth { grid-template-columns: 1fr; }
-  .auth-side { display: none; }
-  .co { grid-template-columns: 1fr; }
-  .co-sum { border-right: 0; border-bottom: 1px solid var(--line); padding: 20px; }
-  .co-form { padding: 20px; }
-  .co-amount { font-size: 26px; margin-bottom: 4px; }
-  .co-sum dl, .co-sum .hidesm { display: none; }
-}
-@media (max-width: 640px) {
-  .kpis { gap: 10px; }
-  .kpi { padding: 14px; }
-  .kpi .val { font-size: 19px; }
-  .page-head h1 { font-size: 21px; }
-  .inv-row.head { display: none; }
-  .inv-row { grid-template-columns: 1fr auto; grid-template-areas: "cl amt" "num st" "due due"; gap: 2px 10px; padding: 12px 14px; }
-  .inv-row .c-num { grid-area: num; font-size: 13px; color: var(--muted); }
-  .inv-row .cl { grid-area: cl; }
-  .inv-row .amt { grid-area: amt; }
-  .inv-row .c-st { grid-area: st; justify-self: end; }
-  .inv-row .c-due { grid-area: due; font-size: 13px; color: var(--muted); }
-  .inv-row .c-due::before { content: "Échéance : "; }
-  .line { grid-template-columns: 1fr 1fr 44px; }
-  .line .l-label { grid-column: 1 / -1; }
-  .line .l-total { grid-column: 1 / 3; justify-content: flex-start; min-height: 0; }
-  .line .l-del { grid-column: 3; grid-row: 2; }
-  .line .l-price { grid-column: 2 / 3; }
-  .paper { padding: 20px 16px; font-size: 10px; aspect-ratio: auto; padding-bottom: 90px; }
-  .paper .p-foot { left: 16px; right: 16px; bottom: 14px; font-size: 9px; }
-  .paper .p-title { font-size: 17px; }
-  .paper .p-tot { width: 100%; }
-  .paper .stamp { top: 90px; right: 16px; font-size: 15px; }
-  .row2 { grid-template-columns: 1fr; }
-  .search { min-width: 0; max-width: none; flex-basis: 100%; }
-  .actions .btn { flex: 1; }
-}
-@media print {
-  body > *:not(#print) { display: none !important; }
-  #print { display: block; }
-  #print .paper { box-shadow: none; border-radius: 0; aspect-ratio: auto; min-height: 260mm; padding: 0 0 30mm; font-size: 11pt; }
-  #print .paper .p-foot { left: 0; right: 0; bottom: 0; }
-  @page { size: A4; margin: 16mm; }
-}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="demo-band" role="note">
-  <span><b>Démonstration — données fictives</b> · date simulée : vendredi 2 octobre 2026</span>
-  <span><button type="button" data-act="brief">Ce que couvre la démo</button><button type="button" data-act="reset">Réinitialiser la démo</button></span>
-</div>
-<div id="app"></div>
-<dialog id="dlg" aria-labelledby="dlg-title"><div id="dlg-content"></div></dialog>
-<div id="toasts" role="status" aria-live="polite"></div>
-<div id="print" aria-hidden="true"></div>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset">Réinitialiser la démo</button></div>
 
-<script>
-"use strict";
-const TODAY = "2026-10-02";
-const KEY = "mvp-saas-demo-v1";
-const $ = (s, r = document) => r.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const fmtEur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
-const eur = n => fmtEur.format(Math.round((Number(n) || 0) * 100) / 100);
-const dfmt = d => d ? new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "—";
-const dlong = d => d ? new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—";
-const uid = () => Math.random().toString(36).slice(2, 9);
-const addDays = (d, n) => { const x = new Date(d + "T12:00:00"); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
-const nowStamp = () => { const n = new Date(); return TODAY + " " + String(n.getHours()).padStart(2, "0") + ":" + String(n.getMinutes()).padStart(2, "0"); };
-const hrs = h => String(h).replace(".", ",");
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-const ICONS = {
-  dash: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
-  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
-  file: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
-  settings: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  logout: '<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/>',
-  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
-  download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
-  send: '<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/>',
-  card: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
-  x: '<path d="M6 6l12 12M18 6 6 18"/>',
-  check: '<path d="m5 12 5 5 9-10"/>',
-  chevL: '<path d="m15 18-6-6 6-6"/>',
-  chevR: '<path d="m9 18 6-6-6-6"/>',
-  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
-  copy: '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
-  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
-  bank: '<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>',
-  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
-  zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
-  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
-  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
-};
-const icon = n => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
-const MARK = `<span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h7M4 17h5"/><path d="m14 15 2.5 2.5L21 12"/></svg></span>`;
-
-const TEAM = { CR: "Camille Roux", TM: "Théo Martin", IB: "Inès Benali" };
-const COLS = [["todo", "À faire", "var(--muted)"], ["doing", "En cours", "var(--info)"], ["done", "Terminé", "var(--ok)"]];
-const ST = { draft: ["Brouillon", "b-draft"], sent: ["Envoyée", "b-sent"], late: ["En retard", "b-late"], paid: ["Payée", "b-paid"] };
-
-/* ---------- Données fictives ---------- */
-function seed() {
-  const T = (title, status, hours, due, who, billed) => ({ id: uid(), title, status, hours, due, who, billed: billed || null });
-  const L = (label, qty, price) => ({ label, qty, price });
-  return {
-    session: null,
-    users: [{ name: "Camille Roux", email: "camille@studio-lumen.fr", pass: "demo1234" }],
-    company: { name: "Studio Lumen", siret: "85214763900027", address: "11 quai de la Fosse\n44000 Nantes", email: "facturation@studio-lumen.fr", iban: "FR76 3000 4000 0312 3456 7890 143", prefix: "F-2026-", vat: 20, next: 35 },
-    clients: [
-      { id: "c1", name: "Maison Ferrand", contact: "Hélène Ferrand", email: "compta@maison-ferrand.fr", address: "14 rue des Tanneurs\n69002 Lyon" },
-      { id: "c2", name: "Brasserie Vauban", contact: "Julien Marchal", email: "julien@brasserie-vauban.fr", address: "3 place Vauban\n59000 Lille" },
-      { id: "c3", name: "Cabinet Morel Avocats", contact: "Me Sophie Morel", email: "secretariat@morel-avocats.fr", address: "27 cours Clemenceau\n33000 Bordeaux" },
-      { id: "c4", name: "Transports Leduc", contact: "Marc Leduc", email: "factures@transports-leduc.fr", address: "8 allée Clément-Ader\n44300 Nantes" }
-    ],
-    projects: [
-      { id: "p1", name: "Refonte boutique en ligne", clientId: "c1", rate: 65, color: "#3943B7", tasks: [
-        T("Atelier de lancement", "done", 2, "2026-09-08", "CR", "i5"),
-        T("Intégration maquettes page produit", "done", 6, "2026-09-22", "TM"),
-        T("Audit de performance mobile", "done", 4, "2026-09-29", "IB"),
-        T("Tunnel de commande en 3 étapes", "doing", 10, "2026-10-07", "TM"),
-        T("Connexion API transporteur", "todo", 5, "2026-10-01", "IB"),
-        T("Recette sur mobile", "todo", 3, "2026-10-12", "CR")] },
-      { id: "p2", name: "Application de réservation", clientId: "c2", rate: 70, color: "#C2410C", tasks: [
-        T("Maquettes validées", "done", 3, "2026-09-18", "CR", "i7"),
-        T("Parcours de réservation de table", "doing", 8, "2026-10-05", "CR"),
-        T("Notifications SMS de confirmation", "todo", 4, "2026-10-09", "TM"),
-        T("Back-office des créneaux", "todo", 6, "2026-10-14", "IB")] },
-      { id: "p3", name: "Migration intranet", clientId: "c3", rate: 75, color: "#0F766E", tasks: [
-        T("Inventaire des documents", "done", 5, "2026-09-21", "IB", "i8"),
-        T("Export de la base contacts", "done", 3, "2026-09-30", "TM"),
-        T("Droits d’accès par associé", "doing", 4, "2026-10-03", "IB"),
-        T("Formation de l’équipe", "todo", 2, "2026-10-20", "CR")] },
-      { id: "p4", name: "Campagne e-mailing T4", clientId: "c4", rate: 55, color: "#9333EA", tasks: [
-        T("Gabarit newsletter responsive", "done", 4, "2026-09-25", "TM", "i9"),
-        T("Segmentation des contacts", "doing", 2, "2026-09-30", "CR"),
-        T("Envoi test et corrections", "todo", 1.5, "2026-10-08", "TM")] }
-    ],
-    invoices: [
-      { id: "i1", num: 27, clientId: "c4", date: "2026-05-12", due: "2026-06-11", status: "paid", paidAt: "2026-05-28", paidVia: "Carte •••• 4242", lines: [L("Conception des gabarits e-mail", 12, 55), L("Intégration et tests multi-clients", 8, 55)], notes: "" },
-      { id: "i2", num: 28, clientId: "c3", date: "2026-06-03", due: "2026-07-03", status: "paid", paidAt: "2026-06-20", paidVia: "Virement", lines: [L("Audit de l’intranet existant", 10, 75), L("Cahier des charges de migration", 6, 75)], notes: "" },
-      { id: "i3", num: 29, clientId: "c1", date: "2026-07-01", due: "2026-07-31", status: "paid", paidAt: "2026-07-15", paidVia: "Carte •••• 1881", lines: [L("Maquettes boutique (forfait 8 écrans)", 1, 1800)], notes: "" },
-      { id: "i4", num: 30, clientId: "c2", date: "2026-07-18", due: "2026-08-17", status: "paid", paidAt: "2026-08-02", paidVia: "Carte •••• 4242", lines: [L("Prototype de réservation", 14, 70)], notes: "" },
-      { id: "i5", num: 31, clientId: "c1", date: "2026-08-20", due: "2026-09-19", status: "paid", paidAt: "2026-09-03", paidVia: "Virement", lines: [L("Développement catalogue produits", 22, 65), L("Atelier de lancement", 2, 65)], notes: "" },
-      { id: "i6", num: 32, clientId: "c4", date: "2026-09-02", due: "2026-10-02", status: "paid", paidAt: "2026-09-16", paidVia: "Carte •••• 4242", lines: [L("Campagne de rentrée : conception et envoi", 1, 950), L("Rapport de statistiques", 2, 55)], notes: "" },
-      { id: "i7", num: 33, clientId: "c2", date: "2026-09-10", due: "2026-09-25", status: "sent", sentAt: "2026-09-10", lines: [L("Maquettes validées", 3, 70), L("Développement du module de créneaux", 12, 70)], notes: "" },
-      { id: "i8", num: 34, clientId: "c3", date: "2026-09-28", due: "2026-10-28", status: "sent", sentAt: "2026-09-28", lines: [L("Inventaire des documents", 5, 75), L("Paramétrage des espaces partagés", 8, 75)], notes: "" },
-      { id: "i9", num: null, clientId: "c4", date: TODAY, due: addDays(TODAY, 30), status: "draft", lines: [L("Gabarit newsletter responsive", 4, 55), L("Forfait hébergement des envois (octobre)", 1, 49)], notes: "" }
-    ],
-    events: [
-      { at: "2026-09-28 09:12", kind: "mail", text: "Facture F-2026-034 envoyée à secretariat@morel-avocats.fr" },
-      { at: "2026-09-16 10:42", kind: "stripe", code: "checkout.session.completed", text: "F-2026-032 marquée payée · 1 386,00 €" },
-      { at: "2026-09-10 17:05", kind: "mail", text: "Facture F-2026-033 envoyée à julien@brasserie-vauban.fr" },
-      { at: "2026-09-03 08:30", kind: "manual", text: "F-2026-031 marquée payée (virement reçu)" }
-    ]
-  };
-}
-function load() { try { const s = localStorage.getItem(KEY); if (s) return JSON.parse(s); } catch (e) {} return seed(); }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
-let db = load();
-const ui = { invFilter: "all", invQuery: "", taskQuery: "", taskWho: "", lastRoute: "" };
-
-/* ---------- Helpers métier ---------- */
-const client = id => db.clients.find(c => c.id === id) || { name: "—", email: "", address: "", contact: "" };
-const invById = id => db.invoices.find(i => i.id === id);
-const projById = id => db.projects.find(p => p.id === id);
-const me = () => db.users.find(u => u.email === db.session) || db.users[0];
-const initials = n => n.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join("");
-function totals(inv) {
-  const ht = inv.lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.price) || 0), 0);
-  const tva = ht * (Number(db.company.vat) || 0) / 100;
-  return { ht, tva, ttc: ht + tva };
-}
-const status = inv => inv.status === "sent" && inv.due < TODAY ? "late" : inv.status;
-const numStr = inv => inv.num ? db.company.prefix + String(inv.num).padStart(3, "0") : "Brouillon";
-const badge = inv => { const [l, c] = ST[status(inv)]; return `<span class="badge ${c}">${l}</span>`; };
-const isLate = t => t.status !== "done" && t.due && t.due < TODAY;
-function findTask(id) { for (const p of db.projects) { const t = p.tasks.find(x => x.id === id); if (t) return { p, t }; } return {}; }
-function logEvent(kind, text, code) { db.events.unshift({ at: nowStamp(), kind, text, code }); db.events = db.events.slice(0, 30); }
-const payLink = inv => "https://pay.exemple.fr/i/" + inv.id + "-" + (inv.num || "x");
-
-function toast(msg, ic = "check") {
-  const el = document.createElement("div");
-  el.className = "toast";
-  el.innerHTML = icon(ic) + "<span>" + esc(msg) + "</span>";
-  $("#toasts").appendChild(el);
-  setTimeout(() => el.remove(), 4200);
-}
-
-/* ---------- Champs ---------- */
-function field(f, name, label, opts = {}) {
-  const id = f + "-" + name;
-  const { type = "text", value = "", attrs = "", hint = "", options } = opts;
-  const desc = `aria-describedby="${id}-e${hint ? " " + id + "-h" : ""}"`;
-  let ctrl;
-  if (options) ctrl = `<select id="${id}" name="${name}" ${desc} ${attrs}>${options.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(value) ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
-  else if (type === "textarea") ctrl = `<textarea id="${id}" name="${name}" ${desc} ${attrs}>${esc(value)}</textarea>`;
-  else ctrl = `<input id="${id}" name="${name}" type="${type}" value="${esc(value)}" ${desc} ${attrs}>`;
-  return `<div class="field"><label for="${id}">${label}</label>${ctrl}${hint ? `<p class="hint" id="${id}-h">${hint}</p>` : ""}<p class="err" id="${id}-e" data-err="${name}"></p></div>`;
-}
-function setErr(form, name, msg) {
-  const inp = form.elements[name], p = form.querySelector(`[data-err="${name}"]`);
-  if (inp) msg ? inp.setAttribute("aria-invalid", "true") : inp.removeAttribute("aria-invalid");
-  if (p) p.textContent = msg || "";
-  return !msg;
-}
-function focusFirstError(form) { const el = form.querySelector('[aria-invalid="true"]'); if (el) el.focus(); }
-
-/* ---------- Dialogue ---------- */
-const dlg = $("#dlg");
-function openDlg(html, cls = "") {
-  dlg.className = cls;
-  $("#dlg-content").innerHTML = html;
-  if (!dlg.open) dlg.showModal();
-  const f = dlg.querySelector("[autofocus]") || dlg.querySelector("input:not([readonly]), select, textarea, .btn.primary");
-  if (f) f.focus();
-}
-const closeBtn = `<button type="button" class="icon-btn dlg-close" data-act="close" aria-label="Fermer">${icon("x")}</button>`;
-function closeDlg() { if (dlg.open) dlg.close(); }
-dlg.addEventListener("click", e => { if (e.target === dlg) closeDlg(); });
-function confirmDlg(title, text, okLabel, fn, danger) {
-  ui.confirmFn = fn;
-  openDlg(`<div class="dlg-body">${closeBtn}<h2 id="dlg-title">${title}</h2><p>${text}</p>
-    <div class="dlg-foot"><button type="button" class="btn" data-act="close">Annuler</button><button type="button" class="btn primary${danger ? " danger" : ""}" data-act="confirmOk" autofocus>${okLabel}</button></div></div>`);
-}
-
-/* ---------- Routage ---------- */
-function parseRoute() { const p = location.hash.replace(/^#\/?/, "").split("/"); return { name: p[0] || "dashboard", id: p[1] }; }
-function go(h) { if (location.hash === h) render(); else location.hash = h; }
-window.addEventListener("hashchange", render);
-
-function render() {
-  let r = parseRoute();
-  const pub = ["login", "signup"].includes(r.name);
-  if (!db.session && !pub) { history.replaceState(null, "", "#/login"); r = { name: "login" }; }
-  if (db.session && pub) { history.replaceState(null, "", "#/dashboard"); r = { name: "dashboard" }; }
-  const app = $("#app");
-  if (r.name === "login" || r.name === "signup") app.innerHTML = authView(r.name);
-  else {
-    let v;
-    if (r.name === "projects") v = projectsView(r.id);
-    else if (r.name === "invoices" && r.id) v = invoiceView(r.id);
-    else if (r.name === "invoices") v = invoicesView();
-    else if (r.name === "settings") v = settingsView();
-    else v = dashView();
-    app.innerHTML = shell(r.name, v);
-  }
-  const key = r.name + "/" + (r.id || "");
-  if (key !== ui.lastRoute) {
-    const first = ui.lastRoute === "";
-    ui.lastRoute = key;
-    const h = $("#page-title");
-    if (h && !first && !dlg.open) h.focus({ preventScroll: true });
-    window.scrollTo(0, 0);
-  }
-}
-
-/* ---------- Authentification ---------- */
-function authView(mode) {
-  const side = `<aside class="auth-side"><div class="brand">${MARK} Tâchio</div>
-    <div><h2>Vos projets, vos tâches et vos factures au même endroit.</h2>
-    <p>Suivez l’avancement de chaque client en listes simples, facturez le temps passé en un clic et encaissez par carte.</p>
-    <ul class="auth-points"><li>${icon("check")} Tableau de bord temps réel</li><li>${icon("check")} Factures PDF conformes, numérotation continue</li><li>${icon("check")} Paiement en ligne Stripe et relances</li></ul></div>
-    <p class="small">Espace hébergé en France · données chiffrées</p></aside>`;
-  if (mode === "signup") {
-    return `<div class="auth">${side}<div class="auth-main"><div class="auth-card">
-      <h1 id="page-title" tabindex="-1">Créer votre espace</h1><p class="muted">14 jours d’essai, sans carte bancaire.</p>
-      <form data-form="signup" novalidate>
-        ${field("su", "name", "Prénom et nom", { attrs: 'autocomplete="name" required' })}
-        ${field("su", "company", "Entreprise", { attrs: 'autocomplete="organization" required', hint: "Elle apparaîtra sur vos factures." })}
-        ${field("su", "email", "E-mail professionnel", { type: "email", attrs: 'autocomplete="email" required' })}
-        <div class="field"><label for="su-pass">Mot de passe</label><input id="su-pass" name="pass" type="password" autocomplete="new-password" aria-describedby="su-pass-h su-pass-e" required>
-          <div class="strength" id="strength" data-s="0" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-          <p class="hint" id="su-pass-h">8 caractères minimum, dont un chiffre.</p><p class="err" id="su-pass-e" data-err="pass"></p></div>
-        <label class="check"><input type="checkbox" name="cgu" aria-describedby="su-cgu-e"> <span>J’accepte les conditions d’utilisation et la politique de confidentialité.</span></label>
-        <p class="err" id="su-cgu-e" data-err="cgu"></p>
-        <button class="btn primary block" type="submit" style="margin-top:10px">Créer mon compte</button>
+<!-- Connexion / inscription -->
+<div id="auth" class="auth" hidden>
+  <section class="auth-side">
+    <div>
+      <div class="brand"><span class="brand-mark"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h4l3-7 4 14 3-7h2"/></svg></span>Cadence</div>
+      <h2>Vos projets, vos tâches et vos factures au même endroit.</h2>
+      <ul>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Suivi de projet en listes simples : à faire, en cours, terminé.</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Les heures terminées deviennent une facture PDF en un clic.</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Paiement en ligne par carte via Stripe, statut mis à jour automatiquement.</span></li>
+      </ul>
+    </div>
+    <small>MVP cliquable — React / TypeScript, API Node (NestJS), PostgreSQL, Stripe.</small>
+  </section>
+  <section class="auth-main">
+    <div class="auth-card">
+      <div class="seg" role="tablist" aria-label="Accès au compte">
+        <button type="button" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login" data-act="authTab" data-t="login">Connexion</button>
+        <button type="button" role="tab" id="tab-signup" aria-selected="false" aria-controls="form-signup" data-act="authTab" data-t="signup">Inscription</button>
+      </div>
+      <form id="form-login" data-form="login" novalidate role="tabpanel" aria-labelledby="tab-login">
+        <h1 style="font-size:22px">Bon retour</h1>
+        <p class="demo-cred">Compte de démonstration pré-rempli : <b>camille@atelier-norde.fr</b> / <b>demo1234</b></p>
+        <div class="field"><label for="l-email">Email professionnel</label><input id="l-email" name="email" type="email" autocomplete="email" value="camille@atelier-norde.fr" aria-describedby="l-email-err"><p class="err" id="l-email-err"></p></div>
+        <div class="field"><label for="l-pass">Mot de passe</label><input id="l-pass" name="password" type="password" autocomplete="current-password" value="demo1234" aria-describedby="l-pass-err"><p class="err" id="l-pass-err"></p></div>
+        <p class="alert" id="login-alert" hidden></p>
+        <button class="btn primary" type="submit">Se connecter</button>
+        <button class="linkbtn" type="button" data-act="forgot">Mot de passe oublié ?</button>
       </form>
-      <p class="small" style="margin-top:18px">Déjà inscrit ? <a href="#/login">Se connecter</a></p>
-    </div></div></div>`;
-  }
-  return `<div class="auth">${side}<div class="auth-main"><div class="auth-card">
-    <h1 id="page-title" tabindex="-1">Connexion</h1><p class="muted">Heureux de vous revoir.</p>
-    <div class="demo-creds"><span>Compte de test : <b>camille@studio-lumen.fr</b> / <b>demo1234</b></span><button type="button" class="btn-sm" data-act="fillLogin">Remplir</button></div>
-    <form data-form="login" novalidate>
-      <p class="alert" id="login-alert" role="alert" hidden></p>
-      ${field("li", "email", "E-mail", { type: "email", attrs: 'autocomplete="email" required' })}
-      ${field("li", "pass", "Mot de passe", { type: "password", attrs: 'autocomplete="current-password" required' })}
-      <p style="margin:-6px 0 14px"><button type="button" class="btn ghost" style="padding:0" data-act="forgot">Mot de passe oublié ?</button></p>
-      <button class="btn primary block" type="submit">Se connecter</button>
-    </form>
-    <p class="small" style="margin-top:18px">Pas encore de compte ? <a href="#/signup">Créer un compte</a></p>
-  </div></div></div>`;
-}
-
-/* ---------- Coquille ---------- */
-function shell(active, content) {
-  const u = me();
-  const late = db.invoices.filter(i => status(i) === "late").length;
-  const item = (h, n, ic, label, extra = "") => `<a href="${h}" ${active === n ? 'aria-current="page"' : ""}>${icon(ic)}<span>${label}</span>${extra}</a>`;
-  return `<div class="shell"><nav class="side" aria-label="Navigation principale">
-    <div class="brand">${MARK} Tâchio</div>
-    <div class="nav">
-      ${item("#/dashboard", "dashboard", "dash", "Tableau de bord")}
-      ${item("#/projects", "projects", "folder", "Projets")}
-      ${item("#/invoices", "invoices", "file", "Factures", late ? `<span class="count" aria-label="${late} en retard">${late}</span>` : "")}
-      ${item("#/settings", "settings", "settings", "Paramètres")}
-    </div>
-    <div class="me"><span class="avatar" aria-hidden="true">${esc(initials(u.name))}</span><div class="who"><b>${esc(u.name)}</b><span>${esc(db.company.name)}</span></div>
-      <button type="button" class="icon-btn" data-act="logout" aria-label="Se déconnecter" title="Se déconnecter">${icon("logout")}</button></div>
-  </nav><main id="main">${content}</main></div>`;
-}
-
-/* ---------- Tableau de bord ---------- */
-function dashView() {
-  const u = me();
-  const since = addDays(TODAY, -30);
-  const paid30 = db.invoices.filter(i => i.status === "paid" && i.paidAt >= since);
-  const pending = db.invoices.filter(i => i.status === "sent");
-  const late = pending.filter(i => status(i) === "late");
-  const sum = a => a.reduce((s, i) => s + totals(i).ttc, 0);
-  const allTasks = db.projects.flatMap(p => p.tasks.map(t => ({ ...t, p })));
-  const open = allTasks.filter(t => t.status !== "done");
-  const lateT = open.filter(isLate);
-  const months = ["2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"];
-  const mLbl = ["mai", "juin", "juil.", "août", "sept.", "oct."];
-  const vals = months.map(m => sum(db.invoices.filter(i => i.status === "paid" && (i.paidAt || "").startsWith(m))));
-  const max = Math.max(...vals, 1);
-  const chart = months.map((m, k) => `<div class="bar${k === 5 ? " cur" : ""}"><b class="num">${vals[k] ? String(Math.round(vals[k] / 100) / 10).replace(".", ",") + " k€" : "0"}</b><i style="height:${Math.max(2, vals[k] / max * 78)}%"></i><span>${mLbl[k]}</span></div>`).join("");
-  const follow = pending.slice().sort((a, b) => a.due.localeCompare(b.due));
-  const due = open.slice().sort((a, b) => (a.due || "9").localeCompare(b.due || "9")).slice(0, 6);
-  return `<div class="page-head"><div><h1 id="page-title" tabindex="-1">Bonjour ${esc(u.name.split(" ")[0])}</h1><p class="sub">Vendredi 2 octobre 2026 · ${open.length} tâches ouvertes sur ${db.projects.length} projets</p></div>
-    <div class="actions"><button type="button" class="btn" data-act="newTask">${icon("plus")} Nouvelle tâche</button><button type="button" class="btn primary" data-act="newInvoice">${icon("plus")} Nouvelle facture</button></div></div>
-  <div class="kpis">
-    <div class="card kpi"><div class="lbl">Encaissé sur 30 jours</div><div class="val num">${eur(sum(paid30))}</div><div class="foot">${paid30.length} facture${paid30.length > 1 ? "s" : ""} payée${paid30.length > 1 ? "s" : ""}</div></div>
-    <div class="card kpi"><div class="lbl">En attente de paiement</div><div class="val num">${eur(sum(pending))}</div><div class="foot">${pending.length} facture${pending.length > 1 ? "s" : ""} envoyée${pending.length > 1 ? "s" : ""}</div></div>
-    <div class="card kpi${late.length ? " alert" : ""}"><div class="lbl">En retard</div><div class="val num">${eur(sum(late))}</div><div class="foot">${late.length ? late.length + " à relancer" : "Aucun retard"}</div></div>
-    <div class="card kpi"><div class="lbl">Tâches ouvertes</div><div class="val num">${open.length}</div><div class="foot">${lateT.length ? `<span style="color:var(--bad);font-weight:700">${lateT.length} en retard</span>` : "Tout est à l’heure"}</div></div>
-  </div>
-  <div class="dash">
-    <div style="display:grid;gap:18px">
-      <section class="card"><h2>Encaissements TTC (6 derniers mois)</h2><div class="chart" role="img" aria-label="Encaissements : ${months.map((m, k) => mLbl[k] + " " + eur(vals[k])).join(", ")}">${chart}</div></section>
-      <section class="card"><h2>Suivi des projets <a href="#/projects" class="small">Tout voir</a></h2><ul class="list">
-        ${db.projects.map(p => { const d = p.tasks.filter(t => t.status === "done").length, n = p.tasks.length, l = p.tasks.filter(isLate).length;
-          return `<li><a class="row-link" href="#/projects/${p.id}"><span class="avatar" style="background:${p.color};color:#fff" aria-hidden="true">${esc(initials(p.name))}</span><span class="grow"><span class="t">${esc(p.name)}</span><span class="s">${esc(client(p.clientId).name)} · ${d}/${n} tâches terminées${l ? ` · <span style="color:var(--bad);font-weight:700">${l} en retard</span>` : ""}</span><span class="progress" aria-hidden="true"><i style="width:${n ? d / n * 100 : 0}%;background:${p.color}"></i></span></span>${icon("chevR")}</a></li>`; }).join("")}
-      </ul></section>
-    </div>
-    <div style="display:grid;gap:18px">
-      <section class="card"><h2>Factures à suivre <a href="#/invoices" class="small">Toutes</a></h2>
-        ${follow.length ? `<ul class="list">${follow.map(i => `<li><a class="row-link" href="#/invoices/${i.id}"><span class="grow"><span class="t">${esc(client(i.clientId).name)}</span><span class="s num">${numStr(i)} · échéance ${dfmt(i.due)}</span></span><span style="text-align:right"><span class="num" style="display:block;font-weight:600">${eur(totals(i).ttc)}</span>${badge(i)}</span></a></li>`).join("")}</ul>` : `<p class="empty">Toutes vos factures sont payées.</p>`}
-      </section>
-      <section class="card"><h2>Prochaines échéances</h2>
-        ${due.length ? `<ul class="list duelist">${due.map(t => `<li><label class="check"><input type="checkbox" data-chg="doneTask" data-id="${t.id}"><span>${esc(t.title)}<small>${esc(t.p.name)} · ${t.due ? (isLate(t) ? `<b style="color:var(--bad)">en retard (${dfmt(t.due)})</b>` : dfmt(t.due)) : "sans échéance"}</small></span></label><span class="avatar" title="${esc(TEAM[t.who] || "")}" aria-label="Assignée à ${esc(TEAM[t.who] || "")}">${esc(t.who)}</span></li>`).join("")}</ul>` : `<p class="empty">Aucune tâche ouverte.</p>`}
-      </section>
-      <section class="card"><h2>Activité récente</h2><ul class="list log">${db.events.slice(0, 6).map(evRow).join("")}</ul></section>
-    </div>
-  </div>`;
-}
-function evRow(e) {
-  const ic = e.kind === "stripe" ? "zap" : e.kind === "mail" ? "mail" : "bank";
-  return `<li><span class="dot${e.kind === "stripe" ? " stripe" : ""}">${icon(ic)}</span><span>${e.code ? `<code>${esc(e.code)}</code> ` : ""}${esc(e.text)}<time>${esc(e.at.replace(" ", " à "))}</time></span></li>`;
-}
-
-/* ---------- Projets ---------- */
-function projectsView(id) {
-  const p = projById(id) || db.projects[0];
-  if (!p) return `<div class="page-head"><h1 id="page-title" tabindex="-1">Projets</h1><button class="btn primary" data-act="newProject">${icon("plus")} Nouveau projet</button></div><p class="empty">Aucun projet.</p>`;
-  const q = ui.taskQuery.trim().toLowerCase();
-  const filtered = p.tasks.filter(t => (!q || t.title.toLowerCase().includes(q)) && (!ui.taskWho || t.who === ui.taskWho));
-  const unbilled = p.tasks.filter(t => t.status === "done" && !t.billed);
-  const unH = unbilled.reduce((s, t) => s + Number(t.hours || 0), 0);
-  const done = p.tasks.filter(t => t.status === "done").length;
-  const spent = p.tasks.filter(t => t.status === "done").reduce((s, t) => s + Number(t.hours || 0), 0);
-  const card = t => {
-    const late = isLate(t);
-    const c = t.status;
-    return `<li class="task${late ? " is-late" : ""}" draggable="true" data-task="${t.id}">
-      <button type="button" class="task-title" data-act="editTask" data-id="${t.id}">${esc(t.title)}</button>
-      <div class="task-foot"><span class="avatar" title="${esc(TEAM[t.who] || "")}" aria-label="Assignée à ${esc(TEAM[t.who] || "non assignée")}">${esc(t.who || "—")}</span>
-        <span class="num">${hrs(t.hours || 0)} h</span>
-        ${t.due ? `<span${late ? ' style="color:var(--bad);font-weight:700"' : ""}>${late ? "En retard · " : ""}${dfmt(t.due)}</span>` : ""}
-        ${t.billed ? `<span class="badge b-paid">Facturée</span>` : ""}
-        <span class="push">
-          ${c !== "todo" && !t.billed ? `<button type="button" class="icon-btn" data-act="moveTask" data-id="${t.id}" data-dir="-1" aria-label="Renvoyer « ${esc(t.title)} » en ${c === "done" ? "cours" : "à faire"}">${icon("chevL")}</button>` : ""}
-          ${c !== "done" ? `<button type="button" class="btn-sm" data-act="moveTask" data-id="${t.id}" data-dir="1" aria-label="${c === "todo" ? "Démarrer" : "Terminer"} « ${esc(t.title)} »">${c === "todo" ? "Démarrer" : "Terminer"}</button>` : ""}
-        </span></div></li>`;
-  };
-  return `<div class="page-head"><div><h1 id="page-title" tabindex="-1">Projets</h1><p class="sub">Glissez les tâches d’une liste à l’autre ou utilisez les boutons.</p></div>
-    <div class="actions"><button type="button" class="btn" data-act="newProject">${icon("plus")} Nouveau projet</button><button type="button" class="btn primary" data-act="newTask" data-project="${p.id}">${icon("plus")} Nouvelle tâche</button></div></div>
-  <nav class="ptabs" aria-label="Projets">${db.projects.map(x => `<a href="#/projects/${x.id}" ${x.id === p.id ? 'aria-current="page"' : ""}><span class="sw" style="background:${x.color}" aria-hidden="true"></span>${esc(x.name)}</a>`).join("")}</nav>
-  <section class="card proj-head" aria-label="Résumé du projet">
-    <div class="stat">Client<b>${esc(client(p.clientId).name)}</b></div>
-    <div class="stat">Taux horaire<b class="num">${eur(p.rate)}</b></div>
-    <div class="stat">Avancement<b class="num">${done}/${p.tasks.length}</b></div>
-    <div class="stat">Temps réalisé<b class="num">${hrs(spent)} h</b></div>
-    <div style="margin-left:auto" class="actions">
-      <button type="button" class="btn primary" data-act="billProject" data-id="${p.id}" ${unH ? "" : "disabled"}>${icon("receipt")} ${unH ? `Facturer ${hrs(unH)} h terminées (${eur(unH * p.rate)} HT)` : "Rien à facturer"}</button>
+      <form id="form-signup" data-form="signup" novalidate role="tabpanel" aria-labelledby="tab-signup" hidden>
+        <h1 style="font-size:22px">Créer votre espace</h1>
+        <p class="hint">14 jours d'essai, sans carte bancaire.</p>
+        <div class="row">
+          <div class="field"><label for="s-name">Nom complet</label><input id="s-name" name="name" autocomplete="name" aria-describedby="s-name-err"><p class="err" id="s-name-err"></p></div>
+          <div class="field"><label for="s-company">Entreprise</label><input id="s-company" name="company" autocomplete="organization" aria-describedby="s-company-err"><p class="err" id="s-company-err"></p></div>
+        </div>
+        <div class="field"><label for="s-email">Email professionnel</label><input id="s-email" name="email" type="email" autocomplete="email" aria-describedby="s-email-err"><p class="err" id="s-email-err"></p></div>
+        <div class="field"><label for="s-pass">Mot de passe</label><input id="s-pass" name="password" type="password" autocomplete="new-password" aria-describedby="s-pass-err s-pass-hint"><p class="hint" id="s-pass-hint">8 caractères minimum, dont un chiffre.</p><p class="err" id="s-pass-err"></p></div>
+        <label class="check"><input type="checkbox" name="cgu" id="s-cgu" aria-describedby="s-cgu-err"><span>J'accepte les conditions d'utilisation et la politique de confidentialité.</span></label>
+        <p class="err" id="s-cgu-err"></p>
+        <button class="btn primary" type="submit">Créer mon compte</button>
+      </form>
     </div>
   </section>
-  <div class="toolbar">
-    <div class="field search"><label for="tq">Rechercher une tâche</label>${icon("search")}<input id="tq" type="search" data-inp="taskQuery" value="${esc(ui.taskQuery)}" placeholder="Titre de la tâche…"></div>
-    <div class="field"><label for="tw">Assignée à</label><select id="tw" data-inp="taskWho"><option value="">Toute l’équipe</option>${Object.entries(TEAM).map(([k, v]) => `<option value="${k}"${ui.taskWho === k ? " selected" : ""}>${v}</option>`).join("")}</select></div>
-  </div>
-  <div class="board">${COLS.map(([k, l, c]) => { const list = filtered.filter(t => t.status === k);
-    return `<section class="col" data-col="${k}" aria-labelledby="col-${k}"><h2 id="col-${k}"><span class="pip" style="background:${c}" aria-hidden="true"></span>${l}<span class="n">${list.length}</span></h2>
-      <ul class="tasks">${list.map(card).join("") || `<li class="empty">${q || ui.taskWho ? "Aucune tâche ne correspond." : "Aucune tâche."}</li>`}</ul>
-      ${k === "todo" ? `<form class="quick" data-form="quick" data-project="${p.id}" novalidate><label for="qa" class="sr">Ajouter rapidement une tâche</label><input id="qa" name="title" placeholder="+ Ajouter une tâche" autocomplete="off"><button class="btn primary" type="submit" aria-label="Ajouter la tâche">${icon("plus")}</button></form>` : ""}
-    </section>`; }).join("")}</div>`;
-}
-function taskDlg(taskId, projectId) {
-  const found = taskId ? findTask(taskId) : {};
-  const t = found.t || { title: "", hours: 2, due: addDays(TODAY, 7), who: "CR", status: "todo" };
-  const pid = found.p ? found.p.id : (projectId || db.projects[0].id);
-  openDlg(`<form class="dlg-body" data-form="task" data-id="${taskId || ""}" novalidate>${closeBtn}<h2 id="dlg-title">${taskId ? "Modifier la tâche" : "Nouvelle tâche"}</h2>
-    ${field("tk", "title", "Intitulé", { value: t.title, attrs: "required autofocus" })}
-    ${field("tk", "project", "Projet", { value: pid, options: db.projects.map(p => [p.id, p.name]), attrs: t.billed ? "disabled" : "" })}
-    <div class="row2">${field("tk", "hours", "Temps estimé (h)", { type: "number", value: t.hours, attrs: 'min="0.25" step="0.25" inputmode="decimal"' })}
-    ${field("tk", "due", "Échéance", { type: "date", value: t.due })}</div>
-    <div class="row2">${field("tk", "who", "Assignée à", { value: t.who, options: Object.entries(TEAM) })}
-    ${field("tk", "status", "Liste", { value: t.status, options: COLS.map(c => [c[0], c[1]]), attrs: t.billed ? "disabled" : "" })}</div>
-    ${t.billed ? `<p class="note">${icon("info")} Tâche déjà facturée : projet et liste verrouillés.</p>` : ""}
-    <div class="dlg-foot">${taskId && !t.billed ? `<button type="button" class="btn danger left" data-act="delTask" data-id="${taskId}">${icon("trash")} Supprimer</button>` : ""}<button type="button" class="btn" data-act="close">Annuler</button><button class="btn primary" type="submit">${taskId ? "Enregistrer" : "Créer la tâche"}</button></div></form>`);
-}
-function moveTask(id, to) {
-  const { p, t } = findTask(id);
-  if (!t) return;
-  if (t.billed) { toast("Cette tâche est déjà facturée.", "info"); return; }
-  t.status = to;
-  save(); render();
-  toast(`« ${t.title} » → ${COLS.find(c => c[0] === to)[1]}`);
-}
+</div>
 
-/* ---------- Factures : liste ---------- */
-function invoicesView() {
-  const counts = { all: db.invoices.length };
-  for (const k of Object.keys(ST)) counts[k] = db.invoices.filter(i => status(i) === k).length;
-  const q = ui.invQuery.trim().toLowerCase();
-  const list = db.invoices.filter(i => (ui.invFilter === "all" || status(i) === ui.invFilter) && (!q || (numStr(i) + " " + client(i.clientId).name).toLowerCase().includes(q)))
-    .sort((a, b) => (b.num || 999) - (a.num || 999));
-  const chips = [["all", "Toutes"], ["draft", "Brouillons"], ["sent", "Envoyées"], ["late", "En retard"], ["paid", "Payées"]];
-  return `<div class="page-head"><div><h1 id="page-title" tabindex="-1">Factures</h1><p class="sub">Numérotation continue ${esc(db.company.prefix)}xxx · TVA ${hrs(db.company.vat)} %</p></div>
-    <div class="actions"><button type="button" class="btn primary" data-act="newInvoice">${icon("plus")} Nouvelle facture</button></div></div>
-  <div class="toolbar">
-    <div class="chips" role="group" aria-label="Filtrer par statut">${chips.map(([k, l]) => `<button type="button" class="chip" data-act="invFilter" data-v="${k}" aria-pressed="${ui.invFilter === k}">${l}<span class="n">${counts[k]}</span></button>`).join("")}</div>
-    <div class="field search" style="margin-left:auto"><label for="iq" class="sr">Rechercher une facture</label>${icon("search")}<input id="iq" type="search" data-inp="invQuery" value="${esc(ui.invQuery)}" placeholder="N° ou client…"></div>
-  </div>
-  <div class="inv-table" id="inv-list">
-    <div class="inv-row head" aria-hidden="true"><span>Numéro</span><span>Client</span><span class="c-date">Émise le</span><span>Échéance</span><span class="amt">Montant TTC</span><span>Statut</span></div>
-    ${list.map(i => `<a class="inv-row" href="#/invoices/${i.id}"><span class="c-num num">${numStr(i)}</span><span class="cl">${esc(client(i.clientId).name)}</span><span class="c-date">${dfmt(i.date)}</span><span class="c-due">${dfmt(i.due)}</span><span class="amt num">${eur(totals(i).ttc)}</span><span class="c-st">${badge(i)}</span></a>`).join("") || `<p class="empty">Aucune facture ne correspond à ce filtre.</p>`}
-  </div>`;
-}
-function newInvoice(clientId, lines, extra = {}) {
-  const inv = { id: "i" + uid(), num: null, clientId: clientId || db.clients[0].id, date: TODAY, due: addDays(TODAY, 30), status: "draft", lines: lines || [{ label: "", qty: 1, price: 0 }], notes: "", ...extra };
-  db.invoices.push(inv);
-  save();
-  return inv;
-}
-
-/* ---------- Facture : détail ---------- */
-function paper(inv) {
-  const c = client(inv.clientId), t = totals(inv), co = db.company, s = status(inv);
-  return `<article class="paper" aria-label="Aperçu de la facture">
-    ${s === "paid" ? `<div class="stamp">Payée</div>` : s === "draft" ? `<div class="stamp draft">Brouillon</div>` : ""}
-    <div class="p-top"><div><div class="p-brand">${esc(co.name)}</div><div class="p-small">${esc(co.address)}
-SIRET ${esc(co.siret)}
-${esc(co.email)}</div></div>
-    <div class="p-right"><div class="p-title">Facture</div><div class="p-num">${inv.num ? numStr(inv) : "N° attribué à l’envoi"}</div><div>Émise le ${dlong(inv.date)}</div><div>Échéance : ${dlong(inv.due)}</div></div></div>
-    <div class="p-client"><div class="p-lbl">Facturé à</div><b>${esc(c.name)}</b>
-${esc(c.contact)}
-${esc(c.address)}</div>
-    <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">P.U. HT</th><th class="r">Total HT</th></tr></thead>
-    <tbody>${inv.lines.map(l => `<tr><td>${esc(l.label) || '<span style="color:#8A93A6">—</span>'}</td><td class="r">${hrs(Number(l.qty) || 0)}</td><td class="r">${eur(l.price)}</td><td class="r">${eur((Number(l.qty) || 0) * (Number(l.price) || 0))}</td></tr>`).join("")}</tbody></table>
-    <div class="p-tot"><span>Total HT</span><span class="r">${eur(t.ht)}</span><span>TVA ${hrs(co.vat)} %</span><span class="r">${eur(t.tva)}</span><span class="g">Total TTC</span><span class="g r">${eur(t.ttc)}</span></div>
-    ${inv.notes ? `<div class="p-notes">${esc(inv.notes)}</div>` : ""}
-    ${s === "paid" ? `<p style="margin-top:14px;color:#1B7044;font-weight:700">Réglée le ${dlong(inv.paidAt)} · ${esc(inv.paidVia || "")}</p>` : ""}
-    <div class="p-foot">Paiement par carte via le lien sécurisé joint, ou par virement : IBAN ${esc(co.iban)}. En cas de retard, pénalités au taux de 3 fois l’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40 €. Pas d’escompte pour paiement anticipé.</div>
-  </article>`;
-}
-function invoiceView(id) {
-  const inv = invById(id);
-  if (!inv) return `<a class="back" href="#/invoices">${icon("chevL")} Factures</a><div class="page-head"><h1 id="page-title" tabindex="-1">Facture introuvable</h1></div>`;
-  const s = status(inv), t = totals(inv), c = client(inv.clientId);
-  if (s === "draft") {
-    return `<a class="back" href="#/invoices">${icon("chevL")} Factures</a>
-    <div class="page-head"><h1 id="page-title" tabindex="-1">Nouvelle facture ${badge(inv)}</h1>
-      <div class="actions"><button type="button" class="btn danger" data-act="delInvoice" data-id="${id}">${icon("trash")} Supprimer</button><button type="button" class="btn" data-act="print" data-id="${id}">${icon("download")} Aperçu PDF</button><button type="button" class="btn primary" data-act="finalize" data-id="${id}">${icon("send")} Finaliser et envoyer</button></div></div>
-    <div class="inv-grid">
-      <section class="card" aria-label="Édition">
-        <div id="inv-errors" role="alert"></div>
-        <form id="inv-form" data-form="noop" novalidate>
-          ${field("iv", "clientId", "Client", { value: inv.clientId, options: db.clients.map(x => [x.id, x.name]), attrs: 'data-inv="clientId"' })}
-          <div class="row2">${field("iv", "date", "Date d’émission", { type: "date", value: inv.date, attrs: 'data-inv="date"' })}${field("iv", "due", "Échéance", { type: "date", value: inv.due, attrs: 'data-inv="due"' })}</div>
-          <h2 style="margin:6px 0 0">Lignes</h2>
-          <div id="lines">${inv.lines.map((l, k) => lineRow(l, k)).join("")}</div>
-          <button type="button" class="btn" data-act="addLine" data-id="${id}" style="margin-top:6px">${icon("plus")} Ajouter une ligne</button>
-          <div class="totals" id="totals">${totalsHtml(t)}</div>
-          ${field("iv", "notes", "Note visible sur la facture (facultatif)", { type: "textarea", value: inv.notes, attrs: 'data-inv="notes" placeholder="Ex. : Merci pour votre confiance."' })}
-          <p class="hint">${icon("check")} Brouillon enregistré automatiquement. Le numéro définitif est attribué à l’envoi.</p>
-        </form>
-      </section>
-      <section class="paper-wrap" id="paper" aria-label="Aperçu">${paper(inv)}</section>
-    </div>`;
-  }
-  const steps = [["Créée", true, dfmt(inv.date)], ["Envoyée à " + c.email, true, dfmt(inv.sentAt || inv.date)], [s === "paid" ? "Payée · " + (inv.paidVia || "") : s === "late" ? "En retard depuis le " + dfmt(inv.due) : "En attente de paiement", s === "paid", s === "paid" ? dfmt(inv.paidAt) : ""]];
-  return `<a class="back" href="#/invoices">${icon("chevL")} Factures</a>
-  <div class="page-head"><div><h1 id="page-title" tabindex="-1"><span class="num">${numStr(inv)}</span> ${badge(inv)}</h1><p class="sub">${esc(c.name)} · émise le ${dfmt(inv.date)}</p></div>
-    <div class="actions"><button type="button" class="btn" data-act="duplicate" data-id="${id}">${icon("copy")} Dupliquer</button><button type="button" class="btn" data-act="print" data-id="${id}">${icon("download")} Télécharger le PDF</button></div></div>
-  <div class="inv-grid view">
-    <section class="paper-wrap">${paper(inv)}</section>
-    <aside class="card">
-      <div class="lbl muted">Montant TTC</div><p class="amount-big num">${eur(t.ttc)}</p>
-      <ol class="timeline">${steps.map(([l, d, when]) => `<li class="${d ? "done" : ""}"><span class="tdot">${d ? icon("check") : ""}</span><span>${esc(l)}${when ? `<br><span class="small muted">${when}</span>` : ""}</span></li>`).join("")}</ol>
-      ${s !== "paid" ? `<div class="aside-actions">
-        <button type="button" class="btn primary" data-act="checkout" data-id="${id}">${icon("card")} Payer en ligne (vue client)</button>
-        <button type="button" class="btn" data-act="mail" data-id="${id}" data-kind="${s === "late" ? "remind" : "resend"}">${icon("mail")} ${s === "late" ? "Envoyer une relance" : "Renvoyer par e-mail"}</button>
-        <button type="button" class="btn" data-act="markPaid" data-id="${id}">${icon("bank")} Marquer payée (virement)</button>
-      </div>
-      <div class="field" style="margin:16px 0 0"><label for="plink">Lien de paiement Stripe</label><div class="linkbox"><input id="plink" readonly value="${payLink(inv)}"><button type="button" class="icon-btn" data-act="copyLink" aria-label="Copier le lien">${icon("copy")}</button></div></div>`
-      : `<p class="note">${icon("check")} Paiement reçu le ${dfmt(inv.paidAt)}. Le reçu a été envoyé au client.</p>`}
-    </aside>
-  </div>`;
-}
-function lineRow(l, k) {
-  return `<div class="line">
-    <div class="field l-label"><label for="ln-${k}-label">Désignation</label><input id="ln-${k}-label" data-line="${k}" data-k="label" value="${esc(l.label)}" placeholder="Prestation…"></div>
-    <div class="field l-qty"><label for="ln-${k}-qty">Qté</label><input id="ln-${k}-qty" type="number" min="0" step="0.25" inputmode="decimal" data-line="${k}" data-k="qty" value="${esc(l.qty)}"></div>
-    <div class="field l-price"><label for="ln-${k}-price">P.U. HT (€)</label><input id="ln-${k}-price" type="number" min="0" step="0.01" inputmode="decimal" data-line="${k}" data-k="price" value="${esc(l.price)}"></div>
-    <div class="l-total num" id="lt-${k}">${eur((Number(l.qty) || 0) * (Number(l.price) || 0))}</div>
-    <button type="button" class="icon-btn l-del" data-act="delLine" data-i="${k}" aria-label="Supprimer la ligne ${k + 1}">${icon("trash")}</button>
-  </div>`;
-}
-const totalsHtml = t => `<span>Total HT</span><span class="num">${eur(t.ht)}</span><span>TVA ${hrs(db.company.vat)} %</span><span class="num">${eur(t.tva)}</span><span class="big">Total TTC</span><span class="big num">${eur(t.ttc)}</span>`;
-function refreshDraft(inv) {
-  inv.lines.forEach((l, k) => { const el = $("#lt-" + k); if (el) el.textContent = eur((Number(l.qty) || 0) * (Number(l.price) || 0)); });
-  $("#totals").innerHTML = totalsHtml(totals(inv));
-  $("#paper").innerHTML = paper(inv);
-  save();
-}
-function validateDraft(inv) {
-  const errs = [];
-  document.querySelectorAll("#lines [aria-invalid]").forEach(el => el.removeAttribute("aria-invalid"));
-  if (!inv.lines.length) errs.push("Ajoutez au moins une ligne.");
-  inv.lines.forEach((l, k) => {
-    if (!l.label.trim()) { errs.push(`Ligne ${k + 1} : la désignation est obligatoire.`); $(`#ln-${k}-label`)?.setAttribute("aria-invalid", "true"); }
-    if (!(Number(l.qty) > 0)) { errs.push(`Ligne ${k + 1} : la quantité doit être supérieure à 0.`); $(`#ln-${k}-qty`)?.setAttribute("aria-invalid", "true"); }
-    if (!(Number(l.price) >= 0) || l.price === "") { errs.push(`Ligne ${k + 1} : prix invalide.`); $(`#ln-${k}-price`)?.setAttribute("aria-invalid", "true"); }
-  });
-  if (inv.due < inv.date) errs.push("L’échéance doit être postérieure à la date d’émission.");
-  if (!errs.length && totals(inv).ttc <= 0) errs.push("Le montant total doit être supérieur à 0 €.");
-  const box = $("#inv-errors");
-  box.innerHTML = errs.length ? `<div class="alert">Impossible de finaliser :<ul>${errs.map(e => `<li>${esc(e)}</li>`).join("")}</ul></div>` : "";
-  if (errs.length) { const f = document.querySelector('#lines [aria-invalid="true"]'); (f || box).focus?.(); }
-  return !errs.length;
-}
-
-/* ---------- E-mail (simulation) ---------- */
-function mailDlg(id, kind) {
-  const inv = invById(id), c = client(inv.clientId), t = totals(inv);
-  const n = inv.num ? numStr(inv) : db.company.prefix + String(db.company.next).padStart(3, "0");
-  const subj = kind === "remind" ? `Relance : facture ${n} échue le ${dfmt(inv.due)}` : `Facture ${n} — ${db.company.name}`;
-  const body = kind === "remind"
-    ? `Bonjour ${c.contact},\n\nSauf erreur de notre part, la facture ${n} d’un montant de ${eur(t.ttc)} TTC, arrivée à échéance le ${dlong(inv.due)}, reste impayée.\n\nVous pouvez la régler en ligne par carte en quelques secondes :\n${payLink(inv)}\n\nBien cordialement,\n${me().name}`
-    : `Bonjour ${c.contact},\n\nVeuillez trouver ci-joint la facture ${n} d’un montant de ${eur(t.ttc)} TTC, payable avant le ${dlong(inv.due)}.\n\nPaiement par carte :\n${payLink(inv)}\n\nMerci pour votre confiance,\n${me().name}`;
-  openDlg(`<form class="dlg-body" data-form="mail" data-id="${id}" data-kind="${kind}" novalidate>${closeBtn}<h2 id="dlg-title">${kind === "remind" ? "Relancer le client" : kind === "send" ? "Envoyer la facture" : "Renvoyer la facture"}</h2>
-    ${field("ml", "to", "Destinataire", { type: "email", value: c.email, attrs: "required" })}
-    ${field("ml", "subject", "Objet", { value: subj, attrs: "required" })}
-    ${field("ml", "body", "Message", { type: "textarea", value: body, attrs: 'rows="9"' })}
-    <p class="note">${icon("file")} Pièce jointe : ${esc(n)}.pdf · lien de paiement Stripe inclus</p>
-    <div class="dlg-foot"><button type="button" class="btn" data-act="close">Annuler</button><button class="btn primary" type="submit">${icon("send")} Envoyer</button></div></form>`);
-}
-
-/* ---------- Paiement (Stripe Checkout simulé) ---------- */
-function checkoutDlg(id) {
-  const inv = invById(id), t = totals(inv), c = client(inv.clientId);
-  openDlg(`<div class="co">${closeBtn}
-    <div class="co-sum"><div class="brand" style="font-size:16px">${MARK} ${esc(db.company.name)}</div>
-      <span class="testbadge">Mode test</span>
-      <p class="muted" style="margin:0">Facture ${numStr(inv)} · ${esc(c.name)}</p>
-      <p class="co-amount num">${eur(t.ttc)}</p>
-      <dl><dt>Total HT</dt><dd class="num">${eur(t.ht)}</dd><dt>TVA ${hrs(db.company.vat)} %</dt><dd class="num">${eur(t.tva)}</dd><dt>Échéance</dt><dd>${dfmt(inv.due)}</dd></dl>
-      <p class="small muted hidesm" style="display:flex;gap:8px">${icon("lock")}<span>Paiement simulé : aucune carte n’est débitée. En production, Stripe Checkout et un webhook <code>checkout.session.completed</code> mettent la facture à jour.</span></p>
+<!-- Application -->
+<div id="app" class="shell" hidden>
+  <aside class="side" aria-label="Navigation principale">
+    <div class="brand"><span class="brand-mark"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h4l3-7 4 14 3-7h2"/></svg></span>Cadence</div>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <div class="plan-box" id="plan-box"></div>
+      <div class="me" id="me"></div>
     </div>
-    <form class="co-form" data-form="pay" data-id="${id}" novalidate>
-      <h2 id="dlg-title">Payer par carte</h2>
-      ${field("py", "email", "E-mail du payeur", { type: "email", value: c.email, attrs: 'autocomplete="email"' })}
-      ${field("py", "card", "Numéro de carte", { attrs: 'inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234" maxlength="19" data-fmt="card"' })}
-      <div class="testcards"><span>Cartes de test :</span><button type="button" class="btn-sm" data-act="fillCard" data-card="4242424242424242">4242… acceptée</button><button type="button" class="btn-sm" data-act="fillCard" data-card="4000000000000002">0002… refusée</button></div>
-      <div class="row2" style="grid-template-columns:1fr 1fr">${field("py", "exp", "Expiration", { attrs: 'inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" data-fmt="exp"' })}
-      ${field("py", "cvc", "CVC", { attrs: 'inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"' })}</div>
-      ${field("py", "holder", "Titulaire de la carte", { value: c.contact, attrs: 'autocomplete="cc-name"' })}
-      <p class="alert" id="pay-alert" role="alert" hidden></p>
-      <button class="btn primary block" type="submit" id="paybtn">${icon("lock")} Payer ${eur(t.ttc)}</button>
-    </form></div>`, "wide");
-}
-function luhn(d) { let s = 0; for (let i = 0; i < d.length; i++) { let n = +d[d.length - 1 - i]; if (i % 2) { n *= 2; if (n > 9) n -= 9; } s += n; } return s % 10 === 0; }
+  </aside>
+  <main class="main" id="view" tabindex="-1"></main>
+</div>
 
-/* ---------- Paramètres ---------- */
-function settingsView() {
-  const co = db.company;
-  const stripeEv = db.events.filter(e => e.kind === "stripe");
-  return `<div class="page-head"><div><h1 id="page-title" tabindex="-1">Paramètres</h1><p class="sub">Ces informations figurent sur chaque facture.</p></div></div>
-  <div class="settings">
-    <section class="card"><h2>Entreprise</h2>
-      <form data-form="company" novalidate>
-        ${field("co", "name", "Raison sociale", { value: co.name, attrs: "required" })}
-        <div class="row2">${field("co", "siret", "SIRET", { value: co.siret, attrs: 'inputmode="numeric"', hint: "14 chiffres" })}${field("co", "email", "E-mail de facturation", { type: "email", value: co.email })}</div>
-        ${field("co", "address", "Adresse", { type: "textarea", value: co.address, attrs: 'rows="2"' })}
-        ${field("co", "iban", "IBAN", { value: co.iban })}
-        <div class="row2">${field("co", "prefix", "Préfixe de numérotation", { value: co.prefix, hint: "Prochaine facture : " + esc(co.prefix + String(co.next).padStart(3, "0")) })}
-        ${field("co", "vat", "Taux de TVA par défaut", { value: co.vat, options: [[20, "20 %"], [10, "10 %"], [5.5, "5,5 %"], [0, "0 % (franchise en base)"]] })}</div>
-        <button class="btn primary" type="submit">Enregistrer</button>
-      </form></section>
-    <section class="card"><h2>Paiement en ligne <span class="badge b-paid">${icon("check")} Connecté</span></h2>
-      <dl class="kv"><dt>Fournisseur</dt><dd>Stripe (mode test)</dd><dt>Compte</dt><dd class="num">acct_1Qx8TestDemo42</dd><dt>Webhook</dt><dd class="num">/api/stripe/webhook</dd><dt>Moyens</dt><dd>Carte bancaire, Apple Pay, Google Pay</dd></dl>
-      <h2 style="margin-top:18px">Derniers événements reçus</h2>
-      <ul class="list log">${stripeEv.length ? stripeEv.slice(0, 6).map(evRow).join("") : `<li class="empty">Aucun événement.</li>`}</ul>
-    </section>
+<dialog id="dlg" aria-labelledby="dlg-title"><div id="dlg-body"></div></dialog>
+<div id="toasts" aria-live="polite"></div>
+<div id="print-area"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='cadence-demo-v1';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtEur=new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'});
+const eur=n=>fmtEur.format(n);
+const pad=n=>String(n).padStart(2,'0');
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const iso=off=>{const d=new Date(TODAY);d.setDate(d.getDate()+off);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());};
+const toDate=s=>new Date(s+'T00:00:00');
+const daysFrom=s=>Math.round((toDate(s)-TODAY)/864e5);
+const dShort=s=>toDate(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+const dLong=s=>toDate(s).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const YEAR=TODAY.getFullYear();
+
+const IC={
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',check:'<path d="M20 6 9 17l-5-5"/>',
+  left:'<path d="M15 18l-6-6 6-6"/>',right:'<path d="M9 18l6-6-6-6"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  print:'<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
+  euro:'<path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/>',alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'
+};
+const ic=(n,extra='')=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true" ${extra}>${IC[n]}</svg>`;
+
+const TEAM=[{id:'cm',name:'Camille Martin',c:'#3B4FD8'},{id:'tr',name:'Théo Roussel',c:'#0F7A5C'},{id:'lb',name:'Lina Benali',c:'#A23B72'},{id:'hg',name:'Hugo Garnier',c:'#9A5300'}];
+const member=id=>TEAM.find(m=>m.id===id)||TEAM[0];
+const initials=n=>n.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const COLS=[['todo','À faire','#8A93A6'],['doing','En cours','#D08A12'],['done','Terminé','#17924F']];
+const ST={draft:'Brouillon',sent:'Envoyée',late:'En retard',paid:'Payée'};
+const PLANS=[
+  {id:'starter',name:'Starter',price:0,desc:'Pour démarrer seul.',feat:['4 projets actifs','Factures PDF illimitées','1 utilisateur']},
+  {id:'pro',name:'Pro',price:29,desc:'Pour les petites équipes.',feat:['Projets illimités','Paiement en ligne des factures','5 utilisateurs','Relances automatiques']},
+  {id:'team',name:'Équipe',price:79,desc:'Pour les structures en croissance.',feat:['Tout le plan Pro','Utilisateurs illimités','Rôles et permissions','Export comptable']}
+];
+
+function seed(){
+  const T=(id,p,title,status,a,due,h,billed)=>({id,projectId:p,title,status,assignee:a,due:iso(due),hours:h,billed:billed||null});
+  return {
+    user:null,
+    accounts:[{name:'Camille Martin',company:'Atelier Norde',email:'camille@atelier-norde.fr',password:'demo1234'}],
+    plan:'starter',
+    seq:{task:100,inv:45,proj:10,cli:10},
+    clients:[
+      {id:'c1',name:'Brasserie Les Docks',email:'compta@brasserie-lesdocks.fr',addr:'4 quai de la Fosse, 44000 Nantes'},
+      {id:'c2',name:'Cabinet Verlaine Avocats',email:'factures@verlaine-avocats.fr',addr:'27 cours Clemenceau, 33000 Bordeaux'},
+      {id:'c3',name:'Optique Saint-Rémi',email:'contact@optique-stremi.fr',addr:'9 place du Marché, 35000 Rennes'},
+      {id:'c4',name:'Studio Halde Architecture',email:'admin@studio-halde.fr',addr:'112 rue Nationale, 59000 Lille'}
+    ],
+    projects:[
+      {id:'p1',name:'Refonte site e-commerce',clientId:'c1',rate:75},
+      {id:'p2',name:'Portail client sécurisé',clientId:'c2',rate:85},
+      {id:'p3',name:'Campagne de rentrée',clientId:'c3',rate:60},
+      {id:'p4',name:'Application suivi de chantier',clientId:'c4',rate:90}
+    ],
+    tasks:[
+      T('t1','p1','Atelier de cadrage et arborescence','done','cm',-20,6,'i42'),
+      T('t2','p1','Intégration des maquettes accueil','done','tr',-8,12,'i42'),
+      T('t3','p1','Fiche produit et panier','done','tr',-2,10),
+      T('t4','p1','Branchement du module de paiement','doing','lb',3,8),
+      T('t5','p1','Recette sur mobile','todo','hg',7,5),
+      T('t6','p1','Mise en ligne et redirections','todo','cm',12,3),
+      T('t7','p2','Espace documents sécurisé','doing','lb',1,14),
+      T('t8','p2','Authentification à double facteur','done','lb',-5,6),
+      T('t9','p2','Prise de rendez-vous en ligne','todo','tr',9,10),
+      T('t10','p2','Export comptable mensuel','todo','cm',-1,4),
+      T('t11','p3','Visuels réseaux sociaux','done','hg',-25,8,'i41'),
+      T('t12','p3','Landing page offre étudiants','done','tr',-22,6,'i41'),
+      T('t13','p3','Emailing de relance','doing','hg',2,3),
+      T('t14','p4','Ateliers utilisateurs sur site','done','cm',-15,5,'i44'),
+      T('t15','p4','Prototype de l\'écran planning','doing','tr',4,12),
+      T('t16','p4','Synchronisation hors ligne','todo','lb',14,16),
+      T('t17','p4','Rapports photo en PDF','todo','hg',18,8)
+    ],
+    invoices:[
+      {id:'i41',number:`F-${YEAR}-0041`,clientId:'c3',projectId:'p3',subject:'Campagne de rentrée',date:iso(-21),due:iso(9),status:'paid',paidAt:iso(-12),lines:[{label:'Visuels réseaux sociaux',qty:8,price:60},{label:'Landing page offre étudiants',qty:6,price:60}]},
+      {id:'i42',number:`F-${YEAR}-0042`,clientId:'c1',projectId:'p1',subject:'Refonte site e-commerce — lot 1',date:iso(-6),due:iso(24),status:'sent',lines:[{label:'Atelier de cadrage et arborescence',qty:6,price:75},{label:'Intégration des maquettes accueil',qty:12,price:75}]},
+      {id:'i43',number:`F-${YEAR}-0043`,clientId:'c2',projectId:'p2',subject:'Portail client — conception',date:iso(-40),due:iso(-10),status:'sent',lines:[{label:'Audit sécurité de l\'existant',qty:7,price:85},{label:'Architecture technique',qty:5,price:85}]},
+      {id:'i44',number:`F-${YEAR}-0044`,clientId:'c4',projectId:'p4',subject:'Suivi de chantier — ateliers',date:iso(0),due:iso(30),status:'draft',lines:[{label:'Ateliers utilisateurs sur site',qty:5,price:90}]}
+    ],
+    payments:[{id:'pi_3QkT8sLw2xA41',date:iso(-12),label:`Facture F-${YEAR}-0041`,amount:1008,method:'Visa •••• 4242'}]
+  };
+}
+let state;
+try{state=JSON.parse(localStorage.getItem(KEY))}catch(e){state=null}
+if(!state||!state.tasks)state=seed();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+const ui={view:'dash',projectId:null,invoiceId:null,invFilter:'all',invSearch:'',taskSearch:'',taskWho:'',focus:null,flash:null};
+
+const client=id=>state.clients.find(c=>c.id===id)||{name:'—',email:'',addr:''};
+const project=id=>state.projects.find(p=>p.id===id);
+const statusOf=i=>i.status==='sent'&&daysFrom(i.due)<0?'late':i.status;
+const ht=i=>sum(i.lines.map(l=>l.qty*l.price));
+const ttc=i=>Math.round(ht(i)*1.2*100)/100;
+const badge=s=>`<span class="badge b-${s}">${ST[s]}</span>`;
+const av=id=>{const m=member(id);return `<span class="avatar" style="background:${m.c}" title="${esc(m.name)}" aria-label="${esc(m.name)}">${initials(m.name)}</span>`};
+const whenTxt=(s)=>{const d=daysFrom(s);if(d<0)return{c:'late',t:`En retard · ${dShort(s)}`};if(d===0)return{c:'soon',t:"Aujourd'hui"};if(d<=3)return{c:'soon',t:d===1?'Demain':`Dans ${d} j`};return{c:'',t:dShort(s)}};
+const progress=p=>{const ts=state.tasks.filter(t=>t.projectId===p.id);const d=ts.filter(t=>t.status==='done').length;return{total:ts.length,done:d,pct:ts.length?Math.round(d/ts.length*100):0}};
+const unbilledOf=pid=>state.tasks.filter(t=>t.projectId===pid&&t.status==='done'&&!t.billed);
+
+function toast(msg,icon='check'){const t=document.createElement('div');t.className='toast';t.innerHTML=ic(icon)+'<span>'+esc(msg)+'</span>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200)}
+
+function setErr(input,msg){if(!input)return;input.setAttribute('aria-invalid',msg?'true':'false');const e=document.getElementById(input.id+'-err');if(e)e.textContent=msg||''}
+const field=(id,label,control,hint='')=>`<div class="field"><label for="${id}">${label}</label>${control}${hint?`<p class="hint">${hint}</p>`:''}<p class="err" id="${id}-err"></p></div>`;
+const input=(id,name,attrs='')=>`<input id="${id}" name="${name}" aria-describedby="${id}-err" ${attrs}>`;
+const select=(id,name,opts,val)=>`<select id="${id}" name="${name}" aria-describedby="${id}-err">${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(val)?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
+const teamOpts=()=>TEAM.map(m=>[m.id,m.name]);
+const isEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+/* ---------- Rendu ---------- */
+function render(){
+  const logged=!!state.user;
+  $('#auth').hidden=logged;$('#app').hidden=!logged;
+  if(!logged)return;
+  renderSide();
+  const v=ui.view;
+  $('#view').innerHTML=v==='projects'?viewProjects():v==='invoices'?viewInvoices():v==='billing'?viewBilling():viewDash();
+  if(ui.focus){const el=$(ui.focus);if(el)el.focus();ui.focus=null}
+  if(ui.flash){const el=$(`[data-task="${ui.flash}"]`);if(el){el.classList.add('flash');el.scrollIntoView({block:'nearest'})}ui.flash=null}
+}
+function renderSide(){
+  const late=state.invoices.filter(i=>statusOf(i)==='late').length;
+  const items=[['dash','Tableau de bord','grid'],['projects','Projets','folder'],['invoices','Factures','file'],['billing','Abonnement','card']];
+  $('#nav').innerHTML=items.map(([v,l,i])=>`<button type="button" class="nav-btn" data-act="nav" data-v="${v}"${ui.view===v?' aria-current="page"':''}>${ic(i)}<span>${l}</span>${v==='invoices'&&late?`<span class="count" aria-label="${late} en retard">${late}</span>`:''}</button>`).join('');
+  const plan=PLANS.find(p=>p.id===state.plan);
+  $('#plan-box').innerHTML=`Plan <b>${plan.name}</b>${state.plan==='starter'?`<br>${state.projects.length}/4 projets utilisés<button type="button" data-act="nav" data-v="billing">Passer au Pro</button>`:'<br>Abonnement actif'}`;
+  const u=state.user;
+  $('#me').innerHTML=`<span class="avatar" style="background:#5466F0">${initials(u.name)}</span><span class="who"><b>${esc(u.name)}</b><span>${esc(u.company)}</span></span><button type="button" class="icon-btn" data-act="logout" aria-label="Se déconnecter" title="Se déconnecter">${ic('logout')}</button>`;
+}
+
+function viewDash(){
+  const T=state.tasks,I=state.invoices;
+  const doing=T.filter(t=>t.status==='doing');
+  const ub=T.filter(t=>t.status==='done'&&!t.billed);
+  const ubH=sum(ub.map(t=>t.hours)),ubAmt=sum(ub.map(t=>t.hours*project(t.projectId).rate));
+  const paid=I.filter(i=>i.status==='paid');
+  const pend=I.filter(i=>['sent','late'].includes(statusOf(i)));const late=pend.filter(i=>statusOf(i)==='late');
+  const upcoming=T.filter(t=>t.status!=='done').sort((a,b)=>a.due.localeCompare(b.due)).slice(0,7);
+  const lastInv=[...I].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const first=state.user.name.split(' ')[0];
+  return `<div class="page-head"><div><h1>Bonjour ${esc(first)}</h1><p>${TODAY.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} · ${esc(state.user.company)}</p></div>
+  <div class="actions"><button class="btn" type="button" data-act="newProject">${ic('plus')}Nouveau projet</button><button class="btn primary" type="button" data-act="newInvoice">${ic('file')}Nouvelle facture</button></div></div>
+  <div class="kpis">
+    <div class="card kpi"><div class="lbl">${ic('clock')}Tâches en cours</div><div class="val num">${doing.length}</div><div class="sub">${T.filter(t=>t.status==='todo').length} à faire · ${T.filter(t=>t.status==='done').length} terminées</div></div>
+    <div class="card kpi"><div class="lbl">${ic('bolt')}À facturer</div><div class="val num">${eur(ubAmt)}</div><div class="sub">${ubH} h terminées non facturées</div></div>
+    <div class="card kpi"><div class="lbl">${ic('euro')}Encaissé</div><div class="val num">${eur(sum(paid.map(ttc)))}</div><div class="sub">${paid.length} facture${paid.length>1?'s':''} payée${paid.length>1?'s':''}</div></div>
+    <div class="card kpi"><div class="lbl">${ic('file')}En attente de paiement</div><div class="val num">${eur(sum(pend.map(ttc)))}</div><div class="sub${late.length?' bad':''}">${late.length?`${late.length} en retard`:'Aucun retard'}</div></div>
+  </div>
+  <div class="dash-grid">
+    <section class="card"><div class="card-h"><h2>Avancement des projets</h2><button class="btn sm ghost" type="button" data-act="nav" data-v="projects">Tout voir</button></div>
+      <ul class="plist">${state.projects.map(p=>{const g=progress(p);return `<li><button type="button" class="prow" data-act="openProject" data-id="${p.id}"><span><span class="t">${esc(p.name)}</span><br><span class="s">${esc(client(p.clientId).name)}</span></span><span class="s num">${g.done}/${g.total}</span><span class="bar" aria-hidden="true"><span style="width:${g.pct}%"></span></span></button></li>`}).join('')}</ul></section>
+    <section class="card"><div class="card-h"><h2>Prochaines échéances</h2><span class="hint">${upcoming.length} tâches</span></div>
+      <div>${upcoming.length?upcoming.map(t=>{const w=whenTxt(t.due);return `<div class="due-row"><button type="button" class="tick" data-act="doneTask" data-id="${t.id}" aria-label="Marquer « ${esc(t.title)} » comme terminée"><span>${ic('check')}</span></button><div class="txt"><b>${esc(t.title)}</b><span>${esc(project(t.projectId).name)}</span></div><span class="when ${w.c}">${w.t}</span>${av(t.assignee)}</div>`}).join(''):'<p class="empty">Rien à l\'horizon. Tout est terminé.</p>'}</div></section>
+    <section class="card"><div class="card-h"><h2>Dernières factures</h2><button class="btn sm ghost" type="button" data-act="nav" data-v="invoices">Tout voir</button></div>
+      <ul class="plist">${lastInv.map(i=>`<li><button type="button" class="prow" data-act="openInvoice" data-id="${i.id}"><span><span class="t num">${i.number}</span><br><span class="s">${esc(client(i.clientId).name)}</span></span><span style="text-align:right"><span class="num" style="font-weight:700">${eur(ttc(i))}</span><br>${badge(statusOf(i))}</span></button></li>`).join('')}</ul></section>
   </div>`;
 }
 
-/* ---------- Brief ---------- */
-function briefDlg() {
-  openDlg(`<div class="dlg-body brief">${closeBtn}<h2 id="dlg-title">Ce que couvre la démo</h2>
-    <p>Les quatre fonctionnalités demandées, cliquables de bout en bout :</p>
-    <ol><li><b>Inscription / connexion</b> : validation des champs, robustesse du mot de passe, déconnexion.</li>
-    <li><b>Tableau de bord et suivi de projet</b> : indicateurs, listes À faire / En cours / Terminé, glisser-déposer, filtres.</li>
-    <li><b>Factures PDF</b> : éditeur avec aperçu en direct, numérotation continue, export via l’impression du navigateur.</li>
-    <li><b>Paiement Stripe</b> : page de paiement en mode test, statut mis à jour par « webhook ».</li></ol>
-    <h3>Parcours conseillé (2 minutes)</h3>
-    <ol><li>Connectez-vous avec le compte de test.</li><li>Projets → « Refonte boutique en ligne » : terminez une tâche, puis « Facturer les heures terminées ».</li><li>Finalisez et envoyez la facture, puis « Payer en ligne » avec la carte 4242 4242 4242 4242.</li><li>Revenez au tableau de bord : encaissements et activité sont à jour.</li></ol>
-    <h3>Stack proposée pour la vraie version</h3>
-    <p style="margin:0">React + TypeScript (intégration des maquettes Figma), API NestJS, PostgreSQL, Stripe Checkout et webhooks, PDF générés côté serveur, déploiement Docker.</p>
-    <div class="dlg-foot"><button type="button" class="btn primary" data-act="close">Compris</button></div></div>`);
+function viewProjects(){
+  if(!project(ui.projectId))ui.projectId=state.projects[0]&&state.projects[0].id;
+  const p=project(ui.projectId);
+  const nav=`<aside class="card proj-nav"><div class="card-h"><h2>Projets</h2><button class="btn sm" type="button" data-act="newProject" aria-label="Nouveau projet">${ic('plus')}Nouveau</button></div><div class="card-b" style="padding:0"><ul class="plist">${state.projects.map(x=>{const g=progress(x);return `<li><button type="button" class="prow" data-act="openProject" data-id="${x.id}" aria-current="${x.id===ui.projectId}"><span><span class="t">${esc(x.name)}</span><br><span class="s">${esc(client(x.clientId).name)}</span></span><span class="s num">${g.pct}%</span><span class="bar" aria-hidden="true"><span style="width:${g.pct}%"></span></span></button></li>`}).join('')}</ul></div></aside>`;
+  if(!p)return `<div class="page-head"><div><h1>Projets</h1></div></div><div class="proj-layout">${nav}<div class="card empty">Créez votre premier projet.</div></div>`;
+  const g=progress(p);const ub=unbilledOf(p.id);const ubH=sum(ub.map(t=>t.hours));
+  const q=ui.taskSearch.trim().toLowerCase();
+  const tasks=state.tasks.filter(t=>t.projectId===p.id&&(!q||t.title.toLowerCase().includes(q))&&(!ui.taskWho||t.assignee===ui.taskWho));
+  const cols=COLS.map(([k,l,c],ci)=>{const list=tasks.filter(t=>t.status===k).sort((a,b)=>a.due.localeCompare(b.due));
+    return `<section class="col" aria-label="${l}"><div class="col-h"><span><span class="dot" style="background:${c}"></span>${l}</span><span class="n">${list.length}</span></div><div class="tasks">${list.length?list.map(t=>{const w=whenTxt(t.due);const isDone=t.status==='done';return `<article class="task" data-task="${t.id}"><button type="button" class="task-title" data-act="editTask" data-id="${t.id}">${esc(t.title)}</button><div class="task-foot">${av(t.assignee)}${isDone?`<span>${dShort(t.due)}</span>`:`<span class="when ${w.c}">${w.t}</span>`}<span class="num">${t.hours} h</span>${t.billed?`<span class="billed">Facturée</span>`:''}<span class="sp"></span><button type="button" class="icon-btn" data-act="move" data-id="${t.id}" data-dir="-1" aria-label="Déplacer vers ${ci>0?COLS[ci-1][1]:''}"${ci===0||t.billed?' disabled':''}>${ic('left')}</button><button type="button" class="icon-btn" data-act="move" data-id="${t.id}" data-dir="1" aria-label="Déplacer vers ${ci<2?COLS[ci+1][1]:''}"${ci===2?' disabled':''}>${ic('right')}</button></div></article>`}).join(''):`<p class="empty" style="padding:16px 4px">${q||ui.taskWho?'Aucun résultat':'Aucune tâche'}</p>`}</div></section>`}).join('');
+  return `<div class="page-head"><div><h1>Projets</h1><p>Suivi en listes simples, de « à faire » à « facturé ».</p></div></div>
+  <div class="proj-layout">${nav}
+  <div>
+    <div class="board-head"><div><h2>${esc(p.name)}</h2><p>${esc(client(p.clientId).name)} · taux <span class="num">${eur(p.rate)}</span>/h · ${g.done}/${g.total} tâches terminées</p></div>
+      <div class="actions"><button class="btn primary" type="button" data-act="bill" data-id="${p.id}"${ubH?'':' disabled'}>${ic('file')}${ubH?`Facturer ${ubH} h terminées (${eur(ubH*p.rate)} HT)`:'Rien à facturer'}</button></div></div>
+    <form class="card addtask" data-form="addTask" novalidate>
+      <div class="f-title">${field('at-title','Nouvelle tâche',input('at-title','title','placeholder="Ex. Maquette de la page contact" autocomplete="off"'))}</div>
+      ${field('at-who','Assignée à',select('at-who','assignee',teamOpts(),'cm'))}
+      ${field('at-due','Échéance',input('at-due','due',`type="date" value="${iso(7)}"`))}
+      ${field('at-h','Heures estimées',input('at-h','hours','type="number" min="0.5" step="0.5" value="4" inputmode="decimal"'))}
+      <div class="field"><span class="hint" aria-hidden="true">&nbsp;</span><button class="btn primary" type="submit">${ic('plus')}Ajouter</button></div>
+    </form>
+    <div class="toolbar">
+      <div class="field search"><label for="ts" class="sr">Rechercher une tâche</label>${ic('search')}<input id="ts" class="input" type="search" placeholder="Rechercher une tâche…" value="${esc(ui.taskSearch)}" data-input="taskSearch"></div>
+      <div class="field" style="flex:0 1 220px"><label for="tw" class="sr">Filtrer par personne</label><select id="tw" class="input" data-input="taskWho"><option value="">Toute l'équipe</option>${TEAM.map(m=>`<option value="${m.id}"${ui.taskWho===m.id?' selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+    </div>
+    <div class="board">${cols}</div>
+  </div></div>`;
 }
 
-/* ---------- Actions (clics) ---------- */
-const ACT = {
-  close: closeDlg,
-  brief: briefDlg,
-  reset() { confirmDlg("Réinitialiser la démo ?", "Toutes vos modifications seront effacées et les données fictives d’origine restaurées.", "Réinitialiser", () => { const s = db.session; db = seed(); db.session = s ? "camille@studio-lumen.fr" : null; ui.invFilter = "all"; ui.invQuery = ui.taskQuery = ui.taskWho = ""; save(); render(); toast("Démo réinitialisée."); }); },
-  confirmOk() { const f = ui.confirmFn; ui.confirmFn = null; closeDlg(); if (f) f(); },
-  fillLogin() { const f = $('form[data-form="login"]'); f.elements.email.value = "camille@studio-lumen.fr"; f.elements.pass.value = "demo1234"; f.querySelector('[type="submit"]').focus(); },
-  forgot() {
-    const f = $('form[data-form="login"]'), v = f.elements.email.value.trim();
-    if (!EMAIL_RE.test(v)) { setErr(f, "email", "Saisissez votre e-mail pour recevoir le lien."); f.elements.email.focus(); return; }
-    setErr(f, "email", ""); toast(`Lien de réinitialisation envoyé à ${v} (simulation)`, "mail");
-  },
-  logout() { db.session = null; save(); go("#/login"); toast("Vous êtes déconnecté."); },
-  newTask(el) { taskDlg(null, el.dataset.project); },
-  editTask(el) { taskDlg(el.dataset.id); },
-  delTask(el) { const { p, t } = findTask(el.dataset.id); confirmDlg("Supprimer la tâche ?", `« ${esc(t.title)} » sera définitivement supprimée.`, "Supprimer", () => { p.tasks = p.tasks.filter(x => x !== t); save(); render(); toast("Tâche supprimée."); }, true); },
-  moveTask(el) {
-    const { t } = findTask(el.dataset.id); const order = COLS.map(c => c[0]);
-    const to = order[order.indexOf(t.status) + Number(el.dataset.dir)];
-    if (to) { moveTask(t.id, to); const again = document.querySelector(`[data-task="${t.id}"] .task-title`); if (again) again.focus(); }
-  },
-  newProject() {
-    openDlg(`<form class="dlg-body" data-form="project" novalidate>${closeBtn}<h2 id="dlg-title">Nouveau projet</h2>
-      ${field("pj", "name", "Nom du projet", { attrs: "required autofocus" })}
-      ${field("pj", "clientId", "Client", { options: db.clients.map(c => [c.id, c.name]) })}
-      ${field("pj", "rate", "Taux horaire HT (€)", { type: "number", value: 65, attrs: 'min="1" step="1" inputmode="numeric"' })}
-      <div class="dlg-foot"><button type="button" class="btn" data-act="close">Annuler</button><button class="btn primary" type="submit">Créer le projet</button></div></form>`);
-  },
-  billProject(el) {
-    const p = projById(el.dataset.id), tasks = p.tasks.filter(t => t.status === "done" && !t.billed);
-    if (!tasks.length) return;
-    const inv = newInvoice(p.clientId, tasks.map(t => ({ label: t.title, qty: Number(t.hours), price: p.rate })), { notes: "Projet : " + p.name });
-    tasks.forEach(t => t.billed = inv.id);
-    save(); go("#/invoices/" + inv.id);
-    toast(`${tasks.length} tâche${tasks.length > 1 ? "s" : ""} ajoutée${tasks.length > 1 ? "s" : ""} au brouillon de facture.`);
-  },
-  invFilter(el) { ui.invFilter = el.dataset.v; render(); $(`[data-act="invFilter"][data-v="${ui.invFilter}"]`).focus(); },
-  newInvoice() { const inv = newInvoice(); go("#/invoices/" + inv.id); },
-  addLine(el) { const inv = invById(el.dataset.id); inv.lines.push({ label: "", qty: 1, price: 0 }); save(); render(); $(`#ln-${inv.lines.length - 1}-label`).focus(); },
-  delLine(el) {
-    const inv = invById(parseRoute().id); inv.lines.splice(Number(el.dataset.i), 1); save(); render();
-    ($(`#ln-${Math.max(0, Number(el.dataset.i) - 1)}-label`) || $('[data-act="addLine"]')).focus();
-  },
-  delInvoice(el) {
-    confirmDlg("Supprimer le brouillon ?", "Les tâches liées redeviendront facturables.", "Supprimer", () => {
-      const id = el.dataset.id; db.invoices = db.invoices.filter(i => i.id !== id);
-      db.projects.forEach(p => p.tasks.forEach(t => { if (t.billed === id) t.billed = null; }));
-      save(); go("#/invoices"); toast("Brouillon supprimé.");
-    }, true);
-  },
-  finalize(el) { const inv = invById(el.dataset.id); if (validateDraft(inv)) mailDlg(inv.id, "send"); },
-  mail(el) { mailDlg(el.dataset.id, el.dataset.kind); },
-  print(el) {
-    const inv = invById(el.dataset.id);
-    $("#print").innerHTML = paper(inv);
-    const old = document.title; document.title = inv.num ? numStr(inv) : "Brouillon-facture";
-    window.addEventListener("afterprint", () => { document.title = old; }, { once: true });
-    toast("Choisissez « Enregistrer au format PDF » dans la fenêtre d’impression.", "download");
-    setTimeout(() => window.print(), 50);
-  },
-  duplicate(el) { const src = invById(el.dataset.id); const inv = newInvoice(src.clientId, src.lines.map(l => ({ ...l }))); go("#/invoices/" + inv.id); toast("Facture dupliquée en brouillon."); },
-  markPaid(el) {
-    const inv = invById(el.dataset.id);
-    confirmDlg("Marquer comme payée ?", `Confirmez la réception du virement de ${eur(totals(inv).ttc)} pour ${numStr(inv)}.`, "Confirmer le paiement", () => {
-      inv.status = "paid"; inv.paidAt = TODAY; inv.paidVia = "Virement";
-      logEvent("manual", `${numStr(inv)} marquée payée (virement reçu)`); save(); render(); toast("Facture marquée payée.");
-    });
-  },
-  checkout(el) { checkoutDlg(el.dataset.id); },
-  fillCard(el) {
-    const f = $('form[data-form="pay"]');
-    f.elements.card.value = el.dataset.card.replace(/(\d{4})(?=\d)/g, "$1 ");
-    f.elements.exp.value = "12/29"; f.elements.cvc.value = "123";
-    ["card", "exp", "cvc"].forEach(n => setErr(f, n, "")); $("#pay-alert").hidden = true;
-    $("#paybtn").focus();
-  },
-  copyLink() {
-    const v = $("#plink").value;
-    try { navigator.clipboard.writeText(v).then(() => toast("Lien copié."), () => { $("#plink").select(); toast("Lien sélectionné, copiez-le avec Ctrl+C.", "info"); }); }
-    catch (e) { $("#plink").select(); toast("Lien sélectionné, copiez-le avec Ctrl+C.", "info"); }
-  },
-  goDash() { closeDlg(); go("#/dashboard"); }
-};
-document.addEventListener("click", e => {
-  const el = e.target.closest("[data-act]");
-  if (el && ACT[el.dataset.act]) { e.preventDefault(); ACT[el.dataset.act](el, e); }
-});
+function viewInvoices(){
+  const I=[...state.invoices].sort((a,b)=>b.number.localeCompare(a.number));
+  const counts={all:I.length};Object.keys(ST).forEach(k=>counts[k]=I.filter(i=>statusOf(i)===k).length);
+  const q=ui.invSearch.trim().toLowerCase();
+  const list=I.filter(i=>(ui.invFilter==='all'||statusOf(i)===ui.invFilter)&&(!q||(i.number+' '+client(i.clientId).name+' '+i.subject).toLowerCase().includes(q)));
+  const sel=state.invoices.find(i=>i.id===ui.invoiceId);
+  const chips=[['all','Toutes'],['draft','Brouillons'],['sent','Envoyées'],['late','En retard'],['paid','Payées']].map(([k,l])=>`<button type="button" class="chip" data-act="invFilter" data-f="${k}" aria-pressed="${ui.invFilter===k}">${l}<span class="n">${counts[k]}</span></button>`).join('');
+  const table=`<section class="card"><div class="card-h" style="flex-wrap:wrap"><div class="chips" role="group" aria-label="Filtrer par statut">${chips}</div><div class="field search" style="flex:1 1 200px;max-width:320px"><label for="is" class="sr">Rechercher une facture</label>${ic('search')}<input id="is" class="input" type="search" placeholder="N°, client, objet…" value="${esc(ui.invSearch)}" data-input="invSearch"></div></div>
+  <div class="table-wrap"><table><thead><tr><th scope="col">N°</th><th scope="col">Client</th><th scope="col" class="hide-sm">Émise le</th><th scope="col" class="hide-sm">Échéance</th><th scope="col" class="r">Montant TTC</th><th scope="col">Statut</th></tr></thead>
+  <tbody>${list.length?list.map(i=>`<tr data-act="openInvoice" data-id="${i.id}" aria-selected="${i.id===ui.invoiceId}"><td><button type="button" class="rowlink" data-act="openInvoice" data-id="${i.id}">${i.number}</button></td><td>${esc(client(i.clientId).name)}<br><span class="hint">${esc(i.subject)}</span></td><td class="hide-sm">${dShort(i.date)}</td><td class="hide-sm">${dShort(i.due)}</td><td class="r num">${eur(ttc(i))}</td><td>${badge(statusOf(i))}</td></tr>`).join(''):`<tr><td colspan="6" class="empty">Aucune facture ne correspond.</td></tr>`}</tbody></table></div></section>`;
+  return `<div class="page-head"><div><h1>Factures</h1><p>Créez, envoyez et encaissez vos factures en ligne.</p></div><div class="actions"><button class="btn primary" type="button" data-act="newInvoice">${ic('plus')}Nouvelle facture</button></div></div>
+  <div class="inv-layout${sel?' split':''}">${table}${sel?invoiceDetail(sel):''}</div>`;
+}
+
+function invoiceDetail(i){
+  const s=statusOf(i);
+  let acts='';
+  if(s==='draft')acts=`<button class="btn primary sm" type="button" data-act="sendInvoice" data-id="${i.id}"${i.lines.length?'':' disabled'}>${ic('mail')}Envoyer par email</button><button class="btn sm" type="button" data-act="printInvoice" data-id="${i.id}">${ic('print')}Aperçu PDF</button><span class="sp"></span><button class="btn sm danger" type="button" data-act="deleteInvoice" data-id="${i.id}">${ic('trash')}Supprimer</button>`;
+  else if(s==='paid')acts=`<button class="btn primary sm" type="button" data-act="printInvoice" data-id="${i.id}">${ic('print')}Télécharger le PDF</button><span class="hint">Payée le ${dLong(i.paidAt)}</span>`;
+  else acts=`<button class="btn primary sm" type="button" data-act="payInvoice" data-id="${i.id}">${ic('card')}Encaisser par carte (Stripe)</button><button class="btn sm" type="button" data-act="printInvoice" data-id="${i.id}">${ic('print')}PDF</button><button class="btn sm" type="button" data-act="sendInvoice" data-id="${i.id}" data-remind="1">${ic('mail')}${s==='late'?'Relancer':'Renvoyer'}</button>`;
+  return `<section class="card" id="inv-detail" aria-label="Facture ${i.number}"><div class="card-h"><h2><span class="num">${i.number}</span> ${badge(s)}</h2><button type="button" class="icon-btn" data-act="closeInvoice" aria-label="Fermer le détail">${ic('x')}</button></div>
+  <div class="detail-actions">${acts}</div>
+  <div class="paper-wrap">${invoiceDoc(i,false)}
+  ${s==='draft'?`<form class="addline" data-form="addLine" data-id="${i.id}" novalidate><div class="f-label">${field('al-label','Ajouter une ligne',input('al-label','label','placeholder="Prestation" autocomplete="off"'))}</div>${field('al-qty','Qté',input('al-qty','qty','type="number" min="0.5" step="0.5" value="1" inputmode="decimal"'))}${field('al-price','PU HT (€)',input('al-price','price',`type="number" min="0" step="1" value="${(project(i.projectId)||{rate:80}).rate}" inputmode="decimal"`))}<div class="field"><span class="hint" aria-hidden="true">&nbsp;</span><button class="btn" type="submit">${ic('plus')}Ajouter</button></div></form>`:''}
+  </div></section>`;
+}
+
+function invoiceDoc(i,print){
+  const c=client(i.clientId),u=state.user||{company:'Atelier Norde',name:''};const editable=!print&&i.status==='draft';
+  const h=ht(i);
+  return `<div class="paper">${statusOf(i)==='paid'?'<div class="stamp">PAYÉE</div>':''}
+  <div class="top"><div><div class="co">${esc(u.company)}</div><div class="muted">12 rue des Olivettes, 44000 Nantes<br>SIRET 912 345 678 00019 · TVA FR42912345678</div></div>
+  <div class="meta"><h3>Facture</h3><div class="num" style="font-weight:600">${i.number}</div><div class="muted">Émise le ${dLong(i.date)}<br>Échéance : ${dLong(i.due)}</div></div></div>
+  <div class="addr"><div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.05em">Objet</div><b>${esc(i.subject)}</b></div><div class="to"><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.05em">Facturé à</div><b>${esc(c.name)}</b><br>${esc(c.addr)}<br>${esc(c.email)}</div></div>
+  <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">PU HT</th><th class="r">Total HT</th>${editable?'<th class="no-print"><span class="sr">Actions</span></th>':''}</tr></thead>
+  <tbody>${i.lines.length?i.lines.map((l,k)=>`<tr style="cursor:default"><td>${esc(l.label)}</td><td class="r num">${l.qty}</td><td class="r num">${eur(l.price)}</td><td class="r num">${eur(l.qty*l.price)}</td>${editable?`<td class="no-print r"><button type="button" class="del" data-act="delLine" data-id="${i.id}" data-k="${k}" aria-label="Supprimer la ligne ${esc(l.label)}">${ic('trash')}</button></td>`:''}</tr>`).join(''):`<tr><td colspan="5" class="muted">Aucune ligne. Ajoutez une prestation ci-dessous.</td></tr>`}</tbody></table>
+  <div class="totals"><div><span>Total HT</span><span class="num">${eur(h)}</span></div><div><span>TVA 20 %</span><span class="num">${eur(h*.2)}</span></div><div class="ttc"><span>Total TTC</span><span class="num">${eur(ttc(i))}</span></div></div>
+  <div class="foot">Paiement à réception par virement (IBAN FR76 3000 4000 0500 0012 3456 789) ou par carte via le lien sécurisé joint à l'email. Pénalités de retard : 3 fois le taux d'intérêt légal ; indemnité forfaitaire de recouvrement : 40 €.</div></div>`;
+}
+
+function viewBilling(){
+  return `<div class="page-head"><div><h1>Abonnement</h1><p>Facturation de votre espace, gérée par Stripe.</p></div><span class="badge b-test">${ic('lock')}Stripe — mode test</span></div>
+  <div class="plans">${PLANS.map(p=>{const cur=p.id===state.plan;const idx=PLANS.findIndex(x=>x.id===state.plan),pi=PLANS.indexOf(p);return `<section class="card plan${cur?' current':''}"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="font-size:18px">${p.name}</h2>${cur?'<span class="badge b-paid">Plan actuel</span>':''}</div><p class="hint">${p.desc}</p><div class="price num">${p.price?eur(p.price):'0 €'}<small> HT / mois</small></div><ul>${p.feat.map(f=>`<li>${ic('check')}<span>${f}</span></li>`).join('')}</ul>${cur?`<button class="btn" type="button" disabled>Plan actuel</button>`:pi>idx?`<button class="btn primary" type="button" data-act="upgrade" data-p="${p.id}">Passer au plan ${p.name}</button>`:`<button class="btn" type="button" data-act="downgrade" data-p="${p.id}">Revenir au plan ${p.name}</button>`}</section>`}).join('')}</div>
+  <section class="card"><div class="card-h"><h2>Historique des paiements Stripe</h2><span class="hint">${state.payments.length} opération${state.payments.length>1?'s':''}</span></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Libellé</th><th class="hide-sm">Référence</th><th class="hide-sm">Moyen</th><th class="r">Montant</th></tr></thead><tbody>${[...state.payments].reverse().map(p=>`<tr style="cursor:default"><td>${dShort(p.date)}</td><td>${esc(p.label)}</td><td class="num hide-sm">${p.id}</td><td class="hide-sm">${esc(p.method)}</td><td class="r num">${eur(p.amount)}</td></tr>`).join('')}</tbody></table></div></section>`;
+}
+
+/* ---------- Dialogues ---------- */
+const dlg=$('#dlg');
+function openDlg(html,focusSel){$('#dlg-body').innerHTML=html;if(!dlg.open)dlg.showModal();const f=focusSel&&$(focusSel,dlg);if(f)f.focus()}
+function closeDlg(){if(dlg.open)dlg.close()}
+dlg.addEventListener('click',e=>{if(e.target===dlg&&!dlg.dataset.busy)closeDlg()});
+dlg.addEventListener('cancel',e=>{if(dlg.dataset.busy)e.preventDefault()});
+const dlgHead=(t,extra='')=>`<div class="dlg-h${extra}"><h2 id="dlg-title">${t}</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic('x')}</button></div>`;
+
+function projectDialog(){
+  if(state.plan==='starter'&&state.projects.length>=4){
+    openDlg(`${dlgHead('Limite du plan Starter atteinte')}<div class="dlg-b"><p style="margin:0">Le plan Starter inclut <b>4 projets actifs</b>. Passez au plan Pro pour créer des projets en illimité et activer le paiement en ligne.</p><p class="hint">Le paiement s'effectue sur une page Stripe en mode test : aucune carte réelle n'est débitée.</p></div><div class="dlg-f"><button class="btn" type="button" data-act="close">Plus tard</button><button class="btn primary" type="button" data-act="upgrade" data-p="pro" data-then="project">Passer au Pro — ${eur(29)} HT/mois</button></div>`,'[data-act="upgrade"]');
+    return;
+  }
+  openDlg(`${dlgHead('Nouveau projet')}<form data-form="project" novalidate><div class="dlg-b">
+  ${field('np-name','Nom du projet',input('np-name','name','autocomplete="off" placeholder="Ex. Site vitrine"'))}
+  ${field('np-client','Client',select('np-client','clientId',[['','Choisir un client…'],...state.clients.map(c=>[c.id,c.name]),['__new','+ Nouveau client']],''))}
+  <div id="np-newclient" hidden class="row">${field('np-cname','Nom du client',input('np-cname','cname','autocomplete="off"'))}${field('np-cemail','Email de facturation',input('np-cemail','cemail','type="email" autocomplete="off"'))}</div>
+  ${field('np-rate','Taux horaire HT (€)',input('np-rate','rate','type="number" min="1" step="1" value="80" inputmode="numeric"'))}
+  </div><div class="dlg-f"><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="submit">Créer le projet</button></div></form>`,'#np-name');
+  $('#np-client').addEventListener('change',e=>{$('#np-newclient').hidden=e.target.value!=='__new'});
+}
+
+function invoiceDialog(){
+  openDlg(`${dlgHead('Nouvelle facture')}<form data-form="invoice" novalidate><div class="dlg-b">
+  ${field('ni-client','Client',select('ni-client','clientId',[['','Choisir un client…'],...state.clients.map(c=>[c.id,c.name])],''))}
+  ${field('ni-subject','Objet',input('ni-subject','subject','autocomplete="off" placeholder="Ex. Maintenance octobre"'))}
+  <div class="row">${field('ni-label','Première ligne',input('ni-label','label','autocomplete="off" placeholder="Prestation"'))}${field('ni-qty','Quantité',input('ni-qty','qty','type="number" min="0.5" step="0.5" value="1"'))}${field('ni-price','PU HT (€)',input('ni-price','price','type="number" min="0" step="1" value="500"'))}</div>
+  ${field('ni-terms','Délai de paiement',select('ni-terms','terms',[['0','À réception'],['15','15 jours'],['30','30 jours'],['45','45 jours fin de mois']],'30'))}
+  </div><div class="dlg-f"><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="submit">Créer le brouillon</button></div></form>`,'#ni-client');
+}
+
+function taskDialog(t){
+  const inv=t.billed&&state.invoices.find(i=>i.id===t.billed);
+  openDlg(`${dlgHead('Modifier la tâche')}<form data-form="task" data-id="${t.id}" novalidate><div class="dlg-b">
+  ${field('et-title','Intitulé',input('et-title','title',`value="${esc(t.title)}" autocomplete="off"`))}
+  <div class="row">${field('et-status','Statut',select('et-status','status',COLS.map(c=>[c[0],c[1]]),t.status).replace('<select',t.billed?'<select disabled':'<select'))}${field('et-who','Assignée à',select('et-who','assignee',teamOpts(),t.assignee))}</div>
+  <div class="row">${field('et-due','Échéance',input('et-due','due',`type="date" value="${t.due}"`))}${field('et-h','Heures',input('et-h','hours',`type="number" min="0.5" step="0.5" value="${t.hours}"`))}</div>
+  ${inv?`<p class="hint">${ic('file','style="vertical-align:-4px"')} Déjà facturée sur ${inv.number} : statut et heures figés.</p>`:''}
+  </div><div class="dlg-f">${t.billed?'':`<button class="btn danger" type="button" data-act="deleteTask" data-id="${t.id}">${ic('trash')}Supprimer</button>`}<span class="sp"></span><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`,'#et-title');
+  if(t.billed)$('#et-h').readOnly=true;
+}
+
+function sendDialog(i,remind){
+  const c=client(i.clientId);
+  const msg=remind?`Bonjour,\n\nSauf erreur de notre part, la facture ${i.number} d'un montant de ${eur(ttc(i))} reste à régler. Vous pouvez la payer par carte via le lien sécurisé ci-joint.\n\nBien cordialement,\n${state.user.name}`:`Bonjour,\n\nVeuillez trouver ci-joint la facture ${i.number} d'un montant de ${eur(ttc(i))}, payable par virement ou par carte via le lien sécurisé.\n\nBien cordialement,\n${state.user.name}`;
+  openDlg(`${dlgHead(remind?'Relancer le client':'Envoyer la facture')}<form data-form="send" data-id="${i.id}" data-remind="${remind?1:''}" novalidate><div class="dlg-b">
+  ${field('sd-to','Destinataire',input('sd-to','to',`type="email" value="${esc(c.email)}"`))}
+  ${field('sd-msg','Message',`<textarea id="sd-msg" name="msg" rows="7">${esc(msg)}</textarea>`)}
+  <p class="hint">${ic('file','style="vertical-align:-4px"')} Pièce jointe : ${i.number}.pdf · lien de paiement Stripe inclus</p>
+  </div><div class="dlg-f"><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="submit">${ic('mail')}Envoyer</button></div></form>`,'#sd-to');
+}
+
+/* Paiement Stripe simulé */
+let checkoutCb=null;
+function checkout({amount,label,email,onSuccess}){
+  checkoutCb=onSuccess;
+  openDlg(`${dlgHead(`${ic('lock')} Paiement sécurisé`,' stripe-h')}<form data-form="checkout" data-amount="${amount}" data-label="${esc(label)}" novalidate><div class="dlg-b">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><div class="hint">${esc(label)}</div><div class="stripe-amt num">${eur(amount)}</div></div><span class="badge b-test">Mode test</span></div>
+  <div class="testcards">Cartes de test : <code>4242 4242 4242 4242</code> (acceptée) · <code>4000 0000 0000 0002</code> (refusée). Date future et CVC quelconques.</div>
+  ${field('co-email','Email',input('co-email','email',`type="email" autocomplete="email" value="${esc(email||'')}"`))}
+  ${field('co-card','Numéro de carte',input('co-card','card','inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234" maxlength="19"'))}
+  <div class="row">${field('co-exp','Expiration',input('co-exp','exp','inputmode="numeric" autocomplete="cc-exp" placeholder="MM / AA" maxlength="7"'))}${field('co-cvc','CVC',input('co-cvc','cvc','inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"'))}</div>
+  ${field('co-name','Titulaire de la carte',input('co-name','name','autocomplete="cc-name"'))}
+  <p class="alert" id="co-alert" role="alert" hidden></p>
+  </div><div class="dlg-f"><button class="btn" type="button" data-act="close">Annuler</button><button class="btn primary" type="submit" id="co-pay">Payer ${eur(amount)}</button></div></form>`,'#co-card');
+  $('#co-card').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'').slice(0,16);e.target.value=v.replace(/(.{4})/g,'$1 ').trim()});
+  $('#co-exp').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'').slice(0,4);e.target.value=v.length>2?v.slice(0,2)+' / '+v.slice(2):v});
+}
+const luhn=n=>{let s=0,alt=false;for(let k=n.length-1;k>=0;k--){let d=+n[k];if(alt){d*=2;if(d>9)d-=9}s+=d;alt=!alt}return s%10===0};
+const payId=()=>'pi_3Q'+Math.random().toString(36).slice(2,12)+Math.floor(Math.random()*90+10);
 
 /* ---------- Formulaires ---------- */
-const FORMS = {
-  login(f) {
-    const email = f.elements.email.value.trim().toLowerCase(), pass = f.elements.pass.value;
-    const a = $("#login-alert"); a.hidden = true;
-    let ok = setErr(f, "email", !email ? "L’e-mail est obligatoire." : !EMAIL_RE.test(email) ? "Format d’e-mail invalide." : "");
-    ok = setErr(f, "pass", pass ? "" : "Le mot de passe est obligatoire.") && ok;
-    if (!ok) return focusFirstError(f);
-    const u = db.users.find(x => x.email === email && x.pass === pass);
-    if (!u) { a.textContent = "E-mail ou mot de passe incorrect."; a.hidden = false; f.elements.pass.value = ""; f.elements.pass.focus(); return; }
-    db.session = u.email; save(); go("#/dashboard"); toast(`Connecté en tant que ${u.name}.`);
+const forms={
+  login(f){
+    const em=f.email,pw=f.password;let ok=true;
+    setErr(em,isEmail(em.value.trim())?'':(ok=false,'Saisissez une adresse email valide.'));
+    setErr(pw,pw.value?'':(ok=false,'Saisissez votre mot de passe.'));
+    const al=$('#login-alert');al.hidden=true;if(!ok)return;
+    const acc=state.accounts.find(a=>a.email.toLowerCase()===em.value.trim().toLowerCase());
+    if(!acc||acc.password!==pw.value){al.textContent='Email ou mot de passe incorrect.';al.hidden=false;return}
+    state.user={name:acc.name,company:acc.company,email:acc.email};ui.view='dash';save();render();$('#view').focus();toast(`Connectée en tant que ${acc.name}`);
   },
-  signup(f) {
-    const v = n => f.elements[n].value.trim();
-    const email = v("email").toLowerCase(), pass = f.elements.pass.value;
-    let ok = setErr(f, "name", v("name").length >= 2 ? "" : "Indiquez votre prénom et votre nom.");
-    ok = setErr(f, "company", v("company") ? "" : "Indiquez le nom de votre entreprise.") && ok;
-    ok = setErr(f, "email", !EMAIL_RE.test(email) ? "Format d’e-mail invalide." : db.users.some(u => u.email === email) ? "Un compte existe déjà avec cet e-mail." : "") && ok;
-    ok = setErr(f, "pass", pass.length < 8 || !/\d/.test(pass) ? "8 caractères minimum, dont au moins un chiffre." : "") && ok;
-    ok = setErr(f, "cgu", f.elements.cgu.checked ? "" : "Vous devez accepter les conditions.") && ok;
-    if (!ok) return focusFirstError(f);
-    db.users.push({ name: v("name"), email, pass });
-    db.company.name = v("company"); db.company.email = email;
-    db.session = email; save(); go("#/dashboard");
-    toast("Espace créé · e-mail de confirmation envoyé (simulation)", "mail");
+  signup(f){
+    let ok=true;const chk=(el,cond,msg)=>{setErr(el,cond?'':msg);if(!cond)ok=false};
+    chk(f.name,f.name.value.trim().length>=2,'Indiquez votre nom.');
+    chk(f.company,f.company.value.trim().length>=2,'Indiquez le nom de votre entreprise.');
+    const em=f.email.value.trim();
+    chk(f.email,isEmail(em),'Saisissez une adresse email valide.');
+    if(ok&&state.accounts.some(a=>a.email.toLowerCase()===em.toLowerCase())){setErr(f.email,'Un compte existe déjà avec cet email.');ok=false}
+    chk(f.password,f.password.value.length>=8&&/\d/.test(f.password.value),'8 caractères minimum, dont au moins un chiffre.');
+    chk(f.cgu,f.cgu.checked,'Vous devez accepter les conditions pour continuer.');
+    if(!ok){const bad=f.querySelector('[aria-invalid="true"]');if(bad)bad.focus();return}
+    const acc={name:f.name.value.trim(),company:f.company.value.trim(),email:em,password:f.password.value};
+    state.accounts.push(acc);state.user={name:acc.name,company:acc.company,email:acc.email};ui.view='dash';save();render();$('#view').focus();
+    toast(`Espace « ${acc.company} » créé · email de bienvenue envoyé (simulation)`,'mail');
   },
-  task(f) {
-    const id = f.dataset.id, title = f.elements.title.value.trim(), hours = parseFloat(f.elements.hours.value);
-    let ok = setErr(f, "title", title.length >= 3 ? "" : "L’intitulé doit faire au moins 3 caractères.");
-    ok = setErr(f, "hours", hours > 0 && hours <= 200 ? "" : "Indiquez un temps entre 0,25 et 200 h.") && ok;
-    if (!ok) return focusFirstError(f);
-    const data = { title, hours, due: f.elements.due.value, who: f.elements.who.value };
-    if (id) {
-      const { p, t } = findTask(id);
-      Object.assign(t, data);
-      if (!t.billed) {
-        t.status = f.elements.status.value;
-        const np = projById(f.elements.project.value);
-        if (np !== p) { p.tasks = p.tasks.filter(x => x !== t); np.tasks.push(t); }
-      }
-      toast("Tâche mise à jour.");
-    } else {
-      const p = projById(f.elements.project.value);
-      p.tasks.push({ id: uid(), ...data, status: f.elements.status.value, billed: null });
-      toast(`Tâche ajoutée à « ${p.name} ».`);
-      if (parseRoute().name === "projects") history.replaceState(null, "", "#/projects/" + p.id);
-    }
-    save(); closeDlg(); render();
+  addTask(f){
+    const t=f.title,h=f.hours;let ok=true;
+    setErr(t,t.value.trim()?'':(ok=false,'Donnez un intitulé à la tâche.'));
+    setErr(h,+h.value>0?'':(ok=false,'Nombre d\'heures invalide.'));
+    setErr(f.due,f.due.value?'':(ok=false,'Choisissez une date.'));
+    if(!ok){f.querySelector('[aria-invalid="true"]').focus();return}
+    const id='t'+(++state.seq.task);
+    state.tasks.push({id,projectId:ui.projectId,title:t.value.trim(),status:'todo',assignee:f.assignee.value,due:f.due.value,hours:+h.value,billed:null});
+    save();ui.flash=id;ui.focus='#at-title';render();toast('Tâche ajoutée à « À faire »');
   },
-  quick(f) {
-    const inp = f.elements.title, title = inp.value.trim();
-    if (title.length < 3) { inp.setAttribute("aria-invalid", "true"); toast("Saisissez au moins 3 caractères.", "info"); inp.focus(); return; }
-    projById(f.dataset.project).tasks.push({ id: uid(), title, status: "todo", hours: 1, due: addDays(TODAY, 7), who: "CR", billed: null });
-    save(); render(); $("#qa").focus(); toast("Tâche ajoutée.");
+  task(f){
+    const t=state.tasks.find(x=>x.id===f.dataset.id);if(!t)return;let ok=true;
+    setErr(f.title,f.title.value.trim()?'':(ok=false,'Donnez un intitulé à la tâche.'));
+    setErr(f.hours,+f.hours.value>0?'':(ok=false,'Nombre d\'heures invalide.'));
+    setErr(f.due,f.due.value?'':(ok=false,'Choisissez une date.'));
+    if(!ok)return;
+    t.title=f.title.value.trim();t.assignee=f.assignee.value;t.due=f.due.value;
+    if(!t.billed){t.status=f.status.value;t.hours=+f.hours.value}
+    save();closeDlg();ui.flash=t.id;render();toast('Tâche mise à jour');
   },
-  project(f) {
-    const name = f.elements.name.value.trim(), rate = parseFloat(f.elements.rate.value);
-    let ok = setErr(f, "name", name.length >= 3 ? "" : "Le nom doit faire au moins 3 caractères.");
-    ok = setErr(f, "rate", rate > 0 ? "" : "Indiquez un taux horaire positif.") && ok;
-    if (!ok) return focusFirstError(f);
-    const colors = ["#3943B7", "#C2410C", "#0F766E", "#9333EA", "#BE185D", "#0369A1"];
-    const p = { id: "p" + uid(), name, clientId: f.elements.clientId.value, rate, color: colors[db.projects.length % colors.length], tasks: [] };
-    db.projects.push(p); save(); closeDlg(); go("#/projects/" + p.id); toast("Projet créé. Ajoutez vos premières tâches.");
+  project(f){
+    let ok=true;const newC=f.clientId.value==='__new';
+    setErr(f.name,f.name.value.trim()?'':(ok=false,'Donnez un nom au projet.'));
+    setErr(f.clientId,f.clientId.value?'':(ok=false,'Choisissez un client.'));
+    if(newC){setErr(f.cname,f.cname.value.trim()?'':(ok=false,'Indiquez le nom du client.'));setErr(f.cemail,isEmail(f.cemail.value.trim())?'':(ok=false,'Email invalide.'))}
+    setErr(f.rate,+f.rate.value>0?'':(ok=false,'Taux invalide.'));
+    if(!ok)return;
+    let cid=f.clientId.value;
+    if(newC){cid='c'+(++state.seq.cli);state.clients.push({id:cid,name:f.cname.value.trim(),email:f.cemail.value.trim(),addr:'Adresse à compléter'})}
+    const id='p'+(++state.seq.proj);
+    state.projects.push({id,name:f.name.value.trim(),clientId:cid,rate:+f.rate.value});
+    save();closeDlg();ui.view='projects';ui.projectId=id;ui.taskSearch='';ui.taskWho='';ui.focus='#at-title';render();toast('Projet créé — ajoutez une première tâche');
   },
-  mail(f) {
-    const inv = invById(f.dataset.id), to = f.elements.to.value.trim();
-    let ok = setErr(f, "to", EMAIL_RE.test(to) ? "" : "Adresse e-mail invalide.");
-    ok = setErr(f, "subject", f.elements.subject.value.trim() ? "" : "L’objet est obligatoire.") && ok;
-    if (!ok) return focusFirstError(f);
-    const kind = f.dataset.kind;
-    if (inv.status === "draft") { inv.num = db.company.next++; inv.status = "sent"; inv.sentAt = TODAY; }
-    logEvent("mail", `${kind === "remind" ? "Relance" : "Facture"} ${numStr(inv)} envoyée à ${to}`);
-    save(); closeDlg(); render();
-    toast(`${kind === "remind" ? "Relance" : "Facture " + numStr(inv)} envoyée à ${to} (simulation)`, "mail");
+  invoice(f){
+    let ok=true;
+    setErr(f.clientId,f.clientId.value?'':(ok=false,'Choisissez un client.'));
+    setErr(f.subject,f.subject.value.trim()?'':(ok=false,'Indiquez l\'objet de la facture.'));
+    setErr(f.label,f.label.value.trim()?'':(ok=false,'Décrivez la prestation.'));
+    setErr(f.qty,+f.qty.value>0?'':(ok=false,'Quantité invalide.'));
+    setErr(f.price,f.price.value!==''&&+f.price.value>=0?'':(ok=false,'Prix invalide.'));
+    if(!ok)return;
+    const inv=newInvoice(f.clientId.value,null,f.subject.value.trim(),[{label:f.label.value.trim(),qty:+f.qty.value,price:+f.price.value}],+f.terms.value);
+    closeDlg();goInvoice(inv.id);toast(`Brouillon ${inv.number} créé`);
   },
-  pay(f) {
-    const inv = invById(f.dataset.id), digits = f.elements.card.value.replace(/\D/g, "");
-    const a = $("#pay-alert"); a.hidden = true;
-    let ok = setErr(f, "email", EMAIL_RE.test(f.elements.email.value.trim()) ? "" : "E-mail invalide.");
-    ok = setErr(f, "card", digits.length !== 16 ? "Le numéro doit comporter 16 chiffres." : !luhn(digits) ? "Numéro de carte invalide." : "") && ok;
-    const m = /^(\d{2})\/(\d{2})$/.exec(f.elements.exp.value.trim());
-    ok = setErr(f, "exp", !m || +m[1] < 1 || +m[1] > 12 ? "Format MM/AA attendu." : ("20" + m[2] + m[1]) < "202610" ? "Cette carte est expirée." : "") && ok;
-    ok = setErr(f, "cvc", /^\d{3,4}$/.test(f.elements.cvc.value.trim()) ? "" : "3 ou 4 chiffres.") && ok;
-    ok = setErr(f, "holder", f.elements.holder.value.trim() ? "" : "Nom du titulaire requis.") && ok;
-    if (!ok) return focusFirstError(f);
-    const btn = $("#paybtn"); btn.disabled = true; btn.innerHTML = `<span class="spin" aria-hidden="true"></span> Traitement…`;
-    setTimeout(() => {
-      if (digits === "4000000000000002") {
-        btn.disabled = false; btn.innerHTML = `${icon("lock")} Payer ${eur(totals(inv).ttc)}`;
-        a.textContent = "Votre carte a été refusée (carte de test « refus »). Essayez 4242 4242 4242 4242."; a.hidden = false;
-        logEvent("stripe", `Paiement refusé pour ${numStr(inv)}`, "payment_intent.payment_failed"); save();
-        f.elements.card.focus(); return;
-      }
-      inv.status = "paid"; inv.paidAt = TODAY; inv.paidVia = "Carte •••• " + digits.slice(-4);
-      logEvent("stripe", `${numStr(inv)} marquée payée · ${eur(totals(inv).ttc)}`, "checkout.session.completed");
-      save(); render();
-      const email = f.elements.email.value.trim();
-      openDlg(`<div class="dlg-body success">${closeBtn}<div class="big-ico">${icon("check")}</div><h2 id="dlg-title" style="padding:0">Paiement accepté</h2>
-        <p class="num" style="font-size:20px;font-weight:600;margin:0 0 8px">${eur(totals(inv).ttc)}</p>
-        <p class="muted">${numStr(inv)} · ${esc(inv.paidVia)}<br>Webhook <code>checkout.session.completed</code> reçu : la facture est passée en « Payée ».<br>Reçu envoyé à ${esc(email)} (simulation).</p>
-        <div class="dlg-foot" style="justify-content:center"><button type="button" class="btn" data-act="close">Fermer</button><button type="button" class="btn primary" data-act="goDash">Voir le tableau de bord</button></div></div>`);
-      toast("Paiement reçu (mode test).", "card");
-    }, 1100);
+  addLine(f){
+    const i=state.invoices.find(x=>x.id===f.dataset.id);let ok=true;
+    setErr(f.label,f.label.value.trim()?'':(ok=false,'Décrivez la prestation.'));
+    setErr(f.qty,+f.qty.value>0?'':(ok=false,'Quantité invalide.'));
+    setErr(f.price,f.price.value!==''&&+f.price.value>=0?'':(ok=false,'Prix invalide.'));
+    if(!ok)return;
+    i.lines.push({label:f.label.value.trim(),qty:+f.qty.value,price:+f.price.value});save();ui.focus='#al-label';render();toast('Ligne ajoutée');
   },
-  company(f) {
-    const v = n => f.elements[n].value.trim();
-    let ok = setErr(f, "name", v("name") ? "" : "La raison sociale est obligatoire.");
-    ok = setErr(f, "siret", /^\d{14}$/.test(v("siret").replace(/\s/g, "")) ? "" : "Le SIRET comporte 14 chiffres.") && ok;
-    ok = setErr(f, "email", EMAIL_RE.test(v("email")) ? "" : "E-mail invalide.") && ok;
-    ok = setErr(f, "iban", /^[A-Z]{2}\d{2}[A-Z0-9 ]{10,}$/i.test(v("iban")) ? "" : "IBAN invalide.") && ok;
-    ok = setErr(f, "prefix", v("prefix") ? "" : "Préfixe requis.") && ok;
-    if (!ok) return focusFirstError(f);
-    Object.assign(db.company, { name: v("name"), siret: v("siret").replace(/\s/g, ""), email: v("email"), address: f.elements.address.value.trim(), iban: v("iban").toUpperCase(), prefix: v("prefix"), vat: parseFloat(f.elements.vat.value) });
-    save(); render(); toast("Paramètres enregistrés : ils s’appliquent aux prochaines factures.");
+  send(f){
+    const i=state.invoices.find(x=>x.id===f.dataset.id);
+    if(!isEmail(f.to.value.trim())){setErr(f.to,'Saisissez une adresse email valide.');f.to.focus();return}
+    if(i.status==='draft'){i.status='sent';i.date=iso(0)}
+    save();closeDlg();render();toast(`${f.dataset.remind?'Relance':'Facture'} ${i.number} envoyée à ${f.to.value.trim()} (simulation)`,'mail');
   },
-  noop() {}
+  checkout(f){
+    let ok=true;const num=f.card.value.replace(/\s/g,'');
+    setErr(f.email,isEmail(f.email.value.trim())?'':(ok=false,'Email invalide.'));
+    setErr(f.card,num.length===16&&luhn(num)?'':(ok=false,'Numéro de carte invalide.'));
+    const m=f.exp.value.match(/^(\d{2}) \/ (\d{2})$/);let expOk=false;
+    if(m){const mm=+m[1],yy=2000+ +m[2];expOk=mm>=1&&mm<=12&&new Date(yy,mm,1)>TODAY}
+    setErr(f.exp,expOk?'':(ok=false,m?'Carte expirée ou date invalide.':'Format attendu : MM / AA.'));
+    setErr(f.cvc,/^\d{3,4}$/.test(f.cvc.value)?'':(ok=false,'CVC invalide.'));
+    setErr(f.name,f.name.value.trim()?'':(ok=false,'Indiquez le titulaire.'));
+    const al=$('#co-alert');al.hidden=true;
+    if(!ok){f.querySelector('[aria-invalid="true"]').focus();return}
+    const btn=$('#co-pay');btn.disabled=true;btn.innerHTML='<span class="spinner" aria-hidden="true"></span>Traitement…';dlg.dataset.busy='1';
+    f.querySelectorAll('input').forEach(x=>x.readOnly=true);
+    setTimeout(()=>{
+      delete dlg.dataset.busy;
+      if(num==='4000000000000002'){al.textContent='Votre carte a été refusée (carte de test de refus). Essayez avec 4242 4242 4242 4242.';al.hidden=false;btn.disabled=false;btn.textContent='Payer '+eur(+f.dataset.amount);f.querySelectorAll('input').forEach(x=>x.readOnly=false);f.card.focus();return}
+      const pid=payId();
+      state.payments.push({id:pid,date:iso(0),label:f.dataset.label,amount:+f.dataset.amount,method:'Visa •••• '+num.slice(-4)});
+      const cb=checkoutCb;checkoutCb=null;
+      openDlg(`<div class="success"><div class="ok-ico">${ic('check')}</div><h2 id="dlg-title">Paiement accepté</h2><p class="stripe-amt num" style="margin:0">${eur(+f.dataset.amount)}</p><p class="hint" style="margin:0">${esc(f.dataset.label)}<br>Référence <span class="num">${pid}</span> · reçu envoyé à ${esc(f.email.value.trim())} (simulation)</p><span class="badge b-test">Mode test — aucun débit réel</span><button class="btn primary" type="button" data-act="close" style="margin-top:8px;min-width:160px">Terminer</button></div>`,'[data-act="close"]');
+      if(cb)cb(pid);save();render();
+    },1300);
+  }
 };
-document.addEventListener("submit", e => { const f = e.target, h = FORMS[f.dataset.form]; if (h) { e.preventDefault(); h(f); } });
 
-/* ---------- Saisies en direct ---------- */
-document.addEventListener("input", e => {
-  const el = e.target;
-  if (el.dataset.inp) {
-    ui[el.dataset.inp] = el.value;
-    const pos = el.selectionStart, id = el.id;
-    render();
-    const again = document.getElementById(id); if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (x) {} }
-    return;
-  }
-  if (el.dataset.line !== undefined || el.dataset.inv) {
-    const inv = invById(parseRoute().id); if (!inv) return;
-    if (el.dataset.inv) inv[el.dataset.inv] = el.value;
-    else { const l = inv.lines[+el.dataset.line]; l[el.dataset.k] = el.dataset.k === "label" ? el.value : el.value === "" ? "" : parseFloat(el.value); el.removeAttribute("aria-invalid"); }
-    refreshDraft(inv);
-    return;
-  }
-  if (el.dataset.fmt === "card") { const d = el.value.replace(/\D/g, "").slice(0, 16); el.value = d.replace(/(\d{4})(?=\d)/g, "$1 "); }
-  if (el.dataset.fmt === "exp") { let d = el.value.replace(/\D/g, "").slice(0, 4); if (d.length > 2) d = d.slice(0, 2) + "/" + d.slice(2); el.value = d; }
-  if (el.id === "su-pass") { const p = el.value; $("#strength").dataset.s = [p.length >= 8, /\d/.test(p), /[A-Z]/.test(p), /[^A-Za-z0-9]/.test(p)].filter(Boolean).length; }
-  if (el.getAttribute("aria-invalid") && el.form && el.form.dataset.form !== "pay") { el.removeAttribute("aria-invalid"); }
-});
-document.addEventListener("change", e => {
-  const el = e.target;
-  if (el.dataset.chg === "doneTask") {
-    const { t } = findTask(el.dataset.id);
-    t.status = "done"; save();
-    toast(`« ${t.title} » terminée.`);
-    setTimeout(render, 350);
-  }
-  if (el.dataset.inv === "clientId") { const inv = invById(parseRoute().id); inv.clientId = el.value; refreshDraft(inv); }
-});
+function newInvoice(clientId,projectId,subject,lines,terms){
+  const n=state.seq.inv++;const id='i'+n+'_'+Date.now().toString(36);
+  const inv={id,number:`F-${YEAR}-${String(n).padStart(4,'0')}`,clientId,projectId,subject,date:iso(0),due:iso(terms==null?30:terms),status:'draft',lines};
+  state.invoices.push(inv);save();return inv;
+}
+function goInvoice(id){ui.view='invoices';ui.invoiceId=id;ui.invFilter='all';ui.invSearch='';render();const d=$('#inv-detail');if(d&&window.innerWidth<1250)d.scrollIntoView({behavior:'smooth',block:'start'})}
 
-/* ---------- Glisser-déposer ---------- */
-document.addEventListener("dragstart", e => { const c = e.target.closest && e.target.closest("[data-task]"); if (c) { e.dataTransfer.setData("text/plain", c.dataset.task); e.dataTransfer.effectAllowed = "move"; c.classList.add("dragging"); } });
-document.addEventListener("dragend", e => { document.querySelectorAll(".dragging, .over").forEach(x => x.classList.remove("dragging", "over")); });
-document.addEventListener("dragover", e => { const col = e.target.closest && e.target.closest("[data-col]"); if (col) { e.preventDefault(); document.querySelectorAll(".col.over").forEach(x => x !== col && x.classList.remove("over")); col.classList.add("over"); } });
-document.addEventListener("drop", e => {
-  const col = e.target.closest && e.target.closest("[data-col]"); if (!col) return;
-  e.preventDefault(); col.classList.remove("over");
-  const id = e.dataTransfer.getData("text/plain"), { t } = findTask(id);
-  if (t && t.status !== col.dataset.col) moveTask(id, col.dataset.col);
-});
+/* ---------- Actions ---------- */
+const acts={
+  reset(){if(!confirm('Réinitialiser la démonstration ? Toutes les modifications seront perdues.'))return;try{localStorage.removeItem(KEY)}catch(e){}state=seed();Object.assign(ui,{view:'dash',projectId:null,invoiceId:null,invFilter:'all',invSearch:'',taskSearch:'',taskWho:''});closeDlg();authTab('login');render();toast('Démo réinitialisée')},
+  authTab(d){authTab(d.t)},
+  forgot(){const v=$('#l-email').value.trim();if(!isEmail(v)){setErr($('#l-email'),'Saisissez votre email pour recevoir le lien.');$('#l-email').focus();return}setErr($('#l-email'),'');toast(`Lien de réinitialisation envoyé à ${v} (simulation)`,'mail')},
+  logout(){state.user=null;save();render();authTab('login');$('#l-email').focus();toast('Vous êtes déconnecté')},
+  nav(d){ui.view=d.v;closeDlg();render();$('#view').focus({preventScroll:true});window.scrollTo(0,0)},
+  close(){if(!dlg.dataset.busy)closeDlg()},
+  openProject(d){ui.view='projects';ui.projectId=d.id;ui.taskSearch='';ui.taskWho='';render()},
+  newProject(){projectDialog()},
+  newInvoice(){invoiceDialog()},
+  doneTask(d){const t=state.tasks.find(x=>x.id===d.id);t.status='done';save();render();toast(`« ${t.title} » terminée · ${t.hours} h à facturer`)},
+  move(d){const t=state.tasks.find(x=>x.id===d.id);const k=COLS.findIndex(c=>c[0]===t.status)+ +d.dir;if(k<0||k>2)return;t.status=COLS[k][0];save();ui.flash=t.id;const sel=`[data-task="${t.id}"] [data-dir="${d.dir}"]`;ui.focus=k===0||k===2?`[data-task="${t.id}"] .task-title`:sel;render();toast(`Déplacée vers « ${COLS[k][1]} »`)},
+  editTask(d){taskDialog(state.tasks.find(x=>x.id===d.id))},
+  deleteTask(d){const t=state.tasks.find(x=>x.id===d.id);if(!confirm(`Supprimer la tâche « ${t.title} » ?`))return;state.tasks=state.tasks.filter(x=>x!==t);save();closeDlg();render();toast('Tâche supprimée','trash')},
+  bill(d){const p=project(d.id);const ub=unbilledOf(p.id);if(!ub.length)return;
+    const inv=newInvoice(p.clientId,p.id,p.name,ub.map(t=>({label:t.title,qty:t.hours,price:p.rate})),30);
+    ub.forEach(t=>t.billed=inv.id);save();goInvoice(inv.id);toast(`Brouillon ${inv.number} généré à partir de ${ub.length} tâche${ub.length>1?'s':''}`)},
+  invFilter(d){ui.invFilter=d.f;ui.focus=`[data-f="${d.f}"]`;render()},
+  openInvoice(d){goInvoice(d.id);ui.focus=null},
+  closeInvoice(){ui.invoiceId=null;render()},
+  printInvoice(d){const i=state.invoices.find(x=>x.id===d.id);$('#print-area').innerHTML=invoiceDoc(i,true);const t=document.title;document.title=i.number;window.print();document.title=t},
+  sendInvoice(d){sendDialog(state.invoices.find(x=>x.id===d.id),!!d.remind)},
+  deleteInvoice(d){const i=state.invoices.find(x=>x.id===d.id);if(!confirm(`Supprimer le brouillon ${i.number} ? Les tâches liées redeviendront « à facturer ».`))return;state.tasks.forEach(t=>{if(t.billed===i.id)t.billed=null});state.invoices=state.invoices.filter(x=>x!==i);ui.invoiceId=null;save();render();toast('Brouillon supprimé','trash')},
+  delLine(d){const i=state.invoices.find(x=>x.id===d.id);const l=i.lines[+d.k];i.lines.splice(+d.k,1);state.tasks.forEach(t=>{if(t.billed===i.id&&t.title===l.label)t.billed=null});save();render();toast('Ligne supprimée','trash')},
+  payInvoice(d){const i=state.invoices.find(x=>x.id===d.id);const c=client(i.clientId);
+    checkout({amount:ttc(i),label:`Facture ${i.number} — ${c.name}`,email:c.email,onSuccess:()=>{i.status='paid';i.paidAt=iso(0);toast(`Facture ${i.number} marquée payée (webhook Stripe simulé)`)}})},
+  upgrade(d){const p=PLANS.find(x=>x.id===d.p);const amount=Math.round(p.price*1.2*100)/100;const then=d.then;
+    checkout({amount,label:`Abonnement ${p.name} — 1er mois (TTC)`,email:state.user.email,onSuccess:()=>{state.plan=p.id;toast(`Plan ${p.name} activé`);if(then==='project')setTimeout(()=>{closeDlg();projectDialog()},900)}})},
+  downgrade(d){const p=PLANS.find(x=>x.id===d.p);if(p.id==='starter'&&state.projects.length>4){toast('Archivez des projets pour revenir à 4 projets maximum.','alert');return}state.plan=p.id;save();render();toast(`Plan ${p.name} actif à la prochaine échéance`)}
+};
+function authTab(t){const login=t==='login';$('#tab-login').setAttribute('aria-selected',login);$('#tab-signup').setAttribute('aria-selected',!login);$('#form-login').hidden=!login;$('#form-signup').hidden=login}
 
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;if(b.tagName==='TR'&&e.target.closest('button'))return;const fn=acts[b.dataset.act];if(fn){e.preventDefault();fn(b.dataset,b,e)}});
+document.addEventListener('submit',e=>{const f=e.target;if(f.dataset.form&&forms[f.dataset.form]){e.preventDefault();forms[f.dataset.form](f)}});
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.input;if(!k)return;ui[k]=e.target.value;const pos=e.target.selectionStart;ui.focus='#'+e.target.id;render();const el=$('#'+e.target.id);if(el&&el.setSelectionRange&&el.type==='search'){try{el.setSelectionRange(pos,pos)}catch(_){}}});
+document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.input;if(k&&e.target.tagName==='SELECT'){ui[k]=e.target.value;ui.focus='#'+e.target.id;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='TR'){e.target.click()}});
 render();
+if(!state.user)authTab('login');
+})();
 </script>
 </body>
 </html>
