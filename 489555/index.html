@@ -60,7 +60,7 @@ svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .cart-btn{position:relative}
 .cart-btn .cnt{position:absolute;top:2px;right:2px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px}
 main{padding:20px clamp(16px,2vw,32px) 56px}
-@media (max-width:760px){.who{margin-left:0;width:100%}.who select{flex:1;max-width:none}#nav{order:3;width:100%}}
+@media (max-width:760px){.who{margin-left:0;width:100%;min-width:0}.who select{flex:1;max-width:none;min-width:0;width:0}#nav{order:3;width:100%}}
 
 /* Boutons, champs */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
@@ -128,7 +128,7 @@ main{padding:20px clamp(16px,2vw,32px) 56px}
 .avatar{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:800;background:var(--accent-soft);color:var(--accent-text);flex:none}
 
 /* Tables */
-.tbl-wrap{overflow-x:auto}
+.tbl-wrap{position:relative;max-width:100%;overflow-x:auto}
 .tbl{width:100%;border-collapse:collapse;font-size:14px}
 .tbl th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--panel-2)}
 .tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
