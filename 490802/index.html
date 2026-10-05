@@ -2,20 +2,878 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Mint, swap et staking</title>
+<meta name="description" content="Application Web3 simulée où mint, swap, achat/vente, trading et staking vont jusqu’au bout, avec un suivi clair de chaque opération (en attente, confirmée, échouée), des pannes simulables et un tableau de santé des intégrations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F4F5F8;--panel:#FFFFFF;--panel-2:#F0F2F6;--ink:#12151C;--muted:#525A69;--line:#E1E4EA;--line-2:#C5CAD4;
+  --accent:#4338CA;--accent-ink:#FFFFFF;--accent-soft:#E9E8FB;--accent-text:#3730A3;
+  --ok:#14724A;--ok-soft:#DDF2E7;--warn:#8A5300;--warn-soft:#FCEED6;--bad:#B42335;--bad-soft:#FCE3E6;--info:#1D5FA8;--info-soft:#E1ECF9;
+  --buy:#14724A;--sell:#B42335;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 3px 10px rgba(16,24,40,.05);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B0D12;--panel:#12151C;--panel-2:#1A1E28;--ink:#E7E9EE;--muted:#9EA6B5;--line:#252A35;--line-2:#3A4150;
+  --accent:#8F8BF7;--accent-ink:#110D35;--accent-soft:#201E47;--accent-text:#BEBBFF;
+  --ok:#5DD39A;--ok-soft:#12301F;--warn:#F0B85A;--warn-soft:#342611;--bad:#FF8A95;--bad-soft:#3A1A1F;--info:#8EC1FF;--info-soft:#16283F;
+  --buy:#5DD39A;--sell:#FF8A95;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;letter-spacing:-.01em;line-height:1.25}
+h1{font-size:22px}h2{font-size:16px}h3{font-size:14.5px}
+p{margin:0}
+.num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.92em}
+.muted{color:var(--muted)}.small{font-size:13px}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.r{text-align:right}
+
+.demo-band{background:var(--warn-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:700}
+
+.top{display:flex;align-items:center;gap:10px 16px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.brand small{display:block;font-weight:600;font-size:11.5px;color:var(--muted);letter-spacing:0}
+.brand-mark{width:36px;height:36px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:7px;align-items:center;padding:0 12px;border-radius:10px;border:0;background:transparent;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current]{background:var(--accent-soft);color:var(--accent-text)}
+.tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.tools .sel{display:flex;align-items:center;gap:6px;min-width:0}
+.tools label{font-size:12.5px;color:var(--muted);font-weight:600}
+.tools select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 8px;min-width:0}
+.pend{position:relative}
+.pend .cnt{position:absolute;top:2px;right:2px;background:var(--warn);color:var(--panel);font-size:11px;font-weight:800;border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px}
+.wallet-btn .addr{font-family:var(--mono);font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;flex:none}
+.dot.bad{background:var(--bad)}.dot.warn{background:var(--warn)}
+main{padding:20px clamp(16px,2vw,32px) 56px}
+#wsban{margin:0 clamp(16px,2vw,32px);margin-top:12px}
+@media (max-width:1180px){#nav{order:3;width:100%}}
+@media (max-width:620px){.tools{margin-left:0;width:100%}.tools .sel{flex:1;min-width:0;display:flex;align-items:center;gap:6px}.tools select{flex:1;width:0}.wallet-btn .addr{max-width:110px;overflow:hidden;text-overflow:ellipsis}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.buy{background:var(--buy);border-color:var(--buy);color:var(--panel)}
+.btn.sell{background:var(--sell);border-color:var(--sell);color:var(--panel)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{min-height:44px;padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed;filter:none}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.flabel{font-weight:700;font-size:13.5px}
+.inp{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+.inp:disabled{background:var(--panel-2);color:var(--muted)}
+.inp[aria-invalid=true]{border-color:var(--bad)}
+.err{color:var(--bad);font-size:13px;font-weight:600}
+.hint{color:var(--muted);font-size:12.5px}
+.row{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+.seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{min-height:44px;border:0;background:transparent;border-radius:8px;padding:0 14px;font-weight:700;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.seg.full{display:flex}.seg.full button{flex:1}
+
+.ph{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.ph p{margin-top:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.g{display:grid;gap:16px;margin-bottom:16px}
+.g>*{min-width:0}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.kpi .v{font-size:22px;font-weight:800;margin-top:2px;overflow-wrap:anywhere}
+.up{color:var(--ok)}.down{color:var(--bad)}
+.g-dash{grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.g-dash{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}.g-dash .recent{grid-column:1/-1}}
+@media (min-width:1450px){.g-dash{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1.2fr)}.g-dash .recent{grid-column:auto}}
+.g-2{grid-template-columns:minmax(0,1fr)}
+@media (min-width:960px){.g-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (min-width:1500px){.g-2.wide{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}}
+.g-trade{grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.g-trade{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.g-trade .tchart{grid-column:1/-1}}
+@media (min-width:1350px){.g-trade{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr)}.g-trade .tchart{grid-column:auto}}
+.g-health{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.g-health{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+
+.chart{position:relative;height:230px}
+.chart svg{width:100%;height:100%;display:block}
+.chart .lab{position:absolute;right:4px;font-size:11.5px;color:var(--muted);font-family:var(--mono);background:var(--panel);padding:0 4px;border-radius:4px}
+
+.tk{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;background:var(--c);color:#fff;font-size:11px;font-weight:800;flex:none}
+.tline{display:flex;align-items:center;gap:10px;min-width:0}
+.blist{display:grid;gap:2px}
+.brow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brow:last-child{border-bottom:0}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2);font-weight:800}
+tr:last-child td{border-bottom:0}
+td.wrap{overflow-wrap:anywhere;word-break:break-word}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-pend{background:var(--warn-soft);color:var(--warn)}.b-fail{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--info-soft);color:var(--info)}.b-mute{background:var(--panel-2);color:var(--muted)}
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:12px 14px;font-size:14px;border:1px solid transparent}
+.alert.ok{background:var(--ok-soft);color:var(--ok)}.alert.warn{background:var(--warn-soft);color:var(--warn)}.alert.bad{background:var(--bad-soft);color:var(--bad)}.alert.info{background:var(--info-soft);color:var(--info)}
+.alert .t{color:var(--ink)}
+.alert svg{margin-top:2px}
+
+/* Mint */
+.mint{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:700px){.mint{grid-template-columns:minmax(0,260px) minmax(0,1fr)}}
+.art{aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.art svg{width:100%;height:100%;display:block}
+.prog{height:10px;background:var(--panel-2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.prog span{display:block;height:100%;background:var(--accent)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty .inp{width:80px;text-align:center}
+.recap{display:grid;gap:6px;padding:12px;background:var(--panel-2);border-radius:10px;font-size:14px}
+.recap div{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.nfts{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,130px),1fr))}
+.nft{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel-2)}
+.nft .art{border:0;border-radius:0}
+.nft p{padding:8px 10px;font-weight:700;font-size:13.5px}
+
+/* Swap */
+.sbox{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel-2);display:grid;gap:8px}
+.sbox .line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.sbox .big{font-size:22px;font-weight:800;border:0;background:transparent;padding:4px 0;min-height:44px;width:100%;min-width:0}
+.sbox .big:focus-visible{outline-offset:0}
+.sbox select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px;font-weight:700}
+.switch{display:flex;justify-content:center;margin:-6px 0}
+.switch button{border:1px solid var(--line-2);background:var(--panel);border-radius:10px;width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
+
+/* Trading */
+.book{font-family:var(--mono);font-size:13px;display:grid}
+.book .bh,.book .br{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:6px;padding:3px 6px;position:relative}
+.book .bh{font-family:var(--font);font-size:11.5px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.book .br span{position:relative;z-index:1}
+.book .br i{position:absolute;right:0;top:1px;bottom:1px;border-radius:3px;opacity:.16}
+.book .ask span:first-child{color:var(--sell)}.book .bid span:first-child{color:var(--buy)}
+.book .ask i{background:var(--sell)}.book .bid i{background:var(--buy)}
+.book .mid{padding:8px 6px;font-size:16px;font-weight:700;border-block:1px solid var(--line);margin:4px 0}
+.book>div{overflow:hidden}
+
+/* Steps */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.steps li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:8px 0;position:relative}
+.steps li:not(:last-child)::after{content:"";position:absolute;left:13px;top:34px;bottom:-6px;width:2px;background:var(--line)}
+.steps .ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-2);color:var(--muted);background:var(--panel)}
+.steps .done .ic{background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.steps .fail .ic{background:var(--bad);border-color:var(--bad);color:var(--panel)}
+.steps .run .ic{border-color:var(--accent);border-top-color:transparent;animation:spin .9s linear infinite}
+.steps .skip{opacity:.55}
+.steps .ic svg{width:15px;height:15px;stroke-width:3}
+.steps .lb{padding-top:3px;font-weight:600}
+.steps .run .lb{color:var(--accent-text);font-weight:800}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.steps .run .ic{animation:none;border-style:dashed}}
+
+/* Modal, toasts */
+.backdrop{position:fixed;inset:0;background:rgba(10,12,20,.55);display:grid;place-items:center;padding:16px;z-index:60}
+.modal{background:var(--panel);border-radius:16px;border:1px solid var(--line);width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.modal .mb{padding:16px;display:grid;gap:14px}
+#toasts{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:80;width:min(400px,calc(100vw - 32px))}
+.toast{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--info);border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.toast.ok{border-left-color:var(--ok)}.toast.bad{border-left-color:var(--bad)}.toast.warn{border-left-color:var(--warn)}
+.toast .x{flex:1;min-width:0}
+.toast .ok svg{color:var(--ok)}
+.toast button{min-height:36px}
+
+/* Santé */
+.svc{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr))}
+.svc .s{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:4px;background:var(--panel-2)}
+.svc .s b{display:flex;align-items:center;gap:8px}
+.log{font-family:var(--mono);font-size:12.5px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px;max-height:300px;overflow:auto;display:grid;gap:3px}
+.log div{overflow-wrap:anywhere}
+.log .ev{color:var(--accent-text);font-weight:600}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.checks li{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+.checks li .st{margin-left:auto}
+.doc h3{margin-top:14px}
+.doc ol,.doc ul{margin:6px 0;padding-left:20px}
+.doc li{margin:3px 0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow span{background:var(--accent-soft);color:var(--accent-text);border-radius:8px;padding:4px 8px;font-weight:700}
+#printzone{display:none}
+@media print{
+  body.print>*{display:none!important}
+  body.print>#printzone{display:block!important;padding:20px;color:#000}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives, réseau de test simulé, aucune vraie transaction</span><button type="button" id="resetBtn">Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="brand-mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 7l4.5 2.5v5L12 17l-4.5-2.5v-5z"/></svg></span><span>Nova<small>Mint · Swap · Trading · Staking</small></span></div>
+  <nav id="nav" aria-label="Sections"></nav>
+  <div class="tools">
+    <div class="sel"><label for="scenario">Scénario réseau</label>
+    <select id="scenario">
+      <option value="normal">Normal</option>
+      <option value="random">Échecs aléatoires (35 %)</option>
+      <option value="fail">Échec forcé (revert / API)</option>
+      <option value="slow">Réseau lent</option>
+      <option value="reject">Signature refusée</option>
+    </select></div>
+    <button type="button" class="btn pend" id="pendBtn" aria-label="Opérations en attente"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="cnt" id="pendCnt" hidden>0</span></button>
+    <button type="button" class="btn wallet-btn" id="walletBtn"></button>
+  </div>
+</header>
+<div id="wsban" hidden></div>
+<main id="view" tabindex="-1"></main>
+<div id="toasts" role="status" aria-live="polite"></div>
+<div id="modalRoot"></div>
+<div id="printzone"></div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const KEY='demo-490802-v1';
+const IC={
+ grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+ hex:'<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 8v8M8 12h8"/>',
+ swap:'<path d="M7 4v16M3 8l4-4 4 4M17 20V4M21 16l-4 4-4-4"/>',
+ card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+ chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/>',
+ layers:'<path d="M12 2l10 5-10 5L2 7z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>',
+ list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ pulse:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+ wallet:'<path d="M20 7H5a2 2 0 010-4h13v4"/><path d="M3 5v14a2 2 0 002 2h15V7"/><circle cx="16" cy="14" r="1.2"/>',
+ check:'<path d="M20 6L9 17l-5-5"/>',
+ x:'<path d="M18 6L6 18M6 6l12 12"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ refresh:'<path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+ alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/>',
+ print:'<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="8" rx="2"/><path d="M6 14h12v8H6z"/>',
+ down:'<path d="M12 5v14M5 12l7 7 7-7"/>',
+ plug:'<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 01-12 0zM12 18v4"/>',
+ doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
+ copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/>',
+ play:'<path d="M6 4l14 8-14 8z"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=(n,d=2)=>Number(n).toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=v=>{const n=parseFloat(String(v).replace(/[\s  ]/g,'').replace(',','.'));return isFinite(n)?n:NaN};
+const usd=n=>fmt(n,2)+' $';
+const dt=ts=>new Date(ts).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const hx=n=>{let s='0x';for(let i=0;i<n;i++)s+='0123456789abcdef'[Math.floor(Math.random()*16)];return s};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const TOK={ETH:{n:'Ether',d:4,c:'#4E63C9'},USDC:{n:'USD Coin',d:2,c:'#1F66B5'},NOVA:{n:'Nova',d:2,c:'#5B34C9'}};
+const tk=t=>`<span class="tk" style="--c:${TOK[t].c}" aria-hidden="true">${t[0]}</span>`;
+const amt=(v,t)=>fmt(v,TOK[t]?TOK[t].d:2)+' '+t;
+const KIND={mint:'Mint',swap:'Swap',approve:'Autorisation',buy:'Achat carte',sell:'Vente',trade:'Trading',stake:'Staking'};
+const APR=0.124, ACCEL=1500, MINT_PRICE=0.02, GAS=0.0011, EURUSD=1.08, MAXW=5, UNB_MS=45000;
+
+/* ---------- État ---------- */
+let S;
+function mkTx(kind,title,status,ago,steps,err,ref){
+  const ts=Date.now()-ago*60000;
+  return {id:uid(),kind,title,status,ts,done:ts+5000,err:err||null,ref:ref===undefined?hx(64):ref,refLabel:'Hash',
+    steps:steps.map((l,i)=>({l,st:status==='fail'&&i===steps.length-2?'fail':status==='fail'&&i===steps.length-1?'skip':'done',t:ts+i*1200})),op:null};
+}
+const CHAIN4=l=>['Signature dans le portefeuille','Transaction diffusée sur le réseau','Confirmations du bloc (2/2)',l];
+function seed(){
+  const hist=[];let p=0.4;for(let i=0;i<90;i++){p*=1+(Math.random()-.485)*.012;hist.push(p)}
+  const now=Date.now();
+  return {
+    wallet:'0x7A3f9c2E41b8D06a5F1e3C94b72d8A0e5B1c91c2',
+    bal:{ETH:1.842,USDC:2450,NOVA:12500},
+    approved:{USDC:false,NOVA:true},
+    nfts:[214,1388],minted:3412,supply:5000,
+    eth:2450,price:p,open:hist[0],hist,
+    orders:[
+      {id:uid(),ts:now-3600e3,side:'buy',type:'Limite',price:+(p*0.93).toFixed(4),qty:1500,status:'open'},
+      {id:uid(),ts:now-7200e3,side:'sell',type:'Marché',price:+(p*1.02).toFixed(4),qty:800,status:'filled'}
+    ],
+    stake:{amt:5000,rew:18.4213,unb:[{id:uid(),amt:800,ready:now+30000}]},
+    txs:[
+      mkTx('stake','Demande de retrait de 800 NOVA du staking','ok',3,CHAIN4('Position indexée par l’API')),
+      mkTx('swap','Swap 0,2500 ETH → 610,40 USDC','fail',22,CHAIN4('Soldes resynchronisés par l’API'),'Revert : le prix a bougé au-delà de la tolérance de glissement (0,5 %) — INSUFFICIENT_OUTPUT_AMOUNT. Aucun ETH débité hors frais de gas.'),
+      mkTx('mint','Mint de 1 Orbis Pass','ok',95,['Signature dans le portefeuille','Transaction diffusée sur le réseau','Confirmations du bloc (2/2)','Événement Transfer indexé','Métadonnées publiées (WebSocket)']),
+      mkTx('buy','Achat de 250,00 € de NOVA par carte','ok',180,['Autorisation du paiement (mode test)','Webhook du prestataire reçu par l’API','Transfert des NOVA on-chain (2/2)','Solde notifié par WebSocket']),
+      mkTx('trade','Ordre au marché : vente 800 NOVA','ok',120,['Signature de l’ordre (EIP-712)','Envoi au moteur d’appariement','Exécution au marché','Règlement on-chain (2/2)'])
+    ],
+    log:[],
+    scenario:'normal'
+  };
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.bal)return s}}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S=load()||seed();
+// Opérations interrompues par un rechargement de page
+S.txs.forEach(t=>{if(t.status==='pending'){t.status='fail';t.err='Interrompue : la page a été rechargée avant la confirmation. Aucun solde n’a été modifié.';t.steps.forEach(s=>{if(s.st==='run'||s.st==='wait')s.st='skip'})}});
+let wsDown=false, cur='dash', ui={fiat:'buy',side:'buy',otype:'Limite',stakeMode:'stake',olist:'open',slip:0.5,actK:'',actS:'',actQ:''};
+const px=t=>t==='USDC'?1:t==='ETH'?S.eth:S.price;
+const nova=v=>amt(v,'NOVA');
+
+/* ---------- Journal WebSocket ---------- */
+function wsLog(ev,data){S.log.unshift({ts:Date.now(),ev,data});if(S.log.length>60)S.log.length=60;if(cur==='health')P.health()}
+
+/* ---------- Toasts ---------- */
+function toast(msg,type='info',txId){
+  const el=document.createElement('div');el.className='toast '+type;
+  const icn=type==='ok'?'check':type==='bad'?'x':type==='warn'?'alert':'clock';
+  el.innerHTML=`<span style="color:var(--${type==='info'?'info':type})">${ic(icn)}</span><div class="x">${msg}</div>${txId?'<button type="button" class="btn sm">Voir</button>':''}<button type="button" class="icon-btn" aria-label="Fermer la notification">${ic('x')}</button>`;
+  const bs=el.querySelectorAll('button');
+  if(txId){bs[0].onclick=()=>{openTx(txId);el.remove()}}
+  bs[bs.length-1].onclick=()=>el.remove();
+  $('#toasts').prepend(el);
+  while($('#toasts').children.length>4)$('#toasts').lastChild.remove();
+  setTimeout(()=>el.remove(),6500);
+}
+
+/* ---------- Modale ---------- */
+let modalTx=null,lastFocus=null;
+function openModal(title,html,mount){
+  lastFocus=document.activeElement;
+  $('#modalRoot').innerHTML=`<div class="backdrop" id="bd"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><header><h2 id="mt">${title}</h2><button type="button" class="icon-btn" id="mclose" aria-label="Fermer">${ic('x')}</button></header><div class="mb" id="mb">${html}</div></div></div>`;
+  $('#mclose').onclick=closeModal;
+  $('#bd').addEventListener('click',e=>{if(e.target.id==='bd')closeModal()});
+  mount&&mount($('#mb'));
+  $('#mclose').focus();
+}
+function closeModal(){$('#modalRoot').innerHTML='';modalTx=null;if(lastFocus&&lastFocus.isConnected)lastFocus.focus()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#bd'))closeModal();
+  if(e.key==='Tab'&&$('#bd')){const f=$$('button,input,select,a[href]',$('#bd')).filter(x=>!x.disabled);if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
+
+/* ---------- Moteur d'opérations ---------- */
+const needWallet=()=>S.wallet?null:'Connectez votre portefeuille pour continuer.';
+function quote(from,to,a){
+  if(!(a>0)||from===to)return null;
+  const v=a*px(from), impact=v/(350000+v), out=v*(1-0.003)*(1-impact)/px(to);
+  return {out,impact,rate:px(from)/px(to),fee:v*0.003};
+}
+const OPS={
+  approve:p=>({kind:'approve',title:`Autorisation ${p.token} pour le routeur de swap`,steps:CHAIN4('Allowance relue par l’API'),failAt:2,
+    failReason:'Transaction annulée : gas insuffisant (out of gas). Aucune autorisation enregistrée, vous pouvez réessayer.',
+    check:needWallet,apply(){S.approved[p.token]=true;S.bal.ETH-=0.0004}}),
+  mint:p=>({kind:'mint',title:`Mint de ${p.qty} Orbis Pass`,
+    steps:['Signature dans le portefeuille','Transaction diffusée sur le réseau','Confirmations du bloc (2/2)','Événement Transfer indexé','Métadonnées publiées (WebSocket)'],
+    failAt:2,failReason:'Revert du contrat : MaxSupplyReached() sur un lot concurrent. Aucun NFT créé, seul le gas de la tentative est consommé.',
+    check(){return needWallet()||(!(p.qty>=1&&p.qty<=MAXW&&Number.isInteger(p.qty))?'Quantité invalide (1 à 5).':S.nfts.length+p.qty>MAXW?`Limite de ${MAXW} Orbis Pass par portefeuille : vous pouvez encore en minter ${MAXW-S.nfts.length}.`:S.bal.ETH<p.qty*MINT_PRICE+GAS?'Solde ETH insuffisant pour le prix et les frais de gas.':null)},
+    apply(){if(S.bal.ETH<p.qty*MINT_PRICE+GAS)return 'Solde ETH insuffisant au moment de l’exécution.';S.bal.ETH-=p.qty*MINT_PRICE+GAS;for(let i=0;i<p.qty;i++){S.minted++;S.nfts.push(S.minted)}wsLog('nft.minted',{qty:p.qty,ids:S.nfts.slice(-p.qty)})}}),
+  swap:p=>({kind:'swap',title:`Swap ${amt(p.a,p.from)} → ${amt(p.min/(1-p.slip/100),p.to)}`,steps:CHAIN4('Soldes resynchronisés par l’API'),failAt:2,
+    failReason:`Revert : le prix a bougé au-delà de la tolérance de glissement (${fmt(p.slip,1)} %) — INSUFFICIENT_OUTPUT_AMOUNT. Aucun ${p.from} débité.`,
+    check(){return needWallet()||(!(p.a>0)?'Saisissez un montant.':p.a>S.bal[p.from]?`Solde ${p.from} insuffisant.`:p.from!=='ETH'&&!S.approved[p.from]?`Autorisez d’abord ${p.from}.`:null)},
+    apply(){const q=quote(p.from,p.to,p.a);if(!q||q.out<p.min)return `Revert : sortie ${amt(q?q.out:0,p.to)} inférieure au minimum garanti ${amt(p.min,p.to)} (le prix a bougé pendant l’attente). Aucun ${p.from} débité.`;
+      if(S.bal[p.from]<p.a)return `Solde ${p.from} insuffisant au moment de l’exécution.`;S.bal[p.from]-=p.a;S.bal[p.to]+=q.out;S.bal.ETH-=0.0008;wsLog('balance.updated',{[p.from]:-p.a,[p.to]:+q.out.toFixed(4)})}}),
+  buy:p=>({kind:'buy',title:`Achat de ${fmt(p.eur)} € de NOVA par carte`,signed:false,hashAt:2,
+    steps:['Autorisation du paiement (mode test)','Webhook du prestataire reçu par l’API','Transfert des NOVA on-chain (2/2)','Solde notifié par WebSocket'],
+    forceFail:p.card.endsWith('0002')?[0,'Carte refusée par la banque émettrice (carte de test 4000 0000 0000 0002). Aucun débit.']:null,
+    failAt:1,failReason:'Webhook non reçu dans le délai imparti : le paiement a été annulé automatiquement, vous n’êtes pas débité.',
+    check(){return needWallet()||(!(p.eur>=20&&p.eur<=5000)?'Montant entre 20 € et 5 000 €.':null)},
+    apply(){const q=p.eur*(1-0.015)*EURUSD/S.price;S.bal.NOVA+=q;wsLog('fiat.credited',{eur:p.eur,nova:+q.toFixed(2)})}}),
+  sell:p=>({kind:'sell',title:`Vente de ${nova(p.a)} vers IBAN ${p.iban.slice(0,4)}…${p.iban.slice(-4)}`,steps:['Signature du transfert','Transaction diffusée sur le réseau','Confirmations du bloc (2/2)','Virement SEPA émis (fonds sous 1 jour ouvré)'],failAt:2,
+    failReason:'Revert : adresse de dépôt non autorisée par le contrat de rachat. Aucun NOVA débité.',
+    check(){return needWallet()||(!(p.a>=50)?'Minimum 50 NOVA.':p.a>S.bal.NOVA?'Solde NOVA insuffisant.':null)},
+    apply(){if(S.bal.NOVA<p.a)return 'Solde NOVA insuffisant au moment de l’exécution.';S.bal.NOVA-=p.a;wsLog('payout.created',{nova:p.a,eur:+(p.a*S.price/EURUSD*0.985).toFixed(2)})}}),
+  limit:p=>({kind:'trade',title:`Ordre limite : ${p.side==='buy'?'achat':'vente'} ${fmt(p.qty,0)} NOVA à ${fmt(p.price,4)} USDC`,hashAt:1,refLabel:'Réf. ordre',
+    steps:['Signature de l’ordre (EIP-712)','Envoi à l’API (POST /orders)','Accusé de réception WebSocket'],ms:[700,800,600],failAt:1,
+    failReason:'API 409 : nonce expiré — ordre non enregistré, aucun fonds bloqué. Réessayez.',
+    check(){return needWallet()||(!(p.price>0)?'Prix invalide.':!(p.qty>=1)?'Quantité minimale : 1 NOVA.':p.side==='buy'&&S.bal.USDC<p.price*p.qty?'Solde USDC insuffisant.':p.side==='sell'&&S.bal.NOVA<p.qty?'Solde NOVA insuffisant.':null)},
+    apply(){if(p.side==='buy'){if(S.bal.USDC<p.price*p.qty)return 'Solde USDC insuffisant.';S.bal.USDC-=p.price*p.qty}else{if(S.bal.NOVA<p.qty)return 'Solde NOVA insuffisant.';S.bal.NOVA-=p.qty}
+      S.orders.unshift({id:uid(),ts:Date.now(),side:p.side,type:'Limite',price:p.price,qty:p.qty,status:'open'});wsLog('order.accepted',{side:p.side,price:p.price,qty:p.qty})}}),
+  market:p=>({kind:'trade',title:`Ordre au marché : ${p.side==='buy'?'achat':'vente'} ${fmt(p.qty,0)} NOVA`,
+    steps:['Signature de l’ordre (EIP-712)','Envoi au moteur d’appariement','Exécution au marché','Règlement on-chain (2/2)'],failAt:2,hashAt:3,
+    failReason:'Liquidité insuffisante dans le carnet pour cette taille — ordre rejeté, aucun fonds débité.',
+    check(){return needWallet()||(!(p.qty>=1)?'Quantité minimale : 1 NOVA.':p.side==='buy'&&S.bal.USDC<S.price*1.01*p.qty?'Solde USDC insuffisant.':p.side==='sell'&&S.bal.NOVA<p.qty?'Solde NOVA insuffisant.':null)},
+    apply(){const pr=S.price*(p.side==='buy'?1.001:.999),c=pr*p.qty;
+      if(p.side==='buy'){if(S.bal.USDC<c)return 'Solde USDC insuffisant au prix d’exécution.';S.bal.USDC-=c;S.bal.NOVA+=p.qty*.999}else{if(S.bal.NOVA<p.qty)return 'Solde NOVA insuffisant.';S.bal.NOVA-=p.qty;S.bal.USDC+=c*.999}
+      S.orders.unshift({id:uid(),ts:Date.now(),side:p.side,type:'Marché',price:+pr.toFixed(4),qty:p.qty,status:'filled'});wsLog('order.filled',{side:p.side,price:+pr.toFixed(4),qty:p.qty})}}),
+  cancel:p=>{const o=S.orders.find(x=>x.id===p.id)||{};return {kind:'trade',title:`Annulation de l’ordre limite ${o.side==='buy'?'achat':'vente'} ${fmt(o.qty||0,0)} NOVA`,hashAt:null,
+    steps:['Signature de l’annulation','Envoi à l’API (DELETE /orders)','Confirmation WebSocket'],ms:[600,700,500],failAt:1,
+    failReason:'API 503 : moteur d’appariement indisponible. L’ordre reste ouvert, réessayez dans un instant.',
+    check(){return needWallet()||(o.status!=='open'?'Cet ordre n’est plus ouvert.':null)},
+    apply(){if(o.status!=='open')return 'L’ordre a été exécuté entre-temps : annulation impossible (état resynchronisé).';o.status='cancelled';
+      if(o.side==='buy')S.bal.USDC+=o.price*o.qty;else S.bal.NOVA+=o.qty;wsLog('order.cancelled',{id:o.id})}}},
+  stake:p=>({kind:'stake',title:`Staking de ${nova(p.a)}`,steps:CHAIN4('Position indexée par l’API'),failAt:2,
+    failReason:'Revert : StakingPaused() — le contrat de staking est en pause. Aucun NOVA débité.',
+    check(){return needWallet()||(!(p.a>0)?'Saisissez un montant.':p.a>S.bal.NOVA?'Solde NOVA insuffisant.':null)},
+    apply(){if(S.bal.NOVA<p.a)return 'Solde NOVA insuffisant.';S.bal.NOVA-=p.a;S.stake.amt+=p.a;wsLog('stake.updated',{staked:S.stake.amt})}}),
+  unstake:p=>({kind:'stake',title:`Demande de retrait de ${nova(p.a)} du staking`,steps:CHAIN4('Position indexée par l’API'),failAt:2,
+    failReason:'Revert : CooldownActive() — une demande précédente bloque encore cette position.',
+    check(){return needWallet()||(!(p.a>0)?'Saisissez un montant.':p.a>S.stake.amt?'Montant supérieur à votre position stakée.':null)},
+    apply(){if(S.stake.amt<p.a)return 'Position insuffisante.';S.stake.amt-=p.a;S.stake.unb.push({id:uid(),amt:p.a,ready:Date.now()+UNB_MS});wsLog('unbonding.started',{amt:p.a})}}),
+  claim:()=>({kind:'stake',title:`Réclamation de ${nova(S.stake.rew)} de récompenses`,steps:CHAIN4('Récompenses remises à zéro par l’API'),failAt:2,
+    failReason:'Revert : NothingToClaim() — désynchronisation détectée entre l’API et le contrat, solde relu.',
+    check(){return needWallet()||(S.stake.rew<0.01?'Aucune récompense à réclamer.':null)},
+    apply(){const r=S.stake.rew;S.bal.NOVA+=r;S.stake.rew=0;wsLog('rewards.claimed',{nova:+r.toFixed(4)})}}),
+  withdraw:p=>{const u=S.stake.unb.find(x=>x.id===p.id)||{};return {kind:'stake',title:`Retrait de ${nova(u.amt||0)} débloqués`,steps:CHAIN4('Solde notifié par WebSocket'),failAt:2,
+    failReason:'Revert : UnbondingNotFinished() — horloge du nœud RPC en retard, réessayez dans quelques secondes.',
+    check(){return needWallet()||(!u.id?'Demande introuvable.':u.ready>Date.now()?'Période de déblocage non terminée.':null)},
+    apply(){const i=S.stake.unb.indexOf(u);if(i<0)return 'Déjà retiré.';S.stake.unb.splice(i,1);S.bal.NOVA+=u.amt;wsLog('unbonding.withdrawn',{amt:u.amt})}}}
+};
+const timers=new Set();
+function later(fn,ms){const t=setTimeout(()=>{timers.delete(t);fn()},ms);timers.add(t)}
+function exec(type,params){
+  const spec=OPS[type](params);
+  const e=spec.check&&spec.check();
+  if(e){toast(esc(e),'bad');return null}
+  const tx={id:uid(),kind:spec.kind,title:spec.title,status:'pending',ts:Date.now(),steps:spec.steps.map(l=>({l,st:'wait'})),op:{type,params},err:null,ref:null,refLabel:spec.refLabel||'Hash',slow:false};
+  const sc=S.scenario;
+  spec._fail=spec.forceFail||(sc==='reject'&&spec.signed!==false?[0,'Signature refusée dans le portefeuille (code 4001). Rien n’a été envoyé au réseau.']:
+    (sc==='fail'||(sc==='random'&&Math.random()<.35))?[spec.failAt,spec.failReason]:null);
+  S.txs.unshift(tx);save();wsLog('tx.created',{kind:tx.kind});
+  openTx(tx.id);step(tx,spec,0);refresh();
+  return tx;
+}
+function finish(tx,ok,err){
+  tx.status=ok?'ok':'fail';tx.done=Date.now();if(err)tx.err=err;
+  wsLog(ok?'tx.confirmed':'tx.failed',{kind:tx.kind,ref:tx.ref?tx.ref.slice(0,10)+'…':null});
+  save();refresh();updTx(tx);
+  if(modalTx!==tx.id)toast(ok?`<b>Confirmée</b> — ${esc(tx.title)}`:`<b>Échec</b> — ${esc(tx.title)}`,ok?'ok':'bad',tx.id);
+}
+function step(tx,spec,i){
+  if(i>=tx.steps.length){const r=spec.apply&&spec.apply();
+    if(typeof r==='string'){const s=tx.steps[tx.steps.length-1];s.st='fail';finish(tx,false,r)}else finish(tx,true);return}
+  const st=tx.steps[i];st.st='run';updTx(tx);
+  let ms=(spec.ms&&spec.ms[i])||[900,700,1500,800,700][i]||800;
+  const slowAt=spec.kind==='trade'&&spec.steps.length===3?1:2;
+  if(S.scenario==='slow'&&i===slowAt){ms=9000;later(()=>{if(st.st==='run'){tx.slow=true;updTx(tx);if(modalTx!==tx.id)toast('Toujours en attente : '+esc(tx.title),'warn',tx.id)}},3000)}
+  later(()=>{
+    if(spec._fail&&spec._fail[0]===i){st.st='fail';tx.steps.slice(i+1).forEach(s=>s.st='skip');finish(tx,false,spec._fail[1]);return}
+    st.st='done';st.t=Date.now();
+    const ha=spec.hashAt===undefined?1:spec.hashAt;
+    if(ha!==null&&i===ha)tx.ref=spec.refLabel?'ORD-'+Date.now().toString(36).toUpperCase()+'-'+uid().toUpperCase():hx(64);
+    tx.slow=false;save();step(tx,spec,i+1);
+  },ms);
+}
+const stBadge=s=>s==='ok'?`<span class="badge b-ok">${ic('check')}Confirmée</span>`:s==='fail'?`<span class="badge b-fail">${ic('x')}Échouée</span>`:`<span class="badge b-pend">${ic('clock')}En attente</span>`;
+function txBody(tx){
+  const steps=tx.steps.map(s=>`<li class="${s.st}"><span class="ic">${s.st==='done'?ic('check'):s.st==='fail'?ic('x'):''}</span><span class="lb">${esc(s.l)}<span class="sr"> — ${s.st==='done'?'terminé':s.st==='fail'?'échec':s.st==='run'?'en cours':s.st==='skip'?'non exécuté':'à venir'}</span></span><span class="muted small num">${s.t&&s.st==='done'?new Date(s.t).toLocaleTimeString('fr-FR'):''}</span></li>`).join('');
+  let msg='';
+  if(tx.status==='ok')msg=`<div class="alert ok">${ic('check')}<div class="t"><b>Opération confirmée.</b> Les soldes affichés ont été mis à jour à partir de l’événement reçu par l’API.</div></div>`;
+  else if(tx.status==='fail')msg=`<div class="alert bad">${ic('alert')}<div class="t"><b>L’opération a échoué.</b><br>${esc(tx.err||'')}</div></div>`;
+  else if(tx.slow)msg=`<div class="alert warn">${ic('clock')}<div class="t"><b>Toujours en attente.</b> Le réseau est lent. Vous pouvez fermer cette fenêtre : une notification s’affichera à la confirmation, et l’opération reste visible dans « Activité ».</div></div>`;
+  else msg=`<div class="alert info">${ic('clock')}<div class="t">Opération en cours. Ne fermez pas votre portefeuille pendant la signature.</div></div>`;
+  return `<div class="actions" style="justify-content:space-between"><b>${esc(tx.title)}</b>${stBadge(tx.status)}</div>
+  <ol class="steps">${steps}</ol>${msg}
+  <div class="small"><span class="muted">${esc(tx.refLabel||'Hash')} : </span><span class="num wrap">${tx.ref?esc(tx.ref):'— (attribué à la diffusion)'}</span></div>
+  <div class="small muted">Créée le ${dt(tx.ts)}${tx.done?' · terminée en '+fmt((tx.done-tx.ts)/1000,1)+' s':''}</div>
+  <div class="actions">${tx.status==='fail'&&tx.op?`<button type="button" class="btn primary" id="retry">${ic('refresh')}Réessayer</button>`:''}<button type="button" class="btn" id="mok">Fermer</button></div>`;
+}
+function openTx(id){const tx=S.txs.find(t=>t.id===id);if(!tx)return;openModal('Suivi de l’opération',txBody(tx),bindTx);modalTx=id}
+function bindTx(mb){
+  const c=$('#mok',mb);if(c)c.onclick=closeModal;
+  const r=$('#retry',mb);if(r)r.onclick=()=>{const tx=S.txs.find(t=>t.id===modalTx);closeModal();if(tx&&tx.op)exec(tx.op.type,tx.op.params)};
+}
+function updTx(tx){if(modalTx===tx.id&&$('#mb')){const f=document.activeElement&&document.activeElement.id;$('#mb').innerHTML=txBody(tx);bindTx($('#mb'));if(f&&$('#'+f))$('#'+f).focus();else if(!$('#bd').contains(document.activeElement))$('#mclose').focus()}}
+
+/* ---------- En-tête ---------- */
+const VIEWS=[['dash','Tableau de bord','grid'],['mint','Mint','hex'],['swap','Swap','swap'],['fiat','Achat / Vente','card'],['trade','Trading','chart'],['stake','Staking','layers'],['act','Activité','list'],['health','Intégrations','pulse']];
+$('#nav').innerHTML=VIEWS.map(([k,l,i])=>`<button type="button" class="tab" data-v="${k}">${ic(i)}${l}</button>`).join('');
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)go(b.dataset.v,true)});
+const short=a=>a.slice(0,6)+'…'+a.slice(-4);
+function header(){
+  const w=$('#walletBtn');
+  w.innerHTML=S.wallet?`<span class="dot" aria-hidden="true"></span>${ic('wallet')}<span class="addr">${short(S.wallet)}</span>`:`${ic('wallet')}Connecter`;
+  w.className='btn wallet-btn'+(S.wallet?'':' primary');
+  w.setAttribute('aria-label',S.wallet?'Portefeuille connecté '+short(S.wallet)+', ouvrir les détails':'Connecter le portefeuille');
+  const n=S.txs.filter(t=>t.status==='pending').length;
+  $('#pendCnt').hidden=!n;$('#pendCnt').textContent=n;
+  $('#pendBtn').setAttribute('aria-label',n?n+' opération(s) en attente':'Aucune opération en attente — voir l’activité');
+  $('#scenario').value=S.scenario;
+  $$('#nav .tab').forEach(b=>b.dataset.v===cur?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+  const wb=$('#wsban');wb.hidden=!wsDown;
+  if(wsDown)wb.innerHTML=`<div class="alert warn">${ic('plug')}<div class="t"><b>Connexion temps réel perdue.</b> Reconnexion automatique en cours ; en attendant, les statuts sont relus par l’API toutes les 10 s (mode dégradé).</div></div>`;
+}
+$('#scenario').onchange=e=>{S.scenario=e.target.value;save();toast('Scénario réseau : '+esc(e.target.selectedOptions[0].text),'info')};
+$('#pendBtn').onclick=()=>{const p=S.txs.find(t=>t.status==='pending');if(p)openTx(p.id);else go('act',true)};
+$('#walletBtn').onclick=()=>{
+  if(!S.wallet){openModal('Connecter un portefeuille',`<p class="muted">Choisissez un portefeuille (simulation, aucune extension requise).</p>
+    <div style="display:grid;gap:8px">${['Extension navigateur','WalletConnect (QR code)','Portefeuille matériel'].map(n=>`<button type="button" class="btn block" data-w style="justify-content:flex-start">${ic('wallet')}${n}</button>`).join('')}</div>`,mb=>{
+      $$('[data-w]',mb).forEach(b=>b.onclick=()=>{b.disabled=true;b.textContent='Signature du message de connexion…';setTimeout(()=>{S.wallet='0x7A3f9c2E41b8D06a5F1e3C94b72d8A0e5B1c91c2';save();closeModal();wsLog('session.opened',{wallet:short(S.wallet)});toast('Portefeuille connecté','ok');render()},900)})});return}
+  openModal('Portefeuille',`<div class="small muted">Adresse</div><div class="num wrap">${S.wallet}</div>
+    <div class="actions"><span class="badge b-ok"><span class="dot"></span>Réseau de test</span><span class="badge b-info">Session signée</span></div>
+    <div class="blist">${Object.keys(S.bal).map(t=>`<div class="brow"><span class="tline">${tk(t)}${t}</span><b class="num">${amt(S.bal[t],t)}</b></div>`).join('')}</div>
+    <div class="actions"><button type="button" class="btn" id="cpy">${ic('copy')}Copier l’adresse</button><button type="button" class="btn danger" id="dis">Déconnecter</button></div>`,mb=>{
+      $('#cpy',mb).onclick=()=>{try{navigator.clipboard.writeText(S.wallet).then(()=>toast('Adresse copiée','ok'),()=>toast('Copie impossible dans ce navigateur','warn'))}catch(e){toast('Copie impossible dans ce navigateur','warn')}};
+      $('#dis',mb).onclick=()=>{S.wallet=null;save();closeModal();toast('Portefeuille déconnecté','info');render()}});
+};
+$('#resetBtn').onclick=()=>{timers.forEach(clearTimeout);timers.clear();try{localStorage.removeItem(KEY)}catch(e){}S=seed();wsDown=false;closeModal();$('#toasts').innerHTML='';render();toast('Démo réinitialisée','ok')};
+
+/* ---------- Vues ---------- */
+const V={},P={},M={};
+function go(v,focus){if(!V[v])v='dash';cur=v;try{history.replaceState(null,'','#'+v)}catch(e){}render();if(focus){window.scrollTo(0,0);const h=$('#view h1');if(h){h.tabIndex=-1;h.focus()}}}
+function render(){$('#view').innerHTML=V[cur]();header();M[cur]&&M[cur]();P[cur]&&P[cur]()}
+function refresh(){header();P[cur]&&P[cur]()}
+function setH(el,h){if(el&&el.__h!==h){el.innerHTML=h;el.__h=h}}
+$('#view').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go,true);const t=e.target.closest('[data-tx]');if(t)openTx(t.dataset.tx)});
+const total=()=>Object.keys(S.bal).reduce((s,t)=>s+S.bal[t]*px(t),0)+S.stake.amt*S.price;
+const chg=()=>(S.price/S.open-1)*100;
+
+function chartSvg(lines){
+  const h=S.hist,mn=Math.min(...h,...(lines||[]).map(l=>l.p))*0.995,mx=Math.max(...h,...(lines||[]).map(l=>l.p))*1.005,W=600,H=200;
+  const y=v=>H-(v-mn)/(mx-mn)*H;
+  const pts=h.map((v,i)=>`${(i/(h.length-1)*W).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const col=chg()>=0?'var(--ok)':'var(--bad)';
+  const ll=(lines||[]).map(l=>`<line x1="0" x2="${W}" y1="${y(l.p)}" y2="${y(l.p)}" stroke="${l.side==='buy'?'var(--buy)':'var(--sell)'}" stroke-dasharray="6 5" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Évolution du prix NOVA/USDC, dernier prix ${fmt(S.price,4)} USDC">
+  ${[0.25,.5,.75].map(f=>`<line x1="0" x2="${W}" y1="${H*f}" y2="${H*f}" stroke="var(--line)" vector-effect="non-scaling-stroke"/>`).join('')}
+  <polygon points="0,${H} ${pts} ${W},${H}" fill="${col}" opacity=".1"/>${ll}
+  <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+  <span class="lab" style="top:2px">${fmt(mx,4)}</span><span class="lab" style="bottom:2px">${fmt(mn,4)}</span>`;
+}
+function txRows(list){
+  if(!list.length)return '<p class="muted">Aucune opération pour ces critères.</p>';
+  return `<div class="tw"><table><thead><tr><th>Date</th><th>Opération</th><th>Statut</th><th><span class="sr">Détails</span></th></tr></thead><tbody>${list.map(t=>`<tr><td class="small num">${dt(t.ts)}</td><td class="wrap"><span class="badge b-mute">${KIND[t.kind]}</span> ${esc(t.title)}${t.status==='fail'?`<div class="small" style="color:var(--bad)">${esc(t.err||'')}</div>`:''}</td><td>${stBadge(t.status)}</td><td class="r"><button type="button" class="btn sm" data-tx="${t.id}">Détails</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* Tableau de bord */
+V.dash=()=>`<div class="ph"><div><h1>Tableau de bord</h1><p class="muted">Portefeuille consolidé et suivi des opérations, alimentés en temps réel par WebSocket.</p></div>
+<div class="actions"><button type="button" class="btn" data-go="swap">${ic('swap')}Swap</button><button type="button" class="btn primary" data-go="mint">${ic('hex')}Minter</button></div></div>
+<div class="kpis" id="dk"></div>
+<div class="g g-dash"><section class="card"><div class="ch"><h2>NOVA / USDC</h2><span id="dp" class="num"></span></div><div class="chart" id="dchart"></div></section>
+<section class="card"><div class="ch"><h2>Soldes</h2><button type="button" class="btn sm" data-go="fiat">Acheter</button></div><div class="blist" id="db"></div></section>
+<section class="card recent"><div class="ch"><h2>Dernières opérations</h2><button type="button" class="btn sm" data-go="act">Tout voir</button></div><div id="dr"></div></section></div>`;
+P.dash=()=>{
+  const pend=S.txs.filter(t=>t.status==='pending').length,c=chg();
+  setH($('#dk'),`<div class="kpi"><div class="l">Valeur totale</div><div class="v num">${usd(total())}</div><div class="small muted">dont staking ${usd(S.stake.amt*S.price)}</div></div>
+  <div class="kpi"><div class="l">Prix NOVA</div><div class="v num">${fmt(S.price,4)} $</div><div class="small ${c>=0?'up':'down'}">${c>=0?'+':''}${fmt(c,2)} % sur la séance</div></div>
+  <div class="kpi"><div class="l">Récompenses staking</div><div class="v num">${fmt(S.stake.rew,4)}</div><div class="small muted">NOVA à réclamer</div></div>
+  <div class="kpi"><div class="l">Opérations en attente</div><div class="v">${pend}</div><div class="small muted">${S.txs.filter(t=>t.status==='fail').length} échouée(s) au total</div></div>`);
+  $('#dchart').innerHTML=chartSvg();
+  $('#dp').innerHTML=`${fmt(S.price,4)} <span class="${c>=0?'up':'down'}">${c>=0?'+':''}${fmt(c,2)} %</span>`;
+  setH($('#db'),Object.keys(S.bal).map(t=>`<div class="brow"><span class="tline">${tk(t)}<span><b>${t}</b><br><span class="small muted">${TOK[t].n}</span></span></span><span class="r"><b class="num">${fmt(S.bal[t],TOK[t].d)}</b><br><span class="small muted num">${usd(S.bal[t]*px(t))}</span></span></div>`).join('')+
+   `<div class="brow"><span class="tline">${tk('NOVA')}<span><b>NOVA stakés</b><br><span class="small muted">APR ${fmt(APR*100,1)} %</span></span></span><span class="r"><b class="num">${fmt(S.stake.amt,2)}</b></span></div>
+   <div class="brow"><span class="tline">${ic('hex')}<b>Orbis Pass</b></span><b>${S.nfts.length} NFT</b></div>`);
+  setH($('#dr'),txRows(S.txs.slice(0,6)));
+};
+
+/* Mint */
+function art(id){const h=(id*47)%360,h2=(h+140)%360,r=(id%5)*6+20;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="hsl(${h} 45% 22%)"/><circle cx="50" cy="50" r="${r+18}" fill="hsl(${h} 55% 38%)"/><path d="M50 ${50-r}l${r*0.87} ${r/2}v${r}l-${r*0.87} ${r/2}-${r*0.87}-${r/2}v-${r}z" fill="none" stroke="hsl(${h2} 80% 75%)" stroke-width="3"/><circle cx="50" cy="50" r="${r/3}" fill="hsl(${h2} 80% 70%)"/><text x="6" y="94" font-size="9" font-family="monospace" fill="#fff" opacity=".85">#${id}</text></svg>`}
+V.mint=()=>`<div class="ph"><div><h1>Mint — Orbis Pass</h1><p class="muted">Collection ERC-721 · ${fmt(MINT_PRICE,2)} ETH l’unité · ${MAXW} maximum par portefeuille.</p></div></div>
+<div class="g g-2 wide"><section class="card"><div class="mint"><div class="art" id="mart"></div>
+<form id="mf" class="stack" style="display:grid;gap:14px" novalidate>
+ <div><div class="actions" style="justify-content:space-between"><span class="flabel">Progression du mint</span><span class="num small" id="mcount"></span></div><div class="prog" style="margin-top:6px"><span id="mprog"></span></div></div>
+ <div class="field"><label for="mq">Quantité</label><div class="qty"><button type="button" class="icon-btn" id="mminus" aria-label="Diminuer" style="border-color:var(--line-2)">−</button><input class="inp num" id="mq" inputmode="numeric" value="1" aria-describedby="mqh"><button type="button" class="icon-btn" id="mplus" aria-label="Augmenter" style="border-color:var(--line-2)">+</button></div><span class="hint" id="mqh"></span></div>
+ <div class="recap" id="mrecap"></div>
+ <p class="err" id="merr" role="alert"></p>
+ <button class="btn primary block" id="mbtn">${ic('hex')}Minter</button>
+</form></div></section>
+<section class="card"><div class="ch"><h2>Vos Orbis Pass</h2><span class="small muted" id="mn"></span></div><div class="nfts" id="mnfts"></div></section></div>`;
+M.mint=()=>{
+  const q=$('#mq'),upd=()=>{const n=parseInt(q.value,10)||0;$('#mrecap').innerHTML=`<div><span>Prix (${n} × ${fmt(MINT_PRICE,2)} ETH)</span><b class="num">${fmt(n*MINT_PRICE,4)} ETH</b></div><div><span>Frais de gas estimés</span><span class="num">${fmt(GAS,4)} ETH</span></div><div><span>Total</span><b class="num">${fmt(n*MINT_PRICE+GAS,4)} ETH</b></div><div class="muted small"><span>Solde disponible</span><span class="num">${amt(S.bal.ETH,'ETH')}</span></div>`;$('#merr').textContent='';q.removeAttribute('aria-invalid')};
+  $('#mminus').onclick=()=>{q.value=Math.max(1,(parseInt(q.value,10)||1)-1);upd()};
+  $('#mplus').onclick=()=>{q.value=Math.min(MAXW,(parseInt(q.value,10)||0)+1);upd()};
+  q.oninput=upd;upd();
+  $('#mf').onsubmit=e=>{e.preventDefault();const n=Number(q.value);const err=OPS.mint({qty:n}).check();if(err){$('#merr').textContent=err;q.setAttribute('aria-invalid','true');q.focus();return}exec('mint',{qty:n})};
+};
+P.mint=()=>{
+  $('#mart').innerHTML=art(S.minted+1);
+  $('#mcount').textContent=`${fmt(S.minted,0)} / ${fmt(S.supply,0)}`;$('#mprog').style.width=(S.minted/S.supply*100)+'%';
+  $('#mqh').textContent=`Vous détenez ${S.nfts.length} / ${MAXW}. Il vous reste ${Math.max(0,MAXW-S.nfts.length)} mint(s) possible(s).`;
+  $('#mn').textContent=S.nfts.length+' détenu(s)';
+  setH($('#mnfts'),S.nfts.length?S.nfts.slice().reverse().map(id=>`<div class="nft"><div class="art">${art(id)}</div><p>Orbis Pass #${id}</p></div>`).join(''):'<p class="muted">Aucun NFT pour l’instant.</p>');
+  const pend=S.txs.filter(t=>t.kind==='mint'&&t.status==='pending').length;
+  const b=$('#mbtn');if(b){b.disabled=!!pend;b.innerHTML=pend?`${ic('clock')}Mint en cours…`:`${ic('hex')}Minter`}
+};
+
+/* Swap */
+const tokOpts=sel=>Object.keys(TOK).map(t=>`<option value="${t}"${t===sel?' selected':''}>${t}</option>`).join('');
+V.swap=()=>`<div class="ph"><div><h1>Swap</h1><p class="muted">Échange instantané via le routeur, avec autorisation ERC-20, tolérance de glissement et minimum garanti.</p></div></div>
+<div class="g g-2"><section class="card"><form id="sf" novalidate style="display:grid;gap:12px">
+ <div class="sbox"><div class="actions" style="justify-content:space-between"><label class="flabel" for="sa">Vous payez</label><span class="small muted">Solde : <span class="num" id="sbal"></span> <button type="button" class="btn sm" id="smax">Max</button></span></div>
+  <div class="line"><input class="big num" id="sa" inputmode="decimal" placeholder="0,00" autocomplete="off"><select id="sfrom" aria-label="Jeton payé">${tokOpts('USDC')}</select></div></div>
+ <div class="switch"><button type="button" id="sinv" aria-label="Inverser les jetons">${ic('swap')}</button></div>
+ <div class="sbox"><span class="flabel" id="soutl">Vous recevez (estimation)</span>
+  <div class="line"><output class="big num" id="sout" aria-labelledby="soutl">0,00</output><select id="sto" aria-label="Jeton reçu">${tokOpts('NOVA')}</select></div></div>
+ <div class="field"><span class="flabel" id="slipl">Tolérance de glissement</span><div class="seg" role="group" aria-labelledby="slipl" id="slip">${[0.5,1,3].map(v=>`<button type="button" data-s="${v}" aria-pressed="${ui.slip===v}">${fmt(v,1)} %</button>`).join('')}</div></div>
+ <div class="recap" id="sdet"></div>
+ <p class="err" id="serr" role="alert"></p>
+ <button class="btn primary block" id="sbtn">Swapper</button>
+</form></section>
+<section class="card"><div class="ch"><h2>Swaps et autorisations récents</h2></div><div id="srec"></div>
+<div class="alert info" style="margin-top:14px">${ic('doc')}<div class="t small">Astuce : passez le scénario réseau sur « Réseau lent » puis lancez un swap : si le prix bouge pendant l’attente au-delà de la tolérance, le contrat rejette l’opération au lieu de vous servir un mauvais prix, et l’interface l’explique.</div></div></section></div>`;
+function swapState(){const f=$('#sfrom').value,t=$('#sto').value,a=num($('#sa').value);return {f,t,a,q:quote(f,t,a)}}
+M.swap=()=>{
+  const u=()=>{$('#serr').textContent='';$('#sa').removeAttribute('aria-invalid');P.swap()};
+  $('#sa').oninput=u;
+  $('#sfrom').onchange=()=>{if($('#sfrom').value===$('#sto').value)$('#sto').value=Object.keys(TOK).find(x=>x!==$('#sfrom').value);u()};
+  $('#sto').onchange=()=>{if($('#sfrom').value===$('#sto').value)$('#sfrom').value=Object.keys(TOK).find(x=>x!==$('#sto').value);u()};
+  $('#sinv').onclick=()=>{const a=$('#sfrom').value;$('#sfrom').value=$('#sto').value;$('#sto').value=a;u()};
+  $('#smax').onclick=()=>{const f=$('#sfrom').value;let v=S.bal[f]-(f==='ETH'?0.005:0);$('#sa').value=String(Math.max(0,Math.floor(v*10000)/10000)).replace('.',',');u()};
+  $('#slip').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;ui.slip=+b.dataset.s;$$('#slip button').forEach(x=>x.setAttribute('aria-pressed',x===b));P.swap()};
+  $('#sf').onsubmit=e=>{e.preventDefault();const s=swapState();
+    if(s.f!=='ETH'&&!S.approved[s.f]&&S.wallet){exec('approve',{token:s.f});return}
+    const p={from:s.f,to:s.t,a:s.a,slip:ui.slip,min:s.q?s.q.out*(1-ui.slip/100):0};
+    const err=OPS.swap(p).check();if(err){$('#serr').textContent=err;$('#sa').setAttribute('aria-invalid','true');$('#sa').focus();return}
+    exec('swap',p)};
+};
+P.swap=()=>{
+  const s=swapState();$('#sbal').textContent=amt(S.bal[s.f],s.f);
+  $('#sout').textContent=s.q?fmt(s.q.out,TOK[s.t].d):'0,00';
+  $('#sdet').innerHTML=`<div><span>Taux</span><span class="num">1 ${s.f} = ${fmt(px(s.f)/px(s.t),s.t==='ETH'?6:4)} ${s.t}</span></div>
+   <div><span>Impact sur le prix</span><span class="num ${s.q&&s.q.impact>.02?'down':''}">${s.q?fmt(s.q.impact*100,2):'0,00'} %</span></div>
+   <div><span>Minimum garanti</span><b class="num">${s.q?amt(s.q.out*(1-ui.slip/100),s.t):'—'}</b></div>
+   <div><span>Frais de pool (0,3 %) / gas</span><span class="num">${s.q?usd(s.q.fee):'—'} / ~0,0008 ETH</span></div>`;
+  const b=$('#sbtn'),pendA=S.txs.some(t=>t.kind==='approve'&&t.status==='pending');
+  let label='Swapper',dis=false;
+  if(!S.wallet){label='Connectez votre portefeuille';dis=true}
+  else if(pendA){label='Autorisation en cours…';dis=true}
+  else if(s.f!=='ETH'&&!S.approved[s.f]){label=`Étape 1/2 : autoriser ${s.f}`}
+  else if(!(s.a>0)){label='Saisissez un montant'}
+  else if(s.a>S.bal[s.f]){label=`Solde ${s.f} insuffisant`}
+  b.textContent=label;b.disabled=dis;
+  setH($('#srec'),txRows(S.txs.filter(t=>t.kind==='swap'||t.kind==='approve').slice(0,6)));
+};
+
+/* Achat / Vente */
+V.fiat=()=>`<div class="ph"><div><h1>Achat / Vente</h1><p class="muted">Achetez des NOVA par carte ou revendez-les vers un compte bancaire.</p></div>
+<div class="seg" role="group" aria-label="Sens"><button type="button" data-f="buy" aria-pressed="${ui.fiat==='buy'}">Acheter</button><button type="button" data-f="sell" aria-pressed="${ui.fiat==='sell'}">Vendre</button></div></div>
+<div class="g g-2"><section class="card">${ui.fiat==='buy'?`
+<form id="ff" novalidate style="display:grid;gap:14px"><div class="ch" style="margin:0"><h2>Acheter des NOVA par carte</h2><span class="badge b-pend">Mode test</span></div>
+ <div class="row"><div class="field"><label for="feur">Montant (€)</label><input class="inp num" id="feur" inputmode="decimal" value="150" aria-describedby="feurh"><span class="hint" id="feurh">Entre 20 € et 5 000 €</span></div>
+ <div class="field"><span class="flabel">Vous recevez (estimation)</span><output class="inp num" id="fout" style="display:flex;align-items:center;background:var(--panel-2)"></output></div></div>
+ <div class="field"><label for="fname">Titulaire de la carte</label><input class="inp" id="fname" autocomplete="cc-name" value="Camille Martin"></div>
+ <div class="field"><label for="fcard">Numéro de carte</label><input class="inp num" id="fcard" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" aria-describedby="fcardh"><span class="hint" id="fcardh">Test : 4242 4242 4242 4242 (acceptée) · 4000 0000 0000 0002 (refusée)</span></div>
+ <div class="row"><div class="field"><label for="fexp">Expiration (MM/AA)</label><input class="inp num" id="fexp" inputmode="numeric" placeholder="12/28" autocomplete="cc-exp"></div>
+ <div class="field"><label for="fcvc">CVC</label><input class="inp num" id="fcvc" inputmode="numeric" placeholder="123" autocomplete="cc-csc"></div></div>
+ <p class="err" id="ferr" role="alert"></p>
+ <button class="btn primary block">${ic('card')}Payer (mode test)</button>
+ <p class="hint">Aucun paiement réel : le prestataire et son webhook sont simulés.</p></form>`:`
+<form id="ff" novalidate style="display:grid;gap:14px"><div class="ch" style="margin:0"><h2>Vendre des NOVA</h2><span class="small muted">Disponible : <span class="num" id="fav"></span></span></div>
+ <div class="row"><div class="field"><label for="fnova">Montant (NOVA)</label><input class="inp num" id="fnova" inputmode="decimal" value="1000" aria-describedby="fnh"><span class="hint" id="fnh">Minimum 50 NOVA</span></div>
+ <div class="field"><span class="flabel">Vous recevez (estimation)</span><output class="inp num" id="fout" style="display:flex;align-items:center;background:var(--panel-2)"></output></div></div>
+ <div class="field"><label for="fiban">IBAN du compte de destination</label><input class="inp num" id="fiban" value="FR76 3000 6000 0112 3456 7890 189" autocomplete="off"></div>
+ <div class="field"><label for="fhold">Titulaire du compte</label><input class="inp" id="fhold" value="Camille Martin"></div>
+ <p class="err" id="ferr" role="alert"></p>
+ <button class="btn primary block">Vendre et recevoir le virement</button></form>`}</section>
+<section class="card"><div class="ch"><h2>Historique achat / vente</h2></div><div id="frec"></div></section></div>`;
+M.fiat=()=>{
+  $$('[data-f]').forEach(b=>b.onclick=()=>{ui.fiat=b.dataset.f;render()});
+  const est=()=>{if(ui.fiat==='buy'){const e=num($('#feur').value);$('#fout').textContent=e>0?nova(e*(1-0.015)*EURUSD/S.price)+' (frais 1,5 %)':'—'}
+    else{const a=num($('#fnova').value);$('#fout').textContent=a>0?fmt(a*S.price/EURUSD*0.985)+' € (frais 1,5 %)':'—'}};
+  $('#ff').oninput=()=>{$('#ferr').textContent='';$$('#ff [aria-invalid]').forEach(i=>i.removeAttribute('aria-invalid'));est()};est();
+  $('#ff').onsubmit=e=>{e.preventDefault();const bad=(id,m)=>{$('#ferr').textContent=m;$('#'+id).setAttribute('aria-invalid','true');$('#'+id).focus()};
+    if(ui.fiat==='buy'){
+      const eur=num($('#feur').value),card=$('#fcard').value.replace(/\D/g,''),exp=$('#fexp').value.trim(),cvc=$('#fcvc').value.trim();
+      if(!(eur>=20&&eur<=5000))return bad('feur','Le montant doit être compris entre 20 € et 5 000 €.');
+      if(!$('#fname').value.trim())return bad('fname','Indiquez le titulaire de la carte.');
+      if(card.length!==16)return bad('fcard','Numéro de carte incomplet (16 chiffres).');
+      const m=exp.match(/^(\d{2})\s*\/\s*(\d{2})$/);if(!m||+m[1]<1||+m[1]>12||new Date(2000+ +m[2],+m[1])<new Date())return bad('fexp','Date d’expiration invalide ou dépassée.');
+      if(!/^\d{3,4}$/.test(cvc))return bad('fcvc','CVC invalide (3 ou 4 chiffres).');
+      if(exec('buy',{eur,card})){$('#fcard').value='';$('#fcvc').value=''}
+    }else{
+      const a=num($('#fnova').value),iban=$('#fiban').value.replace(/\s/g,'').toUpperCase();
+      if(!(a>=50))return bad('fnova','Minimum 50 NOVA.');
+      if(a>S.bal.NOVA)return bad('fnova','Solde NOVA insuffisant.');
+      if(!/^FR\d{2}[0-9A-Z]{23}$/.test(iban))return bad('fiban','IBAN invalide : format FR suivi de 25 caractères attendu.');
+      if(!$('#fhold').value.trim())return bad('fhold','Indiquez le titulaire du compte.');
+      exec('sell',{a,iban});
+    }};
+};
+P.fiat=()=>{const fa=$('#fav');if(fa)fa.textContent=nova(S.bal.NOVA);setH($('#frec'),txRows(S.txs.filter(t=>t.kind==='buy'||t.kind==='sell').slice(0,8)))};
+
+/* Trading */
+V.trade=()=>`<div class="ph"><div><h1>Trading NOVA / USDC</h1><p class="muted">Carnet d’ordres et prix diffusés en temps réel ; les ordres limites s’exécutent automatiquement quand le prix les atteint.</p></div><span class="badge b-info" id="tlive"><span class="dot"></span>Flux temps réel</span></div>
+<div class="g g-trade">
+ <section class="card tchart"><div class="ch"><h2>Prix</h2><span class="num" id="tp"></span></div><div class="chart" id="tchart"></div><p class="hint" style="margin-top:6px">Les pointillés indiquent vos ordres limites ouverts.</p></section>
+ <section class="card"><div class="ch"><h2>Carnet d’ordres</h2></div><div class="book" id="tbook"></div></section>
+ <section class="card"><form id="tf" novalidate style="display:grid;gap:12px">
+  <div class="seg full" role="group" aria-label="Sens de l’ordre"><button type="button" data-side="buy" aria-pressed="${ui.side==='buy'}">Acheter</button><button type="button" data-side="sell" aria-pressed="${ui.side==='sell'}">Vendre</button></div>
+  <div class="field"><label for="ttype">Type d’ordre</label><select class="inp" id="ttype"><option${ui.otype==='Limite'?' selected':''}>Limite</option><option${ui.otype==='Marché'?' selected':''}>Marché</option></select></div>
+  <div class="field"><label for="tprice">Prix limite (USDC)</label><input class="inp num" id="tprice" inputmode="decimal"></div>
+  <div class="field"><label for="tqty">Quantité (NOVA)</label><input class="inp num" id="tqty" inputmode="decimal" value="1000"></div>
+  <div class="seg full" role="group" aria-label="Part du solde">${[25,50,75,100].map(v=>`<button type="button" data-pct="${v}">${v} %</button>`).join('')}</div>
+  <div class="recap" id="trec"></div>
+  <p class="err" id="terr" role="alert"></p>
+  <button class="btn block" id="tbtn"></button>
+ </form></section>
+</div>
+<section class="card"><div class="ch"><div class="seg" role="group" aria-label="Liste des ordres"><button type="button" data-ol="open" aria-pressed="${ui.olist==='open'}">Ordres ouverts</button><button type="button" data-ol="hist" aria-pressed="${ui.olist==='hist'}">Historique</button></div></div><div id="tord"></div></section>`;
+M.trade=()=>{
+  $('#tprice').value=String(S.price.toFixed(4)).replace('.',',');
+  $$('[data-side]').forEach(b=>b.onclick=()=>{ui.side=b.dataset.side;$$('[data-side]').forEach(x=>x.setAttribute('aria-pressed',x===b));P.trade()});
+  $$('[data-ol]').forEach(b=>b.onclick=()=>{ui.olist=b.dataset.ol;$$('[data-ol]').forEach(x=>x.setAttribute('aria-pressed',x===b));P.trade()});
+  $('#ttype').onchange=()=>{ui.otype=$('#ttype').value;P.trade()};
+  $$('[data-pct]').forEach(b=>b.onclick=()=>{const f=+b.dataset.pct/100,pr=ui.otype==='Marché'?S.price*1.01:num($('#tprice').value)||S.price;
+    const q=ui.side==='buy'?S.bal.USDC*f/pr:S.bal.NOVA*f;$('#tqty').value=String(Math.floor(q));P.trade()});
+  $('#tf').oninput=()=>{$('#terr').textContent='';$$('#tf [aria-invalid]').forEach(i=>i.removeAttribute('aria-invalid'));P.trade()};
+  $('#tf').onsubmit=e=>{e.preventDefault();const qty=num($('#tqty').value),price=num($('#tprice').value);
+    const t=ui.otype==='Marché'?'market':'limit',p=t==='market'?{side:ui.side,qty}:{side:ui.side,qty,price};
+    const err=OPS[t](p).check();if(err){$('#terr').textContent=err;const f=/Prix/.test(err)?'#tprice':'#tqty';$(f).setAttribute('aria-invalid','true');$(f).focus();return}
+    exec(t,p)};
+  $('#tord').onclick=e=>{const b=e.target.closest('[data-cancel]');if(b)exec('cancel',{id:b.dataset.cancel})};
+};
+P.trade=()=>{
+  const c=chg();
+  $('#tp').innerHTML=`${fmt(S.price,4)} USDC <span class="${c>=0?'up':'down'}">${c>=0?'+':''}${fmt(c,2)} %</span>`;
+  const open=S.orders.filter(o=>o.status==='open');
+  $('#tchart').innerHTML=chartSvg(open.map(o=>({p:o.price,side:o.side})));
+  const lt=$('#tlive');lt.className='badge '+(wsDown?'b-pend':'b-info');lt.innerHTML=wsDown?`<span class="dot warn"></span>Reconnexion…`:`<span class="dot"></span>Flux temps réel`;
+  // carnet
+  const rows=(side)=>{let out=[];for(let i=8;i>=1;i--){const k=side==='ask'?i:9-i,pr=S.price*(1+(side==='ask'?1:-1)*k*0.0016),q=Math.round(800+((k*7919+Math.floor(S.price*1e4))%4000));out.push([pr,q])}return out};
+  const asks=rows('ask'),bids=rows('bid'),mx=Math.max(...asks.map(a=>a[1]),...bids.map(b=>b[1]));
+  const r=(cls,[p,q])=>`<div class="br ${cls}"><i style="width:${(q/mx*100).toFixed(0)}%"></i><span>${fmt(p,4)}</span><span class="r">${fmt(q,0)}</span><span class="r">${fmt(p*q,0)}</span></div>`;
+  $('#tbook').innerHTML=`<div class="bh"><span>Prix</span><span class="r">NOVA</span><span class="r">USDC</span></div>${asks.map(a=>r('ask',a)).join('')}<div class="mid ${c>=0?'up':'down'}">${fmt(S.price,4)}</div>${bids.map(b=>r('bid',b)).join('')}`;
+  // formulaire
+  const mk=ui.otype==='Marché',pi=$('#tprice');pi.disabled=mk;if(mk)pi.value='Au marché';else if(pi.value==='Au marché')pi.value=String(S.price.toFixed(4)).replace('.',',');
+  const qty=num($('#tqty').value),pr=mk?S.price:num(pi.value),tot=qty*pr;
+  $('#trec').innerHTML=`<div><span>Total estimé</span><b class="num">${isFinite(tot)?fmt(tot,2):'—'} USDC</b></div><div class="muted small"><span>Disponible</span><span class="num">${ui.side==='buy'?amt(S.bal.USDC,'USDC'):amt(S.bal.NOVA,'NOVA')}</span></div>${!mk&&pr>0?`<div class="muted small"><span>Écart au prix actuel</span><span class="num">${fmt((pr/S.price-1)*100,2)} %</span></div>`:''}`;
+  const b=$('#tbtn');b.className='btn block '+(ui.side==='buy'?'buy':'sell');b.textContent=(ui.side==='buy'?'Acheter':'Vendre')+' NOVA'+(mk?' au marché':' (limite)');b.disabled=!S.wallet;
+  // ordres
+  const list=ui.olist==='open'?open:S.orders.filter(o=>o.status!=='open');
+  const SL={open:'<span class="badge b-info">Ouvert</span>',filled:'<span class="badge b-ok">Exécuté</span>',cancelled:'<span class="badge b-mute">Annulé</span>'};
+  const pc=new Set(S.txs.filter(t=>t.status==='pending'&&t.op&&t.op.type==='cancel').map(t=>t.op.params.id));
+  setH($('#tord'),list.length?`<div class="tw"><table><thead><tr><th>Date</th><th>Sens</th><th>Type</th><th class="r">Prix</th><th class="r">Quantité</th><th class="r">Total USDC</th><th>Statut</th><th><span class="sr">Action</span></th></tr></thead><tbody>${list.map(o=>`<tr><td class="small num">${dt(o.ts)}</td><td><b class="${o.side==='buy'?'up':'down'}">${o.side==='buy'?'Achat':'Vente'}</b></td><td>${o.type}</td><td class="r num">${fmt(o.price,4)}</td><td class="r num">${fmt(o.qty,0)}</td><td class="r num">${fmt(o.price*o.qty,2)}</td><td>${SL[o.status]}</td><td class="r">${o.status==='open'?`<button type="button" class="btn sm danger" data-cancel="${o.id}"${pc.has(o.id)?' disabled':''}>${pc.has(o.id)?'Annulation…':'Annuler'}</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:`<p class="muted">${ui.olist==='open'?'Aucun ordre ouvert. Placez un ordre limite proche du prix actuel pour le voir s’exécuter.':'Aucun ordre dans l’historique.'}</p>`);
+};
+
+/* Staking */
+V.stake=()=>`<div class="ph"><div><h1>Staking NOVA</h1><p class="muted">APR ${fmt(APR*100,1)} % · récompenses calculées en continu · période de déblocage de 7 jours (raccourcie à 45 s pour la démo).</p></div></div>
+<div class="kpis" id="sk"></div>
+<div class="g g-2"><section class="card"><form id="kf" novalidate style="display:grid;gap:12px">
+ <div class="seg full" role="group" aria-label="Action"><button type="button" data-k="stake" aria-pressed="${ui.stakeMode==='stake'}">Staker</button><button type="button" data-k="unstake" aria-pressed="${ui.stakeMode==='unstake'}">Retirer</button></div>
+ <div class="field"><label for="ka">Montant (NOVA)</label><div style="display:flex;gap:8px"><input class="inp num" id="ka" inputmode="decimal" placeholder="0,00"><button type="button" class="btn" id="kmax">Max</button></div><span class="hint" id="kh"></span></div>
+ <p class="err" id="kerr" role="alert"></p>
+ <button class="btn primary block" id="kbtn"></button>
+</form>
+<div class="brow" style="margin-top:14px;border-top:1px solid var(--line)"><span><span class="flabel">Récompenses à réclamer</span><br><b class="num" id="krew" style="font-size:20px"></b> <span class="small muted">NOVA</span></span><button type="button" class="btn" id="kclaim">Réclamer</button></div></section>
+<section class="card"><div class="ch"><h2>Retraits en cours de déblocage</h2></div><div id="kunb"></div><h3 style="margin:18px 0 10px">Historique staking</h3><div id="krec"></div></section></div>`;
+M.stake=()=>{
+  $$('[data-k]').forEach(b=>b.onclick=()=>{ui.stakeMode=b.dataset.k;$$('[data-k]').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#kerr').textContent='';P.stake()});
+  $('#kmax').onclick=()=>{$('#ka').value=String(Math.floor((ui.stakeMode==='stake'?S.bal.NOVA:S.stake.amt)*100)/100).replace('.',',')};
+  $('#ka').oninput=()=>{$('#kerr').textContent='';$('#ka').removeAttribute('aria-invalid')};
+  $('#kf').onsubmit=e=>{e.preventDefault();const a=num($('#ka').value),t=ui.stakeMode;const err=OPS[t]({a}).check();if(err){$('#kerr').textContent=err;$('#ka').setAttribute('aria-invalid','true');$('#ka').focus();return}if(exec(t,{a}))$('#ka').value=''};
+  $('#kclaim').onclick=()=>exec('claim',{});
+  $('#kunb').onclick=e=>{const b=e.target.closest('[data-wd]');if(b)exec('withdraw',{id:b.dataset.wd})};
+};
+P.stake=()=>{
+  setH($('#sk'),`<div class="kpi"><div class="l">NOVA stakés</div><div class="v num">${fmt(S.stake.amt,2)}</div><div class="small muted num">${usd(S.stake.amt*S.price)}</div></div>
+  <div class="kpi"><div class="l">APR</div><div class="v">${fmt(APR*100,1)} %</div><div class="small muted">≈ ${nova(S.stake.amt*APR/12)} / mois</div></div>
+  <div class="kpi"><div class="l">Disponible</div><div class="v num">${fmt(S.bal.NOVA,2)}</div><div class="small muted">NOVA dans le portefeuille</div></div>
+  <div class="kpi"><div class="l">En déblocage</div><div class="v num">${fmt(S.stake.unb.reduce((s,u)=>s+u.amt,0),2)}</div><div class="small muted">${S.stake.unb.length} demande(s)</div></div>`);
+  $('#krew').textContent=fmt(S.stake.rew,4);
+  $('#kh').textContent=ui.stakeMode==='stake'?`Disponible : ${nova(S.bal.NOVA)}`:`Position stakée : ${nova(S.stake.amt)} — déblocage sous 45 s (démo)`;
+  $('#kbtn').textContent=ui.stakeMode==='stake'?'Staker mes NOVA':'Demander le retrait';
+  $('#kbtn').disabled=!S.wallet;$('#kclaim').disabled=!S.wallet||S.stake.rew<0.01;
+  const now=Date.now();
+  setH($('#kunb'),S.stake.unb.length?`<div class="blist">${S.stake.unb.map(u=>{const left=Math.max(0,Math.ceil((u.ready-now)/1000));return `<div class="brow"><span><b class="num">${nova(u.amt)}</b><br><span class="small muted">${left?'Disponible dans '+left+' s':'Débloqué'}</span></span>${left?'<span class="badge b-pend">'+ic('clock')+'Déblocage</span>':`<button type="button" class="btn sm primary" data-wd="${u.id}">Retirer vers le portefeuille</button>`}</div>`}).join('')}</div>`:'<p class="muted">Aucun retrait en attente.</p>');
+  setH($('#krec'),txRows(S.txs.filter(t=>t.kind==='stake').slice(0,5)));
+};
+
+/* Activité */
+V.act=()=>`<div class="ph"><div><h1>Activité</h1><p class="muted">Toutes les opérations, avec leur statut réel et la raison de chaque échec.</p></div></div>
+<section class="card"><div class="row" style="margin-bottom:14px">
+ <div class="field"><label for="ak">Type</label><select class="inp" id="ak"><option value="">Tous</option>${Object.keys(KIND).map(k=>`<option value="${k}"${ui.actK===k?' selected':''}>${KIND[k]}</option>`).join('')}</select></div>
+ <div class="field"><label for="as">Statut</label><select class="inp" id="as"><option value="">Tous</option><option value="pending"${ui.actS==='pending'?' selected':''}>En attente</option><option value="ok"${ui.actS==='ok'?' selected':''}>Confirmée</option><option value="fail"${ui.actS==='fail'?' selected':''}>Échouée</option></select></div>
+ <div class="field"><label for="aq">Recherche</label><input class="inp" id="aq" type="search" placeholder="Libellé, hash…" value="${esc(ui.actQ)}"></div>
+</div><p class="small muted" id="acnt" aria-live="polite"></p><div id="alist" style="margin-top:8px"></div></section>`;
+M.act=()=>{$('#ak').onchange=e=>{ui.actK=e.target.value;P.act()};$('#as').onchange=e=>{ui.actS=e.target.value;P.act()};$('#aq').oninput=e=>{ui.actQ=e.target.value;P.act()}};
+P.act=()=>{const q=ui.actQ.trim().toLowerCase();const l=S.txs.filter(t=>(!ui.actK||t.kind===ui.actK)&&(!ui.actS||t.status===ui.actS)&&(!q||(t.title+' '+(t.ref||'')+' '+(t.err||'')).toLowerCase().includes(q)));
+  $('#acnt').textContent=l.length+' opération(s)';setH($('#alist'),txRows(l))};
+
+/* Intégrations */
+const FLOWS=[['Mint',['mint']],['Swap',['swap','approve']],['Achat / Vente',['buy','sell']],['Trading',['trade']],['Staking',['stake']]];
+let checks=null,lat={api:42,rpc:118,idx:1,ws:23};
+V.health=()=>`<div class="ph"><div><h1>Santé des intégrations</h1><p class="muted">Ce que je mets en place pendant la mission : chaque flux suivi de l’interface au contrat, puis retour par l’indexeur et le WebSocket.</p></div>
+<div class="actions"><button type="button" class="btn" id="hws">${ic('plug')}</button><button type="button" class="btn primary" id="hrun">${ic('play')}Lancer la recette de bout en bout</button></div></div>
+<section class="card" style="margin-bottom:16px"><div class="ch"><h2>Services</h2><span class="small muted">Latences mesurées en continu (simulées)</span></div><div class="svc" id="hsvc"></div></section>
+<div class="g g-health"><section class="card"><div class="ch"><h2>Fiabilité par flux</h2><span class="small muted">sur les opérations de la session</span></div><div id="hflows"></div>
+<h3 style="margin:18px 0 10px">Recette automatique</h3><div id="hchk"><p class="muted small">Lance un scénario par flux et vérifie que le statut final est bien remonté jusqu’à l’interface. Le résultat dépend du « Scénario réseau » choisi en haut.</p></div></section>
+<section class="card"><div class="ch"><h2>Événements WebSocket</h2><span class="small muted">les plus récents en haut</span></div><div class="log" id="hlog" aria-live="off"></div></section></div>
+<section class="card doc" id="handoff"><div class="ch"><h2 class="tline">${ic('doc')}Note de passation (aperçu)</h2><button type="button" class="btn" id="hprint">${ic('print')}Imprimer / PDF</button></div>
+<div id="hdoc">
+<h3>1. Cycle de vie d’une opération</h3>
+<div class="flow"><span>Signature</span>→<span>Diffusée (hash)</span>→<span>Confirmations</span>→<span>Indexée par l’API</span>→<span>Notifiée (WebSocket)</span>→<span>Soldes mis à jour</span></div>
+<p class="small muted" style="margin-top:6px">Statuts exposés à l’interface : <b>en attente</b>, <b>confirmée</b>, <b>échouée</b> (avec raison lisible). Les soldes ne changent qu’après confirmation indexée, jamais de façon optimiste.</p>
+<h3>2. Points de synchronisation corrigés</h3>
+<ul><li>Décodage des erreurs de contrat (revert Solidity) en messages compréhensibles côté front.</li><li>Rapprochement des webhooks de paiement avec les transferts on-chain (idempotence par référence).</li><li>Reprise des statuts après coupure WebSocket : relecture par l’API puis rattrapage des événements manqués.</li><li>Opérations interrompues (rechargement, onglet fermé) retrouvées et resynchronisées au retour.</li></ul>
+<h3>3. Procédure de test en production</h3>
+<ol><li>Petits montants sur chaque flux : mint, swap avec autorisation, achat carte, vente, ordre limite et ordre au marché, staking et retrait.</li><li>Vérification croisée : explorateur de blocs ↔ base de l’API ↔ interface.</li><li>Cas d’échec provoqués : signature refusée, glissement dépassé, solde insuffisant, webhook en retard.</li></ol>
+<h3>4. Exploitation</h3>
+<ul><li>Variables d’environnement documentées (RPC, adresses des contrats, clés du prestataire de paiement, URL WebSocket).</li><li>Ordre de démarrage : API Express → indexeur → serveur WebSocket → Next.js.</li><li>Journal structuré par référence d’opération pour diagnostiquer en quelques minutes.</li></ul>
+</div></section>`;
+M.health=()=>{
+  $('#hws').onclick=()=>{if(wsDown)return;wsDown=true;wsLog('ws.disconnected',{code:1006});refresh();toast('WebSocket coupé : passage en relecture API (mode dégradé)','warn');
+    later(()=>{wsDown=false;const n=2+Math.floor(Math.random()*3);wsLog('ws.reconnected',{replayed:n});refresh();toast(`Reconnecté : ${n} événement(s) rattrapé(s), statuts à jour`,'ok')},6000)};
+  $('#hrun').onclick=runChecks;
+  $('#hprint').onclick=()=>{$('#printzone').innerHTML='<h1>Note de passation — intégrations Web3</h1>'+$('#hdoc').innerHTML;document.body.classList.add('print');window.print()};
+};
+window.addEventListener('afterprint',()=>document.body.classList.remove('print'));
+P.health=()=>{
+  const hb=$('#hws');if(!hb)return;hb.innerHTML=ic('plug')+(wsDown?'Reconnexion en cours…':'Simuler une coupure WebSocket');hb.disabled=wsDown;
+  const sv=[['Interface Next.js','ok',null,'rendu et état client'],['API Express','ok',lat.api+' ms','REST /orders, /payments'],['Nœud RPC','ok',lat.rpc+' ms','lecture et diffusion'],['Indexeur d’événements',S.scenario==='slow'?'warn':'ok',S.scenario==='slow'?'retard : 8 blocs':'retard : '+lat.idx+' bloc','Transfer, Swap, Staked'],['Serveur WebSocket',wsDown?'bad':'ok',wsDown?'déconnecté':lat.ws+' ms','prix, statuts, soldes']];
+  $('#hsvc').innerHTML=sv.map(([n,s,v,d])=>`<div class="s"><b><span class="dot ${s==='ok'?'':s}" aria-hidden="true"></span>${n}</b><span class="small">${s==='ok'?'Opérationnel':s==='warn'?'Dégradé':'Indisponible'}${v?' · <span class="num">'+v+'</span>':''}</span><span class="small muted">${d}</span></div>`).join('');
+  setH($('#hflows'),`<div class="tw"><table><thead><tr><th>Flux</th><th class="r">Confirmées</th><th class="r">Échouées</th><th class="r">En attente</th><th>Dernier échec</th></tr></thead><tbody>${FLOWS.map(([n,k])=>{const l=S.txs.filter(t=>k.includes(t.kind)),f=l.find(t=>t.status==='fail');
+    return `<tr><td><b>${n}</b></td><td class="r num">${l.filter(t=>t.status==='ok').length}</td><td class="r num">${l.filter(t=>t.status==='fail').length}</td><td class="r num">${l.filter(t=>t.status==='pending').length}</td><td class="wrap small">${f?esc(f.err):'<span class="muted">—</span>'}</td></tr>`}).join('')}</tbody></table></div>`);
+  $('#hlog').innerHTML=S.log.length?S.log.map(l=>`<div><span class="muted">${new Date(l.ts).toLocaleTimeString('fr-FR')}</span> <span class="ev">${l.ev}</span> ${esc(JSON.stringify(l.data))}</div>`).join(''):'<div class="muted">En attente d’événements…</div>';
+  if(checks)setH($('#hchk'),`<ul class="checks">${checks.map(c=>`<li><span>${c.st==='ok'?'<span class="up">'+ic('check')+'</span>':c.st==='fail'?'<span class="down">'+ic('x')+'</span>':c.st==='run'?ic('clock'):'<span class="muted">'+ic('clock')+'</span>'}</span><span class="wrap"><b>${c.l}</b>${c.msg?'<br><span class="small muted">'+esc(c.msg)+'</span>':''}</span><span class="st">${c.st==='ok'?'<span class="badge b-ok">OK</span>':c.st==='fail'?'<span class="badge b-fail">KO</span>':c.st==='run'?'<span class="badge b-pend">En cours</span>':''}</span></li>`).join('')}</ul>`);
+};
+function runChecks(){
+  const sc=S.scenario,F=[['Mint 1 Orbis Pass → Transfer indexé → NFT affiché','mint',{qty:1}],['Autorisation USDC puis swap → soldes resynchronisés','swap',null],['Achat carte (test) → webhook → NOVA crédités','buy',{eur:50,card:'4242424242424242'}],['Ordre limite → accusé WebSocket → exécution','limit',null],['Stake → retrait → déblocage → réclamation','stake',{a:10}],['Coupure WebSocket → relecture API → rattrapage','ws',null]];
+  checks=F.map(f=>({l:f[0],st:'wait'}));$('#hrun').disabled=true;
+  let i=0;const nx=()=>{if(i>=F.length){$('#hrun')&&($('#hrun').disabled=false);const ko=checks.filter(c=>c.st==='fail').length;toast(ko?`Recette terminée : ${ko} flux en échec, raisons détaillées`:'Recette terminée : tous les flux vont jusqu’au bout',ko?'warn':'ok');if(cur==='health')P.health();return}
+    const c=checks[i];c.st='run';if(cur==='health')P.health();
+    later(()=>{const f=F[i];let fail=null;
+      if(f[1]==='ws')fail=null;
+      else if(sc==='reject')fail='Signature refusée (4001) : message affiché à l’utilisateur, aucun solde modifié — comportement attendu.';
+      else if(sc==='fail'||(sc==='random'&&Math.random()<.35)){const o=OPS[f[1]](f[2]||{side:'buy',qty:1,price:1,from:'USDC',to:'NOVA',a:1,slip:1,min:0,iban:'FR'});fail=o.failReason}
+      c.st=fail?'fail':'ok';c.msg=fail||(sc==='slow'?'Confirmé après une longue attente : statut « en attente » correctement affiché entre-temps.':'Statut final reçu par l’interface en moins de 4 s.');
+      i++;nx()},sc==='slow'?1400:650)};
+  nx();
+}
+
+/* ---------- Temps réel ---------- */
+setInterval(()=>{
+  if(wsDown)return;
+  const drift=(0.42-S.price)*0.01;
+  S.price=Math.max(0.05,S.price*(1+(Math.random()-.5)*0.009+drift));
+  S.eth=Math.max(500,S.eth*(1+(Math.random()-.5)*0.003));
+  S.hist.push(S.price);if(S.hist.length>90)S.hist.shift();
+  lat={api:30+Math.round(Math.random()*40),rpc:90+Math.round(Math.random()*80),idx:Math.random()<.7?1:2,ws:15+Math.round(Math.random()*20)};
+  if(Math.random()<.35)wsLog('price.update',{pair:'NOVA/USDC',price:+S.price.toFixed(4)});
+  // exécution des ordres limites
+  S.orders.forEach(o=>{if(o.status!=='open')return;
+    if((o.side==='buy'&&S.price<=o.price)||(o.side==='sell'&&S.price>=o.price)){
+      o.status='filled';if(o.side==='buy')S.bal.NOVA+=o.qty*.999;else S.bal.USDC+=o.price*o.qty*.999;
+      const tx={id:uid(),kind:'trade',title:`Ordre limite exécuté : ${o.side==='buy'?'achat':'vente'} ${fmt(o.qty,0)} NOVA à ${fmt(o.price,4)}`,status:'ok',ts:Date.now(),done:Date.now()+1500,ref:hx(64),refLabel:'Hash de règlement',
+        steps:['Appariement par le moteur','Règlement on-chain (2/2)','Notification WebSocket'].map(l=>({l,st:'done',t:Date.now()})),op:null,err:null};
+      S.txs.unshift(tx);wsLog('order.filled',{side:o.side,price:o.price,qty:o.qty});toast(`<b>Ordre exécuté</b> — ${o.side==='buy'?'achat':'vente'} ${fmt(o.qty,0)} NOVA à ${fmt(o.price,4)}`,'ok',tx.id);header();
+    }});
+  if(S.txs.length>80)S.txs.length=80;
+  save();
+  if(cur==='dash'||cur==='trade'||cur==='health')P[cur]();
+  else if(cur==='swap'||cur==='fiat')P[cur]();
+},2000);
+setInterval(()=>{
+  S.stake.rew+=S.stake.amt*APR/31536000*ACCEL;
+  if(cur==='stake')P.stake();
+  if(cur==='dash')P.dash();
+},1000);
+
+addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(v!==cur&&V[v])go(v)});
+cur=V[location.hash.slice(1)]?location.hash.slice(1):'dash';
+render();
+})();
+</script>
 </body>
 </html>
