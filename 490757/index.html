@@ -2,20 +2,1028 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Location immobilière Kinshasa</title>
+<meta name="description" content="Plateforme de location immobilière à Kinshasa : recherche filtrée avec carte, favoris, déblocage d'un bailleur pour 5 USD / 24 h via Mobile Money en mode test (taux USD/CDF, webhooks), messagerie, publication d'annonces par les bailleurs et back-office de modération, paiements et statistiques.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F4F2EE;--panel:#FFFFFF;--panel-2:#F8F6F2;--ink:#1B1F1D;--muted:#59605B;--line:#E3DFD8;--line-2:#C9C3B9;
+  --accent:#0E6655;--accent-ink:#FFFFFF;--accent-soft:#DCEFE9;--accent-text:#0A5144;--terra:#9E431D;
+  --ok:#17683F;--ok-soft:#DDF1E5;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#AE2430;--bad-soft:#FBE1E3;--info:#24548F;--info-soft:#E0EAF7;
+  --map-land:#ECE7DC;--map-river:#A9CDE0;--map-road:#FFFFFF;--map-label:#6E6A60;
+  --shadow:0 1px 2px rgba(20,24,22,.05),0 4px 14px rgba(20,24,22,.06);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#101413;--panel:#171C1A;--panel-2:#1D2321;--ink:#E6EAE7;--muted:#A0A9A4;--line:#2A322F;--line-2:#3B4541;
+  --accent:#4FC2A6;--accent-ink:#04241D;--accent-soft:#143029;--accent-text:#86DCC6;--terra:#F0A07A;
+  --ok:#6FD39E;--ok-soft:#14301F;--warn:#F2B661;--warn-soft:#352612;--bad:#FF8E97;--bad-soft:#3A1A1E;--info:#93BFF2;--info-soft:#172A40;
+  --map-land:#1F2624;--map-river:#1E3A4A;--map-road:#2E3734;--map-label:#9AA39E;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3,h4{margin:0;line-height:1.25;letter-spacing:-.01em}
+h1{font-size:clamp(20px,2.4vw,26px);font-weight:800}
+.h2{font-size:17px;font-weight:800}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stack{display:grid;gap:14px;min-width:0}
+.min0{min-width:0}
+.ell{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tnum{font-variant-numeric:tabular-nums}
+.wrap{overflow-wrap:anywhere}
+
+.demo-band{background:var(--warn-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:700}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.brand small{display:block;font-weight:600;font-size:11.5px;color:var(--muted);letter-spacing:0}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 13px;border-radius:10px;border:0;background:transparent;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;border-radius:999px;min-width:19px;height:19px;display:inline-grid;place-items:center;padding:0 5px;line-height:1}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0}
+.who label{font-size:13px;color:var(--muted);white-space:nowrap}
+.who select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px}
+.bell{position:relative}
+.bell .cnt{position:absolute;top:2px;right:0}
+main{padding:20px clamp(16px,2vw,32px) 60px}
+@media (max-width:820px){.who{margin-left:0;width:100%}.who select{flex:1;min-width:0;width:0}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:700;cursor:pointer;text-decoration:none;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{min-height:38px;padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.flabel,legend{font-weight:700;font-size:13.5px}
+.inp,select.inp,textarea.inp{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea.inp{min-height:120px;resize:vertical}
+.inp[aria-invalid=true]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.err{color:var(--bad);font-size:13px;font-weight:600}
+.err:empty{display:none}
+.hint{font-size:12.5px;color:var(--muted)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.g2,.g3,.g4{display:grid;gap:12px}
+@media (min-width:560px){.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:900px){.g4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:14px}
+.chk input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--panel);flex-wrap:wrap}
+.seg button,.seg label{min-height:42px;min-width:44px;padding:0 12px;border:0;background:transparent;cursor:pointer;font-weight:700;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.seg button[aria-pressed=true],.seg label:has(input:checked){background:var(--accent-soft);color:var(--accent-text)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:-3px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head p{margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--panel-2);color:var(--muted);white-space:nowrap}
+.badge svg.i{width:14px;height:14px}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--info-soft);color:var(--info)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi span{font-size:12.5px;font-weight:700;color:var(--muted)}
+.kpi b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.kpi small{color:var(--muted);font-size:12.5px}
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.empty svg.i{width:36px;height:36px;margin-bottom:8px}
+
+/* Recherche */
+.search-layout{display:grid;gap:20px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:960px){.search-layout{grid-template-columns:280px minmax(0,1fr)}}
+@media (min-width:1440px){.search-layout{grid-template-columns:280px minmax(0,1fr) minmax(0,560px)}}
+.filters summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:44px;font-weight:800}
+.filters summary::-webkit-details-marker{display:none}
+.filters[open] summary{margin-bottom:8px}
+.filters .stack{gap:12px}
+.res-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.res-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))}
+.map-col{display:none;position:sticky;top:84px}
+[data-view=map] .map-col{display:block}
+[data-view=map] .res-grid{display:none}
+@media (min-width:1440px){.map-col{display:block}[data-view=map] .res-grid{display:grid}.viewtog{display:none!important}}
+.lcard{position:relative;padding:0;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+.lcard:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.ph{aspect-ratio:16/10;position:relative;overflow:hidden;background:var(--panel-2)}
+.ph svg,.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .badge{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.94);color:#0A5144}
+.fav{position:absolute;right:8px;top:8px;z-index:2;width:44px;height:44px;border-radius:999px;border:0;background:rgba(255,255,255,.94);color:#3a3f3c;display:grid;place-items:center;cursor:pointer}
+.fav[aria-pressed=true]{color:#C0392B}
+.fav[aria-pressed=true] svg{fill:currentColor}
+.lc-body{padding:12px 14px 14px;display:grid;gap:4px;min-width:0}
+.price{font-weight:800;font-size:19px;color:var(--terra)}
+.price small{font-size:13px;color:var(--muted);font-weight:600}
+.lc-body h3{font-size:15px;font-weight:700}
+.stretch{background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.stretch::after{content:"";position:absolute;inset:0;z-index:1}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--accent-text);font-weight:700;cursor:pointer;text-align:left;min-height:32px;text-decoration:underline;text-underline-offset:2px;max-width:100%;overflow-wrap:anywhere}
+.specs{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:4px}
+.specs span{display:inline-flex;gap:5px;align-items:center}
+.specs svg.i{width:16px;height:16px}
+.locline{display:flex;gap:5px;align-items:center;font-size:13px;color:var(--muted);min-width:0}
+.locline svg.i{width:15px;height:15px}
+
+/* Carte */
+.map-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.map-wrap .map-cap{padding:8px 12px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+svg.map{display:block;width:100%;height:auto;touch-action:manipulation}
+.m-land{fill:var(--map-land)}.m-river{fill:var(--map-river)}.m-road{stroke:var(--map-road);stroke-width:4;fill:none;stroke-linecap:round}
+.m-lab{fill:var(--map-label);font-size:8.5px;font-weight:700;font-family:var(--font)}
+.m-rl{fill:#2E6A88;font-size:10px;font-style:italic;font-weight:700;font-family:var(--font)}
+@media (prefers-color-scheme:dark){.m-rl{fill:#8EC3DD}}
+.pin{cursor:pointer}
+.pin rect{fill:var(--panel);stroke:var(--accent);stroke-width:1.5}
+.pin path{fill:var(--accent)}
+.pin text{fill:var(--ink);font-size:9.5px;font-weight:800;font-family:var(--font)}
+.pin:hover rect,.pin:focus rect,.pin.on rect{fill:var(--accent)}
+.pin:hover text,.pin:focus text,.pin.on text{fill:var(--accent-ink)}
+.pin:focus{outline:none}
+.pin:focus-visible rect{stroke:var(--ink);stroke-width:3}
+.me-dot{fill:#2F6FD0;stroke:#fff;stroke-width:2}
+
+/* Dialog */
+dialog{border:0;padding:0;border-radius:16px;background:var(--panel);color:var(--ink);width:min(1020px,calc(100vw - 20px));max-height:calc(100dvh - 20px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.md{width:min(620px,calc(100vw - 20px))}
+dialog::backdrop{background:rgba(10,15,13,.6)}
+.dlg-head{position:sticky;top:0;background:var(--panel);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px 14px 20px;border-bottom:1px solid var(--line);z-index:3}
+.dlg-head h2{font-size:19px;font-weight:800}
+.dlg-body{padding:20px}
+.dgrid{display:grid;gap:22px}
+@media (min-width:800px){.dgrid{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
+.gal-main{border-radius:12px;overflow:hidden;aspect-ratio:16/10;background:var(--panel-2)}
+.gal-main svg,.gal-main img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin-top:8px}
+.thumb{padding:0;border:2px solid transparent;border-radius:9px;overflow:hidden;cursor:pointer;aspect-ratio:16/10;background:none;min-height:44px}
+.thumb[aria-pressed=true]{border-color:var(--accent)}
+.thumb svg,.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.eq{display:flex;flex-wrap:wrap;gap:8px}
+.eq span{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);font-size:13px;font-weight:600}
+.eq svg.i{width:15px;height:15px;color:var(--accent)}
+.lock-box{border:1px dashed var(--line-2);border-radius:12px;padding:14px;display:grid;gap:10px;background:var(--panel-2)}
+.phone-big{font-size:20px;font-weight:800;letter-spacing:.02em;overflow-wrap:anywhere}
+.person{display:flex;align-items:center;gap:12px;min-width:0}
+.av{width:42px;height:42px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:800;flex:none;font-size:14px}
+
+/* Paiement */
+.ops{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.op{position:relative;display:flex;align-items:center;gap:10px;padding:10px;border:1.5px solid var(--line-2);border-radius:12px;cursor:pointer;min-height:56px;min-width:0}
+.op input{position:absolute;opacity:0}
+.op:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.op:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.op-logo{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px;flex:none}
+.op b{display:block;font-size:14px}.op small{color:var(--muted);font-size:12px}
+.phone-in{display:flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--panel)}
+.phone-in span{display:grid;place-items:center;padding:0 12px;background:var(--panel-2);font-weight:700;border-right:1px solid var(--line-2)}
+.phone-in input{border:0;flex:1;min-width:0;min-height:44px;padding:0 12px;background:transparent}
+.phone-in:focus-within{outline:3px solid var(--accent);outline-offset:1px}
+.phone-in.bad{border-color:var(--bad)}
+.sumbox{border-radius:12px;background:var(--panel-2);border:1px solid var(--line);padding:12px 14px;display:grid;gap:6px;font-size:14px}
+.sumbox div{display:flex;justify-content:space-between;gap:10px}
+.sumbox .tot{border-top:1px solid var(--line);padding-top:8px;font-weight:800;font-size:16px}
+.testtag{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:var(--warn);font-weight:800;font-size:12px;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.spin{width:44px;height:44px;border-radius:999px;border:4px solid var(--accent-soft);border-top-color:var(--accent);animation:sp 1s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}.lcard{transition:none}}
+.log{display:grid;gap:6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:60px}
+.log li{display:flex;gap:8px;align-items:flex-start;overflow-wrap:anywhere;min-width:0}
+.log svg.i{width:15px;height:15px;color:var(--ok);margin-top:2px}
+.bigok{width:60px;height:60px;border-radius:999px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;margin:0 auto}
+.bigok svg.i{width:30px;height:30px}
+.bigok.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* Notifications & toasts */
+#notifPanel{position:fixed;right:12px;top:110px;width:min(390px,calc(100vw - 24px));max-height:70vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.18);z-index:50}
+#notifPanel header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 10px 16px;border-bottom:1px solid var(--line);font-weight:800}
+.nitem{display:flex;gap:10px;width:100%;text-align:left;padding:12px 16px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;min-height:44px}
+.nitem:hover{background:var(--panel-2)}
+.nitem .dot{width:9px;height:9px;border-radius:99px;background:var(--accent);margin-top:6px;flex:none}
+.nitem.read .dot{background:transparent}
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:100;width:min(440px,calc(100vw - 24px))}
+.toast{background:#1F2A26;color:#F2F5F3;padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-weight:600;font-size:14px;display:flex;gap:10px;align-items:center}
+.toast svg.i{color:#7FE0C2}
+
+/* Messagerie */
+.msg-layout{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);height:calc(100dvh - 210px);min-height:480px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.conv-list{border-right:1px solid var(--line);overflow:auto;min-width:0}
+.conv{display:flex;gap:10px;width:100%;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;align-items:flex-start}
+.conv:hover{background:var(--panel-2)}
+.conv[aria-current]{background:var(--accent-soft)}
+.conv-main{flex:1;min-width:0;display:grid;gap:1px}
+.conv-top{display:flex;justify-content:space-between;gap:8px}
+.thread{display:flex;flex-direction:column;min-width:0;min-height:0}
+.thread-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.thread-head .back{display:none}
+.msgs{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--panel-2)}
+.bub{max-width:min(80%,520px);padding:9px 13px;border-radius:14px 14px 14px 4px;background:var(--panel);border:1px solid var(--line);align-self:flex-start;overflow-wrap:anywhere}
+.bub.me{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);border-radius:14px 14px 4px 14px}
+.bub time{display:block;font-size:11px;opacity:.75;margin-top:2px}
+.composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.composer input{flex:1}
+.locked-note{padding:12px 14px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--warn-soft)}
+@media (max-width:760px){
+  .msg-layout{grid-template-columns:minmax(0,1fr);height:calc(100dvh - 250px)}
+  .msg-layout[data-sel] .conv-list{display:none}
+  .msg-layout:not([data-sel]) .thread{display:none}
+  .conv-list{border-right:0}
+  .thread-head .back{display:inline-grid}
+}
+
+/* Bailleur */
+.my-list{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(540px,100%),1fr))}
+.hcard{display:grid;grid-template-columns:170px minmax(0,1fr);gap:0;padding:0;overflow:hidden}
+.hcard .ph{aspect-ratio:auto;height:100%;min-height:150px}
+.hcard .hc-body{padding:14px 16px;display:grid;gap:6px;min-width:0}
+@media (max-width:520px){.hcard{grid-template-columns:minmax(0,1fr)}.hcard .ph{aspect-ratio:16/9;min-height:0}}
+.pub-grid{display:grid;gap:18px}
+@media (min-width:1000px){.pub-grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}}
+.eq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr));gap:0 12px}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed var(--line-2);border-radius:12px;padding:18px;text-align:center;cursor:pointer;min-height:110px}
+.drop:hover{background:var(--panel-2)}
+.drop:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.fphotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.fphoto{position:relative;border-radius:9px;overflow:hidden;aspect-ratio:16/10}
+.fphoto svg,.fphoto img{width:100%;height:100%;object-fit:cover;display:block}
+.fphoto button{position:absolute;top:4px;right:4px;width:44px;height:44px;border-radius:999px;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;cursor:pointer}
+.fphoto .cover{position:absolute;left:4px;bottom:4px;font-size:11px;font-weight:800;background:rgba(255,255,255,.94);color:#0A5144;padding:2px 7px;border-radius:99px}
+
+/* Admin */
+.adm-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.adm-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.span2{grid-column:span 2}}
+.bars{display:flex;align-items:flex-end;gap:5px;height:210px;padding-top:8px}
+.bar-col{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
+.bar{width:100%;max-width:46px;background:var(--accent);border-radius:6px 6px 2px 2px;min-height:2px}
+.bar-col span{font-size:11px;color:var(--muted);font-weight:700}
+.hbar{display:grid;gap:4px}
+.hbar .track{height:10px;background:var(--panel-2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.hbar .fill{height:100%;border-radius:99px}
+.hbar-row{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:820px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2);font-weight:800}
+tr:last-child td{border-bottom:0}
+td .actions{flex-wrap:wrap;gap:6px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.toolbar .field{flex:1 1 170px}
+.pay-layout{display:grid;gap:18px}
+@media (min-width:1280px){.pay-layout{grid-template-columns:minmax(0,1fr) 340px;align-items:start}}
+.mod-item{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:start}
+.mod-item .ph{border-radius:10px}
+@media (max-width:620px){.mod-item{grid-template-columns:minmax(0,1fr)}}
+.timeline{display:grid;gap:0;border-left:2px solid var(--line);margin-left:8px}
+.timeline li{position:relative;padding:0 0 14px 18px;font-size:14px;overflow-wrap:anywhere}
+.timeline li::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:99px;background:var(--accent)}
+.timeline li.bad::before{background:var(--bad)}
+.kv{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:6px 12px;font-size:14px}
+.kv dt{color:var(--muted);font-weight:600}.kv dd{margin:0;overflow-wrap:anywhere;font-weight:600}
+
+#printArea{display:none}
+@media print{
+  body>*{display:none!important}
+  #printArea{display:block!important;color:#000;padding:24px;font:14px/1.5 var(--font)}
+  .receipt table{min-width:0}
+  .receipt th,.receipt td{border-bottom:1px solid #ccc;padding:8px;background:none;color:#000}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="region" aria-label="Bandeau de démonstration"><span><b>Démonstration</b> — données fictives · paiements en mode test</span><button type="button" data-act="reset">Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="brand-mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Ndako<small>Location à Kinshasa</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="who">
+    <label for="role">Vue</label>
+    <select id="role">
+      <option value="locataire">Locataire — Grâce M.</option>
+      <option value="bailleur">Bailleur — Patrick I.</option>
+      <option value="admin">Administrateur</option>
+    </select>
+    <button type="button" class="icon-btn bell" data-act="notifs" aria-label="Notifications" aria-expanded="false" aria-controls="notifPanel"></button>
+  </div>
+</header>
+<div id="notifPanel" hidden></div>
+<main id="main"></main>
+<dialog id="dlg" aria-labelledby="dlgTitle"><div id="dlgBody"></div></dialog>
+<div id="toasts" aria-live="polite"></div>
+<div id="printArea"></div>
+
+<script>
+(function(){
+"use strict";
+const KEY='ndako-demo-v1', D=864e5, H=36e5, NOW0=Date.now();
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const uid=()=>Math.random().toString(36).slice(2,8);
+const fmtN=n=>Math.round(n).toLocaleString('fr-FR');
+const usd=n=>fmtN(n)+' $';
+const short=p=>p>=1000?String(Math.round(p/100)/10).replace('.',',')+'k $':p+' $';
+const dt=t=>new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})+' '+new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const day=t=>new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+const hm=t=>{const d=new Date(t),n=new Date();return d.toDateString()===n.toDateString()?d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):dt(t)};
+function rel(t){const s=(Date.now()-t)/1000;if(s<60)return'à l’instant';if(s<3600)return'il y a '+Math.floor(s/60)+' min';if(s<86400)return'il y a '+Math.floor(s/3600)+' h';return'il y a '+Math.floor(s/86400)+' j'}
+function left(exp){const ms=exp-Date.now();if(ms<=0)return'Expiré';const h=Math.floor(ms/H),m=Math.floor(ms%H/6e4),s=Math.floor(ms%6e4/1e3);return h+' h '+String(m).padStart(2,'0')+' min '+String(s).padStart(2,'0')+' s'}
+const initials=n=>n.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+const P_={search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',bed:'<path d="M3 19V6M3 14h18v5M21 14v-2a3 3 0 0 0-3-3h-8v5"/><circle cx="6.5" cy="10.5" r="1.8"/>',bath:'<path d="M4 12h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0M7 20l-1 2M17 20l1 2"/>',area:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',msg:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',bell:'<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',unlock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.7-1.5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 4 6"/>',shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',plus:'<path d="M12 5v14M5 12h14"/>',check:'<path d="m5 12 5 5L20 7"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',map:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/>',back:'<path d="m15 18-6-6 6-6"/>',eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',locate:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',drop:'<path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/>',car:'<path d="M5 17h14M5 17v2M19 17v2M3 13l2-6h14l2 6v4H3z"/><circle cx="7.5" cy="14" r=".8"/><circle cx="16.5" cy="14" r=".8"/>',wifi:'<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',snow:'<path d="M12 2v20M4 6l16 12M20 6 4 18"/>',sofa:'<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2zM5 18v2M19 18v2"/>',refresh:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/>'};
+const ic=(n,c)=>`<svg class="i${c?' '+c:''}" viewBox="0 0 24 24" aria-hidden="true">${P_[n]||''}</svg>`;
+
+const OPS={mpesa:{n:'M-Pesa',sub:'Vodacom',pre:['81','82','83'],c:'#B5101F',ab:'MP'},orange:{n:'Orange Money',sub:'Orange',pre:['84','85','89','80'],c:'#A84400',ab:'OM'},airtel:{n:'Airtel Money',sub:'Airtel',pre:['97','98','99'],c:'#9E0B1F',ab:'AM'},afri:{n:'Afrimoney',sub:'Africell',pre:['90','91'],c:'#5E2A86',ab:'AF'}};
+const C={'Gombe':[178,60],'Lingwala':[198,86],'Barumbu':[226,66],'Kinshasa':[214,100],'Kintambo':[138,74],'Ngaliema':[94,100],'Bandalungwa':[156,112],'Kasa-Vubu':[190,118],'Kalamu':[222,130],'Ngiri-Ngiri':[172,142],'Limete':[262,108],'Lemba':[248,160],'Matete':[288,148],'Masina':[334,120],'Mont-Ngafula':[140,208]};
+const ME=[182,74];
+const TYPES=['Appartement','Maison','Studio','Villa','Chambre'];
+const EQ={eau:['Eau courante (REGIDESO)','drop'],elec:['Électricité (SNEL)','bolt'],groupe:['Groupe électrogène','bolt'],solaire:['Panneaux solaires','sun'],forage:['Forage / citerne','drop'],parking:['Parking','car'],gardien:['Gardiennage 24 h/24','shield'],clim:['Climatisation','snow'],meuble:['Meublé','sofa'],wifi:['Internet / wifi','wifi'],piscine:['Piscine','drop']};
+const STAT={publiee:['Publiée','b-ok'],attente:['En modération','b-warn'],refusee:['Refusée','b-bad'],suspendue:['Suspendue','b-bad'],louee:['Louée','b-info']};
+const KINDS=['facade','salon','chambre','cuisine'];
+
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- Données de départ ---------- */
+function seed(){
+  const now=Date.now(), R=rng(7);
+  const users=[
+    ['u0','Équipe modération','admin','+243 99 000 0000','Gombe',400,true],
+    ['u1','Grâce Mbuyi','locataire','+243 81 234 5678','Lemba',62,true],
+    ['u2','Patrick Ilunga','bailleur','+243 85 412 7790','Limete',214,true],
+    ['u3','Mireille Kabeya','bailleur','+243 82 655 1047','Gombe',330,true],
+    ['u4','Jean-Paul Mukendi','bailleur','+243 97 320 8815','Ngaliema',190,true],
+    ['u5','Sarah Nsimba','bailleur','+243 89 774 2263','Mont-Ngafula',150,true],
+    ['u6','Agence Horizon Immo','bailleur','+243 81 990 4410','Gombe',380,true],
+    ['u7','Didier Tshibangu','bailleur','+243 90 118 3352','Masina',12,false],
+    ['u8','Christian Lukusa','locataire','+243 84 551 2093','Kalamu',40,true],
+    ['u9','Esther Kalala','locataire','+243 98 207 6614','Bandalungwa',95,true],
+    ['u10','Junior Mavungu','locataire','+243 83 470 9921','Matete',22,true],
+    ['u11','Nadine Mpiana','locataire','+243 99 830 1175','Ngaliema',8,false],
+    ['u12','Héritier Banza','locataire','+243 91 664 0038','Masina',30,false]
+  ].map(([id,name,role,phone,commune,d,verified])=>({id,name,role,phone,commune,joined:now-d*D,verified,status:id==='u12'?'suspendu':'actif',email:id==='u1'?'grace.mbuyi@exemple.cd':''}));
+  const LS=[
+    ['Appartement 3 pièces avec vue sur le fleuve','Appartement','Gombe','Socimat','Av. du Fleuve, immeuble Les Palmiers, 4e étage',1800,2,2,110,'u3','publiee',['eau','elec','groupe','parking','gardien','clim','meuble','wifi'],'Appartement lumineux au 4e étage avec ascenseur et balcon donnant sur le fleuve. Cuisine équipée, deux chambres climatisées, gardiennage 24 h/24. Idéal pour cadre ou expatrié.'],
+    ['Villa avec jardin et piscine','Villa','Ngaliema','Ma Campagne','Av. des Orchidées, réf. paroisse Saint-Luc',3500,4,3,320,'u6','publiee',['eau','elec','groupe','forage','parking','gardien','clim','piscine'],'Grande villa sur parcelle clôturée de 1 200 m², jardin arboré, piscine, dépendance pour personnel. Groupe électrogène 60 kVA et forage.'],
+    ['Studio meublé proche UPN','Studio','Ngaliema','Binza UPN','Rue Kimbondo, réf. arrêt UPN',300,1,1,35,'u4','publiee',['eau','elec','meuble','solaire'],'Studio meublé et propre dans une parcelle calme, à 5 minutes à pied de l’UPN. Panneaux solaires pour l’éclairage. Convient à un étudiant ou jeune actif.'],
+    ['Maison familiale 3 chambres','Maison','Lemba','Righini','Av. Kisangani n° 14, réf. marché Righini',450,3,1,140,'u2','publiee',['eau','elec','parking','forage'],'Maison familiale dans une parcelle avec cour, trois chambres, salon spacieux et cuisine intérieure. Forage dans la parcelle, quartier calme proche de l’université.'],
+    ['Appartement neuf 2 chambres','Appartement','Limete','Résidentiel','12e rue Résidentiel, réf. pharmacie Bondeko',750,2,1,90,'u5','publiee',['eau','elec','groupe','parking','gardien','clim'],'Appartement neuf au 1er étage d’un petit immeuble sécurisé. Carrelage, faux plafond, cuisine américaine. Groupe électrogène partagé.'],
+    ['Chambre-salon à Matonge','Chambre','Kalamu','Matonge','Av. Kanda-Kanda, réf. place Victoire',180,1,1,25,'u7','publiee',['eau','elec'],'Chambre-salon dans une parcelle commune, toilette intérieure. Très proche des transports et de la place Victoire.'],
+    ['Appartement standing avec groupe électrogène','Appartement','Gombe','Golf','Av. Batetela, résidence Le Golf',2400,3,2,150,'u6','publiee',['eau','elec','groupe','parking','gardien','clim','meuble','wifi','piscine'],'Appartement haut standing dans une résidence avec piscine commune, salle de sport et sécurité 24 h/24. Entièrement meublé.'],
+    ['Maison 2 chambres avec cour','Maison','Bandalungwa','Adoula','Av. Kasavubu, réf. rond-point Adoula',350,2,1,95,'u2','publiee',['eau','elec','parking'],'Maison simple et bien entretenue, deux chambres, cour pour un véhicule. Accès facile au boulevard.'],
+    ['Duplex moderne à Kintambo','Appartement','Kintambo','Magasin','Av. Ex-Bougie, réf. Kintambo Magasin',900,3,2,130,'u3','publiee',['eau','elec','groupe','parking','clim'],'Duplex récent avec terrasse, trois chambres dont une suite parentale. Proche du rond-point Kintambo Magasin.'],
+    ['Studio à Kasa-Vubu','Studio','Kasa-Vubu','Assossa','Av. Assossa, réf. école Saint-Joseph',220,1,1,30,'u4','publiee',['eau','elec'],'Studio indépendant avec entrée séparée, douche et coin cuisine. Idéal pour une personne seule.'],
+    ['Villa sécurisée Mont-Fleury','Villa','Ngaliema','Mont-Fleury','Av. des Cocotiers, réf. hôtel Mont-Fleury',2800,5,4,400,'u5','publiee',['eau','elec','groupe','forage','parking','gardien','clim'],'Villa de 5 chambres sur les hauteurs, vue dégagée, grand salon, bureau, logement de gardien. Quartier résidentiel très calme.'],
+    ['Maison 4 chambres à Masina','Maison','Masina','Petro-Congo','Av. Mokili, réf. arrêt Petro-Congo',280,4,1,160,'u7','publiee',['eau','elec','forage'],'Grande maison familiale de 4 chambres, parcelle clôturée, forage. Proche du boulevard Lumumba.'],
+    ['Appartement 1 chambre à Lingwala','Appartement','Lingwala','Voix du Peuple','Av. Wangata, réf. stade Tata Raphaël',400,1,1,55,'u4','publiee',['eau','elec','groupe'],'Appartement au rez-de-chaussée, une chambre, salon, cuisine. Groupe électrogène pour les coupures.'],
+    ['Maison avec forage à Mont-Ngafula','Maison','Mont-Ngafula','Kimwenza','Route de Kimwenza, réf. séminaire',500,3,2,200,'u5','publiee',['eau','forage','solaire','parking','gardien'],'Maison au calme sur grande parcelle, forage et installation solaire autonome. Idéal pour famille.'],
+    ['Chambre étudiante à Lemba','Chambre','Lemba','Salongo','Av. de l’Université, réf. arrêt Salongo',120,1,1,18,'u2','attente',['eau','elec','solaire'],'Chambre propre dans une parcelle d’étudiants, douche commune, panneaux solaires. À 10 minutes de l’université.'],
+    ['Appartement proche du grand marché','Appartement','Barumbu','Bon Marché','Av. Kabambare, réf. marché Bon Marché',380,2,1,70,'u7','attente',['eau','elec'],'Appartement au 2e étage, deux chambres. Idéal pour commerçant travaillant au grand marché.'],
+    ['Maison 2 chambres à Matete','Maison','Matete','Kunda','Av. Kunda n° 8, réf. église Kunda',260,2,1,85,'u3','publiee',['eau','elec','parking'],'Maison dans une parcelle calme, deux chambres, cour. Transport facile vers Limete et le centre-ville.'],
+    ['Appartement 7e rue Limete','Appartement','Limete','Industriel','7e rue, réf. station Engen',600,2,1,80,'u2','refusee',['eau','elec','groupe'],'Appartement au 1er étage proche des commerces.']
+  ];
+  const listings=LS.map((a,i)=>{const c=C[a[2]],n=a[1]==='Chambre'||a[1]==='Studio'?3:4;return{id:'L'+(101+i),title:a[0],type:a[1],commune:a[2],quartier:a[3],addr:a[4],price:a[5],ch:a[6],sdb:a[7],m2:a[8],landlord:a[9],status:a[10],eq:a[11],desc:a[12],hue:Math.floor(R()*360),x:c[0]+Math.round(R()*20-10),y:c[1]+Math.round(R()*16-8),views:a[10]==='publiee'?40+Math.floor(R()*420):0,createdAt:now-Math.floor(R()*40+1)*D+i*1000,photos:KINDS.slice(0,n).map(k=>({k})),reason:a[10]==='refusee'?'Photos insuffisantes ou floues : ajoutez au moins 3 photos nettes de l’intérieur.':''}});
+  listings[14].createdAt=now-3*H;listings[15].createdAt=now-7*H;listings[17].photos=[{k:'facade'}];
+  const names=['Christian Lukusa','Esther Kalala','Junior Mavungu','Nadine Mpiana','Rachel Mwamba','Dieudonné Kasongo','Ruth Ngoy','Fabrice Lokondo','Benedicte Matondo','Cédric Kabongo','Laetitia Nzuzi','Olivier Mbala'];
+  const lls=['u2','u3','u4','u5','u6','u7'],pub=listings.filter(l=>l.status==='publiee');
+  const payments=[];
+  for(let d=13;d>=0;d--){
+    const n=3+Math.floor(R()*8), rate=2790+(13-d)*4+Math.floor(R()*6);
+    const sod=new Date(now-d*D);sod.setHours(0,0,0,0);
+    for(let i=0;i<n;i++){
+      const at=sod.getTime()+(7+R()*14)*H; if(at>now-10*6e4) continue;
+      const r=R(),op=r<.42?'mpesa':r<.72?'orange':r<.92?'airtel':'afri';
+      const s=R();let status=s<.88?'ok':s<.97?'fail':'pending';if(status==='pending'&&d>0)status='ok';
+      const l=pub[Math.floor(R()*pub.length)];
+      const pre=OPS[op].pre[0];
+      payments.push({id:'PAY-'+ymd(at)+'-'+Math.floor(R()*9000+1000),at,tenant:names[Math.floor(R()*names.length)],tid:'',landlord:l.landlord,listing:l.id,op,phone:'+243 '+pre+' ••• '+Math.floor(R()*900+100),cur:R()<.6?'CDF':'USD',rate,status,reason:status==='fail'?(R()<.5?'Solde insuffisant':'Délai de validation dépassé'):''});
+    }
+  }
+  payments.push({id:'PAY-'+ymd(now-15*H)+'-4821',at:now-15*H,tenant:'Grâce Mbuyi',tid:'u1',landlord:'u3',listing:'L101',op:'mpesa',phone:'+243 81 ••• 678',cur:'CDF',rate:2846,status:'ok',reason:''});
+  payments.push({id:'PAY-'+ymd(now-50*H)+'-3307',at:now-50*H,tenant:'Grâce Mbuyi',tid:'u1',landlord:'u5',listing:'L105',op:'mpesa',phone:'+243 81 ••• 678',cur:'USD',rate:2838,status:'ok',reason:''});
+  payments.sort((a,b)=>b.at-a.at);
+  const convs=[
+    {id:'c1',tenant:'u1',landlord:'u3',listing:'L101',unreadT:1,unreadL:0,msgs:[['t','Bonjour Madame, l’appartement à Gombe est-il toujours disponible pour début novembre ?',14],['l','Bonjour, oui il est disponible. La garantie est de 3 mois de loyer. Visite possible jeudi à 10 h.',13.5],['t','Parfait, jeudi 10 h me convient. Le groupe électrogène est-il inclus ?',13],['l','Le carburant est partagé entre les locataires, environ 40 $ par mois.',12]].map(([f,t,h])=>({from:f,text:t,at:now-h*H}))},
+    {id:'c2',tenant:'u8',landlord:'u2',listing:'L104',unreadT:0,unreadL:1,msgs:[{from:'t',text:'Bonjour, je suis intéressé par la maison à Righini. L’eau de la REGIDESO est-elle régulière ?',at:now-3*H}]},
+    {id:'c3',tenant:'u10',landlord:'u2',listing:'L108',unreadT:0,unreadL:0,msgs:[['t','Bonjour, la maison est-elle toujours libre ?',50],['l','Oui, visite possible samedi matin.',49],['t','Merci, je passe samedi à 9 h.',30]].map(([f,t,h])=>({from:f,text:t,at:now-h*H}))},
+    {id:'c4',tenant:'u1',landlord:'u5',listing:'L105',unreadT:0,unreadL:0,msgs:[['t','Bonjour, l’appartement de Limete a-t-il un parking ?',49],['l','Oui, une place couverte est incluse.',48]].map(([f,t,h])=>({from:f,text:t,at:now-h*H}))}
+  ];
+  const notifs=[
+    ['locataire','Mireille Kabeya vous a répondu à propos de « Appartement 3 pièces avec vue sur le fleuve ».','messages',12],
+    ['locataire','Nouvelle annonce à Ngaliema correspondant à votre recherche « villa ».','recherche',20],
+    ['bailleur','Christian Lukusa vous a écrit à propos de « Maison familiale 3 chambres ».','messages',3],
+    ['bailleur','Votre annonce « Appartement 7e rue Limete » a été refusée : photos insuffisantes.','annonces',26],
+    ['admin','Nouveau signalement sur « Chambre-salon à Matonge ».','moderation',5],
+    ['admin','2 annonces en attente de modération.','moderation',3]
+  ].map(([role,text,tab,h])=>({id:uid(),role,text,tab,at:now-h*H,read:false}));
+  const reports=[
+    {id:'R1',listing:'L106',by:'Esther Kalala',motif:'Arnaque suspectée',text:'Le bailleur demande une avance par transfert avant toute visite.',at:now-5*H,status:'ouvert'},
+    {id:'R2',listing:'L112',by:'Junior Mavungu',motif:'Photos non conformes',text:'Les photos ne correspondent pas à la maison visitée.',at:now-28*H,status:'ouvert'},
+    {id:'R3',listing:'L103',by:'Nadine Mpiana',motif:'Logement déjà loué',text:'Le bailleur m’a dit que le studio était déjà loué.',at:now-6*D,status:'traite',action:'Classé : annonce mise à jour par le bailleur'}
+  ];
+  return{v:1,role:'locataire',tab:{locataire:'recherche',bailleur:'annonces',admin:'dashboard'},rate:2850,price:5,rateHist:[{rate:2850,at:now-6*H},{rate:2838,at:now-3*D},{rate:2812,at:now-8*D}],users,listings,favs:['L102','L109'],access:{u3:now+9*H,u5:now-26*H},payments,convs,notifs,reports};
+}
+function ymd(t){const d=new Date(t);return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+
+let S=null;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||S.v!==1)S=seed();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const UI={view:'list',conv:{},editId:null,mod:'attente',adm:{pq:'',pop:'',pst:'',lim:25,lq:'',lst:'',uq:'',ur:''}};
+let F={q:'',commune:'',type:'',pmin:'',pmax:'',ch:0,verified:false,sort:'recent'};
+let FD=null, P=null, confirmCb=null, OTP=null;
+
+const user=id=>S.users.find(u=>u.id===id)||{name:'Utilisateur',phone:'',commune:''};
+const lst=id=>S.listings.find(l=>l.id===id);
+const me=()=>user(S.role==='bailleur'?'u2':S.role==='admin'?'u0':'u1');
+const hasAccess=lid=>(S.access[lid]||0)>Date.now();
+const digits=s=>{let d=String(s).replace(/\D/g,'');if(d.startsWith('243'))d=d.slice(3);if(d.startsWith('0'))d=d.slice(1);return d};
+const fmtD=d=>d.slice(0,2)+' '+d.slice(2,5)+' '+d.slice(5);
+const opOf=d=>{for(const k in OPS)if(OPS[k].pre.includes(d.slice(0,2)))return k;return null};
+const mask=p=>{const d=digits(p);return'+243 '+d.slice(0,2)+' ••• •• '+d.slice(-2)};
+const dist=l=>Math.hypot(l.x-ME[0],l.y-ME[1])*0.12;
+const fmtKm=k=>k.toFixed(1).replace('.',',')+' km';
+
+/* ---------- Illustrations ---------- */
+function art(k,h){
+  const w=`hsl(${h} 28% 86%)`,m=`hsl(${h} 32% 58%)`,dk=`hsl(${h} 36% 34%)`;
+  let s='';
+  if(k==='facade'){
+    s=`<rect width="320" height="200" fill="#CFE3EE"/><circle cx="272" cy="38" r="17" fill="#F4D58A"/><rect y="156" width="320" height="44" fill="#8FA86C"/><rect y="150" width="320" height="10" fill="#C4B396"/><rect x="66" y="60" width="188" height="96" fill="${w}"/><polygon points="54,62 160,22 266,62" fill="${dk}"/>`;
+    for(let i=0;i<4;i++)s+=`<rect x="${82+i*42}" y="76" width="26" height="24" fill="#5F7D90"/>`;
+    s+=`<rect x="82" y="114" width="26" height="24" fill="#5F7D90"/><rect x="208" y="114" width="26" height="24" fill="#5F7D90"/><rect x="146" y="112" width="28" height="44" fill="${dk}"/><rect x="0" y="128" width="58" height="26" fill="#B9A887"/><rect x="262" y="128" width="58" height="26" fill="#B9A887"/><path d="M30 156V98" stroke="#6B5434" stroke-width="5"/><path d="M30 98q-20-6-28 10M30 98q20-6 28 10M30 98q-10-18-26-18M30 98q10-18 26-18" stroke="#3F7A3A" stroke-width="5" fill="none"/>`;
+  }else if(k==='salon'){
+    s=`<rect width="320" height="200" fill="${w}"/><rect y="150" width="320" height="50" fill="#C5A27A"/><rect x="200" y="30" width="92" height="82" fill="#BFDDF0" stroke="#fff" stroke-width="6"/><path d="M246 30v82M200 71h92" stroke="#fff" stroke-width="4"/><rect x="34" y="84" width="146" height="34" rx="9" fill="${dk}"/><rect x="28" y="106" width="158" height="44" rx="9" fill="${m}"/><rect x="48" y="96" width="34" height="24" rx="6" fill="#EFE3CF"/><rect x="132" y="96" width="34" height="24" rx="6" fill="#EFE3CF"/><rect x="74" y="164" width="76" height="8" rx="3" fill="#6E4F33"/><rect x="238" y="122" width="18" height="28" fill="#8A6A4A"/><circle cx="247" cy="112" r="18" fill="#4C8A46"/>`;
+  }else if(k==='chambre'){
+    s=`<rect width="320" height="200" fill="${w}"/><rect y="152" width="320" height="48" fill="#BE9C77"/><rect x="70" y="58" width="180" height="56" rx="8" fill="${dk}"/><rect x="58" y="106" width="204" height="52" rx="6" fill="#F2F0EA"/><rect x="58" y="128" width="204" height="30" rx="6" fill="${m}"/><rect x="86" y="92" width="58" height="22" rx="8" fill="#FFFFFF"/><rect x="176" y="92" width="58" height="22" rx="8" fill="#FFFFFF"/><rect x="18" y="118" width="32" height="36" fill="#8A6A4A"/><path d="M34 118v-26" stroke="#555" stroke-width="3"/><polygon points="22,92 46,92 40,76 28,76" fill="#F4D58A"/>`;
+  }else{
+    s=`<rect width="320" height="200" fill="${w}"/><rect y="160" width="320" height="40" fill="#B9B2A6"/><rect x="20" y="30" width="200" height="44" fill="${m}"/><path d="M86 30v44M152 30v44" stroke="${dk}" stroke-width="2"/><rect x="20" y="104" width="220" height="56" fill="${dk}"/><rect x="14" y="98" width="232" height="8" fill="#E7E2D8"/><path d="M93 112v40M166 112v40" stroke="${w}" stroke-width="2"/><rect x="252" y="40" width="54" height="120" rx="4" fill="#E9ECEE"/><path d="M252 94h54M260 66v14M260 110v18" stroke="#9AA3A8" stroke-width="3"/><circle cx="120" cy="88" r="6" fill="#C9CED1"/>`;
+  }
+  return s;
+}
+function photo(l,i,cls){
+  const p=(l.photos&&l.photos[i])||{k:'facade'};
+  const lab=`Photo ${i+1} — ${esc(l.title)}`;
+  if(p.src)return`<img src="${p.src}" alt="${lab}" loading="lazy">`;
+  return`<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${lab}">${art(p.k,l.hue)}</svg>`;
+}
+
+/* ---------- Carte ---------- */
+function mapSVG(list,o){
+  o=o||{};
+  const labs=Object.entries(C).map(([n,[x,y]])=>`<text class="m-lab" x="${x}" y="${y+14}" text-anchor="middle">${n}</text>`).join('');
+  const pins=list.map(l=>`<g class="pin${o.on===l.id?' on':''}" ${o.static?'':`data-act="open" data-id="${l.id}" role="button" tabindex="0"`} aria-label="${esc(l.title)}, ${usd(l.price)} par mois" transform="translate(${l.x} ${l.y})"><rect x="-23" y="-25" width="46" height="18" rx="9"/><path d="M-4 -7.5 0 -1 4 -7.5z"/><text y="-12.5" text-anchor="middle">${short(l.price)}</text></g>`).join('');
+  const pick=o.pick?`<g transform="translate(${o.pick[0]} ${o.pick[1]})" pointer-events="none"><path d="M0 0C-7-9-11-14-11-19a11 11 0 0 1 22 0c0 5-4 10-11 19z" fill="var(--terra)"/><circle cy="-19" r="4" fill="#fff"/></g>`:'';
+  return`<svg class="map" viewBox="0 0 400 260" ${o.pickable?'data-act="mapPick" aria-label="Carte : touchez pour placer le logement"':(o.label?`aria-label="${o.label}"`:'')} role="group">
+<rect class="m-land" width="400" height="260"/>
+<path class="m-road" d="M178 60 L222 130 L248 160 L334 120 M138 74 L94 100 L140 208 M178 60 L156 112 L172 142 M222 130 L262 108 L334 120 M178 60 L138 74 M190 118 L140 208"/>
+<path class="m-river" d="M0 0H400V26C362 34 330 20 292 32C254 44 224 30 192 40C160 50 122 38 84 50C52 60 22 50 0 58Z"/>
+<text class="m-rl" x="22" y="20">Fleuve Congo</text><text class="m-rl" x="300" y="16">Brazzaville ↑</text>
+${labs}${o.me?`<circle class="me-dot" cx="${ME[0]}" cy="${ME[1]}" r="6"/><text class="m-lab" x="${ME[0]+9}" y="${ME[1]+3}">Vous</text>`:''}${pins}${pick}</svg>`;
+}
+
+/* ---------- Navigation ---------- */
+const TABS={locataire:[['recherche','Rechercher','search'],['favoris','Favoris','heart'],['messages','Messages','msg'],['acces','Mes accès','unlock'],['profil','Profil','user']],
+bailleur:[['annonces','Mes annonces','home'],['publier','Publier','plus'],['messages','Messages','msg'],['profil','Profil','user']],
+admin:[['dashboard','Tableau de bord','chart'],['moderation','Modération','shield'],['logements','Logements','home'],['utilisateurs','Utilisateurs','users'],['paiements','Paiements','card']]};
+function unreadMsgs(){return S.role==='locataire'?S.convs.filter(c=>c.tenant==='u1').reduce((a,c)=>a+c.unreadT,0):S.role==='bailleur'?S.convs.filter(c=>c.landlord==='u2').reduce((a,c)=>a+c.unreadL,0):0}
+function badgeFor(t){
+  if(t==='favoris')return S.favs.filter(id=>lst(id)&&lst(id).status==='publiee').length;
+  if(t==='messages')return unreadMsgs();
+  if(t==='moderation')return S.listings.filter(l=>l.status==='attente').length+S.reports.filter(r=>r.status==='ouvert').length;
+  return 0;
+}
+function renderNav(){
+  const cur=S.tab[S.role];
+  $('#nav').innerHTML=TABS[S.role].map(([id,lab,i])=>{const b=badgeFor(id);return`<button type="button" class="tab" data-act="go" data-tab="${id}" ${cur===id?'aria-current="page"':''}>${ic(i)}${lab}${b?` <span class="cnt" aria-label="${b} éléments">${b}</span>`:''}</button>`}).join('');
+  $('#role').value=S.role;
+  const n=S.notifs.filter(x=>x.role===S.role&&!x.read).length;
+  $('.bell').innerHTML=ic('bell')+(n?`<span class="cnt">${n}</span>`:'');
+  $('.bell').setAttribute('aria-label','Notifications'+(n?` (${n} non lues)`:''));
+}
+function render(){
+  const ae=document.activeElement, fid=ae&&ae.id, draft=$('#msgInput')?$('#msgInput').value:null;
+  const t=S.tab[S.role];
+  const fn=SCR[S.role+':'+t];
+  $('#main').innerHTML=fn?fn():'';
+  renderNav();
+  if(S.role==='locataire'&&t==='recherche')updateResults();
+  const ms=$('#msgs');if(ms)ms.scrollTop=ms.scrollHeight;
+  if(draft!=null&&$('#msgInput'))$('#msgInput').value=draft;
+  const fe=fid&&document.getElementById(fid);
+  if(fe&&!$('#dlg').open){fe.focus();if(fe.tagName==='INPUT'){try{const n=fe.value.length;fe.setSelectionRange(n,n)}catch(_){}}}
+  save();
+}
+function go(tab){S.tab[S.role]=tab;if(tab==='publier'&&!UI.keepEdit){UI.editId=null;FD=null}UI.keepEdit=false;$('#notifPanel').hidden=true;render();window.scrollTo(0,0)}
+function notify(role,text,tab){S.notifs.unshift({id:uid(),role,text,tab,at:Date.now(),read:false});renderNav()}
+function toast(msg,icon){const el=document.createElement('div');el.className='toast';el.innerHTML=ic(icon||'check')+`<span>${esc(msg)}</span>`;$('#toasts').appendChild(el);setTimeout(()=>el.remove(),3800)}
+
+/* ---------- Dialog ---------- */
+const dlg=$('#dlg');
+function openDlg(html,size){dlg.className=size||'';$('#dlgBody').innerHTML=html;if(!dlg.open)dlg.showModal();const f=$('#dlgBody [autofocus]')||$('#dlgBody .dlg-head .icon-btn');if(f)f.focus();dlg.scrollTop=0}
+function closeDlg(){if(dlg.open)dlg.close()}
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeDlg()});
+dlg.addEventListener('close',()=>{P=null;OTP=null});
+const head=(title,sub)=>`<div class="dlg-head"><div class="min0">${sub?`<p class="small muted">${sub}</p>`:''}<h2 id="dlgTitle">${title}</h2></div><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic('x')}</button></div>`;
+function confirmDlg(title,text,okLabel,cb){confirmCb=cb;openDlg(head(esc(title))+`<div class="dlg-body stack"><p>${esc(text)}</p><div class="actions"><button type="button" class="btn danger" data-act="confirmOk">${esc(okLabel)}</button><button type="button" class="btn" data-act="close">Annuler</button></div></div>`,'md')}
+
+/* ---------- Locataire : recherche ---------- */
+function filtered(){
+  let r=S.listings.filter(l=>l.status==='publiee');
+  if(F.q){const q=norm(F.q);r=r.filter(l=>norm(l.title+' '+l.commune+' '+l.quartier+' '+l.type).includes(q))}
+  if(F.commune)r=r.filter(l=>l.commune===F.commune);
+  if(F.type)r=r.filter(l=>l.type===F.type);
+  if(F.pmin)r=r.filter(l=>l.price>=+F.pmin);
+  if(F.pmax)r=r.filter(l=>l.price<=+F.pmax);
+  if(F.ch)r=r.filter(l=>l.ch>=F.ch);
+  if(F.verified)r=r.filter(l=>user(l.landlord).verified);
+  const s={recent:(a,b)=>b.createdAt-a.createdAt,pasc:(a,b)=>a.price-b.price,pdesc:(a,b)=>b.price-a.price,dist:(a,b)=>dist(a)-dist(b)}[F.sort];
+  return r.sort(s);
+}
+function lcard(l){
+  const fav=S.favs.includes(l.id),v=user(l.landlord).verified;
+  return`<article class="card lcard"><div class="ph">${photo(l,0)}${v?`<span class="badge">${ic('shield')}Bailleur vérifié</span>`:''}<button type="button" class="fav" data-act="fav" data-id="${l.id}" aria-pressed="${fav}" aria-label="${fav?'Retirer des':'Ajouter aux'} favoris : ${esc(l.title)}">${ic('heart')}</button></div>
+<div class="lc-body"><div class="price">${usd(l.price)}<small> /mois</small></div><h3><button type="button" class="stretch" data-act="open" data-id="${l.id}">${esc(l.title)}</button></h3>
+<p class="locline">${ic('pin')}<span class="ell">${esc(l.commune)} · ${esc(l.quartier)}${F.sort==='dist'?' · à '+fmtKm(dist(l)):''}</span></p>
+<div class="specs"><span>${ic('home')}${l.type}</span><span>${ic('bed')}${l.ch} ch.</span><span>${ic('bath')}${l.sdb} sdb</span><span>${ic('area')}${l.m2} m²</span></div></div></article>`;
+}
+function scrSearch(){
+  const open=window.innerWidth>=960;
+  const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
+  return`<div class="page-head"><div><h1>Trouver un logement à Kinshasa</h1><p class="muted">Annonces vérifiées par notre équipe. Contactez directement le bailleur pour 5 $ (accès 24 h).</p></div></div>
+<div class="search-layout" id="sl" data-view="${UI.view}">
+<details class="card filters" ${open?'open':''}><summary><span style="display:flex;gap:8px;align-items:center">${ic('search')}Filtres</span><span class="small muted" id="fcount"></span></summary>
+<div class="stack">
+<div class="field"><label for="f-q">Mot-clé</label><input class="inp" id="f-q" data-f="q" type="search" placeholder="Ex. villa, Matonge, meublé" value="${esc(F.q)}"></div>
+<div class="field"><label for="f-commune">Commune</label><select class="inp" id="f-commune" data-f="commune"><option value="">Toutes les communes</option>${opt(Object.keys(C).sort(),F.commune)}</select></div>
+<div class="field"><label for="f-type">Type de logement</label><select class="inp" id="f-type" data-f="type"><option value="">Tous les types</option>${opt(TYPES,F.type)}</select></div>
+<div class="g2" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="field"><label for="f-pmin">Loyer min ($)</label><input class="inp" id="f-pmin" data-f="pmin" type="number" min="0" inputmode="numeric" value="${esc(F.pmin)}"></div><div class="field"><label for="f-pmax">Loyer max ($)</label><input class="inp" id="f-pmax" data-f="pmax" type="number" min="0" inputmode="numeric" value="${esc(F.pmax)}"></div></div>
+<div class="field"><span class="flabel" id="chl">Chambres</span><div class="seg" role="group" aria-labelledby="chl">${[0,1,2,3,4].map(n=>`<button type="button" data-act="ch" data-n="${n}" aria-pressed="${F.ch===n}">${n?n+'+':'Toutes'}</button>`).join('')}</div></div>
+<label class="chk"><input type="checkbox" data-f="verified" ${F.verified?'checked':''}>Bailleurs vérifiés uniquement</label>
+<button type="button" class="btn" data-act="locate">${ic('locate')}Autour de moi</button>
+<button type="button" class="btn ghost" data-act="resetF">Effacer les filtres</button>
+</div></details>
+<section class="min0"><div class="res-bar"><p id="rcount" class="muted" aria-live="polite"></p><div class="actions">
+<label class="sr" for="sort">Trier par</label><select class="inp" id="sort" data-f="sort" style="width:auto"><option value="recent">Plus récentes</option><option value="pasc">Loyer croissant</option><option value="pdesc">Loyer décroissant</option><option value="dist">Plus proches de moi</option></select>
+<div class="seg viewtog" role="group" aria-label="Affichage"><button type="button" data-act="view" data-v="list" aria-pressed="${UI.view==='list'}">${ic('list')}Liste</button><button type="button" data-act="view" data-v="map" aria-pressed="${UI.view==='map'}">${ic('map')}Carte</button></div></div></div>
+<div id="results" class="res-grid"></div></section>
+<aside class="map-col" id="mapcol" aria-label="Carte des résultats"></aside>
+</div>`;
+}
+function updateResults(){
+  const r=filtered();
+  const el=$('#results');if(!el)return;
+  $('#sort').value=F.sort;
+  el.innerHTML=r.length?r.map(lcard).join(''):`<div class="card empty" style="grid-column:1/-1">${ic('search')}<p><b>Aucun logement ne correspond.</b></p><p class="small">Élargissez le budget ou changez de commune.</p></div>`;
+  $('#rcount').textContent=r.length+' logement'+(r.length>1?'s':'')+' disponible'+(r.length>1?'s':'');
+  const nf=['q','commune','type','pmin','pmax'].filter(k=>F[k]).length+(F.ch?1:0)+(F.verified?1:0);
+  $('#fcount').textContent=nf?nf+' actif'+(nf>1?'s':''):'';
+  $('#mapcol').innerHTML=`<div class="map-wrap">${mapSVG(r,{me:F.sort==='dist',label:'Carte schématique de Kinshasa'})}<div class="map-cap"><span>Carte schématique · ${r.length} résultat${r.length>1?'s':''}</span><span>Touchez un prix pour ouvrir l’annonce</span></div></div>`;
+}
+
+function scrFavs(){
+  const r=S.favs.map(lst).filter(l=>l&&l.status==='publiee');
+  return`<div class="page-head"><div><h1>Mes favoris</h1><p class="muted">${r.length} logement${r.length>1?'s':''} sauvegardé${r.length>1?'s':''}, synchronisé${r.length>1?'s':''} entre le web et l’application mobile.</p></div></div>
+${r.length?`<div class="res-grid">${r.map(lcard).join('')}</div>`:`<div class="card empty">${ic('heart')}<p><b>Aucun favori pour l’instant.</b></p><p class="small">Touchez le cœur sur une annonce pour la retrouver ici.</p><p style="margin-top:12px"><button type="button" class="btn primary" data-act="go" data-tab="recherche">Rechercher un logement</button></p></div>`}`;
+}
+
+/* ---------- Détail annonce ---------- */
+function openDetail(id,i){
+  const l=lst(id);if(!l)return;
+  if(S.role==='locataire'&&i==null){l.views++;save()}
+  const ll=user(l.landlord),acc=hasAccess(l.landlord),fav=S.favs.includes(l.id),role=S.role;
+  let contact;
+  if(role==='locataire'){
+    contact=acc?`<div class="lock-box" style="border-style:solid;background:var(--ok-soft)"><p style="display:flex;gap:8px;align-items:center;font-weight:800;color:var(--ok)">${ic('unlock')}Accès actif</p><p class="phone-big">${esc(ll.phone)}</p><p class="small"><b>Adresse :</b> ${esc(l.addr)}</p><p class="small">Expire dans <b data-exp="${S.access[l.landlord]}">${left(S.access[l.landlord])}</b></p><div class="actions"><a class="btn primary" href="tel:${ll.phone.replace(/\s/g,'')}">${ic('phone')}Appeler</a><button type="button" class="btn" data-act="msgTo" data-lid="${l.landlord}" data-id="${l.id}">${ic('msg')}Message</button></div></div>`
+    :`<div class="lock-box"><p style="display:flex;gap:8px;align-items:center;font-weight:800">${ic('lock')}Coordonnées masquées</p><p class="phone-big muted">${mask(ll.phone)}</p><p class="small muted">Débloquez ce bailleur pendant 24 h : téléphone, messagerie et adresse exacte de toutes ses annonces.</p><button type="button" class="btn primary block" data-act="pay" data-lid="${l.landlord}" data-id="${l.id}">${ic('unlock')}Débloquer pour ${S.price} $ <span style="font-weight:600">(≈ ${fmtN(S.price*S.rate)} CDF)</span></button><p class="hint">M-Pesa, Orange Money, Airtel Money, Afrimoney</p></div>`;
+  }else contact=`<div class="lock-box"><p class="small muted">${role==='admin'?'Vue administrateur':'Aperçu de votre annonce'}</p><p class="phone-big">${esc(ll.phone)}</p><p class="small"><b>Adresse :</b> ${esc(l.addr)}</p></div>`;
+  const st=STAT[l.status];
+  const modBtns=role==='admin'?`<div class="actions">${l.status==='attente'?`<button type="button" class="btn primary" data-act="approve" data-id="${l.id}">${ic('check')}Approuver</button><button type="button" class="btn danger" data-act="refuse" data-id="${l.id}">Refuser</button>`:l.status==='suspendue'?`<button type="button" class="btn" data-act="unsuspendL" data-id="${l.id}">Réactiver</button>`:`<button type="button" class="btn danger" data-act="suspendL" data-id="${l.id}">Suspendre</button>`}</div>`:'';
+  const gi=i||0;
+  openDlg(head(esc(l.title),`${l.type} · ${esc(l.commune)}, ${esc(l.quartier)} · <span class="badge ${st[1]}">${st[0]}</span>`)+`<div class="dlg-body dgrid">
+<div class="stack">
+<div><div class="gal-main">${photo(l,gi)}</div><div class="thumbs">${l.photos.map((p,k)=>`<button type="button" class="thumb" data-act="gal" data-id="${l.id}" data-i="${k}" aria-pressed="${k===gi}" aria-label="Afficher la photo ${k+1}">${photo(l,k)}</button>`).join('')}</div></div>
+<div class="specs" style="font-size:14px"><span>${ic('bed')}${l.ch} chambre${l.ch>1?'s':''}</span><span>${ic('bath')}${l.sdb} salle${l.sdb>1?'s':''} de bain</span><span>${ic('area')}${l.m2} m²</span><span>${ic('eye')}${l.views} vues</span></div>
+<div><h3 class="h2" style="margin-bottom:6px">Description</h3><p>${esc(l.desc)}</p></div>
+<div><h3 class="h2" style="margin-bottom:8px">Équipements</h3><div class="eq">${l.eq.map(k=>`<span>${ic(EQ[k][1])}${EQ[k][0]}</span>`).join('')}</div></div>
+<div><h3 class="h2" style="margin-bottom:8px">Localisation</h3><div class="map-wrap">${mapSVG([l],{on:l.id,static:true,label:'Position approximative du logement'})}<div class="map-cap"><span>${ic('pin')} ${esc(l.commune)} · ${esc(l.quartier)} — à ${fmtKm(dist(l))} de vous</span><span>${role==='locataire'&&!acc?'Adresse exacte après déblocage':''}</span></div></div></div>
+</div>
+<aside class="stack" style="align-content:start">
+<div class="card stack"><div class="price" style="font-size:26px">${usd(l.price)}<small> /mois</small></div><p class="small muted">≈ ${fmtN(l.price*S.rate)} CDF au taux du jour · Garantie usuelle : 3 mois</p>
+${role==='locataire'?`<button type="button" class="btn" data-act="fav" data-id="${l.id}" aria-pressed="${fav}">${ic('heart')}${fav?'Retirer des favoris':'Ajouter aux favoris'}</button>`:''}</div>
+<div class="card stack"><div class="person"><span class="av">${initials(ll.name)}</span><div class="min0"><b>${esc(ll.name)}</b><p class="small muted">${ll.verified?'Identité vérifiée':'Identité non vérifiée'} · membre depuis ${new Date(ll.joined).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</p></div></div>${contact}</div>
+${l.reason&&l.status==='refusee'?`<div class="card" style="background:var(--bad-soft)"><b>Motif du refus :</b> ${esc(l.reason)}</div>`:''}
+${modBtns}
+${role==='locataire'?`<button type="button" class="btn ghost" data-act="report" data-id="${l.id}">${ic('flag')}Signaler cette annonce</button>`:''}
+</aside></div>`);
+}
+
+/* ---------- Paiement ---------- */
+function payStart(lid,listing){const d=digits(me().phone);P={lid,listing,op:opOf(d)||'mpesa',phone:fmtD(d),cur:'CDF',step:1,log:[]};renderPay()}
+function payLabel(){return P.cur==='USD'?`Payer ${S.price},00 USD`:`Payer ${fmtN(S.price*S.rate)} CDF`}
+function renderPay(){
+  const p=P,ll=user(p.lid),l=lst(p.listing),op=OPS[p.op];
+  let body;
+  if(p.step===1){
+    body=`<form class="dlg-body stack" data-form="pay" novalidate>
+<div class="sumbox"><div><span>Bailleur</span><b>${esc(ll.name)}</b></div><div><span>Annonce</span><span class="wrap" style="text-align:right">${esc(l.title)}</span></div><div><span>Durée d’accès</span><span>24 heures</span></div><div><span>Prix</span><span>${S.price},00 USD</span></div><div><span>Taux USD/CDF appliqué</span><span>1 USD = ${fmtN(S.rate)} CDF</span></div><div class="tot"><span>Total</span><span>${P.cur==='USD'?S.price+',00 USD':fmtN(S.price*S.rate)+' CDF'}</span></div></div>
+<fieldset><legend style="margin-bottom:8px">Opérateur Mobile Money</legend><div class="ops">${Object.entries(OPS).map(([k,o])=>`<label class="op"><input type="radio" name="op" value="${k}" ${k===p.op?'checked':''}><span class="op-logo" style="background:${o.c}">${o.ab}</span><span class="min0"><b>${o.n}</b><small>${o.sub}</small></span></label>`).join('')}</div></fieldset>
+<fieldset><legend style="margin-bottom:8px">Devise débitée</legend><div class="seg"><label><input type="radio" name="cur" value="CDF" ${p.cur==='CDF'?'checked':''}>Francs congolais (CDF)</label><label><input type="radio" name="cur" value="USD" ${p.cur==='USD'?'checked':''}>Dollars (USD)</label></div></fieldset>
+<div class="field"><label for="payPhone">Numéro ${op.n}</label><div class="phone-in" id="phoneBox"><span>+243</span><input id="payPhone" inputmode="numeric" autocomplete="tel-national" value="${esc(p.phone)}" aria-describedby="opHint payErr"></div><p class="hint" id="opHint">Préfixes ${op.n} : ${op.pre.join(', ')}. Astuce démo : un numéro finissant par 0000 simule un refus.</p><p class="err" id="payErr" role="alert"></p></div>
+<button type="submit" class="btn primary block" id="payBtn">${ic('lock')}${payLabel()}</button>
+<p class="small muted">Aucun débit réel. En production, l’accès n’est ouvert qu’à réception du webhook de l’opérateur, signature et montant vérifiés côté serveur.</p></form>`;
+  }else if(p.step===2){
+    body=`<div class="dlg-body stack" style="text-align:center"><div class="spin" role="status" aria-label="Paiement en cours"></div><h3 class="h2">Validez sur votre téléphone</h3><p class="muted">Une demande ${op.n} a été envoyée au +243 ${esc(fmtD(p.d))}. Saisissez votre code PIN pour confirmer (simulation automatique).</p><ol class="log" id="payLog" aria-live="polite" style="text-align:left">${p.log.map(m=>`<li>${ic('check')}${esc(m)}</li>`).join('')}</ol></div>`;
+  }else if(p.step==='ok'){
+    body=`<div class="dlg-body stack"><div class="bigok">${ic('check')}</div><h3 class="h2" style="text-align:center">Paiement confirmé — bailleur débloqué</h3>
+<div class="sumbox"><div><span>Référence</span><b class="wrap">${p.ref}</b></div><div><span>Montant</span><span>${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'}</span></div><div><span>Taux appliqué</span><span>${fmtN(p.rate)} CDF</span></div><div><span>Téléphone du bailleur</span><b>${esc(ll.phone)}</b></div><div><span>Expire dans</span><b data-exp="${S.access[p.lid]}">${left(S.access[p.lid])}</b></div></div>
+<ol class="log">${p.log.map(m=>`<li>${ic('check')}${esc(m)}</li>`).join('')}</ol>
+<div class="actions"><button type="button" class="btn primary" data-act="msgTo" data-lid="${p.lid}" data-id="${p.listing}">${ic('msg')}Écrire au bailleur</button><a class="btn" href="tel:${ll.phone.replace(/\s/g,'')}">${ic('phone')}Appeler</a><button type="button" class="btn" data-act="receipt" data-id="${p.ref}">${ic('print')}Reçu</button><button type="button" class="btn ghost" data-act="open" data-id="${p.listing}">Revoir l’annonce</button></div></div>`;
+  }else{
+    body=`<div class="dlg-body stack"><div class="bigok bad">${ic('x')}</div><h3 class="h2" style="text-align:center">Paiement refusé par l’opérateur</h3><p class="muted" style="text-align:center">Motif renvoyé par le webhook : solde insuffisant. Aucun montant n’a été débité.</p><ol class="log">${p.log.map(m=>`<li>${ic('alert')}${esc(m)}</li>`).join('')}</ol><div class="actions"><button type="button" class="btn primary" data-act="payRetry">Réessayer</button><button type="button" class="btn" data-act="close">Fermer</button></div></div>`;
+  }
+  openDlg(head('Débloquer le bailleur',`<span class="testtag">${ic('alert')}Mode test</span>`)+body,'md');
+}
+function runPay(){
+  const p=P;p.step=2;p.rate=S.rate;p.ref='PAY-'+ymd(Date.now())+'-'+Math.floor(Math.random()*9000+1000);p.log=[];renderPay();
+  const fail=p.d.endsWith('0000'),o=OPS[p.op],amt=p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF';
+  const steps=[[400,`POST /api/payments → 201 · ${p.ref}`],[1200,`Demande envoyée à ${o.n} (+243 ${fmtD(p.d)}) : ${amt}`],[2700,`Webhook ${o.n} reçu : statut ${fail?'FAILED (solde insuffisant)':'SUCCESS'}`],[3100,'Signature HMAC vérifiée · idempotence OK'],[3500,fail?'Paiement enregistré comme échoué · aucun accès ouvert':`Montant contrôlé côté serveur : 5 USD × ${fmtN(p.rate)} = ${fmtN(5*p.rate)} CDF`]];
+  if(!fail)steps.push([3900,'Accès au bailleur ouvert pour 24 h']);
+  steps.forEach(([t,m],i)=>setTimeout(()=>{
+    p.log.push(m);const ol=$('#payLog');if(P===p&&ol)ol.insertAdjacentHTML('beforeend',`<li>${ic(fail&&i>=2?'alert':'check')}${esc(m)}</li>`);
+    if(i===steps.length-1)setTimeout(()=>finishPay(p,fail),500);
+  },t));
+}
+function finishPay(p,fail){
+  const now=Date.now();
+  S.payments.unshift({id:p.ref,at:now,tenant:'Grâce Mbuyi',tid:'u1',landlord:p.lid,listing:p.listing,op:p.op,phone:'+243 '+p.d.slice(0,2)+' ••• '+p.d.slice(-3),cur:p.cur,rate:p.rate,status:fail?'fail':'ok',reason:fail?'Solde insuffisant':''});
+  if(!fail){
+    S.access[p.lid]=now+D;
+    notify('locataire',`Accès à ${user(p.lid).name} ouvert pour 24 h (réf. ${p.ref}).`,'acces');
+    if(p.lid==='u2')notify('bailleur','Grâce Mbuyi a débloqué votre contact pour « '+lst(p.listing).title+' ».','annonces');
+    toast('Paiement confirmé — SMS de confirmation envoyé (simulation)');
+  }
+  p.step=fail?'fail':'ok';
+  if(P===p&&dlg.open)renderPay();
+  render();
+}
+
+/* ---------- Messagerie ---------- */
+const LREP=['Bonjour, merci pour votre message. Le logement est toujours disponible.','Vous pouvez passer pour une visite demain à 10 h, je vous envoie le point de repère.','La garantie est de 3 mois de loyer, payable à la signature du bail.','Oui, l’eau et l’électricité sont régulières dans ce quartier.'];
+const TREP=['Merci beaucoup, je confirme la visite.','D’accord, je vous recontacte ce soir.','Très bien, à demain alors.'];
+function scrMessages(){
+  const side=S.role==='locataire'?'t':'l';
+  const convs=S.convs.filter(c=>side==='t'?c.tenant==='u1':c.landlord==='u2').sort((a,b)=>(b.msgs.length?b.msgs[b.msgs.length-1].at:0)-(a.msgs.length?a.msgs[a.msgs.length-1].at:0));
+  let sel=UI.conv[S.role];
+  if(!sel&&window.innerWidth>760&&convs[0])sel=UI.conv[S.role]=convs[0].id;
+  const c=convs.find(x=>x.id===sel);
+  if(c){if(side==='t')c.unreadT=0;else c.unreadL=0}
+  const list=convs.map(x=>{const o=user(side==='t'?x.landlord:x.tenant),l=lst(x.listing),last=x.msgs[x.msgs.length-1],un=side==='t'?x.unreadT:x.unreadL;
+    return`<li><button type="button" class="conv" data-act="conv" data-id="${x.id}" ${x.id===sel?'aria-current="true"':''}><span class="av">${initials(o.name)}</span><span class="conv-main"><span class="conv-top"><b class="ell">${esc(o.name)}</b><span class="small muted" style="flex:none">${last?rel(last.at):''}</span></span><span class="small muted ell">${esc(l?l.title:'')}</span><span class="small ell">${last?esc((last.from===side?'Vous : ':'')+last.text):'Nouvelle conversation'}</span></span>${un?`<span class="cnt">${un}</span>`:''}</button></li>`}).join('');
+  let th='';
+  if(c){
+    const o=user(side==='t'?c.landlord:c.tenant),l=lst(c.listing),acc=side==='l'||hasAccess(c.landlord);
+    th=`<div class="thread-head"><button type="button" class="icon-btn back" data-act="convBack" aria-label="Retour aux conversations">${ic('back')}</button><span class="av">${initials(o.name)}</span><div class="min0" style="flex:1"><b>${esc(o.name)}</b><button type="button" class="linkbtn small ell" style="display:block" data-act="open" data-id="${c.listing}">${esc(l.title)}</button></div>${side==='t'?(acc?`<span class="badge b-ok">${ic('clock')}<span data-exp="${S.access[c.landlord]}">${left(S.access[c.landlord])}</span></span>`:`<span class="badge b-warn">${ic('lock')}Accès expiré</span>`):''}</div>
+<div class="msgs" id="msgs" aria-live="polite">${c.msgs.length?c.msgs.map(m=>`<div class="bub ${m.from===side?'me':''}"><p>${esc(m.text)}</p><time>${hm(m.at)}</time></div>`).join(''):`<p class="muted small" style="text-align:center;margin:auto">Démarrez la conversation : présentez-vous et proposez un créneau de visite.</p>`}</div>
+${acc?`<form class="composer" data-form="msg" data-id="${c.id}"><label class="sr" for="msgInput">Votre message</label><input class="inp" id="msgInput" autocomplete="off" placeholder="Écrire un message…"><button type="submit" class="btn primary" aria-label="Envoyer">${ic('send')}</button></form>`
+:`<div class="locked-note"><span class="small"><b>Votre accès à ce bailleur a expiré.</b> Débloquez-le à nouveau pour continuer (5 $ / 24 h).</span><button type="button" class="btn primary sm" data-act="pay" data-lid="${c.landlord}" data-id="${c.listing}">Débloquer</button></div>`}`;
+  }else th=`<div class="empty" style="margin:auto">${ic('msg')}<p>Sélectionnez une conversation.</p></div>`;
+  return`<div class="page-head"><div><h1>Messages</h1><p class="muted">${side==='t'?'Échangez avec les bailleurs que vous avez débloqués.':'Répondez aux locataires intéressés par vos logements.'}</p></div></div>
+<div class="msg-layout" ${c?'data-sel="1"':''}><ul class="conv-list" aria-label="Conversations">${list||`<li class="empty small">Aucune conversation. ${side==='t'?'Débloquez un bailleur depuis une annonce pour lui écrire.':''}</li>`}</ul><section class="thread" aria-label="Conversation">${th}</section></div>`;
+}
+function sendMsg(cid,text){
+  const c=S.convs.find(x=>x.id===cid);if(!c)return;
+  const side=S.role==='locataire'?'t':'l';
+  c.msgs.push({from:side,text,at:Date.now()});render();
+  setTimeout(()=>{
+    if(side==='t'){c.msgs.push({from:'l',text:LREP[c.msgs.length%LREP.length],at:Date.now()});c.unreadT++;notify('locataire',user(c.landlord).name+' vous a répondu.','messages')}
+    else{c.msgs.push({from:'t',text:TREP[c.msgs.length%TREP.length],at:Date.now()});c.unreadL++;notify('bailleur',user(c.tenant).name+' vous a répondu.','messages')}
+    render();
+  },2400);
+}
+function msgTo(lid,listing){
+  let c=S.convs.find(x=>x.tenant==='u1'&&x.landlord===lid&&x.listing===listing);
+  if(!c){c={id:'c'+uid(),tenant:'u1',landlord:lid,listing,unreadT:0,unreadL:0,msgs:[]};S.convs.push(c)}
+  UI.conv.locataire=c.id;closeDlg();S.tab.locataire='messages';render();window.scrollTo(0,0);const i=$('#msgInput');if(i)i.focus();
+}
+
+/* ---------- Locataire : accès ---------- */
+function scrAccess(){
+  const entries=Object.entries(S.access).sort((a,b)=>b[1]-a[1]);
+  const pays=S.payments.filter(p=>p.tid==='u1');
+  return`<div class="page-head"><div><h1>Mes accès bailleurs</h1><p class="muted">Chaque déblocage donne accès au bailleur pendant 24 h : téléphone, messagerie, adresses exactes.</p></div></div>
+<div class="adm-grid"><section class="stack ${'span2'}"><h2 class="h2">Accès</h2>${entries.length?entries.map(([lid,exp])=>{const u=user(lid),on=exp>Date.now(),l=S.listings.find(x=>x.landlord===lid&&x.status==='publiee');return`<div class="card" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="person" style="flex:1 1 220px"><span class="av">${initials(u.name)}</span><div class="min0"><b>${esc(u.name)}</b><p class="small muted">${on?esc(u.phone):mask(u.phone)}</p></div></div><div style="flex:1 1 180px">${on?`<span class="badge b-ok">${ic('clock')}Expire dans&nbsp;<span data-exp="${exp}">${left(exp)}</span></span>`:`<span class="badge b-bad">Expiré le ${dt(exp)}</span>`}</div><div class="actions">${on?`<a class="btn sm" href="tel:${u.phone.replace(/\s/g,'')}">${ic('phone')}Appeler</a>${l?`<button type="button" class="btn sm" data-act="msgTo" data-lid="${lid}" data-id="${l.id}">${ic('msg')}Message</button>`:''}<button type="button" class="btn sm ghost" data-act="expire" data-lid="${lid}">Faire expirer (démo)</button>`:(l?`<button type="button" class="btn sm primary" data-act="pay" data-lid="${lid}" data-id="${l.id}">Renouveler · 5 $</button>`:'')}</div></div>`}).join(''):`<div class="card empty">${ic('unlock')}<p>Aucun bailleur débloqué.</p></div>`}</section>
+<section class="stack"><h2 class="h2">Historique des paiements</h2><div class="card stack" style="padding:0">${pays.length?pays.map(p=>`<div style="padding:12px 16px;border-bottom:1px solid var(--line);display:grid;gap:4px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b class="wrap">${p.id}</b>${payBadge(p.status)}</div><p class="small muted">${dt(p.at)} · ${OPS[p.op].n} · ${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'} · ${esc(user(p.landlord).name)}</p>${p.status==='ok'?`<button type="button" class="btn sm" style="justify-self:start" data-act="receipt" data-id="${p.id}">${ic('print')}Reçu imprimable</button>`:''}</div>`).join(''):'<p class="empty small">Aucun paiement.</p>'}</div></section></div>`;
+}
+const payBadge=s=>s==='ok'?`<span class="badge b-ok">Réussi</span>`:s==='fail'?`<span class="badge b-bad">Échoué</span>`:`<span class="badge b-warn">En attente</span>`;
+function receipt(id){
+  const p=S.payments.find(x=>x.id===id);if(!p)return;
+  $('#printArea').innerHTML=`<div class="receipt"><h1 style="font-size:22px">Ndako — Reçu de paiement</h1><p>Document fictif généré par la démonstration (mode test)</p><table style="margin-top:16px;width:100%;border-collapse:collapse"><tr><th>Référence</th><td>${p.id}</td></tr><tr><th>Date</th><td>${dt(p.at)}</td></tr><tr><th>Client</th><td>${esc(p.tenant)}</td></tr><tr><th>Service</th><td>Accès bailleur 24 h — ${esc(user(p.landlord).name)}</td></tr><tr><th>Opérateur</th><td>${OPS[p.op].n} (${esc(p.phone)})</td></tr><tr><th>Montant</th><td>${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'} (5 USD au taux de ${fmtN(p.rate)} CDF)</td></tr><tr><th>Statut</th><td>${p.status==='ok'?'Payé':'Non payé'}</td></tr></table></div>`;
+  closeDlg();setTimeout(()=>window.print(),60);
+}
+
+/* ---------- Profil ---------- */
+function scrProfile(){
+  const u=me(),bl=S.role==='bailleur';
+  return`<div class="page-head"><div><h1>Mon profil</h1><p class="muted">Compte ${bl?'bailleur':'locataire'} · connexion par numéro de téléphone et code SMS.</p></div></div>
+<div class="adm-grid"><form class="card stack span2" data-form="profile" novalidate><h2 class="h2">Informations</h2>
+<div class="g2"><div class="field"><label for="p-name">Nom complet</label><input class="inp" id="p-name" value="${esc(u.name)}" required autocomplete="name"><p class="err" id="e-p-name"></p></div>
+<div class="field"><label for="p-mail">E-mail (facultatif)</label><input class="inp" id="p-mail" type="email" value="${esc(u.email||'')}" autocomplete="email"><p class="err" id="e-p-mail"></p></div>
+<div class="field"><span class="flabel">Téléphone</span><div class="actions"><b>${esc(u.phone)}</b><span class="badge b-ok">${ic('check')}Vérifié</span><button type="button" class="btn sm" data-act="otp">Changer de numéro</button></div></div>
+<div class="field"><label for="p-com">Commune</label><select class="inp" id="p-com">${Object.keys(C).sort().map(c=>`<option ${c===u.commune?'selected':''}>${c}</option>`).join('')}</select></div></div>
+<fieldset><legend>Notifications</legend><div class="eq-grid"><label class="chk"><input type="checkbox" checked>Notifications push (mobile)</label><label class="chk"><input type="checkbox" checked>SMS</label><label class="chk"><input type="checkbox">E-mail</label>${bl?'':'<label class="chk"><input type="checkbox" checked>Alertes nouvelles annonces</label>'}</div></fieldset>
+<div class="actions"><button type="submit" class="btn primary">Enregistrer</button></div></form>
+<section class="stack"><div class="card stack"><h2 class="h2">Sécurité</h2><p class="small">Connexion par code à usage unique (OTP) envoyé par SMS. Sessions actives : application Android, navigateur web.</p><button type="button" class="btn" data-act="logoutOthers">Déconnecter les autres appareils</button></div>
+${bl?`<div class="card stack"><h2 class="h2">Vérification bailleur</h2><p style="display:flex;gap:8px;align-items:center"><span class="badge b-ok">${ic('shield')}Identité vérifiée</span></p><p class="small muted">Carte d’électeur et justificatif de propriété contrôlés par la modération. Le badge « Bailleur vérifié » s’affiche sur vos annonces.</p></div>`:''}</section></div>`;
+}
+function otpDlg(){
+  const s=OTP||{step:1};OTP=s;
+  openDlg(head('Changer de numéro')+(s.step===1?`<form class="dlg-body stack" data-form="otp" novalidate><div class="field"><label for="otpPhone">Nouveau numéro</label><div class="phone-in" id="otpBox"><span>+243</span><input id="otpPhone" inputmode="numeric" autofocus placeholder="81 234 5678"></div><p class="err" id="otpErr" role="alert"></p></div><button type="submit" class="btn primary">Recevoir un code par SMS</button></form>`
+  :`<form class="dlg-body stack" data-form="otp" novalidate><p class="badge b-info" style="justify-self:start">SMS envoyé (simulation) — code : ${s.code}</p><div class="field"><label for="otpCode">Code reçu au +243 ${fmtD(s.d)}</label><input class="inp" id="otpCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" autofocus><p class="err" id="otpErr" role="alert"></p></div><button type="submit" class="btn primary">Vérifier</button></form>`),'md');
+}
+
+/* ---------- Bailleur ---------- */
+function scrMyListings(){
+  const mine=S.listings.filter(l=>l.landlord==='u2').sort((a,b)=>b.createdAt-a.createdAt);
+  const contacts=S.payments.filter(p=>p.landlord==='u2'&&p.status==='ok');
+  const k=[['Annonces en ligne',mine.filter(l=>l.status==='publiee').length,'visibles par les locataires'],['En modération',mine.filter(l=>l.status==='attente').length,'délai moyen : 4 h'],['Vues totales',fmtN(mine.reduce((a,l)=>a+l.views,0)),'sur 30 jours'],['Contacts débloqués',contacts.length,'locataires ayant payé l’accès'],['Messages non lus',unreadMsgs(),'']];
+  return`<div class="page-head"><div><h1>Mes annonces</h1><p class="muted">Bonjour Patrick, gérez vos logements et suivez leur visibilité.</p></div><button type="button" class="btn primary" data-act="go" data-tab="publier">${ic('plus')}Publier une annonce</button></div>
+<div class="kpis">${k.map(([a,b,c])=>`<div class="kpi"><span>${a}</span><b>${b}</b><small>${c}</small></div>`).join('')}</div>
+<div class="my-list">${mine.map(l=>{const st=STAT[l.status],cn=contacts.filter(p=>p.listing===l.id).length;return`<article class="card hcard"><div class="ph">${photo(l,0)}</div><div class="hc-body"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span class="badge ${st[1]}">${st[0]}</span><span class="small muted">${l.id} · publiée ${rel(l.createdAt)}</span></div><h3 style="font-size:16px">${esc(l.title)}</h3><p class="small muted">${esc(l.commune)} · ${esc(l.quartier)} · <b class="price" style="font-size:14px">${usd(l.price)}/mois</b></p>${l.status==='refusee'?`<p class="small" style="color:var(--bad)"><b>Motif :</b> ${esc(l.reason)}</p>`:''}${l.status==='suspendue'?`<p class="small" style="color:var(--bad)">Annonce suspendue par la modération suite à un signalement.</p>`:''}<div class="specs"><span>${ic('eye')}${l.views} vues</span><span>${ic('unlock')}${cn} contact${cn>1?'s':''}</span><span>${ic('heart')}${S.favs.includes(l.id)?1:0} favori</span></div>
+<div class="actions" style="margin-top:4px"><button type="button" class="btn sm" data-act="edit" data-id="${l.id}">${ic('edit')}Modifier</button><button type="button" class="btn sm" data-act="open" data-id="${l.id}">${ic('eye')}Aperçu</button>${l.status==='publiee'?`<button type="button" class="btn sm" data-act="rented" data-id="${l.id}">Marquer louée</button>`:l.status==='louee'?`<button type="button" class="btn sm" data-act="rented" data-id="${l.id}">Remettre en ligne</button>`:''}<button type="button" class="btn sm danger" data-act="del" data-id="${l.id}" aria-label="Supprimer ${esc(l.title)}">${ic('trash')}</button></div></div></article>`}).join('')}</div>`;
+}
+function initFD(){
+  const l=UI.editId?lst(UI.editId):null;
+  FD=l?{photos:l.photos.map(p=>Object.assign({},p)),x:l.x,y:l.y,hue:l.hue,moved:true}:{photos:[],x:C.Limete[0],y:C.Limete[1],hue:Math.floor(Math.random()*360),moved:false};
+}
+function scrPublish(){
+  if(!FD)initFD();
+  const l=UI.editId?lst(UI.editId):null;
+  const v=l||{title:'',type:'Appartement',commune:'Limete',quartier:'',addr:'',price:'',ch:2,sdb:1,m2:'',desc:'',eq:['eau','elec']};
+  const opt=(a,x)=>a.map(o=>`<option ${o===x?'selected':''}>${o}</option>`).join('');
+  return`<div class="page-head"><div><h1>${l?'Modifier l’annonce':'Publier une annonce'}</h1><p class="muted">Votre annonce est vérifiée par la modération avant sa mise en ligne (délai moyen : 4 h).</p></div></div>
+<form class="pub-grid" data-form="listing" novalidate>
+<section class="card stack"><h2 class="h2">Informations</h2>
+<div class="field"><label for="f-title">Titre de l’annonce <span aria-hidden="true">*</span></label><input class="inp" id="f-title" maxlength="80" value="${esc(v.title)}" placeholder="Ex. Maison 3 chambres avec cour à Lemba"><p class="err" id="e-f-title"></p></div>
+<div class="g3"><div class="field"><label for="f-type2">Type</label><select class="inp" id="f-type2">${opt(TYPES,v.type)}</select></div><div class="field"><label for="f-com">Commune</label><select class="inp" id="f-com">${opt(Object.keys(C).sort(),v.commune)}</select></div><div class="field"><label for="f-quart">Quartier <span aria-hidden="true">*</span></label><input class="inp" id="f-quart" value="${esc(v.quartier)}" placeholder="Ex. Righini"><p class="err" id="e-f-quart"></p></div></div>
+<div class="field"><label for="f-addr">Adresse ou point de repère <span aria-hidden="true">*</span></label><input class="inp" id="f-addr" value="${esc(v.addr)}" placeholder="Ex. Av. Kisangani n° 14, réf. marché" aria-describedby="h-addr"><p class="hint" id="h-addr">Visible uniquement par les locataires ayant débloqué votre contact.</p><p class="err" id="e-f-addr"></p></div>
+<div class="g4"><div class="field"><label for="f-price">Loyer mensuel ($) <span aria-hidden="true">*</span></label><input class="inp" id="f-price" type="number" inputmode="numeric" min="20" value="${esc(v.price)}"><p class="err" id="e-f-price"></p></div><div class="field"><label for="f-ch">Chambres</label><input class="inp" id="f-ch" type="number" min="0" max="12" value="${v.ch}"></div><div class="field"><label for="f-sdb">Salles de bain</label><input class="inp" id="f-sdb" type="number" min="0" max="10" value="${v.sdb}"></div><div class="field"><label for="f-m2">Surface (m²)</label><input class="inp" id="f-m2" type="number" min="5" value="${esc(v.m2)}"><p class="err" id="e-f-m2"></p></div></div>
+<div class="field"><label for="f-desc">Description <span aria-hidden="true">*</span></label><textarea class="inp" id="f-desc" maxlength="1200" aria-describedby="h-desc">${esc(v.desc)}</textarea><p class="hint" id="h-desc"><span id="dcount">${v.desc.length}</span> / 1200 caractères · 40 minimum</p><p class="err" id="e-f-desc"></p></div>
+<fieldset><legend>Équipements</legend><div class="eq-grid">${Object.entries(EQ).map(([k,[n]])=>`<label class="chk"><input type="checkbox" name="eq" value="${k}" ${v.eq.includes(k)?'checked':''}>${n}</label>`).join('')}</div></fieldset>
+</section>
+<section class="stack">
+<div class="card stack"><h2 class="h2">Photos <span aria-hidden="true">*</span></h2>
+<label class="drop">${ic('upload')}<b>Ajouter des photos</b><span class="small muted">JPG ou PNG, redimensionnées automatiquement</span><input type="file" id="f-files" accept="image/*" multiple class="sr"></label>
+<button type="button" class="btn sm" data-act="samplePhotos" style="justify-self:start">Ajouter des photos d’exemple</button>
+<div class="fphotos" id="fphotos"></div><p class="err" id="e-photos"></p></div>
+<div class="card stack"><h2 class="h2">Localisation</h2><p class="small muted">Touchez la carte pour placer le logement. Seule une position approximative est montrée avant déblocage.</p><div class="map-wrap" id="fmap"></div><button type="button" class="btn sm" data-act="geoloc" style="justify-self:start">${ic('locate')}Utiliser ma position (simulation)</button></div>
+<div class="actions"><button type="submit" class="btn primary">${ic('send')}${l?'Enregistrer et renvoyer en modération':'Envoyer en modération'}</button><button type="button" class="btn" data-act="go" data-tab="annonces">Annuler</button></div>
+</section></form>`;
+}
+function renderFormBits(){
+  const fp=$('#fphotos');if(!fp)return;
+  const fake={hue:FD.hue,title:'nouvelle annonce',photos:FD.photos};
+  fp.innerHTML=FD.photos.map((p,i)=>`<div class="fphoto">${photo(fake,i)}${i===0?'<span class="cover">Couverture</span>':''}<button type="button" data-act="rmPhoto" data-i="${i}" aria-label="Retirer la photo ${i+1}">${ic('x')}</button></div>`).join('');
+  $('#fmap').innerHTML=mapSVG([],{pick:[FD.x,FD.y],pickable:true});
+}
+function readImg(file){return new Promise(res=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,560/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.72))};im.onerror=()=>res(null);im.src=fr.result};fr.onerror=()=>res(null);fr.readAsDataURL(file)})}
+function submitListing(form){
+  const g=id=>$('#'+id).value.trim();
+  const errs={};
+  const title=g('f-title'),quart=g('f-quart'),addr=g('f-addr'),price=+g('f-price'),m2=+g('f-m2'),desc=g('f-desc');
+  if(title.length<10)errs['f-title']='Le titre doit contenir au moins 10 caractères.';
+  if(!quart)errs['f-quart']='Indiquez le quartier.';
+  if(addr.length<5)errs['f-addr']='Indiquez une adresse ou un point de repère.';
+  if(!price||price<20||price>20000)errs['f-price']='Loyer entre 20 et 20 000 $.';
+  if(!m2||m2<5)errs['f-m2']='Surface invalide.';
+  if(desc.length<40)errs['f-desc']='Décrivez le logement en 40 caractères minimum.';
+  ['f-title','f-quart','f-addr','f-price','f-m2','f-desc'].forEach(id=>{const el=$('#'+id);el.setAttribute('aria-invalid',errs[id]?'true':'false');$('#e-'+id).textContent=errs[id]||''});
+  $('#e-photos').textContent=FD.photos.length?'':'Ajoutez au moins une photo.';
+  if(Object.keys(errs).length||!FD.photos.length){const f=Object.keys(errs)[0];if(f)$('#'+f).focus();else $('#f-files').closest('label').scrollIntoView({block:'center'});toast('Formulaire incomplet : vérifiez les champs signalés','alert');return}
+  const data={title,type:$('#f-type2').value,commune:$('#f-com').value,quartier:quart,addr,price,ch:+g('f-ch')||0,sdb:+g('f-sdb')||0,m2,desc,eq:$$('input[name=eq]:checked',form).map(i=>i.value),photos:FD.photos,x:Math.round(FD.x),y:Math.round(FD.y),hue:FD.hue,status:'attente',reason:''};
+  if(UI.editId){Object.assign(lst(UI.editId),data)}
+  else S.listings.push(Object.assign({id:'L'+(200+S.listings.length),landlord:'u2',views:0,createdAt:Date.now()},data));
+  notify('admin',`${UI.editId?'Annonce modifiée':'Nouvelle annonce'} à modérer : « ${title} ».`,'moderation');
+  toast('Annonce envoyée en modération — visible après validation');
+  UI.editId=null;FD=null;go('annonces');
+}
+
+/* ---------- Admin ---------- */
+function scrDash(){
+  const now=Date.now(),ok=S.payments.filter(p=>p.status==='ok'),fail=S.payments.filter(p=>p.status==='fail');
+  const days=[];for(let d=13;d>=0;d--){const s=new Date(now-d*D);s.setHours(0,0,0,0);const e=s.getTime()+D;const v=ok.filter(p=>p.at>=s.getTime()&&p.at<e).length*5;days.push({l:s.getDate(),v})}
+  const max=Math.max(...days.map(d=>d.v),5);
+  const byOp=Object.keys(OPS).map(k=>({k,n:ok.filter(p=>p.op===k).length}));const tot=ok.length||1;
+  const pubL=S.listings.filter(l=>l.status==='publiee');
+  const com={};pubL.forEach(l=>{com[l.commune]=(com[l.commune]||0)+l.views});const tc=Object.entries(com).sort((a,b)=>b[1]-a[1]).slice(0,6);const tcm=tc.length?tc[0][1]:1;
+  const k=[['Revenus 14 jours',usd(ok.length*5),'≈ '+fmtN(ok.reduce((a,p)=>a+5*p.rate,0))+' CDF'],['Paiements réussis',ok.length,'accès bailleur 24 h'],['Taux d’échec',Math.round(fail.length/S.payments.length*100)+' %',fail.length+' paiements refusés'],['Annonces en ligne',pubL.length,S.listings.filter(l=>l.status==='attente').length+' en modération'],['Signalements ouverts',S.reports.filter(r=>r.status==='ouvert').length,'à traiter'],['Utilisateurs',S.users.filter(u=>u.role!=='admin').length,S.users.filter(u=>u.role==='bailleur').length+' bailleurs · '+S.users.filter(u=>u.role==='locataire').length+' locataires']];
+  return`<div class="page-head"><div><h1>Tableau de bord</h1><p class="muted">Activité de la plateforme · taux du jour 1 USD = ${fmtN(S.rate)} CDF</p></div><button type="button" class="btn" data-act="go" data-tab="paiements">${ic('card')}Voir les paiements</button></div>
+<div class="kpis">${k.map(([a,b,c])=>`<div class="kpi"><span>${a}</span><b>${b}</b><small>${c}</small></div>`).join('')}</div>
+<div class="adm-grid">
+<section class="card span2"><h2 class="h2">Revenus quotidiens (USD)</h2><p class="small muted">Accès bailleurs payés sur les 14 derniers jours</p><div class="bars" role="img" aria-label="Revenus des 14 derniers jours, de ${days[0].v} à ${days[13].v} dollars">${days.map(d=>`<div class="bar-col"><span>${d.v}</span><div class="bar" style="height:${Math.max(2,d.v/max*82)}%"></div><span>${d.l}</span></div>`).join('')}</div></section>
+<section class="card stack"><h2 class="h2">Répartition par opérateur</h2>${byOp.map(o=>`<div class="hbar"><div class="hbar-row"><b>${OPS[o.k].n}</b><span class="muted">${o.n} · ${Math.round(o.n/tot*100)} %</span></div><div class="track"><div class="fill" style="width:${o.n/tot*100}%;background:${OPS[o.k].c}"></div></div></div>`).join('')}<p class="small muted">Webhooks opérationnels sur les 4 opérateurs.</p></section>
+<section class="card stack"><h2 class="h2">Communes les plus consultées</h2>${tc.map(([c,v])=>`<div class="hbar"><div class="hbar-row"><b>${c}</b><span class="muted">${fmtN(v)} vues</span></div><div class="track"><div class="fill" style="width:${v/tcm*100}%;background:var(--accent)"></div></div></div>`).join('')}</section>
+<section class="card stack span2"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><h2 class="h2">Derniers paiements</h2><button type="button" class="btn sm" data-act="go" data-tab="paiements">Tout voir</button></div><div class="tbl-wrap"><table><thead><tr><th>Référence</th><th>Date</th><th>Locataire</th><th>Opérateur</th><th>Montant</th><th>Statut</th></tr></thead><tbody>${S.payments.slice(0,6).map(p=>`<tr><td><button type="button" class="linkbtn" data-act="payDetail" data-id="${p.id}">${p.id}</button></td><td>${dt(p.at)}</td><td>${esc(p.tenant)}</td><td>${OPS[p.op].n}</td><td>${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'}</td><td>${payBadge(p.status)}</td></tr>`).join('')}</tbody></table></div></section>
+</div>`;
+}
+function scrModeration(){
+  const pend=S.listings.filter(l=>l.status==='attente').sort((a,b)=>b.createdAt-a.createdAt);
+  const reps=S.reports.slice().sort((a,b)=>(a.status==='ouvert'?0:1)-(b.status==='ouvert'?0:1)||b.at-a.at);
+  const t=UI.mod;
+  return`<div class="page-head"><div><h1>Modération</h1><p class="muted">Vérifiez les annonces avant publication et traitez les signalements.</p></div><div class="seg" role="group" aria-label="Section"><button type="button" data-act="modTab" data-v="attente" aria-pressed="${t==='attente'}">Annonces (${pend.length})</button><button type="button" data-act="modTab" data-v="reports" aria-pressed="${t==='reports'}">Signalements (${S.reports.filter(r=>r.status==='ouvert').length})</button></div></div>
+${t==='attente'?(pend.length?`<div class="my-list">${pend.map(l=>{const u=user(l.landlord);return`<article class="card mod-item"><div class="ph">${photo(l,0)}</div><div class="stack" style="gap:8px"><div class="actions"><span class="badge b-warn">En attente</span><span class="small muted">${l.id} · reçue ${rel(l.createdAt)}</span></div><h3 style="font-size:16px">${esc(l.title)}</h3><p class="small">${l.type} · ${esc(l.commune)}, ${esc(l.quartier)} · <b>${usd(l.price)}/mois</b> · ${l.photos.length} photo${l.photos.length>1?'s':''}</p><p class="small muted">Bailleur : ${esc(u.name)} ${u.verified?`<span class="badge b-ok">vérifié</span>`:`<span class="badge b-bad">non vérifié</span>`}</p><p class="small">${esc(l.desc.slice(0,160))}${l.desc.length>160?'…':''}</p><div class="actions"><button type="button" class="btn sm primary" data-act="approve" data-id="${l.id}">${ic('check')}Approuver</button><button type="button" class="btn sm danger" data-act="refuse" data-id="${l.id}">Refuser</button><button type="button" class="btn sm" data-act="open" data-id="${l.id}">${ic('eye')}Examiner</button></div></div></article>`}).join('')}</div>`:`<div class="card empty">${ic('check')}<p><b>File de modération vide.</b></p><p class="small">Passez en vue Bailleur pour publier une annonce et la voir arriver ici.</p></div>`)
+:`<div class="my-list">${reps.map(r=>{const l=lst(r.listing);return`<article class="card stack" style="gap:8px"><div class="actions"><span class="badge ${r.status==='ouvert'?'b-bad':'b-ok'}">${r.status==='ouvert'?'Ouvert':'Traité'}</span><span class="small muted">${r.id} · ${rel(r.at)} · par ${esc(r.by)}</span></div><h3 style="font-size:16px">${esc(r.motif)}</h3><p class="small">Annonce : <button type="button" class="linkbtn" data-act="open" data-id="${r.listing}">${esc(l?l.title:r.listing)}</button> ${l?`<span class="badge ${STAT[l.status][1]}">${STAT[l.status][0]}</span>`:''}</p><p class="small muted">« ${esc(r.text)} »</p>${r.status==='ouvert'?`<div class="actions"><button type="button" class="btn sm danger" data-act="repSuspend" data-id="${r.id}">Suspendre l’annonce</button><button type="button" class="btn sm" data-act="repClose" data-id="${r.id}">Classer sans suite</button></div>`:`<p class="small"><b>Décision :</b> ${esc(r.action||'')}</p>`}</article>`}).join('')}</div>`}`;
+}
+function scrAdmListings(){
+  const a=UI.adm;let r=S.listings.slice().sort((x,y)=>y.createdAt-x.createdAt);
+  if(a.lq){const q=norm(a.lq);r=r.filter(l=>norm(l.title+' '+l.id+' '+l.commune+' '+user(l.landlord).name).includes(q))}
+  if(a.lst)r=r.filter(l=>l.status===a.lst);
+  return`<div class="page-head"><div><h1>Logements</h1><p class="muted">${S.listings.length} annonces au total</p></div></div>
+<div class="toolbar"><div class="field"><label for="a-lq">Rechercher</label><input class="inp" id="a-lq" data-a="lq" type="search" value="${esc(a.lq)}" placeholder="Titre, référence, bailleur…"></div><div class="field"><label for="a-lst">Statut</label><select class="inp" id="a-lst" data-a="lst"><option value="">Tous</option>${Object.entries(STAT).map(([k,v])=>`<option value="${k}" ${a.lst===k?'selected':''}>${v[0]}</option>`).join('')}</select></div></div>
+<div class="tbl-wrap"><table><thead><tr><th>Annonce</th><th>Commune</th><th>Type</th><th>Loyer</th><th>Bailleur</th><th>Statut</th><th>Vues</th><th>Actions</th></tr></thead><tbody>${r.map(l=>`<tr><td><b>${esc(l.title)}</b><br><span class="small muted">${l.id}</span></td><td>${esc(l.commune)}</td><td>${l.type}</td><td>${usd(l.price)}</td><td>${esc(user(l.landlord).name)}</td><td><span class="badge ${STAT[l.status][1]}">${STAT[l.status][0]}</span></td><td>${l.views}</td><td><div class="actions"><button type="button" class="btn sm" data-act="open" data-id="${l.id}">Voir</button>${l.status==='suspendue'?`<button type="button" class="btn sm" data-act="unsuspendL" data-id="${l.id}">Réactiver</button>`:l.status==='publiee'?`<button type="button" class="btn sm danger" data-act="suspendL" data-id="${l.id}">Suspendre</button>`:l.status==='attente'?`<button type="button" class="btn sm primary" data-act="approve" data-id="${l.id}">Approuver</button>`:''}</div></td></tr>`).join('')||`<tr><td colspan="8" class="empty">Aucune annonce.</td></tr>`}</tbody></table></div>`;
+}
+function scrUsers(){
+  const a=UI.adm;let r=S.users.filter(u=>u.role!=='admin');
+  if(a.uq){const q=norm(a.uq);r=r.filter(u=>norm(u.name+' '+u.phone+' '+u.commune).includes(q))}
+  if(a.ur)r=r.filter(u=>u.role===a.ur);
+  return`<div class="page-head"><div><h1>Utilisateurs</h1><p class="muted">Comptes locataires et bailleurs</p></div></div>
+<div class="toolbar"><div class="field"><label for="a-uq">Rechercher</label><input class="inp" id="a-uq" data-a="uq" type="search" value="${esc(a.uq)}" placeholder="Nom, téléphone, commune…"></div><div class="field"><label for="a-ur">Rôle</label><select class="inp" id="a-ur" data-a="ur"><option value="">Tous</option><option value="locataire" ${a.ur==='locataire'?'selected':''}>Locataires</option><option value="bailleur" ${a.ur==='bailleur'?'selected':''}>Bailleurs</option></select></div></div>
+<div class="tbl-wrap"><table><thead><tr><th>Nom</th><th>Rôle</th><th>Téléphone</th><th>Commune</th><th>Inscription</th><th>Activité</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${r.map(u=>{const act=u.role==='bailleur'?S.listings.filter(l=>l.landlord===u.id).length+' annonce(s)':S.payments.filter(p=>p.tid===u.id||p.tenant===u.name).length+' paiement(s)';return`<tr><td><div class="person"><span class="av" style="width:36px;height:36px;font-size:12px">${initials(u.name)}</span><b>${esc(u.name)}</b></div></td><td>${u.role==='bailleur'?'Bailleur':'Locataire'}</td><td>${esc(u.phone)}</td><td>${esc(u.commune)}</td><td>${day(u.joined)}</td><td>${act}</td><td><div class="actions" style="gap:4px">${u.status==='actif'?'<span class="badge b-ok">Actif</span>':'<span class="badge b-bad">Suspendu</span>'}${u.verified?'<span class="badge b-acc">Vérifié</span>':'<span class="badge">Non vérifié</span>'}</div></td><td><div class="actions">${!u.verified?`<button type="button" class="btn sm" data-act="uVerify" data-id="${u.id}">${ic('shield')}Vérifier</button>`:''}${u.id==='u1'||u.id==='u2'?'<span class="small muted">Compte de démo</span>':`<button type="button" class="btn sm ${u.status==='actif'?'danger':''}" data-act="uToggle" data-id="${u.id}">${u.status==='actif'?'Suspendre':'Réactiver'}</button>`}</div></td></tr>`}).join('')}</tbody></table></div>`;
+}
+function filtPays(){const a=UI.adm;let r=S.payments;if(a.pop)r=r.filter(p=>p.op===a.pop);if(a.pst)r=r.filter(p=>p.status===a.pst);if(a.pq){const q=norm(a.pq);r=r.filter(p=>norm(p.id+' '+p.tenant+' '+user(p.landlord).name).includes(q))}return r}
+function scrPays(){
+  const a=UI.adm,r=filtPays(),ok=r.filter(p=>p.status==='ok');
+  return`<div class="page-head"><div><h1>Paiements</h1><p class="muted">Accès bailleur · ${S.price} USD / 24 h · Mobile Money</p></div><button type="button" class="btn" data-act="csv">${ic('download')}Exporter CSV</button></div>
+<div class="pay-layout"><section class="min0">
+<div class="toolbar"><div class="field"><label for="a-pq">Rechercher</label><input class="inp" id="a-pq" data-a="pq" type="search" value="${esc(a.pq)}" placeholder="Référence, locataire, bailleur…"></div><div class="field"><label for="a-pop">Opérateur</label><select class="inp" id="a-pop" data-a="pop"><option value="">Tous</option>${Object.entries(OPS).map(([k,o])=>`<option value="${k}" ${a.pop===k?'selected':''}>${o.n}</option>`).join('')}</select></div><div class="field"><label for="a-pst">Statut</label><select class="inp" id="a-pst" data-a="pst"><option value="">Tous</option><option value="ok" ${a.pst==='ok'?'selected':''}>Réussi</option><option value="fail" ${a.pst==='fail'?'selected':''}>Échoué</option><option value="pending" ${a.pst==='pending'?'selected':''}>En attente</option></select></div></div>
+<p class="small muted" style="margin-bottom:8px" aria-live="polite">${r.length} paiement${r.length>1?'s':''} · ${ok.length} réussi${ok.length>1?'s':''} · total encaissé ${usd(ok.length*5)} (≈ ${fmtN(ok.reduce((s,p)=>s+5*p.rate,0))} CDF)</p>
+<div class="tbl-wrap"><table><thead><tr><th>Référence</th><th>Date</th><th>Locataire</th><th>Bailleur</th><th>Opérateur</th><th>Montant</th><th>Taux</th><th>Statut</th><th></th></tr></thead><tbody>${r.slice(0,a.lim).map(p=>`<tr><td><b>${p.id}</b></td><td>${dt(p.at)}</td><td>${esc(p.tenant)}</td><td>${esc(user(p.landlord).name)}</td><td><span style="display:inline-flex;gap:6px;align-items:center"><span class="op-logo" style="width:24px;height:24px;font-size:9px;border-radius:6px;background:${OPS[p.op].c}">${OPS[p.op].ab}</span>${OPS[p.op].n}</span></td><td>${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'}</td><td>${fmtN(p.rate)}</td><td>${payBadge(p.status)}</td><td><button type="button" class="btn sm" data-act="payDetail" data-id="${p.id}">Détail</button></td></tr>`).join('')||`<tr><td colspan="9" class="empty">Aucun paiement.</td></tr>`}</tbody></table></div>
+${r.length>a.lim?`<p style="margin-top:12px;text-align:center"><button type="button" class="btn" data-act="more">Afficher plus (${r.length-a.lim} restants)</button></p>`:''}
+</section>
+<aside class="stack">
+<form class="card stack" data-form="rate" novalidate><h2 class="h2">Taux USD / CDF</h2><p>Taux appliqué : <b>1 USD = ${fmtN(S.rate)} CDF</b></p><p class="small muted">Le montant en CDF est calculé et figé au moment de chaque paiement. Mise à jour manuelle ou via une API de change.</p><div class="field"><label for="r-new">Nouveau taux (CDF pour 1 USD)</label><input class="inp" id="r-new" type="number" inputmode="numeric" min="1000" max="10000" placeholder="${S.rate}"><p class="err" id="e-r-new"></p></div><button type="submit" class="btn primary">Appliquer le taux</button>
+<ul class="small" style="display:grid;gap:4px">${S.rateHist.slice(0,5).map(h=>`<li style="display:flex;justify-content:space-between;gap:8px"><span class="muted">${dt(h.at)}</span><b>${fmtN(h.rate)} CDF</b></li>`).join('')}</ul></form>
+<div class="card stack"><h2 class="h2">Webhooks opérateurs</h2>${Object.entries(OPS).map(([k,o])=>{const last=S.payments.find(p=>p.op===k);return`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><span style="display:inline-flex;gap:8px;align-items:center"><span class="op-logo" style="width:28px;height:28px;font-size:10px;background:${o.c}">${o.ab}</span><b>${o.n}</b></span><span class="small"><span class="badge b-ok">Opérationnel</span> ${last?rel(last.at):''}</span></div>`}).join('')}<p class="small muted">Signature HMAC, rejeu idempotent et réconciliation quotidienne.</p></div>
+</aside></div>`;
+}
+function payDetail(id){
+  const p=S.payments.find(x=>x.id===id);if(!p)return;const o=OPS[p.op],l=lst(p.listing);
+  const t=[[p.at,`Paiement initié par ${p.tenant} — ${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'}`],[p.at+3000,`Demande de paiement envoyée à ${o.n}`]];
+  if(p.status!=='pending')t.push([p.at+41000,`Webhook ${o.n} reçu : ${p.status==='ok'?'SUCCESS':'FAILED ('+p.reason+')'}`,p.status!=='ok'],[p.at+41200,'Signature HMAC vérifiée'],[p.at+41400,p.status==='ok'?'Accès bailleur ouvert pour 24 h':'Aucun accès ouvert',p.status!=='ok']);
+  else t.push([Date.now(),'En attente de confirmation de l’opérateur…']);
+  openDlg(head(p.id,'Détail du paiement')+`<div class="dlg-body stack"><dl class="kv"><dt>Statut</dt><dd>${payBadge(p.status)}</dd><dt>Locataire</dt><dd>${esc(p.tenant)}</dd><dt>Bailleur</dt><dd>${esc(user(p.landlord).name)}</dd><dt>Annonce</dt><dd>${esc(l?l.title:'—')}</dd><dt>Opérateur</dt><dd>${o.n} · ${esc(p.phone)}</dd><dt>Montant</dt><dd>${p.cur==='USD'?'5,00 USD':fmtN(5*p.rate)+' CDF'}</dd><dt>Taux figé</dt><dd>1 USD = ${fmtN(p.rate)} CDF</dd></dl><h3 class="h2">Journal serveur</h3><ol class="timeline">${t.map(([a,m,b])=>`<li class="${b?'bad':''}"><span class="small muted">${new Date(a).toLocaleTimeString('fr-FR')}</span><br>${esc(m)}</li>`).join('')}</ol>${p.status==='pending'?`<div class="actions"><button type="button" class="btn primary" data-act="payForce" data-id="${p.id}">Relancer la vérification auprès de l’opérateur</button></div>`:''}</div>`,'md');
+}
+function csv(){
+  const rows=[['reference','date','locataire','bailleur','operateur','devise','montant','taux','statut']].concat(filtPays().map(p=>[p.id,new Date(p.at).toISOString(),p.tenant,user(p.landlord).name,OPS[p.op].n,p.cur,p.cur==='USD'?5:5*p.rate,p.rate,p.status]));
+  const b=new Blob(['﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='paiements.csv';document.body.appendChild(a);a.click();a.remove();toast('Export CSV téléchargé');
+}
+
+const SCR={'locataire:recherche':scrSearch,'locataire:favoris':scrFavs,'locataire:messages':scrMessages,'locataire:acces':scrAccess,'locataire:profil':scrProfile,
+'bailleur:annonces':scrMyListings,'bailleur:publier':()=>{setTimeout(renderFormBits);return scrPublish()},'bailleur:messages':scrMessages,'bailleur:profil':scrProfile,
+'admin:dashboard':scrDash,'admin:moderation':scrModeration,'admin:logements':scrAdmListings,'admin:utilisateurs':scrUsers,'admin:paiements':scrPays};
+
+/* ---------- Actions ---------- */
+const ACT={
+  reset(){try{localStorage.removeItem(KEY)}catch(e){}S=seed();F={q:'',commune:'',type:'',pmin:'',pmax:'',ch:0,verified:false,sort:'recent'};UI.conv={};UI.editId=null;FD=null;closeDlg();$('#notifPanel').hidden=true;render();toast('Démo réinitialisée','refresh')},
+  go(d){go(d.tab)},
+  close(){closeDlg()},
+  notifs(d,b){const p=$('#notifPanel');p.hidden=!p.hidden;b.setAttribute('aria-expanded',String(!p.hidden));if(!p.hidden){renderNotifs();const r=$('.top').getBoundingClientRect();p.style.top=(r.bottom+6)+'px';const f=p.querySelector('button');if(f)f.focus()}},
+  notifGo(d){const n=S.notifs.find(x=>x.id===d.id);if(n){n.read=true;$('#notifPanel').hidden=true;go(n.tab)}},
+  notifAll(){S.notifs.forEach(n=>{if(n.role===S.role)n.read=true});renderNotifs();renderNav();save()},
+  fav(d,b){const i=S.favs.indexOf(d.id);if(i>=0)S.favs.splice(i,1);else S.favs.push(d.id);const on=i<0;toast(on?'Ajouté aux favoris':'Retiré des favoris','heart');if(dlg.open&&b.closest('dialog'))openDetail(d.id,0);render()},
+  open(d){$('#notifPanel').hidden=true;openDetail(d.id)},
+  gal(d){openDetail(d.id,+d.i);const t=$$('.thumb')[+d.i];if(t)t.focus()},
+  pay(d){payStart(d.lid,d.id)},
+  payRetry(){P.step=1;renderPay()},
+  msgTo(d){msgTo(d.lid,d.id)},
+  conv(d){UI.conv[S.role]=d.id;render();const i=$('#msgInput');if(i)i.focus()},
+  convBack(){UI.conv[S.role]=null;render()},
+  report(d){const l=lst(d.id);openDlg(head('Signaler l’annonce',esc(l.title))+`<form class="dlg-body stack" data-form="report" data-id="${l.id}" novalidate><fieldset><legend style="margin-bottom:6px">Motif</legend>${['Arnaque suspectée','Photos non conformes','Logement déjà loué','Prix trompeur','Contenu inapproprié'].map(m=>`<label class="chk"><input type="radio" name="motif" value="${m}">${m}</label>`).join('')}</fieldset><p class="err" id="repErr" role="alert"></p><div class="field"><label for="repTxt">Précisions (facultatif)</label><textarea class="inp" id="repTxt" maxlength="500"></textarea></div><div class="actions"><button type="submit" class="btn primary">${ic('flag')}Envoyer le signalement</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>`,'md')},
+  view(d){UI.view=d.v;$('#sl').dataset.view=d.v;$$('.viewtog button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===d.v)))},
+  ch(d){F.ch=+d.n;$$('[data-act=ch]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===F.ch)));updateResults()},
+  locate(){F.sort='dist';updateResults();toast('Position détectée (simulation) : Gombe, Kinshasa','locate')},
+  resetF(){F={q:'',commune:'',type:'',pmin:'',pmax:'',ch:0,verified:false,sort:'recent'};render()},
+  expire(d){S.access[d.lid]=Date.now()-1000;render();toast('Accès expiré (simulation)','clock')},
+  receipt(d){receipt(d.id)},
+  otp(){OTP=null;otpDlg()},
+  logoutOthers(){toast('Autres sessions déconnectées')},
+  edit(d){UI.editId=d.id;FD=null;UI.keepEdit=true;go('publier')},
+  rented(d){const l=lst(d.id);l.status=l.status==='louee'?'publiee':'louee';render();toast(l.status==='louee'?'Annonce marquée louée — retirée des résultats':'Annonce remise en ligne')},
+  del(d){const l=lst(d.id);confirmDlg('Supprimer l’annonce ?',`« ${l.title} » sera définitivement supprimée.`,'Supprimer',()=>{S.listings=S.listings.filter(x=>x.id!==d.id);S.favs=S.favs.filter(x=>x!==d.id);render();toast('Annonce supprimée','trash')})},
+  confirmOk(){const cb=confirmCb;confirmCb=null;closeDlg();if(cb)cb()},
+  samplePhotos(){const have=FD.photos.filter(p=>p.k).map(p=>p.k);KINDS.forEach(k=>{if(!have.includes(k))FD.photos.push({k})});renderFormBits();$('#e-photos').textContent=''},
+  rmPhoto(d){FD.photos.splice(+d.i,1);renderFormBits()},
+  geoloc(){const c=C[$('#f-com').value];FD.x=c[0]+6;FD.y=c[1]-4;FD.moved=true;renderFormBits();toast('Position GPS récupérée (simulation)','locate')},
+  mapPick(d,el,e){const svg=el.closest('svg');const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();if(!m)return;const p=pt.matrixTransform(m.inverse());FD.x=Math.max(10,Math.min(390,p.x));FD.y=Math.max(30,Math.min(250,p.y));FD.moved=true;renderFormBits()},
+  approve(d){const l=lst(d.id);l.status='publiee';l.verified=true;l.createdAt=Date.now();if(l.landlord==='u2')notify('bailleur',`Votre annonce « ${l.title} » est en ligne.`,'annonces');notify('locataire',`Nouvelle annonce à ${l.commune} : « ${l.title} ».`,'recherche');closeDlg();render();toast('Annonce approuvée et publiée — le bailleur est notifié')},
+  refuse(d){const l=lst(d.id);openDlg(head('Refuser l’annonce',esc(l.title))+`<form class="dlg-body stack" data-form="refuse" data-id="${l.id}" novalidate><div class="field"><label for="rf-m">Motif</label><select class="inp" id="rf-m"><option value="">Choisir un motif…</option><option>Photos insuffisantes ou floues</option><option>Informations incomplètes</option><option>Prix incohérent</option><option>Doublon d’une annonce existante</option><option>Bailleur non vérifié</option></select><p class="err" id="e-rf-m"></p></div><div class="field"><label for="rf-c">Message au bailleur</label><textarea class="inp" id="rf-c" placeholder="Expliquez ce qu’il faut corriger"></textarea></div><div class="actions"><button type="submit" class="btn danger">Refuser et notifier</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>`,'md')},
+  suspendL(d){const l=lst(d.id);l.status='suspendue';if(l.landlord==='u2')notify('bailleur',`Votre annonce « ${l.title} » a été suspendue.`,'annonces');closeDlg();render();toast('Annonce suspendue')},
+  unsuspendL(d){lst(d.id).status='publiee';closeDlg();render();toast('Annonce réactivée')},
+  modTab(d){UI.mod=d.v;render()},
+  repSuspend(d){const r=S.reports.find(x=>x.id===d.id);r.status='traite';r.action='Annonce suspendue';const l=lst(r.listing);if(l){l.status='suspendue';if(l.landlord==='u2')notify('bailleur',`Votre annonce « ${l.title} » a été suspendue suite à un signalement.`,'annonces')}render();toast('Annonce suspendue — signalement traité')},
+  repClose(d){const r=S.reports.find(x=>x.id===d.id);r.status='traite';r.action='Classé sans suite';render();toast('Signalement classé')},
+  uToggle(d){const u=user(d.id);u.status=u.status==='actif'?'suspendu':'actif';render();toast(u.status==='actif'?'Compte réactivé':'Compte suspendu — SMS envoyé (simulation)')},
+  uVerify(d){user(d.id).verified=true;render();toast('Identité vérifiée')},
+  payDetail(d){payDetail(d.id)},
+  payForce(d){const p=S.payments.find(x=>x.id===d.id);p.status='ok';payDetail(p.id);render();toast('Opérateur interrogé : paiement confirmé')},
+  csv(){csv()},
+  more(){UI.adm.lim+=25;render()}
+};
+function renderNotifs(){
+  const ns=S.notifs.filter(n=>n.role===S.role);
+  $('#notifPanel').innerHTML=`<header><span>Notifications</span><span class="actions"><button type="button" class="btn sm ghost" data-act="notifAll">Tout marquer lu</button><button type="button" class="icon-btn" data-act="notifs" aria-label="Fermer">${ic('x')}</button></span></header>${ns.length?ns.map(n=>`<button type="button" class="nitem ${n.read?'read':''}" data-act="notifGo" data-id="${n.id}"><span class="dot"></span><span class="min0"><span style="display:block;font-size:14px">${esc(n.text)}</span><span class="small muted">${rel(n.at)}</span></span></button>`).join(''):'<p class="empty small">Aucune notification.</p>'}`;
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');
+  if(!b){const np=$('#notifPanel');if(!np.hidden&&!e.target.closest('#notifPanel'))np.hidden=true;return}
+  const a=b.dataset.act;if(!ACT[a])return;
+  if(b.tagName==='A')return;
+  if(a!=='notifs'&&a!=='notifAll'&&!b.closest('#notifPanel'))$('#notifPanel').hidden=true;
+  ACT[a](b.dataset,b,e);
+});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches('g[role=button][data-act]')){e.preventDefault();ACT[e.target.dataset.act](e.target.dataset,e.target,e)}
+  if(e.key==='Escape'&&!$('#notifPanel').hidden){$('#notifPanel').hidden=true;$('.bell').focus()}
+});
+$('#role').addEventListener('change',e=>{S.role=e.target.value;$('#notifPanel').hidden=true;closeDlg();render();window.scrollTo(0,0)});
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.f){F[el.dataset.f]=el.type==='checkbox'?el.checked:el.value;updateResults();return}
+  if(el.dataset.a){UI.adm[el.dataset.a]=el.value;if(el.dataset.a.startsWith('p'))UI.adm.lim=25;render();return}
+  if(el.id==='f-desc'){$('#dcount').textContent=el.value.length;return}
+  if(el.id==='f-com'&&FD&&!FD.moved){const c=C[el.value];FD.x=c[0];FD.y=c[1];renderFormBits();return}
+  if(P&&P.step===1){
+    if(el.name==='op'){P.op=el.value;renderPay();$('#payPhone').focus();return}
+    if(el.name==='cur'){P.cur=el.value;const s=dlg.scrollTop;renderPay();dlg.scrollTop=s;$$('input[name=cur]').find(i=>i.checked).focus();return}
+    if(el.id==='payPhone'){P.phone=el.value;const o=opOf(digits(el.value));if(o&&o!==P.op&&digits(el.value).length>=2){P.op=o;const v=el.value,pos=el.selectionStart;renderPay();const i=$('#payPhone');i.focus();i.value=v;try{i.setSelectionRange(pos,pos)}catch(_){}}return}
+  }
+});
+document.addEventListener('change',async e=>{
+  if(e.target.id==='f-files'&&FD){
+    const files=[...e.target.files].slice(0,8);
+    for(const f of files){const src=await readImg(f);if(src)FD.photos.push({src})}
+    e.target.value='';renderFormBits();if(files.length){$('#e-photos').textContent='';toast(files.length+' photo(s) ajoutée(s)','upload')}
+  }
+});
+document.addEventListener('submit',e=>{
+  const f=e.target,k=f.dataset.form;if(!k)return;e.preventDefault();
+  if(k==='pay'){
+    const d=digits($('#payPhone').value),o=OPS[P.op];let err='';
+    if(d.length!==9)err='Saisissez un numéro à 9 chiffres (ex. 81 234 5678).';
+    else if(!o.pre.includes(d.slice(0,2)))err=`Ce numéro ne correspond pas à ${o.n} (préfixes ${o.pre.join(', ')}).`;
+    $('#payErr').textContent=err;$('#phoneBox').classList.toggle('bad',!!err);$('#payPhone').setAttribute('aria-invalid',err?'true':'false');
+    if(err){$('#payPhone').focus();return}
+    P.d=d;P.phone=fmtD(d);runPay();
+  }else if(k==='msg'){
+    const i=$('#msgInput'),t=i.value.trim();if(!t){i.focus();return}i.value='';sendMsg(f.dataset.id,t);const n=$('#msgInput');if(n)n.focus();
+  }else if(k==='listing')submitListing(f);
+  else if(k==='report'){
+    const m=f.querySelector('input[name=motif]:checked');if(!m){$('#repErr').textContent='Choisissez un motif.';f.querySelector('input[name=motif]').focus();return}
+    const l=lst(f.dataset.id);S.reports.unshift({id:'R'+(S.reports.length+1),listing:l.id,by:'Grâce Mbuyi',motif:m.value,text:$('#repTxt').value.trim()||'Aucune précision.',at:Date.now(),status:'ouvert'});
+    notify('admin',`Nouveau signalement sur « ${l.title} ».`,'moderation');closeDlg();render();toast('Signalement transmis à la modération','flag');
+  }else if(k==='refuse'){
+    const m=$('#rf-m').value;if(!m){$('#e-rf-m').textContent='Choisissez un motif.';$('#rf-m').setAttribute('aria-invalid','true');$('#rf-m').focus();return}
+    const l=lst(f.dataset.id),c=$('#rf-c').value.trim();l.status='refusee';l.reason=m+(c?' : '+c:'.');
+    if(l.landlord==='u2')notify('bailleur',`Votre annonce « ${l.title} » a été refusée : ${m.toLowerCase()}.`,'annonces');
+    closeDlg();render();toast('Annonce refusée — bailleur notifié par SMS (simulation)');
+  }else if(k==='rate'){
+    const v=+$('#r-new').value;if(!v||v<1000||v>10000){$('#e-r-new').textContent='Taux entre 1 000 et 10 000 CDF.';$('#r-new').setAttribute('aria-invalid','true');$('#r-new').focus();return}
+    S.rate=Math.round(v);S.rateHist.unshift({rate:S.rate,at:Date.now()});render();toast('Nouveau taux appliqué aux prochains paiements');
+  }else if(k==='profile'){
+    const n=$('#p-name').value.trim(),m=$('#p-mail').value.trim();let ok=true;
+    $('#e-p-name').textContent=n.length<3?(ok=false,'Nom trop court.'):'';$('#p-name').setAttribute('aria-invalid',n.length<3?'true':'false');
+    const bm=m&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m);$('#e-p-mail').textContent=bm?(ok=false,'E-mail invalide.'):'';$('#p-mail').setAttribute('aria-invalid',bm?'true':'false');
+    if(!ok)return;const u=me();u.name=n;u.email=m;u.commune=$('#p-com').value;save();toast('Profil enregistré');
+  }else if(k==='otp'){
+    if(OTP.step===1){const d=digits($('#otpPhone').value);if(d.length!==9||!opOf(d)){$('#otpErr').textContent='Numéro congolais invalide (9 chiffres, ex. 81 234 5678).';$('#otpBox').classList.add('bad');$('#otpPhone').focus();return}OTP={step:2,d,code:String(Math.floor(100000+Math.random()*900000))};otpDlg()}
+    else{if($('#otpCode').value.trim()!==OTP.code){$('#otpErr').textContent='Code incorrect.';$('#otpCode').setAttribute('aria-invalid','true');$('#otpCode').focus();return}me().phone='+243 '+fmtD(OTP.d);closeDlg();render();toast('Numéro vérifié et mis à jour')}
+  }
+});
+setInterval(()=>{$$('[data-exp]').forEach(el=>{el.textContent=left(+el.dataset.exp)})},1000);
+window.addEventListener('resize',()=>{if(S.role==='locataire'&&S.tab.locataire==='recherche'){const d=$('.filters');if(d&&window.innerWidth>=960)d.open=true}});
+render();
+})();
+</script>
 </body>
 </html>
