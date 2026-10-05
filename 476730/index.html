@@ -2,20 +2,798 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Portail dossiers travaux</title>
+<meta name="description" content="Portail métier de dossiers de construction et rénovation : rôles admin, agent, client et artisan, fiche projet structurée, import d'exports Visuary, liens externes, estimation en fourchettes, récapitulatif PDF et partage sécurisé.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F3F2EF;--panel:#FFFFFF;--panel-2:#F8F7F4;--ink:#1B1E1D;--muted:#575E5B;--line:#E0DDD6;--line-2:#C6C2B8;
+  --accent:#1D5B52;--accent-ink:#FFFFFF;--accent-soft:#DFEDE9;--accent-text:#174A43;
+  --ochre:#8A5A00;--ochre-soft:#F8ECD4;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--vio:#5A3F98;--vio-soft:#ECE6F7;--gray:#4E5552;--gray-soft:#ECEAE5;
+  --shadow:0 1px 2px rgba(20,24,22,.05),0 3px 10px rgba(20,24,22,.05);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#101312;--panel:#171B1A;--panel-2:#1D2220;--ink:#E6E9E7;--muted:#A0A8A4;--line:#2A302E;--line-2:#3D4542;
+  --accent:#6CC3B4;--accent-ink:#082520;--accent-soft:#16332E;--accent-text:#93D8CB;
+  --ochre:#E9B65C;--ochre-soft:#332712;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--vio:#C3B0F2;--vio-soft:#2A2440;--gray:#B8BFBB;--gray-soft:#262B29;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--accent-text)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.9em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{overflow-wrap:anywhere}
+
+.demo-band{background:var(--ochre-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--ochre)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:10px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.02em}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);letter-spacing:0}
+.mark{width:36px;height:36px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"],.tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent-text)}
+.tab .cnt{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--muted)}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0}
+.who label{font-size:13px;color:var(--muted);white-space:nowrap}
+.who select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px;max-width:320px;min-width:0}
+main{padding:20px clamp(16px,2vw,32px) 56px}
+@media (max-width:760px){.who{margin-left:0;width:100%}.who select{flex:1;max-width:none;width:0}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{min-height:44px;padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600;min-height:0}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=number],input[type=date],input[type=url],input[type=search],input[type=password],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:6px}
+.chk{display:flex;flex-wrap:wrap;gap:8px}
+.ck{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer;font-size:14px}
+.ck:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text);font-weight:600}
+.ck input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+fieldset:disabled .ck{cursor:default;opacity:.85}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:16px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:24px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-vio{background:var(--vio-soft);color:var(--vio)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.badge.nodot::before{display:none}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .k-l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .k-v{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:flex-end}
+.filters .field{flex:1 1 170px}
+.filters .grow{flex:3 1 260px}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{padding-left:38px}
+.dgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr))}
+.dcard{display:flex;flex-direction:column;gap:10px;text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit}
+.dcard:hover{border-color:var(--line-2)}
+.dcard .d-top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.dcard .dt{font-size:16.5px;font-weight:800;line-height:1.3}
+.d-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}
+.d-meta span{display:inline-flex;gap:5px;align-items:center;min-width:0}
+.d-meta svg{width:15px;height:15px}
+.bar{height:7px;background:var(--gray-soft);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.d-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;border-top:1px solid var(--line);padding-top:10px}
+.empty{text-align:center;padding:40px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+
+.dhead{margin-bottom:16px;display:grid;gap:12px}
+.dhead .t-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.dhead h1{font-size:23px}
+.ro-note{display:flex;gap:10px;align-items:center;background:var(--info-soft);color:var(--info);border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px}
+.steps{list-style:none;margin:0;padding:0;display:flex;gap:6px}
+.steps li{flex:1;min-width:0;font-size:12.5px;font-weight:600;color:var(--muted);border-top:4px solid var(--line);padding-top:6px;overflow-wrap:anywhere}
+.steps li.done{border-color:var(--accent);color:var(--accent-text)}
+.steps li.cur{border-color:var(--accent);color:var(--ink)}
+.dlayout{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.dlayout{grid-template-columns:minmax(0,1fr) 360px}}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;border-bottom:1px solid var(--line);margin-bottom:16px;padding-bottom:6px}
+.fsecs{display:grid;gap:14px}
+@media (min-width:1500px){.fsecs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fsec h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.fsec h3 .n{width:24px;height:24px;border-radius:7px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-size:12.5px}
+.sticky-save{position:sticky;bottom:0;margin-top:14px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:var(--shadow)}
+
+.side{display:grid;gap:14px;align-content:start}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;font-size:14px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere}
+.people{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.people li{display:flex;gap:10px;align-items:center;min-width:0}
+.av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.av.c{background:var(--ochre-soft);color:var(--ochre)}.av.a{background:var(--gray-soft);color:var(--gray)}
+.people .pi{flex:1;min-width:0}
+.people .pi b{display:block;font-size:14px;overflow-wrap:anywhere}
+.people .pi span{font-size:12.5px;color:var(--muted)}
+.inline-add{display:flex;gap:8px;margin-top:10px}
+.inline-add select{flex:1}
+.journal{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:13.5px}
+.journal li{border-left:3px solid var(--line);padding-left:10px}
+.journal time{display:block;font-size:12px;color:var(--muted)}
+
+.drop{border:2px dashed var(--line-2);border-radius:14px;padding:22px;text-align:center;display:grid;gap:10px;justify-items:center;background:var(--panel-2)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop svg.big{width:34px;height:34px;color:var(--accent)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;font-weight:600;font-size:13.5px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.files{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+.file{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);min-width:0}
+.ficon{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none}
+.fi-pdf{background:var(--bad-soft);color:var(--bad)}.fi-plan{background:var(--info-soft);color:var(--info)}.fi-visuel{background:var(--vio-soft);color:var(--vio)}.fi-metre{background:var(--ok-soft);color:var(--ok)}.fi-autre{background:var(--gray-soft);color:var(--gray)}
+.fbody{flex:1;min-width:0;display:grid;gap:6px}
+.fbody b{font-size:14px;overflow-wrap:anywhere}
+.fbody .m{font-size:12.5px;color:var(--muted)}
+.fbody select{min-height:44px;padding:4px 8px;font-size:13.5px}
+.frow{display:flex;gap:6px;align-items:center}
+
+.two{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1250px){.two{grid-template-columns:minmax(0,430px) minmax(0,1fr)}}
+.links{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.links li{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;min-width:0}
+.links .lb{flex:1;min-width:0}
+.links .lb b{display:block;overflow-wrap:anywhere;font-size:14px}
+.links .lb a,.links .lb span{font-size:12.5px;overflow-wrap:anywhere}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:700;background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+td .badge{white-space:normal}
+dialog{overflow:auto}
+td.r,th.r{text-align:right}
+.est-t input{min-height:44px;padding:6px 8px}
+.est-t td:nth-child(2),.est-t td:nth-child(3){min-width:110px}
+.est-t td:first-child{min-width:180px}
+.rowwarn td{background:var(--warn-soft)}
+.gauge{position:relative;height:16px;border-radius:999px;background:var(--gray-soft);margin:22px 0 8px}
+.gauge .rng{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:999px;opacity:.85}
+.gauge .bud{position:absolute;top:-8px;bottom:-8px;width:3px;background:var(--ochre);border-radius:2px}
+.gauge .bud span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:700;color:var(--ochre);white-space:nowrap}
+.est-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1350px){.est-grid{grid-template-columns:minmax(0,1fr) 380px}}
+.total{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.msg{border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:flex-start}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}.msg.warn{background:var(--warn-soft);color:var(--warn)}.msg.bad{background:var(--bad-soft);color:var(--bad)}
+
+.shares{display:grid;gap:10px}
+.share{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.share .s-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.linkbox{font-family:var(--mono);font-size:13px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere}
+
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(620px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+dialog.wide{width:min(940px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(10,14,12,.5)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:17px}
+#dlgB{padding:18px 20px 20px}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:18px}
+
+#toasts{position:fixed;right:16px;bottom:16px;left:16px;display:grid;justify-items:end;gap:8px;z-index:100;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:10px;font-weight:600;font-size:14px;box-shadow:var(--shadow);max-width:420px;display:flex;gap:8px;align-items:center}
+.toast.bad{background:var(--bad);color:#fff}
+
+/* Document récapitulatif */
+.paper{background:#fff;color:#1b1e1d;border:1px solid #d9d6cf;border-radius:4px;padding:28px;font-size:13px;line-height:1.5}
+.paper h1{font-size:21px;margin:14px 0 2px;color:#123d37}
+.paper h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#1D5B52;border-bottom:2px solid #1D5B52;padding-bottom:3px;margin:18px 0 8px}
+.p-head{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #d9d6cf;padding-bottom:10px;flex-wrap:wrap}
+.p-head b{display:block;font-size:15px;color:#1D5B52}
+.p-head span{color:#555}
+.p-ref{text-align:right;font-family:var(--mono);font-weight:600}
+.p-addr{color:#444}
+.paper table{font-size:12.5px}
+.paper th{background:#f2f0eb;color:#333}
+.paper th,.paper td{border-bottom:1px solid #e3e0d9}
+.p-dl{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:3px 14px;margin:0}
+.p-dl dt{color:#555}.p-dl dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.paper ul{margin:0;padding-left:18px}
+.paper li{overflow-wrap:anywhere}
+.p-foot{margin-top:20px;border-top:1px solid #d9d6cf;padding-top:8px;color:#666;font-size:11px}
+@media (max-width:520px){.paper{padding:16px}.p-dl{grid-template-columns:minmax(0,1fr)}.p-dl dd{margin-bottom:6px}}
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  #printArea .paper{border:0;padding:0}
+  @page{size:A4;margin:14mm}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top" id="top"></header>
+<main id="main"></main>
+<dialog id="dlg" aria-labelledby="dlgT"><div class="dlg-h"><h2 id="dlgT"></h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div id="dlgB"></div></dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
+<div id="printArea"></div>
+<script>
+'use strict';
+const KEY='portail-dossiers-travaux-v1';
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const uid=p=>p+Math.random().toString(36).slice(2,9);
+const DAY=864e5;
+const ago=(d,h=0)=>new Date(Date.now()-d*DAY-h*36e5).toISOString();
+const inDays=d=>new Date(Date.now()+d*DAY).toISOString();
+const nowISO=()=>new Date().toISOString();
+const eur=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(n||0));
+const fdate=s=>new Date(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+const fdt=s=>new Date(s).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const fsize=b=>b>=1048576?(b/1048576).toFixed(1).replace('.',',')+' Mo':Math.max(1,Math.round(b/1024))+' Ko';
+const initials=n=>String(n).split(/\s+/).filter(w=>/^[A-ZÀ-Ý]/.test(w)).slice(0,2).map(w=>w[0]).join('');
+
+const P={
+ folder:'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
+ plus:'M12 5v14M5 12h14',
+ users:'M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM21 19v-1a4 4 0 0 0-3-3.87M16 3.13a3.5 3.5 0 0 1 0 6.75',
+ file:'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5',
+ link:'M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5',
+ euro:'M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10',
+ share:'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
+ print:'M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z',
+ search:'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-5-5',
+ upload:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12',
+ trash:'M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14',
+ eye:'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+ lock:'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
+ copy:'M9 9h11v11H9zM5 15H4V4h11v1',
+ mail:'M3 5h18v14H3zM3 6l9 7 9-7',
+ back:'M19 12H5M12 19l-7-7 7-7',
+ check:'M20 6L9 17l-5-5',
+ x:'M18 6L6 18M6 6l12 12',
+ image:'M3 3h18v18H3zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM21 15l-5-5L5 21',
+ ruler:'M3 17L17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2',
+ plan:'M3 3h18v18H3zM3 12h8M11 3v13M15 12h6M15 12v9',
+ home:'M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6',
+ clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+ ext:'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+ alert:'M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+ pin:'M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+ user:'M20 21v-1a5 5 0 0 0-5-5H9a5 5 0 0 0-5 5v1M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+ form:'M9 4h6v3H9zM7 5H5v16h14V5h-2M8 12h8M8 16h5'
+};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true"><path d="${P[n]}"/></svg>`;
+
+const ROLES={admin:'Administrateur',agent:'Agent immobilier',client:'Client',artisan:'Artisan (lecture seule)'};
+const STATUSES=['Brouillon','En étude','Estimé','Partagé','Travaux engagés'];
+const STCLS={'Brouillon':'gray','En étude':'info','Estimé':'vio','Partagé':'acc','Travaux engagés':'warn'};
+const TYPES=['Rénovation complète','Rénovation énergétique','Extension','Aménagement de combles','Changement d’usage','Cuisine / salle de bains'];
+const CATS={pdf:'Export PDF',plan:'Plan',visuel:'Visuel 3D',metre:'Métré',autre:'Autre'};
+const CATIC={pdf:'file',plan:'plan',visuel:'image',metre:'ruler',autre:'file'};
+const LTYPES=['Visuary','Google Drive','Diagnostic','Devis','Urbanisme / cadastre','Autre'];
+const FICHE=[
+ {t:'Le bien',f:[
+  {k:'bien',l:'Type de bien',type:'select',o:['Maison individuelle','Appartement','Local commercial','Immeuble'],req:1},
+  {k:'annee',l:'Année de construction',type:'number',min:1700,max:2026},
+  {k:'surface',l:'Surface habitable (m²)',type:'number',req:1,min:5,max:5000},
+  {k:'niveaux',l:'Nombre de niveaux',type:'number',min:1,max:30},
+  {k:'dpe',l:'Classe DPE actuelle',type:'select',o:['A','B','C','D','E','F','G','Inconnue']},
+  {k:'occupe',l:'Occupé pendant les travaux',type:'select',o:['Oui','Non','Partiellement']}
+ ]},
+ {t:'Le projet',f:[
+  {k:'besoin',l:'Description du besoin',type:'textarea',req:1,full:1},
+  {k:'objectifs',l:'Objectifs',type:'checks',o:['Agrandir','Performance énergétique','Confort / aménagement','Mise aux normes','Revente','Mise en location'],full:1},
+  {k:'lots',l:'Lots concernés',type:'checks',o:['Démolition','Gros œuvre','Charpente / couverture','Menuiseries','Isolation','Électricité','Plomberie / chauffage','Plâtrerie','Revêtements','Cuisine / SDB'],full:1}
+ ]},
+ {t:'Contraintes et réglementaire',f:[
+  {k:'urba',l:'Autorisation d’urbanisme',type:'select',o:['Aucune','Déclaration préalable','Permis de construire','À déterminer'],req:1},
+  {k:'copro',l:'Copropriété',type:'select',o:['Non','Oui — accord AG à obtenir','Oui — accord obtenu']},
+  {k:'abf',l:'Secteur protégé (ABF)',type:'select',o:['Non','Oui','À vérifier']},
+  {k:'diags',l:'Diagnostics disponibles',type:'checks',o:['Amiante','Plomb','DPE','Électricité','Gaz','Termites'],full:1},
+  {k:'acces',l:'Accès chantier et contraintes',type:'textarea',full:1}
+ ]},
+ {t:'Calendrier et financement',f:[
+  {k:'debut',l:'Démarrage souhaité',type:'date',req:1},
+  {k:'duree',l:'Durée maximale (semaines)',type:'number',min:1,max:104},
+  {k:'budget',l:'Budget cible du client (€ TTC)',type:'number',req:1,min:1000,max:5000000,step:500},
+  {k:'finance',l:'Financement',type:'checks',o:['Fonds propres','Prêt travaux','MaPrimeRénov’','Éco-PTZ','CEE'],full:1}
+ ]}
+];
+const FIELDS=FICHE.flatMap(s=>s.f);
+const RATES={'Démolition':[25,55],'Gros œuvre':[120,260],'Charpente / couverture':[90,180],'Menuiseries':[110,190],'Isolation':[70,140],'Électricité':[60,110],'Plomberie / chauffage':[80,150],'Plâtrerie':[45,85],'Revêtements':[40,95]};
+
+function seed(){
+ const users=[
+  {id:'u1',name:'Claire Morel',role:'admin',email:'claire.morel@exemple.fr',org:'Coordination projets',active:true},
+  {id:'u2',name:'Julien Fabre',role:'agent',email:'j.fabre@rivegauche-immo.exemple.fr',org:'Rive Gauche Immobilier',active:true},
+  {id:'u3',name:'Sonia Benali',role:'agent',email:'s.benali@alpes-habitat.exemple.fr',org:'Alpes Habitat Conseil',active:true},
+  {id:'u4',name:'Marc et Léa Durand',role:'client',email:'durand.famille@exemple.fr',org:'Particulier',active:true},
+  {id:'u5',name:'Hélène Vasseur',role:'client',email:'h.vasseur@exemple.fr',org:'Particulier',active:true},
+  {id:'u6',name:'Thomas Girard',role:'client',email:'t.girard@exemple.fr',org:'SCI Girard Patrimoine',active:true},
+  {id:'u7',name:'Karim Haddad',role:'artisan',email:'contact@haddad-menuiserie.exemple.fr',org:'Haddad Menuiserie',active:true},
+  {id:'u8',name:'Pauline Roux',role:'artisan',email:'p.roux@roux-elec.exemple.fr',org:'Roux Électricité',active:true},
+  {id:'u9',name:'Bernard Lefèvre',role:'artisan',email:'b.lefevre@lefevre-macon.exemple.fr',org:'Lefèvre Maçonnerie',active:true}
+ ];
+ const f=(name,cat,size,days,by)=>({id:uid('f'),name,cat,size,at:ago(days,3),by});
+ const l=(label,url,type)=>({id:uid('l'),label,url,type});
+ const lot=(name,min,max)=>({id:uid('o'),name,min,max});
+ const L=(days,who,txt)=>({at:ago(days,2),who,txt});
+ const sh=(name,email,prof,days,exp,views,sec,pwd='')=>({id:uid('s'),token:tok(),name,email,prof,created:ago(days),exp:inDays(exp),pwd,sec,views,revoked:false});
+ const ALL={fiche:1,docs:1,links:1,est:1}, NOEST={fiche:1,docs:1,links:1,est:0};
+ const dossiers=[
+  {id:'d1',ref:'DOS-2026-0141',title:'Rénovation énergétique maison 1972',type:'Rénovation énergétique',address:'14 chemin des Tilleuls',cp:'69130',city:'Écully',status:'En étude',agentId:'u2',clientId:'u4',artisanIds:['u8'],created:ago(12),updated:ago(1),
+   fiche:{bien:'Maison individuelle',annee:'1972',surface:'128',niveaux:'2',dpe:'F',occupe:'Oui',besoin:'Isolation complète par l’extérieur, remplacement des menuiseries simple vitrage et de la chaudière fioul par une pompe à chaleur air/eau. Objectif : atteindre la classe C.',objectifs:['Performance énergétique','Confort / aménagement'],lots:['Isolation','Menuiseries','Plomberie / chauffage','Électricité'],urba:'Déclaration préalable',copro:'Non',abf:'Non',diags:['Amiante','DPE','Électricité'],acces:'Portail de 3 m, stationnement possible dans la cour. Voisin mitoyen côté est.',debut:'2027-01-11',duree:'10',budget:'85000',finance:['Prêt travaux','MaPrimeRénov’','CEE']},
+   files:[f('Visuary_export_plans_RDC_R+1.pdf','plan',2457600,11,'Julien Fabre'),f('Visuary_rendu_facade_ITE.png','visuel',1843200,11,'Julien Fabre'),f('Metres_surfaces_parois.xlsx','metre',86000,10,'Julien Fabre'),f('DPE_2025_maison_Ecully.pdf','pdf',612000,12,'Marc et Léa Durand')],
+   links:[l('Projet Visuary — maison Écully','https://app.visuary.example/projets/ecully-1972','Visuary'),l('Photos état des lieux','https://drive.example.com/folders/etat-lieux-ecully','Google Drive')],
+   estimate:{aleas:10,tva:'5.5',lots:[lot('Isolation thermique par l’extérieur',28000,36000),lot('Menuiseries PVC double vitrage',14000,19000),lot('Pompe à chaleur air/eau',13000,17500),lot('Mise aux normes électrique',4500,7000)]},
+   shares:[sh('Marc et Léa Durand','durand.famille@exemple.fr','Client',3,27,4,ALL)],
+   log:[L(1,'Julien Fabre','Estimation mise à jour'),L(3,'Julien Fabre','Dossier partagé avec Marc et Léa Durand'),L(10,'Julien Fabre','3 fichiers importés (export Visuary)'),L(12,'Julien Fabre','Dossier créé')]},
+  {id:'d2',ref:'DOS-2026-0138',title:'Extension ossature bois 28 m²',type:'Extension',address:'8 route des Creuses',cp:'74960',city:'Cran-Gevrier',status:'Estimé',agentId:'u3',clientId:'u5',artisanIds:['u7','u9'],created:ago(21),updated:ago(2),
+   fiche:{bien:'Maison individuelle',annee:'1994',surface:'96',niveaux:'1',dpe:'D',occupe:'Oui',besoin:'Création d’une pièce de vie de 28 m² en ossature bois côté jardin, avec baie coulissante et toiture terrasse végétalisée.',objectifs:['Agrandir','Confort / aménagement'],lots:['Gros œuvre','Charpente / couverture','Menuiseries','Isolation','Électricité','Revêtements'],urba:'Déclaration préalable',copro:'Non',abf:'Non',diags:['DPE'],acces:'Accès jardin par le côté nord, passage de 2,20 m.',debut:'2027-03-01',duree:'12',budget:'72000',finance:['Fonds propres','Prêt travaux']},
+   files:[f('Visuary_plan_masse_extension.pdf','plan',1320000,20,'Sonia Benali'),f('Visuary_vue_3D_jardin.jpg','visuel',2210000,20,'Sonia Benali'),f('Visuary_coupe_AA.pdf','plan',980000,19,'Sonia Benali'),f('Metres_extension.csv','metre',24000,19,'Sonia Benali'),f('Synthese_projet_Visuary.pdf','pdf',450000,18,'Sonia Benali')],
+   links:[l('Projet Visuary — extension','https://app.visuary.example/projets/ext-28m2','Visuary'),l('Plan cadastral parcelle','https://cadastre.example.fr/parcelle/74-ab-112','Urbanisme / cadastre'),l('Devis menuiserie (v1)','https://drive.example.com/file/devis-baie-alu','Devis')],
+   estimate:{aleas:8,tva:'10',lots:[lot('Fondations et dalle',9000,13000),lot('Ossature bois et bardage',19000,25000),lot('Toiture terrasse végétalisée',7500,10500),lot('Baie coulissante aluminium',5500,8000),lot('Électricité et chauffage',3500,5500),lot('Revêtements et finitions',4000,6500)]},
+   shares:[sh('Hélène Vasseur','h.vasseur@exemple.fr','Client',2,28,2,ALL),sh('Karim Haddad','contact@haddad-menuiserie.exemple.fr','Artisan',2,14,1,NOEST,'Mz7-k4Qa')],
+   log:[L(2,'Sonia Benali','Statut passé à « Estimé »'),L(2,'Sonia Benali','Dossier partagé avec Karim Haddad'),L(19,'Sonia Benali','5 fichiers importés (export Visuary)'),L(21,'Sonia Benali','Dossier créé')]},
+  {id:'d3',ref:'DOS-2026-0135',title:'Appartement T4 — rénovation complète',type:'Rénovation complète',address:'42 cours Vitton',cp:'69006',city:'Lyon',status:'Partagé',agentId:'u2',clientId:'u6',artisanIds:['u7','u8'],created:ago(30),updated:ago(4),
+   fiche:{bien:'Appartement',annee:'1908',surface:'104',niveaux:'1',dpe:'E',occupe:'Non',besoin:'Rénovation complète avant mise en location : redistribution cuisine ouverte, deux salles d’eau, électricité et plomberie à reprendre, parquet à restaurer.',objectifs:['Mise en location','Mise aux normes','Confort / aménagement'],lots:['Démolition','Électricité','Plomberie / chauffage','Plâtrerie','Revêtements','Cuisine / SDB'],urba:'Aucune',copro:'Oui — accord obtenu',abf:'Oui',diags:['Amiante','Plomb','DPE','Électricité'],acces:'4e étage avec ascenseur, travaux bruyants 8h–18h en semaine (règlement de copropriété).',debut:'2026-11-16',duree:'14',budget:'95000',finance:['Fonds propres']},
+   files:[f('Visuary_plan_existant_T4.pdf','plan',1650000,28,'Julien Fabre'),f('Visuary_plan_projet_T4.pdf','plan',1720000,27,'Julien Fabre'),f('Visuary_rendu_cuisine.png','visuel',2900000,27,'Julien Fabre'),f('Diagnostic_amiante_plomb.pdf','pdf',1100000,29,'Thomas Girard')],
+   links:[l('Projet Visuary — T4 Vitton','https://app.visuary.example/projets/t4-vitton','Visuary'),l('Rapport diagnostics','https://drive.example.com/folders/diags-vitton','Diagnostic')],
+   estimate:{aleas:12,tva:'10',lots:[lot('Démolition et évacuation',6000,8500),lot('Électricité complète',11000,14500),lot('Plomberie et salles d’eau',14000,19000),lot('Cloisons et plâtrerie',9000,12500),lot('Cuisine équipée',12000,17000),lot('Parquet et peinture',10500,14000)]},
+   shares:[sh('Thomas Girard','t.girard@exemple.fr','Client',6,24,7,ALL),sh('Pauline Roux','p.roux@roux-elec.exemple.fr','Artisan',4,10,3,NOEST)],
+   log:[L(4,'Julien Fabre','Statut passé à « Partagé »'),L(4,'Julien Fabre','Dossier partagé avec Pauline Roux'),L(27,'Julien Fabre','Fichiers importés (export Visuary)'),L(30,'Julien Fabre','Dossier créé')]},
+  {id:'d4',ref:'DOS-2026-0144',title:'Aménagement des combles',type:'Aménagement de combles',address:'3 impasse des Vergers',cp:'69340',city:'Francheville',status:'Brouillon',agentId:'u2',clientId:'u5',artisanIds:[],created:ago(3),updated:ago(3),
+   fiche:{bien:'Maison individuelle',surface:'',besoin:'Transformer les combles perdus en suite parentale avec salle d’eau.',objectifs:['Agrandir'],lots:['Charpente / couverture','Isolation','Plâtrerie'],diags:[],finance:[]},
+   files:[],links:[],estimate:{aleas:10,tva:'10',lots:[]},shares:[],
+   log:[L(3,'Julien Fabre','Dossier créé')]},
+  {id:'d5',ref:'DOS-2026-0129',title:'Local commercial transformé en logement',type:'Changement d’usage',address:'17 rue Sainte-Catherine',cp:'69001',city:'Lyon',status:'Travaux engagés',agentId:'u3',clientId:'u4',artisanIds:['u9','u8'],created:ago(54),updated:ago(6),
+   fiche:{bien:'Local commercial',annee:'1890',surface:'62',niveaux:'1',dpe:'G',occupe:'Non',besoin:'Changement de destination d’une ancienne boutique en T2 : création de cloisons, salle d’eau, cuisine, isolation et vitrine remplacée par menuiserie bois.',objectifs:['Mise en location','Performance énergétique'],lots:['Démolition','Menuiseries','Isolation','Électricité','Plomberie / chauffage','Plâtrerie','Cuisine / SDB'],urba:'Déclaration préalable',copro:'Oui — accord obtenu',abf:'Oui',diags:['Amiante','Plomb','Termites'],acces:'Rue piétonne : livraisons avant 10h, autorisation de voirie obtenue.',debut:'2026-09-14',duree:'16',budget:'78000',finance:['Prêt travaux','Éco-PTZ']},
+   files:[f('Visuary_plans_T2.pdf','plan',1400000,50,'Sonia Benali'),f('Visuary_facade_menuiserie_bois.png','visuel',1500000,49,'Sonia Benali'),f('Arrete_DP_accorde.pdf','pdf',320000,30,'Sonia Benali')],
+   links:[l('Projet Visuary — T2 Sainte-Catherine','https://app.visuary.example/projets/t2-ste-catherine','Visuary')],
+   estimate:{aleas:10,tva:'10',lots:[lot('Démolition',4000,6000),lot('Menuiserie bois façade',7500,9800),lot('Isolation et plâtrerie',9000,12500),lot('Électricité',6200,8000),lot('Plomberie, salle d’eau, cuisine',13000,17500)]},
+   shares:[],
+   log:[L(6,'Sonia Benali','Statut passé à « Travaux engagés »'),L(30,'Sonia Benali','Déclaration préalable ajoutée'),L(54,'Sonia Benali','Dossier créé')]},
+  {id:'d6',ref:'DOS-2026-0146',title:'Cuisine et salle de bains',type:'Cuisine / salle de bains',address:'5 allée des Cèdres',cp:'74000',city:'Annecy',status:'Brouillon',agentId:'u3',clientId:'u6',artisanIds:['u7'],created:ago(1),updated:ago(0,5),
+   fiche:{bien:'Appartement',annee:'1985',surface:'71',niveaux:'1',dpe:'D',occupe:'Partiellement',besoin:'Refaire la cuisine (ouverte sur séjour) et transformer la baignoire en douche à l’italienne.',objectifs:['Confort / aménagement'],lots:['Cuisine / SDB','Plomberie / chauffage','Revêtements'],urba:'Aucune',copro:'Oui — accord AG à obtenir',diags:[],finance:['Fonds propres']},
+   files:[f('Visuary_implantation_cuisine.pdf','plan',740000,1,'Sonia Benali')],links:[],estimate:{aleas:10,tva:'10',lots:[]},shares:[],
+   log:[L(1,'Sonia Benali','Fichier importé (export Visuary)'),L(1,'Sonia Benali','Dossier créé')]}
+ ];
+ return {v:1,me:'u1',seq:146,users,dossiers};
+}
+function tok(){const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';let s='';for(let i=0;i<12;i++){s+=c[Math.floor(Math.random()*c.length)];if(i===3||i===7)s+='-'}return s}
+
+let S;
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);if(S&&S.v===1)return}}catch(e){}S=seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const blobs={};
+let view={screen:'dossiers',id:null,tab:'fiche',q:'',st:'',ty:'',sort:'upd',fcat:'',urole:''};
+
+const me=()=>S.users.find(u=>u.id===S.me)||S.users[0];
+const user=id=>S.users.find(u=>u.id===id);
+const uname=id=>(user(id)||{name:'—'}).name;
+const cur=()=>S.dossiers.find(d=>d.id===view.id);
+function canSee(d){const u=me();return u.role==='admin'||(u.role==='agent'&&d.agentId===u.id)||(u.role==='client'&&d.clientId===u.id)||(u.role==='artisan'&&d.artisanIds.includes(u.id))}
+function can(a){const r=me().role;
+ if(a==='fiche'||a==='docs')return r!=='artisan';
+ if(a==='edit'||a==='create')return r==='admin'||r==='agent';
+ if(a==='est')return r!=='artisan';
+ if(a==='users')return r==='admin';
+ return false}
+function log(d,txt){d.log.unshift({at:nowISO(),who:me().name,txt});d.log=d.log.slice(0,40);d.updated=nowISO()}
+function est(d){const e=d.estimate;let mn=0,mx=0;e.lots.forEach(l=>{mn+=+l.min||0;mx+=+l.max||0});const a=1+(+e.aleas||0)/100,t=1+(+e.tva||0)/100;return{mn,mx,hmn:mn*a,hmx:mx*a,tmn:mn*a*t,tmx:mx*a*t}}
+function filled(v){return Array.isArray(v)?v.length>0:String(v??'').trim()!==''}
+function compl(d){return Math.round(FIELDS.filter(f=>filled(d.fiche[f.k])).length/FIELDS.length*100)}
+const badge=s=>`<span class="badge b-${STCLS[s]}">${esc(s)}</span>`;
+
+function toast(t,bad){const el=document.createElement('div');el.className='toast'+(bad?' bad':'');el.innerHTML=(bad?ic('alert'):ic('check'))+'<span>'+esc(t)+'</span>';$('#toasts').appendChild(el);setTimeout(()=>el.remove(),3800)}
+
+/* Dialogue */
+const dlg=$('#dlg');
+function openDlg(title,html,wide){$('#dlgT').textContent=title;$('#dlgB').innerHTML=html;dlg.classList.toggle('wide',!!wide);if(!dlg.open)dlg.showModal();const f=$('#dlgB input:not([type=hidden]),#dlgB select,#dlgB textarea');if(f)f.focus();else $('#dlgB .btn')?.focus()}
+function closeDlg(){if(dlg.open)dlg.close()}
+
+/* Champs */
+function F(fk,{n,l,t='text',req,o,v='',ph='',full,min,max,step,hint,auto}){
+ const id=`${fk}_${n}`;const a=`id="${id}" name="${n}"${req?' aria-required="true"':''} aria-describedby="e_${id}"`;let inp;
+ if(t==='select')inp=`<select ${a}>${o.map(x=>{const[val,lab]=Array.isArray(x)?x:[x,x];return`<option value="${esc(val)}"${String(v)===String(val)?' selected':''}>${esc(lab)}</option>`}).join('')}</select>`;
+ else if(t==='textarea')inp=`<textarea ${a} rows="3" placeholder="${esc(ph)}">${esc(v)}</textarea>`;
+ else inp=`<input ${a} type="${t}" value="${esc(v)}"${ph?` placeholder="${esc(ph)}"`:''}${min!=null?` min="${min}"`:''}${max!=null?` max="${max}"`:''}${step?` step="${step}"`:''}${t==='number'?' inputmode="numeric"':''}${auto?` autocomplete="${auto}"`:''}>`;
+ return`<div class="field${full?' full':''}"><label for="${id}">${esc(l)}${req?' <span class="req" aria-hidden="true">*</span>':''}</label>${inp}${hint?`<p class="hint">${hint}</p>`:''}<p class="err" id="e_${id}"></p></div>`}
+function setErr(form,n,msg){const id=form.dataset.form+'_'+n;const el=form.querySelector('#'+CSS.escape(id));if(el)el.setAttribute('aria-invalid','true');const e=form.querySelector('#e_'+CSS.escape(id));if(e)e.textContent=msg}
+function clearErr(form){$$('[aria-invalid]',form).forEach(x=>x.removeAttribute('aria-invalid'));$$('.err',form).forEach(x=>x.textContent='')}
+function focusErr(form){form.querySelector('[aria-invalid="true"]')?.focus()}
+const isEmail=s=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+
+/* En-tête */
+function renderTop(){
+ const u=me(),hadFocus=document.activeElement&&document.activeElement.id==='who';
+ const groups=['admin','agent','client','artisan'].map(r=>`<optgroup label="${ROLES[r]}">${S.users.filter(x=>x.role===r&&x.active).map(x=>`<option value="${x.id}"${x.id===u.id?' selected':''}>${esc(x.name)} — ${esc(x.org)}</option>`).join('')}</optgroup>`).join('');
+ const sc=view.screen==='users'?'users':'dossiers';
+ $('#top').innerHTML=`<div class="brand"><span class="mark">${ic('home')}</span><span>Chantier Clair<small>Portail dossiers travaux</small></span></div>
+ <nav id="nav" aria-label="Navigation principale"><button type="button" class="tab" data-act="go" data-screen="dossiers"${sc==='dossiers'?' aria-current="page"':''}>${ic('folder')}Dossiers</button>${can('users')?`<button type="button" class="tab" data-act="go" data-screen="users"${sc==='users'?' aria-current="page"':''}>${ic('users')}Utilisateurs</button>`:''}</nav>
+ <div class="who"><label for="who">Connecté en tant que</label><select id="who">${groups}</select></div>`;
+ if(hadFocus)$('#who').focus();
+}
+
+function render(focus){
+ renderTop();
+ const m=$('#main');
+ if(view.screen==='users'&&can('users')){m.innerHTML=usersHTML()}
+ else if(view.screen==='dossier'&&cur()&&canSee(cur())){m.innerHTML=detailHTML(cur())}
+ else{view.screen='dossiers';m.innerHTML=listHTML()}
+ if(focus){const h=$('#main h1');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}window.scrollTo(0,0)}
+}
+
+/* Liste des dossiers */
+function listHTML(){
+ const u=me(),all=S.dossiers.filter(canSee);
+ const act=all.filter(d=>d.status!=='Travaux engagés').length;
+ const toEst=all.filter(d=>d.status==='Brouillon'||d.status==='En étude').length;
+ const shared=all.reduce((n,d)=>n+d.shares.filter(s=>!s.revoked&&new Date(s.exp)>new Date()).length,0);
+ let k4=u.role==='artisan'?`<div class="card kpi"><div class="k-l">Documents disponibles</div><div class="k-v">${all.reduce((n,d)=>n+d.files.length,0)}</div></div>`:
+  `<div class="card kpi"><div class="k-l">Volume estimé (TTC, haut)</div><div class="k-v">${eur(all.reduce((n,d)=>n+est(d).tmx,0))}</div></div>`;
+ const intro={admin:'Vue d’ensemble de tous les dossiers de la plateforme.',agent:'Les dossiers dont vous êtes l’agent référent.',client:'Vos projets en cours : complétez la fiche et ajoutez vos documents.',artisan:'Dossiers partagés avec vous, en lecture seule.'}[u.role];
+ return`<div class="page-h"><div><h1>Dossiers projets</h1><p class="muted">${intro}</p></div>${can('create')?`<button type="button" class="btn primary" data-act="new">${ic('plus')}Nouveau dossier</button>`:''}</div>
+ <div class="kpis"><div class="card kpi"><div class="k-l">Dossiers actifs</div><div class="k-v">${act}</div></div><div class="card kpi"><div class="k-l">À compléter / estimer</div><div class="k-v">${toEst}</div></div><div class="card kpi"><div class="k-l">Partages actifs</div><div class="k-v">${shared}</div></div>${k4}</div>
+ <div class="filters" role="search">
+  <div class="field grow"><label for="q">Rechercher</label><div class="search">${ic('search')}<input type="search" id="q" placeholder="Référence, titre, ville, client…" value="${esc(view.q)}"></div></div>
+  <div class="field"><label for="fst">Statut</label><select id="fst"><option value="">Tous</option>${STATUSES.map(s=>`<option${view.st===s?' selected':''}>${s}</option>`).join('')}</select></div>
+  <div class="field"><label for="fty">Type de projet</label><select id="fty"><option value="">Tous</option>${TYPES.map(s=>`<option${view.ty===s?' selected':''}>${esc(s)}</option>`).join('')}</select></div>
+  <div class="field"><label for="fso">Trier par</label><select id="fso">${[['upd','Dernière activité'],['ref','Référence'],['comp','Complétude']].map(([v,l])=>`<option value="${v}"${view.sort===v?' selected':''}>${l}</option>`).join('')}</select></div>
+ </div>
+ <p class="muted small" id="dcount" aria-live="polite" style="margin-bottom:10px"></p>
+ <div class="dgrid" id="dgrid">${gridHTML()}</div>`;
+}
+function gridHTML(){
+ const q=norm(view.q),art=me().role==='artisan';
+ let ds=S.dossiers.filter(canSee).filter(d=>(!view.st||d.status===view.st)&&(!view.ty||d.type===view.ty)&&(!q||norm([d.ref,d.title,d.address,d.city,d.cp,uname(d.clientId),uname(d.agentId)].join(' ')).includes(q)));
+ ds.sort((a,b)=>view.sort==='ref'?b.ref.localeCompare(a.ref):view.sort==='comp'?compl(b)-compl(a):b.updated.localeCompare(a.updated));
+ setTimeout(()=>{const c=$('#dcount');if(c)c.textContent=ds.length+' dossier'+(ds.length>1?'s':'')+' affiché'+(ds.length>1?'s':'')},0);
+ if(!ds.length)return`<div class="empty" style="grid-column:1/-1">Aucun dossier ne correspond à ces critères.</div>`;
+ return ds.map(d=>{const c=compl(d),e=est(d);return`<button type="button" class="card dcard" data-act="open" data-id="${d.id}">
+  <div class="d-top"><span class="num muted wrap">${d.ref}</span>${badge(d.status)}</div>
+  <span class="dt">${esc(d.title)}</span>
+  <div class="d-meta"><span>${ic('pin')}<span class="wrap">${esc(d.address)}, ${d.cp} ${esc(d.city)}</span></span><span>${ic('user')}${esc(uname(d.clientId))}</span><span>${ic('folder')}${esc(d.type)}</span></div>
+  <div><div class="d-meta" style="justify-content:space-between"><span>Fiche projet complétée</span><b>${c} %</b></div><div class="bar" aria-hidden="true"><i style="width:${c}%"></i></div></div>
+  <div class="d-foot"><span class="muted">${d.files.length} doc. · ${d.links.length} lien${d.links.length>1?'s':''} · agent ${esc(uname(d.agentId))}</span>${!art&&d.estimate.lots.length?`<b class="num">${eur(e.tmn)} – ${eur(e.tmx)}</b>`:`<span class="muted">${art?'Lecture seule':'Non estimé'}</span>`}</div>
+ </button>`}).join('');
+}
+
+/* Détail */
+function tabsFor(d){const r=me().role,t=[['fiche','Fiche projet','form'],['docs','Documents','file',d.files.length],['links','Liens externes','link',d.links.length]];if(r!=='artisan')t.push(['est','Estimation','euro']);if(can('edit'))t.push(['share','Partage','share',d.shares.filter(s=>!s.revoked).length]);return t}
+function detailHTML(d){
+ const tabs=tabsFor(d);if(!tabs.some(t=>t[0]===view.tab))view.tab='fiche';
+ const si=STATUSES.indexOf(d.status),r=me().role;
+ const panel={fiche:ficheHTML,docs:docsHTML,links:linksHTML,est:estHTML,share:shareHTML}[view.tab](d);
+ return`<div class="dhead">
+  <div><button type="button" class="btn ghost sm" data-act="back" style="padding-left:6px">${ic('back')}Tous les dossiers</button></div>
+  <div class="t-row"><div style="min-width:0"><p class="num muted wrap">${d.ref} · ${esc(d.type)}</p><h1>${esc(d.title)}</h1><p class="muted wrap">${esc(d.address)}, ${d.cp} ${esc(d.city)}</p></div>
+   <div class="actions">${can('edit')?`<div class="field"><label for="stSel" class="sr">Statut du dossier</label><select id="stSel">${STATUSES.map(s=>`<option${s===d.status?' selected':''}>${s}</option>`).join('')}</select></div>`:badge(d.status)}
+   <button type="button" class="btn" data-act="pdf">${ic('print')}Récapitulatif PDF</button>${can('edit')?`<button type="button" class="btn primary" data-act="tab" data-tab="share">${ic('share')}Partager</button>`:''}</div></div>
+  <ol class="steps" aria-label="Avancement du dossier">${STATUSES.map((s,i)=>`<li class="${i<si?'done':i===si?'cur':''}"${i===si?' aria-current="step"':''}>${s}</li>`).join('')}</ol>
+  ${r==='artisan'?`<p class="ro-note">${ic('lock')}Accès artisan en lecture seule : fiche, documents et liens. L’estimation budgétaire n’est pas partagée.</p>`:r==='client'?`<p class="ro-note">${ic('user')}Espace client : vous pouvez compléter la fiche projet et déposer vos documents.</p>`:''}
+ </div>
+ <div class="dlayout"><section class="card" aria-label="Contenu du dossier">
+  <div class="tabs" role="tablist">${tabs.map(([k,l,i,n])=>`<button type="button" role="tab" class="tab" id="t-${k}" aria-controls="panel" aria-selected="${view.tab===k}" data-act="tab" data-tab="${k}">${ic(i)}${l}${n!=null?` <span class="cnt">${n}</span>`:''}</button>`).join('')}</div>
+  <div id="panel" role="tabpanel" aria-labelledby="t-${view.tab}">${panel}</div>
+ </section>${sideHTML(d)}</div>`;
+}
+function sideHTML(d){
+ const c=compl(d),e=est(d),art=me().role==='artisan',ed=can('edit');
+ const ag=user(d.agentId),cl=user(d.clientId);
+ const free=S.users.filter(u=>u.role==='artisan'&&u.active&&!d.artisanIds.includes(u.id));
+ const person=(u,cls,lab,rm)=>`<li><span class="av ${cls}" aria-hidden="true">${initials(u.name)}</span><span class="pi"><b>${esc(u.name)}</b><span>${lab} · ${esc(u.org)}</span></span>${rm?`<button type="button" class="icon-btn" data-act="artdel" data-id="${u.id}" aria-label="Retirer ${esc(u.name)} du dossier">${ic('x')}</button>`:''}</li>`;
+ return`<aside class="side" aria-label="Synthèse du dossier">
+ <section class="card"><h2 style="margin-bottom:12px">Synthèse</h2>
+  <div class="d-meta" style="justify-content:space-between;margin-bottom:4px"><span>Fiche projet</span><b>${c} %</b></div><div class="bar" style="margin-bottom:14px"><i style="width:${c}%"></i></div>
+  <dl class="kv">${art?'':`<dt>Fourchette TTC</dt><dd class="num">${d.estimate.lots.length?eur(e.tmn)+' – '+eur(e.tmx):'Non estimé'}</dd><dt>Budget client</dt><dd class="num">${d.fiche.budget?eur(d.fiche.budget):'—'}</dd>`}<dt>Démarrage souhaité</dt><dd>${d.fiche.debut?fdate(d.fiche.debut):'—'}</dd><dt>Documents</dt><dd>${d.files.length}</dd><dt>Liens</dt><dd>${d.links.length}</dd><dt>Mis à jour</dt><dd>${fdt(d.updated)}</dd></dl>
+ </section>
+ <section class="card"><h2 style="margin-bottom:12px">Intervenants</h2><ul class="people">
+  ${ag?person(ag,'','Agent',false):''}${cl?person(cl,'c','Client',false):''}${d.artisanIds.map(id=>user(id)).filter(Boolean).map(u=>person(u,'a','Artisan',ed)).join('')}</ul>
+  ${!d.artisanIds.length?'<p class="muted small" style="margin-top:8px">Aucun artisan associé.</p>':''}
+  ${ed&&free.length?`<div class="inline-add"><label for="artSel" class="sr">Associer un artisan</label><select id="artSel">${free.map(u=>`<option value="${u.id}">${esc(u.name)} — ${esc(u.org)}</option>`).join('')}</select><button type="button" class="btn sm" data-act="artadd">${ic('plus')}Associer</button></div>`:''}
+ </section>
+ <section class="card"><h2 style="margin-bottom:12px">Journal d’activité</h2><ol class="journal">${d.log.slice(0,8).map(l=>`<li><time datetime="${l.at}">${fdt(l.at)} · ${esc(l.who)}</time>${esc(l.txt)}</li>`).join('')}</ol></section>
+ </aside>`;
+}
+
+/* Fiche projet */
+function ficheHTML(d){
+ const ro=!can('fiche');
+ return`<form data-form="fiche" novalidate><fieldset${ro?' disabled':''}><legend class="sr">Fiche projet</legend><div class="fsecs">${FICHE.map((s,i)=>`<section class="fsec card" style="box-shadow:none"><h3><span class="n">${i+1}</span>${s.t}</h3><div class="fgrid">${s.f.map(f=>{const v=d.fiche[f.k];
+  if(f.type==='checks')return`<fieldset class="field full"><legend class="flabel">${f.l}</legend><div class="chk">${f.o.map(o=>`<label class="ck"><input type="checkbox" name="${f.k}" value="${esc(o)}"${(v||[]).includes(o)?' checked':''}><span>${esc(o)}</span></label>`).join('')}</div></fieldset>`;
+  return F('fiche',{n:f.k,l:f.l,t:f.type,req:f.req,o:f.type==='select'?[['','— Choisir —'],...f.o]:null,v:v||'',full:f.full,min:f.min,max:f.max,step:f.step})}).join('')}</div></section>`).join('')}</div>
+ ${ro?'':`<div class="sticky-save"><span class="muted small"><span class="req">*</span> champs obligatoires · complétude actuelle ${compl(d)} %</span><button type="submit" class="btn primary">${ic('check')}Enregistrer la fiche</button></div>`}</fieldset></form>`;
+}
+function saveFiche(form){
+ const d=cur();clearErr(form);const fd=new FormData(form),out={};let n=0;
+ FIELDS.forEach(f=>{out[f.k]=f.type==='checks'?fd.getAll(f.k):String(fd.get(f.k)||'').trim();const v=out[f.k];
+  if(f.req&&!filled(v)){setErr(form,f.k,'Champ obligatoire.');n++}
+  else if(f.type==='number'&&v!==''){const x=Number(v);if(!isFinite(x)||x<f.min||x>f.max){setErr(form,f.k,`Valeur attendue entre ${f.min.toLocaleString('fr-FR')} et ${f.max.toLocaleString('fr-FR')}.`);n++}}});
+ if(n){focusErr(form);toast(`${n} champ${n>1?'s':''} à corriger dans la fiche`,true);return}
+ d.fiche=out;log(d,`Fiche projet enregistrée (${compl(d)} % complétée)`);save();render();toast('Fiche projet enregistrée');
+}
+
+/* Documents */
+function guessCat(n){const x=n.toLowerCase(),e=x.split('.').pop();if(['dwg','dxf'].includes(e)||(e==='pdf'&&/plan|coupe|facade|façade|masse|implantation/.test(x)))return'plan';if(e==='pdf')return'pdf';if(['jpg','jpeg','png','webp','gif'].includes(e))return'visuel';if(['csv','xls','xlsx','ods'].includes(e))return'metre';return'autre'}
+function docsHTML(d){
+ const ed=can('docs'),ff=d.files.filter(f=>!view.fcat||f.cat===view.fcat);
+ const cnt=k=>d.files.filter(f=>f.cat===k).length;
+ return`${ed?`<div class="drop" id="drop">${ic('upload','big')}<p><b>Glissez ici les exports Visuary</b> ou d’autres pièces du dossier</p>
+  <div class="actions" style="justify-content:center"><button type="button" class="btn primary" data-act="pick">${ic('upload')}Choisir des fichiers</button><button type="button" class="btn" data-act="sample">${ic('folder')}Importer un export d’exemple</button></div>
+  <p class="hint">PDF, plans (DWG, DXF, PDF), visuels (JPG, PNG), métrés (CSV, XLSX) — 50 Mo maximum par fichier. Catégorie détectée automatiquement.</p>
+  <input type="file" id="fileIn" multiple class="sr" tabindex="-1" aria-hidden="true" accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png,.webp,.csv,.xls,.xlsx,.ods,.zip"></div>`:''}
+ <div class="chips" role="group" aria-label="Filtrer par catégorie"><button type="button" class="chip" data-act="fcat" data-cat="" aria-pressed="${!view.fcat}">Tous (${d.files.length})</button>${Object.entries(CATS).filter(([k])=>cnt(k)).map(([k,l])=>`<button type="button" class="chip" data-act="fcat" data-cat="${k}" aria-pressed="${view.fcat===k}">${l} (${cnt(k)})</button>`).join('')}</div>
+ ${ff.length?`<div class="files">${ff.map(f=>`<div class="file"><span class="ficon fi-${f.cat}" aria-hidden="true">${ic(CATIC[f.cat])}</span><div class="fbody"><b>${esc(f.name)}</b><span class="m">${fsize(f.size)} · ${fdate(f.at)} · ${esc(f.by)}</span>
+  ${ed?`<div><label class="sr" for="cat_${f.id}">Catégorie de ${esc(f.name)}</label><select id="cat_${f.id}" data-fcat="${f.id}">${Object.entries(CATS).map(([k,l])=>`<option value="${k}"${k===f.cat?' selected':''}>${l}</option>`).join('')}</select></div>`:`<span class="badge nodot b-gray" style="justify-self:start">${CATS[f.cat]}</span>`}</div>
+  <div class="frow" style="flex-direction:column"><button type="button" class="icon-btn" data-act="fview" data-id="${f.id}" aria-label="Aperçu de ${esc(f.name)}">${ic('eye')}</button>${ed?`<button type="button" class="icon-btn" data-act="fdel" data-id="${f.id}" aria-label="Supprimer ${esc(f.name)}">${ic('trash')}</button>`:''}</div></div>`).join('')}</div>`:`<div class="empty">Aucun document${view.fcat?' dans cette catégorie':''} pour l’instant.</div>`}`;
+}
+function addFiles(list){
+ const d=cur();let n=0;
+ for(const f of list){if(f.size>52428800){toast(`« ${f.name} » dépasse 50 Mo`,true);continue}const id=uid('f');if(/^image\//.test(f.type)){try{blobs[id]=URL.createObjectURL(f)}catch(e){}}d.files.unshift({id,name:f.name,size:f.size,cat:guessCat(f.name),at:nowISO(),by:me().name});n++}
+ if(n){view.fcat='';log(d,`${n} fichier${n>1?'s':''} importé${n>1?'s':''}`);save();render();toast(`${n} fichier${n>1?'s':''} ajouté${n>1?'s':''} au dossier`)}
+}
+function planSVG(cat){
+ if(cat==='visuel')return`<svg viewBox="0 0 320 180" width="100%" role="img" aria-label="Rendu 3D simulé" style="max-height:300px;background:#E7EEF0;border-radius:10px"><path d="M0 140h320v40H0z" fill="#B9C9B0"/><path d="M70 140V80l80-45 80 45v60z" fill="#F4EFE6" stroke="#5A6460" stroke-width="2"/><path d="M60 84l90-52 90 52" fill="none" stroke="#7C4A2D" stroke-width="7"/><rect x="95" y="95" width="34" height="28" fill="#9FC3D1" stroke="#5A6460"/><rect x="170" y="95" width="34" height="45" fill="#9FC3D1" stroke="#5A6460"/><rect x="230" y="105" width="70" height="35" fill="#D9CBB0" stroke="#5A6460"/><rect x="240" y="112" width="50" height="22" fill="#9FC3D1"/></svg>`;
+ return`<svg viewBox="0 0 320 200" width="100%" role="img" aria-label="Plan simulé" style="max-height:300px;background:#F7F9FB;border-radius:10px"><g fill="none" stroke="#25528A" stroke-width="3"><rect x="20" y="20" width="280" height="160"/><path d="M150 20v95M150 145v35M20 100h90M140 100h10M210 100h90M210 100v80"/></g><g fill="none" stroke="#25528A" stroke-width="1.5"><path d="M110 100a30 30 0 0 1 30 -30"/><path d="M150 115a30 30 0 0 0 30 30"/></g><g font-family="sans-serif" font-size="11" fill="#25528A"><text x="55" y="62">Séjour 32 m²</text><text x="200" y="62">Cuisine 14 m²</text><text x="45" y="145">Ch. 1 12 m²</text><text x="228" y="145">SdE 6 m²</text></g></svg>`;
+}
+
+/* Liens */
+function linksHTML(d){
+ const ed=can('docs');
+ const list=d.links.length?`<ul class="links">${d.links.map(l=>`<li><span class="ficon fi-plan" aria-hidden="true">${ic(l.type==='Visuary'?'plan':l.type==='Google Drive'?'folder':l.type==='Devis'?'euro':'link')}</span><span class="lb"><b>${esc(l.label)}</b><span class="badge nodot b-gray" style="margin:2px 0">${esc(l.type)}</span><br><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.url)}<span class="sr"> (nouvel onglet)</span></a></span>${ed?`<button type="button" class="icon-btn" data-act="ldel" data-id="${l.id}" aria-label="Supprimer le lien ${esc(l.label)}">${ic('trash')}</button>`:''}</li>`).join('')}</ul>`:'<div class="empty">Aucun lien externe pour l’instant.</div>';
+ if(!ed)return list;
+ return`<div class="two"><form class="card" style="box-shadow:none" data-form="link" novalidate><h2 style="margin-bottom:12px">Ajouter un lien</h2><div class="fgrid" style="grid-template-columns:minmax(0,1fr)">
+  ${F('link',{n:'label',l:'Libellé',req:1,ph:'Ex. Projet Visuary — version 2'})}${F('link',{n:'url',l:'Adresse (URL)',t:'url',req:1,ph:'https://…'})}${F('link',{n:'type',l:'Type',t:'select',o:LTYPES})}
+  </div><div class="dlg-f"><button type="submit" class="btn primary">${ic('plus')}Ajouter le lien</button></div></form><div>${list}</div></div>`;
+}
+
+/* Estimation */
+function estHTML(d){
+ const ro=!can('edit'),e=d.estimate;
+ return`<div class="est-grid"><div>
+ <div class="card-h"><div><h2>Fourchettes par lot (HT)</h2><p class="muted small">Saisie manuelle des montants bas et haut. Les totaux se recalculent en direct.</p></div>${ro?'':`<div class="actions"><button type="button" class="btn sm" data-act="prefill">${ic('ruler')}Pré-remplir depuis la fiche</button><button type="button" class="btn sm primary" data-act="lotadd">${ic('plus')}Ajouter un lot</button></div>`}</div>
+ ${e.lots.length?`<div class="tw"><table class="est-t"><thead><tr><th scope="col">Lot</th><th scope="col" class="r">Bas (€ HT)</th><th scope="col" class="r">Haut (€ HT)</th>${ro?'':'<th scope="col"><span class="sr">Actions</span></th>'}</tr></thead><tbody>${e.lots.map(l=>`<tr data-row="${l.id}"${+l.min>+l.max?' class="rowwarn"':''}>
+  <td>${ro?esc(l.name):`<input type="text" data-lot="${l.id}" data-k="name" value="${esc(l.name)}" aria-label="Intitulé du lot">`}</td>
+  <td class="r">${ro?`<span class="num">${eur(l.min)}</span>`:`<input type="number" min="0" step="100" inputmode="numeric" data-lot="${l.id}" data-k="min" value="${l.min}" aria-label="Montant bas — ${esc(l.name)}">`}</td>
+  <td class="r">${ro?`<span class="num">${eur(l.max)}</span>`:`<input type="number" min="0" step="100" inputmode="numeric" data-lot="${l.id}" data-k="max" value="${l.max}" aria-label="Montant haut — ${esc(l.name)}">`}</td>
+  ${ro?'':`<td><button type="button" class="icon-btn" data-act="lotdel" data-id="${l.id}" aria-label="Supprimer le lot ${esc(l.name)}">${ic('trash')}</button></td>`}</tr>`).join('')}</tbody></table></div>`:`<div class="empty">Aucun lot chiffré. ${ro?'':'Ajoutez un lot ou pré-remplissez à partir des lots cochés dans la fiche.'}</div>`}
+ <div class="fgrid" style="margin-top:14px;max-width:520px">
+  <div class="field"><label for="aleas">Provision pour aléas (%)</label><input type="number" id="aleas" min="0" max="40" step="1" value="${e.aleas}"${ro?' disabled':''}></div>
+  <div class="field"><label for="tva">Taux de TVA</label><select id="tva"${ro?' disabled':''}>${[['5.5','5,5 % (rénovation énergétique)'],['10','10 % (rénovation)'],['20','20 % (neuf / extension)']].map(([v,l])=>`<option value="${v}"${String(e.tva)===v?' selected':''}>${l}</option>`).join('')}</select></div>
+ </div></div>
+ <div class="card" style="box-shadow:none;align-self:start" id="estSum">${estSum(d)}</div></div>`;
+}
+function estSum(d){
+ const e=est(d),b=+d.fiche.budget||0,warn=d.estimate.lots.some(l=>+l.min>+l.max);
+ const top=Math.max(e.tmx,b,1)*1.12,pc=v=>Math.min(100,v/top*100);
+ let msg='';
+ if(!d.estimate.lots.length)msg=`<p class="msg warn">${ic('alert')}Aucun lot chiffré.</p>`;
+ else if(!b)msg=`<p class="msg warn">${ic('alert')}Budget client non renseigné dans la fiche.</p>`;
+ else if(b>=e.tmx)msg=`<p class="msg ok">${ic('check')}Le budget client couvre la fourchette haute.</p>`;
+ else if(b>=e.tmn)msg=`<p class="msg warn">${ic('alert')}Budget client dans la fourchette : arbitrages possibles.</p>`;
+ else msg=`<p class="msg bad">${ic('alert')}Budget client inférieur à la fourchette basse (écart ${eur(e.tmn-b)}).</p>`;
+ return`<h2>Synthèse budgétaire</h2>
+ <dl class="kv" style="margin-top:12px"><dt>Sous-total HT</dt><dd class="num">${eur(e.mn)} – ${eur(e.mx)}</dd><dt>Avec aléas (${d.estimate.aleas||0} %)</dt><dd class="num">${eur(e.hmn)} – ${eur(e.hmx)}</dd><dt>TVA</dt><dd>${String(d.estimate.tva).replace('.',',')} %</dd></dl>
+ <p class="muted small" style="margin-top:14px">Fourchette TTC</p><p class="total num">${eur(e.tmn)} – ${eur(e.tmx)}</p>
+ <div class="gauge" role="img" aria-label="Fourchette ${eur(e.tmn)} à ${eur(e.tmx)}, budget client ${b?eur(b):'non renseigné'}"><span class="rng" style="left:${pc(e.tmn)}%;width:${Math.max(1,pc(e.tmx)-pc(e.tmn))}%"></span>${b?`<span class="bud" style="left:${pc(b)}%"><span>Budget ${eur(b)}</span></span>`:''}</div>
+ <div style="display:grid;gap:8px;margin-top:14px">${msg}${warn?`<p class="msg bad">${ic('alert')}Un lot a un montant bas supérieur au montant haut.</p>`:''}</div>
+ <p class="hint" style="margin-top:12px">Fourchettes indicatives, non contractuelles, reprises dans le récapitulatif PDF.</p>`;
+}
+let estT;
+function onEstInput(el){
+ const d=cur();if(!d)return;
+ if(el.dataset.lot){const l=d.estimate.lots.find(x=>x.id===el.dataset.lot);if(!l)return;l[el.dataset.k]=el.dataset.k==='name'?el.value:Math.max(0,+el.value||0);const tr=el.closest('tr');tr.classList.toggle('rowwarn',+l.min>+l.max)}
+ else if(el.id==='aleas')d.estimate.aleas=Math.min(40,Math.max(0,+el.value||0));
+ else if(el.id==='tva')d.estimate.tva=el.value;
+ $('#estSum').innerHTML=estSum(d);
+ clearTimeout(estT);estT=setTimeout(()=>{log(d,'Estimation mise à jour');save()},700);
+}
+
+/* Partage */
+function shState(s){if(s.revoked)return['Révoqué','bad'];if(new Date(s.exp)<new Date())return['Expiré','gray'];return['Actif','ok']}
+const shUrl=s=>'https://portail.exemple.fr/p/'+s.token;
+function shareHTML(d){
+ const list=d.shares.length?`<div class="shares">${d.shares.map(s=>{const[st,c]=shState(s);const secs=[s.sec.fiche&&'fiche',s.sec.docs&&'documents',s.sec.links&&'liens',s.sec.est&&'estimation'].filter(Boolean).join(', ');return`<div class="share"><div class="s-top"><div style="min-width:0"><b class="wrap">${esc(s.name)}</b> <span class="muted small">· ${esc(s.prof)}</span><br><span class="muted small wrap">${esc(s.email)}</span></div><span class="badge b-${c}">${st}</span></div>
+  <div class="linkbox">${shUrl(s)}</div>
+  <p class="small muted">Contenu : ${secs} · ${s.pwd?'protégé par mot de passe':'sans mot de passe'} · expire le ${fdate(s.exp)} · ${s.views} consultation${s.views>1?'s':''}</p>
+  <div class="actions"><button type="button" class="btn sm" data-act="shview" data-id="${s.id}">${ic('eye')}Aperçu destinataire</button>${st==='Actif'?`<button type="button" class="btn sm" data-act="shcopy" data-id="${s.id}">${ic('copy')}Copier le lien</button><button type="button" class="btn sm" data-act="shmail" data-id="${s.id}">${ic('mail')}Renvoyer l’email</button><button type="button" class="btn sm danger" data-act="shrevoke" data-id="${s.id}">${ic('x')}Révoquer</button>`:''}</div></div>`}).join('')}</div>`:'<div class="empty">Ce dossier n’a pas encore été partagé.</div>';
+ return`<div class="two"><form class="card" style="box-shadow:none" data-form="share" novalidate><h2>Nouveau partage sécurisé</h2><p class="muted small" style="margin:4px 0 12px">Lien unique, consultation en lecture seule, durée limitée et révocable à tout moment.</p>
+ <div class="fgrid" style="grid-template-columns:minmax(0,1fr)">
+  ${F('share',{n:'name',l:'Destinataire',req:1,ph:'Nom et prénom',auto:'off'})}${F('share',{n:'email',l:'Email',t:'email',req:1,ph:'nom@domaine.fr',auto:'off'})}
+  ${F('share',{n:'prof',l:'Profil',t:'select',o:['Client','Agent immobilier','Artisan','Autre partenaire']})}${F('share',{n:'exp',l:'Validité du lien',t:'select',o:[['7','7 jours'],['30','30 jours'],['90','90 jours']],v:'30'})}
+  <fieldset class="field"><legend class="flabel">Contenu partagé</legend><div class="chk">${[['fiche','Fiche projet'],['docs','Documents'],['links','Liens'],['est','Estimation']].map(([k,l])=>`<label class="ck"><input type="checkbox" name="sec" value="${k}" checked><span>${l}</span></label>`).join('')}</div><p class="err" id="e_share_sec"></p></fieldset>
+  <label class="ck" style="justify-self:start"><input type="checkbox" name="pwd" checked><span>${ic('lock')} Protéger par mot de passe</span></label>
+ </div><div class="dlg-f"><button type="submit" class="btn primary">${ic('share')}Générer le lien</button></div></form><div><h2 style="font-size:16px;margin-bottom:10px">Partages du dossier</h2>${list}</div></div>`;
+}
+function saveShare(form){
+ const d=cur();clearErr(form);const fd=new FormData(form);const name=String(fd.get('name')).trim(),email=String(fd.get('email')).trim(),sec=fd.getAll('sec');let n=0;
+ if(!name){setErr(form,'name','Indiquez le destinataire.');n++}
+ if(!email){setErr(form,'email','Indiquez un email.');n++}else if(!isEmail(email)){setErr(form,'email','Adresse email invalide.');n++}
+ if(!sec.length){$('#e_share_sec').textContent='Sélectionnez au moins un élément.';n++}
+ if(n){focusErr(form);return}
+ const pw=fd.get('pwd')?tok().replace(/-/g,'').slice(0,8):'';
+ const s={id:uid('s'),token:tok(),name,email,prof:fd.get('prof'),created:nowISO(),exp:inDays(+fd.get('exp')),pwd:pw,sec:{fiche:+sec.includes('fiche'),docs:+sec.includes('docs'),links:+sec.includes('links'),est:+sec.includes('est')},views:0,revoked:false};
+ d.shares.unshift(s);log(d,`Dossier partagé avec ${name}`);if(STATUSES.indexOf(d.status)<3){d.status='Partagé';log(d,'Statut passé à « Partagé »')}save();render();
+ openDlg('Lien de partage créé',`<p>Le dossier <b>${esc(d.ref)}</b> est accessible à <b>${esc(name)}</b> jusqu’au ${fdate(s.exp)}.</p>
+ <p class="flabel" style="margin-top:14px">Lien sécurisé</p><div class="linkbox">${shUrl(s)}</div>
+ ${pw?`<p class="flabel" style="margin-top:12px">Mot de passe (à transmettre séparément)</p><div class="linkbox">${pw}</div>`:''}
+ <div class="dlg-f"><button type="button" class="btn" data-act="shcopy" data-id="${s.id}">${ic('copy')}Copier le lien</button><button type="button" class="btn primary" data-act="shmail" data-id="${s.id}">${ic('mail')}Envoyer par email</button></div>`);
+}
+
+/* Récapitulatif */
+function fv(v,f){if(!filled(v))return'—';if(Array.isArray(v))return esc(v.join(', '));if(f&&f.k==='budget')return eur(v);if(f&&f.k==='surface')return esc(v)+' m²';if(f&&f.type==='date')return fdate(v);return esc(v)}
+function recapHTML(d,sec){
+ const e=est(d),arts=d.artisanIds.map(user).filter(Boolean);
+ let h=`<article class="paper"><div class="p-head"><div><b>Chantier Clair</b><span>Dossier projet — récapitulatif</span></div><div class="p-ref">${d.ref}<br><span style="font-weight:400">Édité le ${fdate(nowISO())}</span></div></div>
+ <h1>${esc(d.title)}</h1><p class="p-addr">${esc(d.address)}, ${d.cp} ${esc(d.city)} · ${esc(d.type)} · Statut : ${d.status}</p>
+ <h2>Intervenants</h2><dl class="p-dl"><dt>Agent référent</dt><dd>${esc(uname(d.agentId))} — ${esc((user(d.agentId)||{}).org||'')}</dd><dt>Client</dt><dd>${esc(uname(d.clientId))}</dd><dt>Artisans</dt><dd>${arts.length?arts.map(u=>esc(u.name+' ('+u.org+')')).join(', '):'—'}</dd></dl>`;
+ if(sec.fiche)FICHE.forEach(s=>{h+=`<h2>${s.t}</h2><dl class="p-dl">${s.f.map(f=>`<dt>${f.l}</dt><dd>${fv(d.fiche[f.k],f)}</dd>`).join('')}</dl>`});
+ if(sec.est&&d.estimate.lots.length)h+=`<h2>Estimation budgétaire (fourchettes)</h2><table><thead><tr><th>Lot</th><th class="r">Bas HT</th><th class="r">Haut HT</th></tr></thead><tbody>${d.estimate.lots.map(l=>`<tr><td>${esc(l.name)}</td><td class="r">${eur(l.min)}</td><td class="r">${eur(l.max)}</td></tr>`).join('')}<tr><td>Aléas ${d.estimate.aleas} %</td><td class="r">${eur(e.hmn-e.mn)}</td><td class="r">${eur(e.hmx-e.mx)}</td></tr><tr><td><b>Total TTC (TVA ${String(d.estimate.tva).replace('.',',')} %)</b></td><td class="r"><b>${eur(e.tmn)}</b></td><td class="r"><b>${eur(e.tmx)}</b></td></tr></tbody></table>`;
+ if(sec.docs)h+=`<h2>Documents joints (${d.files.length})</h2>${d.files.length?`<ul>${d.files.map(f=>`<li>${esc(f.name)} — ${CATS[f.cat]}, ${fsize(f.size)}</li>`).join('')}</ul>`:'<p>—</p>'}`;
+ if(sec.links)h+=`<h2>Liens externes</h2>${d.links.length?`<ul>${d.links.map(l=>`<li>${esc(l.label)} (${esc(l.type)}) : ${esc(l.url)}</li>`).join('')}</ul>`:'<p>—</p>'}`;
+ return h+`<p class="p-foot">Document généré automatiquement. Les fourchettes budgétaires sont indicatives et non contractuelles. Démonstration — données fictives.</p></article>`;
+}
+function openRecap(d,sec,title){
+ openDlg(title||'Récapitulatif du dossier',`<p class="muted small" style="margin-bottom:12px">Aperçu du PDF généré. Utilisez « Imprimer / Enregistrer en PDF » pour obtenir le fichier.</p>${recapHTML(d,sec)}<div class="dlg-f"><button type="button" class="btn" data-act="close">Fermer</button><button type="button" class="btn primary" data-act="print">${ic('print')}Imprimer / Enregistrer en PDF</button></div>`,true);
+ $('#printArea').innerHTML=recapHTML(d,sec);
+}
+
+/* Utilisateurs */
+function usersHTML(){
+ const us=S.users.filter(u=>!view.urole||u.role===view.urole);
+ const nb=u=>S.dossiers.filter(d=>d.agentId===u.id||d.clientId===u.id||d.artisanIds.includes(u.id)).length;
+ return`<div class="page-h"><div><h1>Utilisateurs et rôles</h1><p class="muted">Gérez les comptes : administrateurs, agents immobiliers, clients et artisans en lecture seule.</p></div><button type="button" class="btn primary" data-act="invite">${ic('plus')}Inviter un utilisateur</button></div>
+ <div class="kpis">${Object.entries(ROLES).map(([k,l])=>`<div class="card kpi"><div class="k-l">${l}</div><div class="k-v">${S.users.filter(u=>u.role===k).length}</div></div>`).join('')}</div>
+ <div class="chips" role="group" aria-label="Filtrer par rôle"><button type="button" class="chip" data-act="urole" data-r="" aria-pressed="${!view.urole}">Tous</button>${Object.entries(ROLES).map(([k,l])=>`<button type="button" class="chip" data-act="urole" data-r="${k}" aria-pressed="${view.urole===k}">${l}</button>`).join('')}</div>
+ <div class="tw"><table><thead><tr><th scope="col">Nom</th><th scope="col">Email</th><th scope="col">Rôle</th><th scope="col" class="r">Dossiers</th><th scope="col">Statut</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody>
+ ${us.map(u=>`<tr><td><b>${esc(u.name)}</b><br><span class="muted small">${esc(u.org)}</span></td><td class="wrap">${esc(u.email)}</td><td><span class="badge nodot ${u.role==='admin'?'b-vio':u.role==='agent'?'b-acc':u.role==='client'?'b-warn':'b-gray'}">${ROLES[u.role]}</span></td><td class="r num">${nb(u)}</td><td>${u.active?'<span class="badge b-ok">Actif</span>':'<span class="badge b-gray">Désactivé</span>'}</td>
+ <td>${u.id===S.me?'<span class="muted small">Vous</span>':`<button type="button" class="btn sm" data-act="utoggle" data-id="${u.id}">${u.active?'Désactiver':'Réactiver'}</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+/* Formulaires */
+const FORMS={
+ fiche:saveFiche,share:saveShare,
+ link(form){const d=cur();clearErr(form);const fd=new FormData(form),label=String(fd.get('label')).trim(),url=String(fd.get('url')).trim();let n=0;
+  if(!label){setErr(form,'label','Indiquez un libellé.');n++}
+  let ok=false;try{const u=new URL(url);ok=/^https?:$/.test(u.protocol)&&u.hostname.includes('.')}catch(e){}
+  if(!url){setErr(form,'url','Indiquez une adresse.');n++}else if(!ok){setErr(form,'url','Adresse invalide : elle doit commencer par https:// ou http://');n++}
+  if(n){focusErr(form);return}
+  d.links.unshift({id:uid('l'),label,url,type:fd.get('type')});log(d,`Lien ajouté : ${label}`);save();render();toast('Lien ajouté au dossier');$('[data-form=link] input')?.focus()},
+ new(form){clearErr(form);const fd=new FormData(form),g=k=>String(fd.get(k)||'').trim();let n=0;
+  if(!g('title')){setErr(form,'title','Indiquez un intitulé.');n++}
+  if(!g('address')){setErr(form,'address','Indiquez l’adresse du bien.');n++}
+  if(!/^\d{5}$/.test(g('cp'))){setErr(form,'cp','Code postal à 5 chiffres.');n++}
+  if(!g('city')){setErr(form,'city','Indiquez la ville.');n++}
+  if(!g('client')){setErr(form,'client','Choisissez un client.');n++}
+  if(n){focusErr(form);return}
+  const id=uid('d');S.seq++;
+  const d={id,ref:'DOS-2026-'+String(S.seq).padStart(4,'0'),title:g('title'),type:g('type'),address:g('address'),cp:g('cp'),city:g('city'),status:'Brouillon',agentId:me().role==='agent'?me().id:g('agent'),clientId:g('client'),artisanIds:[],created:nowISO(),updated:nowISO(),fiche:{diags:[],objectifs:[],lots:[],finance:[]},files:[],links:[],estimate:{aleas:10,tva:'10',lots:[]},shares:[],log:[]};
+  log(d,'Dossier créé');S.dossiers.unshift(d);save();closeDlg();view={...view,screen:'dossier',id,tab:'fiche',fcat:''};render(true);toast(`Dossier ${d.ref} créé`)},
+ invite(form){clearErr(form);const fd=new FormData(form),g=k=>String(fd.get(k)||'').trim();let n=0;
+  if(!g('name')){setErr(form,'name','Indiquez le nom.');n++}
+  if(!isEmail(g('email'))){setErr(form,'email','Adresse email invalide.');n++}else if(S.users.some(u=>u.email.toLowerCase()===g('email').toLowerCase())){setErr(form,'email','Un compte existe déjà avec cet email.');n++}
+  if(n){focusErr(form);return}
+  S.users.push({id:uid('u'),name:g('name'),email:g('email'),role:g('role'),org:g('org')||'—',active:true});save();closeDlg();render();toast(`Invitation envoyée à ${g('email')} (simulation)`)}
+};
+
+/* Événements */
+document.addEventListener('submit',e=>{const f=e.target,k=f.dataset.form;if(!k||!FORMS[k])return;e.preventDefault();FORMS[k](f)});
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,d=cur();
+ switch(a){
+ case'reset':try{localStorage.removeItem(KEY)}catch(x){}S=seed();view={screen:'dossiers',id:null,tab:'fiche',q:'',st:'',ty:'',sort:'upd',fcat:'',urole:''};closeDlg();render(true);toast('Démo réinitialisée');break;
+ case'go':view.screen=b.dataset.screen;render(true);break;
+ case'open':view={...view,screen:'dossier',id:b.dataset.id,tab:'fiche',fcat:''};render(true);break;
+ case'back':view.screen='dossiers';render(true);break;
+ case'tab':view.tab=b.dataset.tab;render();$('#t-'+view.tab)?.focus();break;
+ case'close':closeDlg();break;
+ case'new':{const u=me();openDlg('Nouveau dossier projet',`<form data-form="new" novalidate><div class="fgrid">
+  ${F('new',{n:'title',l:'Intitulé du projet',req:1,ph:'Ex. Rénovation maison de ville',full:1})}
+  ${F('new',{n:'type',l:'Type de projet',t:'select',o:TYPES})}
+  ${F('new',{n:'client',l:'Client',t:'select',req:1,o:[['','— Choisir —'],...S.users.filter(x=>x.role==='client'&&x.active).map(x=>[x.id,x.name])]})}
+  ${u.role==='admin'?F('new',{n:'agent',l:'Agent référent',t:'select',o:S.users.filter(x=>x.role==='agent'&&x.active).map(x=>[x.id,x.name])}):''}
+  ${F('new',{n:'address',l:'Adresse du bien',req:1,ph:'N° et rue',full:1,auto:'street-address'})}
+  ${F('new',{n:'cp',l:'Code postal',req:1,ph:'69000',auto:'postal-code'})}
+  ${F('new',{n:'city',l:'Ville',req:1,ph:'Lyon',auto:'address-level2'})}
+  </div><div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button type="submit" class="btn primary">${ic('check')}Créer le dossier</button></div></form>`);break}
+ case'invite':openDlg('Inviter un utilisateur',`<form data-form="invite" novalidate><div class="fgrid">
+  ${F('invite',{n:'name',l:'Nom complet',req:1,auto:'off'})}${F('invite',{n:'email',l:'Email',t:'email',req:1,auto:'off'})}
+  ${F('invite',{n:'role',l:'Rôle',t:'select',o:Object.entries(ROLES)})}${F('invite',{n:'org',l:'Organisation',ph:'Agence, entreprise…'})}
+  </div><p class="hint" style="margin-top:10px">Un email d’activation sera envoyé (simulation). L’artisan n’a accès qu’aux dossiers auxquels il est associé, en lecture seule.</p>
+  <div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button type="submit" class="btn primary">${ic('mail')}Envoyer l’invitation</button></div></form>`);break;
+ case'utoggle':{const u=user(b.dataset.id);u.active=!u.active;save();render();toast(`${u.name} ${u.active?'réactivé':'désactivé'}`);break}
+ case'urole':view.urole=b.dataset.r;render();break;
+ case'pdf':openRecap(d,me().role==='artisan'?{fiche:1,docs:1,links:1,est:0}:{fiche:1,docs:1,links:1,est:1});log(d,'Récapitulatif PDF généré');save();break;
+ case'print':window.print();break;
+ case'pick':$('#fileIn')?.click();break;
+ case'sample':{const dt=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const fake=[['Visuary_'+dt+'_plans_niveaux.pdf',2100000],['Visuary_'+dt+'_rendu_sejour.png',2600000],['Visuary_'+dt+'_metres_pieces.xlsx',64000],['Visuary_'+dt+'_synthese_projet.pdf',520000]];
+  fake.forEach(([name,size])=>d.files.unshift({id:uid('f'),name,size,cat:guessCat(name),at:nowISO(),by:me().name}));view.fcat='';log(d,'4 fichiers importés (export Visuary)');save();render();toast('Export Visuary importé : 4 fichiers classés');break}
+ case'fcat':view.fcat=b.dataset.cat;render();break;
+ case'fview':{const f=d.files.find(x=>x.id===b.dataset.id);if(!f)break;
+  openDlg(f.name,`${blobs[f.id]?`<img src="${blobs[f.id]}" alt="Aperçu de ${esc(f.name)}" style="max-width:100%;border-radius:10px">`:(f.cat==='plan'||f.cat==='visuel')?planSVG(f.cat):`<div class="empty">${ic(CATIC[f.cat])}<p>Aperçu simulé : la visionneuse ${f.cat==='metre'?'de tableur':'PDF'} afficherait ici le contenu du fichier.</p></div>`}
+  <dl class="kv" style="margin-top:14px"><dt>Catégorie</dt><dd>${CATS[f.cat]}</dd><dt>Taille</dt><dd>${fsize(f.size)}</dd><dt>Ajouté le</dt><dd>${fdt(f.at)}</dd><dt>Par</dt><dd>${esc(f.by)}</dd></dl>
+  <div class="dlg-f"><button type="button" class="btn" data-act="close">Fermer</button><button type="button" class="btn primary" data-act="dl">${ic('upload')}Télécharger</button></div>`,true);break}
+ case'dl':toast('Téléchargement lancé (simulation)');closeDlg();break;
+ case'fdel':{const f=d.files.find(x=>x.id===b.dataset.id);if(!f||!confirm(`Supprimer « ${f.name} » ?`))break;d.files=d.files.filter(x=>x!==f);log(d,`Fichier supprimé : ${f.name}`);save();render();toast('Fichier supprimé');break}
+ case'ldel':{const l=d.links.find(x=>x.id===b.dataset.id);d.links=d.links.filter(x=>x!==l);log(d,`Lien supprimé : ${l.label}`);save();render();toast('Lien supprimé');break}
+ case'lotadd':d.estimate.lots.push({id:uid('o'),name:'Nouveau lot',min:0,max:0});save();render();{const ins=$$('[data-k=name]');ins[ins.length-1]?.select()}break;
+ case'lotdel':d.estimate.lots=d.estimate.lots.filter(x=>x.id!==b.dataset.id);log(d,'Lot supprimé de l’estimation');save();render();break;
+ case'prefill':{const s=+d.fiche.surface;const lots=d.fiche.lots||[];if(!lots.length){toast('Cochez des lots dans la fiche projet',true);break}if(!s){toast('Renseignez la surface dans la fiche projet',true);break}
+  let n=0;lots.forEach(k=>{if(d.estimate.lots.some(l=>norm(l.name).startsWith(norm(k).slice(0,6))))return;const[a,z]=k==='Cuisine / SDB'?[14000,28000]:RATES[k].map(r=>Math.round(r*s/100)*100);d.estimate.lots.push({id:uid('o'),name:k,min:a,max:z});n++});
+  log(d,`Estimation pré-remplie (${n} lot${n>1?'s':''})`);save();render();toast(n?`${n} lot${n>1?'s':''} ajouté${n>1?'s':''} sur la base de ${s} m² — ajustez les montants`:'Tous les lots cochés sont déjà chiffrés');break}
+ case'artadd':{const id=$('#artSel').value;d.artisanIds.push(id);log(d,`Artisan associé : ${uname(id)}`);save();render();toast(`${uname(id)} a désormais accès au dossier (lecture seule)`);break}
+ case'artdel':{const id=b.dataset.id;d.artisanIds=d.artisanIds.filter(x=>x!==id);log(d,`Artisan retiré : ${uname(id)}`);save();render();toast('Accès artisan retiré');break}
+ case'shview':{const s=d.shares.find(x=>x.id===b.dataset.id);s.views++;save();render();openRecap(d,s.sec,`Vue de ${s.name} (lecture seule)`);break}
+ case'shcopy':{const s=d.shares.find(x=>x.id===b.dataset.id);const u=shUrl(s);try{navigator.clipboard.writeText(u).then(()=>toast('Lien copié dans le presse-papiers'),()=>toast('Copie impossible : sélectionnez le lien manuellement',true))}catch(x){toast('Copie impossible : sélectionnez le lien manuellement',true)}break}
+ case'shmail':{const s=d.shares.find(x=>x.id===b.dataset.id);log(d,`Email de partage envoyé à ${s.email}`);save();closeDlg();render();toast(`Email envoyé à ${s.email} (simulation)`);break}
+ case'shrevoke':{const s=d.shares.find(x=>x.id===b.dataset.id);s.revoked=true;log(d,`Partage révoqué : ${s.name}`);save();render();toast('Lien révoqué : il n’est plus accessible');break}
+ }
+});
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.id==='q'){view.q=t.value;$('#dgrid').innerHTML=gridHTML()}
+ else if(t.dataset.lot||t.id==='aleas')onEstInput(t);
+});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.id==='who'){S.me=t.value;view={...view,screen:'dossiers',id:null,urole:'',st:'',ty:'',q:''};save();render(true);toast(`Connecté en tant que ${me().name} (${ROLES[me().role]})`)}
+ else if(t.id==='fst'){view.st=t.value;$('#dgrid').innerHTML=gridHTML()}
+ else if(t.id==='fty'){view.ty=t.value;$('#dgrid').innerHTML=gridHTML()}
+ else if(t.id==='fso'){view.sort=t.value;$('#dgrid').innerHTML=gridHTML()}
+ else if(t.id==='tva')onEstInput(t);
+ else if(t.id==='stSel'){const d=cur();d.status=t.value;log(d,`Statut passé à « ${t.value} »`);save();render();$('#stSel').focus();toast(`Statut : ${t.value}`)}
+ else if(t.id==='fileIn'){addFiles(t.files)}
+ else if(t.dataset.fcat){const d=cur(),f=d.files.find(x=>x.id===t.dataset.fcat);f.cat=t.value;save();toast(`Classé en « ${CATS[t.value]} »`)}
+});
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{const z=e.target.closest&&e.target.closest('#drop');if(z){e.preventDefault();z.classList.add('over')}}));
+document.addEventListener('dragleave',e=>{const z=e.target.closest&&e.target.closest('#drop');if(z&&!z.contains(e.relatedTarget))z.classList.remove('over')});
+document.addEventListener('drop',e=>{const z=e.target.closest&&e.target.closest('#drop');if(z){e.preventDefault();z.classList.remove('over');if(e.dataTransfer.files.length)addFiles(e.dataTransfer.files)}});
+window.addEventListener('dragover',e=>e.preventDefault());window.addEventListener('drop',e=>e.preventDefault());
+
+load();render();
+</script>
 </body>
 </html>
