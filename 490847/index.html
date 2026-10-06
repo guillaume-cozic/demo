@@ -2,20 +2,1009 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Marketplace producteurs locaux</title>
+<meta name="description" content="Marketplace de circuits courts entre agriculteurs et particuliers : recherche de fermes par commune, rayon et catégorie, fiches exploitations, gestion des produits, demandes de réservation avec retrait à la ferme, notifications e-mail simulées et espace administrateur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F3EC;--panel:#FFFFFF;--panel-2:#FAF8F3;--ink:#1F2A1F;--muted:#59625A;--line:#E4DED1;--line-2:#CBC3B2;
+  --accent:#2F6B3F;--accent-ink:#FFFFFF;--accent-soft:#E2EFE3;--accent-text:#24552F;
+  --terra:#9E4326;--terra-soft:#F7E6DD;--river:#A9CBDD;--land:#EDE8DB;
+  --ok:#1E6B39;--ok-soft:#DDF0E2;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4E5552;--gray-soft:#ECEAE5;
+  --shadow:0 1px 2px rgba(30,30,20,.05),0 4px 14px rgba(30,30,20,.06);
+  --font:"Work Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#131712;--panel:#1A1F19;--panel-2:#20271F;--ink:#E7EBE3;--muted:#A5AE9F;--line:#2C3429;--line-2:#3F4A3B;
+  --accent:#86C895;--accent-ink:#0D2213;--accent-soft:#1E3324;--accent-text:#A6DBB2;
+  --terra:#F0A585;--terra-soft:#3A2219;--river:#2E4F63;--land:#1F251D;
+  --ok:#7BD49C;--ok-soft:#163020;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--gray:#B8BFBB;--gray-soft:#262B29;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25}
+h1,h2{font-family:var(--serif);font-weight:700;letter-spacing:-.01em}
+h1{font-size:clamp(22px,2.4vw,30px)}
+h2{font-size:19px}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+a{color:var(--accent-text)}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--terra-soft);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--terra)}
+.demo-band button{min-height:44px;border:0;background:transparent;border-radius:8px;padding:0 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.demo-band button svg{width:15px;height:15px}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:700;font-size:19px;min-width:0}
+.brand small{display:block;font-family:var(--font);font-weight:500;font-size:12px;color:var(--muted)}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.mark svg{width:22px;height:22px}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--terra);color:var(--panel);border-radius:999px;padding:0 7px;min-width:20px;text-align:center;font-weight:700}
+.tools{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:8px;min-width:0}
+.who label{font-size:13px;color:var(--muted);white-space:nowrap}
+.who select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px;max-width:300px;min-width:0}
+.mailbtn{position:relative}
+.mailbtn .cnt{position:absolute;top:2px;right:2px;font-size:11px;padding:0 5px;min-width:18px}
+main{padding:20px clamp(16px,2vw,32px) 64px}
+@media (max-width:820px){.tools{margin-left:0;width:100%}.who{flex:1}.who select{flex:1;max-width:none;width:0}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink);text-align:center;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:currentColor}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.panel,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.panel{padding:18px}
+.page-head{display:flex;gap:12px 20px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+.page-head p{margin-top:4px}
+.back{margin-bottom:12px}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.flabel{font-weight:600;font-size:14px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:500}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=password],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{min-height:88px;resize:vertical}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--accent)}
+.form-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:560px){.form-grid{grid-template-columns:minmax(0,1fr)}}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{font-weight:600;font-size:14px;padding:0;margin-bottom:6px}
+.check{display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;cursor:pointer;font-size:14px;font-weight:500;background:var(--panel)}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.chip:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.chip svg{width:16px;height:16px}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 10px;background:var(--gray-soft);color:var(--gray);line-height:1.5}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}.badge.warn{background:var(--warn-soft);color:var(--warn)}.badge.bad{background:var(--bad-soft);color:var(--bad)}.badge.info{background:var(--info-soft);color:var(--info)}.badge.acc{background:var(--accent-soft);color:var(--accent-text)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+
+.seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{min-height:44px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+
+/* catégories */
+.tile{width:56px;height:56px;border-radius:12px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--k) 14%,var(--panel));color:var(--k);overflow:hidden}
+.tile svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tile img{width:100%;height:100%;object-fit:cover}
+@media (prefers-color-scheme:dark){.tile{color:color-mix(in srgb,var(--k) 55%,#fff);background:color-mix(in srgb,var(--k) 22%,var(--panel))}}
+
+/* explorer */
+.explore{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);grid-template-areas:"f" "m" "r"}
+.explore>.filters{grid-area:f}.explore>.mapbox{grid-area:m}.explore>.results{grid-area:r}
+@media (min-width:900px){.explore{grid-template-columns:270px minmax(0,1fr);grid-template-areas:"f m" "f r"}.filters{align-self:start;position:sticky;top:76px}}
+@media (min-width:1280px){.explore{grid-template-columns:280px minmax(0,1fr) minmax(0,440px);grid-template-areas:"f r m"}.mapbox{align-self:start;position:sticky;top:76px}}
+.filters{display:flex;flex-direction:column;gap:16px}
+.res-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.grid-cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))}
+.farm-card{position:relative;overflow:hidden;display:flex;flex-direction:column}
+.farm-card .ph{position:relative;aspect-ratio:16/9;background:var(--land)}
+.ph svg,.ph img{display:block;width:100%;height:100%;object-fit:cover}
+.dist{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.94);color:#1F2A1F;font-weight:700;font-size:13px;border-radius:999px;padding:2px 10px}
+.farm-card .body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.stretch{background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.stretch::after{content:"";position:absolute;inset:0}
+.stretch:focus-visible{outline:none}
+.farm-card:has(.stretch:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.farm-card:hover{border-color:var(--line-2)}
+.meta{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13.5px}
+.meta svg{width:15px;height:15px}
+.pcard{padding:14px;display:flex;flex-direction:column;gap:10px}
+.pc-top{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.pc-top>div{min-width:0}
+.price{font-weight:700;font-size:17px}
+.empty{text-align:center;padding:36px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+.mapbox{padding:12px}
+.map{width:100%;height:auto;display:block;border-radius:10px;background:var(--land);max-height:520px}
+@media (max-width:899px){.map{max-height:300px}}
+.pin{cursor:pointer}
+.pin:focus{outline:none}
+.pin:focus-visible circle.halo{stroke:var(--ink);stroke-width:3}
+.m-land{fill:var(--land)}.m-river{fill:none;stroke:var(--river)}.m-t{fill:var(--muted)}.m-rad{fill:var(--accent);fill-opacity:.07;stroke:var(--accent)}
+.m-halo{fill:var(--panel);stroke:var(--accent)}.m-on{fill:var(--accent)}.m-st{stroke:var(--panel)}.m-off{fill:var(--line-2);stroke:var(--panel)}.m-me{fill:var(--terra);stroke:var(--panel)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:8px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+
+/* fiche ferme */
+.farm-layout{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.farm-main{display:grid;gap:16px;align-content:start;min-width:0}
+@media (min-width:1000px){.farm-layout{grid-template-columns:minmax(0,1fr) minmax(0,380px)}.basket{position:sticky;top:76px;align-self:start}}
+@media (min-width:1500px){.farm-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.farm-main .prods{grid-column:1/-1}}
+.gallery{padding:0;overflow:hidden}
+.hero{aspect-ratio:16/9;background:var(--land)}
+.hero svg,.hero img{width:100%;height:100%;display:block;object-fit:cover}
+.thumbs{display:flex;gap:8px;padding:10px;overflow-x:auto}
+.thumbs button{width:84px;height:56px;padding:0;border:2px solid transparent;border-radius:8px;overflow:hidden;cursor:pointer;flex:none;background:var(--land)}
+.thumbs button[aria-pressed="true"]{border-color:var(--accent)}
+.thumbs svg,.thumbs img{width:100%;height:100%;display:block;object-fit:cover}
+.info{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));margin:16px 0}
+.info>div{display:flex;gap:10px;min-width:0}
+.info svg{margin-top:3px;color:var(--accent-text)}
+.info dt{font-size:12.5px;color:var(--muted)}
+.info dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.plist{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
+.prow{display:grid;grid-template-columns:56px minmax(0,1fr);grid-template-areas:"t i" "s s";gap:10px 12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.prow .tile{grid-area:t}.prow .pinfo{grid-area:i;min-width:0}.prow .stepper{grid-area:s;justify-self:end}
+.pinfo h3{margin-bottom:2px}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:12px;background:var(--panel)}
+.stepper button{width:44px;height:44px;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;border-radius:11px;color:var(--accent-text)}
+.stepper button:disabled{color:var(--muted);opacity:.45;cursor:not-allowed}
+.stepper output{min-width:64px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.cat-h{display:flex;align-items:center;gap:8px;margin:18px 0 10px;font-size:15px;color:var(--muted);font-weight:600}
+.cat-h:first-of-type{margin-top:6px}
+.basket h2{margin-bottom:6px}
+.blist{list-style:none;margin:14px 0;padding:0;display:grid;gap:8px}
+.blist li{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.blist li span:first-child{min-width:0;overflow-wrap:anywhere}
+.total{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:10px;margin:6px 0 14px;font-weight:700;font-size:17px}
+.note{display:flex;gap:10px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);font-size:13.5px;align-items:flex-start}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note svg{margin-top:2px}
+.mbar{position:fixed;left:12px;right:12px;bottom:12px;z-index:25;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+@media (min-width:1000px){.mbar{display:none}}
+
+/* réservations */
+.req-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr))}
+.req{padding:16px;display:flex;flex-direction:column;gap:12px}
+.req.flash{outline:3px solid var(--accent);outline-offset:2px}
+.req-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.req-h>div{min-width:0}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.kv dt{font-size:12.5px;color:var(--muted)}
+.kv dd{margin:0;font-weight:500;font-size:14px;overflow-wrap:anywhere}
+@media (max-width:420px){.kv{grid-template-columns:minmax(0,1fr)}}
+.items{list-style:none;margin:0;padding:10px 12px;border-radius:10px;background:var(--panel-2);display:grid;gap:4px;font-size:14px}
+.items li{display:flex;justify-content:space-between;gap:10px}
+.items li span:first-child{min-width:0;overflow-wrap:anywhere}
+.items .tot{border-top:1px solid var(--line);padding-top:6px;margin-top:4px;font-weight:700}
+blockquote{margin:0;padding:8px 12px;border-left:3px solid var(--line-2);color:var(--muted);font-size:14px;font-style:italic;overflow-wrap:anywhere}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;font-size:14px;color:var(--accent-text)}
+.tl{margin:0;padding-left:18px;font-size:13.5px;display:grid;gap:4px}
+.tl time{color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* tableaux */
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td .actions{gap:4px}
+.prod-cell{display:flex;gap:10px;align-items:center;min-width:0}
+.prod-cell .tile{width:44px;height:44px}
+.prod-cell .tile svg{width:22px;height:22px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.toolbar .field{flex:1 1 200px;max-width:340px}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi b{display:block;font-size:28px;font-family:var(--serif);line-height:1.2}
+.kpi span{color:var(--muted);font-size:13.5px}
+.cols{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;flex-wrap:wrap}
+.list li>div{min-width:0}
+
+.photos{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin:8px 0}
+.photos figure{margin:0;position:relative;border-radius:10px;overflow:hidden;aspect-ratio:16/10;background:var(--land)}
+.photos figure svg,.photos figure img{width:100%;height:100%;display:block;object-fit:cover}
+.photos figure .icon-btn{position:absolute;top:4px;right:4px;background:rgba(255,255,255,.94);color:#7a1d23}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.filebtn:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+
+dialog{border:0;border-radius:16px;padding:0;width:min(580px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(15,20,15,.5)}
+dialog.drawer{margin:0 0 0 auto;height:100dvh;max-height:100dvh;border-radius:0;width:min(500px,100vw)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dlg-b{padding:18px;display:grid;gap:14px}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding:0 18px 18px}
+.mail{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.mail summary{display:block;min-height:0}
+.mail .to{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.mail pre{white-space:pre-wrap;font:inherit;font-size:14px;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.preview{display:flex;gap:12px;align-items:center}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:100;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:10px;align-items:flex-start;font-size:14px;animation:tin .2s ease-out}
+.toast.bad{background:var(--bad);color:#fff}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19 13 11"/></svg></span><span>Circuit Proche<small>Producteurs près de chez vous</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="tools">
+    <button type="button" class="icon-btn mailbtn" data-act="mails" id="mailBtn" aria-label="E-mails envoyés (simulation)"></button>
+    <div class="who"><label for="who">Voir en tant que</label><select id="who"></select></div>
+    <button type="button" class="btn sm" data-act="signup" id="signupBtn"></button>
+  </div>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="dlg"></dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const KEY='circuit-proche-demo-v1';
+
+const I={
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+back:'<path d="M15 18 9 12l6-6"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+minus:'<path d="M5 12h14"/>',
+edit:'<path d="M4 20h4L19 9l-4-4L4 16Z"/><path d="m13.5 6.5 4 4"/>',
+trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+check:'<path d="m5 12 5 5 9-10"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',
+cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+inbox:'<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v6H3v-6Z"/>',
+eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+eyeoff:'<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3 3.9M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/>',
+store:'<path d="M4 10v10h16V10"/><path d="M3 10 5 4h14l2 6Z"/><path d="M10 20v-5h4v5"/>',
+box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4Z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+chat:'<path d="M4 5h16v11H9l-5 4Z"/>',
+nav:'<path d="M3 11 21 3l-8 18-2-8Z"/>',
+upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+
+const CATS=[
+ {id:'leg',n:'Légumes',k:'#3F7D2C',s:'<path d="M14 10 5 19c-.6.6-1.6.2-1.6-.6l.1-.5L11 7"/><path d="M11 7c1.7-1.1 4-1 5.5.5S18.1 11.3 17 13"/><path d="M15 5c0-1.5 1-3 3-3M17 7c1.5 0 3-1 3-3"/>'},
+ {id:'fru',n:'Fruits',k:'#B5323A',s:'<path d="M12 7c-2-1.5-6-1.2-6.8 2.5C4.5 13 7 20 9.5 20c1 0 1.5-.5 2.5-.5s1.5.5 2.5.5C17 20 19.5 13 18.8 9.5 18 5.8 14 5.5 12 7Z"/><path d="M12 7c0-2 1-3.5 3-4"/>'},
+ {id:'lai',n:'Produits laitiers',k:'#9C7A0E',s:'<path d="M3 17v-6l13-6 5 6v6Z"/><path d="M3 11h18"/><circle cx="8" cy="14.5" r="1"/><circle cx="15" cy="14" r="1.2"/>'},
+ {id:'oeu',n:'Œufs',k:'#8A6A3C',s:'<path d="M12 3c3.5 0 6.5 6 6.5 10.5a6.5 6.5 0 0 1-13 0C5.5 9 8.5 3 12 3Z"/>'},
+ {id:'via',n:'Viande',k:'#9B3B3B',s:'<path d="M15.5 4.5a5 5 0 0 1 4 4 5 5 0 0 1-6.6 5.8l-3.4 3.4a2 2 0 1 1-2.6 2.6 2 2 0 1 1-2.6-2.6 2 2 0 1 1 2.6-2.6l3.4-3.4a5 5 0 0 1 5.2-7.2Z"/>'},
+ {id:'mie',n:'Miel & épicerie',k:'#B06A12',s:'<path d="M7 4h10M8 4v2.5C6 7.5 5.5 9 5.5 11v7a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-7c0-2-.5-3.5-2.5-4.5V4"/><path d="M5.5 12h13"/>'},
+ {id:'bou',n:'Boulangerie',k:'#96602C',s:'<path d="M5 11a3 3 0 0 1-1-5.5C5.5 4.5 8 4 12 4s6.5.5 8 1.5A3 3 0 0 1 19 11v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/>'},
+ {id:'boi',n:'Boissons',k:'#6B4E9B',s:'<path d="M10 2h4M10.5 2v4.5L8 10v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V10l-2.5-3.5V2"/><path d="M8 13h8"/>'},
+];
+const CAT=Object.fromEntries(CATS.map(c=>[c.id,c]));
+const catIcon=(id,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round">${CAT[id].s}</svg>`;
+const UNITS=['kg','pièce','botte','douzaine','litre','pot 500 g','250 g','lot de 4','panier','colis 5 kg'];
+const LABELS=['Agriculture biologique','HVE','Label Rouge','Fermier','Lait cru','Nature & Progrès'];
+const DAYS=[[1,'Lun.'],[2,'Mar.'],[3,'Mer.'],[4,'Jeu.'],[5,'Ven.'],[6,'Sam.'],[0,'Dim.']];
+const DAYN=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+
+const TOWNS={angers:['Angers',47.473,-0.551],avrille:['Avrillé',47.506,-0.589],trelaze:['Trélazé',47.446,-0.466],saumur:['Saumur',47.260,-0.077],cholet:['Cholet',47.060,-0.879],segre:['Segré',47.686,-0.872],bauge:['Baugé',47.541,-0.103],doue:['Doué-la-Fontaine',47.193,-0.275],chalonnes:['Chalonnes-sur-Loire',47.350,-0.762],brissac:['Brissac',47.354,-0.450],durtal:['Durtal',47.672,-0.233],beaupreau:['Beaupréau',47.204,-0.988]};
+const tn=t=>TOWNS[t]?.[0]||t;
+function km(a,b){const A=TOWNS[a],B=TOWNS[b];if(!A||!B)return 0;const r=Math.PI/180,dl=(B[1]-A[1])*r,dn=(B[2]-A[2])*r;const h=Math.sin(dl/2)**2+Math.cos(A[1]*r)*Math.cos(B[1]*r)*Math.sin(dn/2)**2;return 6371*2*Math.asin(Math.sqrt(h))}
+const kmTxt=d=>d<1?'Sur place':`${Math.round(d)} km`;
+
+const money=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);
+const nf=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2}).format(n);
+const qtyTxt=(q,u)=>u==='kg'?`${nf(q)} kg`:u==='litre'?`${nf(q)} L`:`${nf(q)} × ${u}`;
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dayFmt=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const dtFmt=new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const dFmt=new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+const fmtDay=s=>dayFmt.format(new Date(s+'T12:00'));
+const fmtDT=s=>dtFmt.format(new Date(s));
+const daysTxt=a=>DAYS.filter(d=>a.includes(d[0])).map(d=>d[1].toLowerCase()).join(', ')||'à définir';
+function nextSlots(f,from=0){const o=[];const t=new Date();t.setHours(12,0,0,0);for(let i=from+1;i<=from+28&&o.length<6;i++){const d=new Date(t);d.setDate(t.getDate()+i);if(f.days.includes(d.getDay()))o.push(ymd(d))}return o}
+const fmtSlot=(s,f)=>`${fmtDay(s)} · ${f.hours}`;
+
+/* Illustrations de démonstration (photos simulées) */
+const PHOTO_N=['Champ cultivé','Corps de ferme','Verger','Ruchers','Serre maraîchère'];
+function photoSvg(v,label){
+  v=v%5;
+  const sky=['#D6E8EF','#F2E6CF','#DCE9EF','#F0E7D3','#D8E7E2'][v];
+  let s=`<rect width="320" height="200" fill="${sky}"/><circle cx="${250-v*34}" cy="46" r="17" fill="#F2C462"/>`+
+  `<path d="M0 118 Q80 ${86+v*6} 160 110 T320 ${98+v*4} V200 H0Z" fill="#A3BE8F"/>`+
+  `<path d="M0 150 Q100 ${122+v*5} 200 146 T320 138 V200 H0Z" fill="#6F995E"/>`;
+  if(v===0){s+='<path d="M0 200 L0 160 Q160 140 320 160 V200Z" fill="#8C6B45"/><g stroke="#5E8A45" stroke-width="5" stroke-linecap="round">';for(let i=0;i<9;i++)s+=`<path d="M${i*40-10} 200 L${120+i*10} 156"/>`;s+='</g>'}
+  if(v===1){s+='<rect x="186" y="104" width="76" height="52" fill="#A8432C"/><path d="M180 108 224 78 268 108Z" fill="#6E2A1A"/><rect x="212" y="124" width="24" height="32" fill="#F3E9DA"/><path d="M212 124 236 156M236 124 212 156" stroke="#A8432C" stroke-width="2"/><rect x="60" y="120" width="44" height="34" fill="#E6DCC8"/><path d="M56 122 82 104 108 122Z" fill="#8B5A3C"/>'}
+  if(v===2){for(let i=0;i<6;i++){const x=24+i*56,y=150-(i%2)*8;s+=`<rect x="${x-3}" y="${y}" width="6" height="26" fill="#6B4A2E"/><circle cx="${x}" cy="${y-8}" r="20" fill="#4F7F3C"/><circle cx="${x-7}" cy="${y-10}" r="3" fill="#C8473B"/><circle cx="${x+8}" cy="${y-4}" r="3" fill="#C8473B"/>`}}
+  if(v===3){for(let i=0;i<5;i++){const x=40+i*56;s+=`<rect x="${x}" y="142" width="34" height="30" fill="#E2B84F"/><rect x="${x-3}" y="136" width="40" height="7" fill="#F4F0E6"/><path d="M${x} 152h34M${x} 162h34" stroke="#B88A26" stroke-width="2"/><rect x="${x+4}" y="172" width="4" height="10" fill="#6B4A2E"/><rect x="${x+26}" y="172" width="4" height="10" fill="#6B4A2E"/>`}}
+  if(v===4){s+='<path d="M40 172V132a60 34 0 0 1 120 0v40Z" fill="#EEF4F3" fill-opacity=".85" stroke="#8FA9A6" stroke-width="2"/><path d="M70 172v-56M100 172v-62M130 172v-56" stroke="#8FA9A6" stroke-width="2"/><path d="M190 176V140a50 28 0 0 1 100 0v36Z" fill="#EEF4F3" fill-opacity=".85" stroke="#8FA9A6" stroke-width="2"/><g fill="#4F8A3B">';for(let i=0;i<7;i++)s+=`<circle cx="${52+i*16}" cy="166" r="6"/>`;s+='</g>'}
+  return `<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(label||PHOTO_N[v])}">${s}</svg>`;
+}
+const photoHtml=(p,label)=>typeof p==='number'?photoSvg(p,label):`<img src="${p}" alt="${esc(label||'Photo de l\'exploitation')}">`;
+const prodVisual=p=>`<span class="tile" style="--k:${CAT[p.cat].k}">${p.img?`<img src="${p.img}" alt="">`:catIcon(p.cat)}</span>`;
+function stockBadge(p){if(p.stock<=0)return '<span class="badge bad">Épuisé</span>';if(p.stock<=5)return `<span class="badge warn">Stock limité · ${nf(p.stock)} ${p.unit==='kg'?'kg':'restant(s)'}</span>`;return '<span class="badge ok">Disponible</span>'}
+const ST={attente:['En attente','warn'],confirmee:['Confirmée','ok'],refusee:['Refusée','bad'],retiree:['Retirée','info'],annulee:['Annulée','']};
+
+/* ---------- Données ---------- */
+let S;
+function seed(){
+  const ago=n=>{const d=new Date();d.setDate(d.getDate()-n);d.setHours(9+(n%8),17*n%60,0,0);return d.toISOString()};
+  const users=[
+    {id:'u-admin',role:'admin',name:'Équipe Circuit Proche',email:'admin@circuit-proche.fr',town:'angers',created:ago(320),status:'actif'},
+    {id:'u-lea',role:'client',name:'Léa Martin',email:'lea.martin@exemple.fr',phone:'06 12 45 78 90',town:'angers',created:ago(64),status:'actif'},
+    {id:'u-thomas',role:'client',name:'Thomas Garnier',email:'t.garnier@exemple.fr',phone:'06 33 21 08 54',town:'avrille',created:ago(41),status:'actif'},
+    {id:'u-sophie',role:'client',name:'Sophie Lemaire',email:'sophie.lemaire@exemple.fr',town:'trelaze',created:ago(30),status:'actif'},
+    {id:'u-julien',role:'client',name:'Julien Moreau',email:'julien.moreau@exemple.fr',town:'saumur',created:ago(22),status:'actif'},
+    {id:'u-nadia',role:'client',name:'Nadia Benali',email:'nadia.b@exemple.fr',town:'cholet',created:ago(12),status:'actif'},
+    {id:'u-marc',role:'client',name:'Marc Delaunay',email:'marc.delaunay@exemple.fr',town:'angers',created:ago(5),status:'suspendu'},
+  ];
+  const F=(id,name,uid,owner,town,address,phone,short,desc,labels,days,hours,photos,status='publiee',age=200)=>{
+    users.push({id:uid,role:'farmer',name:owner,email:uid.slice(2)+'@ferme-exemple.fr',phone,town,created:ago(age),status:'actif',farmId:id});
+    return {id,name,owner:uid,town,address,phone,email:uid.slice(2)+'@ferme-exemple.fr',short,desc,labels,days,hours,photos,status,created:ago(age)};
+  };
+  const farms=[
+    F('f-chenes','Ferme des Trois Chênes','u-camille','Camille Rousseau','brissac','12 chemin des Noues, 49320 Brissac','02 41 00 12 34','Maraîchage diversifié en agriculture biologique, plus de 40 variétés de légumes de saison.','Installée depuis 2014 sur 4 hectares, la ferme cultive en plein champ et sous serres des légumes de saison sans pesticides de synthèse. Les paniers sont composés le jour même de la récolte. Visite des cultures possible le samedi matin.',['Agriculture biologique'],[3,6],'17h – 19h',[0,4,1],'publiee',900),
+    F('f-verger','Le Verger de la Loire','u-pierre','Pierre Chevalier','chalonnes','La Haute Rive, 49290 Chalonnes-sur-Loire','02 41 00 23 45','Pommes et poires de variétés anciennes, jus et compotes pressés à la ferme.','Un verger familial de 9 hectares en bord de Loire. Plus de 15 variétés de pommes, récoltées à maturité et conservées en chambre froide naturelle. Jus pasteurisé sur place.',['HVE'],[5,6],'10h – 12h30',[2,1,0],'publiee',700),
+    F('f-chevre','Chèvrerie du Moulin Neuf','u-agathe','Agathe Leroy','durtal','Le Moulin Neuf, 49430 Durtal','02 41 00 34 56','Fromages de chèvre au lait cru, troupeau de 60 chèvres alpines en pâturage.','Nos chèvres pâturent d’avril à novembre. Tous les fromages sont moulés à la louche et affinés dans notre cave : crottins frais, bûches cendrées et tommes de 3 mois.',['Fermier','Lait cru'],[2,5,6],'17h30 – 19h',[1,4,2],'publiee',540),
+    F('f-ruches','Les Ruchers du Layon','u-bruno','Bruno Fabre','doue','8 rue des Perrières, 49700 Doué-la-Fontaine','02 41 00 45 67','Miels de cru récoltés en Anjou, pain d’épices et produits de la ruche.','120 ruches réparties entre coteaux du Layon et forêt de Brissac. Extraction à froid et mise en pot à la miellerie. Ateliers découverte pour les enfants en été.',['Agriculture biologique'],[6],'9h – 12h',[3,0,2],'publiee',480),
+    F('f-haie','Élevage de la Haie Vive','u-yann','Yann Guérin','segre','La Haie Vive, 49500 Segré','02 41 00 56 78','Bœuf rouge des prés et volailles fermières élevés en plein air.','Élevage naissant-engraisseur de 70 vaches rouges des prés nourries à l’herbe et au foin de la ferme. Les colis sont préparés par notre boucher partenaire, sous vide et étiquetés.',['Label Rouge'],[5],'16h – 19h',[1,0,4],'publiee',800),
+    F('f-pres','GAEC des Prés Fleuris','u-claire','Claire et Hugo Pasquier','bauge','Route de Clefs, 49150 Baugé','02 41 00 67 89','Lait cru, beurre, yaourts et œufs de poules élevées en plein air.','Ferme laitière de 45 vaches normandes et 500 poules pondeuses en parcours herbeux. Transformation à la ferme dans notre laboratoire agréé.',['Fermier'],[1,3,5],'17h – 19h',[4,1,0],'publiee',650),
+    F('f-fournil','Fournil de la Grange','u-elodie','Élodie Barbier','beaupreau','La Grange, 49600 Beaupréau','02 41 00 78 90','Paysanne-boulangère : blés anciens cultivés, moulus et panifiés sur la ferme.','Du grain au pain : nos blés de population sont moulus sur meule de pierre et cuits au feu de bois deux fois par semaine. Pensez à réserver, les fournées partent vite.',['Agriculture biologique','Nature & Progrès'],[2,5],'16h30 – 19h',[1,0,2],'publiee',420),
+    F('f-coteaux','Domaine des Coteaux','u-louis','Louis Marchand','saumur','15 route de Champigny, 49400 Saumur','02 41 00 89 01','Raisin de table, jus de raisin et confitures du Saumurois.','Domaine familial de troisième génération sur le coteau saumurois. Raisin cueilli à la main, jus pressé à la propriété et confitures cuites en petites bassines.',['HVE'],[3,6],'14h – 18h',[2,3,1],'publiee',380),
+    F('f-jardins','Les Jardins d’Hélène','u-helene','Hélène Dupuis','avrille','3 allée des Tilleuls, 49240 Avrillé','02 41 00 90 12','Jeune installation en micro-ferme maraîchère, légumes et aromatiques.','Micro-ferme d’un hectare en permaculture installée en 2026. Légumes primeurs, aromatiques en pot et fleurs comestibles.',[],[6],'9h – 12h',[4],'attente',3),
+  ];
+  let n=0;const P=(farm,name,cat,price,unit,stock,desc)=>({id:'p'+(++n),farm,name,cat,price,unit,stock,desc,published:true,hidden:false});
+  const products=[
+    P('f-chenes','Tomates anciennes','leg',4.8,'kg',25,'Cœur de bœuf, noire de Crimée, ananas : mélange selon la récolte.'),
+    P('f-chenes','Courgettes','leg',2.9,'kg',18,'Vertes et jaunes, récoltées jeunes.'),
+    P('f-chenes','Salade batavia','leg',1.2,'pièce',30,'Blonde ou rouge selon la semaine.'),
+    P('f-chenes','Carottes en botte','leg',2.2,'botte',12,'Botte d’environ 800 g, fanes comprises.'),
+    P('f-chenes','Panier de saison (≈ 5 kg)','leg',15,'panier',8,'Assortiment de 6 à 8 légumes de la semaine.'),
+    P('f-chenes','Potimarron','leg',2.6,'kg',4,'Pièces de 1 à 1,5 kg, idéales en velouté.'),
+    P('f-chenes','Haricots verts','leg',6.5,'kg',0,'Fin de saison, retour en juin.'),
+    P('f-verger','Pommes Reinette grise','fru',2.8,'kg',60,'Variété ancienne acidulée, parfaite pour les tartes.'),
+    P('f-verger','Poires Conférence','fru',3.2,'kg',22,'Fondantes, à laisser mûrir 2 ou 3 jours.'),
+    P('f-verger','Jus de pomme','boi',3.5,'litre',40,'100 % pur jus, sans sucre ajouté, bouteille consignée.'),
+    P('f-verger','Compote pomme-coing','mie',4.2,'pot 500 g',4,'Cuite au chaudron, très peu sucrée.'),
+    P('f-chevre','Crottin frais','lai',2.4,'pièce',30,'Environ 60 g, affiné 8 jours.'),
+    P('f-chevre','Bûche cendrée','lai',6.8,'pièce',9,'Environ 200 g, affinée 3 semaines.'),
+    P('f-chevre','Tomme de chèvre','lai',26,'kg',4,'Pâte pressée affinée 3 mois, coupe à la demande.'),
+    P('f-chevre','Faisselle','lai',3.1,'pot 500 g',12,'Moulée le matin même.'),
+    P('f-ruches','Miel de tilleul','mie',9.5,'pot 500 g',20,'Miel crémeux, notes mentholées.'),
+    P('f-ruches','Miel de châtaignier','mie',10.5,'pot 500 g',2,'Miel ambré, puissant et légèrement amer.'),
+    P('f-ruches','Pain d’épices au miel','bou',7,'pièce',6,'Environ 400 g, 50 % de miel.'),
+    P('f-haie','Colis de bœuf','via',95,'colis 5 kg',3,'Steaks, rôti, bourguignon et pot-au-feu, sous vide.'),
+    P('f-haie','Poulet fermier entier','via',24,'pièce',7,'Environ 2 kg, élevé 110 jours en plein air.'),
+    P('f-haie','Steaks hachés 15 %','via',18.9,'kg',10,'Par sachets de 4, surgelés.'),
+    P('f-pres','Œufs plein air','oeu',4.2,'douzaine',35,'Calibre moyen à gros, ramassés du jour.'),
+    P('f-pres','Lait cru entier','lai',1.3,'litre',50,'À faire bouillir, apportez vos bouteilles.'),
+    P('f-pres','Beurre demi-sel','lai',4.5,'250 g',14,'Baratté à l’ancienne.'),
+    P('f-pres','Yaourts nature','lai',3.6,'lot de 4',0,'Au lait entier, pots en verre consignés.'),
+    P('f-fournil','Pain au levain 1 kg','bou',5.8,'pièce',20,'Blés anciens, cuisson au feu de bois.'),
+    P('f-fournil','Farine T80','bou',3.2,'kg',25,'Moulue sur meule de pierre.'),
+    P('f-fournil','Brioche du samedi','bou',7.5,'pièce',0,'Au beurre de la ferme voisine.'),
+    P('f-coteaux','Raisin de table chasselas','fru',4.5,'kg',8,'Cueilli à la main, grappes dorées.'),
+    P('f-coteaux','Jus de raisin','boi',4.9,'litre',30,'Pur jus de chenin, non filtré.'),
+    P('f-coteaux','Confiture de figues','mie',5.2,'pot 500 g',15,'Figues du domaine, 55 % de fruits.'),
+    P('f-jardins','Aromatiques en pot','leg',3,'pièce',20,'Basilic, thym, menthe, ciboulette.'),
+    P('f-jardins','Mesclun','leg',18,'kg',5,'Jeunes pousses et fleurs comestibles.'),
+  ];
+  S={users,farms,products,requests:[],emails:[],basket:{farm:null,items:{}},current:'u-lea',seq:137};
+  const pr=id=>products.find(p=>p.id===id);
+  const mk=(client,farm,items,slot,status,age,msg,extra)=>{
+    const r={id:`R-${String(new Date().getFullYear()).slice(2)}-${String(++S.seq).padStart(4,'0')}`,client,farm,slot,status,message:msg||'',created:ago(age),
+      items:items.map(([pid,q])=>{const p=pr(pid);return {pid,name:p.name,unit:p.unit,price:p.price,qty:q}}),history:[{at:ago(age),txt:'Demande envoyée au producteur'}]};
+    if(['confirmee','retiree'].includes(status))r.history.push({at:ago(Math.max(age-1,0)),txt:'Confirmée par le producteur'});
+    if(status==='refusee')r.history.push({at:ago(Math.max(age-1,0)),txt:'Refusée : '+extra});
+    if(status==='retiree')r.history.push({at:ago(Math.max(age-3,0)),txt:'Retirée à la ferme'});
+    S.requests.push(r);
+  };
+  const past=n=>{const d=new Date();d.setDate(d.getDate()-n);return ymd(d)};
+  const fz=id=>farms.find(f=>f.id===id);
+  mk('u-lea','f-chevre',[['p12',4],['p13',1]],past(5),'retiree',8,'');
+  mk('u-nadia','f-fournil',[['p26',2],['p28',1]],past(2),'refusee',4,'',"Brioche épuisée cette semaine");
+  mk('u-lea','f-chenes',[['p1',1.5],['p4',2],['p5',1]],nextSlots(fz('f-chenes'))[0],'confirmee',2,'Je passerai plutôt en fin de créneau, merci !');
+  mk('u-julien','f-verger',[['p8',3],['p10',4]],nextSlots(fz('f-verger'))[0],'attente',1,'');
+  mk('u-thomas','f-chenes',[['p5',2],['p3',3]],nextSlots(fz('f-chenes'))[0],'attente',1,'Est-ce possible d’avoir des carottes en plus dans le panier ?');
+  mk('u-sophie','f-chenes',[['p6',3],['p2',1]],nextSlots(fz('f-chenes'))[1],'attente',0,'');
+  mk('u-thomas','f-pres',[['p22',2],['p24',2]],nextSlots(fz('f-pres'))[0],'confirmee',1,'');
+  S.emails=[
+    {id:'m1',to:'u-lea',subject:'Réservation confirmée — Ferme des Trois Chênes',body:'Bonjour Léa,\n\nCamille Rousseau a confirmé votre demande. Retrait à la ferme au créneau prévu, règlement sur place.\n\nÀ bientôt sur Circuit Proche.',at:ago(1)},
+    {id:'m2',to:'u-camille',subject:'Nouvelle demande de réservation de Sophie Lemaire',body:'Bonjour Camille,\n\nSophie Lemaire vous a envoyé une demande de réservation. Connectez-vous à votre espace producteur pour la confirmer ou la refuser.',at:ago(0)},
+    {id:'m3',to:'u-admin',subject:'Nouvelle fiche producteur à valider : Les Jardins d’Hélène',body:'Une nouvelle exploitation vient de s’inscrire. Vérifiez la fiche puis publiez-la depuis l’espace administrateur.',at:ago(3)},
+  ];
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);return}}catch(e){}seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const me=()=>S.users.find(u=>u.id===S.current)||S.users[1];
+const user=id=>S.users.find(u=>u.id===id);
+const farm=id=>S.farms.find(f=>f.id===id);
+const prod=id=>S.products.find(p=>p.id===id);
+const farmVisible=f=>f.status==='publiee'&&user(f.owner)?.status==='actif';
+const prodVisible=p=>p.published&&!p.hidden;
+const farmProds=(fid,all)=>S.products.filter(p=>p.farm===fid&&(all||prodVisible(p)));
+const farmCats=fid=>[...new Set(farmProds(fid).map(p=>p.cat))];
+const myFarm=()=>farm(me().farmId);
+
+function mail(uid,subject,body){
+  const u=user(uid);if(!u)return;
+  S.emails.unshift({id:'m'+Date.now()+Math.random().toString(36).slice(2,5),to:uid,subject,body,at:new Date().toISOString()});
+  toast(`E-mail envoyé à ${u.name} (simulation)`,'mail');
+}
+function toast(msg,kind){
+  const t=document.createElement('div');t.className='toast'+(kind==='bad'?' bad':'');
+  t.innerHTML=ic(kind==='bad'?'info':kind==='mail'?'mail':'check')+`<span>${esc(msg)}</span>`;
+  $('#toasts').append(t);setTimeout(()=>t.remove(),kind==='mail'?4200:3200);
+}
+
+/* ---------- État UI ---------- */
+const UI={view:'explore',farm:null,mode:'farms',town:'angers',radius:40,cats:[],q:'',dispo:false,photo:0,tab:'todo',mineTab:'all',uq:'',urole:'',pq:'',pcat:'',fq:'',flash:null,mailAll:false,edit:null,tmpImg:null,pending:null};
+const DEF={client:'explore',farmer:'requests',admin:'dash'};
+function go(view,o={}){Object.assign(UI,{view},o);if(view==='farm')UI.photo=0;render();window.scrollTo(0,0)}
+
+/* ---------- En-tête ---------- */
+const NAV={client:[['explore','Explorer','search'],['mine','Mes réservations','cal']],farmer:[['requests','Demandes','inbox'],['products','Mes produits','box'],['profile','Ma fiche','store']],admin:[['dash','Vue d’ensemble','shield'],['users','Utilisateurs','user'],['farms','Producteurs','store'],['aproducts','Produits','box']]};
+function renderTop(){
+  const u=me();
+  const cnt={mine:S.requests.filter(r=>r.client===u.id&&['attente','confirmee'].includes(r.status)).length,
+    requests:u.farmId?S.requests.filter(r=>r.farm===u.farmId&&r.status==='attente').length:0,
+    farms:S.farms.filter(f=>f.status==='attente').length};
+  const cur=UI.view==='farm'?(u.role==='client'?'explore':u.role==='admin'?'farms':'profile'):UI.view==='profile'&&u.role==='admin'?'farms':UI.view;
+  $('#nav').innerHTML=NAV[u.role].map(([v,l,i])=>`<button type="button" class="tab" data-act="nav" data-v="${v}" ${cur===v?'aria-current="page"':''}>${ic(i)}${l}${cnt[v]?`<span class="cnt" aria-label="${cnt[v]} en cours">${cnt[v]}</span>`:''}</button>`).join('');
+  const g=(r,l)=>`<optgroup label="${l}">`+S.users.filter(x=>x.role===r).map(x=>`<option value="${x.id}" ${x.id===u.id?'selected':''}>${esc(x.role==='farmer'?`${x.name} — ${farm(x.farmId)?.name||''}`:x.name)}${x.status==='suspendu'?' (suspendu)':''}</option>`).join('')+'</optgroup>';
+  $('#who').innerHTML=g('client','Particuliers')+g('farmer','Agriculteurs')+g('admin','Administration');
+  const mc=S.emails.filter(m=>m.to===u.id).length;
+  $('#mailBtn').innerHTML=ic('mail')+(mc?`<span class="cnt">${mc}</span>`:'');
+  $('#mailBtn').setAttribute('aria-label',`E-mails envoyés (simulation) : ${mc} pour ${u.name}`);
+  $('#signupBtn').innerHTML=ic('user')+'<span>Créer un compte</span>';
+}
+
+/* ---------- Explorer ---------- */
+function renderExplore(){
+  return `<div class="page-head"><div><h1>Achetez en direct aux producteurs près de chez vous</h1><p class="muted">Trouvez une ferme, réservez vos produits et récupérez-les sur place. Le règlement se fait directement auprès du producteur.</p></div></div>
+  <div class="explore">
+    <aside class="panel filters" aria-label="Filtres de recherche">
+      <form id="fForm" onsubmit="return false">
+        <div class="filters">
+          <div class="field"><label for="fTown">Votre commune</label><select id="fTown" name="town">${Object.entries(TOWNS).sort((a,b)=>a[1][0].localeCompare(b[1][0])).map(([k,v])=>`<option value="${k}" ${UI.town===k?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+          <div class="field"><label for="fRad">Rayon de recherche : <span id="radV">${UI.radius} km</span></label><input type="range" id="fRad" name="radius" min="5" max="80" step="5" value="${UI.radius}"></div>
+          <div class="field"><label for="fQ">Produit ou ferme</label><input type="search" id="fQ" name="q" value="${esc(UI.q)}" placeholder="Tomates, miel, chèvre…" autocomplete="off"></div>
+          <fieldset><legend>Catégories</legend><div class="chips">${CATS.map(c=>`<label class="chip"><input type="checkbox" name="cat" value="${c.id}" ${UI.cats.includes(c.id)?'checked':''}>${catIcon(c.id)}${c.n}</label>`).join('')}</div></fieldset>
+          <label class="check"><input type="checkbox" name="dispo" ${UI.dispo?'checked':''}> Produits disponibles uniquement</label>
+          <button type="button" class="btn ghost sm" data-act="reset-filters">${ic('x')}Effacer les filtres</button>
+        </div>
+      </form>
+    </aside>
+    <section class="mapbox panel" aria-label="Carte des producteurs"><div id="map"></div>
+      <div class="legend"><span><span class="dot" style="background:var(--accent)"></span>Résultats</span><span><span class="dot" style="background:var(--line-2)"></span>Hors critères</span><span><span class="dot" style="background:var(--terra)"></span>Votre commune</span></div></section>
+    <section class="results" aria-labelledby="resTitle">
+      <div class="res-head"><h2 id="resTitle" aria-live="polite"></h2><div class="seg" role="group" aria-label="Type de résultats"><button type="button" data-act="mode" data-m="farms" aria-pressed="${UI.mode==='farms'}">Producteurs</button><button type="button" data-act="mode" data-m="prods" aria-pressed="${UI.mode==='prods'}">Produits</button></div></div>
+      <div id="results"></div>
+    </section>
+  </div>`;
+}
+function exploreData(){
+  const q=norm(UI.q).trim();
+  const near=S.farms.filter(farmVisible).map(f=>({f,d:km(UI.town,f.town)})).filter(x=>x.d<=UI.radius).sort((a,b)=>a.d-b.d);
+  const pOk=p=>prodVisible(p)&&(!UI.cats.length||UI.cats.includes(p.cat))&&(!UI.dispo||p.stock>0);
+  const farms=near.filter(({f})=>{
+    const ps=farmProds(f.id).filter(pOk);
+    if((UI.cats.length||UI.dispo)&&!ps.length)return false;
+    if(!q)return true;
+    return norm([f.name,f.short,f.desc,tn(f.town),...farmProds(f.id).map(p=>p.name)].join(' ')).includes(q);
+  });
+  const prods=[];near.forEach(({f,d})=>farmProds(f.id).filter(pOk).forEach(p=>{if(!q||norm(p.name+' '+p.desc+' '+f.name).includes(q))prods.push({p,f,d})}));
+  return {farms,prods};
+}
+function updateExplore(){
+  const {farms,prods}=exploreData();
+  const segs=document.querySelectorAll('.results .seg button');
+  if(segs.length){segs[0].textContent=`Producteurs (${farms.length})`;segs[1].textContent=`Produits (${prods.length})`}
+  $('#resTitle').textContent=UI.mode==='farms'?`${farms.length} producteur${farms.length>1?'s':''} à moins de ${UI.radius} km de ${tn(UI.town)}`:`${prods.length} produit${prods.length>1?'s':''} à moins de ${UI.radius} km de ${tn(UI.town)}`;
+  let h='';
+  if(UI.mode==='farms'){
+    h=farms.length?'<div class="grid-cards">'+farms.map(({f,d})=>{
+      const ps=farmProds(f.id),av=ps.filter(p=>p.stock>0).length;
+      return `<article class="card farm-card"><div class="ph">${photoHtml(f.photos[0],f.name)}<span class="dist">${kmTxt(d)}</span></div>
+      <div class="body"><h3><button type="button" class="stretch" data-act="open-farm" data-id="${f.id}" data-k="of-${f.id}">${esc(f.name)}</button></h3>
+      <p class="meta">${ic('pin')}${tn(f.town)} · retrait ${daysTxt(f.days)}</p>
+      <p class="small">${esc(f.short)}</p>
+      <div class="tags">${farmCats(f.id).map(c=>`<span class="badge">${CAT[c].n}</span>`).join('')}${f.labels.map(l=>`<span class="badge acc">${esc(l)}</span>`).join('')}</div>
+      <p class="small muted" style="margin-top:auto">${av} produit${av>1?'s':''} disponible${av>1?'s':''} sur ${ps.length}</p></div></article>`}).join('')+'</div>'
+      :`<div class="empty"><p><b>Aucun producteur ne correspond.</b></p><p>Élargissez le rayon ou retirez un filtre.</p></div>`;
+  }else{
+    h=prods.length?'<div class="grid-cards">'+prods.map(({p,f,d})=>`<article class="card pcard"><div class="pc-top">${prodVisual(p)}<div><h3>${esc(p.name)}</h3><p class="small muted">${esc(f.name)} · ${kmTxt(d)}</p></div></div>
+      <p><span class="price">${money(p.price)}</span> <span class="muted">/ ${esc(p.unit)}</span></p><div>${stockBadge(p)}</div>
+      <button type="button" class="btn sm" data-act="open-farm" data-id="${f.id}" data-k="op-${p.id}">${ic('store')}Réserver chez ce producteur</button></article>`).join('')+'</div>'
+      :`<div class="empty"><p><b>Aucun produit ne correspond.</b></p><p>Essayez un autre mot-clé ou élargissez le rayon.</p></div>`;
+  }
+  $('#results').innerHTML=h;
+  const hi=new Set(UI.mode==='farms'?farms.map(x=>x.f.id):prods.map(x=>x.f.id));
+  $('#map').innerHTML=mapSvg(hi);
+}
+const SC=4.6;const px=t=>[(TOWNS[t][2]+1.12)*75.3*SC,(47.78-TOWNS[t][1])*111.2*SC];
+function mapSvg(hi,onlyFarm){
+  const loire=[[-1.12,47.33],[-0.9,47.36],[-0.76,47.355],[-0.62,47.405],[-0.5,47.405],[-0.36,47.37],[-0.22,47.32],[-0.077,47.262],[0.04,47.235]].map(([lo,la])=>`${((lo+1.12)*75.3*SC).toFixed(1)},${((47.78-la)*111.2*SC).toFixed(1)}`).join(' ');
+  const [ux,uy]=px(onlyFarm?farm(onlyFarm).town:UI.town);
+  let s=`<rect width="400" height="400" class="m-land"/><polyline points="${loire}" class="m-river" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><text x="22" y="${(47.78-47.31)*111.2*SC}" font-size="11" class="m-t" font-style="italic">Loire</text>`;
+  Object.entries(TOWNS).forEach(([k,v])=>{const [x,y]=px(k);s+=`<circle cx="${x}" cy="${y}" r="2" class="m-t"/><text x="${x+5}" y="${y-4}" font-size="10.5" class="m-t">${v[0].replace('-sur-Loire','').replace('-la-Fontaine','')}</text>`});
+  if(!onlyFarm)s+=`<circle cx="${ux}" cy="${uy}" r="${UI.radius*SC}" class="m-rad" stroke-dasharray="5 4" stroke-width="1.5"/>`;
+  const fs=onlyFarm?[farm(onlyFarm)]:S.farms.filter(farmVisible);
+  fs.forEach(f=>{const [x,y]=px(f.town);const on=onlyFarm||hi.has(f.id);const ox=(f.id.length%3)*3,oy=(f.id.length%2)*3;
+    s+=on&&!onlyFarm?`<g class="pin" role="button" tabindex="0" data-act="open-farm" data-id="${f.id}" aria-label="${esc(f.name)}, ${kmTxt(km(UI.town,f.town))}"><title>${esc(f.name)}</title><circle class="halo m-halo" cx="${x+ox}" cy="${y+oy}" r="13" stroke-width="2"/><circle cx="${x+ox}" cy="${y+oy}" r="7" class="m-on"/></g>`
+    :`<circle cx="${x+ox}" cy="${y+oy}" r="${onlyFarm?10:6}" class="${onlyFarm?'m-on m-st':'m-off'}" stroke-width="2"><title>${esc(f.name)}</title></circle>`});
+  if(!onlyFarm)s+=`<circle cx="${ux}" cy="${uy}" r="6" class="m-me" stroke-width="2"/>`;
+  return `<svg class="map" viewBox="0 0 400 400" role="group" aria-label="Carte schématique de l’Anjou">${s}</svg>`;
+}
+
+/* ---------- Fiche exploitation ---------- */
+function renderFarm(){
+  const f=farm(UI.farm);if(!f)return go(DEF[me().role]);
+  const u=me(),client=u.role==='client',d=km(client?UI.town:'angers',f.town);
+  const ps=farmProds(f.id);const owner=user(f.owner);
+  const ph=f.photos[UI.photo]??f.photos[0];
+  const bk=S.basket.farm===f.id?S.basket.items:{};
+  const backTo=client?'explore':u.role==='admin'?'farms':'profile';
+  let prods='';
+  CATS.forEach(c=>{const l=ps.filter(p=>p.cat===c.id);if(!l.length)return;
+    prods+=`<h3 class="cat-h">${catIcon(c.id,'i')}${c.n}</h3><ul class="plist">`+l.map(p=>{const q=bk[p.id]||0;
+      return `<li class="prow">${prodVisual(p)}<div class="pinfo"><h3>${esc(p.name)}</h3><p class="small muted">${esc(p.desc)}</p><p style="margin-top:4px"><b>${money(p.price)}</b> <span class="muted">/ ${esc(p.unit)}</span> ${stockBadge(p)}</p></div>
+      ${client?`<div class="stepper" role="group" aria-label="Quantité de ${esc(p.name)}"><button type="button" data-act="qty" data-id="${p.id}" data-d="-1" data-k="qm-${p.id}" aria-label="Retirer" ${q<=0?'disabled':''}>${ic('minus')}</button><output aria-live="polite">${q?qtyTxt(q,p.unit):'0'}</output><button type="button" data-act="qty" data-id="${p.id}" data-d="1" data-k="qp-${p.id}" aria-label="Ajouter" ${p.stock<=q?'disabled':''}>${ic('plus')}</button></div>`:''}</li>`}).join('')+'</ul>'});
+  const n=Object.values(bk).filter(Boolean).length;
+  return `<button type="button" class="btn ghost back" data-act="nav" data-v="${backTo}">${ic('back')}${client?'Retour aux résultats':'Retour'}</button>
+  ${!client?`<p class="note" style="margin-bottom:14px">${ic('eye')}<span>Aperçu de la fiche telle que la voient les particuliers${f.status!=='publiee'?' — <b>fiche non publiée</b>':''}.</span></p>`:''}
+  <div class="farm-layout"><div class="farm-main">
+    <section class="panel gallery" aria-label="Photos"><div class="hero">${photoHtml(ph,f.name)}</div>
+      ${f.photos.length>1?`<div class="thumbs">${f.photos.map((p,i)=>`<button type="button" data-act="photo" data-i="${i}" data-k="ph-${i}" aria-pressed="${i===UI.photo}" aria-label="Photo ${i+1} sur ${f.photos.length}">${photoHtml(p,'')}</button>`).join('')}</div>`:''}</section>
+    <section class="panel">
+      <h1>${esc(f.name)}</h1>
+      <p class="meta" style="margin:6px 0 10px">${ic('user')}${esc(owner?.name)} · ${tn(f.town)}${client?` · ${kmTxt(d)} de ${tn(UI.town)}`:''}</p>
+      <div class="tags">${f.labels.map(l=>`<span class="badge acc">${esc(l)}</span>`).join('')}${farmCats(f.id).map(c=>`<span class="badge">${CAT[c].n}</span>`).join('')}</div>
+      <p style="margin-top:12px"><b>${esc(f.short)}</b></p><p style="margin-top:8px">${esc(f.desc)}</p>
+      <dl class="info">
+        <div>${ic('pin')}<div><dt>Adresse de retrait</dt><dd>${esc(f.address)}</dd></div></div>
+        <div>${ic('clock')}<div><dt>Retraits</dt><dd>${daysTxt(f.days)} · ${esc(f.hours)}</dd></div></div>
+        <div>${ic('phone')}<div><dt>Téléphone</dt><dd><a href="tel:${esc(f.phone.replace(/\s/g,''))}">${esc(f.phone)}</a></dd></div></div>
+        <div>${ic('mail')}<div><dt>E-mail</dt><dd>${esc(f.email)}</dd></div></div>
+      </dl>
+      <div class="actions"><button type="button" class="btn" data-act="contact" data-id="${f.id}">${ic('chat')}Contacter le producteur</button><button type="button" class="btn ghost" data-act="route">${ic('nav')}Itinéraire</button></div>
+    </section>
+    <section class="panel" aria-label="Localisation"><h2 style="margin-bottom:10px">Localisation</h2>${mapSvg(new Set(),f.id)}</section>
+    <section class="panel prods"><h2>Produits proposés</h2>${client?'<p class="muted small">Choisissez vos quantités, puis envoyez votre demande au producteur.</p>':''}${prods||'<p class="empty">Aucun produit publié pour le moment.</p>'}</section>
+  </div>
+  <aside class="panel basket" id="basket" aria-label="Demande de réservation">${client?basketHtml(f,bk):`<h2>Demande de réservation</h2><p class="muted" style="margin:8px 0 14px">Les particuliers choisissent leurs produits et un créneau de retrait ici.</p><button type="button" class="btn block" data-act="as-client" data-id="${f.id}">${ic('user')}Voir en tant que particulier</button>`}</aside>
+  </div>
+  ${client&&n?`<button type="button" class="btn primary mbar" data-act="to-basket">${ic('cal')}Ma demande · ${n} produit${n>1?'s':''}</button>`:''}`;
+}
+function basketHtml(f,bk){
+  const u=me();const ids=Object.keys(bk).filter(k=>bk[k]>0);
+  const other=S.basket.farm&&S.basket.farm!==f.id&&Object.values(S.basket.items).some(Boolean)?farm(S.basket.farm):null;
+  const tot=ids.reduce((s,id)=>s+prod(id).price*bk[id],0);
+  const sl=nextSlots(f);
+  return `<h2>Ma demande de réservation</h2>
+  <p class="note" style="margin-top:8px">${ic('info')}<span>Une demande concerne un seul producteur. Retrait à la ferme, règlement sur place.</span></p>
+  ${other?`<p class="note warn" style="margin-top:8px">${ic('info')}<span>Sélection en cours chez <b>${esc(other.name)}</b> : elle sera remplacée si vous ajoutez un produit ici.</span></p>`:''}
+  ${u.status==='suspendu'?`<p class="note warn" style="margin-top:8px">${ic('info')}<span>Votre compte est suspendu : vous ne pouvez pas envoyer de demande.</span></p>`:''}
+  ${ids.length?`<ul class="blist">${ids.map(id=>{const p=prod(id);return `<li><span>${qtyTxt(bk[id],p.unit)} · ${esc(p.name)}</span><span class="num">${money(p.price*bk[id])}</span></li>`}).join('')}</ul>
+  <div class="total"><span>Total estimé</span><span class="num">${money(tot)}</span></div>`:`<p class="empty" style="margin:14px 0">Ajoutez des produits avec les boutons « + ».</p>`}
+  <form data-form="request" id="reqForm" novalidate>
+    <div style="display:grid;gap:12px">
+    <div class="field"><label for="rSlot">Créneau de retrait <span class="req">*</span></label><select id="rSlot" name="slot" aria-describedby="e-slot"><option value="">Choisir un créneau…</option>${sl.map(s=>`<option value="${s}">${fmtSlot(s,f)}</option>`).join('')}</select><p class="err" id="e-slot" hidden></p></div>
+    <div class="field"><label for="rPhone">Téléphone (facultatif)</label><input type="tel" id="rPhone" name="phone" value="${esc(u.phone||'')}" autocomplete="tel" aria-describedby="e-phone"><p class="err" id="e-phone" hidden></p></div>
+    <div class="field"><label for="rMsg">Message au producteur</label><textarea id="rMsg" name="message" maxlength="400" placeholder="Une précision sur votre commande ?"></textarea></div>
+    <p class="err" id="e-items" hidden></p>
+    <button type="submit" class="btn primary block">${ic('check')}Envoyer la demande</button>
+    <p class="hint">Le producteur reçoit votre demande par e-mail et la confirme. Vous êtes notifié à chaque étape.</p>
+    </div>
+  </form>`;
+}
+
+/* ---------- Particulier : réservations ---------- */
+function reqCard(r,as){
+  const f=farm(r.farm),c=user(r.client),[sl,sc]=ST[r.status];
+  const tot=r.items.reduce((s,i)=>s+i.price*i.qty,0);
+  let act='';
+  if(as==='client'){
+    if(['attente','confirmee'].includes(r.status))act+=`<button type="button" class="btn sm danger" data-act="req-cancel" data-id="${r.id}">${ic('x')}Annuler</button>`;
+    act+=`<button type="button" class="btn sm" data-act="contact" data-id="${f.id}">${ic('chat')}Contacter</button><button type="button" class="btn sm ghost" data-act="open-farm" data-id="${f.id}">${ic('store')}Voir la ferme</button>`;
+  }else{
+    if(r.status==='attente')act=`<button type="button" class="btn sm primary" data-act="req-accept" data-id="${r.id}">${ic('check')}Confirmer</button><button type="button" class="btn sm danger" data-act="req-refuse" data-id="${r.id}">${ic('x')}Refuser</button>`;
+    if(r.status==='confirmee')act=`<button type="button" class="btn sm primary" data-act="req-done" data-id="${r.id}">${ic('check')}Marquer comme retirée</button>`;
+  }
+  return `<article class="card req ${UI.flash===r.id?'flash':''}" id="${r.id}">
+    <header class="req-h"><div><p class="small muted wrap">${r.id} · envoyée le ${fmtDT(r.created)}</p><h3>${esc(as==='client'?f.name:c.name)}</h3></div><span class="badge ${sc}">${sl}</span></header>
+    <dl class="kv"><div><dt>Retrait</dt><dd>${fmtSlot(r.slot,f)}</dd></div><div><dt>${as==='client'?'Adresse':'Contact'}</dt><dd>${as==='client'?esc(f.address):esc(c.email)+(r.phone||c.phone?'<br>'+esc(r.phone||c.phone):'')}</dd></div></dl>
+    <ul class="items">${r.items.map(i=>`<li><span>${qtyTxt(i.qty,i.unit)} · ${esc(i.name)}</span><span class="num">${money(i.price*i.qty)}</span></li>`).join('')}<li class="tot"><span>Total estimé · réglé sur place</span><span class="num">${money(tot)}</span></li></ul>
+    ${r.message?`<blockquote>« ${esc(r.message)} »</blockquote>`:''}
+    <details><summary>Suivi de la demande (${r.history.length} étape${r.history.length>1?'s':''})</summary><ol class="tl">${r.history.map(h=>`<li><time>${fmtDT(h.at)}</time> — ${esc(h.txt)}</li>`).join('')}</ol></details>
+    ${act?`<div class="actions">${act}</div>`:''}
+  </article>`;
+}
+function renderMine(){
+  const u=me();let l=S.requests.filter(r=>r.client===u.id).sort((a,b)=>b.created.localeCompare(a.created));
+  const tabs=[['all','Toutes',l.length],['cur','En cours',l.filter(r=>['attente','confirmee'].includes(r.status)).length],['old','Terminées',l.filter(r=>!['attente','confirmee'].includes(r.status)).length]];
+  if(UI.mineTab==='cur')l=l.filter(r=>['attente','confirmee'].includes(r.status));
+  if(UI.mineTab==='old')l=l.filter(r=>!['attente','confirmee'].includes(r.status));
+  return `<div class="page-head"><div><h1>Mes réservations</h1><p class="muted">Suivez vos demandes : vous êtes prévenu par e-mail dès que le producteur répond.</p></div>
+    <div class="seg" role="group" aria-label="Filtrer">${tabs.map(([k,n,c])=>`<button type="button" data-act="mine-tab" data-t="${k}" aria-pressed="${UI.mineTab===k}">${n} (${c})</button>`).join('')}</div></div>
+    ${l.length?`<div class="req-grid">${l.map(r=>reqCard(r,'client')).join('')}</div>`:`<div class="empty"><p><b>Aucune réservation ici.</b></p><p style="margin:10px 0">Parcourez les producteurs autour de vous.</p><button type="button" class="btn primary" data-act="nav" data-v="explore">${ic('search')}Explorer</button></div>`}`;
+}
+
+/* ---------- Agriculteur ---------- */
+function pendingNote(f){return f&&f.status!=='publiee'?`<p class="note warn" style="margin-bottom:14px">${ic('info')}<span>${f.status==='attente'?'Votre fiche est <b>en attente de validation</b> par l’administrateur : elle sera visible des particuliers dès sa publication.':'Votre fiche est actuellement <b>masquée</b> par l’administrateur.'}</span></p>`:''}
+function renderRequests(){
+  const f=myFarm();const all=S.requests.filter(r=>r.farm===f.id).sort((a,b)=>a.slot.localeCompare(b.slot));
+  const groups={todo:all.filter(r=>r.status==='attente'),next:all.filter(r=>r.status==='confirmee'),hist:all.filter(r=>!['attente','confirmee'].includes(r.status)).reverse()};
+  const l=groups[UI.tab];
+  const tabs=[['todo','À traiter'],['next','À retirer'],['hist','Historique']];
+  return `${pendingNote(f)}<div class="page-head"><div><h1>Demandes de réservation</h1><p class="muted">${esc(f.name)} · retraits ${daysTxt(f.days)}, ${esc(f.hours)}</p></div>
+  <div class="seg" role="group" aria-label="Filtrer les demandes">${tabs.map(([k,n])=>`<button type="button" data-act="req-tab" data-t="${k}" aria-pressed="${UI.tab===k}">${n} (${groups[k].length})</button>`).join('')}</div></div>
+  ${l.length?`<div class="req-grid">${l.map(r=>reqCard(r,'farmer')).join('')}</div>`:`<div class="empty"><p><b>Rien à afficher.</b></p><p>Astuce : passez en vue particulier pour envoyer une demande à votre ferme.</p></div>`}`;
+}
+function renderProducts(){
+  const f=myFarm();const l=S.products.filter(p=>p.farm===f.id);
+  return `${pendingNote(f)}<div class="page-head"><div><h1>Mes produits</h1><p class="muted">${l.filter(prodVisible).length} en ligne · ${l.filter(p=>p.stock<=0).length} épuisé(s)</p></div>
+  <button type="button" class="btn primary" data-act="prod-new">${ic('plus')}Ajouter un produit</button></div>
+  ${l.length?`<div class="tbl-wrap"><table><caption class="sr">Produits de ${esc(f.name)}</caption><thead><tr><th scope="col">Produit</th><th scope="col">Catégorie</th><th scope="col">Prix</th><th scope="col">Disponibilité</th><th scope="col">Statut</th><th scope="col">Actions</th></tr></thead><tbody>
+  ${l.map(p=>`<tr><td><div class="prod-cell">${prodVisual(p)}<div><b>${esc(p.name)}</b><div class="small muted">${esc(p.desc)}</div></div></div></td><td>${CAT[p.cat].n}</td><td class="num"><b>${money(p.price)}</b> / ${esc(p.unit)}</td><td>${stockBadge(p)}<div class="small muted">Stock : ${nf(p.stock)}</div></td>
+  <td>${p.hidden?'<span class="badge bad">Masqué par l’admin</span>':p.published?'<span class="badge ok">En ligne</span>':'<span class="badge">Brouillon</span>'}</td>
+  <td><div class="actions"><button type="button" class="icon-btn" data-act="prod-edit" data-id="${p.id}" aria-label="Modifier ${esc(p.name)}">${ic('edit')}</button><button type="button" class="icon-btn" data-act="prod-pub" data-id="${p.id}" data-k="pp-${p.id}" aria-label="${p.published?'Retirer de la vente':'Mettre en ligne'} : ${esc(p.name)}">${ic(p.published?'eyeoff':'eye')}</button><button type="button" class="icon-btn" data-act="prod-del" data-id="${p.id}" aria-label="Supprimer ${esc(p.name)}">${ic('trash')}</button></div></td></tr>`).join('')}
+  </tbody></table></div>`:`<div class="empty"><p><b>Aucun produit.</b></p><p>Ajoutez votre premier produit pour apparaître dans les recherches.</p></div>`}`;
+}
+function renderProfile(){
+  const f=UI.edit&&me().role==='admin'?farm(UI.edit):myFarm();if(!f)return go(DEF[me().role]);
+  const admin=me().role==='admin';
+  const fld=(id,l,inp,o={})=>`<div class="field ${o.full?'full':''}"><label for="${id}">${l}${o.req?' <span class="req">*</span>':''}</label>${inp}${o.hint?`<p class="hint">${o.hint}</p>`:''}<p class="err" id="e-${id}" hidden></p></div>`;
+  return `${admin?`<button type="button" class="btn ghost back" data-act="nav" data-v="farms">${ic('back')}Retour aux producteurs</button>`:pendingNote(f)}
+  <div class="page-head"><div><h1>${admin?'Modifier la fiche':'Ma fiche exploitation'}</h1><p class="muted">${esc(f.name)} — ces informations sont affichées sur la fiche publique.</p></div>
+  <button type="button" class="btn" data-act="open-farm" data-id="${f.id}">${ic('eye')}Aperçu public</button></div>
+  <form data-form="profile" data-id="${f.id}" novalidate class="cols">
+   <section class="panel"><h2 style="margin-bottom:14px">Présentation</h2><div class="form-grid">
+    ${fld('pf-name','Nom de l’exploitation',`<input type="text" id="pf-name" name="name" value="${esc(f.name)}" aria-describedby="e-pf-name">`,{req:1,full:1})}
+    ${fld('pf-short','Accroche',`<input type="text" id="pf-short" name="short" maxlength="140" value="${esc(f.short)}" aria-describedby="e-pf-short">`,{req:1,full:1,hint:'140 caractères maximum, affichée dans les résultats de recherche.'})}
+    ${fld('pf-desc','Description',`<textarea id="pf-desc" name="desc" rows="5">${esc(f.desc)}</textarea>`,{full:1})}
+    <fieldset class="field full"><legend>Labels et mentions</legend><div class="chips">${LABELS.map(l=>`<label class="chip"><input type="checkbox" name="labels" value="${esc(l)}" ${f.labels.includes(l)?'checked':''}>${esc(l)}</label>`).join('')}</div></fieldset>
+    <div class="field full"><span class="flabel">Photos</span><div class="photos">${f.photos.map((p,i)=>`<figure>${photoHtml(p,'Photo '+(i+1))}<button type="button" class="icon-btn" data-act="rm-photo" data-i="${i}" data-farm="${f.id}" aria-label="Retirer la photo ${i+1}">${ic('trash')}</button></figure>`).join('')}</div>
+      <div class="actions"><span class="btn sm filebtn">${ic('upload')}Importer une photo<input type="file" accept="image/*" id="pf-photo" data-farm="${f.id}" aria-label="Importer une photo"></span>
+      <label class="sr" for="pf-illu">Ajouter une illustration</label><select id="pf-illu" data-farm="${f.id}" style="width:auto;flex:1;min-width:0"><option value="">Ou ajouter une illustration de démo…</option>${PHOTO_N.map((n,i)=>`<option value="${i}">${n}</option>`).join('')}</select></div>
+      <p class="hint">6 photos maximum. Les photos importées restent dans votre navigateur.</p></div>
+   </div></section>
+   <section class="panel"><h2 style="margin-bottom:14px">Localisation et retraits</h2><div class="form-grid">
+    ${fld('pf-town','Commune',`<select id="pf-town" name="town">${Object.entries(TOWNS).map(([k,v])=>`<option value="${k}" ${f.town===k?'selected':''}>${v[0]}</option>`).join('')}</select>`,{req:1})}
+    ${fld('pf-addr','Adresse de retrait',`<input type="text" id="pf-addr" name="address" value="${esc(f.address)}" aria-describedby="e-pf-addr">`,{req:1})}
+    ${fld('pf-phone','Téléphone',`<input type="tel" id="pf-phone" name="phone" value="${esc(f.phone)}" aria-describedby="e-pf-phone">`,{req:1})}
+    ${fld('pf-email','E-mail de contact',`<input type="email" id="pf-email" name="email" value="${esc(f.email)}" aria-describedby="e-pf-email">`,{req:1})}
+    <fieldset class="field full"><legend>Jours de retrait <span class="req">*</span></legend><div class="chips">${DAYS.map(([v,n])=>`<label class="chip"><input type="checkbox" name="days" value="${v}" ${f.days.includes(v)?'checked':''}>${n}</label>`).join('')}</div><p class="err" id="e-pf-days" hidden></p></fieldset>
+    ${fld('pf-hours','Horaires de retrait',`<input type="text" id="pf-hours" name="hours" value="${esc(f.hours)}" placeholder="17h – 19h" aria-describedby="e-pf-hours">`,{req:1})}
+    <div class="field full"><button type="submit" class="btn primary">${ic('check')}Enregistrer la fiche</button></div>
+   </div></section>
+  </form>`;
+}
+
+/* ---------- Admin ---------- */
+function renderDash(){
+  const pend=S.farms.filter(f=>f.status==='attente');
+  const done=S.requests.filter(r=>r.status!=='attente'&&r.status!=='annulee');
+  const rate=done.length?Math.round(done.filter(r=>['confirmee','retiree'].includes(r.status)).length/done.length*100):0;
+  const k=[[S.farms.filter(f=>f.status==='publiee').length,'producteurs publiés'],[S.users.filter(u=>u.role==='client').length,'particuliers inscrits'],[S.products.filter(prodVisible).length,'produits en ligne'],[S.requests.length,'demandes de réservation'],[rate+' %','taux de confirmation'],[pend.length,'fiches à valider']];
+  const last=[...S.requests].sort((a,b)=>b.created.localeCompare(a.created)).slice(0,6);
+  return `<div class="page-head"><div><h1>Vue d’ensemble</h1><p class="muted">Activité de la plateforme et éléments à traiter.</p></div></div>
+  <div class="kpis">${k.map(([v,l])=>`<div class="panel kpi"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+  <div class="cols"><section class="panel"><h2>Fiches en attente de validation</h2>
+    ${pend.length?`<ul class="list">${pend.map(f=>`<li><div><b>${esc(f.name)}</b><div class="small muted">${esc(user(f.owner)?.name)} · ${tn(f.town)} · inscrite le ${dFmt.format(new Date(f.created))}</div></div><div class="actions"><button type="button" class="btn sm" data-act="open-farm" data-id="${f.id}">${ic('eye')}Voir</button><button type="button" class="btn sm primary" data-act="farm-ok" data-id="${f.id}">${ic('check')}Publier</button></div></li>`).join('')}</ul>`:'<p class="muted" style="margin-top:10px">Aucune fiche en attente.</p>'}</section>
+   <section class="panel"><h2>Dernières demandes</h2><ul class="list">${last.map(r=>`<li><div><b class="wrap">${r.id}</b><div class="small muted">${esc(user(r.client)?.name)} → ${esc(farm(r.farm)?.name)}</div></div><span class="badge ${ST[r.status][1]}">${ST[r.status][0]}</span></li>`).join('')}</ul></section></div>`;
+}
+function renderUsers(){
+  const q=norm(UI.uq);const l=S.users.filter(u=>(!UI.urole||u.role===UI.urole)&&(!q||norm(u.name+' '+u.email).includes(q)));
+  const R={client:'Particulier',farmer:'Agriculteur',admin:'Administrateur'};
+  return `<div class="page-head"><div><h1>Utilisateurs</h1><p class="muted">${S.users.length} comptes · ${S.users.filter(u=>u.status==='suspendu').length} suspendu(s)</p></div></div>
+  <div class="toolbar"><div class="field"><label for="uq">Rechercher</label><input type="search" id="uq" value="${esc(UI.uq)}" placeholder="Nom ou e-mail" data-k="uq"></div>
+  <div class="field"><label for="ur">Rôle</label><select id="ur" data-k="ur"><option value="">Tous</option>${Object.entries(R).map(([k,v])=>`<option value="${k}" ${UI.urole===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+  <div class="tbl-wrap"><table><caption class="sr">Liste des utilisateurs</caption><thead><tr><th scope="col">Nom</th><th scope="col">E-mail</th><th scope="col">Rôle</th><th scope="col">Commune</th><th scope="col">Inscription</th><th scope="col">Demandes</th><th scope="col">Statut</th><th scope="col">Action</th></tr></thead><tbody>
+  ${l.map(u=>`<tr><td><b>${esc(u.name)}</b>${u.farmId?`<div class="small muted">${esc(farm(u.farmId)?.name)}</div>`:''}</td><td>${esc(u.email)}</td><td>${R[u.role]}</td><td>${tn(u.town)}</td><td class="num">${dFmt.format(new Date(u.created))}</td>
+  <td class="num">${S.requests.filter(r=>r.client===u.id||(u.farmId&&r.farm===u.farmId)).length}</td><td><span class="badge ${u.status==='actif'?'ok':'bad'}">${u.status==='actif'?'Actif':'Suspendu'}</span></td>
+  <td>${u.role==='admin'?'<span class="small muted">—</span>':`<button type="button" class="btn sm ${u.status==='actif'?'danger':''}" data-act="user-toggle" data-id="${u.id}" data-k="ut-${u.id}">${u.status==='actif'?'Suspendre':'Réactiver'}</button>`}</td></tr>`).join('')||'<tr><td colspan="8" class="muted">Aucun résultat.</td></tr>'}
+  </tbody></table></div>`;
+}
+function renderFarmsAdmin(){
+  const q=norm(UI.fq);const l=S.farms.filter(f=>!q||norm(f.name+' '+tn(f.town)+' '+user(f.owner)?.name).includes(q)).sort((a,b)=>(a.status==='attente'?0:1)-(b.status==='attente'?0:1));
+  const SB={publiee:['Publiée','ok'],attente:['En attente','warn'],masquee:['Masquée','bad']};
+  return `<div class="page-head"><div><h1>Fiches producteurs</h1><p class="muted">Validez les nouvelles inscriptions, masquez ou modifiez une fiche.</p></div></div>
+  <div class="toolbar"><div class="field"><label for="fq">Rechercher</label><input type="search" id="fq" value="${esc(UI.fq)}" placeholder="Ferme, exploitant, commune" data-k="fq"></div></div>
+  <div class="tbl-wrap"><table><caption class="sr">Liste des exploitations</caption><thead><tr><th scope="col">Exploitation</th><th scope="col">Exploitant</th><th scope="col">Commune</th><th scope="col">Produits</th><th scope="col">Demandes</th><th scope="col">Statut</th><th scope="col">Actions</th></tr></thead><tbody>
+  ${l.map(f=>`<tr><td><b>${esc(f.name)}</b><div class="small muted">${f.labels.map(esc).join(', ')||'—'}</div></td><td>${esc(user(f.owner)?.name)}${user(f.owner)?.status==='suspendu'?' <span class="badge bad">compte suspendu</span>':''}</td><td>${tn(f.town)}</td><td class="num">${farmProds(f.id).length} / ${farmProds(f.id,1).length}</td><td class="num">${S.requests.filter(r=>r.farm===f.id).length}</td>
+  <td><span class="badge ${SB[f.status][1]}">${SB[f.status][0]}</span></td>
+  <td><div class="actions"><button type="button" class="icon-btn" data-act="open-farm" data-id="${f.id}" aria-label="Voir ${esc(f.name)}">${ic('eye')}</button><button type="button" class="icon-btn" data-act="farm-edit" data-id="${f.id}" aria-label="Modifier ${esc(f.name)}">${ic('edit')}</button>
+  ${f.status==='publiee'?`<button type="button" class="btn sm" data-act="farm-hide" data-id="${f.id}" data-k="fh-${f.id}">Masquer</button>`:`<button type="button" class="btn sm primary" data-act="farm-ok" data-id="${f.id}" data-k="fo-${f.id}">${f.status==='attente'?'Valider':'Republier'}</button>`}</div></td></tr>`).join('')||'<tr><td colspan="7" class="muted">Aucun résultat.</td></tr>'}
+  </tbody></table></div>`;
+}
+function renderProdAdmin(){
+  const q=norm(UI.pq);const l=S.products.filter(p=>(!UI.pcat||p.cat===UI.pcat)&&(!q||norm(p.name+' '+farm(p.farm)?.name).includes(q)));
+  return `<div class="page-head"><div><h1>Produits</h1><p class="muted">${S.products.length} produits · ${S.products.filter(p=>p.hidden).length} masqué(s) par la modération</p></div></div>
+  <div class="toolbar"><div class="field"><label for="pq">Rechercher</label><input type="search" id="pq" value="${esc(UI.pq)}" placeholder="Produit ou ferme" data-k="pq"></div>
+  <div class="field"><label for="pc">Catégorie</label><select id="pc" data-k="pc"><option value="">Toutes</option>${CATS.map(c=>`<option value="${c.id}" ${UI.pcat===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div></div>
+  <div class="tbl-wrap"><table><caption class="sr">Catalogue des produits</caption><thead><tr><th scope="col">Produit</th><th scope="col">Producteur</th><th scope="col">Catégorie</th><th scope="col">Prix</th><th scope="col">Stock</th><th scope="col">Statut</th><th scope="col">Modération</th></tr></thead><tbody>
+  ${l.map(p=>`<tr><td><div class="prod-cell">${prodVisual(p)}<b>${esc(p.name)}</b></div></td><td>${esc(farm(p.farm)?.name)}</td><td>${CAT[p.cat].n}</td><td class="num">${money(p.price)} / ${esc(p.unit)}</td><td>${stockBadge(p)}</td>
+  <td>${p.hidden?'<span class="badge bad">Masqué</span>':p.published?'<span class="badge ok">En ligne</span>':'<span class="badge">Brouillon</span>'}</td>
+  <td><button type="button" class="btn sm ${p.hidden?'':'danger'}" data-act="prod-mod" data-id="${p.id}" data-k="pm-${p.id}">${ic(p.hidden?'eye':'eyeoff')}${p.hidden?'Rétablir':'Masquer'}</button></td></tr>`).join('')||'<tr><td colspan="7" class="muted">Aucun résultat.</td></tr>'}
+  </tbody></table></div>`;
+}
+
+/* ---------- Rendu ---------- */
+function render(){
+  const u=me();
+  if(!NAV[u.role].some(n=>n[0]===UI.view)&&UI.view!=='farm'&&!(UI.view==='profile'&&u.role==='admin'))UI.view=DEF[u.role];
+  if(u.role==='farmer'&&!myFarm())UI.view='requests';
+  const k=document.activeElement?.dataset?.k;
+  renderTop();
+  const V={explore:renderExplore,farm:renderFarm,mine:renderMine,requests:renderRequests,products:renderProducts,profile:renderProfile,dash:renderDash,users:renderUsers,farms:renderFarmsAdmin,aproducts:renderProdAdmin};
+  const h=V[UI.view]();if(h===undefined)return;
+  $('#main').innerHTML=h;
+  if(UI.view==='explore')updateExplore();
+  if(k){const el=document.querySelector(`[data-k="${k}"]`);if(el){el.focus();if(el.type==='search'){const n=el.value.length;el.setSelectionRange(n,n)}}}
+  if(UI.flash){const el=document.getElementById(UI.flash);if(el)el.scrollIntoView({block:'center'});setTimeout(()=>{UI.flash=null},50)}
+}
+
+/* ---------- Dialogues ---------- */
+const dlg=$('#dlg');
+function openDlg(title,body,foot,drawer){
+  dlg.className=drawer?'drawer':'';
+  dlg.innerHTML=`<div class="dlg-h"><h2 id="dlgT">${title}</h2><button type="button" class="icon-btn" data-act="close-dlg" aria-label="Fermer">${ic('x')}</button></div>${body}${foot||''}`;
+  dlg.setAttribute('aria-labelledby','dlgT');
+  if(!dlg.open)dlg.showModal();
+  const f=dlg.querySelector('input:not([type=hidden]),select,textarea');(f||dlg.querySelector('.icon-btn')).focus();
+}
+const closeDlg=()=>{if(dlg.open)dlg.close()};
+function confirmDlg(title,text,ok,fn,danger){UI.pending=fn;openDlg(title,`<form data-form="confirm"><div class="dlg-b"><p>${text}</p></div><div class="dlg-f"><button type="button" class="btn" data-act="close-dlg">Annuler</button><button type="submit" class="btn ${danger?'danger':'primary'}">${ok}</button></div></form>`)}
+function setErr(form,id,msg){const e=form.querySelector('#e-'+id);const inp=form.querySelector('#'+id)||form.querySelector(`[name="${id}"]`);if(e){e.textContent=msg||'';e.hidden=!msg}if(inp&&inp.tagName)inp.setAttribute('aria-invalid',msg?'true':'false');return !msg}
+const PHONE=/^0[1-9](?:[ .]?\d{2}){4}$/;
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function productForm(p){
+  UI.tmpImg=p?.img||null;
+  const v=p||{name:'',cat:'leg',price:'',unit:'kg',stock:'',desc:'',published:true};
+  openDlg(p?'Modifier le produit':'Nouveau produit',`<form data-form="product" data-id="${p?.id||''}" novalidate><div class="dlg-b"><div class="form-grid">
+    <div class="field full"><label for="pr-name">Nom du produit <span class="req">*</span></label><input type="text" id="pr-name" name="name" value="${esc(v.name)}" maxlength="60" aria-describedby="e-pr-name"><p class="err" id="e-pr-name" hidden></p></div>
+    <div class="field"><label for="pr-cat">Catégorie <span class="req">*</span></label><select id="pr-cat" name="cat">${CATS.map(c=>`<option value="${c.id}" ${v.cat===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div>
+    <div class="field"><label for="pr-unit">Unité de vente <span class="req">*</span></label><select id="pr-unit" name="unit">${UNITS.map(u=>`<option ${v.unit===u?'selected':''}>${u}</option>`).join('')}</select></div>
+    <div class="field"><label for="pr-price">Prix (€) <span class="req">*</span></label><input type="number" id="pr-price" name="price" min="0.01" step="0.01" inputmode="decimal" value="${v.price}" aria-describedby="e-pr-price"><p class="err" id="e-pr-price" hidden></p></div>
+    <div class="field"><label for="pr-stock">Quantité disponible <span class="req">*</span></label><input type="number" id="pr-stock" name="stock" min="0" step="0.5" inputmode="decimal" value="${v.stock}" aria-describedby="e-pr-stock"><p class="err" id="e-pr-stock" hidden></p><p class="hint">0 = affiché « Épuisé ».</p></div>
+    <div class="field full"><label for="pr-desc">Description</label><textarea id="pr-desc" name="desc" maxlength="240" rows="3">${esc(v.desc)}</textarea></div>
+    <div class="field full"><span class="flabel">Photo</span><div class="preview"><span id="prPrev">${prodVisual({...v,img:UI.tmpImg})}</span><span class="btn sm filebtn">${ic('image')}Choisir une photo<input type="file" accept="image/*" id="pr-img" aria-label="Choisir une photo du produit"></span>${UI.tmpImg?`<button type="button" class="btn sm ghost" data-act="img-clear">Retirer</button>`:''}</div><p class="hint">Sans photo, un pictogramme de la catégorie est affiché.</p></div>
+    <label class="check full"><input type="checkbox" name="published" ${v.published?'checked':''}> Mettre en ligne immédiatement</label>
+  </div></div><div class="dlg-f"><button type="button" class="btn" data-act="close-dlg">Annuler</button><button type="submit" class="btn primary">${ic('check')}Enregistrer</button></div></form>`);
+}
+function signupForm(){
+  openDlg('Créer un compte',`<form data-form="signup" novalidate><div class="dlg-b">
+    <fieldset><legend>Je suis</legend><div class="seg" style="width:100%"><label class="chip" style="flex:1;justify-content:center"><input type="radio" name="type" value="client" checked>Particulier</label><label class="chip" style="flex:1;justify-content:center"><input type="radio" name="type" value="farmer">Agriculteur</label></div></fieldset>
+    <div class="form-grid">
+     <div class="field"><label for="su-name">Prénom et nom <span class="req">*</span></label><input type="text" id="su-name" name="name" autocomplete="name" aria-describedby="e-su-name"><p class="err" id="e-su-name" hidden></p></div>
+     <div class="field"><label for="su-email">E-mail <span class="req">*</span></label><input type="email" id="su-email" name="email" autocomplete="email" aria-describedby="e-su-email"><p class="err" id="e-su-email" hidden></p></div>
+     <div class="field"><label for="su-pass">Mot de passe <span class="req">*</span></label><input type="password" id="su-pass" name="pass" autocomplete="new-password" aria-describedby="e-su-pass h-su-pass"><p class="hint" id="h-su-pass">8 caractères minimum.</p><p class="err" id="e-su-pass" hidden></p></div>
+     <div class="field"><label for="su-town">Commune <span class="req">*</span></label><select id="su-town" name="town">${Object.entries(TOWNS).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('')}</select></div>
+     <div class="field full" data-farmer hidden><label for="su-farm">Nom de l’exploitation <span class="req">*</span></label><input type="text" id="su-farm" name="farm" aria-describedby="e-su-farm"><p class="err" id="e-su-farm" hidden></p></div>
+     <div class="field" data-farmer hidden><label for="su-phone">Téléphone <span class="req">*</span></label><input type="tel" id="su-phone" name="phone" autocomplete="tel" aria-describedby="e-su-phone"><p class="err" id="e-su-phone" hidden></p></div>
+     <div class="field" data-farmer hidden><label for="su-cat">Production principale</label><select id="su-cat" name="cat">${CATS.map(c=>`<option value="${c.id}">${c.n}</option>`).join('')}</select></div>
+    </div>
+    <label class="check"><input type="checkbox" name="cgu" id="su-cgu" aria-describedby="e-su-cgu"> J’accepte les conditions d’utilisation</label><p class="err" id="e-su-cgu" hidden></p>
+    <p class="hint" data-farmer hidden>Votre fiche sera vérifiée par l’administrateur avant publication.</p>
+  </div><div class="dlg-f"><button type="button" class="btn" data-act="close-dlg">Annuler</button><button type="submit" class="btn primary">Créer mon compte</button></div></form>`);
+}
+function mailsDrawer(){
+  const u=me();const l=UI.mailAll?S.emails:S.emails.filter(m=>m.to===u.id);
+  openDlg('E-mails envoyés',`<div class="dlg-b"><p class="note">${ic('info')}<span>Simulation : en production, ces notifications partent par e-mail (service transactionnel).</span></p>
+  <div class="seg" role="group" aria-label="Filtrer les e-mails"><button type="button" data-act="mail-f" data-all="0" aria-pressed="${!UI.mailAll}">Pour ${esc(u.name)}</button><button type="button" data-act="mail-f" data-all="1" aria-pressed="${UI.mailAll}">Tous (${S.emails.length})</button></div>
+  ${l.length?l.map(m=>{const t=user(m.to);return `<details class="mail"><summary><b>${esc(m.subject)}</b><div class="to">À : ${esc(t?.name)} &lt;${esc(t?.email)}&gt; · ${fmtDT(m.at)}</div></summary><pre>${esc(m.body)}</pre></details>`}).join(''):'<p class="empty">Aucun e-mail pour ce compte.</p>'}</div>`,'',true);
+}
+
+/* ---------- Actions ---------- */
+function setQty(p,d){
+  const step=p.unit==='kg'?0.5:1;const items=S.basket.items;const q=Math.max(0,Math.min(p.stock,(items[p.id]||0)+d*step));
+  if(q)items[p.id]=q;else delete items[p.id];S.basket.farm=p.farm;save();render();
+}
+function changeReq(r,status,txt){r.status=status;r.history.push({at:new Date().toISOString(),txt});save()}
+const ACT={
+  reset:()=>confirmDlg('Réinitialiser la démo','Toutes vos modifications (comptes, produits, demandes) seront effacées.','Réinitialiser',()=>{try{localStorage.removeItem(KEY)}catch(e){}seed();Object.assign(UI,{view:'explore',town:'angers',radius:40,cats:[],q:'',dispo:false,mode:'farms'});render();toast('Démo réinitialisée')},true),
+  nav:t=>go(t.dataset.v,{edit:null}),
+  'close-dlg':closeDlg,
+  'open-farm':t=>go('farm',{farm:t.dataset.id}),
+  'as-client':t=>{S.current='u-lea';UI.town='angers';save();go('farm',{farm:t.dataset.id})},
+  photo:t=>{UI.photo=+t.dataset.i;render()},
+  mode:t=>{UI.mode=t.dataset.m;document.querySelectorAll('.results .seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===UI.mode));updateExplore()},
+  'reset-filters':()=>{Object.assign(UI,{cats:[],q:'',dispo:false,radius:40,town:me().town||'angers'});render()},
+  route:()=>toast('Ouverture de l’itinéraire dans l’application de cartes (simulation)'),
+  'to-basket':()=>{$('#basket').scrollIntoView({behavior:'smooth'});setTimeout(()=>$('#rSlot')?.focus({preventScroll:true}),400)},
+  qty:t=>{const p=prod(t.dataset.id),d=+t.dataset.d;
+    const other=S.basket.farm&&S.basket.farm!==p.farm&&Object.values(S.basket.items).some(Boolean);
+    if(other&&d>0)return confirmDlg('Changer de producteur ?',`Une demande ne concerne qu’un seul producteur. Votre sélection chez <b>${esc(farm(S.basket.farm).name)}</b> sera remplacée.`,'Remplacer',()=>{S.basket={farm:p.farm,items:{}};setQty(p,d)});
+    if(other)return;setQty(p,d)},
+  contact:t=>{const f=farm(t.dataset.id);openDlg(`Contacter ${esc(f.name)}`,`<form data-form="contact" data-id="${f.id}" novalidate><div class="dlg-b"><p class="muted small">Votre message est transmis par e-mail à ${esc(user(f.owner)?.name)}. Vous pouvez aussi appeler le ${esc(f.phone)}.</p>
+    <div class="field"><label for="ct-msg">Votre message <span class="req">*</span></label><textarea id="ct-msg" name="msg" rows="5" maxlength="800" aria-describedby="e-ct-msg"></textarea><p class="err" id="e-ct-msg" hidden></p></div></div>
+    <div class="dlg-f"><button type="button" class="btn" data-act="close-dlg">Annuler</button><button type="submit" class="btn primary">${ic('mail')}Envoyer</button></div></form>`)},
+  'mine-tab':t=>{UI.mineTab=t.dataset.t;render()},
+  'req-tab':t=>{UI.tab=t.dataset.t;render()},
+  'req-cancel':t=>{const r=S.requests.find(x=>x.id===t.dataset.id);confirmDlg('Annuler la demande',`La demande ${r.id} auprès de ${esc(farm(r.farm).name)} sera annulée et le producteur prévenu.`,'Annuler la demande',()=>{
+    if(r.status==='confirmee')r.items.forEach(i=>{const p=prod(i.pid);if(p)p.stock=+(p.stock+i.qty).toFixed(2)});
+    changeReq(r,'annulee','Annulée par le client');const f=farm(r.farm);
+    mail(f.owner,`Demande ${r.id} annulée par ${me().name}`,`Bonjour,\n\n${me().name} a annulé sa demande prévue le ${fmtSlot(r.slot,f)}.${r.items.length?'\nLes quantités ont été remises en stock.':''}`);render()},true)},
+  'req-accept':t=>{const r=S.requests.find(x=>x.id===t.dataset.id),f=farm(r.farm);const sl=[...new Set([r.slot,...nextSlots(f)])];
+    const short=r.items.filter(i=>(prod(i.pid)?.stock??0)<i.qty);
+    openDlg('Confirmer la demande',`<form data-form="accept" data-id="${r.id}"><div class="dlg-b"><p>${esc(user(r.client).name)} sera prévenu par e-mail. Les quantités seront déduites de votre stock.</p>
+    ${short.length?`<p class="note warn">${ic('info')}<span>Stock insuffisant pour : ${short.map(i=>esc(i.name)).join(', ')}.</span></p>`:''}
+    <div class="field"><label for="ac-slot">Créneau de retrait</label><select id="ac-slot" name="slot">${sl.map(s=>`<option value="${s}" ${s===r.slot?'selected':''}>${fmtSlot(s,f)}${s===r.slot?' (demandé)':''}</option>`).join('')}</select></div>
+    <div class="field"><label for="ac-note">Message au client (facultatif)</label><textarea id="ac-note" name="note" rows="3" placeholder="Ex. : sonnez à la porte de la grange."></textarea></div></div>
+    <div class="dlg-f"><button type="button" class="btn" data-act="close-dlg">Annuler</button><button type="submit" class="btn primary">${ic('check')}Confirmer</button></div></form>`)},
+  'req-refuse':t=>{const r=S.requests.find(x=>x.id===t.dataset.id);
+    openDlg('Refuser la demande',`<form data-form="refuse" data-id="${r.id}" novalidate><div class="dlg-b">
+    <div class="field"><label for="rf-why">Motif <span class="req">*</span></label><select id="rf-why" name="why" aria-describedby="e-rf-why"><option value="">Choisir…</option><option>Produits épuisés</option><option>Créneau impossible</option><option>Quantité trop importante</option><option>Autre</option></select><p class="err" id="e-rf-why" hidden></p></div>
+    <div class="field"><label for="rf-msg">Précision pour le client</label><textarea id="rf-msg" name="msg" rows="3" aria-describedby="e-rf-msg"></textarea><p class="err" id="e-rf-msg" hidden></p></div></div>
+    <div class="dlg-f"><button type="button" class="btn" data-act="close-dlg">Annuler</button><button type="submit" class="btn danger">Refuser la demande</button></div></form>`)},
+  'req-done':t=>{const r=S.requests.find(x=>x.id===t.dataset.id);changeReq(r,'retiree','Retirée à la ferme');
+    mail(r.client,`Merci pour votre passage — ${farm(r.farm).name}`,`Bonjour ${user(r.client).name},\n\nVotre commande ${r.id} a bien été retirée. Merci de soutenir l’agriculture locale !`);render()},
+  'prod-new':()=>productForm(null),
+  'prod-edit':t=>productForm(prod(t.dataset.id)),
+  'prod-pub':t=>{const p=prod(t.dataset.id);p.published=!p.published;save();render();toast(p.published?`« ${p.name} » est en ligne`:`« ${p.name} » est retiré de la vente`)},
+  'prod-del':t=>{const p=prod(t.dataset.id);confirmDlg('Supprimer le produit',`« ${esc(p.name)} » sera supprimé définitivement.`,'Supprimer',()=>{S.products=S.products.filter(x=>x.id!==p.id);save();render();toast('Produit supprimé')},true)},
+  'img-clear':()=>{UI.tmpImg=null;$('#prPrev').innerHTML=prodVisual({cat:$('#pr-cat').value})},
+  'rm-photo':t=>{const f=farm(t.dataset.farm);if(f.photos.length<=1)return toast('Gardez au moins une photo','bad');f.photos.splice(+t.dataset.i,1);save();render()},
+  'farm-ok':t=>{const f=farm(t.dataset.id);f.status='publiee';save();mail(f.owner,`Votre fiche « ${f.name} » est en ligne`,`Bonjour ${user(f.owner).name},\n\nVotre fiche a été validée : les particuliers peuvent désormais découvrir vos produits et vous envoyer des demandes de réservation.`);render()},
+  'farm-hide':t=>{const f=farm(t.dataset.id);confirmDlg('Masquer la fiche',`« ${esc(f.name)} » ne sera plus visible dans les recherches. Le producteur sera prévenu.`,'Masquer',()=>{f.status='masquee';save();mail(f.owner,'Votre fiche a été masquée',`Bonjour,\n\nVotre fiche « ${f.name} » a été temporairement masquée par l’équipe. Contactez-nous pour plus d’informations.`);render()},true)},
+  'farm-edit':t=>go('profile',{edit:t.dataset.id}),
+  'user-toggle':t=>{const u=user(t.dataset.id);u.status=u.status==='actif'?'suspendu':'actif';save();mail(u.id,u.status==='actif'?'Votre compte est réactivé':'Votre compte a été suspendu',`Bonjour ${u.name},\n\n${u.status==='actif'?'Votre compte est de nouveau actif.':'Votre compte a été suspendu par l’administrateur.'}`);render()},
+  'prod-mod':t=>{const p=prod(t.dataset.id);p.hidden=!p.hidden;save();const f=farm(p.farm);
+    if(p.hidden)mail(f.owner,`Produit masqué : ${p.name}`,`Bonjour,\n\nLe produit « ${p.name} » a été masqué par la modération. Vérifiez sa description et son prix puis contactez-nous.`);else toast(`« ${p.name} » est de nouveau visible`);render()},
+  mails:mailsDrawer,
+  'mail-f':t=>{UI.mailAll=t.dataset.all==='1';mailsDrawer()},
+  signup:signupForm,
+};
+const FORMS={
+  confirm:()=>{closeDlg();const f=UI.pending;UI.pending=null;f&&f()},
+  request:form=>{
+    const u=me(),f=farm(UI.farm),bk=S.basket.farm===f.id?S.basket.items:{};const ids=Object.keys(bk).filter(k=>bk[k]>0);
+    if(u.status==='suspendu')return toast('Compte suspendu : demande impossible','bad');
+    let ok=setErr(form,'slot',form.slot.value?'':'Choisissez un créneau de retrait.');
+    const ph=form.phone.value.trim();ok=setErr(form,'phone',ph&&!PHONE.test(ph)?'Format attendu : 06 12 34 56 78.':'')&&ok;
+    const e=form.querySelector('#e-items');e.hidden=!!ids.length;e.textContent=ids.length?'':'Ajoutez au moins un produit à votre demande.';
+    if(!ok||!ids.length){(form.querySelector('[aria-invalid="true"]')||document.querySelector('.stepper button[aria-label="Ajouter"]:not(:disabled)'))?.focus();return}
+    const r={id:`R-${String(new Date().getFullYear()).slice(2)}-${String(++S.seq).padStart(4,'0')}`,client:u.id,farm:f.id,slot:form.slot.value,status:'attente',message:form.message.value.trim(),phone:ph,created:new Date().toISOString(),
+      items:ids.map(id=>{const p=prod(id);return {pid:id,name:p.name,unit:p.unit,price:p.price,qty:bk[id]}}),history:[{at:new Date().toISOString(),txt:'Demande envoyée au producteur'}]};
+    S.requests.push(r);S.basket={farm:null,items:{}};save();
+    mail(f.owner,`Nouvelle demande de réservation de ${u.name}`,`Bonjour ${user(f.owner).name},\n\n${u.name} souhaite retirer le ${fmtSlot(r.slot,f)} :\n${r.items.map(i=>'- '+qtyTxt(i.qty,i.unit)+' '+i.name).join('\n')}\n\nConfirmez ou refusez la demande depuis votre espace producteur.`);
+    setTimeout(()=>{mail(u.id,`Demande ${r.id} envoyée à ${f.name}`,`Bonjour ${u.name},\n\nVotre demande a bien été transmise. Vous recevrez un e-mail dès que le producteur l’aura confirmée.\nRetrait prévu : ${fmtSlot(r.slot,f)}, ${f.address}.\nRèglement directement auprès du producteur.`);save();renderTop()},600);
+    UI.mineTab='all';go('mine',{flash:r.id});
+  },
+  contact:form=>{const m=form.msg.value.trim();if(!setErr(form,'ct-msg',m.length<10?'Votre message doit contenir au moins 10 caractères.':''))return form.msg.focus();
+    const f=farm(form.dataset.id);closeDlg();mail(f.owner,`Message de ${me().name}`,`${m}\n\n— ${me().name} (${me().email})`);save();renderTop()},
+  accept:form=>{const r=S.requests.find(x=>x.id===form.dataset.id),f=farm(r.farm);const ch=form.slot.value!==r.slot;r.slot=form.slot.value;
+    r.items.forEach(i=>{const p=prod(i.pid);if(p)p.stock=Math.max(0,+(p.stock-i.qty).toFixed(2))});
+    changeReq(r,'confirmee','Confirmée par le producteur'+(ch?' (créneau modifié)':''));closeDlg();
+    const note=form.note.value.trim();
+    mail(r.client,`Réservation confirmée — ${f.name}`,`Bonjour ${user(r.client).name},\n\n${user(f.owner).name} a confirmé votre demande ${r.id}.\nRetrait : ${fmtSlot(r.slot,f)}\nAdresse : ${f.address}\nRèglement sur place.${note?'\n\nMessage du producteur : '+note:''}`);render()},
+  refuse:form=>{const w=form.why.value,m=form.msg.value.trim();let ok=setErr(form,'rf-why',w?'':'Indiquez un motif.');ok=setErr(form,'rf-msg',w==='Autre'&&!m?'Précisez le motif pour le client.':'')&&ok;if(!ok)return form.querySelector('[aria-invalid="true"]').focus();
+    const r=S.requests.find(x=>x.id===form.dataset.id),f=farm(r.farm);changeReq(r,'refusee','Refusée : '+w+(m?' — '+m:''));closeDlg();
+    mail(r.client,`Demande ${r.id} non retenue — ${f.name}`,`Bonjour ${user(r.client).name},\n\nLe producteur ne peut pas honorer votre demande.\nMotif : ${w}${m?'\n'+m:''}\n\nD’autres producteurs proches proposent peut-être ces produits.`);render()},
+  product:form=>{
+    const v={name:form.elements.name.value.trim(),cat:form.cat.value,unit:form.unit.value,price:parseFloat(form.price.value.replace(',','.')),stock:parseFloat(form.stock.value.replace(',','.')),desc:form.desc.value.trim(),published:form.published.checked};
+    let ok=setErr(form,'pr-name',v.name.length<2?'Indiquez le nom du produit.':'');
+    ok=setErr(form,'pr-price',!(v.price>0)?'Indiquez un prix supérieur à 0.':v.price>2000?'Prix trop élevé.':'')&&ok;
+    ok=setErr(form,'pr-stock',!(v.stock>=0)?'Indiquez une quantité (0 si épuisé).':'')&&ok;
+    if(!ok)return form.querySelector('[aria-invalid="true"]').focus();
+    v.img=UI.tmpImg;
+    if(form.dataset.id){Object.assign(prod(form.dataset.id),v);toast('Produit mis à jour')}
+    else{S.products.unshift({id:'p'+Date.now(),farm:myFarm().id,hidden:false,...v});toast(`« ${v.name} » ajouté${v.published?' et visible des particuliers':''}`)}
+    save();closeDlg();render()},
+  profile:form=>{
+    const f=farm(form.dataset.id);const g=n=>form.elements[n].value.trim();
+    const days=[...form.querySelectorAll('[name=days]:checked')].map(x=>+x.value);
+    let ok=setErr(form,'pf-name',g('name').length<3?'Indiquez le nom de l’exploitation.':'');
+    ok=setErr(form,'pf-short',!g('short')?'Ajoutez une courte accroche.':'')&&ok;
+    ok=setErr(form,'pf-addr',g('address').length<6?'Indiquez l’adresse de retrait.':'')&&ok;
+    ok=setErr(form,'pf-phone',!PHONE.test(g('phone'))?'Format attendu : 02 41 12 34 56.':'')&&ok;
+    ok=setErr(form,'pf-email',!EMAIL.test(g('email'))?'Adresse e-mail invalide.':'')&&ok;
+    ok=setErr(form,'pf-hours',!g('hours')?'Indiquez vos horaires.':'')&&ok;
+    const de=form.querySelector('#e-pf-days');de.hidden=!!days.length;de.textContent=days.length?'':'Choisissez au moins un jour.';ok=ok&&!!days.length;
+    if(!ok)return (form.querySelector('[aria-invalid="true"]')||form.querySelector('[name=days]')).focus();
+    Object.assign(f,{name:g('name'),short:g('short'),desc:g('desc'),town:form.town.value,address:g('address'),phone:g('phone'),email:g('email'),hours:g('hours'),days,labels:[...form.querySelectorAll('[name=labels]:checked')].map(x=>x.value)});
+    save();render();toast('Fiche enregistrée')},
+  signup:form=>{
+    const t=form.type.value,g=n=>form.elements[n].value.trim();
+    let ok=setErr(form,'su-name',g('name').length<3?'Indiquez votre prénom et nom.':'');
+    ok=setErr(form,'su-email',!EMAIL.test(g('email'))?'Adresse e-mail invalide.':S.users.some(u=>u.email===g('email'))?'Un compte existe déjà avec cet e-mail.':'')&&ok;
+    ok=setErr(form,'su-pass',form.pass.value.length<8?'8 caractères minimum.':'')&&ok;
+    if(t==='farmer'){ok=setErr(form,'su-farm',g('farm').length<3?'Indiquez le nom de votre exploitation.':'')&&ok;ok=setErr(form,'su-phone',!PHONE.test(g('phone'))?'Format attendu : 06 12 34 56 78.':'')&&ok}
+    ok=setErr(form,'su-cgu',form.cgu.checked?'':'Vous devez accepter les conditions.')&&ok;
+    if(!ok)return form.querySelector('[aria-invalid="true"]').focus();
+    const id='u-'+Date.now().toString(36);const u={id,role:t,name:g('name'),email:g('email'),town:form.town.value,created:new Date().toISOString(),status:'actif'};
+    S.users.push(u);closeDlg();
+    if(t==='farmer'){const fid='f-'+Date.now().toString(36);u.farmId=fid;u.phone=g('phone');
+      S.farms.push({id:fid,name:g('farm'),owner:id,town:u.town,address:'Adresse à compléter',phone:g('phone'),email:u.email,short:'Présentation à compléter.',desc:'',labels:[],days:[6],hours:'9h – 12h',photos:[[0,1,2,3,4][CATS.findIndex(c=>c.id===form.cat.value)%5]],status:'attente',created:new Date().toISOString()});
+      S.current=id;save();mail('u-admin',`Nouvelle fiche producteur à valider : ${g('farm')}`,`${u.name} vient de créer un compte agriculteur (${tn(u.town)}). Vérifiez la fiche puis publiez-la.`);
+      setTimeout(()=>{mail(id,'Bienvenue sur Circuit Proche',`Bonjour ${u.name},\n\nVotre compte producteur est créé. Complétez votre fiche et ajoutez vos produits : ils seront visibles dès la validation par notre équipe.`);save();renderTop()},500);
+      go('profile',{edit:null});
+    }else{S.current=id;UI.town=u.town;save();mail(id,'Bienvenue sur Circuit Proche',`Bonjour ${u.name},\n\nVotre compte est créé. Découvrez les producteurs autour de ${tn(u.town)} et réservez vos produits en quelques clics.`);go('explore')}
+  },
+};
+
+/* ---------- Événements ---------- */
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const f=ACT[t.dataset.act];if(f){e.preventDefault();f(t,e)}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button][data-act]')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+document.addEventListener('submit',e=>{const f=e.target;const h=FORMS[f.dataset.form];if(h){e.preventDefault();h(f)}});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.closest('#fForm')){const f=$('#fForm');UI.town=f.town.value;UI.radius=+f.radius.value;UI.q=f.q.value;UI.cats=[...f.querySelectorAll('[name=cat]:checked')].map(x=>x.value);UI.dispo=f.dispo.checked;$('#radV').textContent=UI.radius+' km';updateExplore();return}
+  if(t.id==='uq'){UI.uq=t.value;render()}
+  if(t.id==='fq'){UI.fq=t.value;render()}
+  if(t.id==='pq'){UI.pq=t.value;render()}
+});
+document.addEventListener('change',async e=>{
+  const t=e.target;
+  if(t.id==='who'){S.current=t.value;const u=me();if(u.role==='client')UI.town=u.town;save();go(DEF[u.role],{edit:null});toast(`Vous naviguez en tant que ${u.name}`);return}
+  if(t.id==='ur'){UI.urole=t.value;render()}
+  if(t.id==='pc'){UI.pcat=t.value;render()}
+  if(t.name==='type'&&t.form?.dataset.form==='signup'){t.form.querySelectorAll('[data-farmer]').forEach(x=>x.hidden=t.value!=='farmer')}
+  if(t.id==='pr-cat'&&!UI.tmpImg){$('#prPrev').innerHTML=prodVisual({cat:t.value})}
+  if(t.id==='pr-img'&&t.files[0]){try{UI.tmpImg=await readImg(t.files[0]);$('#prPrev').innerHTML=prodVisual({cat:$('#pr-cat').value,img:UI.tmpImg})}catch(_){toast('Image illisible','bad')}}
+  if(t.id==='pf-photo'&&t.files[0]){const f=farm(t.dataset.farm);if(f.photos.length>=6)return toast('6 photos maximum','bad');try{f.photos.push(await readImg(t.files[0]));save();render();toast('Photo ajoutée')}catch(_){toast('Image illisible','bad')}}
+  if(t.id==='pf-illu'&&t.value!==''){const f=farm(t.dataset.farm);if(f.photos.length>=6)return toast('6 photos maximum','bad');f.photos.push(+t.value);save();render();toast('Illustration ajoutée')}
+});
+function readImg(file){return new Promise((res,rej)=>{if(!/^image\//.test(file.type))return rej();const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,640/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78))};im.onerror=rej;im.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeDlg()});
+
+load();UI.town=me().town||'angers';UI.view=DEF[me().role];render();
+})();
+</script>
 </body>
 </html>
