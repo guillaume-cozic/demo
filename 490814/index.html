@@ -2,20 +2,851 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Location entre particuliers</title>
+<meta name="description" content="Plateforme de mise en relation locataires–propriétaires : recherche filtrée d’annonces, favoris, demande de contact avec dossier, messagerie, proposition et confirmation de visites, et espace propriétaire pour publier et suivre ses annonces.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F1F5FB;--panel:#FFFFFF;--panel-2:#F6F9FD;--ink:#0E1C30;--muted:#4C5D74;--line:#DAE3EF;--line-2:#B9C8DB;
+  --accent:#1D55B0;--accent-ink:#FFFFFF;--accent-soft:#E0EBFB;--accent-text:#164389;--accent-2:#0B6C96;--accent-2-soft:#DDF0F8;
+  --band:#E3EDFA;
+  --ok:#17683D;--ok-soft:#DCF1E4;--warn:#8A4A00;--warn-soft:#FBEBD3;--bad:#A6252E;--bad-soft:#FAE0E2;--gray:#4E5866;--gray-soft:#E8ECF2;
+  --bubble-me:#1D55B0;--bubble-me-ink:#fff;--bubble:#EAF0F8;
+  --shadow:0 1px 2px rgba(14,28,48,.05),0 4px 14px rgba(14,28,48,.06);
+  --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0A111D;--panel:#101A2A;--panel-2:#15223A;--ink:#E2EBF7;--muted:#9EB1C9;--line:#21314A;--line-2:#344B6C;
+  --accent:#7EB0F6;--accent-ink:#071A36;--accent-soft:#15294A;--accent-text:#A8CAFA;--accent-2:#7FD0EE;--accent-2-soft:#0F2C3B;
+  --band:#13243F;
+  --ok:#74D59D;--ok-soft:#13301F;--warn:#F1B866;--warn-soft:#352613;--bad:#FF959B;--bad-soft:#3B1B1E;--gray:#B6C1CF;--gray-soft:#1F2A3A;
+  --bubble-me:#2F6BC9;--bubble-me-ink:#fff;--bubble:#1A2942;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25;letter-spacing:-.015em}
+p{margin:0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{overflow-wrap:anywhere}
+
+.demo-band{background:var(--band);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--accent-text)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:10px 20px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em;min-width:0}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);letter-spacing:0}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:4px;min-width:0}
+.tab{position:relative;min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:11.5px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 7px;min-width:20px;text-align:center;line-height:20px}
+.who{margin-left:auto;display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{min-height:40px;min-width:44px;border:0;background:transparent;border-radius:9px;padding:0 12px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--accent-text);box-shadow:var(--shadow)}
+.me{font-size:13px;color:var(--muted)}
+.me b{color:var(--ink)}
+main{padding:20px clamp(16px,2vw,32px) 56px}
+main:focus{outline:none}
+@media (max-width:759px){
+  .who{margin-left:0;width:100%;justify-content:space-between}
+  #nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);padding:4px 4px calc(4px + env(safe-area-inset-bottom));box-shadow:0 -4px 14px rgba(0,0,0,.06)}
+  .tab{flex-direction:column;gap:2px;font-size:11.5px;padding:6px 2px;min-height:54px;justify-content:center;white-space:normal;text-align:center;line-height:1.2}
+  .tab .cnt{position:absolute;top:3px;left:calc(50% + 6px);line-height:18px;min-width:18px;padding:0 5px}
+  main{padding-bottom:110px}
+}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ok{color:var(--ok);border-color:var(--ok)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn.sm{padding:0 12px;font-size:14px}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:12.5px;color:var(--bad);font-weight:600;min-height:0}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],input[type=search],select,textarea{width:100%;min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;min-width:0}
+textarea{resize:vertical;line-height:1.45}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.check{display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer;font-weight:500}
+.check input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:560px){.fgrid{grid-template-columns:minmax(0,1fr)}}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;line-height:1.3}
+.badge.info{background:var(--accent-soft);color:var(--accent-text)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.gray{background:var(--gray-soft);color:var(--gray)}
+.badge.sky{background:var(--accent-2-soft);color:var(--accent-2)}
+.badge svg{width:13px;height:13px}
+
+/* Illustration bien */
+.ph{position:relative;aspect-ratio:16/9;background:hsl(var(--h) 75% 90%);display:grid;place-items:end center;overflow:hidden}
+.ph svg{width:100%;height:100%}
+.ph .b1{fill:hsl(var(--h) 52% 58%)}
+.ph .b2{fill:hsl(var(--h) 45% 72%)}
+.ph .w{fill:hsl(var(--h) 85% 96%)}
+.ph .g{fill:hsl(var(--h) 40% 80%)}
+.ph .r{fill:hsl(var(--h) 55% 40%)}
+@media (prefers-color-scheme:dark){
+  .ph{background:hsl(var(--h) 45% 18%)}
+  .ph .b1{fill:hsl(var(--h) 42% 40%)}
+  .ph .b2{fill:hsl(var(--h) 35% 28%)}
+  .ph .w{fill:hsl(var(--h) 70% 78%)}
+  .ph .g{fill:hsl(var(--h) 35% 25%)}
+  .ph .r{fill:hsl(var(--h) 45% 30%)}
+}
+.ph-tag{position:absolute;left:10px;top:10px;background:var(--panel);color:var(--ink);font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px}
+
+/* Recherche */
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:14px 24px;flex-wrap:wrap;margin-bottom:18px}
+.hero h1{font-size:clamp(22px,2.4vw,30px);font-weight:800}
+.nudge{display:flex;gap:12px;align-items:center;padding:10px 14px;background:var(--accent-2-soft);border-radius:12px;flex-wrap:wrap;min-width:0}
+.nudge p{min-width:0}
+.meter{height:8px;border-radius:99px;background:var(--line);overflow:hidden;width:120px;flex:none}
+.meter i{display:block;height:100%;background:var(--accent-2);border-radius:99px}
+.search{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+.filters{padding:16px;display:flex;flex-direction:column;gap:14px}
+.filt-toggle{justify-self:start}
+@media (min-width:1000px){
+  .search{grid-template-columns:290px minmax(0,1fr)}
+  .filt-toggle{display:none}
+  .filters{position:sticky;top:76px}
+}
+@media (max-width:999px){.filters:not(.open){display:none}}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar h2{font-size:17px}
+.inline{flex-direction:row;align-items:center;gap:8px}
+.inline select{width:auto}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr));gap:16px}
+.lcard{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0;transition:transform .15s,box-shadow .15s}
+.lcard:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(14,28,48,.06),0 10px 24px rgba(14,28,48,.1)}
+.lcard .fav{position:absolute;top:8px;right:8px;z-index:2;background:var(--panel);color:var(--muted);border:1px solid var(--line)}
+.fav[aria-pressed="true"]{color:var(--accent)!important}
+.fav[aria-pressed="true"] svg{fill:currentColor}
+.lbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.price{font-size:19px;font-weight:800;color:var(--accent-text)}
+.lcard h3{font-size:15.5px;font-weight:700}
+.stretch{all:unset;cursor:pointer;overflow-wrap:anywhere}
+.stretch::after{content:"";position:absolute;inset:0;z-index:1;border-radius:14px}
+.stretch:focus-visible::after{outline:3px solid var(--accent);outline-offset:-3px}
+.loc{display:flex;gap:4px;align-items:center}
+.loc svg{width:14px;height:14px}
+.feats{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.feats li{font-size:12.5px;font-weight:600;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
+.lcard .badge{align-self:flex-start;margin-top:4px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty svg{width:36px;height:36px;color:var(--line-2)}
+
+/* Modale */
+dialog{border:0;padding:0;border-radius:16px;background:var(--panel);color:var(--ink);width:min(860px,calc(100% - 20px));max-height:calc(100dvh - 24px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.narrow{width:min(520px,calc(100% - 20px))}
+dialog::backdrop{background:rgba(8,18,36,.55)}
+.mhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.mhead h2{font-size:18px;overflow-wrap:anywhere}
+.mbody{padding:18px 20px 22px}
+.mfoot{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding-top:6px}
+.ph.big{border-radius:12px;aspect-ratio:21/8;margin-bottom:16px}
+.detail{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:760px){.detail{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
+.specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.spec{display:flex;gap:8px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;min-width:0}
+.spec svg{color:var(--accent-text)}
+.owner{display:flex;gap:10px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.contact{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px}
+.contact h3{font-size:16px}
+.mini{font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:3px}
+
+/* Messages */
+.msgs{display:grid;grid-template-columns:minmax(250px,340px) minmax(0,1fr);height:calc(100dvh - 170px);min-height:500px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.tlist{border-right:1px solid var(--line);overflow-y:auto;min-width:0}
+.tlist h1{font-size:17px;padding:16px 16px 10px}
+.titem{display:flex;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:12px 14px;cursor:pointer;min-height:64px;align-items:flex-start}
+.titem:hover{background:var(--panel-2)}
+.titem[aria-current="true"]{background:var(--accent-soft)}
+.titem .tx{min-width:0;flex:1;display:grid;gap:2px}
+.titem .nm{display:flex;justify-content:space-between;gap:6px;font-weight:700}
+.titem .nm span:first-child{overflow-wrap:anywhere}
+.titem .ex{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none;margin-top:6px}
+.pane{display:flex;flex-direction:column;min-width:0;min-height:0}
+.phead{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.phead .tx{min-width:0;flex:1}
+.phead h2{font-size:16px;overflow-wrap:anywhere}
+.linkbtn{all:unset;cursor:pointer;color:var(--accent-text);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere;min-height:24px}
+.linkbtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:3px}
+.back{display:none}
+.pbar{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px;background:var(--panel-2)}
+.visit{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.visit svg{color:var(--accent-text)}
+.visit .tx{flex:1;min-width:160px}
+details.dos summary{cursor:pointer;font-weight:600;font-size:14px;min-height:32px;display:flex;align-items:center}
+.mlist{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.bub{max-width:min(78%,560px);padding:9px 13px;border-radius:14px;background:var(--bubble);align-self:flex-start;overflow-wrap:anywhere;white-space:pre-wrap}
+.bub.me{background:var(--bubble-me);color:var(--bubble-me-ink);align-self:flex-end;border-bottom-right-radius:4px}
+.bub:not(.me){border-bottom-left-radius:4px}
+.bub time{display:block;font-size:11.5px;opacity:.8;margin-top:3px}
+.sys{align-self:center;font-size:12.5px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;text-align:center;max-width:100%}
+.composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);align-items:flex-end}
+.composer textarea{min-height:44px;max-height:140px;resize:none}
+.composer .btn{width:48px;padding:0;flex:none}
+@media (max-width:859px){
+  .msgs{grid-template-columns:minmax(0,1fr);height:calc(100dvh - 230px);min-height:440px}
+  .msgs.open .tlist{display:none}
+  .msgs:not(.open) .pane{display:none}
+  .tlist{border-right:0}
+  .back{display:inline-grid}
+  .bub{max-width:88%}
+}
+
+/* Propriétaire */
+.ph-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.ph-row h1{font-size:clamp(21px,2.2vw,27px);font-weight:800}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:12px;margin-bottom:18px}
+.kpi{padding:14px 16px;display:flex;gap:12px;align-items:center;min-width:0}
+.kpi .ic{width:42px;height:42px;border-radius:11px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.kpi b{display:block;font-size:24px;line-height:1.1;font-weight:800}
+.kpi span{font-size:13px;color:var(--muted)}
+.dash{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+@media (min-width:1100px){.dash{grid-template-columns:minmax(0,1fr) 360px}}
+@media (min-width:1600px){.dash{grid-template-columns:minmax(0,1fr) 420px}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:0 14px;font-weight:600;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip small{opacity:.8;font-weight:700}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:14px}
+.rcard{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.rhead{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.rhead .tx{flex:1;min-width:150px}
+.rhead h3{font-size:16px;overflow-wrap:anywhere}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+@media (max-width:520px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.facts div{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;min-width:0}
+.facts dt{font-size:11.5px;color:var(--muted);font-weight:600}
+.facts dd{margin:0;font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.ratio.ok{color:var(--ok)}.ratio.warn{color:var(--warn)}.ratio.bad{color:var(--bad)}
+.excerpt{font-size:14px;color:var(--muted);border-left:3px solid var(--line-2);padding-left:10px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.side{padding:16px;display:flex;flex-direction:column;gap:12px}
+.side h2{font-size:16px}
+.vlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.vitem{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;min-width:0}
+.vdate{width:52px;flex:none;text-align:center;background:var(--accent-soft);color:var(--accent-text);border-radius:10px;padding:5px 0;line-height:1.15}
+.vdate b{display:block;font-size:19px}
+.vdate span{font-size:11.5px;font-weight:700;text-transform:uppercase}
+.vitem .tx{min-width:0;flex:1}
+.tip{background:var(--accent-2-soft);border-radius:12px;padding:12px 14px;font-size:13.5px}
+.olist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:16px}
+.ocard{display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.ocard .ph{aspect-ratio:21/8}
+.ocard .ob{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.ocard h3{font-size:16px;overflow-wrap:anywhere}
+.ostats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.ostats b{color:var(--ink)}
+.ocard .actions{margin-top:auto}
+.ocard.off .ph{filter:grayscale(.7);opacity:.7}
+
+/* Dossier */
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+@media (min-width:1050px){.dgrid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+.dform{padding:18px}
+.preview{padding:18px;display:flex;flex-direction:column;gap:12px}
+.ring{display:flex;gap:14px;align-items:center}
+.ring .meter{width:auto;flex:1}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:14px}
+.checklist li{display:flex;gap:8px;align-items:center}
+.checklist .y{color:var(--ok)}.checklist .n{color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(440px,calc(100% - 24px));pointer-events:none}
+.toast div{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:8px;align-items:center;animation:tin .2s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (max-width:759px){.toast{bottom:84px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" style="width:22px;height:22px"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M14 9l2 2"/></svg></span><span>Logéo<small>Location directe entre particuliers</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="who">
+    <div class="seg" role="group" aria-label="Choisir l’espace">
+      <button type="button" data-act="role" data-r="t" id="r-t">Locataire</button>
+      <button type="button" data-act="role" data-r="o" id="r-o">Propriétaire</button>
+    </div>
+    <span class="me" id="me"></span>
+  </div>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="modal" aria-labelledby="m-title"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur=n=>Number(n||0).toLocaleString("fr-FR")+" €";
+const pd=iso=>new Date(iso.length===10?iso+"T12:00:00":iso);
+const fD=iso=>pd(iso).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
+const fDL=iso=>pd(iso).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+const fDT=iso=>{const d=pd(iso);return d.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})+" · "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});};
+const nowISO=()=>new Date().toISOString();
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d);};
+const today=()=>ymd(new Date());
+const initials=n=>String(n).split(/[\s-]+/).filter(w=>w&&w[0]===w[0].toUpperCase()).slice(0,2).map(w=>w[0]).join("");
+const first=n=>String(n).split(" ")[0];
+const hm=t=>t.replace(":"," h ");
+
+const P={
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+check:'<path d="M20 6 9 17l-5-5"/>',
+x:'<path d="M18 6 6 18M6 6l12 12"/>',
+back:'<path d="m15 18-6-6 6-6"/>',
+pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+area:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+door:'<path d="M3 21h18M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M14 12h.01"/>',
+send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+grid:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+sofa:'<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3"/><path d="M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z"/><path d="M5 18v2M19 18v2"/>',
+euro:'<path d="M18 7a7 7 0 1 0 0 10"/><path d="M4 10h10M4 14h10"/>',
+inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13L22 12v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z"/>'
+};
+const ic=(n,s)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true"${s?` style="width:${s}px;height:${s}px"`:""}>${P[n]}</svg>`;
+
+const OWN={o1:{name:"Claire Moreau",resp:"répond en moyenne en 3 h"},o2:{name:"Hugo Lefèvre",resp:"répond en moyenne en 5 h"},o3:{name:"Agnès Roussel",resp:"répond en moyenne en 1 jour"},o4:{name:"Karim Haddad",resp:"répond en moyenne en 8 h"}};
+const SITU=["CDI","CDD","Indépendant","Fonctionnaire","Étudiant","Alternant","Retraité","Autre"];
+const GAR=["Aucun","Visale","Caution parentale","Garantie bancaire"];
+const TYPES=["Appartement","Studio","Maison"];
+
+function seed(){
+  return {
+    nextId:100,
+    favs:["L5"],
+    dossier:{name:"Lucas Bernard",email:"lucas.bernard@exemple.fr",phone:"06 12 34 56 78",situation:"CDI",employer:"Développeur dans une PME",income:2600,guarantor:"Aucun",moveIn:"2026-11-01",about:""},
+    listings:[
+      {id:"L1",ownerId:"o1",title:"T2 lumineux avec balcon",city:"Lyon",district:"4e — Croix-Rousse",type:"Appartement",rent:790,charges:60,surface:46,rooms:2,furnished:false,avail:"2026-11-01",desc:"Au 3e étage avec ascenseur : séjour traversant ouvert sur un balcon, chambre sur cour très calme, cuisine équipée. Cave et local vélos. Métro C à 4 minutes à pied.",hue:208,status:"active",created:"2026-09-28T10:00:00",views:184},
+      {id:"L2",ownerId:"o1",title:"Studio meublé entièrement rénové",city:"Lyon",district:"7e — Guillotière",type:"Studio",rent:560,charges:40,surface:22,rooms:1,furnished:true,avail:"2026-10-15",desc:"Rénové en 2025 : coin nuit, kitchenette équipée (plaques, four, lave-linge), salle d’eau avec douche à l’italienne. Idéal étudiant ou jeune actif, tram T1 à deux pas.",hue:214,status:"active",created:"2026-10-02T08:30:00",views:96},
+      {id:"L3",ownerId:"o1",title:"Maison 4 pièces avec jardin",city:"Villeurbanne",district:"Gratte-Ciel",type:"Maison",rent:1350,charges:0,surface:92,rooms:4,furnished:false,avail:"2026-12-01",desc:"Maison mitoyenne sur deux niveaux : trois chambres, grand séjour ouvert sur un jardin de 120 m², garage. Quartier calme, écoles et commerces accessibles à pied.",hue:200,status:"active",created:"2026-09-20T14:00:00",views:241},
+      {id:"L4",ownerId:"o2",title:"T2 meublé quartier des Chartrons",city:"Bordeaux",district:"Chartrons",type:"Appartement",rent:820,charges:50,surface:41,rooms:2,furnished:true,avail:"2026-11-01",desc:"Immeuble en pierre, parquet ancien et moulures. Chambre séparée, cuisine ouverte équipée, nombreux rangements. Tram B et quais à 5 minutes.",hue:218,status:"active",created:"2026-09-30T09:00:00",views:132},
+      {id:"L5",ownerId:"o3",title:"T3 familial proche du Thabor",city:"Rennes",district:"Thabor",type:"Appartement",rent:880,charges:90,surface:64,rooms:3,furnished:false,avail:"2026-11-15",desc:"Deux chambres, séjour exposé sud, cuisine séparée, place de parking en sous-sol. À 300 m du parc du Thabor, écoles à proximité.",hue:204,status:"active",created:"2026-10-01T16:20:00",views:77},
+      {id:"L6",ownerId:"o4",title:"Studio étudiant à Wazemmes",city:"Lille",district:"Wazemmes",type:"Studio",rent:520,charges:35,surface:19,rooms:1,furnished:true,avail:"2026-10-20",desc:"Studio meublé fonctionnel avec mezzanine, kitchenette et salle d’eau. Marché de Wazemmes et métro Gambetta au pied de l’immeuble. Éligible APL.",hue:222,status:"active",created:"2026-10-04T11:00:00",views:58},
+      {id:"L7",ownerId:"o2",title:"T3 avec terrasse sur l’île",city:"Nantes",district:"Île de Nantes",type:"Appartement",rent:940,charges:70,surface:68,rooms:3,furnished:false,avail:"2026-11-01",desc:"Résidence récente basse consommation (DPE B). Terrasse de 12 m² sans vis-à-vis, deux chambres, cellier. Busway et Machines de l’île à 6 minutes.",hue:196,status:"active",created:"2026-09-25T10:00:00",views:164},
+      {id:"L8",ownerId:"o3",title:"T2 au calme, quartier des Carmes",city:"Toulouse",district:"Carmes",type:"Appartement",rent:760,charges:45,surface:44,rooms:2,furnished:true,avail:"2026-10-25",desc:"Au dernier étage d’un immeuble toulousain en brique. Chambre sur cour, séjour lumineux, cuisine équipée. Métro Carmes à 2 minutes.",hue:210,status:"active",created:"2026-10-03T18:00:00",views:89},
+      {id:"L9",ownerId:"o4",title:"Maison de ville 3 chambres",city:"Nantes",district:"Chantenay",type:"Maison",rent:1200,charges:0,surface:85,rooms:4,furnished:false,avail:"2026-12-15",desc:"Maison de ville avec cour arborée, trois chambres à l’étage, bureau au rez-de-chaussée. Proche de la Loire et des transports.",hue:216,status:"active",created:"2026-09-18T09:00:00",views:203},
+      {id:"L10",ownerId:"o2",title:"T3 rénové proche Part-Dieu",city:"Lyon",district:"3e — Part-Dieu",type:"Appartement",rent:1050,charges:80,surface:67,rooms:3,furnished:false,avail:"2026-11-10",desc:"Rénovation complète : double vitrage, cuisine équipée neuve, deux chambres avec placards. Gare Part-Dieu à 8 minutes à pied.",hue:202,status:"active",created:"2026-09-27T12:00:00",views:148}
+    ],
+    requests:[
+      {id:"R1",listingId:"L1",tenant:{id:"x1",name:"Sarah Benali",situation:"CDI",employer:"Infirmière en centre hospitalier",income:2900,guarantor:"Visale",moveIn:"2026-11-01"},status:"nouvelle",visit:null,unread:{t:0,o:1},created:"2026-10-05T19:42:00",
+        messages:[{from:"t",text:"Bonjour, je suis très intéressée par votre T2. Je travaille en CDI à dix minutes et je pourrais emménager début novembre. Seriez-vous disponible pour une visite cette semaine ?",at:"2026-10-05T19:42:00"}]},
+      {id:"R2",listingId:"L1",tenant:{id:"x2",name:"Thomas Girard",situation:"Étudiant",employer:"Master 2 à l’université",income:900,guarantor:"Caution parentale",moveIn:"2026-11-01"},status:"visite",visit:{date:"2026-10-09",time:"18:00",confirmed:true},unread:{t:0,o:0},created:"2026-10-03T10:05:00",
+        messages:[{from:"t",text:"Bonjour Madame, votre appartement correspond exactement à ce que je cherche. Mes parents se portent caution (revenus : 4 200 € nets).",at:"2026-10-03T10:05:00"},{from:"o",text:"Bonjour Thomas, merci pour votre message. Je vous propose une visite vendredi à 18 h.",at:"2026-10-03T13:20:00"},{from:"sys",text:"Visite proposée le vendredi 9 octobre à 18 h 00",at:"2026-10-03T13:20:00"},{from:"sys",text:"Visite confirmée par le locataire",at:"2026-10-03T14:02:00"},{from:"t",text:"Parfait, à vendredi !",at:"2026-10-03T14:02:00"}]},
+      {id:"R3",listingId:"L2",tenant:{id:"x3",name:"Inès Martin",situation:"CDD",employer:"Assistante marketing (12 mois)",income:1750,guarantor:"Visale",moveIn:"2026-10-20"},status:"nouvelle",visit:null,unread:{t:0,o:1},created:"2026-10-06T08:14:00",
+        messages:[{from:"t",text:"Bonjour, le studio est-il toujours disponible ? Je commence un nouveau poste à Lyon fin octobre. J’ai la garantie Visale.",at:"2026-10-06T08:14:00"}]},
+      {id:"R4",listingId:"L3",tenant:{id:"x4",name:"Julien et Marie Petit",situation:"CDI",employer:"Deux salaires en CDI",income:5200,guarantor:"Aucun",moveIn:"2026-12-01"},status:"acceptee",visit:{date:"2026-09-30",time:"17:30",confirmed:true},unread:{t:0,o:0},created:"2026-09-24T21:00:00",
+        messages:[{from:"t",text:"Bonjour, nous cherchons une maison avec jardin pour nos deux enfants. Votre annonce nous plaît beaucoup.",at:"2026-09-24T21:00:00"},{from:"sys",text:"Visite effectuée le mercredi 30 septembre",at:"2026-09-30T18:30:00"},{from:"sys",text:"Dossier accepté par le propriétaire",at:"2026-10-01T09:00:00"},{from:"o",text:"Bonjour, je suis ravie de vous confirmer que votre dossier est retenu. Je vous envoie le projet de bail cette semaine.",at:"2026-10-01T09:01:00"}]},
+      {id:"R5",listingId:"L4",tenant:{id:"t1",name:"Lucas Bernard",situation:"CDI",employer:"Développeur dans une PME",income:2600,guarantor:"Aucun",moveIn:"2026-11-01"},status:"visite",visit:{date:"2026-10-10",time:"11:00",confirmed:false},unread:{t:1,o:0},created:"2026-10-04T18:30:00",
+        messages:[{from:"t",text:"Bonjour, votre T2 aux Chartrons m’intéresse beaucoup. Je suis en CDI et je souhaiterais emménager le 1er novembre.",at:"2026-10-04T18:30:00"},{from:"o",text:"Bonjour Lucas, merci pour votre dossier, il est complet. Je vous propose une visite samedi à 11 h.",at:"2026-10-05T09:10:00"},{from:"sys",text:"Visite proposée le samedi 10 octobre à 11 h 00",at:"2026-10-05T09:10:00"}]}
+    ]
+  };
+}
+
+const KEY="logeo-demo-v1";
+let S;
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);return;}}catch(e){}S=seed();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const defF=()=>({q:"",city:"",max:"",rooms:0,type:"",furnished:false,sort:"recent"});
+let ui={role:"t",view:{t:"search",o:"dash"},thread:null,mobileOpen:false,f:defF(),filtersOpen:false,rf:"all",rl:""};
+const L=id=>S.listings.find(l=>l.id===id);
+const R=id=>S.requests.find(r=>r.id===id);
+const reqsT=()=>S.requests.filter(r=>r.tenant.id==="t1");
+const reqsO=()=>S.requests.filter(r=>{const l=L(r.listingId);return l&&l.ownerId==="o1";});
+const lastAt=r=>pd(r.messages[r.messages.length-1].at).getTime();
+const threads=role=>(role==="t"?reqsT():reqsO()).sort((a,b)=>lastAt(b)-lastAt(a));
+
+/* ---------- Composants ---------- */
+function ph(l,cls){
+  let s='<svg viewBox="0 0 160 90" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><rect class="g" x="0" y="80" width="160" height="10"/>';
+  if(l.type==="Maison"){
+    s+='<rect class="b2" x="112" y="52" width="30" height="28"/><polygon class="r" points="40,48 80,20 120,48"/><rect class="b1" x="48" y="46" width="64" height="34"/>';
+    [[56,54],[92,54]].forEach(([x,y])=>s+=`<rect class="w" x="${x}" y="${y}" width="12" height="10" rx="1"/>`);
+    s+='<rect class="w" x="74" y="62" width="12" height="18" rx="1"/><circle class="b2" cx="26" cy="62" r="12"/><rect class="r" x="25" y="68" width="3" height="12"/>';
+  }else{
+    const cols=l.type==="Studio"?2:3,w=cols===2?44:60,x0=80-w/2;
+    s+=`<rect class="b2" x="18" y="40" width="26" height="40"/><rect class="b2" x="116" y="30" width="28" height="50"/><rect class="b1" x="${x0}" y="14" width="${w}" height="66" rx="1"/>`;
+    for(let r=0;r<4;r++)for(let c=0;c<cols;c++)s+=`<rect class="w" x="${x0+8+c*17}" y="${21+r*14}" width="10" height="8" rx="1"/>`;
+    s+=`<rect class="w" x="74" y="70" width="12" height="10" rx="1"/>`;
+  }
+  return `<div class="ph ${cls||""}" style="--h:${l.hue}">${s}</svg><span class="ph-tag">${esc(l.type)}${l.furnished?" meublé":""}</span></div>`;
+}
+function availTxt(d){return d<=today()?"immédiatement":"à partir du "+pd(d).toLocaleDateString("fr-FR",{day:"numeric",month:"long"});}
+function stBadge(r){
+  const m={nouvelle:["Nouvelle demande","info","inbox"],visite:[r.visit&&r.visit.confirmed?"Visite confirmée":"Visite proposée",r.visit&&r.visit.confirmed?"sky":"warn","cal"],acceptee:["Dossier accepté","ok","check"],refusee:["Non retenu","gray","x"]}[r.status];
+  return `<span class="badge ${m[1]}">${ic(m[2])}${m[0]}</span>`;
+}
+function ratio(t,l){
+  if(!t.income)return '<span class="muted">—</span>';
+  const x=t.income/(l.rent+l.charges),c=x>=3?"ok":x>=2.2?"warn":"bad";
+  return `<span class="ratio ${c}">${x.toLocaleString("fr-FR",{maximumFractionDigits:1})}× le loyer</span>`;
+}
+function facts(t,l){
+  if(!t.situation)return '<p class="small muted">Dossier locataire non transmis.</p>';
+  return `<dl class="facts"><div><dt>Situation</dt><dd>${esc(t.situation)}</dd></div><div><dt>Revenus nets</dt><dd>${eur(t.income)}</dd></div><div><dt>Garant</dt><dd>${esc(t.guarantor)}</dd></div><div><dt>Revenus / loyer</dt><dd>${ratio(t,l)}</dd></div></dl>`;
+}
+const timeOpts=sel=>{let o="";for(let h=9;h<=19;h++)for(const m of["00","30"]){const v=String(h).padStart(2,"0")+":"+m;o+=`<option${v===sel?" selected":""}>${v}</option>`;}return o;};
+
+/* ---------- Navigation ---------- */
+const NAV={t:[["search","Rechercher","search"],["favs","Favoris","heart"],["msgs","Messages","chat"],["dossier","Mon dossier","file"]],o:[["dash","Tableau de bord","grid"],["listings","Mes annonces","home"],["msgs","Messages","chat"]]};
+function badgeFor(v){
+  if(v==="msgs")return threads(ui.role).reduce((s,r)=>s+(r.unread[ui.role]||0),0);
+  if(v==="dash")return reqsO().filter(r=>r.status==="nouvelle").length;
+  if(v==="favs")return S.favs.filter(id=>L(id)&&L(id).status==="active").length;
+  return 0;
+}
+function renderNav(){
+  const cur=ui.view[ui.role];
+  $("#nav").innerHTML=NAV[ui.role].map(([v,lab,i])=>{const n=badgeFor(v);return `<button type="button" class="tab" data-act="nav" data-v="${v}"${v===cur?' aria-current="page"':""}>${ic(i)}<span>${lab}</span>${n?`<span class="cnt" aria-label="${n} ${v==="favs"?"favori(s)":"non lu(s)"}">${n}</span>`:""}</button>`;}).join("");
+  $("#r-t").setAttribute("aria-pressed",ui.role==="t");
+  $("#r-o").setAttribute("aria-pressed",ui.role==="o");
+  $("#me").innerHTML=`Connecté : <b>${ui.role==="t"?esc(S.dossier.name||"Locataire"):OWN.o1.name}</b>`;
+}
+function render(){
+  const v=ui.view[ui.role],m=$("#main");
+  const fn={search:vSearch,favs:vFavs,msgs:vMsgs,dossier:vDossier,dash:vDash,listings:vListings}[v];
+  m.innerHTML=fn();
+  if(v==="search")updateResults();
+  if(v==="msgs"){const ml=$("#mlist");if(ml)ml.scrollTop=ml.scrollHeight;}
+  renderNav();
+}
+function refresh(){
+  const a=document.activeElement;
+  if(a&&a.matches("input,select,textarea")&&$("#main").contains(a)&&a.id!=="c-text"){renderNav();return;}
+  const txt=$("#c-text")?$("#c-text").value:null,foc=a&&a.id==="c-text";
+  render();
+  const t=$("#c-text");if(t&&txt!=null){t.value=txt;if(foc)t.focus();}
+}
+
+/* ---------- Locataire : recherche ---------- */
+function completeness(){
+  const d=S.dossier,chk=[["Nom et prénom",!!d.name],["Email",/^\S+@\S+\.\S+$/.test(d.email||"")],["Téléphone",(d.phone||"").replace(/\D/g,"").length>=10],["Situation professionnelle",!!d.situation],["Revenus mensuels",d.income>0],["Garant renseigné",!!d.guarantor&&d.guarantor!=="Aucun"],["Date d’emménagement",!!d.moveIn],["Présentation (30 caractères min.)",(d.about||"").trim().length>=30]];
+  return {pct:Math.round(chk.filter(c=>c[1]).length/chk.length*100),chk};
+}
+function nudge(){
+  const c=completeness();
+  if(c.pct===100)return `<div class="nudge"><span class="badge ok">${ic("shield")}Dossier complet</span><p class="small">Les propriétaires voient un dossier prêt à l’emploi.</p></div>`;
+  return `<div class="nudge"><div class="meter" role="img" aria-label="Dossier complet à ${c.pct} %"><i style="width:${c.pct}%"></i></div><p class="small"><b>Dossier complet à ${c.pct} %</b> — un dossier complet obtient plus de réponses.</p><button class="btn sm" data-act="nav" data-v="dossier">Compléter</button></div>`;
+}
+function vSearch(){
+  const f=ui.f,act=S.listings.filter(l=>l.status==="active");
+  const cities=[...new Set(act.map(l=>l.city))].sort();
+  return `<div class="hero"><div><h1>Trouvez votre prochain logement</h1><p class="muted">Contactez directement les propriétaires, sans frais d’agence.</p></div>${nudge()}</div>
+  <div class="search">
+    <button type="button" class="btn filt-toggle" data-act="toggleFilters" aria-expanded="${ui.filtersOpen}" aria-controls="filters">${ic("sliders")}Filtres</button>
+    <aside id="filters" class="card filters${ui.filtersOpen?" open":""}" aria-label="Filtres de recherche">
+      <div class="field"><label for="f-q">Mot-clé</label><input id="f-q" type="search" value="${esc(f.q)}" placeholder="balcon, jardin, métro…"></div>
+      <div class="field"><label for="f-city">Ville</label><select id="f-city"><option value="">Toutes les villes</option>${cities.map(c=>`<option${c===f.city?" selected":""}>${esc(c)}</option>`).join("")}</select></div>
+      <div class="field"><label for="f-max">Budget max. charges comprises (€)</label><input id="f-max" type="number" inputmode="numeric" min="0" step="50" value="${esc(f.max)}" placeholder="ex. 900"></div>
+      <fieldset class="field"><legend class="flabel">Pièces minimum</legend><div class="seg" style="margin-top:5px">${[0,1,2,3,4].map(n=>`<button type="button" data-act="rooms" data-n="${n}" aria-pressed="${f.rooms===n}">${n===0?"Tout":n===4?"4+":n}</button>`).join("")}</div></fieldset>
+      <div class="field"><label for="f-type">Type de bien</label><select id="f-type"><option value="">Tous les types</option>${TYPES.map(t=>`<option${t===f.type?" selected":""}>${t}</option>`).join("")}</select></div>
+      <label class="check"><input type="checkbox" id="f-furn"${f.furnished?" checked":""}> Meublé uniquement</label>
+      <button type="button" class="btn ghost" data-act="clearFilters">Effacer les filtres</button>
+    </aside>
+    <section aria-labelledby="res-title" style="min-width:0">
+      <div class="toolbar"><h2 id="res-title" aria-live="polite"></h2>
+        <div class="field inline"><label for="f-sort">Trier par</label><select id="f-sort">${[["recent","Plus récentes"],["asc","Loyer croissant"],["desc","Loyer décroissant"],["surface","Surface"]].map(([v,t])=>`<option value="${v}"${v===f.sort?" selected":""}>${t}</option>`).join("")}</select></div>
+      </div>
+      <div id="results" class="grid-cards"></div>
+    </section>
+  </div>`;
+}
+function card(l){
+  const fav=S.favs.includes(l.id),r=S.requests.find(x=>x.listingId===l.id&&x.tenant.id==="t1");
+  return `<article class="lcard">${ph(l)}
+    <button type="button" class="icon-btn fav" data-act="fav" data-id="${l.id}" aria-pressed="${fav}" aria-label="Favori : ${esc(l.title)}">${ic("heart")}</button>
+    <div class="lbody">
+      <div class="price">${eur(l.rent+l.charges)} <span class="muted small" style="font-weight:500">/ mois CC</span></div>
+      <h3><button type="button" class="stretch" data-act="open" data-id="${l.id}">${esc(l.title)}</button></h3>
+      <p class="muted small loc">${ic("pin")}<span class="wrap">${esc(l.city)} · ${esc(l.district)}</span></p>
+      <ul class="feats"><li>${l.surface} m²</li><li>${l.rooms} pièce${l.rooms>1?"s":""}</li><li>${l.furnished?"Meublé":"Vide"}</li></ul>
+      <p class="small muted">Disponible ${availTxt(l.avail)}</p>
+      ${r?stBadge(r):""}
+    </div></article>`;
+}
+function updateResults(){
+  const f=ui.f,q=f.q.trim().toLowerCase(),max=parseFloat(f.max);
+  let list=S.listings.filter(l=>l.status==="active"&&(!f.city||l.city===f.city)&&(!max||l.rent+l.charges<=max)&&(!f.rooms||l.rooms>=f.rooms)&&(!f.type||l.type===f.type)&&(!f.furnished||l.furnished)&&(!q||(l.title+" "+l.desc+" "+l.city+" "+l.district).toLowerCase().includes(q)));
+  const s={recent:(a,b)=>b.created.localeCompare(a.created),asc:(a,b)=>(a.rent+a.charges)-(b.rent+b.charges),desc:(a,b)=>(b.rent+b.charges)-(a.rent+a.charges),surface:(a,b)=>b.surface-a.surface}[f.sort];
+  list.sort(s);
+  $("#res-title").textContent=list.length+" logement"+(list.length>1?"s":"")+" disponible"+(list.length>1?"s":"");
+  $("#results").innerHTML=list.length?list.map(card).join(""):`<div class="empty" style="grid-column:1/-1">${ic("search")}<p>Aucun logement ne correspond à ces critères.</p><button type="button" class="btn" data-act="clearFilters">Effacer les filtres</button></div>`;
+}
+function vFavs(){
+  const list=S.favs.map(L).filter(l=>l&&l.status==="active");
+  return `<div class="ph-row"><div><h1>Mes favoris</h1><p class="muted">Les logements que vous avez mis de côté.</p></div></div>
+  ${list.length?`<div class="grid-cards">${list.map(card).join("")}</div>`:`<div class="card empty">${ic("heart")}<p>Aucun favori pour l’instant. Touchez le cœur d’une annonce pour la retrouver ici.</p><button type="button" class="btn primary" data-act="nav" data-v="search">Parcourir les annonces</button></div>`}`;
+}
+
+/* ---------- Fiche annonce + contact ---------- */
+const modal=$("#modal");let lastFocus=null;
+function openModal(html,narrow){lastFocus=document.activeElement;modal.className=narrow?"narrow":"";modal.innerHTML=html;if(!modal.open)modal.showModal();const f=modal.querySelector("[autofocus]");if(f)f.focus();}
+function closeModal(){if(modal.open)modal.close();}
+modal.addEventListener("close",()=>{if(lastFocus&&document.contains(lastFocus))lastFocus.focus();});
+modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
+const mhead=t=>`<div class="mhead"><h2 id="m-title">${t}</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic("x")}</button></div>`;
+
+function openListing(id){
+  const l=L(id),o=OWN[l.ownerId],r=S.requests.find(x=>x.listingId===id&&x.tenant.id==="t1"),d=S.dossier,own=ui.role==="o";
+  let right;
+  if(own){right=`<div class="contact stack"><h3>Aperçu locataire</h3><p class="small muted">C’est ainsi que votre annonce apparaît aux locataires.</p></div>`;}
+  else if(r){right=`<div class="contact stack"><h3>Vous avez déjà contacté ${esc(first(o.name))}</h3>${stBadge(r)}${r.visit?`<p class="small">${ic("cal")} Visite le ${fDL(r.visit.date)} à ${hm(r.visit.time)}</p>`:""}<button type="button" class="btn primary" data-act="goThread" data-id="${r.id}">${ic("chat")}Voir la conversation</button></div>`;}
+  else{
+    const c=completeness();
+    right=`<form id="contactForm" class="contact stack" data-id="${l.id}" novalidate>
+      <h3>Contacter ${esc(first(o.name))}</h3>
+      <div class="field"><label for="c-msg">Votre message <span class="req" aria-hidden="true">*</span></label><textarea id="c-msg" rows="6" aria-describedby="c-msg-err" required>Bonjour, votre annonce « ${esc(l.title)} » m’intéresse. ${d.situation?`Je suis en ${esc(d.situation)}${d.employer?" ("+esc(d.employer.toLowerCase())+")":""}`:""} et je souhaiterais organiser une visite. Bien cordialement, ${esc(first(d.name||""))}</textarea><p class="err" id="c-msg-err"></p></div>
+      <div class="field"><label for="c-move">Emménagement souhaité</label><input type="date" id="c-move" value="${esc(d.moveIn)}"></div>
+      <label class="check"><input type="checkbox" id="c-dos" checked> Joindre mon dossier locataire (${c.pct} %)</label>
+      <div class="mini" id="c-mini"><b>${esc(d.name)}</b><span>${esc(d.situation||"Situation non renseignée")} · ${d.income?eur(d.income)+" nets/mois":"revenus non renseignés"}</span><span>Garant : ${esc(d.guarantor||"—")} · ${ratio(d,l)}</span></div>
+      <button type="submit" class="btn primary">${ic("send")}Envoyer la demande</button>
+      <p class="hint">${esc(o.name)} est prévenu par email (simulation). Vos coordonnées ne sont partagées qu’avec ce propriétaire.</p>
+    </form>`;
+  }
+  openModal(`${mhead(esc(l.title))}<div class="mbody">${ph(l,"big")}
+    <div class="detail"><div>
+      <div class="price">${eur(l.rent+l.charges)} <span class="muted small" style="font-weight:500">/ mois charges comprises</span></div>
+      <p class="small muted">Loyer ${eur(l.rent)} + charges ${eur(l.charges)} · Disponible ${availTxt(l.avail)}</p>
+      <div class="specs"><div class="spec">${ic("pin")}<span class="wrap">${esc(l.city)} · ${esc(l.district)}</span></div><div class="spec">${ic("area")}${l.surface} m²</div><div class="spec">${ic("door")}${l.rooms} pièce${l.rooms>1?"s":""}</div><div class="spec">${ic("sofa")}${l.furnished?"Meublé":"Non meublé"}</div></div>
+      <p class="wrap">${esc(l.desc)}</p>
+      <div class="owner"><span class="avatar" aria-hidden="true">${initials(o.name)}</span><div><b>${esc(o.name)}</b><p class="small muted">Propriétaire particulier · ${o.resp}</p></div></div>
+    </div><div>${right}</div></div></div>`);
+}
+function submitContact(form){
+  const msg=$("#c-msg",form),txt=msg.value.trim();
+  if(txt.length<20){msg.setAttribute("aria-invalid","true");$("#c-msg-err").textContent="Votre message doit contenir au moins 20 caractères.";msg.focus();return;}
+  const l=L(form.dataset.id),d=S.dossier,withD=$("#c-dos",form).checked,mv=$("#c-move",form).value;
+  const t=withD?{id:"t1",name:d.name,situation:d.situation,employer:d.employer,income:+d.income||0,guarantor:d.guarantor,moveIn:mv}:{id:"t1",name:d.name,moveIn:mv};
+  const r={id:"R"+(S.nextId++),listingId:l.id,tenant:t,status:"nouvelle",visit:null,unread:{t:0,o:1},created:nowISO(),messages:[{from:"t",text:txt,at:nowISO()}]};
+  if(withD)r.messages.push({from:"sys",text:"Dossier locataire joint à la demande",at:nowISO()});
+  S.requests.push(r);save();closeModal();
+  ui.view.t="msgs";ui.thread=r.id;ui.mobileOpen=true;render();
+  toast("Demande envoyée — email de notification envoyé (simulation)");
+  if(l.ownerId==="o1")setTimeout(()=>toast("Astuce : passez en espace Propriétaire pour y répondre"),2600);
+  else simOwnerReply(r.id);
+}
+function simOwnerReply(rid){
+  setTimeout(()=>{
+    const r=R(rid);if(!r||r.status!=="nouvelle")return;
+    const l=L(r.listingId),o=OWN[l.ownerId],d=addDays(3);
+    r.messages.push({from:"o",text:`Bonjour ${first(r.tenant.name)}, merci pour votre message. Je vous propose une visite le ${fDL(d)} à 18 h 30. Cela vous convient-il ?`,at:nowISO()});
+    r.status="visite";r.visit={date:d,time:"18:30",confirmed:false};
+    r.messages.push({from:"sys",text:`Visite proposée le ${fDL(d)} à 18 h 30`,at:nowISO()});
+    r.unread.t++;save();refresh();toast(`${o.name} vous a répondu et propose une visite`);
+  },3000);
+}
+
+/* ---------- Messagerie ---------- */
+function vMsgs(){
+  const list=threads(ui.role);
+  if(!list.length)return `<div class="card empty">${ic("chat")}<p>${ui.role==="t"?"Aucune conversation. Contactez un propriétaire depuis une annonce.":"Aucune demande reçue pour l’instant."}</p>${ui.role==="t"?'<button type="button" class="btn primary" data-act="nav" data-v="search">Rechercher un logement</button>':""}</div>`;
+  if(!ui.thread||!list.some(r=>r.id===ui.thread))ui.thread=window.innerWidth>=860?list[0].id:null;
+  if(!ui.thread)ui.mobileOpen=false;
+  const cur=ui.thread&&R(ui.thread);
+  if(cur&&(ui.mobileOpen||window.innerWidth>=860)&&cur.unread[ui.role]){cur.unread[ui.role]=0;save();}
+  return `<div class="msgs${ui.mobileOpen?" open":""}">
+    <nav class="tlist" aria-label="Conversations"><h1>Messages</h1>${list.map(r=>{
+      const l=L(r.listingId),other=ui.role==="t"?OWN[l.ownerId].name:r.tenant.name,last=r.messages[r.messages.length-1],un=r.unread[ui.role];
+      return `<button type="button" class="titem" data-act="thread" data-id="${r.id}" aria-current="${r.id===ui.thread}"><span class="avatar" aria-hidden="true">${initials(other)}</span><span class="tx"><span class="nm"><span>${esc(other)}</span><span class="small muted" style="font-weight:500;white-space:nowrap">${fD(last.at)}</span></span><span class="small wrap" style="color:var(--accent-text);font-weight:600">${esc(l.title)}</span><span class="ex">${last.from==="sys"?"":(last.from===ui.role?"Vous : ":"")}${esc(last.text)}</span></span>${un?`<span class="dot"><span class="sr">${un} non lu</span></span>`:""}</button>`;}).join("")}</nav>
+    <section class="pane" aria-label="Conversation">${cur?pane(cur):`<div class="empty">${ic("chat")}<p>Sélectionnez une conversation.</p></div>`}</section>
+  </div>`;
+}
+function pane(r){
+  const l=L(r.listingId),t=ui.role==="t",other=t?OWN[l.ownerId].name:r.tenant.name,fin=r.status==="acceptee"||r.status==="refusee";
+  let act="";
+  if(t){
+    if(r.status==="visite"&&r.visit&&!r.visit.confirmed)act=`<button type="button" class="btn primary sm" data-act="confirmVisit" data-id="${r.id}">${ic("check")}Confirmer la visite</button><button type="button" class="btn sm" data-act="askOther" data-id="${r.id}">Demander un autre créneau</button>`;
+  }else if(!fin){
+    act=`<button type="button" class="btn sm" data-act="propose" data-id="${r.id}">${ic("cal")}${r.visit?"Modifier la visite":"Proposer une visite"}</button><button type="button" class="btn ok sm" data-act="accept" data-id="${r.id}">${ic("check")}Accepter le dossier</button><button type="button" class="btn danger sm" data-act="refuse" data-id="${r.id}">${ic("x")}Refuser</button>`;
+  }
+  const visit=r.visit&&r.status!=="refusee"?`<div class="visit">${ic("cal",22)}<div class="tx"><b>Visite le ${fDL(r.visit.date)} à ${hm(r.visit.time)}</b><p class="small muted">${esc(l.city)} · ${esc(l.district)} — ${r.visit.confirmed?"confirmée par les deux parties":"en attente de confirmation du locataire"}</p></div></div>`:"";
+  const dos=!t?`<details class="dos"><summary>Dossier de ${esc(first(r.tenant.name))}${r.tenant.situation?"":" (non transmis)"}</summary><div style="margin-top:8px">${facts(r.tenant,l)}${r.tenant.employer?`<p class="small muted" style="margin-top:6px">${esc(r.tenant.employer)} · emménagement souhaité ${r.tenant.moveIn?fD(r.tenant.moveIn):"—"}</p>`:""}</div></details>`:"";
+  const bar=visit||dos||act?`<div class="pbar">${visit}${dos}${act?`<div class="actions">${act}</div>`:""}</div>`:"";
+  return `<div class="phead"><button type="button" class="icon-btn back" data-act="back" aria-label="Retour aux conversations">${ic("back")}</button><span class="avatar" aria-hidden="true">${initials(other)}</span><div class="tx"><h2>${esc(other)}</h2><button type="button" class="linkbtn" data-act="open" data-id="${l.id}">${esc(l.title)} · ${eur(l.rent+l.charges)}</button></div>${stBadge(r)}</div>
+  ${bar}
+  <div class="mlist" id="mlist" role="log" aria-label="Messages">${r.messages.map(m=>m.from==="sys"?`<p class="sys">${esc(m.text)}</p>`:`<div class="bub${m.from===ui.role?" me":""}">${esc(m.text)}<time datetime="${m.at}">${m.from===ui.role?"Vous":esc(first(m.from==="t"?r.tenant.name:OWN[l.ownerId].name))} · ${fDT(m.at)}</time></div>`).join("")}</div>
+  <form class="composer" id="composer" data-id="${r.id}"><label for="c-text" class="sr">Votre message</label><textarea id="c-text" rows="1" placeholder="Écrire un message…"></textarea><button type="submit" class="btn primary" aria-label="Envoyer">${ic("send")}</button></form>`;
+}
+const REPLY_O=["Merci pour votre retour, c’est noté.","Très bien, je reste disponible si vous avez d’autres questions.","Entendu ! Je vous tiens au courant rapidement."];
+const REPLY_T=["Merci beaucoup pour votre réponse !","Parfait, c’est noté de mon côté.","Super, merci. Je reste disponible si besoin de pièces complémentaires."];
+function sendMsg(form){
+  const ta=$("#c-text",form),txt=ta.value.trim();if(!txt){ta.focus();return;}
+  const r=R(form.dataset.id),other=ui.role==="t"?"o":"t";
+  r.messages.push({from:ui.role,text:txt,at:nowISO()});r.unread[other]++;save();
+  ta.value="";render();$("#c-text").focus();
+  simReply(r,ui.role);
+}
+function simReply(r,from){
+  const l=L(r.listingId);
+  const auto=from==="t"?l.ownerId!=="o1":r.tenant.id!=="t1";
+  if(!auto)return;
+  const id=r.id;
+  setTimeout(()=>{const x=R(id);if(!x)return;const to=from==="t"?"o":"t",pool=to==="o"?REPLY_O:REPLY_T;
+    x.messages.push({from:to,text:pool[x.messages.length%pool.length],at:nowISO()});x.unread[from]++;save();refresh();
+    toast("Nouveau message de "+(to==="o"?OWN[l.ownerId].name:x.tenant.name));},2200);
+}
+function sys(r,text,notify){r.messages.push({from:"sys",text,at:nowISO()});if(notify)r.unread[notify]++;}
+
+function openPropose(id){
+  const r=R(id),v=r.visit||{date:addDays(2),time:"18:00"};
+  openModal(`${mhead("Proposer une visite")}<form class="mbody stack" id="proposeForm" data-id="${id}" novalidate>
+    <p class="muted small">Le créneau est envoyé à ${esc(r.tenant.name)} avec une notification email (simulation).</p>
+    <div class="fgrid"><div class="field"><label for="v-date">Date <span class="req" aria-hidden="true">*</span></label><input type="date" id="v-date" min="${today()}" value="${v.date<today()?addDays(2):v.date}" aria-describedby="v-date-err" autofocus><p class="err" id="v-date-err"></p></div>
+    <div class="field"><label for="v-time">Heure</label><select id="v-time">${timeOpts(v.time)}</select></div></div>
+    <div class="field"><label for="v-msg">Message (facultatif)</label><textarea id="v-msg" rows="3" placeholder="Code d’accès, étage, interphone…"></textarea></div>
+    <div class="mfoot"><button type="button" class="btn" data-act="close">Annuler</button><button type="submit" class="btn primary">${ic("send")}Envoyer la proposition</button></div></form>`,true);
+}
+function submitPropose(form){
+  const r=R(form.dataset.id),d=$("#v-date",form);
+  if(!d.value||d.value<today()){d.setAttribute("aria-invalid","true");$("#v-date-err").textContent="Choisissez une date à partir d’aujourd’hui.";d.focus();return;}
+  const time=$("#v-time",form).value,msg=$("#v-msg",form).value.trim();
+  r.status="visite";r.visit={date:d.value,time,confirmed:false};
+  sys(r,`Visite proposée le ${fDL(d.value)} à ${hm(time)}`,"t");
+  if(msg)r.messages.push({from:"o",text:msg,at:nowISO()});
+  save();closeModal();refresh();toast("Créneau envoyé au locataire — email envoyé (simulation)");
+  if(r.tenant.id!=="t1"){const id=r.id;setTimeout(()=>{const x=R(id);if(!x||!x.visit||x.visit.confirmed)return;x.visit.confirmed=true;sys(x,"Visite confirmée par le locataire");x.messages.push({from:"t",text:"Merci, ce créneau me convient parfaitement. À bientôt !",at:nowISO()});x.unread.o++;save();refresh();toast(x.tenant.name+" a confirmé la visite");},3000);}
+}
+function confirmBox(title,text,btn,cb){
+  openModal(`${mhead(title)}<div class="mbody stack"><p>${text}</p><div class="mfoot"><button type="button" class="btn" data-act="close" autofocus>Annuler</button><button type="button" class="btn danger" id="cb-ok">${btn}</button></div></div>`,true);
+  $("#cb-ok").addEventListener("click",()=>{closeModal();cb();});
+}
+
+/* ---------- Locataire : dossier ---------- */
+function vDossier(){
+  const d=S.dossier,c=completeness();
+  const sel=(id,arr,v)=>`<select id="${id}">${arr.map(x=>`<option${x===v?" selected":""}>${x}</option>`).join("")}</select>`;
+  const inp=(id,type,v,extra)=>`<input type="${type}" id="${id}" value="${esc(v)}" aria-describedby="${id}-err" ${extra||""}>`;
+  return `<div class="ph-row"><div><h1>Mon dossier locataire</h1><p class="muted">Rempli une seule fois, joint en un clic à chaque demande.</p></div></div>
+  <div class="dgrid">
+    <form class="card dform stack" id="dossierForm" novalidate>
+      <div class="fgrid">
+        <div class="field"><label for="d-name">Nom et prénom <span class="req" aria-hidden="true">*</span></label>${inp("d-name","text",d.name,'autocomplete="name"')}<p class="err" id="d-name-err"></p></div>
+        <div class="field"><label for="d-email">Email <span class="req" aria-hidden="true">*</span></label>${inp("d-email","email",d.email,'autocomplete="email"')}<p class="err" id="d-email-err"></p></div>
+        <div class="field"><label for="d-phone">Téléphone</label>${inp("d-phone","tel",d.phone,'autocomplete="tel"')}<p class="err" id="d-phone-err"></p></div>
+        <div class="field"><label for="d-move">Emménagement souhaité</label>${inp("d-move","date",d.moveIn)}<p class="err" id="d-move-err"></p></div>
+        <div class="field"><label for="d-sit">Situation professionnelle</label>${sel("d-sit",SITU,d.situation)}</div>
+        <div class="field"><label for="d-emp">Poste ou formation</label>${inp("d-emp","text",d.employer)}<p class="err" id="d-emp-err"></p></div>
+        <div class="field"><label for="d-inc">Revenus nets mensuels (€) <span class="req" aria-hidden="true">*</span></label>${inp("d-inc","number",d.income,'inputmode="numeric" min="0" step="10"')}<p class="err" id="d-inc-err"></p></div>
+        <div class="field"><label for="d-gar">Garant</label>${sel("d-gar",GAR,d.guarantor)}<p class="hint">Visale est une garantie gratuite pour de nombreux locataires.</p></div>
+        <div class="field full"><label for="d-about">Présentation</label><textarea id="d-about" rows="4" aria-describedby="d-about-err" placeholder="Quelques mots sur vous, votre projet, votre rythme de vie…">${esc(d.about)}</textarea><p class="err" id="d-about-err"></p></div>
+      </div>
+      <div class="actions"><button type="submit" class="btn primary">${ic("check")}Enregistrer le dossier</button></div>
+    </form>
+    <aside class="card preview" aria-labelledby="pv-t">
+      <h2 id="pv-t" style="font-size:16px">Ce que voient les propriétaires</h2>
+      <div class="ring"><div class="meter" role="img" aria-label="Complet à ${c.pct} %"><i style="width:${c.pct}%"></i></div><b>${c.pct} %</b></div>
+      <ul class="checklist">${c.chk.map(([t,ok])=>`<li class="${ok?"y":"n"}">${ic(ok?"check":"x")}<span style="color:var(--ink)">${t}</span><span class="sr">${ok?"renseigné":"manquant"}</span></li>`).join("")}</ul>
+      <div class="mini"><b>${esc(d.name)}</b><span>${esc(d.situation)}${d.employer?" · "+esc(d.employer):""}</span><span>${d.income?eur(d.income)+" nets / mois":"Revenus non renseignés"} · Garant : ${esc(d.guarantor)}</span>${d.about?`<span class="muted wrap">« ${esc(d.about)} »</span>`:""}</div>
+      <p class="hint">Les justificatifs (pièce d’identité, bulletins de salaire, avis d’imposition) seraient déposés ici et partagés uniquement avec les propriétaires contactés.</p>
+    </aside>
+  </div>`;
+}
+function submitDossier(form){
+  let ok=true,firstBad=null;
+  const set=(id,msg)=>{const el=$("#"+id,form),e=$("#"+id+"-err",form);if(msg){el.setAttribute("aria-invalid","true");e.textContent=msg;ok=false;firstBad=firstBad||el;}else{el.removeAttribute("aria-invalid");e.textContent="";}};
+  const v=id=>$("#"+id,form).value.trim();
+  set("d-name",v("d-name").length<3?"Indiquez votre nom et prénom.":"");
+  set("d-email",/^\S+@\S+\.\S+$/.test(v("d-email"))?"":"Adresse email invalide.");
+  set("d-phone",v("d-phone")&&v("d-phone").replace(/\D/g,"").length<10?"Numéro incomplet (10 chiffres).":"");
+  const inc=parseFloat(v("d-inc"));set("d-inc",!(inc>=0)||v("d-inc")===""?"Indiquez vos revenus (0 si aucun).":"");
+  set("d-about",v("d-about")&&v("d-about").length<30?"30 caractères minimum, ou laissez vide.":"");
+  if(!ok){firstBad.focus();return;}
+  Object.assign(S.dossier,{name:v("d-name"),email:v("d-email"),phone:v("d-phone"),moveIn:$("#d-move",form).value,situation:$("#d-sit",form).value,employer:v("d-emp"),income:inc,guarantor:$("#d-gar",form).value,about:v("d-about")});
+  save();render();toast("Dossier enregistré — complet à "+completeness().pct+" %");
+}
+
+/* ---------- Propriétaire ---------- */
+function vDash(){
+  const reqs=reqsO(),mine=S.listings.filter(l=>l.ownerId==="o1");
+  const upcoming=reqs.filter(r=>r.visit&&r.status==="visite"&&r.visit.date>=today()).sort((a,b)=>(a.visit.date+a.visit.time).localeCompare(b.visit.date+b.visit.time));
+  const cnt=s=>reqs.filter(r=>s==="all"||r.status===s).length;
+  let list=reqs.filter(r=>(ui.rf==="all"||r.status===ui.rf)&&(!ui.rl||r.listingId===ui.rl)).sort((a,b)=>({nouvelle:0,visite:1,acceptee:2,refusee:3}[a.status]-{nouvelle:0,visite:1,acceptee:2,refusee:3}[b.status])||lastAt(b)-lastAt(a));
+  const kpi=(i,v,t)=>`<div class="card kpi"><span class="ic">${ic(i,20)}</span><div><b>${v}</b><span>${t}</span></div></div>`;
+  return `<div class="ph-row"><div><h1>Bonjour ${first(OWN.o1.name)}</h1><p class="muted">Suivez vos demandes de location et organisez vos visites.</p></div><button type="button" class="btn primary" data-act="newListing">${ic("plus")}Publier une annonce</button></div>
+  <div class="kpis">${kpi("home",mine.filter(l=>l.status==="active").length+" / "+mine.length,"annonces en ligne")}${kpi("inbox",cnt("nouvelle"),"nouvelles demandes")}${kpi("cal",upcoming.length,"visites à venir")}${kpi("eye",mine.reduce((s,l)=>s+l.views,0),"vues sur vos annonces")}</div>
+  <div class="dash">
+    <section aria-labelledby="rq-t" style="min-width:0">
+      <div class="toolbar"><h2 id="rq-t">Demandes reçues</h2>
+        <div class="field inline"><label for="rl">Annonce</label><select id="rl"><option value="">Toutes</option>${mine.map(l=>`<option value="${l.id}"${l.id===ui.rl?" selected":""}>${esc(l.title)}</option>`).join("")}</select></div></div>
+      <div class="chips" role="group" aria-label="Filtrer par statut" style="margin-bottom:14px">${[["all","Toutes"],["nouvelle","Nouvelles"],["visite","Visites"],["acceptee","Acceptées"],["refusee","Non retenues"]].map(([s,t])=>`<button type="button" class="chip" data-act="rf" data-s="${s}" aria-pressed="${ui.rf===s}">${t} <small>${cnt(s)}</small></button>`).join("")}</div>
+      ${list.length?`<div class="rgrid">${list.map(rcard).join("")}</div>`:`<div class="card empty">${ic("inbox")}<p>Aucune demande pour ce filtre.</p></div>`}
+    </section>
+    <aside class="card side" aria-labelledby="vs-t">
+      <h2 id="vs-t">Prochaines visites</h2>
+      ${upcoming.length?`<ul class="vlist">${upcoming.map(r=>{const d=pd(r.visit.date);return `<li class="vitem"><span class="vdate"><b>${d.getDate()}</b><span>${d.toLocaleDateString("fr-FR",{month:"short"})}</span></span><div class="tx"><b class="wrap">${esc(r.tenant.name)}</b><p class="small muted wrap">${hm(r.visit.time)} · ${esc(L(r.listingId).title)}</p></div>${r.visit.confirmed?'<span class="badge sky">Confirmée</span>':'<span class="badge warn">En attente</span>'}</li>`;}).join("")}</ul>`:'<p class="muted small">Aucune visite planifiée.</p>'}
+      <div class="tip"><b>Conseil :</b> le ratio revenus / loyer aide à comparer les dossiers. Au-delà de 3×, le risque d’impayé est faible ; une garantie Visale couvre aussi les loyers.</div>
+    </aside>
+  </div>`;
+}
+function rcard(r){
+  const l=L(r.listingId),fin=r.status==="acceptee"||r.status==="refusee",last=r.messages.filter(m=>m.from==="t").pop();
+  return `<article class="card rcard">
+    <div class="rhead"><span class="avatar" aria-hidden="true">${initials(r.tenant.name)}</span><div class="tx"><h3>${esc(r.tenant.name)}</h3><p class="small muted wrap">pour <b style="color:var(--ink)">${esc(l.title)}</b> · reçue le ${fD(r.created)}</p></div>${stBadge(r)}</div>
+    ${facts(r.tenant,l)}
+    ${r.visit&&r.status==="visite"?`<p class="small">${ic("cal")} Visite le ${fDL(r.visit.date)} à ${hm(r.visit.time)} — ${r.visit.confirmed?"confirmée":"en attente"}</p>`:""}
+    ${last?`<p class="excerpt">« ${esc(last.text)} »</p>`:""}
+    <div class="actions"><button type="button" class="btn sm" data-act="goThread" data-id="${r.id}">${ic("chat")}Répondre${r.unread.o?` <span class="cnt">${r.unread.o}</span>`:""}</button>
+    ${fin?"":`<button type="button" class="btn sm" data-act="propose" data-id="${r.id}">${ic("cal")}${r.visit?"Modifier la visite":"Proposer une visite"}</button><button type="button" class="btn ok sm" data-act="accept" data-id="${r.id}">${ic("check")}Accepter</button><button type="button" class="btn danger sm" data-act="refuse" data-id="${r.id}" aria-label="Refuser le dossier de ${esc(r.tenant.name)}">${ic("x")}Refuser</button>`}</div>
+  </article>`;
+}
+function vListings(){
+  const mine=S.listings.filter(l=>l.ownerId==="o1").sort((a,b)=>b.created.localeCompare(a.created));
+  const st={active:"En ligne",pause:"En pause",louee:"Louée"};
+  return `<div class="ph-row"><div><h1>Mes annonces</h1><p class="muted">${mine.length} annonce${mine.length>1?"s":""} · publiez, mettez en pause ou marquez comme louée.</p></div><button type="button" class="btn primary" data-act="newListing">${ic("plus")}Publier une annonce</button></div>
+  ${mine.length?`<div class="olist">${mine.map(l=>{const n=S.requests.filter(r=>r.listingId===l.id).length;return `<article class="card ocard${l.status!=="active"?" off":""}">${ph(l)}<div class="ob">
+    <div class="rhead"><div class="tx"><h3>${esc(l.title)}</h3><p class="small muted wrap">${esc(l.city)} · ${esc(l.district)}</p></div><span class="badge ${l.status==="active"?"ok":l.status==="louee"?"info":"gray"}">${st[l.status]}</span></div>
+    <div class="price">${eur(l.rent+l.charges)} <span class="muted small" style="font-weight:500">CC · ${l.surface} m² · ${l.rooms} p.</span></div>
+    <div class="ostats"><span>${ic("eye")} <b>${l.views}</b> vues</span><span>${ic("inbox")} <b>${n}</b> demande${n>1?"s":""}</span><span>${ic("clock")} publiée le ${fD(l.created)}</span></div>
+    <div class="field"><label for="st-${l.id}">Statut de l’annonce</label><select id="st-${l.id}" class="lstatus" data-id="${l.id}">${Object.entries(st).map(([k,v])=>`<option value="${k}"${k===l.status?" selected":""}>${v}</option>`).join("")}</select></div>
+    <div class="actions"><button type="button" class="btn sm" data-act="viewReqs" data-id="${l.id}">${ic("inbox")}Demandes</button><button type="button" class="btn sm" data-act="editListing" data-id="${l.id}">${ic("edit")}Modifier</button><button type="button" class="btn sm" data-act="open" data-id="${l.id}">${ic("eye")}Aperçu</button><button type="button" class="icon-btn" data-act="delListing" data-id="${l.id}" aria-label="Supprimer ${esc(l.title)}">${ic("trash")}</button></div>
+  </div></article>`;}).join("")}</div>`:`<div class="card empty">${ic("home")}<p>Vous n’avez aucune annonce.</p><button type="button" class="btn primary" data-act="newListing">Publier ma première annonce</button></div>`}`;
+}
+function openListingForm(id){
+  const l=id?L(id):{title:"",city:"",district:"",type:"Appartement",rent:"",charges:"",surface:"",rooms:2,furnished:false,avail:addDays(30),desc:""};
+  const f=(fid,lab,input,req,full,hint)=>`<div class="field${full?" full":""}"><label for="${fid}">${lab}${req?' <span class="req" aria-hidden="true">*</span>':""}</label>${input}${hint?`<p class="hint">${hint}</p>`:""}<p class="err" id="${fid}-err"></p></div>`;
+  const i=(fid,type,v,x)=>`<input type="${type}" id="${fid}" value="${esc(v)}" aria-describedby="${fid}-err" ${x||""}>`;
+  openModal(`${mhead(id?"Modifier l’annonce":"Publier une annonce")}<form class="mbody stack" id="listingForm" data-id="${id||""}" novalidate>
+    <div class="fgrid">
+      ${f("l-title","Titre de l’annonce",i("l-title","text",l.title,'placeholder="ex. T2 lumineux proche métro" autofocus maxlength="70"'),1,1)}
+      ${f("l-city","Ville",i("l-city","text",l.city,'autocomplete="address-level2"'),1)}
+      ${f("l-district","Quartier",i("l-district","text",l.district),0)}
+      ${f("l-type","Type de bien",`<select id="l-type">${TYPES.map(t=>`<option${t===l.type?" selected":""}>${t}</option>`).join("")}</select>`)}
+      ${f("l-rooms","Nombre de pièces",i("l-rooms","number",l.rooms,'min="1" max="10" inputmode="numeric"'),1)}
+      ${f("l-rent","Loyer hors charges (€)",i("l-rent","number",l.rent,'min="0" step="10" inputmode="numeric"'),1)}
+      ${f("l-charges","Charges (€)",i("l-charges","number",l.charges,'min="0" step="5" inputmode="numeric"'),0)}
+      ${f("l-surface","Surface (m²)",i("l-surface","number",l.surface,'min="5" inputmode="numeric"'),1)}
+      ${f("l-avail","Disponible le",i("l-avail","date",l.avail),1)}
+      <div class="field full"><label class="check"><input type="checkbox" id="l-furn"${l.furnished?" checked":""}> Logement meublé</label></div>
+      ${f("l-desc","Description",`<textarea id="l-desc" rows="5" aria-describedby="l-desc-err l-desc-h" placeholder="Étage, exposition, équipements, transports…">${esc(l.desc)}</textarea>`,1,1)}
+    </div>
+    <p class="hint" id="l-desc-h">60 caractères minimum. Les photos seraient ajoutées ici (téléversement non simulé).</p>
+    <div class="mfoot"><button type="button" class="btn" data-act="close">Annuler</button><button type="submit" class="btn primary">${ic("check")}${id?"Enregistrer":"Publier l’annonce"}</button></div>
+  </form>`);
+}
+function submitListing(form){
+  let ok=true,firstBad=null;
+  const set=(fid,msg)=>{const el=$("#"+fid,form),e=$("#"+fid+"-err",form);if(msg){el.setAttribute("aria-invalid","true");e.textContent=msg;ok=false;firstBad=firstBad||el;}else{el.removeAttribute("aria-invalid");e.textContent="";}};
+  const v=fid=>$("#"+fid,form).value.trim(),n=fid=>parseFloat(v(fid));
+  set("l-title",v("l-title").length<8?"8 caractères minimum.":"");
+  set("l-city",v("l-city").length<2?"Indiquez la ville.":"");
+  set("l-rooms",!(n("l-rooms")>=1&&n("l-rooms")<=10)?"Entre 1 et 10 pièces.":"");
+  set("l-rent",!(n("l-rent")>=100&&n("l-rent")<=10000)?"Loyer entre 100 € et 10 000 €.":"");
+  set("l-charges",v("l-charges")&&!(n("l-charges")>=0)?"Montant invalide.":"");
+  set("l-surface",!(n("l-surface")>=5&&n("l-surface")<=1000)?"Surface entre 5 et 1 000 m².":"");
+  set("l-avail",!v("l-avail")?"Indiquez une date de disponibilité.":"");
+  set("l-desc",v("l-desc").length<60?`Encore ${60-v("l-desc").length} caractères minimum.`:"");
+  if(!ok){firstBad.focus();return;}
+  const data={title:v("l-title"),city:v("l-city"),district:v("l-district")||"Centre",type:v("l-type"),rooms:Math.round(n("l-rooms")),rent:Math.round(n("l-rent")),charges:Math.round(n("l-charges")||0),surface:Math.round(n("l-surface")),avail:v("l-avail"),furnished:$("#l-furn",form).checked,desc:v("l-desc")};
+  if(form.dataset.id){Object.assign(L(form.dataset.id),data);toast("Annonce mise à jour");}
+  else{S.listings.push(Object.assign({id:"L"+(S.nextId++),ownerId:"o1",hue:198+Math.floor(Math.random()*24),status:"active",created:nowISO(),views:0},data));toast("Annonce publiée — visible dès maintenant dans la recherche locataire");}
+  save();closeModal();ui.view.o="listings";render();
+}
+
+/* ---------- Actions ---------- */
+const A={
+  reset(){try{localStorage.removeItem(KEY);}catch(e){}S=seed();ui={role:ui.role,view:{t:"search",o:"dash"},thread:null,mobileOpen:false,f:defF(),filtersOpen:false,rf:"all",rl:""};closeModal();render();toast("Démo réinitialisée");},
+  role(b){if(ui.role===b.dataset.r)return;ui.role=b.dataset.r;ui.thread=null;ui.mobileOpen=false;render();toast(ui.role==="t"?"Espace locataire":"Espace propriétaire");},
+  nav(b){ui.view[ui.role]=b.dataset.v;ui.mobileOpen=false;closeModal();render();window.scrollTo(0,0);$("#main").focus({preventScroll:true});},
+  fav(b){const id=b.dataset.id,i=S.favs.indexOf(id);if(i<0)S.favs.push(id);else S.favs.splice(i,1);save();
+    if(ui.view.t==="favs")render();else{b.setAttribute("aria-pressed",i<0);renderNav();}
+    toast(i<0?"Ajouté aux favoris":"Retiré des favoris");},
+  open(b){openListing(b.dataset.id);},
+  close(){closeModal();},
+  rooms(b){ui.f.rooms=+b.dataset.n;$$('[data-act="rooms"]').forEach(x=>x.setAttribute("aria-pressed",x===b));updateResults();},
+  clearFilters(){ui.f=defF();render();},
+  toggleFilters(b){ui.filtersOpen=!ui.filtersOpen;b.setAttribute("aria-expanded",ui.filtersOpen);$("#filters").classList.toggle("open",ui.filtersOpen);},
+  thread(b){ui.thread=b.dataset.id;ui.mobileOpen=true;render();const t=$("#c-text");if(t&&window.innerWidth>=860)t.focus();else{const p=$(".pane .back");if(p)p.focus();}},
+  back(){ui.mobileOpen=false;const id=ui.thread;ui.thread=null;render();const b=$(`.titem[data-id="${id}"]`);if(b)b.focus();},
+  goThread(b){closeModal();ui.view[ui.role]="msgs";ui.thread=b.dataset.id;ui.mobileOpen=true;render();window.scrollTo(0,0);},
+  confirmVisit(b){const r=R(b.dataset.id);r.visit.confirmed=true;sys(r,"Visite confirmée par le locataire","o");save();render();toast("Visite confirmée — rappel envoyé par email (simulation)");},
+  askOther(b){const r=R(b.dataset.id),l=L(r.listingId);r.messages.push({from:"t",text:"Ce créneau ne m’arrange malheureusement pas. Auriez-vous une autre disponibilité ?",at:nowISO()});r.unread.o++;save();render();toast("Demande envoyée au propriétaire");
+    if(l.ownerId!=="o1"){const id=r.id;setTimeout(()=>{const x=R(id);if(!x)return;const d=addDays(4);x.visit={date:d,time:"12:30",confirmed:false};x.messages.push({from:"o",text:"Bien sûr ! Je peux aussi vous proposer ce créneau-ci :",at:nowISO()});sys(x,`Visite proposée le ${fDL(d)} à 12 h 30`,"t");save();refresh();toast(OWN[l.ownerId].name+" propose un nouveau créneau");},2800);}},
+  propose(b){openPropose(b.dataset.id);},
+  accept(b){const r=R(b.dataset.id);r.status="acceptee";sys(r,"Dossier accepté par le propriétaire","t");r.messages.push({from:"o",text:`Bonjour ${first(r.tenant.name)}, votre dossier est retenu ! Je reviens vers vous pour la signature du bail.`,at:nowISO()});r.unread.t++;save();refresh();toast("Dossier accepté — le locataire est notifié (simulation)");},
+  refuse(b){const r=R(b.dataset.id);confirmBox("Refuser ce dossier ?",`${esc(r.tenant.name)} recevra un message courtois l’informant que son dossier n’a pas été retenu.`,"Refuser le dossier",()=>{r.status="refusee";sys(r,"Dossier non retenu par le propriétaire","t");r.unread.t++;save();refresh();toast("Dossier refusé — message envoyé au locataire");});},
+  newListing(){openListingForm(null);},
+  editListing(b){openListingForm(b.dataset.id);},
+  delListing(b){const l=L(b.dataset.id);confirmBox("Supprimer l’annonce ?",`« ${esc(l.title)} » sera retirée de la recherche, ainsi que ses demandes et conversations.`,"Supprimer",()=>{S.listings=S.listings.filter(x=>x.id!==l.id);S.requests=S.requests.filter(r=>r.listingId!==l.id);S.favs=S.favs.filter(x=>x!==l.id);save();render();toast("Annonce supprimée");});},
+  viewReqs(b){ui.rl=b.dataset.id;ui.rf="all";ui.view.o="dash";render();window.scrollTo(0,0);},
+  rf(b){ui.rf=b.dataset.s;render();const c=$(`.chip[data-s="${ui.rf}"]`);if(c)c.focus();}
+};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const f=A[b.dataset.act];if(f){e.preventDefault();f(b);}});
+document.addEventListener("submit",e=>{const f=e.target;e.preventDefault();
+  ({contactForm:submitContact,composer:sendMsg,proposeForm:submitPropose,dossierForm:submitDossier,listingForm:submitListing})[f.id]?.(f);});
+document.addEventListener("input",e=>{const t=e.target;
+  if(t.id==="f-q"){ui.f.q=t.value;updateResults();}
+  else if(t.id==="f-max"){ui.f.max=t.value;updateResults();}
+  else if(t.id==="c-msg"&&t.value.trim().length>=20){t.removeAttribute("aria-invalid");$("#c-msg-err").textContent="";}
+  else if(t.id==="c-text"){t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,140)+"px";}
+});
+document.addEventListener("change",e=>{const t=e.target;
+  if(t.id==="f-city"){ui.f.city=t.value;updateResults();}
+  else if(t.id==="f-type"){ui.f.type=t.value;updateResults();}
+  else if(t.id==="f-furn"){ui.f.furnished=t.checked;updateResults();}
+  else if(t.id==="f-sort"){ui.f.sort=t.value;updateResults();}
+  else if(t.id==="c-dos"){const m=$("#c-mini");if(m)m.hidden=!t.checked;}
+  else if(t.id==="rl"){ui.rl=t.value;render();$("#rl").focus();}
+  else if(t.classList.contains("lstatus")){const l=L(t.dataset.id);l.status=t.value;save();render();$("#st-"+l.id).focus();toast(l.status==="active"?"Annonce remise en ligne":l.status==="louee"?"Annonce marquée comme louée — retirée de la recherche":"Annonce mise en pause");}
+});
+document.addEventListener("keydown",e=>{if(e.target.id==="c-text"&&e.key==="Enter"&&!e.shiftKey){e.preventDefault();e.target.form.requestSubmit();}});
+let rT;window.addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>{if(ui.view[ui.role]==="msgs"&&window.innerWidth>=860&&!ui.thread)refresh();},200);});
+
+function toast(msg){const t=document.createElement("div");t.innerHTML=ic("check")+"<span>"+esc(msg)+"</span>";$("#toast").appendChild(t);setTimeout(()=>t.remove(),3800);}
+
+load();render();
+})();
+</script>
 </body>
 </html>
