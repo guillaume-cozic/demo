@@ -2,20 +2,1061 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Site équipements agricoles</title>
+<meta name="description" content="Site vitrine et catalogue d'équipements agricoles, avicoles et de transformation : recherche de machines, demande de devis multi-produits, contact WhatsApp et back-office de gestion des demandes, produits et SEO.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F5F7F3;--surface:#FFFFFF;--surface-2:#EDF2EA;--ink:#13211A;--muted:#4D5C53;--line:#D9E1D6;--line-2:#BCC8B8;
+  --brand:#0E3B26;--brand-ink:#FFFFFF;--brand-muted:#C4D9CB;
+  --primary:#1E6B30;--primary-ink:#FFFFFF;--accent-soft:#E2EFDF;--accent-text:#1B5E27;--leaf:#3E8E3A;
+  --red:#B8262D;--red-soft:#FBE5E5;
+  --info:#23548A;--info-soft:#E1EAF6;--warn:#865000;--warn-soft:#FBEDD3;--ok:#1B6B39;--ok-soft:#DCF0E2;--gray:#4F5753;--gray-soft:#ECEEEA;
+  --shadow:0 1px 2px rgba(14,40,26,.06),0 6px 18px rgba(14,40,26,.06);
+  --head:"Barlow Semi Condensed",system-ui,sans-serif;--font:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --px:clamp(16px,3vw,32px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B140F;--surface:#111D16;--surface-2:#17271E;--ink:#E4ECE6;--muted:#A2B3A8;--line:#24362B;--line-2:#365142;
+  --brand:#08261A;--brand-ink:#F1F7F2;--brand-muted:#A9C6B3;
+  --primary:#7CCB80;--primary-ink:#0A1F10;--accent-soft:#183522;--accent-text:#94D898;--leaf:#7CCB80;
+  --red:#FF8E92;--red-soft:#3A1A1C;
+  --info:#9CC2F2;--info-soft:#172A40;--warn:#F2BA64;--warn-soft:#352613;--ok:#7AD6A0;--ok-soft:#14301F;--gray:#BAC3BE;--gray-soft:#232D28;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--leaf);outline-offset:2px}
+h1,h2,h3,h4{margin:0;font-family:var(--head);line-height:1.15;letter-spacing:-.005em}
+p{margin:0}
+a{color:var(--accent-text)}
+.muted{color:var(--muted)}.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wrap{overflow-wrap:anywhere}
+
+/* Bandeau démo */
+.demo-band{background:var(--surface-2);border-bottom:1px solid var(--line);font-size:13px;padding:4px var(--px);display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:center}
+.demo-band strong{color:var(--accent-text)}
+.demo-band .sw{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+.demo-band .sw a,.demo-band button{min-height:36px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;font-weight:600;text-decoration:none;color:var(--ink);background:var(--surface);border:0;cursor:pointer}
+.demo-band .sw a[aria-current="true"]{background:var(--primary);color:var(--primary-ink)}
+.demo-band button{border:1px solid var(--line-2);border-radius:9px}
+.demo-band svg.i{width:15px;height:15px}
+
+/* Boutons et champs */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;text-align:center;line-height:1.2}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.light{background:#fff;color:#0E3B26;border-color:#fff}
+.btn.outline-light{background:transparent;color:#fff;border-color:rgba(255,255,255,.55)}
+.btn.outline-light:hover{background:rgba(255,255,255,.1)}
+.btn.wa{background:#1F7A45;border-color:#1F7A45;color:#fff}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.sm{padding:0 12px;font-size:14px}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;flex:none}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.req{color:var(--red)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:12.5px;color:var(--red);font-weight:600}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=password],input[type=search],select,textarea{width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--surface);min-width:0}
+textarea{min-height:96px;resize:vertical}
+[aria-invalid="true"]{border-color:var(--red)!important;box-shadow:0 0 0 1px var(--red)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:620px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;min-height:44px;padding-top:10px}
+.check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--primary);flex:none}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.b-stock{background:var(--ok-soft);color:var(--ok)}
+.b-cmd{background:var(--warn-soft);color:var(--warn)}
+.b-svc{background:var(--info-soft);color:var(--info)}
+.st-nouvelle{background:var(--red-soft);color:var(--red)}
+.st-encours{background:var(--info-soft);color:var(--info)}
+.st-envoye{background:var(--warn-soft);color:var(--warn)}
+.st-gagnee{background:var(--ok-soft);color:var(--ok)}
+.st-perdue{background:var(--gray-soft);color:var(--gray)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+
+/* ===== Site public ===== */
+.site-h{position:sticky;top:0;z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
+.site-h-in{display:flex;align-items:center;gap:12px 24px;padding:8px var(--px);min-height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);min-width:0}
+.logo-mark{width:42px;height:42px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;flex:none}
+.logo-mark svg{width:26px;height:26px}
+.logo-txt{font-family:var(--head);font-weight:700;font-size:20px;line-height:1;letter-spacing:.01em}
+.logo-txt small{display:block;font-family:var(--font);font-weight:600;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.logo-txt em{font-style:normal;color:var(--red)}
+#snav{display:flex;gap:2px;margin-left:auto}
+#snav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:15px}
+#snav a:hover{background:var(--surface-2)}
+#snav a[aria-current="page"]{color:var(--accent-text);box-shadow:inset 0 -3px 0 var(--leaf);border-radius:10px 10px 0 0}
+.h-act{display:flex;gap:8px;align-items:center}
+.h-act select{width:auto;min-width:0}
+.cart-n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--red);color:#fff;font-size:12px;font-weight:700}
+.menu-btn{display:none}
+@media (max-width:1000px){
+  .site-h-in{flex-wrap:wrap}
+  .menu-btn{display:inline-grid;margin-left:auto}
+  #snav{display:none;order:5;width:100%;flex-direction:column;margin:0;padding-bottom:6px}
+  .site-h.open #snav{display:flex}
+  #snav a[aria-current="page"]{box-shadow:inset 3px 0 0 var(--leaf);border-radius:0 10px 10px 0;background:var(--surface-2)}
+  .h-act{order:4;width:100%;justify-content:space-between}
+}
+.sec{padding:56px var(--px)}
+.sec.alt{background:var(--surface)}
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 24px;flex-wrap:wrap;margin-bottom:26px}
+.sec-h h2{font-size:clamp(26px,3vw,36px)}
+.kicker{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--leaf);margin-bottom:6px}
+.lead{font-size:17px;color:var(--muted);max-width:70ch}
+
+.hero{background:var(--brand);color:var(--brand-ink);padding:clamp(36px,6vw,80px) var(--px);display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr);gap:32px 56px;align-items:center;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:6px;background:linear-gradient(90deg,#3E8E3A 0 82%,#B8262D 82% 100%)}
+.hero h1{font-size:clamp(34px,4.6vw,58px);font-weight:700;max-width:18ch}
+.hero .kicker{color:#9FD39B}
+.hero p.lead{color:var(--brand-muted);margin:18px 0 26px;max-width:58ch}
+.hero-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,255,.15)}
+.hero-stats b{display:block;font-family:var(--head);font-size:30px;color:#fff}
+.hero-stats span{font-size:13px;color:var(--brand-muted)}
+.finder{background:var(--surface);color:var(--ink);border-radius:16px;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.25);display:grid;gap:14px}
+.finder h2{font-size:24px}
+.finder-q{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.finder-q a{min-height:44px;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600;line-height:1.2}
+.finder-q a:hover{border-color:var(--leaf);background:var(--accent-soft)}
+.finder-q svg{color:var(--leaf)}
+@media (max-width:980px){.hero{grid-template-columns:minmax(0,1fr)}.hero-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.finder-q{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.dom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.dom{padding:22px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--ink);transition:border-color .15s}
+.dom:hover{border-color:var(--leaf)}
+.dom .ic{width:52px;height:52px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center}
+.dom .ic svg{width:28px;height:28px}
+.dom h3{font-size:22px}
+.dom p{color:var(--muted);font-size:14.5px}
+.dom .more{margin-top:auto;display:flex;align-items:center;gap:6px;font-weight:600;color:var(--accent-text);font-size:14px}
+
+.p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:16px}
+.pcard{display:flex;flex-direction:column;overflow:hidden}
+.pimg{aspect-ratio:16/10;background:var(--surface-2) repeating-linear-gradient(135deg,transparent 0 14px,rgba(62,142,58,.06) 14px 15px);display:grid;place-items:center;position:relative;color:var(--leaf);border-bottom:1px solid var(--line)}
+.pimg svg{width:64px;height:64px;stroke-width:1.3}
+.pimg .badge{position:absolute;top:10px;left:10px}
+.pimg .ref{position:absolute;bottom:8px;right:10px;font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.pbody{padding:16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.pdom{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--leaf)}
+.pbody h3{font-size:19px}
+.pbody h3 a{color:var(--ink);text-decoration:none}
+.pbody h3 a:hover{text-decoration:underline}
+.pdesc{font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pfoot{margin-top:auto;padding-top:10px;display:flex;flex-direction:column;gap:10px}
+.price{font-family:var(--head);font-weight:700;font-size:20px}
+.price small{font-family:var(--font);font-weight:500;font-size:12px;color:var(--muted);display:block}
+.pfoot .actions .btn{flex:1}
+
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:s}
+.step{padding:22px;position:relative}
+.step::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--head);font-weight:700;font-size:34px;color:var(--leaf);display:block;margin-bottom:6px}
+.step h3{font-size:20px;margin-bottom:6px}
+.step p{font-size:14.5px;color:var(--muted)}
+@media (max-width:900px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.steps{grid-template-columns:minmax(0,1fr)}}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:center}
+@media (max-width:900px){.split{grid-template-columns:minmax(0,1fr)}}
+.ticks{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}
+.ticks li{display:flex;gap:10px;align-items:flex-start}
+.ticks svg{color:var(--leaf);margin-top:2px}
+.flags{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,170px),1fr));gap:10px}
+.flags div{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.flags b{display:block;font-family:var(--head);font-size:19px}
+.flags span{font-size:13px;color:var(--muted)}
+.cta-band{background:var(--brand);color:var(--brand-ink);padding:36px var(--px);display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between}
+.cta-band h2{font-size:clamp(24px,3vw,32px)}
+.cta-band p{color:var(--brand-muted)}
+
+.page-h{padding:34px var(--px) 26px;background:var(--surface);border-bottom:1px solid var(--line)}
+.page-h h1{font-size:clamp(30px,4vw,44px)}
+.crumbs{font-size:13px;color:var(--muted);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px}
+.crumbs a{color:var(--muted)}
+
+.cat-layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;padding:24px var(--px) 56px;align-items:start}
+.filters{padding:18px;display:grid;gap:16px;position:sticky;top:84px}
+.filters h2{font-size:18px}
+.dom-list{display:grid;gap:4px}
+.dom-list button{min-height:44px;display:flex;align-items:center;gap:10px;justify-content:space-between;text-align:left;border:1px solid transparent;border-radius:10px;background:transparent;padding:6px 10px;cursor:pointer;font-weight:500;font-size:14px}
+.dom-list button:hover{background:var(--surface-2)}
+.dom-list button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text);font-weight:700;border-color:var(--line)}
+.dom-list .n{font-size:12px;color:var(--muted)}
+.cat-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.searchbox{position:relative;flex:1;min-width:min(100%,240px)}
+.searchbox svg{position:absolute;left:12px;top:12px;color:var(--muted)}
+.searchbox input{padding-left:40px}
+@media (max-width:900px){.cat-layout{grid-template-columns:minmax(0,1fr)}.filters{position:static}.dom-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr))}}
+.empty{padding:40px 20px;text-align:center;color:var(--muted);display:grid;gap:12px;justify-items:center}
+
+.prod{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;padding:28px var(--px) 20px;align-items:start}
+.prod .pimg{aspect-ratio:4/3;border:1px solid var(--line);border-radius:16px}
+.prod .pimg svg{width:120px;height:120px}
+.prod h1{font-size:clamp(30px,3.6vw,42px);margin:6px 0 10px}
+.prod-info{display:grid;gap:16px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.qty button{width:44px;height:44px;border:0;background:var(--surface-2);cursor:pointer;font-size:20px}
+.qty input{width:64px;border:0;border-radius:0;text-align:center;min-height:44px}
+.incl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.incl div{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+.incl svg{color:var(--leaf)}
+.specs{width:100%;border-collapse:collapse;font-size:14.5px}
+.specs th,.specs td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.specs th{width:42%;color:var(--muted);font-weight:600}
+@media (max-width:860px){.prod{grid-template-columns:minmax(0,1fr)}.incl{grid-template-columns:minmax(0,1fr)}}
+
+.quote{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;padding:24px var(--px) 56px;align-items:start}
+@media (max-width:980px){.quote{grid-template-columns:minmax(0,1fr)}}
+.panel{padding:20px}
+.panel>h2{font-size:22px;margin-bottom:14px}
+.qitem{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.qitem .mini{width:48px;height:48px;border-radius:10px;background:var(--surface-2);color:var(--leaf);display:grid;place-items:center}
+.qitem b{display:block;line-height:1.3}
+.qitem .qa{display:flex;gap:6px;align-items:center}
+.qitem .qa input{width:74px}
+@media (max-width:480px){.qitem{grid-template-columns:40px minmax(0,1fr)}.qitem .mini{width:40px;height:40px}.qitem .qa{grid-column:1/-1;justify-content:flex-end}}
+.total{display:flex;justify-content:space-between;gap:12px;padding-top:14px;font-weight:700;flex-wrap:wrap}
+.note{font-size:13px;color:var(--muted);background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-top:12px}
+.done{max-width:none;padding:48px var(--px);display:grid;justify-items:center;text-align:center;gap:14px}
+.done .ok-ic{width:72px;height:72px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.done .ok-ic svg{width:38px;height:38px}
+.refbig{font-family:var(--head);font-size:28px;font-weight:700;overflow-wrap:anywhere}
+
+.contact{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px;padding:24px var(--px) 56px;align-items:start}
+@media (max-width:980px){.contact{grid-template-columns:minmax(0,1fr)}}
+.cinfo{display:grid;gap:10px}
+.cline{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.cline .ic{width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.cline b{display:block}
+.map{height:180px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);overflow:hidden}
+.map svg{width:100%;height:100%}
+
+.site-f{background:#0A2619;color:#CFE0D4;padding:44px var(--px) 90px}
+.site-f a{color:#fff}
+.site-f .logo-txt small{color:#A9C6B3}
+.f-grid{display:grid;grid-template-columns:1.4fr repeat(3,minmax(0,1fr));gap:28px}
+.site-f h3{color:#fff;font-size:18px;margin-bottom:10px}
+.site-f ul{list-style:none;padding:0;margin:0;display:grid;gap:4px}
+.site-f ul a{display:inline-flex;min-height:32px;align-items:center;text-decoration:none}
+.site-f ul a:hover{text-decoration:underline}
+.f-bot{margin-top:30px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media (max-width:860px){.f-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.f-grid{grid-template-columns:minmax(0,1fr)}}
+.wa-fab{position:fixed;right:18px;bottom:18px;z-index:45;min-height:56px;padding:0 20px 0 16px;border-radius:999px;border:0;background:#1F7A45;color:#fff;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.wa-fab svg{width:26px;height:26px}
+@media (max-width:520px){.wa-fab span{display:none}.wa-fab{padding:0;width:56px;justify-content:center}}
+
+/* ===== Back-office ===== */
+.adm-h{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:8px var(--px);background:var(--brand);color:#fff;position:sticky;top:0;z-index:40}
+.adm-h .logo{color:#fff}
+.adm-h .logo-txt small{color:var(--brand-muted)}
+.adm-h .tag{font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:2px 10px}
+.adm-h .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.adm-h .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+.adm-h .btn:hover{background:rgba(255,255,255,.1)}
+.adm{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:calc(100vh - 110px)}
+.adm-nav{background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.adm-nav a{min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:14.5px;white-space:nowrap}
+.adm-nav a:hover{background:var(--surface-2)}
+.adm-nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.adm-nav .cart-n{margin-left:auto}
+.adm-main{padding:22px var(--px) 56px;min-width:0}
+.adm-main>h1{font-size:30px;margin-bottom:4px}
+.adm-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+@media (max-width:900px){.adm{grid-template-columns:minmax(0,1fr)}.adm-nav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px var(--px);scrollbar-width:thin}.adm-nav .cart-n{margin-left:6px}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:14px;margin-bottom:18px}
+.kpi{padding:16px 18px}
+.kpi span{font-size:13px;color:var(--muted);font-weight:600}
+.kpi b{display:block;font-family:var(--head);font-size:34px;line-height:1.1;margin-top:4px}
+.kpi small{font-size:12.5px;color:var(--muted)}
+.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.dash .wide{grid-column:span 2}
+@media (max-width:1200px){.dash{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.dash{grid-template-columns:minmax(0,1fr)}.dash .wide{grid-column:auto}}
+.bars{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.bars li{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:4px 10px;font-size:14px}
+.bars .tr{grid-column:1/-1;height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bars .fill{height:100%;background:var(--leaf);border-radius:99px}
+.bars b{text-align:right}
+.rlist{list-style:none;margin:0;padding:0}
+.rlist a,.rlist button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:12px;border:0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);background:transparent;width:100%;text-align:left;cursor:pointer;min-height:44px}
+.rlist a:hover,.rlist button:hover{background:var(--surface-2)}
+.rlist .sel{background:var(--accent-soft)!important;box-shadow:inset 3px 0 0 var(--leaf)}
+.rlist .t{font-weight:600;overflow-wrap:anywhere}
+.rlist .s{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+@media (pointer:coarse){.chip{min-height:44px}}
+.req-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;align-items:start}
+.req-layout>.card{overflow:hidden}
+@media (max-width:1100px){.req-layout{grid-template-columns:minmax(0,1fr)}.req-layout.has-detail .rl-list{display:none}.req-layout:not(.has-detail) .rl-detail{display:none}}
+.rl-tools{padding:12px;display:grid;gap:10px;border-bottom:1px solid var(--line)}
+.rl-tools .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,160px);gap:8px}
+.det{padding:20px;display:grid;gap:18px}
+.det-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.det-h h2{font-size:26px;overflow-wrap:anywhere}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px}
+.kv div{padding:10px 12px;background:var(--surface-2);border-radius:10px;min-width:0}
+.kv span{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.kv b,.kv a{font-weight:600;overflow-wrap:anywhere}
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;overflow-wrap:anywhere}
+.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface-2);font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .r{text-align:right}
+.timeline{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.timeline li{padding:10px 12px;border-left:3px solid var(--leaf);background:var(--surface-2);border-radius:0 10px 10px 0;font-size:14px;overflow-wrap:anywhere}
+.timeline small{display:block;color:var(--muted);font-size:12px}
+.switch{position:relative;width:52px;height:44px;border:0;background:transparent;cursor:pointer;padding:0;flex:none}
+.switch::before{content:"";position:absolute;left:4px;top:11px;width:44px;height:22px;border-radius:99px;background:var(--line-2);transition:background .15s}
+.switch::after{content:"";position:absolute;left:7px;top:14px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch[aria-checked="true"]::before{background:var(--primary)}
+.switch[aria-checked="true"]::after{transform:translateX(22px)}
+.star{color:var(--muted)}.star[aria-pressed="true"]{color:#C08A00}
+.star[aria-pressed="true"] svg{fill:currentColor}
+.set-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+@media (max-width:1000px){.set-grid{grid-template-columns:minmax(0,1fr)}}
+.serp{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface);font-family:Arial,sans-serif}
+.serp .u{font-size:13px;color:var(--muted)}
+.serp .t{font-size:19px;color:#1A0DAB;margin:2px 0;overflow-wrap:anywhere}
+@media (prefers-color-scheme:dark){.serp .t{color:#8AB4F8}}
+.serp .d{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.cnt{font-size:12px;color:var(--muted)}.cnt.over{color:var(--red);font-weight:700}
+.login{min-height:calc(100vh - 50px);display:grid;place-items:center;padding:24px var(--px)}
+.login .card{width:100%;max-width:420px;padding:28px;display:grid;gap:16px}
+.road{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.road li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.road svg{color:var(--leaf);margin-top:2px}
+
+/* Dialog et toast */
+dialog{border:0;border-radius:16px;padding:0;width:min(640px,calc(100vw - 24px));max-height:calc(100vh - 24px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(8,20,14,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 14px 14px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.dlg-h h2{font-size:22px}
+.dlg-b{padding:20px;display:grid;gap:14px}
+.dlg-f{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:100;display:grid;gap:8px;width:min(460px,calc(100vw - 24px));pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:var(--shadow);display:flex;gap:10px;align-items:flex-start}
+.toast svg{color:var(--primary)}
+@media (prefers-color-scheme:dark){.toast svg{color:#1E6B30}}
+
+#print{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  body>*:not(#print){display:none!important}
+  #print{display:block;font:12pt/1.45 var(--font);color:#000}
+  #print h1{font-size:22pt}
+  #print table{width:100%;border-collapse:collapse;margin:14px 0}
+  #print th,#print td{border-bottom:1px solid #999;padding:6px;text-align:left}
+  #print .r{text-align:right}
+  #print .ph{display:flex;justify-content:space-between;border-bottom:3px solid #0E3B26;padding-bottom:10px;margin-bottom:16px}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="region" aria-label="Bandeau de démonstration">
+  <strong>Démonstration — données fictives</strong>
+  <span class="sw" role="group" aria-label="Vue">
+    <a href="#/" id="sw-site">Site public</a><a href="#/admin" id="sw-adm">Back-office</a>
+  </span>
+  <button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button>
+</div>
+<div id="app"></div>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+<div class="toasts" aria-live="polite" id="toasts"></div>
+<div id="print"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='niayes-agro-demo-v1';
+const RATE=655.957;
+const TODAY=new Date('2026-10-06T10:00:00');
+
+const P={
+ agri:'<circle cx="7" cy="16.5" r="3.5"/><circle cx="18" cy="17.5" r="2.5"/><path d="M3.5 14V7h7l2 6h5.5l2.5 3"/><path d="M10.5 7v6.5"/><path d="M6 7V4h3"/>',
+ avi:'<path d="M12 3c-3.6 0-6.5 5.6-6.5 10.2a6.5 6.5 0 0 0 13 0C18.5 8.6 15.6 3 12 3z"/><path d="M9 14.5l2 2 4-4"/>',
+ elev:'<path d="M3 21V10l9-6 9 6v11"/><path d="M8 21v-7h8v7"/><path d="M8 14l8 7M16 14l-8 7"/>',
+ transfo:'<path d="M3 21V11l5 3v-3l5 3V7l8 4v10z"/><path d="M7 18h2M12 18h2M17 18h2"/>',
+ machines:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/><circle cx="12" cy="12" r="7"/>',
+ conseil:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 10l2.5 2.5L16 7"/>',
+ wa:'<path d="M3.5 20.5l1.4-4.2A8.6 8.6 0 1 1 8 19.3z"/><path d="M9 8.5c-.4 2.9 3.6 6.9 6.5 6.5l.7-1.6-2-1-1 .9c-1-.4-2-1.4-2.4-2.4l.9-1-1-2z"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+ doc:'<path d="M9 3h6v3H9z"/><path d="M15 4.5h3V21H6V4.5h3"/><path d="M9 11h6M9 15h4"/>',
+ phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+ pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+ trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+ menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+ arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>',
+ truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-4.5"/>',
+ tool:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+ print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>',
+ chart:'<path d="M4 20V4M4 20h16"/><path d="M8 16v-5M12 16V8M16 16v-3"/>',
+ inbox:'<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 2h6l1-2h5"/>',
+ box:'<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>',
+ cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+ out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+ eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
+ send:'<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',
+ leaf:'<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19l8-8"/>'
+};
+const ico=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const DOMAINS=[
+ {id:'agri',name:'Agriculture & mécanisation',short:'Agriculture',desc:'Tracteurs, motoculteurs, semoirs et irrigation pour le maraîchage, les céréales et l\'arachide.',points:['Tracteurs et outils attelés','Motoculteurs pour le maraîchage','Irrigation goutte-à-goutte et pompage','Formation des conducteurs']},
+ {id:'avi',name:'Aviculture',short:'Aviculture',desc:'Couveuses, cages pondeuses, matériel d\'alimentation et de chauffage pour poulets de chair et pondeuses.',points:['Couveuses de 100 à 5 000 œufs','Cages pondeuses galvanisées','Mangeoires, abreuvoirs, éleveuses','Plans de bâtiments avicoles']},
+ {id:'elev',name:'Élevage',short:'Élevage',desc:'Équipements pour bovins, ovins et caprins : préparation des fourrages, abreuvement, traite.',points:['Hache-paille et broyeurs','Abreuvoirs automatiques','Trayeuses mobiles','Aménagement de bergeries et étables']},
+ {id:'transfo',name:'Transformation agroalimentaire',short:'Transformation',desc:'Décortiqueuses, moulins, presses à huile et ensacheuses pour valoriser les récoltes localement.',points:['Décorticage arachide et riz','Mouture mil, maïs, sorgho','Extraction d\'huile','Conditionnement et ensachage']},
+ {id:'machines',name:'Machines & équipements professionnels',short:'Machines pro',desc:'Groupes électrogènes, mélangeurs d\'aliment et équipements robustes pour exploitations et unités de production.',points:['Énergie : groupes électrogènes','Fabrication d\'aliment bétail','Pièces détachées d\'origine','Maintenance préventive']},
+ {id:'conseil',name:'Conseil & accompagnement',short:'Conseil',desc:'Études de projet, dimensionnement, installation, mise en service et formation de vos équipes.',points:['Étude de faisabilité et budget','Installation clé en main','Formation sur site','Contrat de maintenance']}
+];
+const dom=id=>DOMAINS.find(d=>d.id===id)||{id,name:id,short:id};
+const COUNTRIES=['Sénégal','Mali','Mauritanie','Gambie','Guinée','Guinée-Bissau','Côte d\'Ivoire','Burkina Faso','Cap-Vert','France','Autre pays'];
+const STATUS={nouvelle:'Nouvelle',encours:'En cours',envoye:'Devis envoyé',gagnee:'Gagnée',perdue:'Perdue'};
+const TYPES={devis:'Demande de devis',info:'Renseignement',whatsapp:'WhatsApp'};
+
+function seed(){
+ const pr=(id,ref,name,d,price,stock,featured,desc,specs)=>({id,ref,name,domain:d,price,stock,featured,visible:true,desc,specs});
+ return {
+ products:[
+  pr('p1','AGR-TR75','Tracteur agricole 75 ch 4RM','agri',18500000,'commande',true,'Tracteur polyvalent quatre roues motrices, adapté aux sols sableux et argileux. Relevage 3 points et prise de force pour tous les outils attelés.',[['Puissance','75 ch, diesel 4 cylindres'],['Transmission','12 AV / 12 AR'],['Capacité de relevage','2 500 kg'],['Prise de force','540 / 1 000 tr/min'],['Garantie','12 mois ou 1 000 h']]),
+  pr('p2','AGR-MC12','Motoculteur diesel 12 ch','agri',1450000,'stock',false,'Le motoculteur de référence pour le maraîchage : labour, fraisage, transport avec remorque. Démarrage électrique.',[['Moteur','Diesel 12 ch, refroidi à l\'eau'],['Largeur de travail','80 à 100 cm'],['Accessoires inclus','Fraise rotative, charrue'],['Option','Remorque 1 t']]),
+  pr('p3','AGR-SM04','Semoir pneumatique 4 rangs','agri',3200000,'commande',false,'Semis de précision pour arachide, maïs, mil et niébé, avec fertiliseur intégré.',[['Rangs','4, écartement réglable 45 à 80 cm'],['Trémie engrais','4 × 40 L'],['Puissance requise','≥ 50 ch']]),
+  pr('p4','AGR-GG1H','Kit irrigation goutte-à-goutte 1 ha','agri',850000,'stock',true,'Kit complet prêt à poser : filtration, conduite principale, gaines goutteuses et raccords. Jusqu\'à 50 % d\'eau économisée.',[['Surface','1 hectare'],['Gaine','16 mm, goutteurs tous les 30 cm'],['Filtration','Filtre à disques 2"'],['Pose','Assistance à l\'installation incluse']]),
+  pr('p5','AGR-MP3','Motopompe essence 3 pouces','agri',285000,'stock',false,'Motopompe robuste pour l\'irrigation par aspersion ou le remplissage de bassins.',[['Débit','60 m³/h'],['Hauteur de refoulement','28 m'],['Moteur','Essence 7 ch']]),
+  pr('p6','AVI-CV528','Couveuse automatique 528 œufs','avi',1150000,'stock',true,'Incubation et éclosion automatiques : retournement, régulation de la température et de l\'hygrométrie. Fonctionne sur batterie en cas de coupure.',[['Capacité','528 œufs de poule'],['Retournement','Automatique, toutes les 2 h'],['Alimentation','220 V + entrée 12 V batterie'],['Taux d\'éclosion constaté','85 à 92 %']]),
+  pr('p7','AVI-CP128','Batterie de cages pondeuses 128 sujets','avi',690000,'stock',false,'Cages galvanisées à chaud, 4 étages, avec gouttières de ramassage des œufs et abreuvement par pipettes.',[['Capacité','128 pondeuses'],['Étages','4'],['Traitement','Galvanisation à chaud']]),
+  pr('p8','AVI-KA50','Kit mangeoires et abreuvoirs (lot de 50)','avi',95000,'stock',false,'Lot de 25 mangeoires et 25 abreuvoirs siphoïdes pour poussins et poulets de chair.',[['Composition','25 mangeoires 10 kg, 25 abreuvoirs 8 L'],['Matière','Polypropylène traité anti-UV']]),
+  pr('p9','AVI-EG01','Éleveuse au gaz pour poussinière','avi',65000,'stock',false,'Radiant à gaz pour le démarrage des poussins, jusqu\'à 1 000 sujets.',[['Couverture','800 à 1 000 poussins'],['Énergie','Gaz butane']]),
+  pr('p10','ELV-HP3','Hache-paille broyeur 3 t/h','elev',780000,'stock',true,'Hache les fourrages secs et verts, broie les tiges de mil et de maïs pour l\'alimentation du bétail.',[['Débit','Jusqu\'à 3 t/h'],['Moteur','Électrique 7,5 kW ou thermique'],['Grilles','3 grilles fournies']]),
+  pr('p11','ELV-TR2','Trayeuse mobile 2 postes','elev',1650000,'commande',false,'Traite hygiénique de deux vaches simultanément, idéale pour les fermes laitières de 10 à 40 têtes.',[['Postes','2'],['Pompe à vide','250 L/min'],['Bidons','2 × 30 L inox']]),
+  pr('p12','ELV-AB40','Abreuvoir automatique bovins 40 L','elev',120000,'stock',false,'Abreuvoir à niveau constant avec flotteur, pour bovins, ovins et caprins.',[['Contenance','40 L'],['Matière','Polyéthylène haute densité']]),
+  pr('p13','TRF-DA500','Décortiqueuse d\'arachide 500 kg/h','transfo',920000,'stock',false,'Décorticage rapide avec faible taux de casse, ventilation intégrée pour séparer les coques.',[['Débit','500 kg/h'],['Taux de casse','< 5 %'],['Moteur','Électrique 4 kW ou diesel']]),
+  pr('p14','TRF-ML15','Moulin à céréales 15 ch (mil, maïs, sorgho)','transfo',1100000,'stock',false,'Moulin à meules et marteaux pour farines fines et semoules, adapté aux unités villageoises.',[['Débit','150 à 300 kg/h'],['Moteur','Diesel 15 ch'],['Finesse','Réglable']]),
+  pr('p15','TRF-PH50','Presse à huile 50 kg/h','transfo',2400000,'commande',false,'Extraction à froid ou à chaud de l\'huile d\'arachide, de sésame ou de tournesol.',[['Capacité','50 kg de graines/h'],['Filtration','Filtre sous vide intégré'],['Puissance','5,5 kW']]),
+  pr('p16','MAC-GE20','Groupe électrogène diesel 20 kVA','machines',4200000,'stock',false,'Groupe insonorisé pour couveuses, chambres froides et ateliers de transformation.',[['Puissance','20 kVA secours'],['Démarrage','Inverseur automatique en option'],['Autonomie','10 h à 75 %']]),
+  pr('p17','MAC-MX500','Mélangeur d\'aliment bétail 500 kg','machines',1350000,'commande',false,'Mélangeur vertical pour fabriquer votre aliment volaille ou bétail à la ferme.',[['Capacité','500 kg par cycle'],['Temps de mélange','10 à 15 min']]),
+  pr('p18','CSL-ETAV','Étude de projet avicole clé en main','conseil',null,'service',false,'Dimensionnement du bâtiment, choix des équipements, budget d\'investissement et plan de trésorerie prévisionnel.',[['Livrables','Plan, devis équipements, prévisionnel 3 ans'],['Délai','2 à 3 semaines']]),
+  pr('p19','CSL-FORM','Formation et mise en service sur site','conseil',null,'service',false,'Installation, réglages et formation pratique de vos opérateurs, partout au Sénégal et dans la sous-région.',[['Durée','1 à 3 jours selon l\'équipement'],['Zone','Sénégal et Afrique de l\'Ouest']])
+ ],
+ requests:[
+  rq('r1',131,'2026-09-16','devis','gagnee','Moussa Diop','GIE Ndiambour Maraîchage','Sénégal','Louga','+221 77 412 58 30','m.diop@exemple.sn',[['p2',2],['p4',1]],'Nous cherchons à équiper 2 ha de maraîchage (oignon, chou). Livraison à Louga souhaitée.',[['2026-09-17','Devis envoyé par email.'],['2026-09-24','Bon de commande reçu, livraison planifiée le 3 octobre.']]),
+  rq('r2',132,'2026-09-19','devis','envoye','Awa Ndiaye','Ferme avicole Keur Massar','Sénégal','Keur Massar','+221 76 208 11 47','awa.ndiaye@exemple.sn',[['p6',2],['p8',3],['p9',4]],'Démarrage d\'une bande de 1 000 poulets de chair en novembre.',[['2026-09-20','Devis DV-2026-0132 envoyé.']]),
+  rq('r3',133,'2026-09-22','info','perdue','Jean-Baptiste Mendy','','Sénégal','Ziguinchor','+221 78 551 02 96','jb.mendy@exemple.sn',[['p1',1]],'Proposez-vous un paiement échelonné pour le tracteur 75 ch ?',[['2026-09-23','Appel : budget insuffisant cette saison, à relancer en mars.']]),
+  rq('r4',134,'2026-09-25','devis','encours','Mamadou Traoré','Coopérative du Bélédougou','Mali','Bamako','+223 76 44 18 02','coop.beledougou@exemple.ml',[['p13',1],['p14',2]],'Merci d\'indiquer les délais et frais de transport jusqu\'à Bamako.',[['2026-09-26','Demande de cotation transport envoyée au transitaire.']]),
+  rq('r5',135,'2026-09-29','whatsapp','encours','Aminata Sow','','Sénégal','Thiès','+221 77 930 64 15','',[['p6',1]],'Bonjour, la couveuse 528 œufs est-elle disponible à Thiès ?',[]),
+  rq('r6',136,'2026-10-01','devis','nouvelle','Kouassi Yao','Agro-Transfo Bouaké SARL','Côte d\'Ivoire','Bouaké','+225 07 58 21 44 90','k.yao@exemple.ci',[['p15',1],['p16',1]],'Projet d\'unité d\'huile d\'arachide. Besoin d\'un devis CIF Abidjan.',[]),
+  rq('r7',137,'2026-10-03','devis','nouvelle','Fatou Sarr','Ranch Sarr & Fils','Sénégal','Kaolack','+221 70 114 87 52','contact@ranch-sarr.exemple.sn',[['p10',1],['p12',6],['p17',1]],'Équipement d\'un embouche bovine de 60 têtes.',[]),
+  rq('r8',138,'2026-10-05','info','nouvelle','Cheikh Ba','Les Jardins du Fleuve','Mauritanie','Rosso','+222 36 41 20 77','cheikh.ba@exemple.mr',[['p18',1]],'Nous voulons lancer un poulailler de 3 000 pondeuses. Pouvez-vous nous accompagner sur l\'étude ?',[])
+ ],
+ settings:{phone:'+221 33 800 12 34',wa:'+221 77 000 12 34',email:'contact@niayes-agro.exemple.sn',address:'Route de Rufisque, km 12 — Dakar, Sénégal',hours:'Lun–ven 8 h–18 h · sam 9 h–13 h',waMsg:'Bonjour, je souhaite des informations sur vos équipements.',seoTitle:'Équipements agricoles, avicoles et d\'élevage au Sénégal',seoDesc:'Tracteurs, couveuses, moulins, presses à huile : catalogue, devis sous 24 h, livraison et mise en service au Sénégal et en Afrique de l\'Ouest.'},
+ cart:[],currency:'XOF'
+ };
+}
+function rq(id,n,date,type,status,name,company,country,city,phone,email,items,message,notes){
+ return {id,ref:'DV-2026-0'+n,num:n,date,type,status,name,company,country,city,phone,email,items:items.map(([pid,qty])=>({pid,qty})),message,notes:notes.map(([d,t])=>({d,t})),delivery:'Livraison sur site'};
+}
+
+let S;
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);if(S&&S.products)return;}}catch(e){}S=seed();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+load();
+let logged=false;
+const catF={q:'',dom:'all',stock:'all',sort:'pert'};
+const adF={q:'',st:'all',type:'all'};
+const prF={q:'',dom:'all'};
+
+const app=document.getElementById('app');
+const dlg=document.getElementById('dlg');
+const prod=id=>S.products.find(p=>p.id===id);
+function money(n){
+ if(n==null)return 'Prix sur devis';
+ if(S.currency==='EUR')return Math.round(n/RATE).toLocaleString('fr-FR')+' €';
+ return n.toLocaleString('fr-FR')+' FCFA';
+}
+const fdate=d=>new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+const iso=d=>d.toISOString().slice(0,10);
+const cartCount=()=>S.cart.reduce((a,c)=>a+c.qty,0);
+function toast(msg){
+ const t=document.createElement('div');t.className='toast';t.innerHTML=ico('check')+'<span>'+esc(msg)+'</span>';
+ document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),4200);
+}
+function stockBadge(p){
+ if(p.stock==='service')return '<span class="badge b-svc">Prestation</span>';
+ return p.stock==='stock'?'<span class="badge b-stock">En stock à Dakar</span>':'<span class="badge b-cmd">Sur commande</span>';
+}
+const stBadge=s=>`<span class="badge st-${s}">${STATUS[s]}</span>`;
+const logo=()=>`<span class="logo-mark">${ico('leaf')}</span><span class="logo-txt">Niayes<em>.</em>Agro<small>Équipements &amp; solutions</small></span>`;
+
+/* ================= SITE ================= */
+function siteHeader(r){
+ const L=[['','Accueil'],['domaines','Domaines'],['catalogue','Catalogue'],['contact','Contact']];
+ return `<header class="site-h" id="sh"><div class="site-h-in">
+  <a class="logo" href="#/" aria-label="Niayes Agro, accueil">${logo()}</a>
+  <button class="icon-btn menu-btn" type="button" data-act="menu" aria-expanded="false" aria-controls="snav" aria-label="Ouvrir le menu">${ico('menu')}</button>
+  <nav id="snav" aria-label="Navigation principale">${L.map(([h,t])=>`<a href="#/${h}"${(r===h||(h==='catalogue'&&r==='produit'))?' aria-current="page"':''}>${t}</a>`).join('')}</nav>
+  <div class="h-act">
+   <label class="sr" for="cur">Devise d'affichage</label>
+   <select id="cur" data-ch="cur"><option value="XOF"${S.currency==='XOF'?' selected':''}>FCFA</option><option value="EUR"${S.currency==='EUR'?' selected':''}>Euro</option></select>
+   <a class="btn primary" href="#/devis">${ico('doc')}Ma demande de devis <span class="cart-n" aria-label="articles">${cartCount()}</span></a>
+  </div></div></header>`;
+}
+function siteFooter(){
+ const s=S.settings;
+ return `<footer class="site-f"><div class="f-grid">
+  <div><a class="logo" href="#/" style="color:#fff">${logo().replace('logo-mark','logo-mark" style="background:#1E6B30')}</a><p style="margin-top:12px;max-width:40ch">Équipements agricoles, avicoles, d'élevage et de transformation. Vente, installation, formation et service après-vente depuis Dakar.</p></div>
+  <div><h3>Domaines</h3><ul>${DOMAINS.map(d=>`<li><a href="#/catalogue/${d.id}">${d.short}</a></li>`).join('')}</ul></div>
+  <div><h3>Contact</h3><ul><li class="wrap">${esc(s.address)}</li><li><a href="tel:${esc(s.phone.replace(/\s/g,''))}">${esc(s.phone)}</a></li><li><button type="button" data-act="wa" style="all:unset;cursor:pointer;text-decoration:underline;min-height:32px;display:inline-flex;align-items:center">WhatsApp ${esc(s.wa)}</button></li><li class="wrap">${esc(s.email)}</li></ul></div>
+  <div><h3>Horaires</h3><p>${esc(s.hours)}</p><p style="margin-top:10px">Expédition vers toute l'Afrique de l'Ouest.</p></div>
+ </div><div class="f-bot"><span>© 2026 Niayes Agro — site de démonstration</span><span>Prix indicatifs HT, hors transport.</span></div></footer>
+ <button class="wa-fab" type="button" data-act="wa" aria-label="Nous écrire sur WhatsApp">${ico('wa')}<span>WhatsApp</span></button>`;
+}
+function pcard(p){
+ const d=dom(p.domain);
+ return `<article class="card pcard"><div class="pimg">${ico(p.domain)}${stockBadge(p)}<span class="ref">${esc(p.ref)}</span></div>
+ <div class="pbody"><p class="pdom">${esc(d.short)}</p><h3><a href="#/produit/${p.id}">${esc(p.name)}</a></h3><p class="pdesc">${esc(p.desc)}</p>
+ <div class="pfoot"><p class="price">${p.price==null?'Sur devis':'<small>À partir de</small>'+money(p.price)}</p>
+ <div class="actions"><button class="btn primary sm" type="button" data-act="add" data-id="${p.id}">${ico('plus')}Ajouter au devis</button><a class="btn sm" href="#/produit/${p.id}" aria-label="Fiche ${esc(p.name)}">Fiche</a></div></div></div></article>`;
+}
+function pHome(){
+ const vis=S.products.filter(p=>p.visible);
+ const feat=vis.filter(p=>p.featured).slice(0,4);
+ return `<section class="hero">
+  <div>
+   <p class="kicker">Équipementier agricole · Dakar</p>
+   <h1>Des machines fiables pour produire, élever et transformer.</h1>
+   <p class="lead">Matériel agricole, avicole, d'élevage et de transformation : nous conseillons, livrons, installons et assurons le service après-vente au Sénégal et dans toute l'Afrique de l'Ouest.</p>
+   <div class="actions"><a class="btn light" href="#/catalogue">${ico('box')}Voir le catalogue</a><a class="btn outline-light" href="#/devis">${ico('doc')}Demander un devis</a><button class="btn wa" type="button" data-act="wa">${ico('wa')}WhatsApp</button></div>
+   <div class="hero-stats"><div><b>15 ans</b><span>d'expérience terrain</span></div><div><b>2 400+</b><span>équipements installés</span></div><div><b>8 pays</b><span>livrés en Afrique de l'Ouest</span></div><div><b>24 h</b><span>délai de réponse devis</span></div></div>
+  </div>
+  <form class="finder" id="f-finder" role="search" aria-label="Rechercher un équipement">
+   <h2>Trouver un équipement</h2>
+   <div class="field"><label for="fq">Machine, usage ou référence</label><div class="searchbox">${ico('search')}<input type="search" id="fq" placeholder="ex. couveuse, moulin, irrigation…"></div></div>
+   <div class="field"><label for="fd">Domaine</label><select id="fd"><option value="all">Tous les domaines</option>${DOMAINS.map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select></div>
+   <button class="btn primary" type="submit">${ico('search')}Rechercher</button>
+   <p class="flabel" style="margin-top:4px">Accès rapide</p>
+   <div class="finder-q">${DOMAINS.map(d=>`<a href="#/catalogue/${d.id}">${ico(d.id)}${d.short}</a>`).join('')}</div>
+  </form>
+ </section>
+ <section class="sec"><div class="sec-h"><div><p class="kicker">Nos domaines</p><h2>Une offre complète, de la parcelle à l'atelier</h2></div><a class="btn" href="#/domaines">Tous les domaines ${ico('arrow')}</a></div>
+  <div class="dom-grid">${DOMAINS.map(d=>`<a class="card dom" href="#/catalogue/${d.id}"><span class="ic">${ico(d.id)}</span><h3>${d.name}</h3><p>${d.desc}</p><span class="more">${vis.filter(p=>p.domain===d.id).length} références ${ico('arrow')}</span></a>`).join('')}</div></section>
+ <section class="sec alt"><div class="sec-h"><div><p class="kicker">Sélection</p><h2>Équipements les plus demandés</h2></div><a class="btn" href="#/catalogue">Tout le catalogue ${ico('arrow')}</a></div>
+  <div class="p-grid">${feat.map(pcard).join('')||'<p class="muted">Aucun produit mis en avant.</p>'}</div></section>
+ <section class="sec"><div class="sec-h"><div><p class="kicker">Comment ça marche</p><h2>Du besoin à la mise en service</h2></div></div>
+  <div class="steps"><div class="card step"><h3>Vous sélectionnez</h3><p>Ajoutez un ou plusieurs équipements à votre demande, ou décrivez simplement votre projet.</p></div><div class="card step"><h3>Nous chiffrons</h3><p>Un conseiller vous répond sous 24 h ouvrées avec un devis détaillé, transport compris.</p></div><div class="card step"><h3>Nous livrons</h3><p>Livraison partout au Sénégal, expédition vers la sous-région par route ou par conteneur.</p></div><div class="card step"><h3>Nous installons</h3><p>Mise en service, formation de vos opérateurs, garantie et pièces détachées disponibles.</p></div></div></section>
+ <section class="sec alt"><div class="split"><div><p class="kicker">Sénégal & international</p><h2 style="font-size:clamp(26px,3vw,36px)">Un interlocuteur unique, où que soit votre exploitation</h2><p class="lead" style="margin-top:12px">Coopératives, GIE, fermes familiales, industriels et projets de développement : nous adaptons l'offre, la logistique et le financement à chaque client.</p>
+  <ul class="ticks"><li>${ico('check')}Devis en FCFA ou en euros, incoterms au choix (départ Dakar, CIF)</li><li>${ico('check')}Réponse sur WhatsApp, par téléphone ou par email</li><li>${ico('check')}Garantie constructeur et SAV assuré par nos techniciens</li></ul></div>
+  <div class="flags">${[['Sénégal','14 régions couvertes'],['Mali','Livraison Bamako 5–7 j'],['Mauritanie','Via Rosso'],['Gambie','Transit direct'],['Côte d\'Ivoire','CIF Abidjan'],['Guinée','Conakry, Labé']].map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join('')}</div></div></section>
+ <section class="cta-band"><div><h2>Un projet d'équipement ?</h2><p>Décrivez votre besoin, un conseiller vous rappelle sous 24 h.</p></div><div class="actions"><a class="btn light" href="#/devis">Demander un devis</a><button class="btn outline-light" type="button" data-act="wa">${ico('wa')}Écrire sur WhatsApp</button></div></section>`;
+}
+function pDomains(){
+ const vis=S.products.filter(p=>p.visible);
+ return `<div class="page-h"><nav class="crumbs" aria-label="Fil d'Ariane"><a href="#/">Accueil</a><span aria-hidden="true">/</span><span>Domaines</span></nav><h1>Nos domaines d'activité</h1><p class="lead" style="margin-top:8px">Six métiers, une même exigence : du matériel éprouvé, installé et suivi par nos équipes.</p></div>
+ <section class="sec"><div class="dom-grid">${DOMAINS.map(d=>`<article class="card dom"><span class="ic">${ico(d.id)}</span><h2 style="font-size:24px">${d.name}</h2><p>${d.desc}</p><ul class="ticks" style="margin:6px 0 8px">${d.points.map(x=>`<li>${ico('check')}${x}</li>`).join('')}</ul><div class="actions" style="margin-top:auto"><a class="btn primary sm" href="#/catalogue/${d.id}">Voir les ${vis.filter(p=>p.domain===d.id).length} produits</a><button class="btn sm" type="button" data-act="wa" data-dom="${d.id}">${ico('wa')}Question</button></div></article>`).join('')}</div></section>`;
+}
+function pCatalog(){
+ const vis=S.products.filter(p=>p.visible);
+ return `<div class="page-h"><nav class="crumbs" aria-label="Fil d'Ariane"><a href="#/">Accueil</a><span aria-hidden="true">/</span><span>Catalogue</span></nav><h1>Catalogue produits</h1><p class="lead" style="margin-top:8px">Prix indicatifs HT départ Dakar. Ajoutez les équipements à votre demande : le devis définitif inclut transport et installation.</p></div>
+ <div class="cat-layout">
+  <aside class="card filters" aria-label="Filtres">
+   <h2>Domaines</h2>
+   <div class="dom-list" role="group" aria-label="Filtrer par domaine">
+    <button type="button" data-act="catdom" data-id="all" aria-pressed="${catF.dom==='all'}"><span>Tous les produits</span><span class="n">${vis.length}</span></button>
+    ${DOMAINS.map(d=>`<button type="button" data-act="catdom" data-id="${d.id}" aria-pressed="${catF.dom===d.id}"><span>${d.name}</span><span class="n">${vis.filter(p=>p.domain===d.id).length}</span></button>`).join('')}
+   </div>
+   <div class="field"><label for="cat-stock">Disponibilité</label><select id="cat-stock" data-ch="cat-stock"><option value="all">Toutes</option><option value="stock"${catF.stock==='stock'?' selected':''}>En stock à Dakar</option><option value="commande"${catF.stock==='commande'?' selected':''}>Sur commande</option></select></div>
+  </aside>
+  <div style="min-width:0">
+   <div class="cat-bar"><div class="searchbox"><label class="sr" for="cat-q">Rechercher dans le catalogue</label>${ico('search')}<input type="search" id="cat-q" data-in="cat-q" placeholder="Rechercher une machine, une référence…" value="${esc(catF.q)}"></div>
+   <div class="field" style="flex-direction:row;align-items:center;gap:8px"><label for="cat-sort" style="white-space:nowrap">Trier</label><select id="cat-sort" data-ch="cat-sort" style="width:auto"><option value="pert">Pertinence</option><option value="asc"${catF.sort==='asc'?' selected':''}>Prix croissant</option><option value="desc"${catF.sort==='desc'?' selected':''}>Prix décroissant</option><option value="az"${catF.sort==='az'?' selected':''}>Nom A → Z</option></select></div></div>
+   <p class="muted small" id="cat-count" aria-live="polite" style="margin-bottom:12px"></p>
+   <div class="p-grid" id="cat-list"></div>
+  </div></div>`;
+}
+function renderCatList(){
+ const q=catF.q.trim().toLowerCase();
+ let L=S.products.filter(p=>p.visible&&(catF.dom==='all'||p.domain===catF.dom)&&(catF.stock==='all'||p.stock===catF.stock)&&(!q||(p.name+' '+p.ref+' '+p.desc+' '+dom(p.domain).name).toLowerCase().includes(q)));
+ const pv=p=>p.price==null?Infinity:p.price;
+ if(catF.sort==='asc')L.sort((a,b)=>pv(a)-pv(b));
+ if(catF.sort==='desc')L.sort((a,b)=>(b.price??-1)-(a.price??-1));
+ if(catF.sort==='az')L.sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+ const el=document.getElementById('cat-list');if(!el)return;
+ document.getElementById('cat-count').textContent=L.length+' produit'+(L.length>1?'s':'')+(catF.dom!=='all'?' · '+dom(catF.dom).name:'');
+ el.innerHTML=L.length?L.map(pcard).join(''):`<div class="card empty" style="grid-column:1/-1">${ico('search')}<p>Aucun équipement ne correspond. Décrivez votre besoin : nous trouvons la machine adaptée.</p><div class="actions"><button class="btn" type="button" data-act="catclear">Effacer les filtres</button><a class="btn primary" href="#/devis">Demande sur mesure</a></div></div>`;
+}
+function pProduct(id){
+ const p=prod(id);
+ if(!p||!p.visible)return `<div class="done"><h1>Produit introuvable</h1><p class="muted">Cette fiche n'est plus disponible.</p><a class="btn primary" href="#/catalogue">Retour au catalogue</a></div>`;
+ const d=dom(p.domain);
+ const rel=S.products.filter(x=>x.visible&&x.domain===p.domain&&x.id!==p.id).slice(0,4);
+ return `<div style="padding:18px var(--px) 0"><nav class="crumbs" aria-label="Fil d'Ariane"><a href="#/">Accueil</a><span aria-hidden="true">/</span><a href="#/catalogue/${d.id}">${d.short}</a><span aria-hidden="true">/</span><span class="wrap">${esc(p.name)}</span></nav></div>
+ <section class="prod">
+  <div class="pimg">${ico(p.domain)}${stockBadge(p)}<span class="ref">Réf. ${esc(p.ref)}</span></div>
+  <div class="prod-info">
+   <div><p class="pdom">${esc(d.name)}</p><h1>${esc(p.name)}</h1><p class="lead">${esc(p.desc)}</p></div>
+   <p class="price" style="font-size:30px">${p.price==null?'Prix sur devis':'<small>Prix indicatif HT, départ Dakar</small>'+money(p.price)}</p>
+   <div class="actions"><span class="flabel" id="ql">Quantité</span><div class="qty" role="group" aria-labelledby="ql"><button type="button" data-act="q-" aria-label="Diminuer">−</button><label class="sr" for="pqty">Quantité</label><input type="number" id="pqty" min="1" max="999" value="1" inputmode="numeric"><button type="button" data-act="q+" aria-label="Augmenter">+</button></div></div>
+   <div class="actions"><button class="btn primary" type="button" data-act="add" data-id="${p.id}" data-qty="1">${ico('plus')}Ajouter à ma demande de devis</button><button class="btn wa" type="button" data-act="wa" data-id="${p.id}">${ico('wa')}Question sur WhatsApp</button></div>
+   <div class="incl"><div>${ico('truck')}Livraison Sénégal & sous-région</div><div>${ico('tool')}Installation et mise en service</div><div>${ico('shield')}Garantie 12 mois</div><div>${ico('cog')}Pièces détachées disponibles</div></div>
+  </div></section>
+ <section class="sec" style="padding-top:20px"><div class="split" style="align-items:start"><div class="card panel"><h2>Caractéristiques techniques</h2><table class="specs"><tbody><tr><th scope="row">Référence</th><td>${esc(p.ref)}</td></tr>${p.specs.map(([k,v])=>`<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}<tr><th scope="row">Disponibilité</th><td>${p.stock==='stock'?'En stock à Dakar, livraison sous 72 h':p.stock==='service'?'Planification sous 2 semaines':'Sur commande, 4 à 6 semaines'}</td></tr></tbody></table></div>
+ <div class="card panel"><h2>Besoin d'un conseil ?</h2><p class="muted">Nos techniciens vous aident à choisir le bon modèle selon votre surface, votre cheptel ou votre volume de production.</p><ul class="ticks"><li>${ico('phone')}<span>${esc(S.settings.phone)}</span></li><li>${ico('mail')}<span class="wrap">${esc(S.settings.email)}</span></li><li>${ico('clock')}<span>${esc(S.settings.hours)}</span></li></ul><div class="actions" style="margin-top:16px"><a class="btn" href="#/contact">Nous contacter</a></div></div></div></section>
+ ${rel.length?`<section class="sec alt"><div class="sec-h"><h2>Dans la même gamme</h2></div><div class="p-grid">${rel.map(pcard).join('')}</div></section>`:''}`;
+}
+function fld(id,label,type,o={}){
+ const req=o.req?' <span class="req" aria-hidden="true">*</span>':'';
+ const desc=`${o.hint?` aria-describedby="${id}-h ${id}-e"`:` aria-describedby="${id}-e"`}`;
+ let ctrl;
+ if(type==='select')ctrl=`<select id="${id}" name="${id}"${o.req?' required':''}${desc}>${o.opts.map(x=>`<option${x===o.val?' selected':''}>${esc(x)}</option>`).join('')}</select>`;
+ else if(type==='textarea')ctrl=`<textarea id="${id}" name="${id}"${desc} placeholder="${esc(o.ph||'')}">${esc(o.val||'')}</textarea>`;
+ else ctrl=`<input type="${type}" id="${id}" name="${id}"${o.req?' required':''}${desc} value="${esc(o.val||'')}" placeholder="${esc(o.ph||'')}"${o.ac?` autocomplete="${o.ac}"`:''}>`;
+ return `<div class="field${o.full?' full':''}"><label for="${id}">${label}${req}</label>${ctrl}${o.hint?`<span class="hint" id="${id}-h">${o.hint}</span>`:''}<span class="err" id="${id}-e"></span></div>`;
+}
+function contactFields(px){
+ return `<div class="grid2">
+  ${fld(px+'name','Nom et prénom','text',{req:1,ac:'name'})}
+  ${fld(px+'company','Entreprise, GIE ou coopérative','text',{ac:'organization'})}
+  ${fld(px+'country','Pays','select',{req:1,opts:COUNTRIES,val:'Sénégal'})}
+  ${fld(px+'city','Ville / localité','text',{ph:'ex. Thiès'})}
+  ${fld(px+'phone','Téléphone / WhatsApp','tel',{req:1,ac:'tel',ph:'+221 77 000 00 00',hint:'Avec l\'indicatif pays.'})}
+  ${fld(px+'email','Email','email',{ac:'email',ph:'nom@exemple.com',hint:'Facultatif, pour recevoir le devis en PDF.'})}
+ </div>`;
+}
+function pQuote(){
+ const items=S.cart.map(c=>({...c,p:prod(c.pid)})).filter(c=>c.p);
+ const tot=items.reduce((a,c)=>a+(c.p.price||0)*c.qty,0);
+ const hasNull=items.some(c=>c.p.price==null);
+ return `<div class="page-h"><nav class="crumbs" aria-label="Fil d'Ariane"><a href="#/">Accueil</a><span aria-hidden="true">/</span><span>Demande de devis</span></nav><h1>Demande de devis</h1><p class="lead" style="margin-top:8px">Gratuite et sans engagement. Réponse sous 24 h ouvrées, depuis le Sénégal comme depuis l'étranger.</p></div>
+ <div class="quote">
+  <section class="card panel" aria-labelledby="qsel"><h2 id="qsel">Équipements sélectionnés</h2>
+  ${items.length?items.map(c=>`<div class="qitem"><span class="mini">${ico(c.p.domain)}</span><div style="min-width:0"><b class="wrap"><a href="#/produit/${c.p.id}" style="color:inherit">${esc(c.p.name)}</a></b><span class="small muted wrap">${esc(c.p.ref)} · ${money(c.p.price)}</span></div>
+   <div class="qa"><label class="sr" for="cq-${c.pid}">Quantité ${esc(c.p.name)}</label><input type="number" min="1" max="999" id="cq-${c.pid}" data-ch="cq" data-id="${c.pid}" value="${c.qty}"><button class="icon-btn" type="button" data-act="rm" data-id="${c.pid}" aria-label="Retirer ${esc(c.p.name)}">${ico('trash')}</button></div></div>`).join('')
+   +`<div class="total"><span>Total indicatif HT</span><span>${money(tot)}${hasNull?' + prestations sur devis':''}</span></div><p class="note">Montant indicatif hors transport, installation et taxes. Le devis définitif vous est envoyé par un conseiller.</p><div class="actions" style="margin-top:12px"><a class="btn sm" href="#/catalogue">${ico('plus')}Ajouter d'autres équipements</a></div>`
+   :`<div class="empty">${ico('box')}<p>Aucun équipement sélectionné. Vous pouvez parcourir le catalogue ou décrire directement votre projet.</p><a class="btn" href="#/catalogue">Parcourir le catalogue</a></div>`}
+  </section>
+  <form class="card panel" id="f-quote" novalidate aria-labelledby="qf"><h2 id="qf">Vos coordonnées</h2>
+   ${contactFields('q-')}
+   <div class="grid2" style="margin-top:14px">
+    ${fld('q-delivery','Livraison souhaitée','select',{opts:['Livraison sur site','Retrait à Dakar','Expédition internationale (CIF)','À définir avec le conseiller'],val:'Livraison sur site'})}
+    ${fld('q-when','Échéance du projet','select',{opts:['Dès que possible','Sous 1 mois','Sous 3 mois','Projet à l\'étude'],val:'Sous 1 mois'})}
+    ${fld('q-msg','Votre projet','textarea',{full:1,ph:'Surface, cheptel, volume à transformer, contraintes d\'énergie…'})}
+   </div>
+   <label class="check"><input type="checkbox" id="q-ok" aria-describedby="q-ok-e"> <span>J'accepte d'être recontacté au sujet de cette demande. <span class="req" aria-hidden="true">*</span></span></label><span class="err" id="q-ok-e"></span>
+   <div class="actions" style="margin-top:14px"><button class="btn primary" type="submit">${ico('send')}Envoyer ma demande</button><span class="hint"><span class="req">*</span> champs obligatoires</span></div>
+  </form></div>`;
+}
+function pDone(id){
+ const r=S.requests.find(x=>x.id===id);
+ if(!r)return `<div class="done"><h1>Demande introuvable</h1><a class="btn primary" href="#/">Accueil</a></div>`;
+ return `<section class="done"><span class="ok-ic">${ico('check')}</span><h1 style="font-size:clamp(28px,4vw,40px)">Merci ${esc(r.name.split(' ')[0])}, votre demande est bien reçue</h1>
+ <p class="muted">Numéro de suivi</p><p class="refbig">${esc(r.ref)}</p>
+ <p class="lead" style="text-align:center">Un conseiller vous répond sous 24 h ouvrées ${r.email?'par email à <b>'+esc(r.email)+'</b> et ':''}au <b>${esc(r.phone)}</b>.</p>
+ <div class="actions" style="justify-content:center"><a class="btn" href="#/catalogue">Continuer la visite</a><button class="btn wa" type="button" data-act="wa">${ico('wa')}Suivre sur WhatsApp</button><a class="btn primary" href="#/admin/demandes/${r.id}">${ico('eye')}Voir la demande côté back-office</a></div></section>`;
+}
+function pContact(){
+ const s=S.settings;
+ return `<div class="page-h"><nav class="crumbs" aria-label="Fil d'Ariane"><a href="#/">Accueil</a><span aria-hidden="true">/</span><span>Contact</span></nav><h1>Contact</h1><p class="lead" style="margin-top:8px">Une question technique, un délai, une demande depuis l'étranger ? Écrivez-nous ou passez au showroom.</p></div>
+ <div class="contact">
+  <div class="cinfo">
+   <button class="cline" type="button" data-act="wa" style="text-align:left;cursor:pointer;font:inherit;color:inherit"><span class="ic">${ico('wa')}</span><span><b>WhatsApp</b><span class="muted">${esc(s.wa)} — réponse rapide</span></span></button>
+   <div class="cline"><span class="ic">${ico('phone')}</span><span><b>Téléphone</b><a href="tel:${esc(s.phone.replace(/\s/g,''))}">${esc(s.phone)}</a></span></div>
+   <div class="cline"><span class="ic">${ico('mail')}</span><span style="min-width:0"><b>Email</b><span class="wrap">${esc(s.email)}</span></span></div>
+   <div class="cline"><span class="ic">${ico('pin')}</span><span><b>Showroom & atelier</b><span class="wrap">${esc(s.address)}</span></span></div>
+   <div class="cline"><span class="ic">${ico('clock')}</span><span><b>Horaires</b>${esc(s.hours)}</span></div>
+   <div class="map" role="img" aria-label="Plan schématique d'accès au showroom, route de Rufisque"><svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice"><rect width="400" height="180" fill="var(--surface-2)"/><path d="M-10 140 C80 120 160 110 230 90 S350 50 420 40" stroke="var(--line-2)" stroke-width="14" fill="none"/><path d="M120 -10 L150 200" stroke="var(--line)" stroke-width="8"/><path d="M290 -10 L260 200" stroke="var(--line)" stroke-width="8"/><circle cx="232" cy="88" r="11" fill="var(--red)"/><circle cx="232" cy="88" r="4" fill="#fff"/><text x="250" y="122" font-size="13" font-family="Inter,sans-serif" fill="var(--ink)">Route de Rufisque, km 12</text></svg></div>
+  </div>
+  <form class="card panel" id="f-contact" novalidate aria-labelledby="cf"><h2 id="cf">Envoyer un message</h2>
+   ${contactFields('c-')}
+   <div class="grid2" style="margin-top:14px">
+    ${fld('c-subject','Objet','select',{full:1,opts:['Renseignement produit','Disponibilité / délai','Service après-vente','Partenariat / distribution','Autre'],val:'Renseignement produit'})}
+    ${fld('c-msg','Message','textarea',{full:1,req:1})}
+   </div>
+   <div class="actions" style="margin-top:14px"><button class="btn primary" type="submit">${ico('send')}Envoyer</button></div>
+  </form></div>`;
+}
+
+/* ================= ADMIN ================= */
+function admShell(sec,body){
+ const nNew=S.requests.filter(r=>r.status==='nouvelle').length;
+ const L=[['','chart','Tableau de bord'],['demandes','inbox','Demandes'],['produits','box','Catalogue produits'],['reglages','cog','Réglages & SEO']];
+ return `<header class="adm-h"><a class="logo" href="#/admin" aria-label="Back-office, tableau de bord">${logo()}</a><span class="tag">Back-office</span>
+  <div class="right"><span class="small" style="color:var(--brand-muted)">Connecté : Khady Faye, commerciale</span><a class="btn sm" href="#/">${ico('eye')}Voir le site</a><button class="btn sm" type="button" data-act="logout">${ico('out')}Déconnexion</button></div></header>
+ <div class="adm"><nav class="adm-nav" aria-label="Back-office">${L.map(([h,i,t])=>`<a href="#/admin${h?'/'+h:''}"${sec===h?' aria-current="page"':''}>${ico(i)}${t}${h==='demandes'&&nNew?`<span class="cart-n" aria-label="${nNew} nouvelles">${nNew}</span>`:''}</a>`).join('')}</nav>
+ <main class="adm-main" id="main">${body}</main></div>`;
+}
+function aLogin(){
+ return `<div class="login"><form class="card" id="f-login" novalidate><div class="logo">${logo()}</div><h1 style="font-size:28px">Connexion au back-office</h1><p class="muted small">Identifiants de démonstration pré-remplis.</p>
+  ${fld('l-mail','Email','email',{req:1,val:'k.faye@niayes-agro.exemple.sn',ac:'username'})}
+  <div class="field"><label for="l-pw">Mot de passe <span class="req" aria-hidden="true">*</span></label><input type="password" id="l-pw" value="demo-2026" autocomplete="current-password" aria-describedby="l-pw-e"><span class="err" id="l-pw-e"></span></div>
+  <button class="btn primary" type="submit">Se connecter</button><a class="btn ghost" href="#/">${ico('back')}Retour au site</a></form></div>`;
+}
+function aDash(){
+ const R=S.requests;
+ const since=iso(new Date(TODAY.getTime()-30*864e5));
+ const r30=R.filter(r=>r.date>=since);
+ const nNew=R.filter(r=>r.status==='nouvelle').length;
+ const g=R.filter(r=>r.status==='gagnee').length,l=R.filter(r=>r.status==='perdue').length;
+ const intl=R.filter(r=>r.country!=='Sénégal').length;
+ const won=R.filter(r=>r.status==='gagnee').reduce((a,r)=>a+r.items.reduce((s,i)=>s+((prod(i.pid)||{}).price||0)*i.qty,0),0);
+ const byDom={};R.forEach(r=>r.items.forEach(i=>{const p=prod(i.pid);if(p)byDom[p.domain]=(byDom[p.domain]||0)+1;}));
+ const byC={};R.forEach(r=>byC[r.country]=(byC[r.country]||0)+1);
+ const bars=(o,lab)=>{const m=Math.max(1,...Object.values(o));return `<ul class="bars">${Object.entries(o).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<li><span>${esc(lab(k))}</span><b>${v}</b><span class="tr" aria-hidden="true"><span class="fill" style="display:block;width:${v/m*100}%"></span></span></li>`).join('')}</ul>`;};
+ const byT={};R.forEach(r=>byT[r.type]=(byT[r.type]||0)+1);
+ const recent=[...R].sort((a,b)=>b.date.localeCompare(a.date)||b.num-a.num).slice(0,6);
+ return `<div class="adm-top"><div><h1 style="font-size:30px">Tableau de bord</h1><p class="muted">Activité commerciale du site au ${fdate(iso(TODAY))}</p></div><a class="btn primary" href="#/admin/demandes">${ico('inbox')}Traiter les demandes</a></div>
+ <div class="kpis">
+  <div class="card kpi"><span>Demandes (30 jours)</span><b>${r30.length}</b><small>devis, contacts et WhatsApp</small></div>
+  <div class="card kpi"><span>À traiter</span><b style="color:var(--red)">${nNew}</b><small>objectif : réponse &lt; 24 h</small></div>
+  <div class="card kpi"><span>Taux de transformation</span><b>${g+l?Math.round(g/(g+l)*100):0} %</b><small>${g} gagnée(s) / ${l} perdue(s)</small></div>
+  <div class="card kpi"><span>Chiffre signé</span><b style="font-size:26px">${money(won)}</b><small>demandes gagnées, prix catalogue</small></div>
+  <div class="card kpi"><span>International</span><b>${R.length?Math.round(intl/R.length*100):0} %</b><small>${intl} demande(s) hors Sénégal</small></div>
+ </div>
+ <div class="dash">
+  <section class="card panel wide" aria-labelledby="h-rec"><div class="sec-h" style="margin-bottom:8px"><h2 id="h-rec" style="font-size:20px">Dernières demandes</h2><a class="btn sm" href="#/admin/demandes">Tout voir</a></div>
+   <ul class="rlist">${recent.map(r=>`<li><a href="#/admin/demandes/${r.id}"><span class="t">${esc(r.name)}${r.company?' · '+esc(r.company):''}</span>${stBadge(r.status)}<span class="s">${esc(r.ref)} · ${TYPES[r.type]} · ${esc(r.city||'')} (${esc(r.country)})</span><span class="s">${fdate(r.date)}</span></a></li>`).join('')}</ul></section>
+  <section class="card panel" aria-labelledby="h-ch"><h2 id="h-ch" style="font-size:20px">Canal d'entrée</h2>${bars(byT,k=>TYPES[k])}</section>
+  <section class="card panel" aria-labelledby="h-dom"><h2 id="h-dom" style="font-size:20px">Domaines demandés</h2>${bars(byDom,k=>dom(k).short)}</section>
+  <section class="card panel" aria-labelledby="h-pays"><h2 id="h-pays" style="font-size:20px">Origine des demandes</h2>${bars(byC,k=>k)}</section>
+  <section class="card panel" aria-labelledby="h-cat"><h2 id="h-cat" style="font-size:20px">Catalogue</h2><div class="kv"><div><span>Produits publiés</span><b>${S.products.filter(p=>p.visible).length} / ${S.products.length}</b></div><div><span>Mis en avant</span><b>${S.products.filter(p=>p.featured).length}</b></div><div><span>Sur commande</span><b>${S.products.filter(p=>p.stock==='commande').length}</b></div></div><div class="actions" style="margin-top:12px"><a class="btn sm" href="#/admin/produits">Gérer le catalogue</a></div></section>
+ </div>`;
+}
+function filteredReqs(){
+ const q=adF.q.trim().toLowerCase();
+ return S.requests.filter(r=>(adF.st==='all'||r.status===adF.st)&&(adF.type==='all'||r.type===adF.type)&&(!q||[r.ref,r.name,r.company,r.city,r.country,r.phone,r.email].join(' ').toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date)||b.num-a.num);
+}
+function reqListHTML(sel){
+ const L=filteredReqs();
+ return L.length?L.map(r=>`<li><a href="#/admin/demandes/${r.id}"${r.id===sel?' class="sel" aria-current="true"':''}><span class="t">${esc(r.name)}</span>${stBadge(r.status)}<span class="s">${esc(r.ref)} · ${TYPES[r.type]}${r.company?' · '+esc(r.company):''}</span><span class="s">${fdate(r.date)}</span><span class="s" style="grid-column:1/-1">${esc(r.city?r.city+', ':'')}${esc(r.country)} · ${r.items.length} article(s)</span></a></li>`).join(''):`<li class="empty">${ico('inbox')}<p>Aucune demande pour ces filtres.</p></li>`;
+}
+function aReqs(sel){
+ const cnt=s=>s==='all'?S.requests.length:S.requests.filter(r=>r.status===s).length;
+ const r=S.requests.find(x=>x.id===sel);
+ return `<div class="adm-top"><div><h1 style="font-size:30px">Demandes</h1><p class="muted">Devis, renseignements et conversations WhatsApp reçus depuis le site.</p></div></div>
+ <div class="req-layout${r?' has-detail':''}">
+  <section class="card rl-list" aria-label="Liste des demandes">
+   <div class="rl-tools">
+    <div class="row"><div class="searchbox"><label class="sr" for="ad-q">Rechercher une demande</label>${ico('search')}<input type="search" id="ad-q" data-in="ad-q" placeholder="Nom, référence, ville…" value="${esc(adF.q)}"></div>
+    <div><label class="sr" for="ad-type">Canal</label><select id="ad-type" data-ch="ad-type"><option value="all">Tous canaux</option>${Object.entries(TYPES).map(([k,v])=>`<option value="${k}"${adF.type===k?' selected':''}>${v}</option>`).join('')}</select></div></div>
+    <div class="chips" role="group" aria-label="Filtrer par statut">${['all',...Object.keys(STATUS)].map(s=>`<button class="chip" type="button" data-act="adst" data-id="${s}" aria-pressed="${adF.st===s}">${s==='all'?'Toutes':STATUS[s]} <span>${cnt(s)}</span></button>`).join('')}</div>
+   </div>
+   <ul class="rlist" id="ad-list">${reqListHTML(sel)}</ul>
+  </section>
+  <section class="card rl-detail" aria-label="Détail de la demande">${r?reqDetail(r):`<div class="empty">${ico('inbox')}<p>Sélectionnez une demande pour la traiter.</p></div>`}</section>
+ </div>`;
+}
+function reqDetail(r){
+ const items=r.items.map(i=>({...i,p:prod(i.pid)}));
+ const tot=items.reduce((a,i)=>a+((i.p&&i.p.price)||0)*i.qty,0);
+ return `<div class="det">
+  <a class="btn sm ghost" href="#/admin/demandes" style="justify-self:start">${ico('back')}Retour à la liste</a>
+  <div class="det-h"><div style="min-width:0"><p class="small muted">${TYPES[r.type]} · reçue le ${fdate(r.date)}</p><h2>${esc(r.ref)}</h2></div>
+   <div class="field" style="min-width:180px"><label for="rs">Statut</label><select id="rs" data-ch="rstatus" data-id="${r.id}">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}"${r.status===k?' selected':''}>${v}</option>`).join('')}</select></div></div>
+  <div class="kv"><div><span>Client</span><b>${esc(r.name)}</b></div><div><span>Structure</span><b>${esc(r.company||'—')}</b></div><div><span>Localisation</span><b>${esc((r.city?r.city+', ':'')+r.country)}</b></div><div><span>Téléphone</span>${/\d/.test(r.phone)?`<a href="tel:${esc(r.phone.replace(/\s/g,''))}">${esc(r.phone)}</a>`:`<b>${esc(r.phone)}</b>`}</div><div><span>Email</span><b>${esc(r.email||'—')}</b></div><div><span>Livraison</span><b>${esc(r.delivery||'—')}</b></div></div>
+  ${r.message?`<div><p class="flabel">Message du client</p><p class="note" style="margin-top:6px;font-size:14.5px;color:var(--ink)">${esc(r.message)}</p></div>`:''}
+  <div><p class="flabel" style="margin-bottom:8px">Équipements demandés</p>
+  ${items.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th scope="col">Produit</th><th scope="col" class="r">Qté</th><th scope="col" class="r">Prix unitaire</th><th scope="col" class="r">Total</th></tr></thead><tbody>${items.map(i=>`<tr><td>${i.p?`<b>${esc(i.p.name)}</b><br><span class="small muted">${esc(i.p.ref)}</span>`:'<span class="muted">Produit supprimé</span>'}</td><td class="r">${i.qty}</td><td class="r">${i.p?money(i.p.price):'—'}</td><td class="r">${i.p&&i.p.price!=null?money(i.p.price*i.qty):'Sur devis'}</td></tr>`).join('')}<tr><td colspan="3" class="r"><b>Total indicatif HT</b></td><td class="r"><b>${money(tot)}</b></td></tr></tbody></table></div>`:'<p class="muted">Demande sans produit (projet à qualifier).</p>'}</div>
+  <div class="actions"><button class="btn primary" type="button" data-act="sendq" data-id="${r.id}"${r.email?'':' disabled title="Pas d\'email client"'}>${ico('mail')}Envoyer le devis par email</button><button class="btn wa" type="button" data-act="wareply" data-id="${r.id}">${ico('wa')}Répondre sur WhatsApp</button><button class="btn" type="button" data-act="print" data-id="${r.id}">${ico('print')}Devis PDF / imprimer</button></div>
+  <div><p class="flabel" style="margin-bottom:8px">Suivi interne</p>
+   <ul class="timeline">${r.notes.length?r.notes.map(n=>`<li><small>${fdate(n.d)}</small>${esc(n.t)}</li>`).join(''):'<li class="muted">Aucune note pour le moment.</li>'}</ul>
+   <form id="f-note" data-id="${r.id}" style="margin-top:10px;display:grid;gap:8px" novalidate><label class="flabel" for="note-t">Ajouter une note</label><textarea id="note-t" style="min-height:70px" placeholder="ex. Rappelé le client, attend la cotation transport." aria-describedby="note-t-e"></textarea><span class="err" id="note-t-e"></span><button class="btn sm" type="submit" style="justify-self:start">${ico('plus')}Ajouter la note</button></form></div>
+ </div>`;
+}
+function aProducts(){
+ return `<div class="adm-top"><div><h1 style="font-size:30px">Catalogue produits</h1><p class="muted">Les modifications sont visibles immédiatement sur le site public.</p></div><button class="btn primary" type="button" data-act="pnew">${ico('plus')}Ajouter un produit</button></div>
+ <div class="card" style="padding:12px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:10px">
+  <div class="searchbox"><label class="sr" for="pr-q">Rechercher un produit</label>${ico('search')}<input type="search" id="pr-q" data-in="pr-q" placeholder="Nom ou référence…" value="${esc(prF.q)}"></div>
+  <div style="min-width:min(100%,220px)"><label class="sr" for="pr-dom">Domaine</label><select id="pr-dom" data-ch="pr-dom"><option value="all">Tous les domaines</option>${DOMAINS.map(d=>`<option value="${d.id}"${prF.dom===d.id?' selected':''}>${d.name}</option>`).join('')}</select></div>
+ </div>
+ <div class="tbl-wrap card"><table class="tbl"><thead><tr><th scope="col">Référence</th><th scope="col">Produit</th><th scope="col">Domaine</th><th scope="col" class="r">Prix HT</th><th scope="col">Disponibilité</th><th scope="col">Publié</th><th scope="col">Accueil</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody id="pr-body"></tbody></table></div>`;
+}
+function renderPrBody(){
+ const b=document.getElementById('pr-body');if(!b)return;
+ const q=prF.q.trim().toLowerCase();
+ const L=S.products.filter(p=>(prF.dom==='all'||p.domain===prF.dom)&&(!q||(p.name+' '+p.ref).toLowerCase().includes(q)));
+ b.innerHTML=L.length?L.map(p=>`<tr><td class="small" style="font-weight:600">${esc(p.ref)}</td><td style="min-width:180px"><a href="#/produit/${p.id}" style="color:inherit;font-weight:600">${esc(p.name)}</a></td><td>${esc(dom(p.domain).short)}</td><td class="r" style="min-width:110px">${p.price==null?'Sur devis':money(p.price)}</td><td>${stockBadge(p)}</td>
+ <td><button class="switch" type="button" role="switch" aria-checked="${p.visible}" data-act="pvis" data-id="${p.id}" aria-label="Publier ${esc(p.name)}"></button></td>
+ <td><button class="icon-btn star" type="button" aria-pressed="${p.featured}" data-act="pfeat" data-id="${p.id}" aria-label="Mettre en avant ${esc(p.name)} sur l'accueil">${ico('star')}</button></td>
+ <td><div style="display:flex;gap:2px"><button class="icon-btn" type="button" data-act="pedit" data-id="${p.id}" aria-label="Modifier ${esc(p.name)}">${ico('edit')}</button><button class="icon-btn" type="button" data-act="pdel" data-id="${p.id}" aria-label="Supprimer ${esc(p.name)}">${ico('trash')}</button></div></td></tr>`).join(''):`<tr><td colspan="8" class="muted" style="text-align:center;padding:24px">Aucun produit.</td></tr>`;
+}
+function aSettings(){
+ const s=S.settings;
+ return `<div class="adm-top"><div><h1 style="font-size:30px">Réglages & SEO</h1><p class="muted">Coordonnées affichées sur le site, bouton WhatsApp et référencement.</p></div></div>
+ <form id="f-set" novalidate><div class="set-grid">
+  <section class="card panel"><h2>Coordonnées & WhatsApp</h2><div class="grid2">
+   ${fld('s-phone','Téléphone standard','tel',{req:1,val:s.phone})}
+   ${fld('s-wa','Numéro WhatsApp','tel',{req:1,val:s.wa,hint:'Format international, utilisé pour le lien wa.me.'})}
+   ${fld('s-email','Email de réception des demandes','email',{req:1,val:s.email,full:1})}
+   ${fld('s-address','Adresse','text',{val:s.address,full:1})}
+   ${fld('s-hours','Horaires','text',{val:s.hours,full:1})}
+   ${fld('s-waMsg','Message WhatsApp pré-rempli','textarea',{val:s.waMsg,full:1})}
+  </div></section>
+  <section class="card panel"><h2>Référencement (page d'accueil)</h2>
+   <div style="display:grid;gap:14px">
+    <div class="field"><label for="s-seoTitle">Balise titre</label><input type="text" id="s-seoTitle" data-in="seo" value="${esc(s.seoTitle)}" aria-describedby="seo-tc"><span class="cnt" id="seo-tc"></span></div>
+    <div class="field"><label for="s-seoDesc">Meta description</label><textarea id="s-seoDesc" data-in="seo" aria-describedby="seo-dc">${esc(s.seoDesc)}</textarea><span class="cnt" id="seo-dc"></span></div>
+    <div><p class="flabel" style="margin-bottom:6px">Aperçu dans les résultats de recherche</p><div class="serp" aria-live="polite"><div class="u">niayes-agro.exemple.sn</div><div class="t" id="serp-t"></div><div class="d" id="serp-d"></div></div></div>
+    <ul class="road" aria-label="Socle technique SEO"><li>${ico('check')}URL lisibles par produit et par domaine, sitemap.xml généré</li><li>${ico('check')}Données structurées Product et LocalBusiness</li><li>${ico('check')}Images compressées, chargement différé, score mobile optimisé</li></ul>
+   </div></section>
+  <section class="card panel"><h2>Évolutions prévues</h2><p class="muted small" style="margin-bottom:10px">L'architecture (API + back-office) prépare les étapes suivantes :</p>
+   <ul class="road"><li>${ico('globe')}Version anglaise du site pour les clients internationaux</li><li>${ico('doc')}Espace client : suivi des devis, factures, garanties</li><li>${ico('box')}Gestion des stocks et des pièces détachées</li><li>${ico('phone')}Application mobile pour les techniciens SAV</li></ul></section>
+ </div>
+ <div class="actions" style="margin-top:16px"><button class="btn primary" type="submit">${ico('check')}Enregistrer les réglages</button></div></form>`;
+}
+function updSeo(){
+ const t=document.getElementById('s-seoTitle'),d=document.getElementById('s-seoDesc');if(!t)return;
+ const tc=document.getElementById('seo-tc'),dc=document.getElementById('seo-dc');
+ tc.textContent=t.value.length+' / 60 caractères recommandés';tc.classList.toggle('over',t.value.length>60);
+ dc.textContent=d.value.length+' / 160 caractères recommandés';dc.classList.toggle('over',d.value.length>160);
+ document.getElementById('serp-t').textContent=(t.value||'Titre de la page')+' | Niayes Agro';
+ document.getElementById('serp-d').textContent=d.value.length>160?d.value.slice(0,157)+'…':d.value;
+}
+
+/* ================= ROUTER ================= */
+let lastRoute='';
+function render(){
+ const parts=location.hash.replace(/^#\/?/,'').split('/');
+ const isAdm=parts[0]==='admin';
+ document.getElementById('sw-site').setAttribute('aria-current',String(!isAdm));
+ document.getElementById('sw-adm').setAttribute('aria-current',String(isAdm));
+ const route=location.hash;
+ if(isAdm){
+  if(!logged){app.innerHTML=aLogin();}
+  else{
+   const sec=parts[1]||'';
+   let body=sec==='demandes'?aReqs(parts[2]):sec==='produits'?aProducts():sec==='reglages'?aSettings():aDash();
+   app.innerHTML=admShell(sec,body);
+   renderPrBody();updSeo();
+  }
+ }else{
+  const r=parts[0]||'';
+  if(r==='catalogue'){catF.dom=parts[1]&&DOMAINS.some(d=>d.id===parts[1])?parts[1]:(route!==lastRoute?'all':catF.dom);}
+  const body=r===''?pHome():r==='domaines'?pDomains():r==='catalogue'?pCatalog():r==='produit'?pProduct(parts[1]):r==='devis'?(parts[1]==='ok'?pDone(parts[2]):pQuote()):r==='contact'?pContact():`<div class="done"><h1>Page introuvable</h1><a class="btn primary" href="#/">Accueil</a></div>`;
+  app.innerHTML=siteHeader(r)+`<main id="main">${body}</main>`+siteFooter();
+  renderCatList();
+ }
+ if(route!==lastRoute){
+  const keepScroll=isAdm&&parts[1]==='demandes'&&lastRoute.startsWith('#/admin/demandes')&&innerWidth>1100;
+  if(!keepScroll)window.scrollTo(0,0);
+ }
+ lastRoute=route;
+}
+window.addEventListener('hashchange',render);
+
+/* ================= DIALOGS ================= */
+function openDlg(title,body,foot){
+ dlg.innerHTML=`<div class="dlg-h"><h2 id="dlg-title">${title}</h2><button class="icon-btn" type="button" data-act="close" aria-label="Fermer">${ico('x')}</button></div><div class="dlg-b">${body}</div>${foot?`<div class="dlg-f">${foot}</div>`:''}`;
+ if(!dlg.open)dlg.showModal();
+ const f=dlg.querySelector('.dlg-b input,.dlg-b textarea,.dlg-b select');if(f)f.focus();
+}
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close();});
+let waCtx=null;
+function openWa(pid,did){
+ const p=pid&&prod(pid);const s=S.settings;
+ let msg=s.waMsg;
+ if(p)msg+=`\nProduit : ${p.name} (réf. ${p.ref})`;
+ if(did)msg+=`\nDomaine : ${dom(did).name}`;
+ waCtx={pid};
+ openDlg('Discuter sur WhatsApp',`<p class="muted">Un conseiller répond du lundi au samedi. Votre message s'ouvrira dans WhatsApp vers le <b>${esc(s.wa)}</b>.</p>
+  <form id="f-wa" novalidate style="display:grid;gap:14px">
+   ${fld('w-name','Votre nom','text',{req:1,ac:'name'})}
+   ${fld('w-country','Pays','select',{opts:COUNTRIES,val:'Sénégal'})}
+   ${fld('w-msg','Message','textarea',{val:msg})}
+   <p class="hint wrap" id="w-link"></p>
+   <div class="actions"><button class="btn wa" type="submit">${ico('wa')}Ouvrir WhatsApp</button><button class="btn" type="button" data-act="close">Annuler</button></div>
+  </form>`);
+ const upd=()=>{const m=document.getElementById('w-msg');document.getElementById('w-link').textContent='Lien généré : https://wa.me/'+s.wa.replace(/\D/g,'')+'?text='+encodeURIComponent(m.value).slice(0,80)+'…';};
+ upd();document.getElementById('w-msg').addEventListener('input',upd);
+}
+function prodForm(p){
+ const n=!p;p=p||{ref:'',name:'',domain:'agri',price:null,stock:'stock',desc:'',specs:[],visible:true,featured:false};
+ openDlg(n?'Nouveau produit':'Modifier le produit',`<form id="f-prod" data-id="${p.id||''}" novalidate style="display:grid;gap:14px"><div class="grid2">
+  ${fld('pf-name','Nom du produit','text',{req:1,val:p.name,full:1})}
+  ${fld('pf-ref','Référence','text',{req:1,val:p.ref,ph:'ex. AVI-CV1056'})}
+  <div class="field"><label for="pf-dom">Domaine</label><select id="pf-dom">${DOMAINS.map(d=>`<option value="${d.id}"${p.domain===d.id?' selected':''}>${d.name}</option>`).join('')}</select></div>
+  ${fld('pf-price','Prix HT (FCFA)','number',{val:p.price??'',hint:'Laisser vide pour « Prix sur devis ».'})}
+  <div class="field"><label for="pf-stock">Disponibilité</label><select id="pf-stock"><option value="stock"${p.stock==='stock'?' selected':''}>En stock à Dakar</option><option value="commande"${p.stock==='commande'?' selected':''}>Sur commande</option><option value="service"${p.stock==='service'?' selected':''}>Prestation</option></select></div>
+  ${fld('pf-desc','Description','textarea',{val:p.desc,full:1,req:1})}
+  ${fld('pf-specs','Caractéristiques techniques','textarea',{val:p.specs.map(s=>s[0]+' : '+s[1]).join('\n'),full:1,hint:'Une ligne par caractéristique, au format « Libellé : valeur ».'})}
+ </div>
+ <label class="check"><input type="checkbox" id="pf-vis"${p.visible?' checked':''}> Publié sur le site</label>
+ <label class="check" style="padding-top:0"><input type="checkbox" id="pf-feat"${p.featured?' checked':''}> Mis en avant sur la page d'accueil</label>
+ <div class="actions"><button class="btn primary" type="submit">${ico('check')}${n?'Créer le produit':'Enregistrer'}</button><button class="btn" type="button" data-act="close">Annuler</button></div></form>`);
+}
+
+/* ================= VALIDATION ================= */
+function setErr(id,msg){
+ const el=document.getElementById(id),e=document.getElementById(id+'-e');
+ if(el)el.setAttribute('aria-invalid',msg?'true':'false');
+ if(e)e.textContent=msg||'';
+ return !msg;
+}
+const val=id=>(document.getElementById(id)||{}).value?.trim()||'';
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function validContact(px){
+ const errs=[];
+ const chk=(id,m)=>{if(!setErr(id,m))errs.push(id);};
+ chk(px+'name',val(px+'name').length<2?'Indiquez votre nom.':'');
+ chk(px+'phone',val(px+'phone').replace(/\D/g,'').length<8?'Numéro invalide (8 chiffres minimum, avec indicatif).':'');
+ const em=val(px+'email');chk(px+'email',em&&!EMAIL.test(em)?'Adresse email invalide.':'');
+ return errs;
+}
+function focusFirst(errs){if(errs.length){const el=document.getElementById(errs[0]);el&&el.focus();}}
+function newReq(o){
+ const num=Math.max(130,...S.requests.map(r=>r.num))+1;
+ const r={id:'r'+Date.now(),ref:'DV-2026-0'+num,num,date:iso(TODAY),status:'nouvelle',notes:[],company:'',city:'',email:'',delivery:'',...o};
+ S.requests.push(r);save();return r;
+}
+function printQuote(r){
+ const s=S.settings;
+ const items=r.items.map(i=>({...i,p:prod(i.pid)})).filter(i=>i.p);
+ const tot=items.reduce((a,i)=>a+(i.p.price||0)*i.qty,0);
+ document.getElementById('print').innerHTML=`<div class="ph"><div><h1>Niayes Agro</h1><div>${esc(s.address)}<br>${esc(s.phone)} · ${esc(s.email)}</div></div><div style="text-align:right"><b>DEVIS ${esc(r.ref)}</b><br>Date : ${fdate(iso(TODAY))}<br>Validité : 30 jours</div></div>
+ <p><b>Client :</b> ${esc(r.name)}${r.company?' — '+esc(r.company):''}<br>${esc((r.city?r.city+', ':'')+r.country)} · ${esc(r.phone)} ${r.email?'· '+esc(r.email):''}</p>
+ <table><thead><tr><th>Réf.</th><th>Désignation</th><th class="r">Qté</th><th class="r">P.U. HT</th><th class="r">Total HT</th></tr></thead><tbody>${items.map(i=>`<tr><td>${esc(i.p.ref)}</td><td>${esc(i.p.name)}</td><td class="r">${i.qty}</td><td class="r">${money(i.p.price)}</td><td class="r">${i.p.price==null?'Sur devis':money(i.p.price*i.qty)}</td></tr>`).join('')}<tr><td colspan="4" class="r"><b>Total HT</b></td><td class="r"><b>${money(tot)}</b></td></tr></tbody></table>
+ <p>Conditions : livraison ${esc(r.delivery||'à définir')}, garantie 12 mois, mise en service incluse au Sénégal. Acompte de 40 % à la commande.</p><p style="margin-top:30px;font-size:10pt;color:#555">Document de démonstration — données fictives.</p>`;
+ window.print();
+}
+
+/* ================= EVENTS ================= */
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const a=b.dataset.act,id=b.dataset.id;
+ if(a==='reset'){try{localStorage.removeItem(KEY);}catch(x){}S=seed();logged=false;Object.assign(catF,{q:'',dom:'all',stock:'all',sort:'pert'});Object.assign(adF,{q:'',st:'all',type:'all'});Object.assign(prF,{q:'',dom:'all'});if(dlg.open)dlg.close();lastRoute='';if(location.hash&&location.hash!=='#/')location.hash='#/';else render();toast('Démo réinitialisée.');}
+ else if(a==='menu'){const h=document.getElementById('sh');const o=h.classList.toggle('open');b.setAttribute('aria-expanded',String(o));}
+ else if(a==='add'){
+  const q=b.dataset.qty?Math.max(1,Math.min(999,parseInt(val('pqty'))||1)):1;
+  const c=S.cart.find(x=>x.pid===id);if(c)c.qty+=q;else S.cart.push({pid:id,qty:q});save();
+  document.querySelectorAll('.cart-n').forEach(n=>{if(n.closest('.site-h'))n.textContent=cartCount();});
+  toast(`${prod(id).name} ajouté à votre demande de devis (${cartCount()} article${cartCount()>1?'s':''}).`);
+ }
+ else if(a==='q-'||a==='q+'){const i=document.getElementById('pqty');i.value=Math.max(1,Math.min(999,(parseInt(i.value)||1)+(a==='q+'?1:-1)));}
+ else if(a==='rm'){S.cart=S.cart.filter(c=>c.pid!==id);save();render();toast('Équipement retiré de la demande.');}
+ else if(a==='catdom'){catF.dom=id;const h=id==='all'?'#/catalogue':'#/catalogue/'+id;history.replaceState(null,'',h);lastRoute=h;document.querySelectorAll('.dom-list button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.id===id)));renderCatList();}
+ else if(a==='catclear'){Object.assign(catF,{q:'',dom:'all',stock:'all'});history.replaceState(null,'','#/catalogue');lastRoute='#/catalogue';render();}
+ else if(a==='wa'){openWa(id,b.dataset.dom);}
+ else if(a==='close'){dlg.close();}
+ else if(a==='logout'){logged=false;location.hash='#/';toast('Vous êtes déconnecté.');}
+ else if(a==='adst'){adF.st=id;document.querySelectorAll('[data-act="adst"]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.id===id)));document.getElementById('ad-list').innerHTML=reqListHTML(location.hash.split('/')[3]);}
+ else if(a==='sendq'){const r=S.requests.find(x=>x.id===id);r.status='envoye';r.notes.push({d:iso(TODAY),t:`Devis ${r.ref} envoyé par email à ${r.email} (PDF joint).`});save();render();toast(`Devis envoyé à ${r.email} (simulation).`);}
+ else if(a==='wareply'){const r=S.requests.find(x=>x.id===id);if(r.status==='nouvelle')r.status='encours';r.notes.push({d:iso(TODAY),t:'Réponse envoyée sur WhatsApp.'});save();render();toast(`Conversation WhatsApp ouverte avec ${r.phone} (simulation).`);}
+ else if(a==='print'){printQuote(S.requests.find(x=>x.id===id));}
+ else if(a==='pnew'){prodForm(null);}
+ else if(a==='pedit'){prodForm(prod(id));}
+ else if(a==='pvis'){const p=prod(id);p.visible=!p.visible;save();b.setAttribute('aria-checked',String(p.visible));toast(p.visible?`« ${p.name} » est publié sur le site.`:`« ${p.name} » est masqué du site.`);}
+ else if(a==='pfeat'){const p=prod(id);p.featured=!p.featured;save();b.setAttribute('aria-pressed',String(p.featured));toast(p.featured?'Produit mis en avant sur l\'accueil.':'Produit retiré de l\'accueil.');}
+ else if(a==='pdel'){const p=prod(id);openDlg('Supprimer le produit',`<p>Supprimer définitivement <b>${esc(p.name)}</b> (${esc(p.ref)}) du catalogue ? Les demandes existantes conservent leur historique.</p>`,`<button class="btn" type="button" data-act="close">Annuler</button><button class="btn danger" type="button" data-act="pdelok" data-id="${id}">${ico('trash')}Supprimer</button>`);}
+ else if(a==='pdelok'){const p=prod(id);S.products=S.products.filter(x=>x.id!==id);S.cart=S.cart.filter(c=>c.pid!==id);save();dlg.close();renderPrBody();toast(`« ${p.name} » supprimé.`);}
+});
+document.addEventListener('input',e=>{
+ const k=e.target.dataset.in;if(!k)return;
+ if(k==='cat-q'){catF.q=e.target.value;renderCatList();}
+ else if(k==='ad-q'){adF.q=e.target.value;document.getElementById('ad-list').innerHTML=reqListHTML(location.hash.split('/')[3]);}
+ else if(k==='pr-q'){prF.q=e.target.value;renderPrBody();}
+ else if(k==='seo')updSeo();
+});
+document.addEventListener('change',e=>{
+ const t=e.target,k=t.dataset.ch;if(!k)return;
+ if(k==='cur'){S.currency=t.value;save();render();document.getElementById('cur').focus();}
+ else if(k==='cat-stock'){catF.stock=t.value;renderCatList();}
+ else if(k==='cat-sort'){catF.sort=t.value;renderCatList();}
+ else if(k==='cq'){const c=S.cart.find(x=>x.pid===t.dataset.id);c.qty=Math.max(1,Math.min(999,parseInt(t.value)||1));save();render();const f=document.getElementById(t.id);f&&f.focus();}
+ else if(k==='ad-type'){adF.type=t.value;document.getElementById('ad-list').innerHTML=reqListHTML(location.hash.split('/')[3]);}
+ else if(k==='pr-dom'){prF.dom=t.value;renderPrBody();}
+ else if(k==='rstatus'){const r=S.requests.find(x=>x.id===t.dataset.id);r.status=t.value;r.notes.push({d:iso(TODAY),t:'Statut passé à « '+STATUS[t.value]+' ».'});save();render();document.getElementById('rs').focus();toast(`${r.ref} : statut « ${STATUS[t.value]} ».`);}
+});
+document.addEventListener('submit',e=>{
+ const f=e.target;e.preventDefault();
+ if(f.id==='f-finder'){catF.q=val('fq');const d=val('fd');const h=d==='all'?'#/catalogue':'#/catalogue/'+d;lastRoute=h;location.hash=h;render();}
+ else if(f.id==='f-quote'){
+  const errs=validContact('q-');
+  if(!S.cart.length&&val('q-msg').length<10){setErr('q-msg','Sélectionnez un équipement ou décrivez votre projet (10 caractères min.).');errs.push('q-msg');}else setErr('q-msg','');
+  if(!document.getElementById('q-ok').checked){setErr('q-ok','Merci de cocher cette case.');errs.push('q-ok');}else setErr('q-ok','');
+  if(errs.length){focusFirst(errs);toast('Merci de corriger les champs signalés.');return;}
+  const r=newReq({type:'devis',name:val('q-name'),company:val('q-company'),country:val('q-country'),city:val('q-city'),phone:val('q-phone'),email:val('q-email'),delivery:val('q-delivery'),message:[val('q-msg'),'Échéance : '+val('q-when')].filter(Boolean).join('\n'),items:S.cart.map(c=>({...c}))});
+  S.cart=[];save();location.hash='#/devis/ok/'+r.id;
+  setTimeout(()=>toast(r.email?`Accusé de réception envoyé à ${r.email} (simulation).`:'Accusé de réception envoyé par SMS (simulation).'),300);
+ }
+ else if(f.id==='f-contact'){
+  const errs=validContact('c-');
+  if(val('c-msg').length<10){setErr('c-msg','Votre message doit contenir au moins 10 caractères.');errs.push('c-msg');}else setErr('c-msg','');
+  if(errs.length){focusFirst(errs);return;}
+  const r=newReq({type:'info',name:val('c-name'),company:val('c-company'),country:val('c-country'),city:val('c-city'),phone:val('c-phone'),email:val('c-email'),message:val('c-subject')+' — '+val('c-msg'),items:[]});
+  location.hash='#/devis/ok/'+r.id;setTimeout(()=>toast('Message transmis à l\'équipe commerciale (simulation).'),300);
+ }
+ else if(f.id==='f-wa'){
+  if(!setErr('w-name',val('w-name').length<2?'Indiquez votre nom.':'')){focusFirst(['w-name']);return;}
+  const r=newReq({type:'whatsapp',name:val('w-name'),country:val('w-country'),phone:'Numéro WhatsApp du visiteur',message:val('w-msg'),items:waCtx&&waCtx.pid?[{pid:waCtx.pid,qty:1}]:[]});
+  dlg.close();toast(`Ouverture de WhatsApp simulée. Conversation tracée dans le back-office (${r.ref}).`);
+ }
+ else if(f.id==='f-login'){
+  const ok1=setErr('l-mail',EMAIL.test(val('l-mail'))?'':'Email invalide.');
+  const ok2=setErr('l-pw',val('l-pw').length>=4?'':'Mot de passe requis.');
+  if(!ok1||!ok2){focusFirst([!ok1?'l-mail':'l-pw']);return;}
+  logged=true;render();toast('Bienvenue dans le back-office.');
+ }
+ else if(f.id==='f-note'){
+  const t=val('note-t');if(!setErr('note-t',t.length<3?'Saisissez une note.':'')){focusFirst(['note-t']);return;}
+  const r=S.requests.find(x=>x.id===f.dataset.id);r.notes.push({d:iso(TODAY),t});save();render();document.getElementById('note-t').focus();toast('Note ajoutée.');
+ }
+ else if(f.id==='f-prod'){
+  const errs=[];const id=f.dataset.id;
+  const chk=(i,m)=>{if(!setErr(i,m))errs.push(i);};
+  chk('pf-name',val('pf-name').length<3?'Nom requis (3 caractères min.).':'');
+  const ref=val('pf-ref').toUpperCase();
+  chk('pf-ref',!ref?'Référence requise.':S.products.some(p=>p.ref===ref&&p.id!==id)?'Cette référence existe déjà.':'');
+  const pr=val('pf-price');chk('pf-price',pr&&(isNaN(+pr)||+pr<0)?'Prix invalide.':'');
+  chk('pf-desc',val('pf-desc').length<10?'Description requise (10 caractères min.).':'');
+  if(errs.length){focusFirst(errs);return;}
+  const specs=val('pf-specs').split('\n').map(l=>l.split(/\s*:\s*/)).filter(x=>x[0]&&x.length>1).map(([k,...v])=>[k.trim(),v.join(' : ').trim()]);
+  const data={name:val('pf-name'),ref,domain:val('pf-dom'),price:pr?Math.round(+pr):null,stock:val('pf-stock'),desc:val('pf-desc'),specs,visible:document.getElementById('pf-vis').checked,featured:document.getElementById('pf-feat').checked};
+  if(id)Object.assign(prod(id),data);else S.products.unshift({id:'p'+Date.now(),...data});
+  save();dlg.close();renderPrBody();toast(id?'Produit mis à jour.':`« ${data.name} » ajouté au catalogue${data.visible?' et publié':''}.`);
+ }
+ else if(f.id==='f-set'){
+  const errs=[];const chk=(i,m)=>{if(!setErr(i,m))errs.push(i);};
+  chk('s-phone',val('s-phone').replace(/\D/g,'').length<8?'Numéro invalide.':'');
+  chk('s-wa',val('s-wa').replace(/\D/g,'').length<8?'Numéro invalide.':'');
+  chk('s-email',EMAIL.test(val('s-email'))?'':'Email invalide.');
+  if(errs.length){focusFirst(errs);return;}
+  Object.assign(S.settings,{phone:val('s-phone'),wa:val('s-wa'),email:val('s-email'),address:val('s-address'),hours:val('s-hours'),waMsg:val('s-waMsg'),seoTitle:val('s-seoTitle'),seoDesc:val('s-seoDesc')});
+  save();toast('Réglages enregistrés : le site public est à jour.');
+ }
+});
+
+render();
+})();
+</script>
 </body>
 </html>
