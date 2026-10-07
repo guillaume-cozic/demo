@@ -2,20 +2,915 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Espace abonnés PDF</title>
+<meta name="description" content="Espace abonnés d'une lettre professionnelle bimensuelle : création de compte par code d'accès, lecture ou téléchargement du nouveau numéro et des 3 derniers mois, message aux non-abonnés, et back-office de dépôt du PDF et du fichier abonnés avec compteur de téléchargements et email du jeudi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F5F2EC;--panel:#FFFFFF;--panel-2:#FAF8F4;--ink:#1D1A17;--muted:#5C5650;--line:#E4DED4;--line-2:#C9C1B4;
+  --accent:#8E1B2F;--accent-ink:#FFFFFF;--accent-soft:#F6E3E5;--accent-text:#7A1627;
+  --ok:#1D6A3F;--ok-soft:#DFF0E5;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A3232E;--bad-soft:#FAE1E2;--info:#24518A;--info-soft:#E2EAF6;--gray:#55504A;--gray-soft:#EEEAE3;
+  --band:#F1E7D6;--shadow:0 1px 2px rgba(30,20,10,.06),0 4px 14px rgba(30,20,10,.06);
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Fraunces",Georgia,"Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141210;--panel:#1C1916;--panel-2:#221F1B;--ink:#ECE7E1;--muted:#ADA59C;--line:#302B26;--line-2:#463F38;
+  --accent:#E8899A;--accent-ink:#2A0910;--accent-soft:#3A1C22;--accent-text:#F2A9B6;
+  --ok:#7BD5A0;--ok-soft:#173022;--warn:#F0B661;--warn-soft:#352613;--bad:#FF959C;--bad-soft:#3B1B1E;--info:#9DC1F0;--info-soft:#172A40;--gray:#C2BAB0;--gray-soft:#2A2622;
+  --band:#2B2319;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1,h2{font-family:var(--serif);font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.muted{color:var(--muted)}.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{overflow-wrap:anywhere}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;letter-spacing:.02em}
+
+.demo-band{background:var(--band);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:10px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-family:var(--serif);font-weight:800;font-size:19px;letter-spacing:-.02em;display:block;line-height:1.1}
+.brand small{display:block;font-size:12px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.seg{display:inline-flex;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.who .me{font-size:13px;color:var(--muted);max-width:260px;overflow-wrap:anywhere}
+.subnav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:6px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line)}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+main{padding:22px clamp(16px,2vw,32px) 60px}
+@media (max-width:640px){.who{margin-left:0;width:100%}.seg{width:100%}.seg button{flex:1;justify-content:center;padding:0 8px}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.link{border:0;background:none;padding:0 4px;color:var(--accent-text);text-decoration:underline;text-underline-offset:3px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:20px;min-width:0}
+.card h2{font-size:20px;margin-bottom:4px}
+.card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head h1{font-size:clamp(24px,3vw,32px)}
+.grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.grid>*{min-width:0}
+@media (min-width:900px){.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g-side{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+@media (min-width:1400px){.g-side{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.kpi .l{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.kpi .v{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1.15;margin-top:4px}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;margin-bottom:14px}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:500}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;padding:9px 12px;width:100%;min-width:0}
+textarea{min-height:120px;resize:vertical;line-height:1.45}
+input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+input[type=file]{min-height:44px;width:100%;padding:8px;border:1px dashed var(--line-2);border-radius:10px;background:var(--panel-2)}
+.radio-row{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;min-height:44px}
+.choice input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.choice b{display:block;font-size:14px}
+.choice span{font-size:13px;color:var(--muted)}
+.row2{display:grid;gap:0 14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:560px){.row2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}.p-bad{background:var(--bad-soft);color:var(--bad)}.p-warn{background:var(--warn-soft);color:var(--warn)}.p-info{background:var(--info-soft);color:var(--info)}.p-gray{background:var(--gray-soft);color:var(--gray)}.p-acc{background:var(--accent-soft);color:var(--accent-text)}
+.opt{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--info);background:var(--info-soft);border-radius:6px;padding:1px 7px;vertical-align:middle}
+
+.alert{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:14px 16px;margin-bottom:18px;border:1px solid}
+.alert.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.alert.bad svg{color:var(--bad)}
+.alert.info{background:var(--info-soft);border-color:transparent}
+.alert.info svg{color:var(--info)}
+.alert b{display:block}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end}
+.toolbar .field{margin:0;flex:1 1 220px}
+.toolbar .field.sm{flex:0 1 220px}
+
+/* Couvertures */
+.cover{container-type:inline-size;aspect-ratio:210/297;background:#FBF8F1;color:#1A1714;border:1px solid #DDD5C7;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.12),0 10px 24px rgba(0,0,0,.08);display:flex;flex-direction:column;padding:6cqw;gap:3cqw;overflow:hidden;font-family:var(--serif);width:100%}
+.cv-mast{font-weight:800;font-size:12cqw;line-height:.92;letter-spacing:-.03em;border-bottom:1cqw solid var(--c);padding-bottom:2.5cqw}
+.cv-meta{font:600 3.5cqw/1.2 var(--sans);display:flex;justify-content:space-between;gap:2cqw;text-transform:uppercase;letter-spacing:.05em;color:#4A433C}
+.cv-img{flex:1;min-height:0;background:var(--c);border-radius:1cqw;overflow:hidden}
+.cv-img svg{width:100%;height:100%;display:block}
+.cv-head{font-weight:700;font-size:6.6cqw;line-height:1.08}
+.cv-list{font:500 3.3cqw/1.3 var(--sans);list-style:none;margin:0;padding:2cqw 0 0;border-top:.4cqw solid #1A1714;display:grid;grid-template-columns:1fr 1fr;gap:.6cqw 3cqw;color:#3A342E}
+.cv-wrap{position:relative}
+.cv-lock{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:rgba(20,16,12,.78);color:#fff;display:grid;place-items:center}
+.cv-lock svg{width:16px;height:16px}
+
+/* Bibliothèque abonné */
+.lib{display:grid;gap:28px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.lib{grid-template-columns:minmax(0,520px) minmax(0,1fr);align-items:start}}
+.feat{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:560px){.feat{grid-template-columns:minmax(0,230px) minmax(0,1fr)}}
+.feat .kicker{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text)}
+.feat h2{font-size:clamp(22px,2.6vw,28px);margin:6px 0 10px}
+.feat dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0 0 16px;font-size:14px}
+.feat dt{color:var(--muted)}.feat dd{margin:0;font-weight:500}
+.feat ul.som{margin:0 0 18px;padding:0;list-style:none;border-top:1px solid var(--line)}
+.feat ul.som li{padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.feat .cv-box{max-width:230px;width:100%}
+.issues{display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:700px){.issues{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1500px){.issues{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.iss{display:flex;flex-direction:column;gap:8px;min-width:0}
+.iss .t{font-weight:700;font-size:14px}
+.iss .d{font-size:13px;color:var(--muted)}
+.iss .btn{font-size:14px;padding:0 10px;margin-top:auto}
+.sec-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sec-title h2{font-size:22px}
+.hero{display:flex;gap:16px 24px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:22px}
+.hero h1{font-size:clamp(22px,2.8vw,30px)}
+.hero p{color:var(--muted);margin-top:4px;max-width:70ch}
+
+.auth{display:grid;gap:20px;grid-template-columns:minmax(0,1fr);max-width:980px;margin:0 auto}
+@media (min-width:860px){.auth{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}}
+.auth h1{font-size:28px;margin-bottom:6px}
+.help{background:var(--panel-2);border:1px dashed var(--line-2);border-radius:14px;padding:18px}
+.help h3{font-size:14px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.help ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.help li{font-size:13.5px}
+.help .btn{min-height:44px;font-size:13.5px;margin-top:4px}
+
+/* Barres */
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:64px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:13.5px}
+.bar .track{height:14px;background:var(--gray-soft);border-radius:7px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:7px}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.feed li:last-child{border-bottom:0}
+.feed time{color:var(--muted);font-size:12.5px;display:block}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--accent);margin-top:7px;flex:none}
+.check{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.check li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.check li svg{margin-top:2px}
+.ok-ic{color:var(--ok)}.warn-ic{color:var(--warn)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:10px;margin:12px 0}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat b{font-family:var(--serif);font-size:22px;display:block}
+.stat span{font-size:12.5px;color:var(--muted)}
+.stat.good b{color:var(--ok)}.stat.bad b{color:var(--bad)}.stat.warn b{color:var(--warn)}
+.diff{font-size:13px;margin:0;padding-left:18px;color:var(--muted)}
+
+/* Email */
+.mail{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel-2)}
+.mail-h{padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;display:grid;gap:2px}
+.mail-b{background:#FBF8F1;color:#1A1714;padding:22px;font-size:14px}
+.mail-b .mm{font-family:var(--serif);font-weight:800;font-size:22px;border-bottom:3px solid #8E1B2F;padding-bottom:6px;margin-bottom:14px}
+.mail-b .mg{display:grid;grid-template-columns:90px minmax(0,1fr);gap:14px;margin:14px 0}
+.mail-b .cta{display:inline-block;background:#8E1B2F;color:#fff;padding:10px 18px;border-radius:8px;font-weight:600;margin-top:12px}
+.mail-b .ft{font-size:12px;color:#5C5650;margin-top:18px;border-top:1px solid #DDD5C7;padding-top:10px}
+.switch{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-weight:600}
+.switch input{width:22px;height:22px;accent-color:var(--accent)}
+
+/* Dialogues */
+dialog{border:0;padding:0;border-radius:16px;background:var(--panel);color:var(--ink);width:min(520px,calc(100vw - 24px));box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(20,15,10,.55)}
+.dlg{padding:22px}
+.dlg h2{font-size:21px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.dlg .actions{margin-top:18px;justify-content:flex-end}
+#viewer{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;background:#2A2622;color:#F2EEE8}
+.vw{display:flex;flex-direction:column;height:100%}
+.vw-bar{display:flex;align-items:center;gap:8px 12px;padding:8px 14px;background:#1C1916;flex-wrap:wrap}
+.vw-bar .t{font-weight:600;flex:1 1 180px;min-width:0;overflow-wrap:anywhere}
+.vw-bar .btn{background:#2F2A25;border-color:#4A433C;color:#F2EEE8}
+.vw-bar .btn:hover{background:#3A342E}
+.vw-bar .pg{font-variant-numeric:tabular-nums;min-width:64px;text-align:center}
+.vw-bar select{width:auto;background:#2F2A25;border-color:#4A433C;color:#F2EEE8}
+.vw-body{flex:1;overflow:auto;padding:18px;display:flex;justify-content:center;align-items:flex-start}
+.vw-page{width:calc(min(100%, (100dvh - 150px) * .707) * var(--z,1));flex:none}
+.vw-page.z{width:calc(min(100vw - 36px, (100dvh - 150px) * .707) * var(--z,1))}
+.paper{container-type:inline-size;aspect-ratio:210/297;background:#FBF8F1;color:#1A1714;padding:7cqw;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.4);user-select:none;-webkit-user-select:none}
+.paper .rh{display:flex;justify-content:space-between;font:600 2.3cqw var(--sans);text-transform:uppercase;letter-spacing:.06em;color:#5C5650;border-bottom:.3cqw solid #1A1714;padding-bottom:1.4cqw;margin-bottom:4cqw}
+.paper .rub{font:700 2.6cqw var(--sans);text-transform:uppercase;letter-spacing:.08em;color:#8E1B2F}
+.paper h3{font-family:var(--serif);font-size:6cqw;line-height:1.08;margin:1.5cqw 0 2.5cqw}
+.paper .chap{font-size:3cqw;font-weight:600;line-height:1.35;margin-bottom:3cqw}
+.paper .txt{columns:2;column-gap:4cqw;font-size:2.55cqw;line-height:1.5;text-align:justify;hyphens:auto}
+.paper .txt p{margin:0 0 1.8cqw}
+.paper .box{break-inside:avoid;background:#F1E9DB;padding:2.5cqw;margin:0 0 2cqw;font-size:2.4cqw}
+.paper .box b{font-family:var(--serif);font-size:3cqw;display:block;margin-bottom:1cqw}
+.paper .cover{border:0;box-shadow:none;padding:0;aspect-ratio:auto;height:100%;background:transparent}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:100;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:10px;align-items:flex-start}
+.toast svg{margin-top:1px}
+
+@media print{
+  .demo-band,.top,.subnav,#toasts{display:none!important}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note">
+  <span><b>Démonstration</b> — données fictives</span>
+  <button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button>
+</div>
+<header class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>
+    <span><b>Le Courrier des Planches</b><small id="brandSub">Espace abonnés</small></span>
+  </div>
+  <div class="seg" role="group" aria-label="Choisir la vue">
+    <button type="button" data-act="view" data-v="abonne" aria-pressed="true"><svg class="i" viewBox="0 0 24 24"><path d="M2 6s3-2 10-2 10 2 10 2v14s-3-2-10-2-10 2-10 2z"/><path d="M12 4v14"/></svg>Site abonné</button>
+    <button type="button" data-act="view" data-v="editeur" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Back-office</button>
+  </div>
+  <div class="who" id="who"></div>
+</header>
+<nav class="subnav" id="subnav" aria-label="Back-office" hidden></nav>
+<main id="main" tabindex="-1"></main>
+<div id="toasts" aria-live="polite"></div>
+
+<dialog id="dlg" aria-labelledby="dlgT"><div class="dlg" id="dlgBody"></div></dialog>
+<dialog id="viewer" aria-label="Visionneuse"><div class="vw">
+  <div class="vw-bar">
+    <span class="t" id="vwT"></span>
+    <button type="button" class="btn" data-act="vw-prev" aria-label="Page précédente"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <span class="pg" id="vwP" aria-live="polite"></span>
+    <button type="button" class="btn" data-act="vw-next" aria-label="Page suivante"><svg class="i" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    <label class="sr" for="vwZ">Zoom</label>
+    <select id="vwZ"><option value="1">100 %</option><option value="1.4">140 %</option><option value="1.8">180 %</option></select>
+    <button type="button" class="btn" data-act="vw-close"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Fermer</button>
+  </div>
+  <div class="vw-body" id="vwBody"></div>
+</div></dialog>
+
+<script>
+(function(){
+'use strict';
+const KEY='cdp-demo-v1';
+const COLORS=['#8E1B2F','#1F4E5F','#6B4A12','#2E4A2A','#4A2D5A','#7A3512','#23395B','#5E2430','#3C4A1E'];
+const HEADS={
+ 586:'Création : les résidences d’artistes changent de modèle',
+ 585:'Rentrée des scènes : billetteries en hausse, budgets sous tension',
+ 584:'Intermittence : ce que change la réforme des annexes',
+ 583:'Festivals d’été : un bilan de fréquentation contrasté',
+ 582:'Scènes conventionnées : cinq nominations à la direction',
+ 581:'Arts de la rue : les communes réduisent la voilure',
+ 580:'Festival off : les compagnies face à la hausse des coûts',
+ 579:'Musiques actuelles : les salles labellisées se regroupent',
+ 578:'Cirque : un plan de soutien à la création itinérante',
+ 577:'Emploi culturel : les chiffres du premier semestre',
+ 576:'Tournées : le coût du transport pèse sur la diffusion'
+};
+const RUB=['Nominations','Appels à projets','Festivals','Collectivités','Emploi & formation','Agenda pro','Numérique','Droit social'];
+const rubs=n=>[0,1,2,3].map(i=>RUB[(n*3+i*2)%RUB.length]);
+const P=[['claire','morel','scene-exemple.fr'],['lea','garnier','theatre-exemple.fr'],['hugo','lambert','exemple.fr'],['ines','faure','cie-exemple.org'],['mathieu','roussel','exemple.fr'],['sophie','brunet','festival-exemple.fr'],['antoine','perrin','exemple.org'],['camille','fontaine','scene-exemple.fr'],['julien','chevalier','exemple.fr'],['manon','robin','prod-exemple.fr'],['thomas','gauthier','exemple.fr'],['elise','mercier','theatre-exemple.fr'],['karim','benali','exemple.fr'],['louise','girard','cie-exemple.org'],['olivier','boyer','exemple.fr'],['nadia','lemaire','mairie-exemple.fr'],['pierre','dumas','exemple.fr'],['sarah','renaud','festival-exemple.fr'],['vincent','arnaud','exemple.org'],['amandine','picard','exemple.fr'],['yann','leclerc','scene-exemple.fr'],['marion','colin','exemple.fr'],['baptiste','marchand','prod-exemple.fr'],['chloe','vasseur','exemple.fr'],['fabrice','hamon','theatre-exemple.fr'],['agathe','collet','exemple.fr'],['romain','jacquet','exemple.org'],['emma','barbier','cie-exemple.org'],['samuel','huet','exemple.fr'],['lucie','poirier','exemple.fr'],['gaelle','tessier','mairie-exemple.fr'],['david','marty','exemple.fr'],['helene','carre','scene-exemple.fr'],['axel','renard','exemple.fr'],['jeanne','aubert','exemple.fr'],['nathan','millet','prod-exemple.fr']];
+
+const I={
+ lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ dl:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+ book:'<path d="M2 6s3-2 10-2 10 2 10 2v14s-3-2-10-2-10 2-10 2z"/><path d="M12 4v14"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
+ up:'<path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 3h14"/>',
+ users:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+ chart:'<path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/>',
+ file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
+ alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+ info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+ eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ key:'<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M14 9l2 2"/>',
+ send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+ clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pD=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fD=s=>pD(s).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const fDw=d=>(typeof d==='string'?pD(d):d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const fS=ts=>new Date(ts).toLocaleDateString('fr-FR');
+const fT=ts=>{const d=new Date(ts);return d.toLocaleDateString('fr-FR')+' à '+pad(d.getHours())+':'+pad(d.getMinutes())};
+const eve=s=>{const d=pD(s);d.setDate(d.getDate()-1);return d};
+
+/* ---------- Données ---------- */
+function seed(){
+  let s=7;const r=()=>(s=s*16807%2147483647)/2147483647;
+  const AL='abcdefghjkmnpqrstuvwxyz23456789';const used=new Set(['k7p2xq','w9bd5k','h4tq8m','r3m8tw','q8vn3d','t2hx7c','b5ke9r']);
+  const gen=()=>{let c;do{c='';for(let i=0;i<6;i++)c+=AL[Math.floor(r()*AL.length)]}while(used.has(c));used.add(c);return c};
+  const file=P.map((p,i)=>({email:`${p[0]}.${p[1]}@${p[2]}`,code:i===0?'k7p2xq':i===1?'w9bd5k':gen()}));
+  file.push({email:'accueil@cie-exemple.org',code:'h4tq8m'});
+  const base=Date.parse('2026-09-24T18:00:00');
+  const accounts=file.slice(0,24).map((f,i)=>{const created=base-(i*5+3)*864e5;return {email:f.email,code:f.code,pwd:'scene2026',created,last:Math.max(created+36e5,base+Math.floor(r()*11)*864e5+Math.floor(r()*10)*36e5)}});
+  accounts.push({email:'paul.vidal@exemple.fr',code:'r3m8tw',pwd:'scene2026',created:Date.parse('2025-11-12T10:00:00'),last:Date.parse('2026-07-02T09:12:00')});
+  const issues=[];
+  for(let k=0;k<9;k++){const n=584-k;const d=new Date(2026,8,25-14*k);issues.push({n,date:iso(d),head:HEADS[n],online:true,dl:0,views:0,pages:8,size:(2.1+r()*1.4).toFixed(1)})}
+  const dl=[];
+  issues.forEach((is,k)=>{const on=eve(is.date).getTime()+18*36e5;accounts.forEach((a,j)=>{if(j===24&&k<5)return;if(j<2||r()<.78){const ts=on+Math.floor(r()*(k===0?11:13)*864e5);if(ts<Date.now()){dl.push({n:is.n,email:a.email,ts,kind:'pdf'});is.dl++}}})});
+  return {
+    issues,file,accounts,dl,fileDate:base-6*36e5,
+    mode:'pdf',
+    mail:{on:true,hour:'20:00',subject:'Le n° {num} du Courrier des Planches est en ligne',intro:'Bonjour,\nLe nouveau numéro est disponible dès ce soir dans votre espace abonné, la veille de sa parution papier.'},
+    mailLog:[{ts:Date.parse('2026-09-24T20:00:00'),n:584,count:37},{ts:Date.parse('2026-09-10T20:00:00'),n:583,count:36},{ts:Date.parse('2026-08-27T20:00:00'),n:582,count:36},{ts:Date.parse('2026-08-13T20:00:00'),n:581,count:35}],
+    log:[
+      {ts:Date.parse('2026-09-24T20:00:00'),t:'Email du jeudi envoyé à 37 abonnés (n° 584)'},
+      {ts:Date.parse('2026-09-24T18:00:00'),t:'N° 584 mis en ligne : le n° 577 sort des 3 derniers mois'},
+      {ts:Date.parse('2026-09-24T12:04:00'),t:'Fichier des abonnés remplacé : 37 lignes, 2 nouveaux, 1 retiré'},
+      {ts:Date.parse('2026-09-23T16:41:00'),t:'PDF du n° 584 déposé (programmé la veille de parution)'},
+      {ts:Date.parse('2026-09-10T20:00:00'),t:'Email du jeudi envoyé à 36 abonnés (n° 583)'}
+    ]
+  };
+}
+let S;
+function load(){try{const t=localStorage.getItem(KEY);if(t){S=JSON.parse(t);return}}catch(e){}S=seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+let session=null; // identification demandée à chaque visite : rien n'est conservé
+let view='abonne',screen='home',tab='dash',pending=null,notice='';
+let abQ='',abF='all';
+
+const online=()=>S.issues.filter(i=>i.online).sort((a,b)=>b.n-a.n);
+const fileCodes=()=>new Set(S.file.map(f=>f.code));
+const acc=()=>S.accounts.find(a=>a.email===session);
+const isActive=a=>!!a&&fileCodes().has(a.code);
+function issueStatus(is){
+  if(!is.online)return ['Programmé','p-warn'];
+  const i=online().indexOf(is);
+  return i===0?['À la une','p-acc']:i<=6?['3 derniers mois','p-ok']:['Archivé','p-gray'];
+}
+const latest=()=>[...S.issues].sort((a,b)=>b.n-a.n)[0];
+const colorOf=n=>COLORS[n%COLORS.length];
+
+/* ---------- Couverture ---------- */
+function stage(n){
+  const v=n%3;
+  return `<svg viewBox="0 0 200 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path d="M0 0h200v140H0z" fill="rgba(0,0,0,.18)"/>
+    <path d="M${60+v*20} 0 L${20+v*30} 140 L${150+v*10} 140 Z" fill="rgba(255,255,255,.14)"/>
+    <ellipse cx="${100+v*12}" cy="128" rx="70" ry="10" fill="rgba(255,255,255,.18)"/>
+    <path d="M0 0h46c-6 40-4 90 6 140H0z" fill="rgba(0,0,0,.28)"/>
+    <path d="M200 0h-46c6 40 4 90-6 140h52z" fill="rgba(0,0,0,.28)"/>
+    <path d="M0 0h200v14c-30 8-70 10-100 4S30 10 0 16z" fill="rgba(0,0,0,.32)"/>
+    <circle cx="${92+v*14}" cy="${86-v*4}" r="7" fill="rgba(255,255,255,.75)"/>
+    <path d="M${84+v*14} ${96-v*4}h16l4 30h-24z" fill="rgba(255,255,255,.7)"/>
+  </svg>`;
+}
+function cover(is){
+  return `<div class="cover" style="--c:${colorOf(is.n)}" role="img" aria-label="Couverture du n° ${is.n}">
+    <div class="cv-mast">Le Courrier<br>des Planches</div>
+    <div class="cv-meta"><span>N° ${is.n}</span><span>${pD(is.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</span></div>
+    <div class="cv-img">${stage(is.n)}</div>
+    <div class="cv-head">${esc(is.head)}</div>
+    <ul class="cv-list">${rubs(is.n).map(r=>`<li>${esc(r)}</li>`).join('')}</ul>
+  </div>`;
+}
+
+/* ---------- Rendu ---------- */
+function render(){
+  document.querySelectorAll('[data-act="view"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===view)));
+  document.getElementById('brandSub').textContent=view==='abonne'?'Espace abonnés':'Back-office de la rédaction';
+  const who=document.getElementById('who'),nav=document.getElementById('subnav'),m=document.getElementById('main');
+  if(view==='abonne'){
+    nav.hidden=true;
+    if(session){
+      who.innerHTML=`<span class="me">${esc(session)}</span>
+        <button type="button" class="btn" data-act="go" data-s="account" ${screen==='account'?'aria-current="page"':''}>${ic('user')}Mon compte</button>
+        <button type="button" class="btn ghost" data-act="logout">${ic('out')}Déconnexion</button>`;
+    }else{
+      who.innerHTML=`<button type="button" class="btn" data-act="go" data-s="login">${ic('key')}Se connecter</button>
+        <button type="button" class="btn primary" data-act="go" data-s="signup">Créer mon compte</button>`;
+    }
+    m.innerHTML=({home,login,signup,forgot,account}[screen]||home)();
+  }else{
+    nav.hidden=false;
+    const T=[['dash','Tableau de bord','chart'],['depot','Dépôt bimensuel','up'],['numeros','Numéros','book'],['abonnes','Abonnés','users'],['emails','Email du jeudi','mail']];
+    nav.innerHTML=T.map(t=>`<button type="button" class="tab" data-act="tab" data-t="${t[0]}" ${tab===t[0]?'aria-current="page"':''}>${ic(t[2])}${t[1]}</button>`).join('');
+    who.innerHTML=`<span class="me">${ic('user')} Rédaction · administrateur</span>`;
+    m.innerHTML=({dash,depot,numeros,abonnes,emails}[tab])();
+    if(tab==='depot')updPreview();
+    if(tab==='emails')updMail();
+    if(tab==='abonnes')drawAb();
+  }
+}
+
+/* ---------- Côté abonné ---------- */
+function btnFor(is,big){
+  const a=acc();
+  if(!session)return `<button type="button" class="btn ${big?'primary':''}" data-act="open" data-n="${is.n}">${ic('lock')}${big?'Se connecter pour lire':'Se connecter'}</button>`;
+  if(!isActive(a))return `<button type="button" class="btn" data-act="open" data-n="${is.n}">${ic('lock')}Accès réservé</button>`;
+  return S.mode==='pdf'
+    ?`<button type="button" class="btn ${big?'primary':''}" data-act="open" data-n="${is.n}">${ic('dl')}${big?'Télécharger le PDF':'PDF'} <span class="small" style="font-weight:500">(${is.size} Mo)</span></button>`
+    :`<button type="button" class="btn ${big?'primary':''}" data-act="open" data-n="${is.n}">${ic('eye')}Lire en ligne</button>`;
+}
+function home(){
+  const iss=online(),cur=iss[0],rest=iss.slice(1,7),a=acc(),locked=!session||!isActive(a);
+  let top='';
+  if(session&&!isActive(a)){
+    top=`<div class="alert bad" role="alert">${ic('alert')}<div><b>Désolé, vous n’êtes pas abonné.e ou vous n’êtes plus abonné.e</b><span class="small">Votre code d’accès <span class="mono">${esc(a.code)}</span> ne figure pas dans le fichier des abonnés en cours. Pour vous réabonner, contactez le service abonnements : abonnements@courrier-planches.example</span></div></div>`;
+  }else if(!session){
+    top=`<section class="hero"><div><h1>Votre lettre en PDF, dès la veille de sa parution</h1><p>Le nouveau numéro et ceux des 3 derniers mois sont réservés aux abonnés. Identifiez-vous, ou créez votre compte avec le code d’accès reçu par email.</p></div>
+      <div class="actions"><button type="button" class="btn primary" data-act="go" data-s="login">${ic('key')}Se connecter</button><button type="button" class="btn" data-act="go" data-s="signup">J’ai un code d’accès</button></div></section>`;
+  }else{
+    top=`<div class="alert info" role="status">${ic('info')}<div><b>Bonjour, vous êtes identifié.e.</b><span class="small">${S.mode==='pdf'?'Cliquez sur un numéro pour télécharger son PDF.':'Cliquez sur un numéro pour l’ouvrir dans la visionneuse (lecture en ligne, sans téléchargement).'}</span></div></div>`;
+  }
+  return `${top}
+  <div class="lib">
+    <section class="card" aria-labelledby="featT">
+      <div class="feat">
+        <div class="cv-box cv-wrap">${cover(cur)}${locked?`<span class="cv-lock" aria-hidden="true">${ic('lock')}</span>`:''}</div>
+        <div style="min-width:0">
+          <span class="kicker">Nouveau numéro</span>
+          <h2 id="featT">N° ${cur.n} — ${esc(cur.head)}</h2>
+          <dl><dt>Parution papier</dt><dd>${fDw(cur.date)}</dd><dt>En ligne depuis</dt><dd>${fDw(eve(cur.date))}, 18 h</dd><dt>Format</dt><dd>${S.mode==='pdf'?`PDF · ${cur.pages*2} pages`:'Visionneuse en ligne'}</dd></dl>
+          <ul class="som" aria-label="Au sommaire">${rubs(cur.n).map(r=>`<li>${esc(r)}</li>`).join('')}</ul>
+          ${btnFor(cur,true)}
+        </div>
+      </div>
+    </section>
+    <section aria-labelledby="lastT">
+      <div class="sec-title"><h2 id="lastT">Les 3 derniers mois</h2><span class="muted small">${rest.length} numéros précédents</span></div>
+      <div class="issues">${rest.map(is=>`<article class="iss">
+        <div class="cv-wrap">${cover(is)}${locked?`<span class="cv-lock" aria-hidden="true">${ic('lock')}</span>`:''}</div>
+        <span class="t">N° ${is.n}</span><span class="d">Parution du ${fD(is.date)}</span>
+        ${btnFor(is,false)}
+      </article>`).join('')}</div>
+    </section>
+  </div>`;
+}
+function helpBox(kind){
+  return `<aside class="help" aria-labelledby="helpT"><h3 id="helpT">${ic('info')}Pour tester</h3><ul>
+    ${kind==='login'?`
+    <li><b>Abonnée active</b><br><span class="mono">claire.morel@scene-exemple.fr</span> · <span class="mono">scene2026</span><br><button type="button" class="btn" data-act="fill" data-e="claire.morel@scene-exemple.fr">Remplir</button></li>
+    <li><b>Ancien abonné</b> (code retiré du fichier)<br><span class="mono">paul.vidal@exemple.fr</span> · <span class="mono">scene2026</span><br><button type="button" class="btn" data-act="fill" data-e="paul.vidal@exemple.fr">Remplir</button></li>`:`
+    <li><b>Code libre</b> présent dans le fichier : <span class="mono">h4tq8m</span><br><button type="button" class="btn" data-act="fillcode" data-c="h4tq8m">Utiliser ce code</button></li>
+    <li><b>Code déjà utilisé</b> : <span class="mono">k7p2xq</span></li>
+    <li><b>Code inconnu</b> : n’importe quel autre, ex. <span class="mono">zz99aa</span></li>`}
+  </ul></aside>`;
+}
+function login(){
+  return `<div class="auth"><section class="card">
+    <h1>Connexion</h1><p class="muted" style="margin-bottom:16px">Identifiez-vous pour lire ou télécharger les numéros. Par sécurité, l’identification est demandée à chaque visite.</p>
+    ${notice?`<div class="alert info" role="status">${ic('lock')}<div>${esc(notice)}</div></div>`:''}
+    <form data-form="login" novalidate>
+      <div class="field"><label for="lE">Adresse email</label><input id="lE" name="email" type="email" autocomplete="username" aria-describedby="lEe"><span class="err" id="lEe" data-err="email"></span></div>
+      <div class="field"><label for="lP">Mot de passe</label><input id="lP" name="pwd" type="password" autocomplete="current-password" aria-describedby="lPe"><span class="err" id="lPe" data-err="pwd"></span></div>
+      <button class="btn primary block" type="submit">${ic('key')}Se connecter</button>
+    </form>
+    <div class="actions" style="margin-top:14px;justify-content:space-between"><button type="button" class="btn link" data-act="go" data-s="forgot">Mot de passe oublié ?</button><button type="button" class="btn link" data-act="go" data-s="signup">Première visite : créer mon compte</button></div>
+  </section>${helpBox('login')}</div>`;
+}
+function signup(){
+  return `<div class="auth"><section class="card">
+    <h1>Créer mon compte</h1><p class="muted" style="margin-bottom:16px">Saisissez le code d’accès à 6 caractères reçu avec votre abonnement, puis choisissez vos identifiants.</p>
+    <form data-form="signup" novalidate>
+      <div class="field"><label for="sC">Code d’accès</label><input id="sC" name="code" type="text" maxlength="6" autocomplete="off" autocapitalize="none" spellcheck="false" class="mono" placeholder="ex. a1b2c3" aria-describedby="sCh sCe"><span class="hint" id="sCh">6 lettres ou chiffres, sans espace.</span><span class="err" id="sCe" data-err="code"></span></div>
+      <div class="field"><label for="sE">Adresse email</label><input id="sE" name="email" type="email" autocomplete="email" aria-describedby="sEe"><span class="err" id="sEe" data-err="email"></span></div>
+      <div class="row2">
+        <div class="field"><label for="sP">Mot de passe</label><input id="sP" name="pwd" type="password" autocomplete="new-password" aria-describedby="sPh sPe"><span class="hint" id="sPh">8 caractères minimum.</span><span class="err" id="sPe" data-err="pwd"></span></div>
+        <div class="field"><label for="sP2">Confirmation</label><input id="sP2" name="pwd2" type="password" autocomplete="new-password" aria-describedby="sP2e"><span class="err" id="sP2e" data-err="pwd2"></span></div>
+      </div>
+      <button class="btn primary block" type="submit">Créer mon compte</button>
+    </form>
+    <div class="actions" style="margin-top:14px"><button type="button" class="btn link" data-act="go" data-s="login">J’ai déjà un compte</button></div>
+  </section>${helpBox('signup')}</div>`;
+}
+function forgot(){
+  return `<div class="auth"><section class="card">
+    <h1>Mot de passe oublié</h1><p class="muted" style="margin-bottom:16px">Indiquez l’adresse de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
+    <form data-form="forgot" novalidate>
+      <div class="field"><label for="fE">Adresse email</label><input id="fE" name="email" type="email" autocomplete="email" aria-describedby="fEe"><span class="err" id="fEe" data-err="email"></span></div>
+      <button class="btn primary block" type="submit">${ic('send')}Recevoir le lien</button>
+    </form>
+    <div class="actions" style="margin-top:14px"><button type="button" class="btn link" data-act="go" data-s="login">Retour à la connexion</button></div>
+  </section></div>`;
+}
+function account(){
+  const a=acc();if(!a){screen='login';return login()}
+  const mine=S.dl.filter(d=>d.email===a.email).sort((x,y)=>y.ts-x.ts).slice(0,10);
+  return `<div class="page-head"><div><h1>Mon compte</h1><p class="muted">Vos informations d’abonné et vos derniers téléchargements.</p></div><button type="button" class="btn" data-act="go" data-s="home">${ic('home')}Retour aux numéros</button></div>
+  <div class="grid g2">
+    <section class="card"><h2>Abonnement</h2>
+      <dl class="feat" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;margin:12px 0 0">
+        <dt class="muted">Email</dt><dd class="wrap" style="margin:0">${esc(a.email)}</dd>
+        <dt class="muted">Code d’accès</dt><dd style="margin:0" class="mono">${esc(a.code)}</dd>
+        <dt class="muted">Statut</dt><dd style="margin:0">${isActive(a)?'<span class="pill p-ok">Abonné.e actif</span>':'<span class="pill p-bad">Plus abonné.e</span>'}</dd>
+        <dt class="muted">Compte créé le</dt><dd style="margin:0">${fS(a.created)}</dd>
+      </dl>
+    </section>
+    <section class="card"><h2>Mes derniers téléchargements</h2>
+      ${mine.length?`<ul class="feed">${mine.map(d=>`<li><span class="dot" aria-hidden="true"></span><div>N° ${d.n} ${d.kind==='viewer'?'(lu en ligne)':'(PDF)'}<time>${fT(d.ts)}</time></div></li>`).join('')}</ul>`:'<p class="muted">Aucun téléchargement pour l’instant.</p>'}
+    </section>
+  </div>`;
+}
+
+/* ---------- PDF fictif ---------- */
+function ascii(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’‘]/g,"'").replace(/[«»“”]/g,'"').replace(/[—–]/g,'-').replace(/[^\x20-\x7E]/g,'').replace(/([()\\])/g,'\\$1')}
+function makePdf(is){
+  const L=[['F2',26,'Le Courrier des Planches'],['F1',12,'Numero '+is.n+' - parution du '+fD(is.date)],['F1',12,''],['F2',18,is.head],['F1',12,''],['F1',11,'Au sommaire : '+rubs(is.n).join(' / ')],['F1',11,''],['F1',11,'Document fictif genere par la demonstration.'],['F1',11,'Dans le service final, ce fichier est le PDF depose par la redaction,'],['F1',11,'servi uniquement aux abonnes identifies et dont le code est actif.']];
+  let c='BT 56 780 Td 22 TL\n';
+  L.forEach(l=>{c+=`/${l[0]} ${l[1]} Tf (${ascii(l[2])}) Tj T*\n`});
+  c+='ET\n0.56 0.11 0.18 RG 3 w 56 750 m 539 750 l S\n';
+  const objs=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold >>',`<< /Length ${c.length} >>\nstream\n${c}endstream`];
+  let out='%PDF-1.4\n';const off=[];
+  objs.forEach((o,i)=>{off.push(out.length);out+=`${i+1} 0 obj\n${o}\nendobj\n`});
+  const x=out.length;
+  out+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`+off.map(o=>String(o).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF`;
+  return new Blob([out],{type:'application/pdf'});
+}
+function download(is){
+  try{const u=URL.createObjectURL(makePdf(is));const a=document.createElement('a');a.href=u;a.download=`courrier-des-planches-${is.n}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}catch(e){}
+}
+
+/* ---------- Visionneuse ---------- */
+const PARAS=['Les responsables de lieux interrogés décrivent une saison sous contrainte : des charges fixes en hausse, des subventions stables en valeur et une billetterie qui repart, mais de manière inégale selon les territoires.','Dans les petites communes, la programmation se resserre sur des formes légères, plus faciles à accueillir. Les compagnies adaptent leurs fiches techniques et proposent des versions tout-terrain de leurs créations.','Les fédérations professionnelles réclament une concertation rapide avec l’État et les collectivités, afin de sécuriser les budgets de création pour les deux prochaines années.','Côté emploi, les structures privilégient les contrats courts et la mutualisation des postes administratifs entre plusieurs équipes artistiques.','Plusieurs directeurs évoquent des coopérations régionales pour partager les coûts de tournée et allonger la durée de vie des spectacles.','La question de la transition écologique s’invite dans les cahiers des charges : sobriété des décors, mobilité des publics et circulation des équipes.'];
+const ART=[['Enquête','Une saison sous tension budgétaire'],['Collectivités','Les intercommunalités prennent la main'],['Nominations','Qui dirige quoi cette rentrée'],['Emploi & formation','Les métiers techniques en tension'],['Festivals','La jauge n’est plus le seul indicateur'],['Appels à projets','Les dispositifs ouverts ce mois-ci'],['Agenda pro','Rencontres, salons et assemblées']];
+let vw={n:0,p:0};
+function pageHTML(is,p){
+  if(p===0)return `<div class="paper">${cover(is)}</div>`;
+  const a=ART[(p-1+is.n)%ART.length];
+  const ps=[0,1,2,3,4,5].map(i=>PARAS[(i+p+is.n)%PARAS.length]);
+  return `<div class="paper"><div class="rh"><span>Le Courrier des Planches · N° ${is.n}</span><span>Page ${p+1}</span></div>
+    <span class="rub">${esc(a[0])}</span><h3>${esc(a[1])}</h3><p class="chap">${esc(ps[0])}</p>
+    <div class="txt"><p>${esc(ps[1])}</p><p>${esc(ps[2])}</p><div class="box"><b>Repères</b>${esc(ps[3])}</div><p>${esc(ps[4])}</p><p>${esc(ps[5])}</p><p>${esc(ps[1])}</p></div></div>`;
+}
+function openViewer(is){
+  vw={n:is.n,p:0};drawViewer();
+  const d=document.getElementById('viewer');if(!d.open)d.showModal();
+}
+function drawViewer(){
+  const is=S.issues.find(i=>i.n===vw.n);
+  document.getElementById('vwT').textContent=`N° ${is.n} — ${is.head}`;
+  document.getElementById('vwP').textContent=`${vw.p+1} / ${is.pages}`;
+  const z=document.getElementById('vwZ').value;
+  document.getElementById('vwBody').innerHTML=`<div class="vw-page ${z!=='1'?'z':''}" style="--z:${z}" oncontextmenu="return false">${pageHTML(is,vw.p)}</div>`;
+  document.querySelector('[data-act="vw-prev"]').disabled=vw.p===0;
+  document.querySelector('[data-act="vw-next"]').disabled=vw.p>=is.pages-1;
+}
+document.getElementById('vwZ').addEventListener('change',drawViewer);
+document.getElementById('viewer').addEventListener('keydown',e=>{
+  const is=S.issues.find(i=>i.n===vw.n);if(!is)return;
+  if(e.key==='ArrowRight'&&vw.p<is.pages-1){vw.p++;drawViewer()}
+  if(e.key==='ArrowLeft'&&vw.p>0){vw.p--;drawViewer()}
+});
+
+function openIssue(n){
+  const is=S.issues.find(i=>i.n===n);
+  if(!session){pending=n;notice=`Identifiez-vous pour accéder au n° ${n}.`;screen='login';render();focusMain();return}
+  const a=acc();
+  if(!isActive(a)){
+    dialog(`<h2 id="dlgT">${ic('lock')}Accès réservé</h2><p><b>Désolé, vous n’êtes pas abonné.e ou vous n’êtes plus abonné.e</b></p><p class="muted small" style="margin-top:8px">L’accès aux numéros est vérifié à chaque fois à partir du dernier fichier des abonnés déposé par la rédaction.</p><div class="actions"><button type="button" class="btn primary" data-act="close">J’ai compris</button></div>`);
+    return;
+  }
+  S.dl.push({n,email:a.email,ts:Date.now(),kind:S.mode==='pdf'?'pdf':'viewer'});
+  if(S.mode==='pdf'){is.dl++;save();download(is);toast(`Téléchargement du n° ${n} lancé (PDF fictif de démonstration).`)}
+  else{is.views++;save();openViewer(is)}
+}
+
+/* ---------- Back-office ---------- */
+function dash(){
+  const iss=online(),cur=iss[0],vis=iss.slice(0,7),max=Math.max(1,...vis.map(i=>i.dl+i.views));
+  const nAcc=S.accounts.filter(a=>fileCodes().has(a.code)).length;
+  const nx=latest(),nextThu=nextThursday();
+  const sched=S.issues.find(i=>!i.online);
+  return `<div class="page-head"><div><h1>Tableau de bord</h1><p class="muted">Suivi du numéro en ligne, des abonnés et des téléchargements.</p></div>
+    <div class="actions"><button type="button" class="btn primary" data-act="tab" data-t="depot">${ic('up')}Faire le dépôt de la quinzaine</button></div></div>
+  <div class="kpis">
+    <div class="kpi"><span class="l">${ic('book')}Numéro à la une</span><span class="v">N° ${cur.n}</span><span class="s">Parution du ${fD(cur.date)}</span></div>
+    <div class="kpi"><span class="l">${ic('users')}Abonnés dans le fichier</span><span class="v">${S.file.length}</span><span class="s">Fichier du ${fS(S.fileDate)}</span></div>
+    <div class="kpi"><span class="l">${ic('user')}Comptes créés</span><span class="v">${nAcc}</span><span class="s">${Math.round(nAcc/Math.max(1,S.file.length)*100)} % des abonnés actifs</span></div>
+    <div class="kpi"><span class="l">${ic('dl')}Téléchargements n° ${cur.n} <span class="opt">Option 2</span></span><span class="v">${cur.dl+cur.views}</span><span class="s">${cur.dl} PDF · ${cur.views} lectures en ligne</span></div>
+  </div>
+  <div class="grid g-side">
+    <section class="card"><div class="card-head"><div><h2>Téléchargements par numéro <span class="opt">Option 2</span></h2><p class="muted small">Numéro à la une et 3 derniers mois. Le compteur s’incrémente à chaque téléchargement ou lecture par un abonné.</p></div></div>
+      <div class="bars" role="list">${vis.map(i=>`<div class="bar" role="listitem"><span>N° ${i.n}</span><span class="track" aria-hidden="true"><span class="fill" style="display:block;width:${(i.dl+i.views)/max*100}%"></span></span><span class="v">${i.dl+i.views}</span></div>`).join('')}</div>
+    </section>
+    <section class="card"><h2>Prochaine échéance</h2><p class="muted small" style="margin-bottom:12px">Dépôt tous les quinze jours, mise en ligne la veille de parution.</p>
+      <ul class="check">
+        <li>${sched||nx.n>cur.n?ic('check','ok-ic'):ic('clock','warn-ic')}<span>${sched?`PDF du n° ${sched.n} déposé, mise en ligne programmée ${fDw(eve(sched.date))} à 18 h`:`PDF du n° ${cur.n+1} : à déposer (parution ${fDw(nextParution())})`}</span></li>
+        <li>${Date.now()-S.fileDate<7*864e5?ic('check','ok-ic'):ic('clock','warn-ic')}<span>Fichier des abonnés : dernière mise à jour le ${fT(S.fileDate)}</span></li>
+        <li>${S.mail.on?ic('check','ok-ic'):ic('clock','warn-ic')}<span>Email aux abonnés <span class="opt">Option 3</span> : ${S.mail.on?`${fDw(nextThu)} à ${S.mail.hour}`:'désactivé'}</span></li>
+        <li>${ic('check','ok-ic')}<span>Diffusion <span class="opt">Option 1</span> : ${S.mode==='pdf'?'PDF téléchargeable':'visionneuse en ligne, sans téléchargement'}</span></li>
+      </ul>
+    </section>
+    <section class="card" style="grid-column:1/-1"><h2>Activité récente</h2>
+      <ul class="feed">${[...S.log].sort((a,b)=>b.ts-a.ts).slice(0,8).map(l=>`<li><span class="dot" aria-hidden="true"></span><div>${esc(l.t)}<time>${fT(l.ts)}</time></div></li>`).join('')}</ul>
+    </section>
+  </div>`;
+}
+function nextThursday(){const d=new Date();d.setHours(0,0,0,0);while(d.getDay()!==4)d.setDate(d.getDate()+1);return d}
+function nextParution(){const d=pD(latest().date);d.setDate(d.getDate()+14);return d}
+function depot(){
+  const nx=latest().n+1,dt=iso(nextParution());
+  const sched=S.issues.filter(i=>!i.online);
+  return `<div class="page-head"><div><h1>Dépôt bimensuel</h1><p class="muted">Tous les quinze jours : le PDF du nouveau numéro et le fichier des abonnés (email + code d’accès).</p></div></div>
+  <div class="grid g2">
+    <section class="card" aria-labelledby="dpT"><div class="card-head"><div><h2 id="dpT">1. PDF du nouveau numéro</h2><p class="muted small">Il prend la place du numéro à la une, qui rejoint « Les 3 derniers mois ». Le plus ancien des 6 sort de la liste.</p></div></div>
+      ${sched.length?`<div class="alert info" role="status">${ic('clock')}<div><b>N° ${sched.map(s=>s.n).join(', ')} programmé</b><span class="small">Mise en ligne ${fDw(eve(sched[0].date))} à 18 h.</span><div class="actions" style="margin-top:8px"><button type="button" class="btn" data-act="golive" data-n="${sched[0].n}">Mettre en ligne maintenant</button></div></div></div>`:''}
+      <form data-form="pdf" novalidate>
+        <div class="row2">
+          <div class="field"><label for="dN">Numéro</label><input id="dN" name="num" type="number" value="${nx}" aria-describedby="dNe"><span class="err" id="dNe" data-err="num"></span></div>
+          <div class="field"><label for="dD">Date de parution papier</label><input id="dD" name="date" type="date" value="${dt}" aria-describedby="dDe"><span class="err" id="dDe" data-err="date"></span></div>
+        </div>
+        <div class="field"><label for="dH">Titre de une</label><input id="dH" name="head" type="text" value="${esc(HEADS[nx]||'')}" aria-describedby="dHe"><span class="err" id="dHe" data-err="head"></span></div>
+        <div class="field"><label for="dF">Fichier PDF</label><input id="dF" name="pdf" type="file" accept="application/pdf,.pdf" aria-describedby="dFh"><span class="hint" id="dFh">Facultatif dans la démo : sans fichier, un PDF fictif est généré.</span></div>
+        <fieldset class="field" style="border:0;padding:0;margin:0 0 16px"><legend class="flabel" style="margin-bottom:6px">Mise en ligne</legend>
+          <div class="radio-row">
+            <label class="choice"><input type="radio" name="pub" value="veille" checked><span><b>La veille de parution, à 18 h</b><span>Programmée automatiquement</span></span></label>
+            <label class="choice"><input type="radio" name="pub" value="now"><span><b>Immédiatement</b><span>Le numéro passe à la une tout de suite</span></span></label>
+          </div>
+        </fieldset>
+        <button type="submit" class="btn primary">${ic('up')}Déposer le numéro</button>
+      </form>
+    </section>
+    <section class="card" aria-labelledby="dsT"><div class="card-head"><div><h2 id="dsT">2. Fichier des abonnés</h2><p class="muted small">Il remplace le fichier précédent. Un compte dont le code n’y figure plus perd l’accès aux numéros.</p></div></div>
+      <form data-form="subs" novalidate>
+        <div class="field"><label for="sF">Fichier CSV ou TXT</label><input id="sF" type="file" accept=".csv,.txt,text/csv,text/plain" aria-describedby="sFh"><span class="hint" id="sFh">Une ligne par abonné : email;code (séparateur ; , ou tabulation).</span></div>
+        <div class="field"><label for="sT">Contenu du fichier</label><textarea id="sT" name="txt" class="mono" rows="8" spellcheck="false" placeholder="email;code"></textarea></div>
+        <div class="actions" style="margin-bottom:6px"><button type="button" class="btn" data-act="sample">${ic('file')}Charger un fichier d’exemple</button></div>
+        <div id="preview" aria-live="polite"></div>
+        <button type="submit" class="btn primary" id="subsBtn" disabled>${ic('users')}Remplacer le fichier des abonnés</button>
+      </form>
+    </section>
+  </div>`;
+}
+function parseSubs(txt){
+  const valid=[],invalid=[],seen=new Set();
+  txt.split(/\r?\n/).forEach((raw,i)=>{
+    const l=raw.trim();if(!l)return;
+    const parts=l.split(/[;,\t]/).map(s=>s.trim().replace(/^"|"$/g,''));
+    if(i===0&&/e-?mail/i.test(parts[0]))return;
+    const [email,code]=parts;let why='';
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email||''))why='email invalide';
+    else if(!/^[a-z0-9]{6}$/i.test(code||''))why='code invalide (6 caractères attendus)';
+    else if(seen.has(code.toLowerCase()))why='code en double';
+    if(why)invalid.push({line:i+1,raw:l,why});else{seen.add(code.toLowerCase());valid.push({email:email.toLowerCase(),code:code.toLowerCase()})}
+  });
+  return {valid,invalid};
+}
+function updPreview(){
+  const ta=document.getElementById('sT'),pv=document.getElementById('preview'),b=document.getElementById('subsBtn');if(!ta)return;
+  if(!ta.value.trim()){pv.innerHTML='';b.disabled=true;return}
+  const {valid,invalid}=parseSubs(ta.value),old=fileCodes(),nw=new Set(valid.map(v=>v.code));
+  const added=valid.filter(v=>!old.has(v.code)),removed=S.file.filter(f=>!nw.has(f.code));
+  const lostAcc=removed.filter(f=>S.accounts.some(a=>a.code===f.code));
+  pv.innerHTML=`<div class="stats">
+    <div class="stat"><b>${valid.length}</b><span>lignes valides</span></div>
+    <div class="stat good"><b>+${added.length}</b><span>nouveaux</span></div>
+    <div class="stat warn"><b>−${removed.length}</b><span>retirés</span></div>
+    <div class="stat bad"><b>${invalid.length}</b><span>ignorées</span></div></div>
+    ${removed.length?`<p class="small"><b>Perdront l’accès :</b></p><ul class="diff wrap">${removed.slice(0,5).map(f=>`<li>${esc(f.email)} <span class="mono">${esc(f.code)}</span>${S.accounts.some(a=>a.code===f.code)?' — compte existant':''}</li>`).join('')}${removed.length>5?`<li>… et ${removed.length-5} autres</li>`:''}</ul>`:''}
+    ${invalid.length?`<p class="small" style="margin-top:8px"><b>Lignes ignorées :</b></p><ul class="diff wrap">${invalid.slice(0,5).map(v=>`<li>Ligne ${v.line} : ${esc(v.why)} — <span class="mono">${esc(v.raw)}</span></li>`).join('')}</ul>`:''}
+    <p class="small muted" style="margin:10px 0 14px">${lostAcc.length} compte(s) existant(s) passeront en « plus abonné.e ».</p>`;
+  b.disabled=!valid.length;
+}
+function sampleFile(){
+  const keep=S.file.filter(f=>!['w9bd5k'].includes(f.code)&&f.email!=='hugo.lambert@exemple.fr');
+  return ['email;code',...keep.map(f=>`${f.email};${f.code}`),'direction@scene-exemple.fr;q8vn3d','m.leroy@exemple.fr;t2hx7c','programmation@festival-exemple.fr;b5ke9r','contact@theatre-exemple;zz1'].join('\n');
+}
+function numeros(){
+  const all=[...S.issues].sort((a,b)=>b.n-a.n);
+  return `<div class="page-head"><div><h1>Numéros</h1><p class="muted">Le site affiche le numéro à la une et les 6 précédents (« Les 3 derniers mois »). Les plus anciens sont archivés.</p></div>
+    <button type="button" class="btn primary" data-act="tab" data-t="depot">${ic('up')}Déposer un numéro</button></div>
+  <section class="card" style="margin-bottom:16px" aria-labelledby="mdT"><div class="card-head"><div><h2 id="mdT">Mode de diffusion <span class="opt">Option 1</span></h2><p class="muted small">Choisissez comment les abonnés accèdent aux numéros. Testez l’effet dans « Site abonné ».</p></div></div>
+    <form data-form="mode"><fieldset style="border:0;padding:0;margin:0"><legend class="sr">Mode de diffusion</legend><div class="radio-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px">
+      <label class="choice"><input type="radio" name="mode" value="pdf" ${S.mode==='pdf'?'checked':''}><span><b>PDF téléchargeable</b><span>L’abonné télécharge le fichier.</span></span></label>
+      <label class="choice"><input type="radio" name="mode" value="viewer" ${S.mode==='viewer'?'checked':''}><span><b>Visionneuse en ligne</b><span>Lecture page à page, sans téléchargement.</span></span></label>
+    </div></fieldset></form>
+  </section>
+  <div class="tw"><table style="min-width:760px"><caption class="sr">Liste des numéros</caption>
+    <thead><tr><th scope="col">N°</th><th scope="col">Parution</th><th scope="col">Titre de une</th><th scope="col">Statut</th><th scope="col" class="n">PDF téléchargés</th><th scope="col" class="n">Lectures en ligne</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+    <tbody>${all.map(i=>{const [l,c]=issueStatus(i);return `<tr><td><b>${i.n}</b></td><td>${fD(i.date)}</td><td>${esc(i.head)}</td><td><span class="pill ${c}">${l}</span>${!i.online?`<br><span class="small muted">${fDw(eve(i.date))}, 18 h</span>`:''}</td><td class="n">${i.dl}</td><td class="n">${i.views}</td>
+      <td><div class="actions">${!i.online?`<button type="button" class="btn" data-act="golive" data-n="${i.n}">Mettre en ligne</button>`:''}<button type="button" class="btn" data-act="preview" data-n="${i.n}" aria-label="Aperçu du n° ${i.n}">${ic('eye')}Aperçu</button></div></td></tr>`}).join('')}</tbody></table></div>`;
+}
+function subRows(){
+  const codes=fileCodes(),cnt={};S.dl.forEach(d=>{cnt[d.email]=(cnt[d.email]||0)+1});
+  const rows=S.file.map(f=>{const a=S.accounts.find(x=>x.code===f.code);return {email:f.email,acc:a,code:f.code,active:true}});
+  S.accounts.filter(a=>!codes.has(a.code)).forEach(a=>rows.push({email:a.email,acc:a,code:a.code,active:false}));
+  return rows.map(r=>({...r,n:r.acc?cnt[r.acc.email]||0:0}));
+}
+function abonnes(){
+  return `<div class="page-head"><div><h1>Abonnés</h1><p class="muted">Croisement du fichier déposé et des comptes créés sur le site.</p></div>
+    <button type="button" class="btn" data-act="tab" data-t="depot">${ic('up')}Nouveau fichier</button></div>
+  <div class="toolbar">
+    <div class="field"><label for="aQ">Rechercher</label><input id="aQ" type="search" placeholder="Email ou code" value="${esc(abQ)}"></div>
+    <div class="field sm"><label for="aF">Afficher</label><select id="aF">
+      ${[['all','Tous'],['acc','Abonnés avec compte'],['noacc','Abonnés sans compte'],['ex','Plus abonnés']].map(o=>`<option value="${o[0]}" ${abF===o[0]?'selected':''}>${o[1]}</option>`).join('')}
+    </select></div>
+  </div>
+  <p class="small muted" id="aCount" aria-live="polite" style="margin-bottom:8px"></p>
+  <div class="tw"><table style="min-width:720px"><caption class="sr">Liste des abonnés</caption>
+    <thead><tr><th scope="col">Email</th><th scope="col">Code</th><th scope="col">Compte</th><th scope="col">Statut</th><th scope="col" class="n">Téléchargements</th><th scope="col">Dernière connexion</th></tr></thead>
+    <tbody id="aBody"></tbody></table></div>`;
+}
+function drawAb(){
+  const b=document.getElementById('aBody');if(!b)return;
+  const q=abQ.trim().toLowerCase();
+  const rows=subRows().filter(r=>(abF==='all'||(abF==='acc'&&r.active&&r.acc)||(abF==='noacc'&&r.active&&!r.acc)||(abF==='ex'&&!r.active))&&(!q||r.email.includes(q)||r.code.includes(q)||(r.acc&&r.acc.email.includes(q))));
+  document.getElementById('aCount').textContent=`${rows.length} ligne(s)`;
+  b.innerHTML=rows.length?rows.map(r=>`<tr><td class="wrap">${esc(r.email)}${r.acc&&r.acc.email!==r.email?`<br><span class="small muted">compte : ${esc(r.acc.email)}</span>`:''}</td><td class="mono">${esc(r.code)}</td>
+    <td>${r.acc?`Créé le ${fS(r.acc.created)}`:'<span class="muted">Pas encore créé</span>'}</td>
+    <td>${r.active?'<span class="pill p-ok">Abonné</span>':'<span class="pill p-bad">Plus abonné</span>'}</td>
+    <td class="n">${r.n}</td><td>${r.acc?fT(r.acc.last):'—'}</td></tr>`).join(''):`<tr><td colspan="6" class="muted">Aucun résultat.</td></tr>`;
+}
+function emails(){
+  const m=S.mail;
+  return `<div class="page-head"><div><h1>Email du jeudi <span class="opt">Option 3</span></h1><p class="muted">Un email est envoyé le jeudi soir à toutes les adresses du fichier des abonnés pour annoncer le nouveau numéro.</p></div></div>
+  <div class="grid g2">
+    <section class="card" aria-labelledby="emT"><h2 id="emT">Réglages</h2>
+      <form data-form="mail" novalidate style="margin-top:12px">
+        <label class="switch"><input type="checkbox" name="on" ${m.on?'checked':''}>Envoi automatique activé</label>
+        <div class="row2">
+          <div class="field"><label for="mJ">Jour</label><input id="mJ" type="text" value="Jeudi (jour de mise en ligne)" readonly></div>
+          <div class="field"><label for="mH">Heure d’envoi</label><select id="mH" name="hour">${['18:00','19:00','20:00','21:00'].map(h=>`<option ${m.hour===h?'selected':''}>${h}</option>`).join('')}</select></div>
+        </div>
+        <div class="field"><label for="mS">Objet</label><input id="mS" name="subject" type="text" value="${esc(m.subject)}" aria-describedby="mSh mSe"><span class="hint" id="mSh">{num} est remplacé par le numéro.</span><span class="err" id="mSe" data-err="subject"></span></div>
+        <div class="field"><label for="mI">Texte d’introduction</label><textarea id="mI" name="intro" rows="4">${esc(m.intro)}</textarea></div>
+        <div class="actions"><button type="submit" class="btn primary">${ic('check')}Enregistrer</button><button type="button" class="btn" data-act="sendnow">${ic('send')}Simuler l’envoi du jeudi</button></div>
+      </form>
+      <form data-form="test" novalidate style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px">
+        <div class="field"><label for="mT">Envoyer un email de test à</label><input id="mT" name="to" type="email" placeholder="vous@exemple.fr" aria-describedby="mTe"><span class="err" id="mTe" data-err="to"></span></div>
+        <button type="submit" class="btn">${ic('mail')}Envoyer le test</button>
+      </form>
+    </section>
+    <section class="card" aria-labelledby="apT"><h2 id="apT">Aperçu</h2><p class="muted small" style="margin-bottom:12px">Mis à jour pendant la saisie.</p><div id="mailPrev"></div></section>
+    <section class="card" style="grid-column:1/-1" aria-labelledby="hiT"><h2 id="hiT" style="margin-bottom:12px">Historique des envois</h2>
+      <div class="tw"><table><thead><tr><th scope="col">Date</th><th scope="col">Numéro</th><th scope="col" class="n">Destinataires</th><th scope="col">Statut</th></tr></thead>
+      <tbody>${[...S.mailLog].sort((a,b)=>b.ts-a.ts).map(l=>`<tr><td>${fT(l.ts)}</td><td>N° ${l.n}</td><td class="n">${l.count}</td><td><span class="pill p-ok">Envoyé${l.sim?' (simulation)':''}</span></td></tr>`).join('')}</tbody></table></div>
+    </section>
+  </div>`;
+}
+function updMail(){
+  const f=document.querySelector('[data-form="mail"]'),pv=document.getElementById('mailPrev');if(!f||!pv)return;
+  const is=latest(),subj=(f.elements.subject.value||'').replace(/\{num\}/g,is.n),intro=f.elements.intro.value;
+  pv.innerHTML=`<div class="mail"><div class="mail-h"><span><b>De :</b> Le Courrier des Planches &lt;abonnes@courrier-planches.example&gt;</span><span><b>À :</b> ${S.file.length} abonnés (fichier du ${fS(S.fileDate)})</span><span class="wrap"><b>Objet :</b> ${esc(subj)}</span><span><b>Envoi :</b> ${f.elements.on.checked?`${fDw(nextThursday())} à ${esc(f.elements.hour.value)}`:'désactivé'}</span></div>
+    <div class="mail-b"><div class="mm">Le Courrier des Planches</div>${esc(intro).replace(/\n/g,'<br>')}
+    <div class="mg"><div>${cover(is)}</div><div><b>N° ${is.n}</b><br>${esc(is.head)}<br><span style="font-size:13px;color:#5C5650">Au sommaire : ${rubs(is.n).map(esc).join(', ')}</span></div></div>
+    <span class="cta">Lire le n° ${is.n}</span>
+    <div class="ft">Vous recevez cet email car votre adresse figure dans le fichier des abonnés. Identifiez-vous avec votre email et votre mot de passe pour accéder au numéro.</div></div></div>`;
+}
+
+/* ---------- Utilitaires UI ---------- */
+function toast(t,kind){
+  const d=document.createElement('div');d.className='toast';d.innerHTML=ic(kind==='bad'?'alert':'check')+`<span>${esc(t)}</span>`;
+  document.getElementById('toasts').appendChild(d);setTimeout(()=>d.remove(),4200);
+}
+function dialog(html){const d=document.getElementById('dlg');document.getElementById('dlgBody').innerHTML=html;if(!d.open)d.showModal();const b=d.querySelector('.btn.primary');if(b)b.focus()}
+function focusMain(){const m=document.getElementById('main');m.focus({preventScroll:true});window.scrollTo(0,0)}
+function err(f,name,msg){
+  const i=f.elements[name],e=f.querySelector(`[data-err="${name}"]`);
+  if(msg){i.setAttribute('aria-invalid','true');e.textContent=msg}else{i.removeAttribute('aria-invalid');e.textContent=''}
+  return !msg;
+}
+const firstInvalid=f=>{const i=f.querySelector('[aria-invalid="true"]');if(i)i.focus()};
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function logEv(t){S.log.push({ts:Date.now(),t})}
+
+/* ---------- Événements ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='reset'){try{localStorage.removeItem(KEY)}catch(x){}S=seed();session=null;screen='home';tab='dash';pending=null;notice='';abQ='';abF='all';render();toast('Démo réinitialisée.');return}
+  if(a==='view'){view=b.dataset.v;render();focusMain()}
+  else if(a==='go'){screen=b.dataset.s;if(screen!=='login'){notice='';pending=null}render();focusMain()}
+  else if(a==='tab'){view='editeur';tab=b.dataset.t;render();focusMain();if(tab==='abonnes')drawAb()}
+  else if(a==='logout'){session=null;screen='home';render();toast('Vous êtes déconnecté.e.')}
+  else if(a==='open')openIssue(+b.dataset.n);
+  else if(a==='fill'){const f=document.querySelector('[data-form="login"]');f.elements.email.value=b.dataset.e;f.elements.pwd.value='scene2026';f.querySelector('[type=submit]').focus()}
+  else if(a==='fillcode'){const f=document.querySelector('[data-form="signup"]');f.elements.code.value=b.dataset.c;f.elements.email.focus()}
+  else if(a==='close')document.getElementById('dlg').close();
+  else if(a==='vw-close')document.getElementById('viewer').close();
+  else if(a==='vw-prev'){if(vw.p>0){vw.p--;drawViewer()}}
+  else if(a==='vw-next'){const is=S.issues.find(i=>i.n===vw.n);if(vw.p<is.pages-1){vw.p++;drawViewer()}}
+  else if(a==='preview')openViewer(S.issues.find(i=>i.n===+b.dataset.n));
+  else if(a==='golive'){const is=S.issues.find(i=>i.n===+b.dataset.n);goLive(is);render()}
+  else if(a==='sample'){document.getElementById('sT').value=sampleFile();updPreview();toast('Fichier d’exemple chargé : vérifiez l’aperçu avant de valider.')}
+  else if(a==='sendnow'){const is=latest();S.mailLog.push({ts:Date.now(),n:is.n,count:S.file.length,sim:true});logEv(`Email du jeudi envoyé à ${S.file.length} abonnés (n° ${is.n}, simulation)`);save();render();toast(`${S.file.length} emails envoyés (simulation).`)}
+});
+function goLive(is){
+  const prev=online();is.online=true;save();
+  const out=prev[6];
+  logEv(`N° ${is.n} mis en ligne${out?` : le n° ${out.n} sort des 3 derniers mois`:''}`);save();
+  toast(`N° ${is.n} en ligne et à la une.${out?` Le n° ${out.n} sort des 3 derniers mois.`:''}`);
+}
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.name==='mode'&&t.closest('[data-form="mode"]')){S.mode=t.value;logEv(`Mode de diffusion : ${t.value==='pdf'?'PDF téléchargeable':'visionneuse en ligne'}`);save();toast(t.value==='pdf'?'Les abonnés téléchargent désormais le PDF.':'Les abonnés lisent désormais dans la visionneuse, sans téléchargement.')}
+  if(t.id==='aF'){abF=t.value;drawAb()}
+  if(t.id==='sF'&&t.files[0]){const r=new FileReader();r.onload=()=>{document.getElementById('sT').value=String(r.result);updPreview()};r.readAsText(t.files[0])}
+  if(t.closest('[data-form="mail"]'))updMail();
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='aQ'){abQ=t.value;drawAb()}
+  if(t.id==='sT')updPreview();
+  if(t.closest('[data-form="mail"]'))updMail();
+});
+document.addEventListener('submit',e=>{
+  const f=e.target,k=f.dataset.form;if(!k)return;e.preventDefault();
+  const v=n=>(f.elements[n].value||'').trim();
+  if(k==='login'){
+    const email=v('email').toLowerCase(),pwd=f.elements.pwd.value;
+    let ok=err(f,'email',!email?'Saisissez votre adresse email.':!EMAIL.test(email)?'Adresse email invalide.':'');
+    ok=err(f,'pwd',!pwd?'Saisissez votre mot de passe.':'')&&ok;
+    if(ok){const a=S.accounts.find(x=>x.email===email);
+      if(!a)ok=err(f,'email','Aucun compte avec cette adresse. Créez votre compte avec votre code d’accès.');
+      else if(a.pwd!==pwd)ok=err(f,'pwd','Mot de passe incorrect.');
+      if(ok){a.last=Date.now();save();session=email;screen='home';notice='';const pn=pending;pending=null;render();focusMain();
+        toast(isActive(a)?'Connexion réussie.':'Connexion réussie, mais votre abonnement n’est plus actif.',isActive(a)?'':'bad');
+        if(pn&&isActive(a))setTimeout(()=>{const btn=document.querySelector(`[data-act="open"][data-n="${pn}"]`);if(btn)btn.focus()},50);
+      }}
+    if(!ok)firstInvalid(f);
+  }
+  else if(k==='signup'){
+    const code=v('code').toLowerCase(),email=v('email').toLowerCase(),p=f.elements.pwd.value,p2=f.elements.pwd2.value;
+    let ok=true;
+    let ce=!code?'Saisissez votre code d’accès.':!/^[a-z0-9]{6}$/.test(code)?'Le code comporte 6 lettres ou chiffres.':!fileCodes().has(code)?'Code inconnu : vérifiez-le ou contactez le service abonnements.':S.accounts.some(a=>a.code===code)?'Ce code a déjà servi à créer un compte. Connectez-vous ou utilisez « Mot de passe oublié ».':'';
+    ok=err(f,'code',ce)&&ok;
+    ok=err(f,'email',!email?'Saisissez votre adresse email.':!EMAIL.test(email)?'Adresse email invalide.':S.accounts.some(a=>a.email===email)?'Un compte existe déjà avec cette adresse.':'')&&ok;
+    ok=err(f,'pwd',p.length<8?'8 caractères minimum.':'')&&ok;
+    ok=err(f,'pwd2',p2!==p?'Les deux mots de passe ne correspondent pas.':'')&&ok;
+    if(!ok){firstInvalid(f);return}
+    S.accounts.push({email,code,pwd:p,created:Date.now(),last:Date.now()});logEv(`Compte créé par ${email} (code ${code})`);save();
+    session=email;screen='home';render();focusMain();toast('Compte créé, vous êtes connecté.e. Email de confirmation envoyé (simulation).');
+  }
+  else if(k==='forgot'){
+    const email=v('email');
+    if(!err(f,'email',!EMAIL.test(email)?'Adresse email invalide.':'')){firstInvalid(f);return}
+    toast('Si un compte existe, un lien de réinitialisation a été envoyé (simulation).');screen='login';render();focusMain();
+  }
+  else if(k==='pdf'){
+    const num=parseInt(v('num'),10),date=v('date'),head=v('head');
+    let ok=err(f,'num',!num?'Numéro requis.':S.issues.some(i=>i.n===num)?`Le n° ${num} existe déjà.`:num<latest().n?`Le numéro doit être supérieur au n° ${latest().n}.`:'');
+    ok=err(f,'date',!date?'Date requise.':date<=latest().date?'La parution doit être postérieure au dernier numéro.':'')&&ok;
+    ok=err(f,'head',head.length<10?'Titre de une trop court (10 caractères minimum).':'')&&ok;
+    if(!ok){firstInvalid(f);return}
+    const file=f.elements.pdf.files[0];
+    const is={n:num,date,head,online:false,dl:0,views:0,pages:8,size:file?(file.size/1048576).toFixed(1):'2.6'};
+    S.issues.push(is);logEv(`PDF du n° ${num} déposé${file?` (${file.name})`:''}`);
+    if(f.elements.pub.value==='now')goLive(is);
+    else{save();toast(`N° ${num} déposé : mise en ligne programmée ${fDw(eve(date))} à 18 h.`)}
+    render();focusMain();
+  }
+  else if(k==='subs'){
+    const {valid,invalid}=parseSubs(f.elements.txt.value);if(!valid.length)return;
+    const nw=new Set(valid.map(x=>x.code)),old=fileCodes();
+    const add=valid.filter(x=>!old.has(x.code)).length,rem=S.file.filter(x=>!nw.has(x.code)).length;
+    S.file=valid;S.fileDate=Date.now();
+    logEv(`Fichier des abonnés remplacé : ${valid.length} lignes, ${add} nouveaux, ${rem} retirés${invalid.length?`, ${invalid.length} ignorées`:''}`);save();
+    toast(`Fichier remplacé : ${valid.length} abonnés (${add} nouveaux, ${rem} retirés).`);
+    tab='abonnes';render();drawAb();focusMain();
+  }
+  else if(k==='mail'){
+    if(!err(f,'subject',v('subject').length<5?'Objet trop court.':'')){firstInvalid(f);return}
+    S.mail={on:f.elements.on.checked,hour:f.elements.hour.value,subject:v('subject'),intro:f.elements.intro.value};save();toast('Réglages de l’email enregistrés.');
+  }
+  else if(k==='test'){
+    const to=v('to');
+    if(!err(f,'to',!EMAIL.test(to)?'Adresse email invalide.':'')){firstInvalid(f);return}
+    toast(`Email de test envoyé à ${to} (simulation).`);f.reset();
+  }
+});
+
+render();
+})();
+</script>
 </body>
 </html>
