@@ -4,18 +4,904 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Voyages sur mesure Amérique Europe</title>
+<meta name="description" content="Maquette du site unique de voyages sur mesure réunissant les univers Amérique et Europe : pages destinations optimisées pour le référencement, idées d’itinéraires filtrables, réservation d’appel découverte, demande d’itinéraire et cartes cadeaux.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{--bg:#f8f5ef;--bg2:#f0eae0;--surface:#fff;--ink:#1b222c;--muted:#535c69;--line:#e2dacd;--line-s:#8d8577;--accent:#b0432a;--accent-h:#93361f;--on-accent:#fff;--am:#1b5a6a;--eu:#36498a;--ok:#246b43;--err:#b3261e;--r:20px;--sh:0 14px 36px -18px rgba(27,34,44,.35);--pad:clamp(16px,3vw,32px);--ff:"Inter",system-ui,-apple-system,sans-serif;--fd:"Fraunces",Georgia,serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#10141a;--bg2:#171c24;--surface:#1c222c;--ink:#eef1f5;--muted:#a9b2be;--line:#2d3542;--line-s:#6c7887;--accent:#f08d69;--accent-h:#f6a98c;--on-accent:#1d0f09;--am:#82c7d8;--eu:#adbcf2;--ok:#74d29c;--err:#ff8f86;--sh:0 14px 36px -18px rgba(0,0,0,.7);color-scheme:dark}}
+*{box-sizing:border-box}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--ff);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+h1,h2,h3{font-family:var(--fd);font-weight:600;line-height:1.12;letter-spacing:-.015em;margin:0 0 .45em}
+h1{font-size:clamp(2.1rem,5.2vw,3.9rem)}h2{font-size:clamp(1.65rem,3.4vw,2.6rem)}h3{font-size:1.22rem}
+p{margin:0 0 1em}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+.wrap{width:100%;max-width:1360px;margin:0 auto;padding:0 var(--pad)}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:12px;top:-60px;z-index:200;background:var(--accent);color:var(--on-accent);padding:10px 16px;border-radius:10px}.skip:focus{top:12px}
+.muted{color:var(--muted)}
+.lead{font-size:clamp(1.05rem,1.6vw,1.22rem);color:var(--muted);max-width:62ch}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;color:var(--accent);margin-bottom:12px}
+.kicker::before{content:"";width:22px;height:2px;background:currentColor;border-radius:2px}
+
+/* bandeau */
+.demo-band{display:flex;gap:6px 14px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 var(--pad);font-size:.85rem;background:var(--ink);color:var(--bg)}
+.demo-band button{min-height:44px;background:transparent;color:inherit;border:0;font:inherit;font-weight:600;display:inline-flex;gap:6px;align-items:center;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:0 6px}
+.demo-band .i{width:16px;height:16px}
+
+/* en-tête */
+header.site{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;gap:12px;padding:8px var(--pad);min-height:70px;position:relative}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;min-height:44px;min-width:0}
+.brand svg{width:38px;height:38px;flex:none}
+.brand b{font-family:var(--fd);font-weight:600;font-size:1.22rem;line-height:1.1;display:block}
+.brand small{display:block;font-size:.74rem;color:var(--muted);line-height:1.2}
+nav.main{margin-left:auto;display:flex;gap:2px;align-items:center}
+nav.main a{text-decoration:none;padding:0 13px;border-radius:999px;font-weight:500;font-size:.95rem;min-height:44px;display:inline-flex;align-items:center;white-space:nowrap}
+nav.main a:hover{background:var(--bg2)}
+nav.main a[aria-current=page]{box-shadow:inset 0 -2px 0 var(--accent);border-radius:0;font-weight:600}
+nav.main .btn{margin-left:8px}
+.burger{display:none;margin-left:auto;width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);align-items:center;justify-content:center;cursor:pointer}
+@media (max-width:1080px){
+ .burger{display:inline-flex}
+ nav.main{display:none;position:absolute;left:0;right:0;top:100%;flex-direction:column;align-items:stretch;background:var(--surface);border-bottom:1px solid var(--line);padding:8px var(--pad) 18px;box-shadow:var(--sh)}
+ nav.main.open{display:flex}
+ nav.main a{padding:0 12px;min-height:50px}
+ nav.main a[aria-current=page]{box-shadow:inset 3px 0 0 var(--accent)}
+ nav.main .btn{margin:10px 0 0}
+}
+
+/* boutons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font:600 .97rem var(--ff);cursor:pointer;text-decoration:none;transition:background .2s,transform .2s,border-color .2s;text-align:center;line-height:1.2}
+.btn:active{transform:translateY(1px)}
+.btn-p{background:var(--accent);color:var(--on-accent)}.btn-p:hover{background:var(--accent-h)}
+.btn-g{background:transparent;border-color:var(--line-s);color:var(--ink)}.btn-g:hover{background:var(--bg2)}
+.btn-w{background:#fff;color:#1b222c}.btn-w:hover{background:#f1ece4}
+.btn-o{background:transparent;border-color:rgba(255,255,255,.75);color:#fff}.btn-o:hover{background:rgba(255,255,255,.12)}
+.btn-sm{min-height:44px;padding:0 16px;font-size:.92rem}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* photos */
+.ph{background-color:#2a3340;background-image:linear-gradient(180deg,rgba(8,12,18,.12) 25%,rgba(8,12,18,.8)),var(--img),var(--g);background-size:cover;background-position:center;color:#fff}
+.ph-soft{background-image:var(--img),var(--g);background-size:cover;background-position:center;background-color:#c9bba5}
+
+/* accueil */
+.hero-in{padding:clamp(36px,6vw,80px) var(--pad) clamp(24px,3vw,40px);text-align:center;max-width:980px;margin:0 auto}
+.hero-in .lead{margin:0 auto 24px}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,1.6vw,20px);padding:0 var(--pad)}
+.ucard{position:relative;min-height:min(74vh,660px);border-radius:28px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:clamp(22px,3.4vw,44px);text-decoration:none;isolation:isolate;color:#fff;min-width:0}
+.ucard .bg{position:absolute;inset:0;z-index:-1;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.ucard:hover .bg,.ucard:focus-visible .bg{transform:scale(1.05)}
+.ucard .tag,.gcard .tag{align-self:flex-start;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 12px;font-size:.85rem;font-weight:600;margin-bottom:auto}
+.ucard h2{font-size:clamp(1.9rem,4vw,3.2rem);margin-top:24px}
+.ucard p{max-width:46ch;opacity:.95;margin-bottom:18px}
+.ucard .go,.gcard .go{display:inline-flex;align-items:center;gap:10px;font-weight:600;background:#fff;color:#1b222c;border-radius:999px;padding:0 20px;min-height:48px;align-self:flex-start}
+.ucard .dests{font-size:.9rem;opacity:.9;margin-bottom:14px}
+@media (max-width:760px){.duo{grid-template-columns:minmax(0,1fr)}.ucard{min-height:62vh}}
+
+.sec{padding:clamp(56px,8vw,112px) 0}
+.sec.alt{background:var(--bg2)}
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px 32px;flex-wrap:wrap;margin-bottom:clamp(24px,4vw,44px)}
+.sec-h>div{min-width:0;max-width:760px}
+.sec-h p{margin:0}
+.grid{display:grid;gap:clamp(14px,1.6vw,22px)}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr))}
+.grid>*{min-width:0}
+@media (max-width:860px){.g2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(20px,2.2vw,28px);min-width:0}
+
+.vision{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:center}
+.vision .pic{border-radius:28px;min-height:440px;box-shadow:var(--sh)}
+@media (max-width:900px){.vision{grid-template-columns:minmax(0,1fr)}.vision .pic{min-height:280px}}
+.pillars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0}
+.pillars div{border-top:2px solid var(--accent);padding-top:10px;font-weight:600;min-width:0}
+.pillars span{display:block;font-weight:400;color:var(--muted);font-size:.92rem}
+@media (max-width:520px){.pillars{grid-template-columns:minmax(0,1fr)}}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:clamp(36px,5vw,64px)}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;min-width:0}
+.stat b{display:block;font-family:var(--fd);font-size:clamp(2rem,3.4vw,2.8rem);line-height:1;color:var(--accent);margin-bottom:8px}
+.stat span{color:var(--muted);font-size:.94rem}
+@media (max-width:860px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;counter-reset:s}
+.steps li{counter-increment:s;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:26px 22px 22px;min-width:0}
+.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--fd);font-size:2.4rem;line-height:1;color:var(--accent);display:block;margin-bottom:14px}
+.steps h3{margin-bottom:6px}.steps p{margin:0;color:var(--muted);font-size:.95rem}
+.steps .free{display:inline-block;background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);font-size:.8rem;font-weight:600;border-radius:999px;padding:2px 10px;margin-bottom:8px}
+@media (max-width:1000px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.steps{grid-template-columns:minmax(0,1fr)}}
+
+.eng{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.eng div{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0}
+.eng b{display:block;font-family:var(--fd);font-size:1.6rem;color:var(--accent);line-height:1;margin-bottom:10px}
+.eng h3{font-size:1.02rem;font-family:var(--ff);font-weight:600;letter-spacing:0;margin-bottom:4px}
+.eng p{font-size:.9rem;color:var(--muted);margin:0}
+@media (max-width:1200px){.eng{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){.eng{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:440px){.eng{grid-template-columns:minmax(0,1fr)}}
+
+/* chips & filtres */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:22px}
+.chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-s);background:transparent;color:var(--ink);font:500 .92rem var(--ff);cursor:pointer}
+.chip:hover{background:var(--bg2)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters select{min-height:44px;border-radius:999px;padding:0 14px;border:1px solid var(--line-s);background:var(--surface);color:var(--ink);font:inherit}
+.count{margin-left:auto;color:var(--muted);font-size:.92rem}
+
+.dcard,.icard{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;text-decoration:none;min-width:0;transition:transform .3s,box-shadow .3s}
+.dcard:hover,.icard:hover{transform:translateY(-3px);box-shadow:var(--sh)}
+.dcard .im,.icard .im{aspect-ratio:16/10;position:relative}
+.dcard .im span,.icard .im span{position:absolute;left:14px;bottom:12px;font-weight:600;font-size:.85rem;background:rgba(10,14,20,.6);color:#fff;border-radius:999px;padding:3px 12px}
+.dcard .tx,.icard .tx{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+.dcard h3,.icard h3{margin:0}
+.dcard p,.icard p{color:var(--muted);font-size:.95rem;margin:0}
+.dcard .more{margin-top:auto;padding-top:8px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:6px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font-size:.8rem;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.icard .meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem;color:var(--muted)}
+.icard .meta span{display:inline-flex;gap:6px;align-items:center}
+.icard .act{margin-top:auto;padding-top:10px}
+.empty{grid-column:1/-1;text-align:center;padding:40px 20px;border:1px dashed var(--line-s);border-radius:var(--r)}
+
+.quote{font-family:var(--fd);font-size:clamp(1.3rem,2.4vw,1.8rem);line-height:1.35;margin:0 0 14px}
+.tcard{display:flex;flex-direction:column;gap:12px}
+.tcard .who{display:flex;gap:12px;align-items:center;margin-top:auto}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--bg2);font-weight:600;color:var(--accent);flex:none}
+.stars{display:flex;gap:2px;color:#c58a17}.stars .i{width:18px;height:18px;fill:currentColor;stroke:none}
+.tcard.big{grid-row:span 2}
+
+.gcard{position:relative;border-radius:24px;overflow:hidden;min-height:300px;padding:28px;display:flex;flex-direction:column;justify-content:flex-end;text-decoration:none;isolation:isolate;color:#fff}
+.gcard h3{font-size:1.7rem}
+.gcard p{opacity:.95;max-width:44ch}
+
+.about{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(24px,5vw,72px);align-items:center}
+.about .pic{border-radius:28px;min-height:480px}
+@media (max-width:900px){.about{grid-template-columns:minmax(0,1fr)}.about .pic{min-height:300px}}
+blockquote.palin{margin:24px 0;padding:0 0 0 20px;border-left:3px solid var(--accent)}
+blockquote.palin p{font-family:var(--fd);font-size:1.25rem;line-height:1.45;margin-bottom:6px}
+blockquote.palin footer{color:var(--muted);font-size:.92rem}
+
+.price{display:flex;flex-direction:column;gap:10px}
+.price .amt{font-family:var(--fd);font-size:2.4rem;line-height:1}
+.price ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.price li{display:flex;gap:10px;font-size:.95rem}
+.price li .i{color:var(--ok);margin-top:3px;width:18px;height:18px}
+.price.hl{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.badge{align-self:flex-start;font-size:.8rem;font-weight:600;border-radius:999px;padding:3px 10px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+
+.cta-band{border-radius:28px;padding:clamp(28px,5vw,64px);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center}
+.cta-band h2{margin-bottom:8px}.cta-band p{margin:0;opacity:.95;max-width:60ch}
+@media (max-width:760px){.cta-band{grid-template-columns:minmax(0,1fr)}}
+
+/* pages intérieures */
+.phero{min-height:min(66vh,580px);display:flex;align-items:flex-end;padding:clamp(28px,5vw,64px) 0}
+.phero .wrap>*{max-width:820px}
+.phero .lead{color:#fff;opacity:.95}
+.crumbs ol{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-wrap:wrap;gap:4px 8px;font-size:.92rem}
+.crumbs li{display:flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}
+.crumbs li+li::before{content:"/";opacity:.7}
+.crumbs a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}
+.crumbs [aria-current]{font-weight:600}
+.phero .crumbs a{color:#fff}
+.crumbs.plain{padding-top:24px}
+.infos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:-40px;position:relative}
+.infos div{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--sh);display:flex;gap:12px;min-width:0}
+.infos .i{color:var(--accent);margin-top:3px}
+.infos b{display:block;font-size:.85rem;color:var(--muted);font-weight:500}
+@media (max-width:820px){.infos{grid-template-columns:minmax(0,1fr);margin-top:-28px}}
+.hl-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hl-list li{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.hl-list .i{color:var(--accent);margin-top:3px}
+.split{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start}
+@media (max-width:900px){.split{grid-template-columns:minmax(0,1fr)}}
+.sticky{position:sticky;top:96px}
+@media (max-width:900px){.sticky{position:static}}
+
+/* encart SEO */
+details.seo{border:1px dashed var(--line-s);border-radius:16px;background:var(--surface);font-size:.92rem;margin-top:28px}
+details.seo summary{min-height:48px;display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-weight:600;list-style:none}
+details.seo summary::-webkit-details-marker{display:none}
+details.seo summary .i{color:var(--accent)}
+details.seo summary em{font-style:normal;font-weight:400;color:var(--muted);font-size:.85rem;margin-left:auto}
+details.seo[open] summary{border-bottom:1px solid var(--line)}
+.seo-b{padding:16px 18px 18px}
+.seo dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:8px 16px;margin:0 0 14px}
+.seo dt{color:var(--muted)}.seo dd{margin:0;min-width:0;overflow-wrap:anywhere}
+@media (max-width:600px){.seo dl{grid-template-columns:minmax(0,1fr)}.seo dd{margin-bottom:6px}}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em;background:var(--bg2);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:560px;font-size:.9rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-weight:600;background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+.s301{font-weight:600;color:var(--ok)}
+.tester{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:14px}
+.tester .field{flex:1 1 260px}
+
+/* formulaires */
+form{margin:0}
+fieldset{border:0;margin:0 0 18px;padding:0;min-width:0}
+legend{font-weight:600;font-size:.95rem;margin-bottom:8px;padding:0}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px}
+.fgrid .full{grid-column:1/-1}
+@media (max-width:640px){.fgrid{grid-template-columns:minmax(0,1fr)}}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>label,.lbl{font-weight:600;font-size:.93rem}
+.hint{font-size:.85rem;color:var(--muted)}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],select,textarea{font:inherit;min-height:48px;padding:10px 14px;border:1px solid var(--line-s);border-radius:12px;background:var(--surface);color:var(--ink);width:100%;min-width:0}
+textarea{min-height:110px;resize:vertical}
+input:hover,select:hover,textarea:hover{border-color:var(--ink)}
+[aria-invalid=true]{border-color:var(--err)!important;box-shadow:0 0 0 1px var(--err)}
+.err{color:var(--err);font-size:.86rem;font-weight:500}
+.err:empty{display:none}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px 0 12px;border:1px solid var(--line-s);border-radius:999px;cursor:pointer;font-size:.93rem;background:var(--surface)}
+.opt input{accent-color:var(--accent);width:18px;height:18px;margin:0}
+.opt:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.opt:has(input:disabled){opacity:.5;cursor:not-allowed;text-decoration:line-through}
+.opt:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.ucho{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ucho label{display:flex;gap:12px;align-items:flex-start;padding:16px;border:1px solid var(--line-s);border-radius:16px;cursor:pointer;background:var(--surface);min-width:0}
+.ucho label:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ucho label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.ucho input{accent-color:var(--accent);width:20px;height:20px;margin:2px 0 0;flex:none}
+.ucho b{display:block}.ucho span{font-size:.88rem;color:var(--muted)}
+@media (max-width:480px){.ucho{grid-template-columns:minmax(0,1fr)}}
+.contact-side{display:grid;gap:14px}
+.cline{display:flex;gap:14px;align-items:center;text-decoration:none;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);min-height:56px;min-width:0}
+.cline .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--bg2);color:var(--accent);flex:none}
+.cline b{display:block;overflow-wrap:anywhere}.cline span{font-size:.88rem;color:var(--muted)}
+.ok-box{border:1px solid color-mix(in srgb,var(--ok) 50%,var(--line));background:color-mix(in srgb,var(--ok) 8%,var(--surface));border-radius:var(--r);padding:24px}
+.ok-box h3{display:flex;gap:10px;align-items:center;color:var(--ok)}
+.ok-box dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 14px;margin:12px 0 18px}
+.ok-box dt{color:var(--muted)}.ok-box dd{margin:0;overflow-wrap:anywhere}
+@media (max-width:520px){.ok-box dl{grid-template-columns:minmax(0,1fr)}.ok-box dd{margin-bottom:6px}}
+.reqs{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.reqs li{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--surface);display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:space-between}
+.reqs li>*{min-width:0;overflow-wrap:anywhere}
+.pill{font-size:.8rem;font-weight:600;border-radius:999px;padding:2px 10px;background:color-mix(in srgb,var(--eu) 14%,transparent);color:var(--eu);align-self:flex-start}
+.pill.am{background:color-mix(in srgb,var(--am) 14%,transparent);color:var(--am)}
+
+/* cartes cadeaux */
+.gift-l{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(24px,4vw,56px);align-items:start}
+@media (max-width:960px){.gift-l{grid-template-columns:minmax(0,1fr)}}
+.gprev{aspect-ratio:1.6;border-radius:24px;padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--sh);position:relative;overflow:hidden;min-width:0}
+.gprev .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.gprev .top b{font-family:var(--fd);font-size:1.05rem}
+.gprev .amt{font-family:var(--fd);font-size:clamp(2rem,5vw,3rem);line-height:1}
+.gprev .t{font-family:var(--fd);font-size:clamp(1.2rem,2.4vw,1.6rem)}
+.gprev .msg{font-size:.9rem;opacity:.95;overflow-wrap:anywhere;max-height:3.2em;overflow:hidden}
+.gprev small{opacity:.9;overflow-wrap:anywhere}
+.amts{display:flex;flex-wrap:wrap;gap:8px}
+
+/* dialogue, toast */
+dialog{border:0;border-radius:24px;padding:0;width:min(640px,calc(100vw - 20px));max-width:none;max-height:calc(100dvh - 20px);background:var(--surface);color:var(--ink);box-shadow:0 30px 80px -20px rgba(0,0,0,.5);overflow:auto}
+dialog::backdrop{background:rgba(10,14,20,.6)}
+.dlg-h{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:14px 14px 14px 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:1.35rem;margin:0;flex:1;min-width:0}
+.x{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.x:hover{background:var(--bg2)}
+.dlg-b{padding:22px 24px 26px}
+@media (max-width:480px){.dlg-b{padding:18px 16px 22px}.dlg-h{padding-left:16px}}
+.days-l{list-style:none;margin:16px 0;padding:0;counter-reset:d}
+.days-l li{counter-increment:d;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;padding:0 0 16px;position:relative}
+.days-l li::before{content:counter(d);width:30px;height:30px;border-radius:50%;background:var(--bg2);color:var(--accent);display:grid;place-items:center;font-weight:600;font-size:.85rem}
+.days-l li:not(:last-child)::after{content:"";position:absolute;left:14px;top:32px;bottom:2px;width:2px;background:var(--line)}
+.testmode{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,#c58a17 14%,var(--surface));border:1px solid color-mix(in srgb,#c58a17 45%,var(--line));font-size:.9rem;margin-bottom:18px}
+.spin{width:20px;height:20px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:300;display:grid;gap:8px;width:min(460px,calc(100vw - 24px));pointer-events:none}
+.tst{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;box-shadow:var(--sh);font-size:.93rem;display:flex;gap:10px;align-items:center;animation:tin .25s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+
+/* pied de page */
+footer.site{background:#141a22;color:#d9dee5;padding:clamp(48px,6vw,80px) 0 28px;margin-top:0}
+footer.site a{color:#fff;text-decoration:none}
+footer.site a:hover{text-decoration:underline}
+.ft{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:32px}
+.ft h3{font-family:var(--ff);font-size:.95rem;font-weight:600;color:#fff;margin-bottom:12px}
+.ft ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.ft ul a{display:inline-flex;min-height:40px;align-items:center}
+.ft p{color:#b9c1cc;font-size:.94rem}
+.fb{border-top:1px solid #2b3440;margin-top:36px;padding-top:20px;display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.88rem;color:#aab3bf}
+.fb a{min-height:44px;display:inline-flex;align-items:center}
+@media (max-width:900px){.ft{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.ft{grid-template-columns:minmax(0,1fr)}}
+
+.prose{max-width:760px}
+.prose h2{font-size:1.4rem;margin-top:1.6em}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-weight:600;list-style:none;padding:8px 0}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:1.5rem;color:var(--accent);font-weight:400}
+.faq details[open] summary::after{content:"–"}
+.faq p{color:var(--muted)}
+
+/* animations */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.ucard .bg{transition:none}}
+#print{display:none}
+@media print{
+ body>*{display:none!important}
+ body>#print{display:block!important;color:#000;background:#fff}
+ #print .gprev{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:16cm;margin:2cm auto 0}
+ #print p{text-align:center;font-size:11pt;margin-top:12px}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+ <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+ <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+ <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+ <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+ <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+ <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M20 7H5a2 2 0 0 1 0-4h13v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15V7"/><circle cx="16" cy="14" r="1.2"/></symbol>
+ <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+ <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M22 21a7 7 0 0 0-4-6.3"/></symbol>
+ <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+ <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+ <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></symbol>
+ <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol>
+ <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+ <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+ <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+ <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+ <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/></symbol>
+</svg>
+<a class="skip" href="#main">Aller au contenu</a>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" aria-hidden="true"><use href="#i-reset"/></svg>Réinitialiser la démo</button></div>
+<header class="site">
+ <div class="hd">
+  <a class="brand" href="#/" aria-label="Deux Horizons, accueil">
+   <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="var(--accent)"/><path d="M6 24c5-6 9-6 14 0s9 6 14 0" fill="none" stroke="var(--on-accent)" stroke-width="2.2" stroke-linecap="round"/><path d="M8 17c4-4 8-4 12 0s8 4 12 0" fill="none" stroke="var(--on-accent)" stroke-width="2.2" stroke-linecap="round" opacity=".6"/></svg>
+   <span><b>Deux Horizons</b><small>Voyages sur mesure · Amérique &amp; Europe</small></span>
+  </a>
+  <button class="burger" type="button" aria-expanded="false" aria-controls="nav" data-act="menu"><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg><span class="sr">Menu</span></button>
+  <nav class="main" id="nav" aria-label="Navigation principale">
+   <a href="#/amerique">Amérique</a>
+   <a href="#/europe">Europe</a>
+   <a href="#/methode">Notre méthode</a>
+   <a href="#/cartes-cadeaux">Cartes cadeaux</a>
+   <a href="#/qui-suis-je">Qui suis-je</a>
+   <a href="#/contact">Contact</a>
+   <button class="btn btn-p btn-sm" type="button" data-act="call"><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg>Appel découverte</button>
+  </nav>
+ </div>
+</header>
+<main id="main" tabindex="-1"></main>
+<footer class="site">
+ <div class="wrap">
+  <div class="ft">
+   <div>
+    <p style="font-family:var(--fd);font-size:1.4rem;color:#fff;margin-bottom:8px">Deux Horizons</p>
+    <p>Voyages sur mesure en Amérique et en Europe, imaginés par des passionnés autour de vos envies et de votre rythme.</p>
+    <ul>
+     <li><a href="tel:+33612345678"><svg class="i" aria-hidden="true" style="margin-right:8px"><use href="#i-phone"/></svg>06 12 34 56 78</a></li>
+     <li><a href="mailto:bonjour@deuxhorizons-voyages.fr" style="overflow-wrap:anywhere"><svg class="i" aria-hidden="true" style="margin-right:8px"><use href="#i-mail"/></svg>bonjour@deuxhorizons-voyages.fr</a></li>
+    </ul>
+   </div>
+   <div><h3>Amérique</h3><ul id="ft-am"></ul></div>
+   <div><h3>Europe</h3><ul id="ft-eu"></ul></div>
+   <div><h3>L’agence</h3><ul>
+    <li><a href="#/methode">Comment ça marche</a></li>
+    <li><a href="#/methode">Tarifs</a></li>
+    <li><a href="#/cartes-cadeaux">Cartes cadeaux</a></li>
+    <li><a href="#/qui-suis-je">Qui suis-je</a></li>
+    <li><a href="#/contact">Demande d’itinéraire</a></li>
+   </ul></div>
+  </div>
+  <div class="fb">
+   <span>© 2026 Deux Horizons — nom provisoire</span>
+   <a href="#/mentions-legales">Mentions légales</a>
+   <a href="#/cgv">Conditions générales de vente</a>
+   <a href="#/contact">Contact</a>
+  </div>
+ </div>
+</footer>
+<dialog id="dlg" aria-labelledby="dlg-t">
+ <div class="dlg-h"><h2 id="dlg-t"></h2><button class="x" type="button" data-act="close"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg><span class="sr">Fermer</span></button></div>
+ <div class="dlg-b" id="dlg-b"></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="print"></div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const IMG=id=>`url('https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=70')`;
+const ic=(n,c='i')=>`<svg class="${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const bg=(img,g)=>`style="--img:${img};--g:${g}"`;
+const eur=n=>n.toLocaleString('fr-FR')+' €';
+const BRAND='Deux Horizons';
+
+const UNIV={
+ amerique:{name:'Amérique',de:'d’Amérique',title:'Voyage sur mesure en Amérique : États-Unis, Canada, Amérique du Sud',h1:'Votre aventure américaine sur mesure',
+  lead:'Des grands espaces américains et canadiens jusqu’aux sommets d’Amérique du Sud : un itinéraire pensé autour de vos envies, de votre rythme et des émotions que vous souhaitez vivre.',
+  img:IMG('1500530855697-b586d89ba3ee'),g:'linear-gradient(135deg,#1b5a6a,#c98a4b)',
+  desc:'Voyages sur mesure aux États-Unis, au Canada et en Amérique du Sud : itinéraires 100 % personnalisés, appel découverte gratuit de 30 minutes.'},
+ europe:{name:'Europe',de:'d’Europe',title:'Voyage sur mesure en Europe : itinéraires personnalisés et pépites locales',h1:'Le voyage sans stress et sur mesure',
+  lead:'La magie de l’Europe à votre rythme : itinéraires personnalisés, pépites locales et temps de trajet optimisés, du soleil de la Méditerranée aux fjords du Nord.',
+  img:IMG('1499856871958-5b9627545d1a'),g:'linear-gradient(135deg,#36498a,#d9a35f)',
+  desc:'Voyages sur mesure en Europe : Italie, Grèce, Portugal, Norvège, Écosse. Itinéraires personnalisés, pépites locales, appel découverte gratuit.'}
+};
+const DEST=[
+ {u:'amerique',s:'etats-unis',n:'États-Unis',en:'aux États-Unis',img:'1501594907352-04cda38ebc29',g:'linear-gradient(135deg,#7a3b2e,#d79b5a)',lead:'Parcs nationaux de l’Ouest, routes mythiques, New York ou la Louisiane : composez le road trip qui vous ressemble.',season:'Avril à octobre pour l’Ouest, toute l’année pour la Floride',dur:'12 à 21 jours',bud:'dès 2 600 € / pers. sur place',hl:['Grand Canyon, Monument Valley et Bryce Canyon au bon moment de la journée','La côte californienne par la Highway 1, étapes choisies hors des foules','New York, Boston et la Nouvelle-Angleterre aux couleurs de l’automne','La Nouvelle-Orléans, le jazz et les bayous de Louisiane'],old:'/etats-unis/'},
+ {u:'amerique',s:'canada',n:'Canada',en:'au Canada',img:'1503614472-8c93d56e92ce',g:'linear-gradient(135deg,#1f4d3a,#8fb3a0)',lead:'Rocheuses, lacs turquoise, Québec et baleines du Saint-Laurent : le Canada côté nature comme côté villes.',season:'Juin à septembre, fin septembre pour l’été indien',dur:'14 à 21 jours',bud:'dès 2 300 € / pers. sur place',hl:['Banff, Jasper et la promenade des Glaciers','Québec, Charlevoix et l’observation des baleines à Tadoussac','Vancouver et la côte sauvage de l’île de Vancouver','Des nuits en chalet au bord d’un lac'],old:'/canada/'},
+ {u:'amerique',s:'amerique-du-sud',n:'Amérique du Sud',en:'en Amérique du Sud',img:'1526392060635-9d6019884377',g:'linear-gradient(135deg,#5b3a6b,#d08a5a)',lead:'Pérou, Argentine, Chili : des Andes à la Patagonie, des itinéraires rythmés mais jamais épuisants.',season:'Mai à octobre pour les Andes, novembre à mars pour la Patagonie',dur:'15 à 24 jours',bud:'dès 2 900 € / pers. sur place',hl:['Le Machu Picchu et la Vallée sacrée, avec une acclimatation progressive','Le désert d’Atacama et ses lagunes d’altitude','Les glaciers de Patagonie, d’El Calafate à Torres del Paine','Buenos Aires et la route des vins de Mendoza'],old:'/amerique-du-sud/'},
+ {u:'europe',s:'italie',n:'Italie',en:'en Italie',img:'1523906834658-6e24ef2386f9',g:'linear-gradient(135deg,#8a4b2a,#e0b06a)',lead:'Toscane, Pouilles, lacs du Nord ou Sicile : la dolce vita sans les files d’attente.',season:'Avril à juin et septembre à octobre',dur:'7 à 14 jours',bud:'dès 1 300 € / pers. sur place',hl:['Agritourismes sélectionnés au cœur des collines toscanes','Les Pouilles : trulli, masserie et criques préservées','Venise tôt le matin, avant l’arrivée des visiteurs','Tables familiales repérées sur le terrain'],old:'/italie/'},
+ {u:'europe',s:'grece',n:'Grèce',en:'en Grèce',img:'1533105079780-92b9be482077',g:'linear-gradient(135deg,#1f5f8b,#9fd0e0)',lead:'Cyclades, Péloponnèse ou Crète : un combiné d’îles pensé pour limiter les ferries et profiter de chaque journée.',season:'Mai à juin et septembre à mi-octobre',dur:'8 à 15 jours',bud:'dès 1 400 € / pers. sur place',hl:['Un combiné d’îles avec des liaisons en ferry optimisées','Le Péloponnèse en voiture, de Nauplie à Monemvasia','Des plages accessibles à pied pour les familles','Athènes en deux jours, sans courir'],old:'/grece/'},
+ {u:'europe',s:'portugal',n:'Portugal',en:'au Portugal',img:'1555881400-74d7acaacd8b',g:'linear-gradient(135deg,#7d3a2a,#e7b46d)',lead:'Porto, la vallée du Douro, Lisbonne et l’Alentejo : un pays doux, généreux et facile à vivre.',season:'Mars à juin et septembre à novembre',dur:'7 à 12 jours',bud:'dès 1 100 € / pers. sur place',hl:['Une nuit dans une quinta au milieu des vignes du Douro','Lisbonne quartier par quartier','L’Alentejo, ses villages blancs et sa gastronomie','La côte sauvage de l’Algarve ouest'],old:'/portugal/'},
+ {u:'europe',s:'norvege',n:'Norvège',en:'en Norvège',img:'1520769669658-f07657f5a307',g:'linear-gradient(135deg,#1d3d55,#7fa8b8)',lead:'Fjords, routes panoramiques et îles Lofoten : la Norvège en voiture, avec des étapes bien dosées.',season:'Juin à août ; février à mars pour les aurores',dur:'10 à 16 jours',bud:'dès 2 200 € / pers. sur place',hl:['Le Geirangerfjord et la route des Trolls','Les îles Lofoten en rorbu, cabanes de pêcheurs','Bergen et la ligne de Flåm','Aurores boréales à Tromsø en hiver'],old:'/norvege/'},
+ {u:'europe',s:'ecosse',n:'Écosse',en:'en Écosse',img:'1506905925346-21bda4d32df4',g:'linear-gradient(135deg,#2f4a3a,#9aa680)',lead:'Highlands, île de Skye et distilleries : une Écosse authentique, loin des cars de touristes.',season:'Mai à septembre',dur:'8 à 14 jours',bud:'dès 1 500 € / pers. sur place',hl:['L’île de Skye en évitant les heures de pointe','La North Coast 500, étapes choisies','Édimbourg et ses quartiers moins connus','Des B&B tenus par des habitants passionnés'],old:'/ecosse/'}
+];
+const D=s=>DEST.find(d=>d.s===s);
+const ENVIES=['Grands espaces','Road trip','Villes','Famille','Plages','Gastronomie','Culture'];
+const ITIN=[
+ {id:'ouest-americain',d:'etats-unis',t:'Les grands parcs de l’Ouest américain',days:16,env:['Grands espaces','Road trip'],p:3200,st:['Las Vegas : arrivée et nuit au calme, loin du Strip','Zion et Bryce Canyon, randonnées adaptées à votre niveau','Monument Valley, nuit chez l’habitant en territoire navajo','Grand Canyon, rive sud au lever du soleil','Route 66 puis Joshua Tree','Los Angeles et départ']},
+ {id:'new-york-nouvelle-angleterre',d:'etats-unis',t:'New York et la Nouvelle-Angleterre en automne',days:12,env:['Villes','Road trip'],p:2900,st:['New York : Manhattan, Brooklyn et adresses de quartier','Route vers Boston par la côte du Connecticut','Le Vermont et ses forêts flamboyantes','Le Maine : phares, homards et Acadia','Retour par Boston']},
+ {id:'floride-famille',d:'etats-unis',t:'La Floride en famille, des parcs aux Keys',days:14,env:['Famille','Plages'],p:2700,st:['Orlando : parcs à thème avec planning anti-files d’attente','Cap Canaveral et le centre spatial','Les Everglades en hydroglisseur','Les Keys jusqu’à Key West','Miami Beach, plages et Art déco']},
+ {id:'rocheuses',d:'canada',t:'Les Rocheuses canadiennes en chalet',days:15,env:['Grands espaces','Famille'],p:3100,st:['Calgary puis Canmore','Banff et le lac Louise au petit matin','La promenade des Glaciers','Jasper : faune et canoë sur le lac Maligne','Wells Gray et ses cascades','Vancouver et départ']},
+ {id:'quebec',d:'canada',t:'Québec, fjord du Saguenay et baleines',days:12,env:['Villes','Grands espaces'],p:2400,st:['Montréal, entre Plateau et Vieux-Port','Québec et l’île d’Orléans','Charlevoix, terroir et paysages','Tadoussac : sortie aux baleines','Le fjord du Saguenay en kayak','Retour à Montréal']},
+ {id:'perou',d:'amerique-du-sud',t:'Pérou : Cuzco, Vallée sacrée et Machu Picchu',days:15,env:['Culture','Grands espaces'],p:3300,st:['Lima et sa cuisine','Arequipa et le canyon de Colca','Le lac Titicaca chez l’habitant','Cuzco, acclimatation en douceur','Vallée sacrée et Machu Picchu','Retour à Lima']},
+ {id:'patagonie',d:'amerique-du-sud',t:'De Buenos Aires à la Patagonie',days:21,env:['Grands espaces','Gastronomie'],p:4200,st:['Buenos Aires, tango et marchés','Mendoza et ses bodegas','El Calafate et le glacier Perito Moreno','El Chaltén, randonnées au pied du Fitz Roy','Torres del Paine côté chilien','Santiago et départ']},
+ {id:'cyclades',d:'grece',t:'Athènes et les Cyclades à votre rythme',days:10,env:['Plages','Famille','Culture'],p:1750,st:['Athènes : Acropole tôt le matin, Plaka le soir','Ferry vers Naxos, plages familiales','Paros et ses villages','Santorin hors des points de vue bondés','Retour à Athènes']},
+ {id:'peloponnese',d:'grece',t:'Le Péloponnèse en voiture',days:9,env:['Road trip','Culture'],p:1400,st:['Athènes puis le canal de Corinthe','Nauplie et Épidaure','Le Magne et ses villages-tours','Monemvasia, la citadelle sur la mer','Olympie et retour']},
+ {id:'toscane',d:'italie',t:'Toscane, Ombrie et Cinque Terre',days:10,env:['Gastronomie','Road trip'],p:1900,st:['Florence en deux jours','Le Chianti et ses domaines','Val d’Orcia, Pienza et Montepulciano','Assise et l’Ombrie','Les Cinque Terre en train et à pied']},
+ {id:'pouilles',d:'italie',t:'Les Pouilles hors des sentiers battus',days:8,env:['Plages','Gastronomie'],p:1500,st:['Bari et sa vieille ville','Alberobello et la vallée d’Itria','Nuits en masseria','Lecce, la Florence du Sud','Les criques du Salento']},
+ {id:'douro-lisbonne',d:'portugal',t:'Porto, la vallée du Douro et Lisbonne',days:9,env:['Villes','Gastronomie'],p:1350,st:['Porto et les caves de Gaia','Deux nuits en quinta dans le Douro','Coimbra, ville universitaire','Lisbonne et Sintra','Départ de Lisbonne']},
+ {id:'fjords',d:'norvege',t:'Fjords de Norvège et îles Lofoten',days:12,env:['Grands espaces','Road trip'],p:2600,st:['Bergen et ses maisons colorées','La ligne de Flåm et le Nærøyfjord','Geiranger et la route des Trolls','Vol vers Bodø','Les Lofoten en rorbu']},
+ {id:'highlands',d:'ecosse',t:'Highlands et île de Skye',days:10,env:['Grands espaces','Culture'],p:1800,st:['Édimbourg, vieille ville et Dean Village','Glencoe et ses vallées','L’île de Skye en trois jours','Le Loch Ness côté rive sud','Speyside et ses distilleries']}
+];
+const ENG=[
+ ['Un voyage 100 % sur mesure','Aucun circuit catalogue : tout part de vos envies.'],
+ ['Des expériences authentiques','Pépites locales, rencontres et adresses de confiance.'],
+ ['Des temps de trajet optimisés','Moins de route, plus de moments sur place.'],
+ ['Des heures de préparation économisées','Nous faisons les recherches à votre place.'],
+ ['Des conseils de terrain','Des recommandations issues de nos propres voyages.'],
+ ['Des économies sur votre budget','Les bonnes périodes et les bons choix d’hébergement.'],
+ ['Des alternatives proposées','Plusieurs options pour chaque étape clé.'],
+ ['Des tarifs clairs','Un prix annoncé dès le départ, sans frais cachés.'],
+ ['Un carnet de voyage complet','Tout votre voyage, jour par jour, dans un seul document.'],
+ ['Une écoute avant et pendant','Une réponse rapide si un imprévu survient.']
+];
+const STEPS=[
+ ['Appel découverte','30 minutes pour parler de vos envies : où, quand, combien de personnes, budget et incontournables.',true],
+ ['Proposition d’itinéraire','Un itinéraire jour par jour, avec hébergements, temps de trajet et activités suggérées.'],
+ ['Ajustements','Nous affinons ensemble jusqu’à ce que chaque étape vous corresponde.'],
+ ['Carnet de voyage','Vous recevez votre carnet complet : réservations, conseils, adresses et plans.']
+];
+const PRICES=[
+ {n:'Itinéraire essentiel',a:190,d:'Jusqu’à 10 jours',f:['Appel découverte offert','Itinéraire jour par jour','Sélection d’hébergements','1 série d’ajustements']},
+ {n:'Itinéraire complet',a:290,d:'Jusqu’à 21 jours',f:['Tout l’essentiel','Accompagnement aux réservations','Carnet de voyage détaillé','3 séries d’ajustements'],hl:true},
+ {n:'Sérénité',a:390,d:'Toutes durées',f:['Tout le complet','Alternatives pour chaque étape','Assistance par message pendant le voyage','Bilan au retour']}
+];
+const REDIR=[
+ ['Ancien site Amérique','/','/amerique/'],
+ ['Ancien site Amérique','/etats-unis/','/amerique/etats-unis/'],
+ ['Ancien site Amérique','/canada/','/amerique/canada/'],
+ ['Ancien site Amérique','/amerique-du-sud/','/amerique/amerique-du-sud/'],
+ ['Ancien site Amérique','/cartes-cadeaux/','/cartes-cadeaux/'],
+ ['Ancien site Amérique','/contact/','/contact/'],
+ ['Ancien site Europe','/','/europe/'],
+ ['Ancien site Europe','/italie/','/europe/italie/'],
+ ['Ancien site Europe','/grece/','/europe/grece/'],
+ ['Ancien site Europe','/portugal/','/europe/portugal/'],
+ ['Ancien site Europe','/norvege/','/europe/norvege/'],
+ ['Ancien site Europe','/ecosse/','/europe/ecosse/'],
+ ['Ancien site Europe','/qui-suis-je/','/qui-suis-je/'],
+ ['Ancien site Europe','/comment-ca-marche/','/methode/'],
+ ['Ancien site Europe','/carte-cadeau/','/cartes-cadeaux/']
+];
+
+/* ---------- état ---------- */
+const KEY='deux-horizons-demo-v1';
+const fresh=()=>({calls:[],reqs:[],gifts:[],seq:74});
+let S=fresh();
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(fresh(),JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+function toast(msg){const t=document.createElement('div');t.className='tst';t.innerHTML=ic('check')+'<span>'+esc(msg)+'</span>';$('#toast').append(t);setTimeout(()=>t.remove(),4200)}
+
+/* ---------- fragments ---------- */
+const crumbs=(items,cls='')=>`<nav class="crumbs ${cls}" aria-label="Fil d’Ariane"><ol>${items.map((c,i)=>i<items.length-1?`<li><a href="${c[1]}">${esc(c[0])}</a></li>`:`<li><span aria-current="page">${esc(c[0])}</span></li>`).join('')}</ol></nav>`;
+
+function seoBox(p){
+ const olds=REDIR.filter(r=>r[2]===p.url);
+ return `<details class="seo"><summary>${ic('search')}Référencement de cette page<em>encart visible uniquement dans la démo</em></summary><div class="seo-b">
+ <dl>
+  <dt>Adresse</dt><dd><code>${esc(p.url)}</code></dd>
+  <dt>Balise title</dt><dd>${esc(p.title)} <span class="muted">(${p.title.length} car.)</span></dd>
+  <dt>Meta description</dt><dd>${esc(p.desc)} <span class="muted">(${p.desc.length} car.)</span></dd>
+  <dt>Titre H1</dt><dd>${esc(p.h1)}</dd>
+  <dt>Fil d’Ariane</dt><dd>${p.crumbs.map(c=>esc(c[0])).join(' › ')} <span class="muted">— balisé en données structurées BreadcrumbList</span></dd>
+  <dt>Anciennes adresses</dt><dd>${olds.length?olds.map(r=>`${esc(r[0])} <code>${esc(r[1])}</code> → <span class="s301">redirection 301</span> vers cette page`).join('<br>'):'Nouvelle page, sans équivalent sur les anciens sites.'}</dd>
+ </dl>
+ <p class="muted" style="margin:0">Les deux anciens sites redirigeront chacune de leurs pages vers son équivalent ici : les visiteurs et Google retrouvent la bonne page, et l’ancienneté des liens est conservée.</p>
+ </div></details>`;
+}
+function setMeta(p){
+ document.title=p.title+' | '+BRAND;
+ let m=$('meta[name=description]');m.setAttribute('content',p.desc);
+ let ld=$('#ld');if(ld)ld.remove();
+ if(p.crumbs){ld=document.createElement('script');ld.type='application/ld+json';ld.id='ld';
+  ld.textContent=JSON.stringify({'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:p.crumbs.map((c,i)=>({'@type':'ListItem',position:i+1,name:c[0],item:c[1].replace('#','')}))});document.head.append(ld)}
+}
+
+const destCard=d=>`<a class="dcard rv" href="#/${d.u}/${d.s}"><div class="im ph-soft" ${bg(IMG(d.img),d.g)}><span>${esc(UNIV[d.u].name)}</span></div><div class="tx"><h3>${esc(d.n)}</h3><p>${esc(d.lead)}</p><span class="more">Voyage sur mesure ${esc(d.en)} ${ic('arrow')}</span></div></a>`;
+const itinCard=it=>{const d=D(it.d);return `<article class="icard rv"><div class="im ph-soft" ${bg(IMG(d.img),d.g)}><span>${esc(d.n)}</span></div><div class="tx"><h3>${esc(it.t)}</h3><div class="meta"><span>${ic('clock')}${it.days} jours</span><span>${ic('wallet')}~${eur(it.p)} / pers.</span></div><div class="tags">${it.env.map(e=>`<span>${esc(e)}</span>`).join('')}</div><div class="act"><button class="btn btn-g btn-sm" type="button" data-act="itin" data-id="${it.id}">Voir l’itinéraire ${ic('arrow')}</button></div></div></article>`};
+
+const stepsHtml=()=>`<ol class="steps">${STEPS.map(s=>`<li class="rv">${s[2]?'<span class="free">Gratuit</span>':''}<h3>${s[0]}</h3><p>${s[1]}</p></li>`).join('')}</ol>`;
+const engHtml=()=>`<div class="eng">${ENG.map((e,i)=>`<div class="rv"><b>${String(i+1).padStart(2,'0')}</b><h3>${e[0]}</h3><p>${e[1]}</p></div>`).join('')}</div>`;
+const priceHtml=()=>`<div class="grid g3">${PRICES.map(p=>`<div class="card price rv${p.hl?' hl':''}">${p.hl?'<span class="badge">Le plus choisi</span>':''}<h3 style="margin:0">${p.n}</h3><div><span class="amt">${eur(p.a)}</span> <span class="muted">par voyage</span></div><span class="muted">${p.d}</span><ul>${p.f.map(f=>`<li>${ic('check')}${f}</li>`).join('')}</ul></div>`).join('')}</div><p class="muted" style="margin-top:16px">Tarifs de démonstration, à définir ensemble. Le prix est annoncé avant tout engagement : pas de frais cachés ni de commission sur vos réservations.</p>`;
+const ctaBand=(t='Parlons de votre prochain voyage',p='Un premier échange de 30 minutes, gratuit et sans engagement, pour poser les bases de votre itinéraire.')=>`<section class="sec" style="padding-top:0"><div class="wrap"><div class="cta-band ph rv" ${bg(IMG('1476514525535-07fb3b4ae5f1'),'linear-gradient(135deg,#1b2a3a,#b0432a)')}><div><h2>${t}</h2><p>${p}</p></div><div class="row"><button class="btn btn-w" type="button" data-act="call">${ic('phone')}Réserver mon appel découverte gratuit</button></div></div></div></section>`;
+const testi=()=>`<div class="grid g3">
+ <figure class="card tcard rv" style="margin:0"><div class="stars" role="img" aria-label="5 étoiles sur 5">${ic('star').repeat(5)}</div><blockquote class="quote" style="margin:0">« Tout était parfait. Je recommande les yeux fermés pour ceux qui veulent voyager l’esprit léger. »</blockquote><figcaption class="who"><span class="av">FR</span><span><b>Famille Rossi</b><br><span class="muted">Dijon · séjour en Grèce</span></span></figcaption></figure>
+ <figure class="card tcard rv" style="margin:0"><div class="stars" role="img" aria-label="5 étoiles sur 5">${ic('star').repeat(5)}</div><blockquote style="margin:0">« Notre road trip dans l’Ouest était parfaitement dosé : jamais plus de trois heures de route par jour, et des étapes que nous n’aurions jamais trouvées seuls. »</blockquote><figcaption class="who"><span class="av">CM</span><span><b>Claire et Mathieu</b><br><span class="muted">Nantes · Ouest américain</span></span></figcaption></figure>
+ <figure class="card tcard rv" style="margin:0"><div class="stars" role="img" aria-label="5 étoiles sur 5">${ic('star').repeat(5)}</div><blockquote style="margin:0">« Le carnet de voyage est une merveille. Avec trois enfants, tout était anticipé : horaires, pique-niques, plans B en cas de pluie. »</blockquote><figcaption class="who"><span class="av">BL</span><span><b>Famille Laurent</b><br><span class="muted">Rennes · Norvège</span></span></figcaption></figure>
+</div>`;
+const giftTeaser=()=>`<div class="grid g2">
+ <a class="gcard ph rv" href="#/cartes-cadeaux?u=amerique" ${bg(IMG('1469474968028-56623f02e42e'),UNIV.amerique.g)}><span class="tag" style="align-self:flex-start;margin-bottom:auto;font-weight:600">${ic('gift')}</span><h3>L’Amérique en cadeau</h3><p>Des grands espaces américains et canadiens jusqu’à l’Amérique du Sud.</p><span class="go" style="display:inline-flex;gap:8px;align-items:center;font-weight:600">Offrir une carte ${ic('arrow')}</span></a>
+ <a class="gcard ph rv" href="#/cartes-cadeaux?u=europe" ${bg(IMG('1533105079780-92b9be482077'),UNIV.europe.g)}><span class="tag" style="align-self:flex-start;margin-bottom:auto;font-weight:600">${ic('gift')}</span><h3>L’Europe en cadeau</h3><p>Du soleil de la Méditerranée aux fjords du Nord.</p><span class="go" style="display:inline-flex;gap:8px;align-items:center;font-weight:600">Offrir une carte ${ic('arrow')}</span></a>
+</div>`;
+
+/* ---------- liste d'itinéraires filtrable ---------- */
+const F={u:'',env:'',dur:''};
+function itinSection(fixedU){
+ const envs=ENVIES.filter(e=>ITIN.some(i=>(!fixedU||D(i.d).u===fixedU)&&i.env.includes(e)));
+ return `<div class="filters" role="group" aria-label="Filtrer les itinéraires">
+  ${fixedU?'':`<button class="chip" type="button" data-f="u" data-v="" aria-pressed="${!F.u}">Toutes destinations</button><button class="chip" type="button" data-f="u" data-v="amerique" aria-pressed="${F.u==='amerique'}">Amérique</button><button class="chip" type="button" data-f="u" data-v="europe" aria-pressed="${F.u==='europe'}">Europe</button><span style="width:8px"></span>`}
+  <label class="sr" for="f-env">Envie</label><select id="f-env" data-fs="env"><option value="">Toutes les envies</option>${envs.map(e=>`<option ${F.env===e?'selected':''}>${e}</option>`).join('')}</select>
+  <label class="sr" for="f-dur">Durée</label><select id="f-dur" data-fs="dur"><option value="">Toutes durées</option><option value="s" ${F.dur==='s'?'selected':''}>Jusqu’à 10 jours</option><option value="m" ${F.dur==='m'?'selected':''}>11 à 15 jours</option><option value="l" ${F.dur==='l'?'selected':''}>Plus de 15 jours</option></select>
+  <span class="count" id="it-count" aria-live="polite"></span>
+ </div><div class="grid g3" id="it-list" data-u="${fixedU||''}"></div>`;
+}
+function fillItins(){
+ const box=$('#it-list');if(!box)return;
+ const fu=box.dataset.u||F.u;
+ const l=ITIN.filter(i=>(!fu||D(i.d).u===fu)&&(!F.env||i.env.includes(F.env))&&(!F.dur||(F.dur==='s'?i.days<=10:F.dur==='m'?i.days>10&&i.days<=15:i.days>15)));
+ box.innerHTML=l.length?l.map(itinCard).join(''):`<div class="empty"><p><b>Aucun itinéraire ne correspond à ces critères.</b><br><span class="muted">Chaque voyage étant sur mesure, nous pouvons le créer pour vous.</span></p><div class="row" style="justify-content:center"><button class="btn btn-g btn-sm" type="button" data-act="fclear">Effacer les filtres</button><a class="btn btn-p btn-sm" href="#/contact${fu?'?u='+fu:''}">Demander un itinéraire</a></div></div>`;
+ $('#it-count').textContent=l.length+' idée'+(l.length>1?'s':'')+' d’itinéraire';
+ reveal(box);
+}
+
+/* ---------- pages ---------- */
+const P={};
+P.home=()=>({title:'Voyages sur mesure en Amérique et en Europe',desc:'Itinéraires 100 % personnalisés aux États-Unis, au Canada, en Amérique du Sud et partout en Europe. Appel découverte gratuit de 30 minutes, tarifs clairs.',h1:'Votre voyage sur mesure, en Amérique comme en Europe',url:'/',html:`
+<section class="hero-in"><p class="kicker" style="justify-content:center">Voyages sur mesure, conçus par des passionnés</p><h1>Votre voyage sur mesure, en Amérique comme en Europe</h1><p class="lead">Un voyage réussi se construit autour de vos envies, de votre rythme et des émotions que vous souhaitez vivre. Choisissez votre horizon.</p></section>
+<div class="duo">
+ <a class="ucard" href="#/amerique"><span class="bg ph" ${bg(UNIV.amerique.img,UNIV.amerique.g)}></span><span class="tag">Univers Amérique</span><h2>Votre aventure américaine sur mesure</h2><p class="dests">États-Unis · Canada · Amérique du Sud</p><span class="go">Découvrir l’Amérique ${ic('arrow')}</span></a>
+ <a class="ucard" href="#/europe"><span class="bg ph" ${bg(UNIV.europe.img,UNIV.europe.g)}></span><span class="tag">Univers Europe</span><h2>La magie de l’Europe, à votre rythme</h2><p class="dests">Italie · Grèce · Portugal · Norvège · Écosse</p><span class="go">Découvrir l’Europe ${ic('arrow')}</span></a>
+</div>
+<section class="sec"><div class="wrap"><div class="vision">
+ <div class="rv"><p class="kicker">Notre vision</p><h2>Un itinéraire 100 % personnalisé, pensé par des passionnés</h2><p class="lead">Pas de circuit catalogue ni de formule toute faite : chaque voyage part d’une conversation, de vos envies et de votre façon de voyager.</p>
+  <div class="pillars"><div>Vos envies<span>ce qui vous fait vibrer</span></div><div>Votre rythme<span>lent, intense ou entre les deux</span></div><div>Vos émotions<span>les moments à vivre</span></div></div>
+  <div class="row"><button class="btn btn-p" type="button" data-act="call">${ic('phone')}Réserver mon appel découverte gratuit</button><a class="btn btn-g" href="#/methode">Comment ça marche</a></div></div>
+ <div class="pic ph-soft rv" ${bg(IMG('1488646953014-85cb44e25828'),'linear-gradient(135deg,#c98a4b,#1b5a6a)')} role="img" aria-label="Carte et carnet de voyage préparés sur une table"></div>
+</div>
+<div class="stats"><div class="stat rv"><b>+73</b><span>projets de voyage réalisés en Europe</span></div><div class="stat rv"><b>100 %</b><span>de voyageurs satisfaits</span></div><div class="stat rv"><b>30 min</b><span>d’appel découverte offertes</span></div><div class="stat rv"><b>0 €</b><span>de frais cachés</span></div></div>
+</div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><p class="kicker">Comment ça marche</p><h2>Quatre étapes, aucun stress</h2></div><a class="btn btn-g" href="#/methode">Méthode et tarifs ${ic('arrow')}</a></div>${stepsHtml()}</div></section>
+<section class="sec"><div class="wrap"><div class="sec-h"><div><p class="kicker">Idées d’itinéraires</p><h2>Pour commencer à rêver</h2><p class="lead">Des exemples de voyages déjà imaginés. Le vôtre sera différent : il sera construit pour vous.</p></div></div>${itinSection('')}</div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><p class="kicker">Nos 10 engagements</p><h2>Ce que vous gagnez à nous confier votre voyage</h2></div></div>${engHtml()}</div></section>
+<section class="sec"><div class="wrap"><div class="sec-h"><div><p class="kicker">Ils sont partis l’esprit léger</p><h2>Témoignages</h2></div></div>${testi()}</div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><p class="kicker">Cartes cadeaux</p><h2>Offrez un voyage sur mesure</h2></div><a class="btn btn-g" href="#/cartes-cadeaux">Toutes les cartes cadeaux ${ic('arrow')}</a></div>${giftTeaser()}</div></section>
+<section class="sec"><div class="wrap"><div class="about">
+ <div class="pic ph-soft rv" ${bg(IMG('1503220317375-aaad61436b1b'),'linear-gradient(135deg,#36498a,#c98a4b)')} role="img" aria-label="Voyageur face à un paysage de montagne"></div>
+ <div class="rv"><p class="kicker">Qui suis-je</p><h2>L’architecte de votre voyage</h2><p class="lead">Tout est né d’une passion : celle de préparer chaque voyage comme une œuvre, en cherchant la meilleure route, le bon hébergement et la petite adresse qui fera la différence.</p>
+ <blockquote class="palin"><p>« Une fois que la mouche du voyage vous a piqué, il n’existe aucun antidote : vous en serez heureusement infecté pour le reste de votre vie. »</p><footer>Michael Palin</footer></blockquote>
+ <a class="btn btn-g" href="#/qui-suis-je">En savoir plus ${ic('arrow')}</a></div>
+</div></div></section>
+<section class="sec" style="padding-top:0"><div class="wrap">${redirBox()}</div></section>
+${ctaBand()}`});
+
+function redirBox(){
+ return `<details class="seo" style="margin-top:0"><summary>${ic('route')}Pour la démo : plan de redirection des deux anciens sites<em>référencement</em></summary><div class="seo-b">
+ <p>Les deux sites actuels sont fusionnés. Chaque ancienne adresse renverra automatiquement (redirection 301) vers sa nouvelle page : aucun lien cassé, et Google transfère l’historique de référencement vers le nouveau site.</p>
+ <div class="tw"><table><caption class="sr">Correspondance entre anciennes et nouvelles adresses</caption><thead><tr><th scope="col">Ancien site</th><th scope="col">Ancienne adresse</th><th scope="col">Statut</th><th scope="col">Nouvelle adresse</th></tr></thead><tbody>
+ ${REDIR.map(r=>`<tr><td>${r[0]}</td><td><code>${r[1]}</code></td><td class="s301">301</td><td><a href="#${r[2].replace(/\/$/,'')||'/'}"><code>${r[2]}</code></a></td></tr>`).join('')}
+ </tbody></table></div>
+ <div class="tester"><div class="field"><label for="old-url">Tester une ancienne adresse</label><select id="old-url">${REDIR.map((r,i)=>`<option value="${i}">${r[0]} — ${r[1]}</option>`).join('')}</select></div><button class="btn btn-p btn-sm" type="button" data-act="redir">Simuler la visite</button></div>
+ <p class="muted" style="margin:14px 0 0">Également prévus : plan du site XML soumis à la Search Console, balises title et descriptions uniques par page, URLs lisibles, images compressées et chargement rapide sur mobile.</p>
+ </div></details>`;
+}
+
+P.univ=u=>{const U=UNIV[u],dl=DEST.filter(d=>d.u===u),cr=[['Accueil','#/'],[U.name,'#/'+u]];
+ return {title:U.title,desc:U.desc,h1:U.h1,url:'/'+u+'/',crumbs:cr,html:`
+<section class="phero ph" ${bg(U.img,U.g)}><div class="wrap">${crumbs(cr)}<p class="kicker" style="color:#fff">Univers ${U.name}</p><h1>${U.h1}</h1><p class="lead">${U.lead}</p><div class="row"><button class="btn btn-w" type="button" data-act="call">${ic('phone')}Réserver mon appel découverte gratuit</button><a class="btn btn-o" href="#/contact?u=${u}">Demander un itinéraire</a></div></div></section>
+<section class="sec"><div class="wrap"><div class="sec-h"><div><p class="kicker">Destinations</p><h2>Où partir ${u==='amerique'?'en Amérique':'en Europe'} ?</h2><p class="lead">Chaque destination a sa page, ses saisons et ses idées d’itinéraires.</p></div></div><div class="grid ${dl.length>3?'g4':'g3'}">${dl.map(destCard).join('')}</div>
+${u==='europe'?`<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))"><div class="stat rv"><b>+73</b><span>projets réalisés</span></div><div class="stat rv"><b>100 %</b><span>de satisfaction</span></div><div class="stat rv"><b>5</b><span>pays en Europe</span></div></div>`:`<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))"><div class="stat rv"><b>3</b><span>grandes régions : États-Unis, Canada, Amérique du Sud</span></div><div class="stat rv"><b>100 %</b><span>sur mesure, aucun circuit catalogue</span></div><div class="stat rv"><b>30 min</b><span>d’appel découverte offertes</span></div></div>`}
+</div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><p class="kicker">Idées d’itinéraires</p><h2>Inspirations ${U.de}</h2></div></div>${itinSection(u)}</div></section>
+<section class="sec"><div class="wrap"><div class="sec-h"><div><p class="kicker">Comment ça marche</p><h2>De l’appel découverte au carnet de voyage</h2></div></div>${stepsHtml()}${seoBox({title:U.title,desc:U.desc,h1:U.h1,url:'/'+u+'/',crumbs:cr})}</div></section>
+${ctaBand('Votre voyage '+U.de+' commence par un appel')}`}};
+
+P.dest=(u,s)=>{const d=D(s);if(!d||d.u!==u)return P.nf();const U=UNIV[u];
+ const cr=[['Accueil','#/'],[U.name,'#/'+u],[d.n,'#/'+u+'/'+s]];
+ const title='Voyage sur mesure '+d.en+' : itinéraires personnalisés';
+ const desc=`Préparez votre voyage sur mesure ${d.en} : meilleure saison, durée idéale, idées d’itinéraires et conseils de terrain. Appel découverte gratuit.`;
+ const h1='Voyage sur mesure '+d.en;
+ const its=ITIN.filter(i=>i.d===s), others=DEST.filter(x=>x.u===u&&x.s!==s);
+ return {title,desc,h1,url:`/${u}/${s}/`,crumbs:cr,html:`
+<section class="phero ph" ${bg(IMG(d.img),d.g)}><div class="wrap">${crumbs(cr)}<h1>${h1}</h1><p class="lead">${d.lead}</p><div class="row"><button class="btn btn-w" type="button" data-act="call">${ic('phone')}Réserver mon appel découverte gratuit</button><a class="btn btn-o" href="#/contact?u=${u}&d=${s}">Demander mon itinéraire</a></div></div></section>
+<div class="wrap"><div class="infos"><div>${ic('sun')}<span><b>Meilleure période</b>${d.season}</span></div><div>${ic('clock')}<span><b>Durée conseillée</b>${d.dur}</span></div><div>${ic('wallet')}<span><b>Budget indicatif</b>${d.bud}, hors vols</span></div></div></div>
+<section class="sec"><div class="wrap"><div class="split">
+ <div><h2 class="rv">Pourquoi partir ${d.en} avec nous</h2><p class="lead rv">Nous construisons votre itinéraire étape par étape, en équilibrant temps de trajet, visites et moments de pause, avec des adresses repérées sur le terrain.</p>
+ <h3 class="rv" style="margin-top:28px">Les incontournables… et nos pépites</h3><ul class="hl-list">${d.hl.map(h=>`<li class="rv">${ic('pin')}<span>${h}</span></li>`).join('')}</ul></div>
+ <aside class="card sticky rv"><h3>Votre voyage ${d.en}</h3><p class="muted">Racontez-nous vos envies : nous revenons vers vous sous 48 h pour fixer l’appel découverte.</p>
+  <ul class="hl-list" style="margin-bottom:18px"><li>${ic('check')}<span>Itinéraire 100 % personnalisé</span></li><li>${ic('check')}<span>Tarifs clairs, sans frais cachés</span></li><li>${ic('check')}<span>Carnet de voyage complet</span></li></ul>
+  <div style="display:grid;gap:10px"><a class="btn btn-p" href="#/contact?u=${u}&d=${s}">Demander mon itinéraire ${d.en}</a><button class="btn btn-g" type="button" data-act="call">${ic('phone')}Appel découverte gratuit</button></div></aside>
+</div></div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><p class="kicker">Idées d’itinéraires</p><h2>Exemples de voyages ${d.en}</h2></div></div><div class="grid g3">${its.map(itinCard).join('')}</div></div></section>
+<section class="sec"><div class="wrap"><div class="sec-h"><div><p class="kicker">${U.name}</p><h2>Autres destinations</h2></div><a class="btn btn-g" href="#/${u}">Tout l’univers ${U.name} ${ic('arrow')}</a></div><div class="grid g4">${others.map(destCard).join('')}</div>${seoBox({title,desc,h1,url:`/${u}/${s}/`,crumbs:cr})}</div></section>
+${ctaBand()}`}};
+
+P.methode=()=>{const cr=[['Accueil','#/'],['Notre méthode','#/methode']];const t='Comment ça marche et tarifs : voyage sur mesure sans frais cachés',ds='Appel découverte gratuit, proposition d’itinéraire, ajustements et carnet de voyage : notre méthode et nos tarifs clairs, sans frais cachés.';
+ return {title:t,desc:ds,h1:'Notre méthode',url:'/methode/',crumbs:cr,html:`
+<div class="wrap">${crumbs(cr,'plain')}<section style="padding:12px 0 40px"><p class="kicker">Comment ça marche</p><h1>Notre méthode</h1><p class="lead">Un voyage sur mesure se construit à deux. Voici comment nous passons de vos premières idées à un carnet de voyage prêt à l’emploi.</p></section>${stepsHtml()}</div>
+<section class="sec"><div class="wrap"><div class="sec-h"><div><p class="kicker">Tarifs</p><h2>Des tarifs clairs, sans frais cachés</h2></div></div>${priceHtml()}</div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><p class="kicker">Nos 10 engagements</p><h2>Notre promesse</h2></div></div>${engHtml()}</div></section>
+<section class="sec"><div class="wrap"><div class="split"><div><h2>Questions fréquentes</h2><div class="faq">
+ <details><summary>L’appel découverte est-il vraiment gratuit ?</summary><p>Oui. Ces 30 minutes servent à comprendre votre projet : où, quand, combien de personnes, budget, envies et incontournables. Vous décidez ensuite librement de continuer.</p></details>
+ <details><summary>Réservez-vous les vols et les hébergements ?</summary><p>Nous vous indiquons les meilleures options et vous accompagnons pas à pas ; vous gardez la main sur vos réservations et ne payez aucune commission cachée.</p></details>
+ <details><summary>Combien de temps faut-il pour recevoir l’itinéraire ?</summary><p>Comptez en général 7 à 10 jours après l’appel découverte pour une première proposition.</p></details>
+ <details><summary>Et si un imprévu arrive pendant le voyage ?</summary><p>Avec la formule Sérénité, vous pouvez nous écrire à tout moment : nous cherchons une alternative avec vous.</p></details>
+</div></div><div class="card sticky"><h3>Prêt à commencer ?</h3><p class="muted">Réservez un créneau de 30 minutes, à l’heure qui vous convient.</p><button class="btn btn-p" type="button" data-act="call" style="width:100%">${ic('phone')}Réserver mon appel découverte gratuit</button></div></div>${seoBox({title:t,desc:ds,h1:'Notre méthode',url:'/methode/',crumbs:cr})}</div></section>`}};
+
+P.about=()=>{const cr=[['Accueil','#/'],['Qui suis-je','#/qui-suis-je']];const t='Qui suis-je : l’architecte de votre voyage sur mesure',ds='Derrière chaque itinéraire, une passion du voyage et des conseils de terrain : découvrez qui conçoit vos voyages sur mesure en Amérique et en Europe.';
+ return {title:t,desc:ds,h1:'L’architecte de votre voyage',url:'/qui-suis-je/',crumbs:cr,html:`
+<div class="wrap">${crumbs(cr,'plain')}</div>
+<section class="sec" style="padding-top:16px"><div class="wrap"><div class="about">
+ <div class="pic ph-soft rv" ${bg(IMG('1503220317375-aaad61436b1b'),'linear-gradient(135deg,#36498a,#c98a4b)')} role="img" aria-label="Voyageur face à un paysage de montagne"></div>
+ <div class="rv"><p class="kicker">Qui suis-je</p><h1>L’architecte de votre voyage</h1>
+ <p class="lead">Tout est né d’une passion. Après des années à organiser mes propres voyages, des parcs de l’Ouest américain aux îles grecques, j’ai voulu mettre cette expérience au service de ceux qui rêvent de partir sans passer des semaines à tout préparer.</p>
+ <p>Mon rôle : écouter, comprendre ce que vous voulez vivre, puis dessiner l’itinéraire qui vous ressemble. Je choisis chaque étape comme un architecte choisit ses matériaux, avec le souci du détail, du bon rythme et des temps de trajet maîtrisés.</p>
+ <blockquote class="palin"><p>« Une fois que la mouche du voyage vous a piqué, il n’existe aucun antidote : vous en serez heureusement infecté pour le reste de votre vie. »</p><footer>Michael Palin</footer></blockquote>
+ <div class="row"><button class="btn btn-p" type="button" data-act="call">${ic('phone')}Réserver mon appel découverte gratuit</button><a class="btn btn-g" href="#/contact">M’écrire</a></div></div>
+</div></div></section>
+<section class="sec alt"><div class="wrap"><div class="sec-h"><div><h2>Ils m’ont fait confiance</h2></div></div>${testi()}${seoBox({title:t,desc:ds,h1:'L’architecte de votre voyage',url:'/qui-suis-je/',crumbs:cr})}</div></section>`}};
+
+/* cartes cadeaux */
+const G={u:'europe',amt:200,custom:'',from:'',to:'',msg:'',mail:''};
+P.gift=q=>{if(q.u&&UNIV[q.u])G.u=q.u;const cr=[['Accueil','#/'],['Cartes cadeaux','#/cartes-cadeaux']];const t='Carte cadeau voyage sur mesure : l’Amérique ou l’Europe en cadeau',ds='Offrez un voyage sur mesure : carte cadeau Amérique ou Europe, montant libre, message personnalisé, envoi par email ou à imprimer.';
+ return {title:t,desc:ds,h1:'Offrez un voyage sur mesure',url:'/cartes-cadeaux/',crumbs:cr,html:`
+<div class="wrap">${crumbs(cr,'plain')}<section style="padding:12px 0 32px"><p class="kicker">Cartes cadeaux</p><h1>Offrez un voyage sur mesure</h1><p class="lead">La carte cadeau est valable un an sur toutes nos prestations : itinéraire sur mesure, carnet de voyage ou formule Sérénité.</p></section>
+<div class="gift-l" style="padding-bottom:64px">
+ <form id="giftf" class="card" novalidate>
+  <fieldset><legend>Choisissez votre carte</legend><div class="ucho">
+   <label><input type="radio" name="gu" value="amerique" ${G.u==='amerique'?'checked':''}><span><b>L’Amérique en cadeau</b><span>Des grands espaces américains et canadiens à l’Amérique du Sud</span></span></label>
+   <label><input type="radio" name="gu" value="europe" ${G.u==='europe'?'checked':''}><span><b>L’Europe en cadeau</b><span>Du soleil de la Méditerranée aux fjords du Nord</span></span></label>
+  </div></fieldset>
+  <fieldset><legend>Montant</legend><div class="amts">${[100,190,290,390].map(a=>`<label class="opt"><input type="radio" name="ga" value="${a}" ${!G.custom&&G.amt===a?'checked':''}>${eur(a)}</label>`).join('')}<label class="opt"><input type="radio" name="ga" value="c" ${G.custom?'checked':''}>Autre montant</label></div>
+   <div class="field" id="g-cust-w" style="margin-top:12px;${G.custom?'':'display:none'}"><label for="g-cust">Montant libre (50 à 2 000 €)</label><input id="g-cust" type="number" inputmode="numeric" min="50" max="2000" step="10" value="${esc(G.custom)}" aria-describedby="e-cust"><span class="err" id="e-cust"></span></div></fieldset>
+  <div class="fgrid">
+   <div class="field"><label for="g-from">De la part de</label><input id="g-from" type="text" autocomplete="name" value="${esc(G.from)}" aria-describedby="e-from" placeholder="Ex. Sophie et Antoine"><span class="err" id="e-from"></span></div>
+   <div class="field"><label for="g-to">Pour</label><input id="g-to" type="text" value="${esc(G.to)}" aria-describedby="e-to" placeholder="Ex. Papa et Maman"><span class="err" id="e-to"></span></div>
+   <div class="field full"><label for="g-msg">Message <span class="hint" id="g-cnt">(0/160)</span></label><textarea id="g-msg" maxlength="160" placeholder="Pour vos 30 ans de mariage, partez où vous voulez !">${esc(G.msg)}</textarea></div>
+   <div class="field full"><label for="g-mail">Email du bénéficiaire <span class="hint">(facultatif — sinon, carte à imprimer)</span></label><input id="g-mail" type="email" autocomplete="off" value="${esc(G.mail)}" aria-describedby="e-mail"><span class="err" id="e-mail"></span></div>
+  </div>
+  <div class="row" style="margin-top:22px"><button class="btn btn-p" type="submit">${ic('lock')}<span id="g-pay">Payer</span></button><span class="hint">Paiement simulé, aucun débit</span></div>
+ </form>
+ <div class="sticky"><p class="lbl" style="margin-bottom:10px">Aperçu de la carte</p><div id="g-prev"></div>
+ ${S.gifts.length?`<div style="margin-top:24px"><p class="lbl">Cartes déjà offertes (démo)</p><ul class="reqs">${S.gifts.slice().reverse().map(g=>`<li><span><b>${esc(g.code)}</b><br><span class="muted">Pour ${esc(g.to)} · ${eur(g.amt)}</span></span><span class="pill ${g.u==='amerique'?'am':''}">${UNIV[g.u].name}</span></li>`).join('')}</ul></div>`:''}</div>
+</div>${seoBox({title:t,desc:ds,h1:'Offrez un voyage sur mesure',url:'/cartes-cadeaux/',crumbs:cr})}<div style="height:56px"></div></div>`}};
+const gAmt=()=>G.custom?Number(G.custom)||0:G.amt;
+function giftCardHtml(code){const U=UNIV[G.u];const img=G.u==='amerique'?IMG('1469474968028-56623f02e42e'):IMG('1533105079780-92b9be482077');
+ return `<div class="gprev ph" ${bg(img,U.g)}><div class="top"><b>${BRAND}</b><span style="font-size:.85rem;opacity:.9">Carte cadeau</span></div><div><div class="t">${G.u==='amerique'?'L’Amérique en cadeau':'L’Europe en cadeau'}</div><div class="amt">${eur(gAmt())}</div></div><div><div class="msg">${esc(G.msg||'Un voyage sur mesure, imaginé rien que pour vous.')}</div><small>Pour ${esc(G.to||'…')} · de la part de ${esc(G.from||'…')}${code?` · code ${code}`:''}</small></div></div>`}
+function giftPreview(){const p=$('#g-prev');if(!p)return;p.innerHTML=giftCardHtml();$('#g-pay').textContent='Payer '+eur(gAmt())+' (mode test)';$('#g-cnt').textContent=`(${G.msg.length}/160)`}
+
+/* contact */
+P.contact=q=>{const cr=[['Accueil','#/'],['Contact','#/contact']];const t='Demande d’itinéraire sur mesure : contact et appel découverte',ds='Décrivez votre projet de voyage en Amérique ou en Europe : dates, voyageurs, budget et envies. Réponse sous 48 h, appel découverte gratuit.';
+ const it=q.it?ITIN.find(i=>i.id===q.it):null;const u=q.u||(it?D(it.d).u:'');const ds2=q.d||(it?it.d:'');
+ return {title:t,desc:ds,h1:'Demande d’itinéraire',url:'/contact/',crumbs:cr,html:`
+<div class="wrap">${crumbs(cr,'plain')}<section style="padding:12px 0 32px"><p class="kicker">Contact</p><h1>Demande d’itinéraire</h1><p class="lead">Quelques informations suffisent pour préparer notre appel découverte. Réponse sous 48 heures.</p></section>
+<div class="split" style="padding-bottom:64px"><div id="c-zone">${contactForm(u,ds2,it)}</div>
+<aside class="contact-side sticky"><a class="cline" href="tel:+33612345678"><span class="ic">${ic('phone')}</span><span><b>06 12 34 56 78</b><span>Du lundi au vendredi, 9 h – 19 h</span></span></a><a class="cline" href="mailto:bonjour@deuxhorizons-voyages.fr"><span class="ic">${ic('mail')}</span><span><b>bonjour@deuxhorizons-voyages.fr</b><span>Réponse sous 48 h</span></span></a>
+<div class="card"><h3>Préférez-vous en parler ?</h3><p class="muted">Réservez directement un créneau de 30 minutes, gratuit et sans engagement.</p><button class="btn btn-p" type="button" data-act="call" style="width:100%">${ic('cal')}Réserver mon appel découverte gratuit</button></div>
+<div id="c-reqs">${reqList()}</div></aside></div>${seoBox({title:t,desc:ds,h1:'Demande d’itinéraire',url:'/contact/',crumbs:cr})}<div style="height:56px"></div></div>`}};
+const destOpts=(u,sel)=>`<option value="">Pas encore décidé</option>`+DEST.filter(d=>!u||d.u===u).map(d=>`<option value="${d.s}" ${sel===d.s?'selected':''}>${d.n}</option>`).join('');
+function contactForm(u,ds,it){return `<form id="cf" class="card" novalidate>
+ ${it?`<div class="testmode" style="background:var(--bg2);border-color:var(--line)">${ic('route')}<span>Inspiré de l’itinéraire <b>${esc(it.t)}</b> (${it.days} jours). Nous l’adapterons à vos envies.</span></div>`:''}
+ <fieldset><legend>Destination souhaitée <span class="err">*</span></legend><div class="ucho" id="c-u" aria-describedby="e-u">
+  <label><input type="radio" name="cu" value="amerique" ${u==='amerique'?'checked':''}><span><b>Amérique</b><span>États-Unis, Canada, Amérique du Sud</span></span></label>
+  <label><input type="radio" name="cu" value="europe" ${u==='europe'?'checked':''}><span><b>Europe</b><span>Italie, Grèce, Portugal, Norvège, Écosse…</span></span></label>
+ </div><span class="err" id="e-u"></span></fieldset>
+ <div class="fgrid">
+  <div class="field"><label for="c-d">Pays ou région</label><select id="c-d">${destOpts(u,ds)}</select></div>
+  <div class="field"><label for="c-date">Date de départ envisagée</label><input id="c-date" type="date" aria-describedby="e-date"><span class="err" id="e-date"></span></div>
+  <div class="field"><label for="c-dur">Durée</label><select id="c-dur"><option value="">Je ne sais pas encore</option><option ${it&&it.days<=10?'selected':''}>Moins de 10 jours</option><option ${it&&it.days>10&&it.days<=15?'selected':''}>10 à 15 jours</option><option ${it&&it.days>15?'selected':''}>Plus de 15 jours</option></select></div>
+  <div class="field"><label for="c-pax">Nombre de voyageurs <span class="err">*</span></label><input id="c-pax" type="number" inputmode="numeric" min="1" max="20" value="2" aria-describedby="e-pax"><span class="err" id="e-pax"></span></div>
+  <div class="field full"><label for="c-bud">Budget par personne, hors vols</label><select id="c-bud"><option value="">À définir ensemble</option><option>Moins de 1 500 €</option><option>1 500 à 2 500 €</option><option>2 500 à 4 000 €</option><option>Plus de 4 000 €</option></select></div>
+ </div>
+ <fieldset style="margin-top:18px"><legend>Vos envies</legend><div class="opts">${ENVIES.map(e=>`<label class="opt"><input type="checkbox" name="ce" value="${e}" ${it&&it.env.includes(e)?'checked':''}>${e}</label>`).join('')}</div></fieldset>
+ <div class="fgrid">
+  <div class="field full"><label for="c-msg">Vos incontournables, vos questions</label><textarea id="c-msg" placeholder="Ex. un road trip avec des ados, pas plus de 3 h de route par jour, une nuit insolite…">${it?esc('Bonjour, l’itinéraire « '+it.t+' » nous fait rêver. '):''}</textarea></div>
+  <div class="field"><label for="c-name">Nom et prénom <span class="err">*</span></label><input id="c-name" type="text" autocomplete="name" aria-describedby="e-name"><span class="err" id="e-name"></span></div>
+  <div class="field"><label for="c-mail">Email <span class="err">*</span></label><input id="c-mail" type="email" autocomplete="email" aria-describedby="e-mail2"><span class="err" id="e-mail2"></span></div>
+  <div class="field"><label for="c-tel">Téléphone</label><input id="c-tel" type="tel" autocomplete="tel" aria-describedby="e-tel"><span class="err" id="e-tel"></span></div>
+ </div>
+ <div class="row" style="margin-top:22px"><button class="btn btn-p" type="submit">Envoyer ma demande ${ic('arrow')}</button><span class="hint">* champs obligatoires</span></div>
+</form>`}
+function reqList(){if(!S.reqs.length)return '';return `<div class="card"><h3>Vos demandes envoyées</h3><ul class="reqs">${S.reqs.slice().reverse().map(r=>`<li><span><b>${esc(r.ref)}</b><br><span class="muted">${esc(r.dest)} · ${r.pax} voyageur${r.pax>1?'s':''}</span></span><span class="pill ${r.u==='amerique'?'am':''}">${UNIV[r.u].name}</span></li>`).join('')}</ul></div>`}
+
+P.legal=k=>{const m=k==='cgv';const cr=[['Accueil','#/'],[m?'Conditions générales de vente':'Mentions légales','#/'+k]];const t=m?'Conditions générales de vente':'Mentions légales';const ds=m?'Conditions générales de vente des prestations de conception de voyages sur mesure.':'Mentions légales du site de voyages sur mesure.';
+ return {title:t,desc:ds,h1:t,url:'/'+k+'/',crumbs:cr,html:`<div class="wrap">${crumbs(cr,'plain')}<section class="prose" style="padding:12px 0 72px"><h1>${t}</h1><p class="muted">Contenu provisoire de démonstration — à remplacer par les textes définitifs.</p>${m?`
+<h2>1. Objet</h2><p>Les présentes conditions encadrent la conception d’itinéraires de voyage sur mesure : appel découverte, proposition d’itinéraire, ajustements et carnet de voyage.</p>
+<h2>2. Tarifs</h2><p>Les prix sont indiqués en euros TTC avant toute commande. Aucun frais supplémentaire n’est appliqué sans accord préalable.</p>
+<h2>3. Cartes cadeaux</h2><p>Les cartes cadeaux sont valables douze mois à compter de leur achat, sur l’ensemble des prestations.</p>
+<h2>4. Rétractation</h2><p>Le client dispose d’un délai de quatorze jours, sauf si la prestation a été pleinement exécutée avec son accord.</p>`:`
+<h2>Éditeur du site</h2><p>Deux Horizons (nom provisoire) — entreprise individuelle fictive, 12 rue des Voyageurs, 21000 Dijon. Téléphone : 06 12 34 56 78.</p>
+<h2>Hébergement</h2><p>Hébergeur à préciser.</p>
+<h2>Données personnelles</h2><p>Les informations saisies dans les formulaires servent uniquement à répondre à votre demande. Vous pouvez demander leur suppression à tout moment.</p>
+<h2>Crédits photos</h2><p>Photographies libres de droits (Unsplash).</p>`}</section></div>`}};
+P.nf=()=>({title:'Page introuvable',desc:'Cette page n’existe pas.',h1:'Page introuvable',url:'/404',html:`<div class="wrap" style="padding:80px var(--pad)"><h1>Page introuvable</h1><p class="lead">Cette adresse n’existe pas ou plus.</p><a class="btn btn-p" href="#/">Retour à l’accueil</a></div>`});
+
+/* ---------- routeur ---------- */
+let first=true;
+function parse(){const h=location.hash.replace(/^#\/?/,'');const [path,qs]=h.split('?');const q={};(qs||'').split('&').filter(Boolean).forEach(p=>{const [k,v]=p.split('=');q[decodeURIComponent(k)]=decodeURIComponent(v||'')});return {parts:path.split('/').filter(Boolean),q}}
+function route(){
+ const {parts,q}=parse();let pg,navKey=parts[0]||'';
+ Object.assign(F,{u:'',env:'',dur:''});
+ if(!parts.length)pg=P.home();
+ else if(UNIV[parts[0]])pg=parts[1]?P.dest(parts[0],parts[1]):P.univ(parts[0]);
+ else pg=({methode:P.methode,'qui-suis-je':P.about,'cartes-cadeaux':P.gift,contact:P.contact,'mentions-legales':()=>P.legal('mentions-legales'),cgv:()=>P.legal('cgv')}[parts[0]]||P.nf)(q);
+ $('#main').innerHTML=pg.html;setMeta(pg);
+ $$('nav.main a').forEach(a=>{const k=a.getAttribute('href').slice(2);a.toggleAttribute('aria-current',false);if(k===navKey)a.setAttribute('aria-current','page')});
+ closeMenu();
+ if($('#it-list'))fillItins();
+ if($('#g-prev'))giftPreview();
+ reveal(document);
+ if(!first){window.scrollTo({top:0,behavior:'instant'});const h1=$('#main h1');if(h1){h1.tabIndex=-1;h1.focus({preventScroll:true})}}
+ first=false;
+}
+window.addEventListener('hashchange',route);
+
+/* ---------- apparition au défilement ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const io='IntersectionObserver' in window&&!RM?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -6% 0px'}):null;
+function reveal(root){$$('.rv:not(.in)',root).forEach((el,i)=>{if(io){el.style.transitionDelay=(i%4)*60+'ms';io.observe(el)}else el.classList.add('in')})}
+
+/* ---------- menu ---------- */
+function closeMenu(){$('#nav').classList.remove('open');$('.burger').setAttribute('aria-expanded','false')}
+
+/* ---------- dialogue ---------- */
+const dlg=$('#dlg');
+function openDlg(t,html){$('#dlg-t').textContent=t;$('#dlg-b').innerHTML=html;if(!dlg.open)dlg.showModal();dlg.scrollTop=0}
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+
+function showItin(id){const it=ITIN.find(i=>i.id===id);if(!it)return;const d=D(it.d);
+ openDlg(it.t,`<div class="ph-soft" ${bg(IMG(d.img),d.g)} style="aspect-ratio:16/7;border-radius:16px;margin-bottom:16px" role="img" aria-label="${esc(d.n)}"></div>
+ <div class="icard" style="border:0;background:none"><div class="meta"><span>${ic('pin')}${esc(d.n)}</span><span>${ic('clock')}${it.days} jours</span><span>${ic('wallet')}~${eur(it.p)} / pers. sur place, hors vols</span></div></div>
+ <ol class="days-l">${it.st.map(s=>`<li><span>${esc(s)}</span></li>`).join('')}</ol>
+ <p class="muted">Exemple de trame : votre itinéraire sera construit selon vos dates, votre rythme et vos envies.</p>
+ <div class="row"><a class="btn btn-p" href="#/contact?it=${it.id}" data-act="close">Demander ce voyage sur mesure</a><a class="btn btn-g" href="#/${d.u}/${d.s}" data-act="close">Voyage ${esc(d.en)}</a></div>`)}
+
+/* appel découverte */
+const SLOTS=['09:30','11:00','14:00','16:30','18:00'];
+function nextDays(){const r=[];const d=new Date();d.setHours(12,0,0,0);while(r.length<6){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)r.push(new Date(d))}return r}
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fday=d=>d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const booked=(day,i,slot)=>((i*3+SLOTS.indexOf(slot))%4===1)||S.calls.some(c=>c.day===day&&c.slot===slot);
+function showCall(){const days=nextDays();
+ openDlg('Réserver mon appel découverte gratuit',`<p class="muted">30 minutes au téléphone pour parler de votre projet : où, quand, combien de personnes, budget, envies et incontournables. Gratuit et sans engagement.</p>
+ <form id="callf" novalidate>
+ <fieldset><legend>1. Choisissez un jour</legend><div class="opts">${days.map((d,i)=>`<label class="opt"><input type="radio" name="kday" value="${iso(d)}" data-i="${i}">${d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</label>`).join('')}</div><span class="err" id="e-kday"></span></fieldset>
+ <fieldset><legend>2. Choisissez un créneau</legend><div class="opts" id="k-slots"><span class="hint">Sélectionnez d’abord un jour.</span></div><span class="err" id="e-kslot"></span></fieldset>
+ <div class="fgrid">
+  <div class="field full"><label for="k-name">Nom et prénom</label><input id="k-name" type="text" autocomplete="name" aria-describedby="e-kname"><span class="err" id="e-kname"></span></div>
+  <div class="field"><label for="k-tel">Téléphone</label><input id="k-tel" type="tel" autocomplete="tel" placeholder="06 00 00 00 00" aria-describedby="e-ktel"><span class="err" id="e-ktel"></span></div>
+  <div class="field"><label for="k-mail">Email (pour la confirmation)</label><input id="k-mail" type="email" autocomplete="email" aria-describedby="e-kmail"><span class="err" id="e-kmail"></span></div>
+  <div class="field full"><label for="k-u">Votre projet concerne</label><select id="k-u"><option value="amerique">L’Amérique</option><option value="europe">L’Europe</option><option value="">Je ne sais pas encore</option></select></div>
+ </div>
+ <div class="row" style="margin-top:20px"><button class="btn btn-p" type="submit">${ic('check')}Confirmer mon appel</button></div>
+ </form>`);
+ const {parts}=parse();if(UNIV[parts[0]])$('#k-u').value=parts[0];
+}
+function renderSlots(){const r=$('input[name=kday]:checked');if(!r)return;const i=+r.dataset.i;
+ $('#k-slots').innerHTML=SLOTS.map(s=>{const b=booked(r.value,i,s);return `<label class="opt"><input type="radio" name="kslot" value="${s}" ${b?'disabled':''}>${s.replace(':',' h ')}${b?'<span class="sr"> (complet)</span>':''}</label>`}).join('')}
+
+/* ---------- validation ---------- */
+function setErr(inp,errId,msg){const e=$('#'+errId);if(e)e.textContent=msg||'';if(inp){if(msg)inp.setAttribute('aria-invalid','true');else inp.removeAttribute('aria-invalid')}return !msg}
+const okMail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+const okTel=v=>{const d=v.replace(/[^\d+]/g,'');return /^(\+33|0)\d{9}$/.test(d)||/^\+\d{10,14}$/.test(d)};
+
+/* ---------- événements ---------- */
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act],[data-f]');if(!b)return;
+ if(b.dataset.f){F[b.dataset.f]=b.dataset.v;$$('[data-f="'+b.dataset.f+'"]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));fillItins();return}
+ const a=b.dataset.act;
+ if(a==='menu'){const o=$('#nav').classList.toggle('open');b.setAttribute('aria-expanded',String(o))}
+ else if(a==='close'){dlg.close()}
+ else if(a==='call'){closeMenu();showCall()}
+ else if(a==='itin'){showItin(b.dataset.id)}
+ else if(a==='fclear'){F.u='';F.env='';F.dur='';const {parts}=parse();route()}
+ else if(a==='redir'){const r=REDIR[+$('#old-url').value];toast(`${r[0]} ${r[1]} → 301 vers ${r[2]}`);location.hash='#'+(r[2].replace(/\/$/,'')||'/')}
+ else if(a==='reset'){try{localStorage.removeItem(KEY)}catch(x){}S=fresh();Object.assign(F,{u:'',env:'',dur:''});Object.assign(G,{u:'europe',amt:200,custom:'',from:'',to:'',msg:'',mail:''});if(dlg.open)dlg.close();route();toast('Démo réinitialisée')}
+ else if(a==='print'){window.print()}
+ else if(a==='gmail'){toast('Carte envoyée à '+b.dataset.to+' (simulation)')}
+});
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.dataset.fs){F[t.dataset.fs]=t.value;fillItins()}
+ if(t.name==='kday'){renderSlots();setErr(null,'e-kday','')}
+ if(t.name==='kslot')setErr(null,'e-kslot','');
+ if(t.name==='cu'){const sel=$('#c-d');sel.innerHTML=destOpts(t.value,'');setErr(null,'e-u','')}
+ if(t.name==='gu'){G.u=t.value;giftPreview()}
+ if(t.name==='ga'){if(t.value==='c'){G.custom=$('#g-cust').value||'250';$('#g-cust').value=G.custom;$('#g-cust-w').style.display=''}else{G.custom='';G.amt=+t.value;$('#g-cust-w').style.display='none'}giftPreview()}
+});
+document.addEventListener('input',e=>{
+ const t=e.target,map={'g-from':'from','g-to':'to','g-msg':'msg','g-mail':'mail','g-cust':'custom'};
+ if(map[t.id]){G[map[t.id]]=t.value;giftPreview()}
+ if(t.getAttribute('aria-invalid')==='true'){t.removeAttribute('aria-invalid');const d=t.getAttribute('aria-describedby');if(d&&$('#'+d))$('#'+d).textContent=''}
+});
+document.addEventListener('submit',e=>{
+ const f=e.target;e.preventDefault();
+ if(f.id==='callf'){
+  const day=$('input[name=kday]:checked',f),slot=$('input[name=kslot]:checked',f),n=$('#k-name'),tel=$('#k-tel'),m=$('#k-mail');
+  const ok=[setErr(null,'e-kday',day?'':'Choisissez un jour.'),setErr(null,'e-kslot',slot?'':'Choisissez un créneau horaire.'),setErr(n,'e-kname',n.value.trim().length>1?'':'Indiquez votre nom.'),setErr(tel,'e-ktel',okTel(tel.value)?'':'Numéro de téléphone invalide (ex. 06 12 34 56 78).'),setErr(m,'e-kmail',okMail(m.value.trim())?'':'Adresse email invalide.')];
+  if(ok.includes(false)){const fi=f.querySelector('[aria-invalid=true]')||f.querySelector('input');fi&&fi.focus();return}
+  const c={day:day.value,slot:slot.value,name:n.value.trim(),tel:tel.value.trim(),mail:m.value.trim(),u:$('#k-u').value};S.calls.push(c);save();
+  const dd=new Date(c.day+'T12:00');
+  openDlg('Votre appel est réservé',`<div class="ok-box"><h3>${ic('check')}C’est noté, ${esc(c.name.split(' ')[0])} !</h3><dl><dt>Date</dt><dd>${fday(dd)}</dd><dt>Heure</dt><dd>${c.slot.replace(':',' h ')} (30 min)</dd><dt>Nous vous appelons au</dt><dd>${esc(c.tel)}</dd><dt>Projet</dt><dd>${c.u?UNIV[c.u].name:'À définir ensemble'}</dd></dl><p class="muted" style="margin:0">Pour gagner du temps, pensez à vos dates, au nombre de voyageurs, à votre budget et à vos incontournables.</p></div><div class="row" style="margin-top:18px"><button class="btn btn-p" type="button" data-act="close">Parfait</button><a class="btn btn-g" href="#/contact${c.u?'?u='+c.u:''}" data-act="close">Préciser mon projet par écrit</a></div>`);
+  toast('Email de confirmation envoyé à '+c.mail+' (simulation)');
+ }
+ else if(f.id==='cf'){
+  const u=$('input[name=cu]:checked',f),pax=$('#c-pax'),date=$('#c-date'),n=$('#c-name'),m=$('#c-mail'),tel=$('#c-tel');
+  const today=iso(new Date());
+  const ok=[setErr(null,'e-u',u?'':'Choisissez l’Amérique ou l’Europe.'),setErr(date,'e-date',!date.value||date.value>today?'':'La date de départ doit être dans le futur.'),setErr(pax,'e-pax',+pax.value>=1&&+pax.value<=20?'':'Entre 1 et 20 voyageurs.'),setErr(n,'e-name',n.value.trim().length>1?'':'Indiquez votre nom.'),setErr(m,'e-mail2',okMail(m.value.trim())?'':'Adresse email invalide.'),setErr(tel,'e-tel',!tel.value.trim()||okTel(tel.value)?'':'Numéro de téléphone invalide.')];
+  if(ok.includes(false)){const fi=f.querySelector('[aria-invalid=true]')||(u?null:f.querySelector('input[name=cu]'));fi&&fi.focus();return}
+  S.seq++;const dsel=$('#c-d');const r={ref:'DH-2026-'+String(S.seq).padStart(4,'0'),u:u.value,dest:dsel.value?D(dsel.value).n:UNIV[u.value].name,pax:+pax.value,date:date.value,dur:$('#c-dur').value,bud:$('#c-bud').value,env:$$('input[name=ce]:checked',f).map(x=>x.value),name:n.value.trim(),mail:m.value.trim()};
+  S.reqs.push(r);save();
+  $('#c-zone').innerHTML=`<div class="ok-box" tabindex="-1" id="c-ok"><h3>${ic('check')}Demande envoyée</h3><p>Merci ${esc(r.name.split(' ')[0])} ! Votre demande <b>${r.ref}</b> est bien reçue. Nous vous recontactons sous 48 h pour fixer l’appel découverte.</p><dl><dt>Destination</dt><dd>${esc(r.dest)}</dd><dt>Départ</dt><dd>${r.date?new Date(r.date+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'Dates flexibles'}</dd><dt>Voyageurs</dt><dd>${r.pax}</dd><dt>Durée</dt><dd>${esc(r.dur||'À définir')}</dd><dt>Budget</dt><dd>${esc(r.bud||'À définir ensemble')}</dd><dt>Envies</dt><dd>${r.env.length?esc(r.env.join(', ')):'—'}</dd></dl><div class="row"><button class="btn btn-p" type="button" data-act="call">${ic('cal')}Réserver l’appel maintenant</button><a class="btn btn-g" href="#/${r.u}">Continuer la visite</a></div></div>`;
+  $('#c-reqs').innerHTML=reqList();$('#c-ok').focus();
+  toast('Accusé de réception envoyé à '+r.mail+' (simulation)');
+ }
+ else if(f.id==='giftf'){
+  const fr=$('#g-from'),to=$('#g-to'),ml=$('#g-mail'),cu=$('#g-cust');const a=gAmt();
+  const ok=[setErr(G.custom?cu:null,'e-cust',a>=50&&a<=2000?'':'Montant entre 50 et 2 000 €.'),setErr(fr,'e-from',fr.value.trim()?'':'Indiquez de qui vient le cadeau.'),setErr(to,'e-to',to.value.trim()?'':'Indiquez le bénéficiaire.'),setErr(ml,'e-mail',!ml.value.trim()||okMail(ml.value.trim())?'':'Adresse email invalide.')];
+  if(ok.includes(false)){const fi=f.querySelector('[aria-invalid=true]');fi&&fi.focus();return}
+  openDlg('Paiement sécurisé',`<div class="testmode">${ic('info')}<span><b>Mode test</b> — aucun paiement réel. Les coordonnées de la carte de test sont pré-remplies.</span></div>
+  <form id="payf" novalidate><p style="margin-bottom:16px">${G.u==='amerique'?'L’Amérique':'L’Europe'} en cadeau · <b>${eur(a)}</b></p><div class="fgrid">
+   <div class="field full"><label for="p-num">Numéro de carte</label><input id="p-num" type="text" inputmode="numeric" autocomplete="off" value="4242 4242 4242 4242" aria-describedby="e-pnum"><span class="err" id="e-pnum"></span></div>
+   <div class="field"><label for="p-exp">Expiration (MM/AA)</label><input id="p-exp" type="text" inputmode="numeric" value="12/29" aria-describedby="e-pexp"><span class="err" id="e-pexp"></span></div>
+   <div class="field"><label for="p-cvc">Cryptogramme</label><input id="p-cvc" type="text" inputmode="numeric" value="123" aria-describedby="e-pcvc"><span class="err" id="e-pcvc"></span></div>
+  </div><div class="row" style="margin-top:20px"><button class="btn btn-p" type="submit" id="p-btn">${ic('lock')}Payer ${eur(a)}</button></div></form>`);
+ }
+ else if(f.id==='payf'){
+  const num=$('#p-num'),exp=$('#p-exp'),cvc=$('#p-cvc');
+  const ok=[setErr(num,'e-pnum',num.value.replace(/\s/g,'').length===16?'':'16 chiffres attendus.'),setErr(exp,'e-pexp',/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp.value.trim())?'':'Format MM/AA.'),setErr(cvc,'e-pcvc',/^\d{3}$/.test(cvc.value.trim())?'':'3 chiffres.')];
+  if(ok.includes(false))return;
+  const btn=$('#p-btn');btn.disabled=true;btn.innerHTML='<span class="spin" aria-hidden="true"></span>Paiement en cours…';
+  setTimeout(()=>{
+   const code='DH-'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+   S.gifts.push({code,u:G.u,amt:gAmt(),to:G.to,from:G.from});save();
+   $('#print').innerHTML=giftCardHtml(code)+`<p>Carte valable 12 mois · à utiliser sur ${location.host||'le site'} ou au 06 12 34 56 78</p>`;
+   openDlg('Paiement accepté',`<div class="ok-box"><h3>${ic('check')}Merci pour votre cadeau !</h3><p>Paiement de test validé. Code de la carte : <b class="mono">${code}</b></p></div><div style="margin:18px 0">${giftCardHtml(code)}</div><div class="row"><button class="btn btn-p" type="button" data-act="print">${ic('print')}Imprimer / enregistrer en PDF</button>${G.mail?`<button class="btn btn-g" type="button" data-act="gmail" data-to="${esc(G.mail)}">${ic('mail')}Renvoyer par email</button>`:''}</div>`);
+   toast(G.mail?'Carte cadeau envoyée à '+G.mail+' (simulation)':'Confirmation de commande envoyée (simulation)');
+   dlg.addEventListener('close',function h(){dlg.removeEventListener('close',h);if(location.hash.startsWith('#/cartes-cadeaux')){Object.assign(G,{from:'',to:'',msg:'',mail:''});route()}});
+  },900);
+ }
+});
+
+/* pied de page */
+$('#ft-am').innerHTML=`<li><a href="#/amerique">Voyages en Amérique</a></li>`+DEST.filter(d=>d.u==='amerique').map(d=>`<li><a href="#/amerique/${d.s}">${d.n}</a></li>`).join('');
+$('#ft-eu').innerHTML=`<li><a href="#/europe">Voyages en Europe</a></li>`+DEST.filter(d=>d.u==='europe').map(d=>`<li><a href="#/europe/${d.s}">${d.n}</a></li>`).join('');
+route();
+})();
+</script>
 </body>
 </html>
