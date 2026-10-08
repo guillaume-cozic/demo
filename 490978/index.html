@@ -2,20 +2,1061 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>ERP atelier sur mesure</title>
+<meta name="description" content="Petit ERP pour atelier de fabrication sur mesure : suivi de chaque affaire du devis à la livraison, avec commande, achats fournisseurs, planning de production automatique, emballage, expédition et documents imprimables.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F2F3F5;--panel:#FFFFFF;--panel-2:#F7F8FA;--ink:#1A1F26;--muted:#56606C;--line:#DDE1E6;--line-2:#C2C8D0;
+  --accent:#1F4F7A;--accent-ink:#FFFFFF;--accent-soft:#E2ECF5;--accent-text:#1A4469;
+  --ok:#1B6B3F;--ok-soft:#DEF0E4;--warn:#8A4A00;--warn-soft:#FAEBD3;--bad:#A3262E;--bad-soft:#F9E0E1;--info:#245592;--info-soft:#E1EAF6;--vio:#5A3F98;--vio-soft:#ECE6F7;--teal:#11625E;--teal-soft:#DCEFEC;--gray:#4E5660;--gray-soft:#E9ECEF;
+  --h0:#1F4F7A;--s0:#E2ECF5;--h1:#8A4A00;--s1:#FAEBD3;--h2:#1B6B3F;--s2:#DEF0E4;--h3:#5A3F98;--s3:#ECE6F7;--h4:#A3262E;--s4:#F9E0E1;--h5:#11625E;--s5:#DCEFEC;
+  --shadow:0 1px 2px rgba(20,28,38,.05),0 3px 10px rgba(20,28,38,.05);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F1216;--panel:#161B21;--panel-2:#1C222A;--ink:#E5E9EE;--muted:#A1AAB5;--line:#29313A;--line-2:#3C4651;
+  --accent:#7EB3E6;--accent-ink:#0A1E31;--accent-soft:#17283A;--accent-text:#A3CBF1;
+  --ok:#74D29D;--ok-soft:#14301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--vio:#C3B0F2;--vio-soft:#2A2440;--teal:#7FD6CD;--teal-soft:#123230;--gray:#B8C0C8;--gray-soft:#252C34;
+  --h0:#7EB3E6;--s0:#17283A;--h1:#F0B661;--s1:#352613;--h2:#74D29D;--s2:#14301F;--h3:#C3B0F2;--s3:#2A2440;--h4:#FF9198;--s4:#3B1B1E;--h5:#7FD6CD;--s5:#123230;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25}
+p{margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.92em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{overflow-wrap:anywhere}
+
+.demo-band{background:var(--warn-soft);color:var(--ink);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:10px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+.brand small{display:block;font-weight:500;font-size:11.5px;color:var(--muted)}
+.mark{width:36px;height:36px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.tab .cnt{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--muted)}
+main{padding:20px clamp(16px,2vw,32px) 56px}
+@media (max-width:760px){#nav{order:3;width:100%;flex:none}.top .newbtn{margin-left:auto}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13.5px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=number],input[type=date],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
+.ck{display:flex;align-items:center;gap:10px;min-height:44px;padding:4px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer}
+.ck:has(input:checked){background:var(--ok-soft);border-color:var(--ok)}
+.ck input{width:20px;height:20px;accent-color:var(--ok);margin:0;flex:none}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:16px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:23px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-vio{background:var(--vio-soft);color:var(--vio)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}.b-teal{background:var(--teal-soft);color:var(--teal)}
+.stack{display:grid;gap:16px;min-width:0}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));margin-bottom:16px}
+.kpi{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 12px;text-align:left;cursor:pointer;align-items:center}
+.kpi:hover{border-color:var(--line-2)}
+.kpi-i{grid-row:span 3;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text)}
+.kpi.warn .kpi-i{background:var(--warn-soft);color:var(--warn)}.kpi.bad .kpi-i{background:var(--bad-soft);color:var(--bad)}
+.kpi-l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi-v{font-size:23px;font-weight:700}
+.kpi-s{font-size:12.5px;color:var(--muted)}
+.dash{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.dash{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}
+@media (min-width:1600px){.dash{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr)}}
+.flow{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(118px,100%),1fr))}
+.flow button{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;min-height:44px;min-width:0;border-top:4px solid var(--sc,var(--line-2))}
+.flow button:hover{border-color:var(--line-2)}
+.flow .fl{font-size:13px;font-weight:600;color:var(--muted)}
+.flow .fv{font-size:22px;font-weight:700}
+.flow .fs{font-size:12px;color:var(--muted)}
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.task{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;min-height:44px}
+.task:hover{background:var(--panel-2)}
+.task .dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--info)}
+.task.warn .dot{background:var(--warn)}.task.bad .dot{background:var(--bad)}
+.task .tt{flex:1;min-width:0;overflow-wrap:anywhere}
+.task .tt small{display:block;color:var(--muted)}
+.load{display:grid;gap:10px}
+.lrow{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 48px;gap:10px;align-items:center;font-size:13.5px}
+.bar{height:8px;background:var(--gray-soft);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar i.hi{background:var(--warn)}.bar i.over{background:var(--bad)}
+.autos{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.autos li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;font-size:13.5px}
+.autos .zi{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--teal-soft);color:var(--teal);grid-row:span 2}
+.autos small{color:var(--muted)}
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:13.5px}
+.feed li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;overflow-wrap:anywhere}
+.feed .fd{color:var(--muted);font-family:var(--mono);font-size:12px;padding-top:2px}
+.lnk{background:none;border:0;padding:0;color:var(--accent-text);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;min-height:24px}
+
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:flex-end}
+.filters .field{flex:1 1 170px}
+.filters .grow{flex:3 1 260px}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{padding-left:38px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--panel)}
+.seg button{min-height:42px;border:0;background:transparent;padding:0 14px;display:inline-flex;gap:6px;align-items:center;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-text)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:0 14px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.kwrap{overflow-x:auto;position:relative;padding-bottom:6px}
+.kanban{display:grid;grid-template-columns:repeat(7,minmax(220px,1fr));gap:12px;min-width:1610px}
+@media (min-width:1640px){.kanban{min-width:0}}
+.kcol{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0;border-top:4px solid var(--sc,var(--line-2))}
+.kcol h2{font-size:14px;display:flex;justify-content:space-between;gap:6px;padding:2px 4px}
+.kcard{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;box-shadow:var(--shadow);min-width:0}
+.kcard:hover{border-color:var(--line-2)}
+.kc-top{display:flex;justify-content:space-between;gap:6px;align-items:center;flex-wrap:wrap}
+.kc-t{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.kc-b{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.kempty{font-size:13px;color:var(--muted);padding:8px 4px}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--panel-2)}
+.t-devis td input,.t-devis td select{min-height:40px;padding:6px 8px}
+.t-devis{min-width:1000px}
+.tag{display:inline-block;font-size:12px;font-weight:600;border-radius:6px;padding:2px 8px}
+.tag.mat{background:var(--info-soft);color:var(--info)}.tag.mo{background:var(--accent-soft);color:var(--accent-text)}.tag.st{background:var(--vio-soft);color:var(--vio)}
+
+.fhead{display:grid;gap:14px;margin-bottom:16px}
+.fhead .t-row{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.fhead h1{font-size:22px;overflow-wrap:anywhere}
+.figs{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(160px,100%),1fr))}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:0}
+.fig span{display:block;font-size:12.5px;color:var(--muted);font-weight:600}
+.fig strong{font-size:17px}
+.steps{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:6px;grid-template-columns:repeat(6,minmax(0,1fr))}
+@media (max-width:640px){.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.steps button{width:100%;min-height:56px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);border-top:4px solid var(--line-2);background:var(--panel);cursor:pointer;text-align:left;font-weight:600;font-size:14px;color:var(--muted)}
+.steps button small{font-weight:500;font-size:12px}
+.steps .done button{border-top-color:var(--ok);color:var(--ink)}
+.steps .cur button{border-top-color:var(--accent);color:var(--ink)}
+.steps button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.steps button:disabled{cursor:not-allowed;opacity:.65}
+.flay{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1150px){.flay{grid-template-columns:minmax(0,1fr) 360px}}
+@media (min-width:1700px){.flay{grid-template-columns:minmax(0,1fr) 420px}}
+.note{display:flex;gap:10px;align-items:flex-start;border-radius:10px;padding:10px 14px;font-size:14px;background:var(--info-soft);color:var(--info)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}.note.bad{background:var(--bad-soft);color:var(--bad)}.note.ok{background:var(--ok-soft);color:var(--ok)}.note.teal{background:var(--teal-soft);color:var(--teal)}
+.note svg{margin-top:2px}
+.totals{display:grid;gap:4px;max-width:420px;margin-left:auto;font-size:14px}
+.totals div{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.totals .big{font-size:17px;font-weight:700;border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.totals input{width:90px;min-height:40px;text-align:right}
+.dl{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr);gap:6px 12px;margin:0;font-size:14px}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0;overflow-wrap:anywhere}
+.split{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.split{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.empty{text-align:center;padding:32px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px}
+
+.pl-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.pl-tools .wk{font-weight:700;min-width:0}
+.pgrid{display:grid;min-width:880px}
+.pgrid>div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px;min-width:0}
+.ph{background:var(--panel-2);font-size:13px;font-weight:600;color:var(--muted)}
+.ph.today{color:var(--accent-text);background:var(--accent-soft)}
+.pp{background:var(--panel-2);font-weight:600;font-size:14px}
+.pp small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.pc{display:flex;flex-direction:column;gap:5px;min-height:96px}
+.pc.today{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+.pc .bar{height:5px;margin-bottom:2px}
+.opc{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:4px solid var(--hc);background:var(--sc2);border-radius:7px;padding:5px 8px;font-size:12.5px;line-height:1.3;cursor:pointer;min-height:44px;color:var(--ink);overflow-wrap:anywhere}
+.opc b{font-family:var(--mono);font-weight:600;font-size:11.5px;color:var(--hc)}
+.opc.done{opacity:.6;text-decoration:line-through}
+.opc.prev{border-style:dashed;border-left-style:solid}
+.c0{--hc:var(--h0);--sc2:var(--s0)}.c1{--hc:var(--h1);--sc2:var(--s1)}.c2{--hc:var(--h2);--sc2:var(--s2)}.c3{--hc:var(--h3);--sc2:var(--s3)}.c4{--hc:var(--h4);--sc2:var(--s4)}.c5{--hc:var(--h5);--sc2:var(--s5)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{display:inline-block;width:18px;height:12px;border-radius:3px;border:1px solid var(--line-2)}
+.egrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))}
+.ecard{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);min-width:0}
+.ecard .kc-t{font-size:14.5px}
+.colis{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.colis li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 6px 6px 12px;border:1px solid var(--line);border-radius:10px;overflow-wrap:anywhere}
+.ach-side{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1200px){.ach-side{grid-template-columns:minmax(0,1fr) 340px}}
+
+dialog{border:0;border-radius:14px;padding:0;background:var(--panel);color:var(--ink);width:min(620px,calc(100vw - 24px));max-height:calc(100vh - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.wide{width:min(900px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(10,15,22,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:17px}
+.dlg-b{padding:18px 20px 20px;display:grid;gap:14px}
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:100;width:min(460px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px;display:flex;gap:10px;align-items:center}
+
+.doc-wrap{background:var(--gray-soft);padding:12px;border-radius:10px;overflow-x:auto}
+.doc{background:#fff;color:#1a1a1a;padding:28px;border-radius:6px;font-size:13px;line-height:1.45;min-width:0}
+.doc-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2px solid #1F4F7A;padding-bottom:12px;margin-bottom:14px}
+.doc-t{text-align:right}
+.doc-t h3{font-size:19px;color:#1F4F7A;margin-bottom:2px}
+.doc-dest{margin:0 0 14px auto;max-width:280px;border:1px solid #ccc;border-radius:6px;padding:8px 12px}
+.doc table{font-size:12.5px;margin:10px 0}
+.doc th{background:#eef2f6;color:#333}
+.doc th,.doc td{border-bottom:1px solid #ddd;padding:6px 8px}
+.doc .sub td{color:#555;font-style:italic;padding-left:20px}
+.doc .tot{margin-left:auto;max-width:260px}
+.doc .tot div{display:flex;justify-content:space-between;padding:2px 0}
+.doc .tot .b{font-weight:700;border-top:1px solid #999;margin-top:4px;padding-top:4px}
+.doc .sign{display:flex;gap:16px;margin-top:18px;flex-wrap:wrap}
+.doc .sign div{flex:1 1 200px;border:1px solid #bbb;border-radius:6px;height:80px;padding:6px 10px;color:#555}
+.doc-foot{margin-top:18px;font-size:11px;color:#666;border-top:1px solid #ddd;padding-top:8px}
+.labels{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))}
+.label{border:2px solid #1a1a1a;border-radius:6px;padding:10px;font-size:13px;break-inside:avoid}
+.label .big{font-size:22px;font-weight:700;font-family:var(--mono)}
+#printzone{display:none}
+@media print{
+  body{background:#fff}
+  body>*:not(#printzone){display:none!important}
+  #printzone{display:block!important}
+  .doc{padding:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="resetBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M2 20h20M4 20V9l5 3V9l5 3V5h6v15"/></svg></span><span>Atelier ERP<small>Du devis à la livraison</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <button type="button" class="btn primary newbtn" data-act="newAff"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nouvelle affaire</button>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="dlg" aria-labelledby="dlgT"><div class="dlg-h"><h2 id="dlgT"></h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div class="dlg-b" id="dlgB"></div></dialog>
+<div id="toasts" aria-live="polite" role="status"></div>
+<div id="printzone"></div>
+<script>
+(function(){
+'use strict';
+const KEY='erp-atelier-490978-v1',CAP=7;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=(n,d=0)=>(+n||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:d,maximumFractionDigits:d});
+const hf=h=>(Math.round((+h||0)*10)/10).toLocaleString('fr-FR')+' h';
+const nf=n=>(Math.round((+n||0)*100)/100).toLocaleString('fr-FR');
+
+/* ---------- Dates ---------- */
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const pd=s=>{const p=s.split('-').map(Number);return new Date(p[0],p[1]-1,p[2])};
+const isWE=d=>d.getDay()===0||d.getDay()===6;
+const T=new Date();T.setHours(0,0,0,0);
+const TODAY=iso(T);
+function addWD(s,n){const d=pd(s);while(isWE(d))d.setDate(d.getDate()+1);let k=Math.abs(n);const st=n<0?-1:1;while(k>0){d.setDate(d.getDate()+st);if(!isWE(d))k--}return iso(d)}
+function addD(s,n){const d=pd(s);d.setDate(d.getDate()+n);return iso(d)}
+function wdBetween(a,b){let n=0,d=a;while(d<b&&n<400){d=addD(d,1);if(!isWE(pd(d)))n++}return n}
+const fd=s=>s?pd(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';
+const fdd=s=>s?pd(s).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}):'—';
+const fdw=s=>pd(s).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'});
+
+/* ---------- Icônes ---------- */
+const IP={
+dash:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/>',
+truck:'<path d="M1 4h13v12H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18.5" r="2"/><circle cx="17.5" cy="18.5" r="2"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+print:'<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="8" rx="2"/><path d="M6 14h12v8H6z"/>',
+send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+check:'<path d="M20 6 9 17l-5-5"/>',
+x:'<path d="M18 6 6 18M6 6l12 12"/>',
+back:'<path d="M19 12H5M12 19l-7-7 7-7"/>',
+alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+chev:'<path d="m9 18 6-6-6-6"/>',chevl:'<path d="m15 18-6-6 6-6"/>',
+zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+cols:'<rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="4" height="15" rx="1"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'
+};
+const I=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IP[n]}</svg>`;
+
+/* ---------- Référentiels ---------- */
+const POSTES=[{id:'laser',n:'Découpe laser',t:95},{id:'pliage',n:'Pliage / roulage',t:72},{id:'soud',n:'Soudure',t:65},{id:'usin',n:'Usinage CN',t:85},{id:'peint',n:'Peinture / finition',t:58},{id:'mont',n:'Montage & contrôle',t:55}];
+const PM=Object.fromEntries(POSTES.map(p=>[p.id,p]));
+const FOURN=['Aciers du Rhône','Inox Distribution Sud','Visserie Pro Lyon','Roulements & Transmissions','Galva Est','Thermolaquage Martin','Traitements de Surface Isère'];
+const CLIENTS=[
+{n:'Agroalim Bresse SAS',c:'Julie Perrin',a:'14 route de Bourg, 01340 Montrevel-en-Bresse'},
+{n:'Laboratoires Ventoux',c:'Dr Marc Aubert',a:'ZA Les Garrigues, 84200 Carpentras'},
+{n:'Mairie de Saint-Vérand',c:'Service technique',a:'1 place de la Mairie, 38160 Saint-Vérand'},
+{n:'Brasserie des Monts',c:'Léa Fontaine',a:'Chemin du Moulin, 73000 Chambéry'},
+{n:'Plasturgie Ain Industrie',c:'Thomas Girard',a:'Rue de l\'Industrie, 01100 Oyonnax'},
+{n:'SCI Les Terrasses',c:'Nadia Benali',a:'8 montée des Vignes, 69005 Lyon'},
+{n:'Convoyeurs Dauphiné',c:'Pierre Lambert',a:'ZI Centr\'Alp, 38430 Moirans'}];
+const EMET={n:'Atelier Métal Sur Mesure',a:'12 rue des Forges — 38120 Saint-Égrève',s:'SIRET 000 000 000 00000 (fictif) · contact@exemple.test'};
+const STAGES=[{id:'devis',l:'Devis',c:'var(--gray)',b:'b-gray'},{id:'commande',l:'Commande',c:'var(--info)',b:'b-info'},{id:'achats',l:'Achats',c:'var(--warn)',b:'b-warn'},{id:'production',l:'Production',c:'var(--accent)',b:'b-acc'},{id:'emballage',l:'Emballage',c:'var(--vio)',b:'b-vio'},{id:'livraison',l:'Livraison',c:'var(--teal)',b:'b-teal'},{id:'livre',l:'Livré',c:'var(--ok)',b:'b-ok'}];
+const SI=id=>STAGES.findIndex(s=>s.id===id);
+const SL=id=>STAGES[SI(id)];
+const CHECKS=['Pièces protégées (film, cornières)','Plans et notice joints','Étiquettes apposées sur chaque colis','Photos avant fermeture'];
+const TYPES={mat:'Matière',st:'Sous-traitance',mo:'Main d\'œuvre'};
+const ACH_ST={a_commander:['À commander','b-warn'],commande:['Commandé','b-info'],recu:['Reçu','b-ok']};
+
+/* ---------- État ---------- */
+let S;
+const UI={view:'dash',aff:null,step:null,mode:'kanban',q:'',stage:'',achF:'actifs',achFour:'',achQ:'',week:0,span:window.innerWidth>=1500?10:5};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function loadState(){try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&o.v===1&&o.day===TODAY){S=o;return}}}catch(e){}S=seed()}
+const uid=()=>'x'+(S.seq++);
+const getAff=id=>S.affaires.find(a=>a.id===id);
+function log(a,t,d){d=d||TODAY;S.log.unshift({d,t,a:a?a.id:'',ref:a?a.ref:''});if(a)a.histo.unshift({d,t});if(S.log.length>200)S.log.length=200}
+function toast(t){const el=document.createElement('div');el.className='toast';el.innerHTML=I('check')+'<span>'+esc(t)+'</span>';$('#toasts').appendChild(el);setTimeout(()=>el.remove(),4200)}
+
+const M=(lib,four,qte,unite,pu,delai)=>({type:'mat',lib,four,qte,unite,pu,delai});
+const ST=(lib,four,qte,unite,pu,delai)=>({type:'st',lib,four,qte,unite,pu,delai});
+const MO=(lib,poste,h)=>({type:'mo',lib,poste,qte:h,unite:'h',pu:PM[poste].t,delai:0});
+
+function newAff(o){
+  const n=o.num||S.num++;
+  const a={id:'a'+n,n,ref:'AF-26-0'+n,client:o.client,titre:o.titre,desc:o.desc||'',qty:o.qty||1,ech:o.ech,cree:o.cree||TODAY,stage:'devis',
+    devis:{num:'DV-26-0'+n,statut:'brouillon',lignes:(o.lines||[]).map(l=>Object.assign({id:uid()},l)),marge:o.marge??25,envoye:'',accepte:'',motif:''},
+    commande:null,achats:[],ops:[],emb:{type:'Palette',colis:[],checks:[]},livr:{mode:'Transporteur',transp:'',date:'',statut:'',bl:'',recep:'',livreLe:''},histo:[]};
+  S.affaires.unshift(a);return a;
+}
+function tot(a){
+  const g={mat:0,st:0,mo:0};let h=0;
+  a.devis.lignes.forEach(l=>{g[l.type]+=(+l.qte||0)*(+l.pu||0);if(l.type==='mo')h+=(+l.qte||0)});
+  const c=g.mat+g.st+g.mo,ht=Math.round(c*(1+(+a.devis.marge||0)/100));
+  return {c,g,h,ht,tva:ht*.2,ttc:ht*1.2,mg:ht-c};
+}
+const cl=a=>CLIENTS.find(c=>c.n===a.client)||{n:a.client,c:'',a:''};
+
+/* ---------- Planification ---------- */
+function spread(o,cb){let r=+o.h||0,d=o.jour;if(!d)return;let g=0;while(r>0.0001&&g++<60){const h=Math.min(CAP,r);cb(d,h);r-=h;if(r>0.0001)d=addWD(d,1)}}
+function opEnd(o){let l=o.jour;spread(o,d=>{l=d});return l}
+function finPrevue(a){return a.ops.reduce((m,o)=>{const e=opEnd(o);return e&&e>m?e:m},'')}
+function loadMap(ex){const m={};S.affaires.forEach(a=>{if(a===ex)return;a.ops.forEach(o=>{if(o.jour)spread(o,(d,h)=>{const k=o.poste+'|'+d;m[k]=(m[k]||0)+h})})});return m}
+function baseStart(a){
+  let b=addWD(TODAY,0);
+  a.achats.forEach(x=>{if(x.statut==='recu')return;const d=addWD(x.prevu||addWD(TODAY,x.delai),1);if(d>b)b=d});
+  a.ops.forEach(o=>{if(o.fait&&o.jour){const e=opEnd(o);if(e>b)b=e}});
+  return b;
+}
+function schedule(a,start){
+  const m=loadMap(a);let cur=start||baseStart(a);
+  a.ops.forEach(o=>{
+    if(o.fait)return;let d=cur,g=0;
+    while((m[o.poste+'|'+d]||0)+Math.min(o.h,CAP)>CAP+0.001&&g++<80)d=addWD(d,1);
+    o.jour=d;let last=d;
+    spread(o,(dd,h)=>{const k=o.poste+'|'+dd;m[k]=(m[k]||0)+h;last=dd});
+    cur=o.h<=3?last:addWD(last,1);
+  });
+}
+function replanAll(){
+  const list=S.affaires.filter(a=>a.ops.some(o=>!o.fait)).sort((x,y)=>x.ech<y.ech?-1:1);
+  list.forEach(a=>a.ops.forEach(o=>{if(!o.fait)o.jour=''}));
+  list.forEach(a=>schedule(a));
+  return list.length;
+}
+function retard(a){
+  if(a.stage==='livre'||a.stage==='devis')return false;
+  if(a.ech<TODAY)return true;
+  const f=finPrevue(a);return SI(a.stage)<=3&&!!f&&f>=a.ech;
+}
+
+/* ---------- Actions métier ---------- */
+function validateDevis(a){
+  if(!a.devis.lignes.length)return 'Ajoutez au moins une ligne au devis.';
+  for(const l of a.devis.lignes){
+    if(!String(l.lib).trim())return 'Chaque ligne doit avoir une désignation.';
+    if(!(+l.qte>0))return `Quantité manquante sur « ${l.lib} ».`;
+    if(!(+l.pu>0))return `Coût unitaire manquant sur « ${l.lib} ».`;
+    if(l.type!=='mo'&&!l.four)return `Fournisseur manquant sur « ${l.lib} ».`;
+  }
+  if(!a.devis.lignes.some(l=>l.type==='mo'))return 'Ajoutez au moins une opération de main d\'œuvre (elle alimente le planning).';
+  return '';
+}
+function sendDevis(a,d){a.devis.statut='envoye';a.devis.envoye=d||TODAY;log(a,`Devis ${a.devis.num} envoyé au client (${eur(tot(a).ht)} HT)`,d)}
+function accept(a,num,date){
+  a.devis.statut='accepte';a.devis.accepte=date;
+  a.commande={num,date,arc:'ARC-26-0'+a.n};
+  a.achats=a.devis.lignes.filter(l=>l.type!=='mo').map(l=>({id:uid(),lib:l.lib,four:l.four,qte:+l.qte,unite:l.unite,pu:+l.pu,delai:+l.delai||5,type:l.type,statut:'a_commander',bc:'',cmdLe:'',prevu:'',recuLe:''}));
+  a.ops=a.devis.lignes.filter(l=>l.type==='mo').map(l=>({id:uid(),lib:l.lib,poste:l.poste,h:+l.qte,jour:'',fait:false,faitLe:''}));
+  a.ops.push({id:uid(),lib:'Contrôle final & PV qualité',poste:'mont',h:1,jour:'',fait:false,faitLe:'',ctrl:true});
+  a.stage=a.achats.length?'commande':'production';
+  S.auto.acc++;
+  log(a,`Devis accepté — commande client ${num}`,date);
+  log(a,`Automatisme : commande ${a.commande.arc} créée, ${a.achats.length} besoin(s) d'achat générés, ${a.ops.length} opérations planifiées`,date);
+  schedule(a);
+}
+function commanderLot(pairs,date){
+  date=date||TODAY;const groups={};
+  pairs.forEach(p=>{(groups[p[1].four]=groups[p[1].four]||[]).push(p)});
+  const affs=new Set();
+  Object.keys(groups).forEach(f=>{
+    const bc='BC-26-00'+(S.bc++);
+    groups[f].forEach(([a,x])=>{x.statut='commande';x.cmdLe=date;x.prevu=addWD(date,x.delai);x.bc=bc;affs.add(a);if(a.stage==='commande')a.stage='achats'});
+    const byA={};groups[f].forEach(([a,x])=>{(byA[a.id]=byA[a.id]||[]).push(x)});
+    Object.keys(byA).forEach(id=>log(getAff(id),`Bon de commande ${bc} envoyé à ${f} (${byA[id].length} ligne(s))`,date));
+  });
+  affs.forEach(a=>{if(a.stage==='achats')schedule(a)});
+  return Object.keys(groups).length;
+}
+function recevoir(a,x){
+  x.statut='recu';x.recuLe=TODAY;log(a,`Réception : ${x.lib} (${x.four})`);
+  if(a.stage==='achats'&&a.achats.every(y=>y.statut==='recu')){
+    a.stage='production';S.auto.rec++;
+    log(a,'Automatisme : toutes les matières sont reçues → production lancée');
+    schedule(a);
+    toast(`${a.ref} : matières complètes, production lancée automatiquement`);
+  }
+}
+function setOp(a,o,v){
+  if(a.stage!=='production')return;
+  o.fait=v;o.faitLe=v?TODAY:'';
+  log(a,`${v?'Opération terminée':'Opération rouverte'} : ${o.lib} (${PM[o.poste].n})`);
+  if(v&&a.ops.every(x=>x.fait)){
+    a.stage='emballage';S.auto.prod++;
+    log(a,'Automatisme : contrôle final validé → affaire passée en emballage');
+    toast(`${a.ref} : production terminée, passage en emballage`);
+  }
+}
+
+/* ---------- Données de démonstration ---------- */
+function seed(){
+  S={v:1,day:TODAY,num:142,seq:1,bc:52,bl:28,affaires:[],log:[],auto:{acc:0,rec:0,prod:0,emb:0,liv:0}};
+  const W=n=>addWD(TODAY,n);
+  const recvAll=(a,d)=>{a.achats.forEach(x=>{x.statut='recu';x.recuLe=d});a.stage='production';log(a,'Automatisme : toutes les matières sont reçues → production lancée',d)};
+  const planPast=(a,d)=>{schedule(a,d);a.ops.forEach(o=>{if(opEnd(o)<TODAY){o.fait=true;o.faitLe=opEnd(o)}})};
+  const allDone=a=>{a.ops.forEach(o=>{o.fait=true;o.faitLe=opEnd(o)});a.stage='emballage';log(a,'Automatisme : contrôle final validé → affaire passée en emballage',finPrevue(a))};
+
+  let a=newAff({num:130,client:'Agroalim Bresse SAS',titre:'Passerelle de maintenance 6 m avec escalier',desc:'Passerelle acier galvanisé au-dessus de la ligne 3, caillebotis, garde-corps et escalier d\'accès 45°.',qty:1,ech:W(-4),cree:W(-42),marge:26,lines:[
+    M('Profilés UPN 160 et cornières','Aciers du Rhône',220,'kg',2.4,4),M('Caillebotis pressé 30x30','Aciers du Rhône',9,'m²',62,6),M('Boulonnerie HR galvanisée','Visserie Pro Lyon',1,'lot',180,3),
+    MO('Débit et perçage','laser',6),MO('Soudure des modules','soud',28),ST('Galvanisation à chaud','Galva Est',640,'kg',0.95,6),MO('Montage à blanc','mont',6)]});
+  sendDevis(a,W(-40));accept(a,'CMD-AB-2291',W(-36));commanderLot(a.achats.map(x=>[a,x]),W(-36));recvAll(a,W(-28));planPast(a,W(-27));allDone(a);
+  a.emb={type:'Vrac sur camion',colis:[{id:uid(),d:'Passerelle (2 modules)',L:620,l:110,h:120,kg:540},{id:uid(),d:'Escalier + garde-corps',L:380,l:90,h:160,kg:180}],checks:CHECKS.slice()};
+  a.stage='livraison';log(a,'Emballage validé (2 colis)',W(-9));
+  a.livr={mode:'Nos moyens',transp:'Camion atelier',date:W(-6),statut:'livre',bl:'BL-26-0027',recep:'Julie Perrin',livreLe:W(-6)};
+  a.stage='livre';log(a,'Expédition BL-26-0027 — Camion atelier',W(-6));log(a,'Livraison confirmée — réceptionnée par Julie Perrin',W(-6));
+
+  a=newAff({num:133,client:'Convoyeurs Dauphiné',titre:'Rampe de chargement réglable 2,5 t',desc:'Rampe acier larmé, charnière renforcée, béquilles réglables, peinture RAL 7016.',qty:1,ech:W(1),cree:W(-34),marge:28,lines:[
+    M('Tôle larmée 6/8 mm','Aciers du Rhône',5.2,'m²',96,4),M('Tube rectangulaire 80x40x4','Aciers du Rhône',24,'m',11.5,4),M('Axe de charnière Ø40 rectifié','Roulements & Transmissions',2,'u',85,8),
+    MO('Découpe laser des flasques','laser',4),MO('Pliage des rives','pliage',3),MO('Soudure de la structure','soud',16),ST('Thermolaquage RAL 7016','Thermolaquage Martin',1,'forfait',380,5),MO('Montage et essai de charge','mont',4)]});
+  sendDevis(a,W(-32));accept(a,'PO-77812',W(-27));commanderLot(a.achats.map(x=>[a,x]),W(-27));recvAll(a,W(-17));planPast(a,W(-16));allDone(a);
+  a.emb={type:'Palette',colis:[{id:uid(),d:'Rampe sur palette',L:260,l:180,h:40,kg:410}],checks:CHECKS.slice()};
+  a.stage='livraison';log(a,'Emballage validé (1 colis)',W(-2));
+  a.livr={mode:'Transporteur',transp:'Transports Moreau',date:W(-1),statut:'expedie',bl:'BL-26-0028',recep:'',livreLe:''};
+  log(a,'Expédition BL-26-0028 — Transports Moreau',W(-1));
+
+  a=newAff({num:135,client:'SCI Les Terrasses',titre:'Escalier hélicoïdal acier Ø1600',desc:'Escalier intérieur 14 marches, tube central Ø168, marches tôle pliée, rampe ronde Ø42, finition noir sablé.',qty:1,ech:W(4),cree:W(-30),marge:32,lines:[
+    M('Tube central Ø168,3 x 5','Aciers du Rhône',3.2,'m',74,4),M('Tôle S235 5 mm (marches)','Aciers du Rhône',4.5,'m²',58,4),M('Tube rond Ø42 cintré (main courante)','Aciers du Rhône',9,'m',16,6),
+    MO('Découpe laser des marches','laser',5),MO('Pliage des marches','pliage',6),MO('Soudure et assemblage','soud',24),ST('Sablage + thermolaquage noir','Thermolaquage Martin',1,'forfait',640,6),MO('Montage à blanc','mont',6)]});
+  sendDevis(a,W(-28));accept(a,'Commande signée 12/26',W(-24));commanderLot(a.achats.map(x=>[a,x]),W(-24));recvAll(a,W(-16));planPast(a,W(-15));allDone(a);
+  a.emb={type:'Caisse bois',colis:[{id:uid(),d:'Fût central + marches',L:180,l:120,h:110,kg:320}],checks:[CHECKS[0],CHECKS[1]]};
+
+  a=newAff({num:136,client:'Brasserie des Monts',titre:'Capotages inox ligne d\'embouteillage',desc:'3 capots de protection inox 304 brossé avec portes vitrées polycarbonate et charnières inox.',qty:3,ech:W(2),cree:W(-22),marge:30,lines:[
+    M('Tôle inox 304 brossé 1,5 mm','Inox Distribution Sud',14,'m²',54,5),M('Polycarbonate 6 mm découpé','Visserie Pro Lyon',4,'m²',75,4),M('Charnières et poignées inox','Visserie Pro Lyon',12,'u',14,3),
+    MO('Découpe laser','laser',6),MO('Pliage','pliage',9),MO('Soudure TIG et meulage','soud',10),MO('Brossage final','peint',5),MO('Montage portes','mont',4)]});
+  sendDevis(a,W(-21));accept(a,'BDM-2026-118',W(-17));commanderLot(a.achats.map(x=>[a,x]),W(-17));recvAll(a,W(-9));planPast(a,W(-6));
+
+  a=newAff({num:137,client:'Plasturgie Ain Industrie',titre:'Châssis mécanosoudé pour presse 80 t',desc:'Châssis HEA 160 avec platines usinées (planéité 0,1 mm), peinture RAL 5010.',qty:1,ech:W(9),cree:W(-20),marge:27,lines:[
+    M('Poutrelles HEA 160','Aciers du Rhône',14,'m',38,4),M('Tôle S355 15 mm (platines)','Aciers du Rhône',2.5,'m²',145,5),
+    MO('Découpe laser des platines','laser',5),MO('Soudure du châssis','soud',30),MO('Usinage des platines','usin',12),MO('Peinture RAL 5010','peint',6),MO('Montage et contrôle géométrique','mont',3)]});
+  sendDevis(a,W(-18));accept(a,'OA-55120',W(-15));commanderLot(a.achats.map(x=>[a,x]),W(-15));recvAll(a,W(-8));planPast(a,W(-7));
+
+  a=newAff({num:138,client:'Brasserie des Monts',titre:'Support de cuve et passerelle d\'accès',desc:'Support 4 pieds pour cuve de garde 20 hl, avec passerelle latérale et échelle à crinoline. Acier thermolaqué RAL 9006.',qty:1,ech:W(22),cree:W(-10),marge:29,lines:[
+    M('Tube carré 100x100x5','Aciers du Rhône',16,'m',24,4),M('Caillebotis pressé 30x30','Aciers du Rhône',3,'m²',62,6),ST('Thermolaquage RAL 9006','Thermolaquage Martin',1,'forfait',460,6),
+    MO('Débit et perçage','laser',4),MO('Soudure','soud',20),MO('Montage à blanc','mont',4)]});
+  sendDevis(a,W(-8));accept(a,'BDM-2026-131',W(-1));
+
+  a=newAff({num:139,client:'Agroalim Bresse SAS',titre:'Bâtis supports convoyeur inox',desc:'2 bâtis inox 304 pour convoyeur à bande, pieds réglables, entretoises démontables, finition alimentaire.',qty:2,ech:W(18),cree:W(-8),marge:27,lines:[
+    M('Tube inox 304 50x50x2','Inox Distribution Sud',36,'m',21,5),M('Vérins de pieds réglables inox','Visserie Pro Lyon',12,'u',18,3),M('Tôle inox 304 2 mm','Inox Distribution Sud',4,'m²',62,5),
+    MO('Découpe laser','laser',3),MO('Pliage des goussets','pliage',2),MO('Soudure TIG','soud',18),MO('Décapage / passivation','peint',4),MO('Montage','mont',4)]});
+  sendDevis(a,W(-7));accept(a,'CMD-AB-2350',W(-3));commanderLot([[a,a.achats[0]],[a,a.achats[1]]],W(-2));
+
+  a=newAff({num:140,client:'Laboratoires Ventoux',titre:'Cuve inox 316L 500 L avec agitateur',desc:'Cuve cylindrique fond bombé, double piquage DN40, agitateur 0,75 kW, pieds réglables. Finition décapée-passivée.',qty:1,ech:W(32),cree:W(-12),marge:30,lines:[
+    M('Tôle inox 316L 3 mm','Inox Distribution Sud',6,'m²',118,6),M('Fonds bombés inox 316L Ø800','Inox Distribution Sud',2,'u',340,10),M('Agitateur 0,75 kW + support moteur','Roulements & Transmissions',1,'u',1450,12),
+    MO('Découpe laser','laser',3),MO('Roulage de la virole','pliage',6),MO('Soudure TIG','soud',26),MO('Usinage des brides','usin',4),ST('Décapage-passivation','Traitements de Surface Isère',1,'forfait',420,5),MO('Montage agitateur et essais','mont',8)]});
+  sendDevis(a,W(-9));
+
+  a=newAff({num:141,client:'Mairie de Saint-Vérand',titre:'Garde-corps acier galvanisé 12 m',desc:'Garde-corps pour le belvédère : 6 modules de 2 m, lisses horizontales, main courante plate, fixation par platines.',qty:1,ech:W(25),cree:W(-1),marge:28,lines:[
+    M('Tube acier 40x40x2','Aciers du Rhône',48,'m',6.8,4),M('Plat acier 40x8 (main courante)','Aciers du Rhône',26,'m',5.2,4),M('Platines + chevilles chimiques','Visserie Pro Lyon',24,'u',9.5,3),
+    MO('Découpe laser des platines','laser',4),MO('Soudure des modules','soud',22),ST('Galvanisation à chaud','Galva Est',380,'kg',0.95,6),MO('Montage à blanc et contrôle','mont',4)]});
+  log(a,'Affaire créée — demande reçue par téléphone',W(-1));
+
+  S.num=142;
+  S.log.sort((x,y)=>x.d<y.d?1:x.d>y.d?-1:0);
+  S.affaires.forEach(x=>x.histo.sort((p,q)=>p.d<q.d?1:p.d>q.d?-1:0));
+  S.auto={acc:6,rec:5,prod:3,emb:2,liv:1};
+  return S;
+}
+
+/* ---------- Composants ---------- */
+const stBadge=a=>{const s=SL(a.stage);return `<span class="badge ${s.b}">${s.l}</span>`};
+function devisBadge(a){const m={brouillon:['Brouillon','b-gray'],envoye:['Envoyé','b-info'],accepte:['Accepté','b-ok'],refuse:['Refusé','b-bad']}[a.devis.statut];return `<span class="badge ${m[1]}">${m[0]}</span>`}
+function progress(a){
+  if(a.stage==='achats'){const r=a.achats.filter(x=>x.statut==='recu').length;return {t:`Achats reçus ${r}/${a.achats.length}`,p:r/a.achats.length}}
+  if(a.stage==='production'){const f=a.ops.filter(x=>x.fait).length;return {t:`Opérations ${f}/${a.ops.length}`,p:f/a.ops.length}}
+  if(a.stage==='emballage')return {t:`Contrôles ${a.emb.checks.length}/${CHECKS.length}`,p:a.emb.checks.length/CHECKS.length};
+  return null;
+}
+function openModal(title,html,mount,wide){
+  const d=$('#dlg');$('#dlgT').textContent=title;$('#dlgB').innerHTML=html;d.classList.toggle('wide',!!wide);
+  if(!d.open)d.showModal();
+  if(mount)mount($('#dlgB'));
+  const f=$('#dlgB').querySelector('input:not([type=hidden]),select,textarea');if(f)f.focus();
+}
+function closeModal(){const d=$('#dlg');if(d.open)d.close()}
+function go(view,extra){Object.assign(UI,{view},extra||{});render();window.scrollTo(0,0);$('#main').focus({preventScroll:true})}
+function openAff(id,step){go('aff',{aff:id,step:step||null})}
+
+/* ---------- Navigation ---------- */
+function renderNav(){
+  const act=S.affaires.filter(a=>a.stage!=='livre').length;
+  const ac=S.affaires.reduce((n,a)=>n+a.achats.filter(x=>x.statut==='a_commander').length,0);
+  const ex=S.affaires.filter(a=>a.stage==='emballage'||(a.stage==='livraison')).length;
+  const items=[['dash','dash','Tableau de bord',''],['affaires','brief','Affaires',act],['planning','cal','Planning atelier',''],['achats','cart','Achats',ac],['expe','truck','Expéditions',ex]];
+  const cur=UI.view==='aff'?'affaires':UI.view;
+  $('#nav').innerHTML=items.map(i=>`<button type="button" class="tab" data-act="nav" data-v="${i[0]}" ${cur===i[0]?'aria-current="page"':''}>${I(i[1])}${i[2]}${i[3]!==''?` <span class="cnt">${i[3]}</span>`:''}</button>`).join('');
+}
+
+/* ---------- Tableau de bord ---------- */
+function tasks(){
+  const t=[];
+  S.affaires.forEach(a=>{
+    if(a.stage==='devis'){
+      if(a.devis.statut==='brouillon')t.push({l:'info',t:'Finaliser et envoyer le devis',a,st:'devis'});
+      else if(a.devis.statut==='envoye'){const j=wdBetween(a.devis.envoye,TODAY);if(j>=5)t.push({l:'warn',t:`Relancer le client — devis envoyé il y a ${j} jours ouvrés`,a,st:'devis'})}
+    }
+    const ac=a.achats.filter(x=>x.statut==='a_commander');
+    if(ac.length)t.push({l:'warn',t:`${ac.length} achat(s) à commander`,a,st:'achats'});
+    a.achats.filter(x=>x.statut==='commande'&&x.prevu<=TODAY).forEach(x=>t.push({l:x.prevu<TODAY?'bad':'info',t:`${x.prevu<TODAY?'Réception en retard':'Réception attendue aujourd\'hui'} : ${x.lib} (${x.four})`,a,st:'achats'}));
+    if(a.stage==='production'){const n=a.ops.filter(o=>!o.fait&&o.jour<=TODAY).length;if(n)t.push({l:'info',t:`${n} opération(s) planifiée(s) à terminer`,a,st:'production'})}
+    if(a.stage==='emballage')t.push({l:'info',t:'Préparer le colisage et valider l\'emballage',a,st:'emballage'});
+    if(a.stage==='livraison')t.push(a.livr.statut==='expedie'?{l:'info',t:'Confirmer la réception par le client',a,st:'livraison'}:{l:'warn',t:'Planifier l\'expédition',a,st:'livraison'});
+    if(retard(a))t.push({l:'bad',t:`Échéance menacée : fin de production prévue le ${fd(finPrevue(a)||TODAY)} pour une livraison au ${fd(a.ech)}`,a,st:'production'});
+  });
+  const o={bad:0,warn:1,info:2};return t.sort((x,y)=>o[x.l]-o[y.l]);
+}
+function weekLoad(days){
+  const m={};POSTES.forEach(p=>m[p.id]=0);
+  S.affaires.forEach(a=>a.ops.forEach(o=>spread(o,(d,h)=>{if(days.includes(d))m[o.poste]+=h})));
+  return m;
+}
+function curWeek(){const d=pd(TODAY);const dow=(d.getDay()+6)%7;const mon=addD(TODAY,dow>4?7-dow:-dow);return [0,1,2,3,4].map(i=>addD(mon,i))}
+function renderDash(){
+  const devisAtt=S.affaires.filter(a=>a.stage==='devis'&&a.devis.statut!=='refuse');
+  const carnet=S.affaires.filter(a=>SI(a.stage)>=1&&a.stage!=='livre');
+  let achC=0,achR=0,achLate=0;S.affaires.forEach(a=>a.achats.forEach(x=>{if(x.statut==='a_commander')achC++;if(x.statut==='commande'){achR++;if(x.prevu<TODAY)achLate++}}));
+  const late=S.affaires.filter(retard);
+  const wk=curWeek(),wl=weekLoad(wk),tot5=POSTES.length*5*CAP,used=Object.values(wl).reduce((s,v)=>s+v,0);
+  const kp=(lab,val,sub,ic,v,tone,extra)=>`<button type="button" class="card kpi ${tone||''}" data-act="nav" data-v="${v}" ${extra||''}><span class="kpi-i">${I(ic)}</span><span class="kpi-l">${lab}</span><span class="kpi-v">${val}</span><span class="kpi-s">${sub}</span></button>`;
+  const tk=tasks();
+  const flow=STAGES.map(s=>{const l=S.affaires.filter(a=>a.stage===s.id);const sum=l.reduce((n,a)=>n+tot(a).ht,0);return `<button type="button" data-act="stageFilter" data-s="${s.id}" style="--sc:${s.c}"><span class="fl">${s.l}</span><span class="fv">${l.length}</span><span class="fs">${eur(sum)} HT</span></button>`}).join('');
+  const loadRows=POSTES.map(p=>{const pc=Math.round(wl[p.id]/(5*CAP)*100);return `<div class="lrow"><span>${p.n}</span><span class="bar" role="img" aria-label="Charge ${pc} %"><i class="${pc>100?'over':pc>85?'hi':''}" style="width:${Math.min(100,pc)}%"></i></span><span class="num">${pc} %</span></div>`}).join('');
+  const autos=[['Devis accepté','commande + besoins d\'achat + planning générés',S.auto.acc],['Toutes les matières reçues','production lancée et replanifiée',S.auto.rec],['Contrôle final validé','passage en emballage',S.auto.prod],['Emballage validé','expédition à planifier, étiquettes prêtes',S.auto.emb],['Livraison confirmée','facture à émettre (simulation)',S.auto.liv]];
+  $('#main').innerHTML=`
+  <div class="page-h"><div><h1>Tableau de bord</h1><p class="muted">${pd(TODAY).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p></div>
+  <div class="actions"><button type="button" class="btn" data-act="nav" data-v="planning">${I('cal')}Planning atelier</button></div></div>
+  <div class="kpis">
+    ${kp('Devis en attente',devisAtt.length,eur(devisAtt.reduce((n,a)=>n+tot(a).ht,0))+' HT','file','affaires','','data-s="devis"')}
+    ${kp('Carnet de commandes',eur(carnet.reduce((n,a)=>n+tot(a).ht,0)),carnet.length+' affaire(s) en cours','brief','affaires')}
+    ${kp('Achats',achC+' à commander',achR+' en attente de réception'+(achLate?` · ${achLate} en retard`:''),'cart','achats',achC?'warn':'')}
+    ${kp('Charge atelier (semaine)',Math.round(used/tot5*100)+' %',hf(used)+' sur '+hf(tot5),'clock','planning')}
+    ${kp('Affaires à risque',late.length,late.length?'échéance menacée':'aucun retard prévu','alert','affaires',late.length?'bad':'')}
+  </div>
+  <div class="dash">
+    <div class="stack">
+      <section class="card" aria-labelledby="h-flow"><div class="card-h"><h2 id="h-flow">Flux des affaires</h2><span class="muted small">Cliquez une étape pour filtrer</span></div><div class="flow">${flow}</div></section>
+      <section class="card" aria-labelledby="h-tasks"><div class="card-h"><h2 id="h-tasks">À faire (${tk.length})</h2><span class="muted small">Généré automatiquement à partir de l'avancement</span></div>
+      ${tk.length?`<ul class="tasks">${tk.map(x=>`<li><button type="button" class="task ${x.l}" data-act="open" data-id="${x.a.id}" data-step="${x.st}"><span class="dot" aria-hidden="true"></span><span class="tt">${esc(x.t)}<small><span class="num">${x.a.ref}</span> · ${esc(x.a.titre)} · ${esc(x.a.client)}</small></span>${I('chev')}</button></li>`).join('')}</ul>`:'<p class="empty">Rien à faire pour le moment.</p>'}
+      </section>
+    </div>
+    <div class="stack">
+      <section class="card" aria-labelledby="h-load"><div class="card-h"><h2 id="h-load">Charge par poste</h2><span class="muted small">Semaine du ${fdd(wk[0])} · ${CAP} h/jour</span></div><div class="load">${loadRows}</div></section>
+      <section class="card" aria-labelledby="h-auto"><div class="card-h"><h2 id="h-auto">Automatismes actifs</h2></div><ul class="autos">${autos.map(x=>`<li><span class="zi">${I('zap')}</span><strong>${x[0]}</strong><small>→ ${x[1]} · ${x[2]} déclenchement(s)</small></li>`).join('')}</ul></section>
+    </div>
+    <section class="card" aria-labelledby="h-feed"><div class="card-h"><h2 id="h-feed">Activité récente</h2></div><ul class="feed">${S.log.slice(0,12).map(e=>`<li><span class="fd">${fdd(e.d)}</span><span>${e.a?`<button type="button" class="lnk num" data-act="open" data-id="${e.a}">${e.ref}</button> `:''}${esc(e.t)}</span></li>`).join('')}</ul></section>
+  </div>`;
+}
+
+/* ---------- Affaires ---------- */
+function filteredAff(){const q=UI.q.trim().toLowerCase();return S.affaires.filter(a=>(!UI.stage||a.stage===UI.stage)&&(!q||(a.ref+' '+a.titre+' '+a.client).toLowerCase().includes(q)))}
+function kcard(a){
+  const p=progress(a),r=retard(a);
+  return `<button type="button" class="kcard" data-act="open" data-id="${a.id}"><span class="kc-top"><span class="num muted">${a.ref}</span>${r?'<span class="badge b-bad">À risque</span>':a.stage==='devis'?devisBadge(a):''}</span>
+  <span class="kc-t">${esc(a.titre)}</span><span class="muted small wrap">${esc(a.client)} · qté ${a.qty}</span>
+  ${p?`<span class="small muted">${p.t}</span><span class="bar"><i style="width:${Math.round(p.p*100)}%"></i></span>`:''}
+  <span class="kc-b"><span class="num">${eur(tot(a).ht)} HT</span><span>${a.stage==='livre'?'Livré le '+fdd(a.livr.livreLe):'Échéance '+fdd(a.ech)}</span></span></button>`;
+}
+function affResults(){
+  const l=filteredAff();
+  if(UI.mode==='kanban'){
+    return `<div class="kwrap"><div class="kanban">${STAGES.map(s=>{const c=l.filter(a=>a.stage===s.id);return `<section class="kcol" style="--sc:${s.c}" aria-label="${s.l}"><h2><span>${s.l}</span><span class="muted">${c.length}</span></h2>${c.map(kcard).join('')||'<p class="kempty">Aucune affaire</p>'}</section>`}).join('')}</div></div>`;
+  }
+  if(!l.length)return '<p class="empty">Aucune affaire ne correspond.</p>';
+  return `<div class="tw"><table><thead><tr><th scope="col">Réf.</th><th scope="col">Affaire</th><th scope="col">Client</th><th scope="col">Étape</th><th scope="col" class="r">Montant HT</th><th scope="col">Échéance</th><th scope="col">Fin prod. prévue</th><th scope="col">Avancement</th></tr></thead><tbody>
+  ${l.map(a=>{const p=progress(a),f=finPrevue(a);return `<tr class="click" data-act="open" data-id="${a.id}"><td class="num"><button type="button" class="lnk num" data-act="open" data-id="${a.id}">${a.ref}</button></td><td>${esc(a.titre)}</td><td>${esc(a.client)}</td><td>${stBadge(a)}</td><td class="r num">${eur(tot(a).ht)}</td><td>${fd(a.ech)}${retard(a)?' <span class="badge b-bad">À risque</span>':''}</td><td>${f?fd(f):'—'}</td><td class="small">${p?p.t:a.stage==='devis'?devisBadge(a):'—'}</td></tr>`}).join('')}
+  </tbody></table></div>`;
+}
+function renderAffaires(){
+  $('#main').innerHTML=`<div class="page-h"><div><h1>Affaires</h1><p class="muted">Chaque produit est unique : une affaire suit son propre parcours, du devis à la livraison.</p></div>
+  <button type="button" class="btn primary" data-act="newAff">${I('plus')}Nouvelle affaire</button></div>
+  <div class="filters">
+    <div class="field grow"><label for="fq">Rechercher</label><div class="search">${I('search')}<input type="search" id="fq" data-q="aff" value="${esc(UI.q)}" placeholder="Référence, produit, client…"></div></div>
+    <div class="field"><label for="fs">Étape</label><select id="fs" data-sel="stage"><option value="">Toutes les étapes</option>${STAGES.map(s=>`<option value="${s.id}" ${UI.stage===s.id?'selected':''}>${s.l}</option>`).join('')}</select></div>
+    <div class="seg" role="group" aria-label="Affichage"><button type="button" data-act="mode" data-m="kanban" aria-pressed="${UI.mode==='kanban'}">${I('cols')}Tableau</button><button type="button" data-act="mode" data-m="liste" aria-pressed="${UI.mode==='liste'}">${I('list')}Liste</button></div>
+  </div><div id="affRes">${affResults()}</div>`;
+}
+
+/* ---------- Fiche affaire ---------- */
+function renderFiche(){
+  const a=getAff(UI.aff);if(!a){go('affaires');return}
+  const cur=SI(a.stage),step=UI.step||(a.stage==='livre'?'livraison':a.stage),t=tot(a),f=finPrevue(a);
+  const sub={devis:()=>a.devis.statut==='accepte'?'Accepté':a.devis.statut==='envoye'?'Envoyé':a.devis.statut==='refuse'?'Refusé':'Brouillon',
+    commande:()=>a.commande?'Confirmée':'—',achats:()=>a.achats.length?`${a.achats.filter(x=>x.statut==='recu').length}/${a.achats.length} reçus`:'—',
+    production:()=>a.ops.length?`${a.ops.filter(o=>o.fait).length}/${a.ops.length} opérations`:'—',emballage:()=>a.emb.colis.length?a.emb.colis.length+' colis':'—',
+    livraison:()=>a.stage==='livre'?'Livré':a.livr.statut==='expedie'?'En transit':'—'};
+  const steps=STAGES.slice(0,6).map((s,i)=>`<li class="${i<cur?'done':i===cur?'cur':''}"><button type="button" data-act="step" data-s="${s.id}" aria-pressed="${step===s.id}" ${i>cur&&!(i===2&&a.commande)&&!(i===3&&a.ops.length)?'disabled':''} ${i===cur?'aria-current="step"':''}>${i<cur||a.stage==='livre'?'':''}${s.l}<small>${i>cur?'À venir':sub[s.id]()}</small></button></li>`).join('');
+  const panels={devis:pDevis,commande:pCommande,achats:pAchats,production:pProd,emballage:pEmb,livraison:pLivr};
+  const c=cl(a);
+  $('#main').innerHTML=`<div class="fhead">
+    <div class="t-row"><button type="button" class="btn sm" data-act="nav" data-v="affaires">${I('back')}Affaires</button>
+    <div style="flex:1;min-width:0"><p class="muted small"><span class="num">${a.ref}</span> · ${esc(a.client)}</p><h1>${esc(a.titre)}</h1></div>
+    <div class="actions">${stBadge(a)}${retard(a)?'<span class="badge b-bad">Échéance menacée</span>':''}</div></div>
+    <div class="figs"><div class="fig"><span>Montant HT</span><strong class="num" id="hdHT">${eur(t.ht)}</strong></div><div class="fig"><span>Quantité</span><strong>${a.qty}</strong></div>
+    <div class="fig"><span>Livraison souhaitée</span><strong>${fd(a.ech)}</strong></div><div class="fig"><span>Fin de production prévue</span><strong>${f?fd(f):'—'}</strong></div>
+    <div class="fig"><span>Charge atelier</span><strong>${hf(t.h+(a.ops.length?1:0))}</strong></div></div>
+  </div>
+  <ol class="steps" aria-label="Étapes de l'affaire">${steps}</ol>
+  <div class="flay"><div class="stack" id="panel">${panels[step](a)}</div>
+  <aside class="stack">
+    <section class="card"><h2 style="margin-bottom:10px">Client</h2><dl class="dl"><dt>Société</dt><dd>${esc(c.n)}</dd><dt>Contact</dt><dd>${esc(c.c||'—')}</dd><dt>Adresse</dt><dd>${esc(c.a||'—')}</dd><dt>Créée le</dt><dd>${fd(a.cree)}</dd></dl></section>
+    <section class="card"><h2 style="margin-bottom:8px">Description du produit</h2><p class="wrap">${esc(a.desc)||'<span class="muted">Aucune description.</span>'}</p></section>
+    <section class="card"><h2 style="margin-bottom:10px">Journal de l'affaire</h2><ul class="feed">${a.histo.map(h=>`<li><span class="fd">${fdd(h.d)}</span><span>${esc(h.t)}</span></li>`).join('')||'<li class="muted">—</li>'}</ul></section>
+  </aside></div>`;
+}
+function lineRow(a,l,ed){
+  const lt=(+l.qte||0)*(+l.pu||0);
+  if(!ed)return `<tr><td><span class="tag ${l.type}">${TYPES[l.type]}</span></td><td>${esc(l.lib)}</td><td>${esc(l.type==='mo'?PM[l.poste].n:l.four)}</td><td class="r num">${nf(l.qte)}</td><td>${esc(l.unite)}</td><td class="r num">${eur(l.pu,2)}</td><td class="r">${l.type==='mo'?'—':l.delai+' j'}</td><td class="r num">${eur(lt,2)}</td></tr>`;
+  const sel=l.type==='mo'?`<select aria-label="Poste" data-f="poste">${POSTES.map(p=>`<option value="${p.id}" ${l.poste===p.id?'selected':''}>${p.n}</option>`).join('')}</select>`:`<select aria-label="Fournisseur" data-f="four"><option value="">— Choisir —</option>${FOURN.map(f=>`<option ${l.four===f?'selected':''}>${esc(f)}</option>`).join('')}</select>`;
+  return `<tr data-lid="${l.id}"><td><span class="tag ${l.type}">${TYPES[l.type]}</span></td><td><input type="text" aria-label="Désignation" data-f="lib" value="${esc(l.lib)}"></td><td>${sel}</td>
+  <td><input type="number" aria-label="Quantité" data-f="qte" min="0" step="any" value="${l.qte}"></td><td>${l.type==='mo'?'h':`<input type="text" aria-label="Unité" data-f="unite" value="${esc(l.unite)}">`}</td>
+  <td><input type="number" aria-label="Coût unitaire" data-f="pu" min="0" step="any" value="${l.pu}"></td><td>${l.type==='mo'?'<span class="muted">—</span>':`<input type="number" aria-label="Délai fournisseur en jours" data-f="delai" min="0" step="1" value="${l.delai}">`}</td>
+  <td class="r num" data-tot>${eur(lt,2)}</td><td><button type="button" class="icon-btn" data-act="delLine" data-lid="${l.id}" aria-label="Supprimer la ligne ${esc(l.lib)}">${I('trash')}</button></td></tr>`;
+}
+function pDevis(a){
+  const ed=a.devis.statut==='brouillon',t=tot(a),st=a.devis.statut;
+  let acts='';
+  if(st==='brouillon')acts=`<button type="button" class="btn" data-act="pvDevis">${I('print')}Aperçu PDF</button><button type="button" class="btn primary" data-act="sendDevis">${I('send')}Envoyer au client</button>`;
+  else if(st==='envoye')acts=`<button type="button" class="btn" data-act="pvDevis">${I('print')}Aperçu PDF</button><button type="button" class="btn" data-act="relance">${I('mail')}Relancer</button><button type="button" class="btn" data-act="toDraft">Repasser en brouillon</button><button type="button" class="btn danger" data-act="refuse">Refusé</button><button type="button" class="btn ok" data-act="accept">${I('check')}Devis accepté</button>`;
+  else if(st==='refuse')acts=`<button type="button" class="btn" data-act="toDraft">Rouvrir le devis</button>`;
+  else acts=`<button type="button" class="btn" data-act="pvDevis">${I('print')}Aperçu PDF</button>`;
+  const note=st==='envoye'?`<div class="note">${I('info')}<span>Envoyé le ${fd(a.devis.envoye)}. À l'acceptation, la commande, les achats et le planning seront générés automatiquement.</span></div>`:st==='accepte'?`<div class="note ok">${I('check')}<span>Accepté le ${fd(a.devis.accepte)} — le devis est figé.</span></div>`:st==='refuse'?`<div class="note bad">${I('x')}<span>Refusé : ${esc(a.devis.motif)}</span></div>`:`<div class="note">${I('info')}<span>Chiffrez le produit ligne par ligne : les matières et la sous-traitance deviendront des achats, la main d'œuvre des opérations au planning.</span></div>`;
+  return `<section class="card"><div class="card-h"><h2>Devis <span class="num">${a.devis.num}</span> ${devisBadge(a)}</h2><div class="actions">${acts}</div></div>
+  <div style="display:grid;gap:12px">${note}<p class="err" id="devErr" role="alert"></p>
+  <div class="tw"><table class="t-devis"><thead><tr><th scope="col" style="width:110px">Type</th><th scope="col">Désignation</th><th scope="col" style="width:190px">Fournisseur / poste</th><th scope="col" class="r" style="width:90px">Qté</th><th scope="col" style="width:80px">Unité</th><th scope="col" class="r" style="width:110px">Coût unit.</th><th scope="col" class="r" style="width:80px">Délai</th><th scope="col" class="r" style="width:110px">Total coût</th>${ed?'<th scope="col" style="width:56px"><span class="sr">Actions</span></th>':''}</tr></thead>
+  <tbody>${a.devis.lignes.map(l=>lineRow(a,l,ed)).join('')||`<tr><td colspan="9" class="muted">Aucune ligne — ajoutez des matières, de la main d'œuvre ou de la sous-traitance.</td></tr>`}</tbody></table></div>
+  ${ed?`<div class="actions"><button type="button" class="btn sm" data-act="addLine" data-t="mat">${I('plus')}Matière / composant</button><button type="button" class="btn sm" data-act="addLine" data-t="mo">${I('plus')}Main d'œuvre</button><button type="button" class="btn sm" data-act="addLine" data-t="st">${I('plus')}Sous-traitance</button></div>`:''}
+  <div class="totals" id="devTot">
+    <div><span>Matières et composants</span><span class="num" data-k="mat">${eur(t.g.mat,2)}</span></div>
+    <div><span>Main d'œuvre (<span data-k="h">${hf(t.h)}</span>)</span><span class="num" data-k="mo">${eur(t.g.mo,2)}</span></div>
+    <div><span>Sous-traitance</span><span class="num" data-k="st">${eur(t.g.st,2)}</span></div>
+    <div><strong>Coût de revient</strong><strong class="num" data-k="c">${eur(t.c,2)}</strong></div>
+    <div><label for="marge">Marge (%)</label>${ed?`<input type="number" id="marge" data-marge min="0" max="200" step="1" value="${a.devis.marge}">`:`<span class="num">${a.devis.marge} %</span>`}</div>
+    <div class="big"><span>Prix de vente HT</span><span class="num" data-k="ht">${eur(t.ht)}</span></div>
+    <div><span>Soit par pièce</span><span class="num" data-k="pu">${eur(t.ht/a.qty,2)}</span></div>
+    <div><span>TVA 20 %</span><span class="num" data-k="tva">${eur(t.tva,2)}</span></div>
+    <div><strong>Total TTC</strong><strong class="num" data-k="ttc">${eur(t.ttc,2)}</strong></div>
+  </div></div></section>`;
+}
+function updTotals(a){
+  const t=tot(a),box=$('#devTot');if(!box)return;
+  const v={mat:eur(t.g.mat,2),mo:eur(t.g.mo,2),st:eur(t.g.st,2),c:eur(t.c,2),ht:eur(t.ht),pu:eur(t.ht/a.qty,2),tva:eur(t.tva,2),ttc:eur(t.ttc,2),h:hf(t.h)};
+  box.querySelectorAll('[data-k]').forEach(e=>e.textContent=v[e.dataset.k]);
+  const h=$('#hdHT');if(h)h.textContent=eur(t.ht);
+}
+function lockedNote(t){return `<section class="card"><div class="empty">${I('lock')}<p style="margin-top:6px">${t}</p></div></section>`}
+function pCommande(a){
+  if(!a.commande)return lockedNote('La commande sera créée automatiquement lorsque le devis sera accepté.');
+  const t=tot(a);
+  return `<section class="card"><div class="card-h"><h2>Commande <span class="num">${a.commande.arc}</span> <span class="badge b-ok">Confirmée</span></h2><div class="actions"><button type="button" class="btn" data-act="pvArc">${I('print')}Accusé de réception</button><button type="button" class="btn" data-act="sendArc">${I('mail')}Envoyer l'ARC</button></div></div>
+  <div class="split"><dl class="dl"><dt>N° commande client</dt><dd class="num">${esc(a.commande.num)}</dd><dt>Date de commande</dt><dd>${fd(a.commande.date)}</dd><dt>Montant HT</dt><dd class="num">${eur(t.ht)}</dd><dt>Acompte 30 %</dt><dd class="num">${eur(t.ht*.3*1.2,2)} TTC</dd></dl>
+  <form data-form="ech" class="field"><label for="ech">Date de livraison convenue</label><input type="date" id="ech" name="ech" value="${a.ech}" min="${TODAY}" required><span class="hint">Modifier la date met à jour les alertes de retard.</span><div><button class="btn sm" type="submit">Enregistrer</button></div></form></div>
+  <div class="note teal" style="margin-top:14px">${I('zap')}<span>Généré automatiquement à l'acceptation : ${a.achats.length} besoin(s) d'achat et ${a.ops.length} opérations planifiées sur ${new Set(a.ops.map(o=>o.poste)).size} postes.</span></div>
+  ${a.stage==='commande'?`<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" data-act="step" data-s="achats">${I('cart')}Passer les commandes fournisseurs</button></div>`:''}</section>`;
+}
+function achRow(a,x,showAff){
+  const late=x.statut==='commande'&&x.prevu<TODAY;
+  const act=x.statut==='a_commander'?`<button type="button" class="btn sm" data-act="cmdOne" data-id="${a.id}" data-x="${x.id}">${I('send')}Commander</button>`:x.statut==='commande'?`<button type="button" class="btn sm ok" data-act="recv" data-id="${a.id}" data-x="${x.id}">${I('check')}Réceptionner</button>`:`<span class="small muted">le ${fdd(x.recuLe)}</span>`;
+  return `<tr>${showAff?`<td><button type="button" class="lnk num" data-act="open" data-id="${a.id}" data-step="achats">${a.ref}</button></td>`:''}<td>${esc(x.lib)}<br><span class="tag ${x.type}">${TYPES[x.type]}</span></td><td>${esc(x.four)}</td><td class="r num">${nf(x.qte)} ${esc(x.unite)}</td><td class="r num">${eur(x.qte*x.pu,2)}</td>
+  <td>${x.bc?`<button type="button" class="lnk num" data-act="pvBc" data-bc="${x.bc}">${x.bc}</button>`:'—'}</td><td>${x.prevu?fd(x.prevu):`<span class="muted">${x.delai} j ouvrés</span>`}${late?' <span class="badge b-bad">Retard</span>':''}</td><td><span class="badge ${ACH_ST[x.statut][1]}">${ACH_ST[x.statut][0]}</span></td><td>${act}</td></tr>`;
+}
+const achHead=showAff=>`<thead><tr>${showAff?'<th scope="col">Affaire</th>':''}<th scope="col">Article</th><th scope="col">Fournisseur</th><th scope="col" class="r">Qté</th><th scope="col" class="r">Montant</th><th scope="col">Bon de cde</th><th scope="col">Réception prévue</th><th scope="col">Statut</th><th scope="col">Action</th></tr></thead>`;
+function pAchats(a){
+  if(!a.commande)return lockedNote('Les besoins d\'achat seront générés à partir des lignes du devis accepté.');
+  if(!a.achats.length)return lockedNote('Aucun achat pour cette affaire : tout est en stock.');
+  const ac=a.achats.filter(x=>x.statut==='a_commander').length;
+  return `<section class="card"><div class="card-h"><h2>Achats de l'affaire</h2><div class="actions">${ac?`<button type="button" class="btn primary" data-act="cmdAff">${I('send')}Commander tout (${ac})</button>`:''}</div></div>
+  <div style="display:grid;gap:12px">${a.stage==='achats'?`<div class="note teal">${I('zap')}<span>Dès que toutes les lignes sont réceptionnées, la production démarre et le planning se recale automatiquement.</span></div>`:''}
+  <div class="tw"><table style="min-width:900px">${achHead(false)}<tbody>${a.achats.map(x=>achRow(a,x,false)).join('')}</tbody></table></div></div></section>`;
+}
+function pProd(a){
+  if(!a.ops.length)return lockedNote('Les opérations seront créées à partir de la main d\'œuvre chiffrée au devis.');
+  const f=finPrevue(a),can=a.stage==='production';
+  return `<section class="card"><div class="card-h"><h2>Gamme de fabrication</h2><div class="actions"><button type="button" class="btn" data-act="replanAff" ${a.ops.every(o=>o.fait)?'disabled':''}>${I('zap')}Replanifier</button><button type="button" class="btn" data-act="toPlanning" data-d="${a.ops.find(o=>!o.fait)?.jour||f}">${I('cal')}Voir au planning</button></div></div>
+  <div style="display:grid;gap:12px">
+  ${a.stage==='achats'?`<div class="note warn">${I('clock')}<span>En attente de réception des achats : opérations planifiées à titre prévisionnel.</span></div>`:''}
+  ${retard(a)?`<div class="note bad">${I('alert')}<span>Fin de production prévue le ${fd(f)} pour une livraison souhaitée le ${fd(a.ech)}. Replanifiez ou ajustez la date avec le client.</span></div>`:f?`<div class="note ok">${I('check')}<span>Fin de production prévue le ${fd(f)} — livraison souhaitée le ${fd(a.ech)}.</span></div>`:''}
+  <div class="tw"><table style="min-width:760px"><thead><tr><th scope="col">#</th><th scope="col">Opération</th><th scope="col">Poste</th><th scope="col" class="r">Durée</th><th scope="col">Planifiée</th><th scope="col">Statut</th><th scope="col">Action</th></tr></thead><tbody>
+  ${a.ops.map((o,i)=>`<tr><td class="num">${i+1}</td><td>${esc(o.lib)}</td><td>${PM[o.poste].n}</td><td class="r num">${hf(o.h)}</td><td>${o.jour?fdw(o.jour)+(opEnd(o)!==o.jour?' → '+fdw(opEnd(o)):''):'—'}</td>
+  <td>${o.fait?`<span class="badge b-ok">Terminée</span>`:o.jour<TODAY?'<span class="badge b-bad">En retard</span>':'<span class="badge b-gray">À faire</span>'}</td>
+  <td>${can?`<button type="button" class="btn sm ${o.fait?'':'ok'}" data-act="opToggle" data-id="${a.id}" data-o="${o.id}" aria-pressed="${o.fait}">${o.fait?'Rouvrir':I('check')+'Terminer'}</button>`:`<span class="small muted">${o.fait?'le '+fdd(o.faitLe):'—'}</span>`}</td></tr>`).join('')}
+  </tbody></table></div></div></section>`;
+}
+function pEmb(a){
+  const cur=SI(a.stage);
+  if(cur<4)return lockedNote('L\'emballage se débloque quand le contrôle final de production est validé.');
+  const ro=cur>4,e=a.emb,kg=e.colis.reduce((s,c)=>s+(+c.kg||0),0);
+  return `<section class="card"><div class="card-h"><h2>Emballage &amp; colisage</h2><div class="actions">${e.colis.length?`<button type="button" class="btn" data-act="pvEtiq">${I('print')}Étiquettes colis</button>`:''}${ro?'<span class="badge b-ok">Validé</span>':''}</div></div>
+  <div class="split"><div style="display:grid;gap:12px">
+    <div class="field"><label for="embType">Conditionnement</label><select id="embType" data-emb="type" ${ro?'disabled':''}>${['Palette','Caisse bois','Carton','Vrac sur camion'].map(o=>`<option ${e.type===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    <div><p class="flabel" style="margin-bottom:6px">Colis (${e.colis.length}) · ${nf(kg)} kg</p>${e.colis.length?`<ul class="colis">${e.colis.map((c,i)=>`<li><span><strong>${i+1}.</strong> ${esc(c.d)} — <span class="num">${c.L}×${c.l}×${c.h} cm · ${nf(c.kg)} kg</span></span>${ro?'':`<button type="button" class="icon-btn" data-act="delColis" data-c="${c.id}" aria-label="Supprimer le colis ${i+1}">${I('trash')}</button>`}</li>`).join('')}</ul>`:'<p class="muted small">Aucun colis.</p>'}</div>
+    ${ro?'':`<form data-form="colis" class="fgrid" novalidate style="border:1px dashed var(--line-2);border-radius:10px;padding:12px">
+      <div class="field full"><label for="cD">Contenu du colis <span class="req">*</span></label><input type="text" id="cD" name="d" required placeholder="ex. Structure + visserie"></div>
+      <div class="field"><label for="cL">Longueur (cm) <span class="req">*</span></label><input type="number" id="cL" name="L" min="1" required></div>
+      <div class="field"><label for="cl">Largeur (cm) <span class="req">*</span></label><input type="number" id="cl" name="l" min="1" required></div>
+      <div class="field"><label for="ch">Hauteur (cm) <span class="req">*</span></label><input type="number" id="ch" name="h" min="1" required></div>
+      <div class="field"><label for="ck">Poids (kg) <span class="req">*</span></label><input type="number" id="ck" name="kg" min="0.1" step="any" required></div>
+      <p class="err full" id="colErr" role="alert"></p>
+      <div class="full"><button type="submit" class="btn sm">${I('plus')}Ajouter le colis</button></div></form>`}
+  </div>
+  <fieldset style="border:0;margin:0;padding:0;min-width:0;display:grid;gap:6px" ${ro?'disabled':''}><legend class="flabel" style="margin-bottom:6px">Check-list avant expédition</legend>
+    ${CHECKS.map((c,i)=>`<label class="ck"><input type="checkbox" data-chk="${i}" ${e.checks.includes(c)?'checked':''}>${c}</label>`).join('')}
+    ${ro?'':`<p class="err" id="embErr" role="alert"></p><div><button type="button" class="btn primary" data-act="validEmb">${I('check')}Valider l'emballage</button></div>`}
+  </fieldset></div></section>`;
+}
+function pLivr(a){
+  const cur=SI(a.stage);
+  if(cur<5)return lockedNote('La livraison se débloque une fois l\'emballage validé.');
+  const L=a.livr,c=cl(a);
+  if(L.statut==='livre')return `<section class="card"><div class="card-h"><h2>Livraison</h2><button type="button" class="btn" data-act="pvBl">${I('print')}Bon de livraison</button></div>
+  <div class="note ok">${I('check')}<span>Livré le ${fd(L.livreLe)} — réceptionné par ${esc(L.recep)}. Facture à émettre (simulation).</span></div>
+  <dl class="dl" style="margin-top:12px"><dt>BL</dt><dd class="num">${L.bl}</dd><dt>Mode</dt><dd>${esc(L.mode)} ${L.transp?'· '+esc(L.transp):''}</dd><dt>Adresse</dt><dd>${esc(c.a)}</dd></dl></section>`;
+  if(L.statut==='expedie')return `<section class="card"><div class="card-h"><h2>Livraison <span class="badge b-teal">En transit</span></h2><button type="button" class="btn" data-act="pvBl">${I('print')}Bon de livraison</button></div>
+  <dl class="dl"><dt>BL</dt><dd class="num">${L.bl}</dd><dt>Expédié le</dt><dd>${fd(L.date)}</dd><dt>Mode</dt><dd>${esc(L.mode)} ${L.transp?'· '+esc(L.transp):''}</dd><dt>Adresse</dt><dd>${esc(c.a)}</dd></dl>
+  <form data-form="livre" class="fgrid" novalidate style="margin-top:14px"><div class="field"><label for="rcp">Réceptionné par <span class="req">*</span></label><input type="text" id="rcp" name="recep" required value="${esc(c.c)}"></div>
+  <div class="field"><label for="rcpd">Date de réception <span class="req">*</span></label><input type="date" id="rcpd" name="d" value="${TODAY}" max="${TODAY}" required></div>
+  <p class="err full" id="livErr" role="alert"></p><div class="full"><button type="submit" class="btn ok">${I('check')}Confirmer la livraison</button></div></form></section>`;
+  return `<section class="card"><div class="card-h"><h2>Préparer l'expédition</h2></div>
+  <form data-form="expe" class="fgrid" novalidate>
+    <div class="field"><label for="lm">Mode de livraison</label><select id="lm" name="mode">${['Transporteur','Nos moyens','Enlèvement client'].map(o=>`<option ${L.mode===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    <div class="field"><label for="lt">Transporteur / véhicule</label><input type="text" id="lt" name="transp" value="${esc(L.transp)}" placeholder="ex. Transports Moreau"><span class="hint">Obligatoire pour un transporteur.</span></div>
+    <div class="field"><label for="ld">Date d'expédition <span class="req">*</span></label><input type="date" id="ld" name="date" value="${L.date||TODAY}" min="${TODAY}" required></div>
+    <div class="field full"><span class="flabel">Adresse de livraison</span><p class="wrap">${esc(c.n)} — ${esc(c.a)}</p></div>
+    <p class="err full" id="expErr" role="alert"></p>
+    <div class="full actions"><button type="submit" class="btn primary">${I('truck')}Expédier et éditer le BL</button></div>
+  </form></section>`;
+}
+
+/* ---------- Planning ---------- */
+function planDays(){const d=pd(TODAY);const dow=(d.getDay()+6)%7;let x=addD(TODAY,(dow>4?7-dow:-dow)+UI.week*7);const out=[];while(out.length<UI.span){if(!isWE(pd(x)))out.push(x);x=addD(x,1)}return out}
+function renderPlanning(){
+  const days=planDays(),m={};
+  S.affaires.forEach(a=>a.ops.forEach(o=>spread(o,(d,h)=>{if(days.includes(d))(m[o.poste+'|'+d]=m[o.poste+'|'+d]||[]).push({a,o,h})})));
+  const cols=`minmax(130px,170px) repeat(${days.length},minmax(${days.length>5?'120px':'150px'},1fr))`;
+  let g=`<div class="ph">Poste</div>`+days.map(d=>`<div class="ph ${d===TODAY?'today':''}">${fdw(d)}${d===TODAY?' · aujourd\'hui':''}</div>`).join('');
+  POSTES.forEach(p=>{
+    const wk=days.reduce((s,d)=>s+(m[p.id+'|'+d]||[]).reduce((t,x)=>t+x.h,0),0);
+    g+=`<div class="pp">${p.n}<small>${Math.round(wk/(days.length*CAP)*100)} % de charge · ${p.t} €/h</small></div>`;
+    days.forEach(d=>{const l=m[p.id+'|'+d]||[];const h=l.reduce((t,x)=>t+x.h,0),pc=Math.round(h/CAP*100);
+      g+=`<div class="pc ${d===TODAY?'today':''}"><span class="bar" role="img" aria-label="${hf(h)} sur ${CAP} h"><i class="${pc>100?'over':pc>85?'hi':''}" style="width:${Math.min(100,pc)}%"></i></span>${l.map(x=>`<button type="button" class="opc c${x.a.n%6} ${x.o.fait?'done':''} ${x.a.stage==='achats'?'prev':''}" data-act="op" data-id="${x.a.id}" data-o="${x.o.id}" aria-label="${x.a.ref}, ${esc(x.o.lib)}, ${hf(x.h)}${x.o.fait?', terminée':''}"><b>${x.a.ref}</b> ${hf(x.h)}<br>${esc(x.o.lib)}</button>`).join('')}</div>`});
+  });
+  $('#main').innerHTML=`<div class="page-h"><div><h1>Planning atelier</h1><p class="muted">Ordonnancement automatique par poste (capacité ${CAP} h/jour), en fonction des réceptions d'achats et des échéances.</p></div>
+  <button type="button" class="btn primary" data-act="replanAll">${I('zap')}Replanifier automatiquement</button></div>
+  <div class="pl-tools"><button type="button" class="icon-btn" data-act="wk" data-d="-1" aria-label="Semaine précédente">${I('chevl')}</button><button type="button" class="btn sm" data-act="wk" data-d="0">Aujourd'hui</button><button type="button" class="icon-btn" data-act="wk" data-d="1" aria-label="Semaine suivante">${I('chev')}</button>
+  <span class="wk">Du ${fd(days[0])} au ${fd(days[days.length-1])}</span>
+  <span class="seg" role="group" aria-label="Période" style="margin-left:auto"><button type="button" data-act="span" data-n="5" aria-pressed="${UI.span===5}">1 semaine</button><button type="button" data-act="span" data-n="10" aria-pressed="${UI.span===10}">2 semaines</button></span></div>
+  <div class="tw"><div class="pgrid" style="grid-template-columns:${cols};min-width:${days.length>5?1400:880}px">${g}</div></div>
+  <div class="legend"><span><i style="background:var(--s0);border-left:4px solid var(--h0)"></i>Une couleur par affaire</span><span><i style="border-style:dashed"></i>Prévisionnel (achats non reçus)</span><span><i style="opacity:.6;background:var(--gray-soft)"></i>Terminée</span><span>Cliquez une opération pour la terminer ou la déplacer.</span></div>`;
+}
+
+/* ---------- Achats (global) ---------- */
+function achPairs(){
+  const q=UI.achQ.trim().toLowerCase(),r=[];
+  S.affaires.forEach(a=>a.achats.forEach(x=>{
+    if(UI.achF==='actifs'&&x.statut==='recu')return;
+    if(!['actifs','all'].includes(UI.achF)&&x.statut!==UI.achF)return;
+    if(UI.achFour&&x.four!==UI.achFour)return;
+    if(q&&!(x.lib+' '+a.ref+' '+x.four+' '+x.bc).toLowerCase().includes(q))return;
+    r.push([a,x]);
+  }));
+  const o={a_commander:0,commande:1,recu:2};return r.sort((p,q2)=>o[p[1].statut]-o[q2[1].statut]||(p[1].prevu||'z').localeCompare(q2[1].prevu||'z'));
+}
+function achResults(){
+  const r=achPairs(),ac=r.filter(p=>p[1].statut==='a_commander');
+  return `<div class="actions" style="margin-bottom:10px;justify-content:space-between"><span class="muted small">${r.length} ligne(s)</span>${ac.length?`<button type="button" class="btn primary" data-act="cmdBulk">${I('send')}Commander les ${ac.length} ligne(s) — 1 BC par fournisseur</button>`:''}</div>
+  ${r.length?`<div class="tw"><table style="min-width:1000px">${achHead(true)}<tbody>${r.map(p=>achRow(p[0],p[1],true)).join('')}</tbody></table></div>`:'<p class="empty">Aucun achat ne correspond.</p>'}`;
+}
+function renderAchats(){
+  const by={};S.affaires.forEach(a=>a.achats.forEach(x=>{if(x.statut==='recu')return;const b=by[x.four]=by[x.four]||{n:0,m:0,late:0};b.n++;b.m+=x.qte*x.pu;if(x.statut==='commande'&&x.prevu<TODAY)b.late++}));
+  const F=[['actifs','En cours'],['a_commander','À commander'],['commande','Commandés'],['recu','Reçus'],['all','Tous']];
+  $('#main').innerHTML=`<div class="page-h"><div><h1>Achats</h1><p class="muted">Besoins générés automatiquement depuis les devis acceptés, regroupés par fournisseur.</p></div></div>
+  <div class="ach-side"><div style="min-width:0">
+  <div class="filters"><div class="chips" role="group" aria-label="Statut">${F.map(f=>`<button type="button" class="chip" data-act="achF" data-f="${f[0]}" aria-pressed="${UI.achF===f[0]}">${f[1]}</button>`).join('')}</div></div>
+  <div class="filters"><div class="field grow"><label for="aq">Rechercher</label><div class="search">${I('search')}<input type="search" id="aq" data-q="ach" value="${esc(UI.achQ)}" placeholder="Article, affaire, n° de BC…"></div></div>
+  <div class="field"><label for="af">Fournisseur</label><select id="af" data-sel="four"><option value="">Tous</option>${FOURN.map(f=>`<option ${UI.achFour===f?'selected':''}>${esc(f)}</option>`).join('')}</select></div></div>
+  <div id="achRes">${achResults()}</div></div>
+  <aside class="card"><h2 style="margin-bottom:10px">Engagements en cours</h2>${Object.keys(by).length?`<ul class="feed">${Object.entries(by).sort((a,b)=>b[1].m-a[1].m).map(([f,b])=>`<li style="grid-template-columns:minmax(0,1fr) auto"><span><strong>${esc(f)}</strong><br><span class="muted small">${b.n} ligne(s)${b.late?` · <span style="color:var(--bad)">${b.late} en retard</span>`:''}</span></span><span class="num">${eur(b.m)}</span></li>`).join('')}</ul>`:'<p class="muted">Aucun achat en cours.</p>'}</aside></div>`;
+}
+
+/* ---------- Expéditions ---------- */
+function renderExpe(){
+  const grp=[['À emballer',a=>a.stage==='emballage','box'],['À expédier',a=>a.stage==='livraison'&&a.livr.statut!=='expedie','truck'],['En transit',a=>a.stage==='livraison'&&a.livr.statut==='expedie','clock'],['Livrées',a=>a.stage==='livre','check']];
+  $('#main').innerHTML=`<div class="page-h"><div><h1>Expéditions</h1><p class="muted">Emballage, bons de livraison et confirmations de réception.</p></div></div>
+  <div class="egrid">${grp.map(([t,fn,ic])=>{const l=S.affaires.filter(fn);return `<section class="card"><div class="card-h"><h2 style="display:flex;gap:8px;align-items:center">${I(ic)}${t}</h2><span class="muted">${l.length}</span></div><div style="display:grid;gap:8px">
+  ${l.map(a=>{const kg=a.emb.colis.reduce((s,c)=>s+(+c.kg||0),0);return `<div class="ecard"><span class="kc-top"><span class="num muted">${a.ref}</span>${retard(a)?'<span class="badge b-bad">À risque</span>':''}</span><span class="kc-t">${esc(a.titre)}</span><span class="small muted wrap">${esc(a.client)}</span>
+  <span class="small">${a.emb.colis.length} colis · ${nf(kg)} kg${a.livr.bl?` · <span class="num">${a.livr.bl}</span>`:''}</span><span class="small muted">${a.stage==='livre'?'Livré le '+fd(a.livr.livreLe):a.livr.statut==='expedie'?'Expédié le '+fd(a.livr.date)+' · '+esc(a.livr.transp||a.livr.mode):'Échéance '+fd(a.ech)}</span>
+  <div><button type="button" class="btn sm" data-act="open" data-id="${a.id}" data-step="${a.stage==='emballage'?'emballage':'livraison'}">Ouvrir ${I('chev')}</button></div></div>`}).join('')||'<p class="muted small">Aucune affaire.</p>'}</div></section>`}).join('')}</div>`;
+}
+
+/* ---------- Documents imprimables ---------- */
+function docShell(title,num,dest,body){
+  return `<div class="doc"><div class="doc-h"><div><strong>${EMET.n}</strong><br>${EMET.a}<br><span style="color:#666">${EMET.s}</span></div><div class="doc-t"><h3>${title}</h3><div class="num">${esc(num)}</div><div>Édité le ${fd(TODAY)}</div></div></div>
+  <div class="doc-dest"><strong>${esc(dest.n)}</strong><br>${dest.c?'À l\'attention de '+esc(dest.c)+'<br>':''}${esc(dest.a||'')}</div>${body}<p class="doc-foot">Document généré par la démonstration — données fictives, sans valeur contractuelle.</p></div>`;
+}
+function previewDoc(title,html){openModal(title,`<div class="note">${I('info')}<span>Aperçu du PDF : « Imprimer » ouvre la boîte de dialogue du navigateur (choisir « Enregistrer en PDF »).</span></div><div class="doc-wrap" id="docSrc">${html}</div><div class="actions"><button type="button" class="btn primary" data-act="print">${I('print')}Imprimer / PDF</button><button type="button" class="btn" data-act="close">Fermer</button></div>`,null,true)}
+function devisDoc(a){
+  const t=tot(a),k=1+a.devis.marge/100,mx=Math.max(0,...a.devis.lignes.filter(l=>l.type!=='mo').map(l=>+l.delai||0)),wk=Math.ceil((mx+Math.ceil(t.h/CAP)+3)/5);
+  return docShell('Devis',a.devis.num,cl(a),`<p><strong>Objet :</strong> ${esc(a.titre)} — réf. affaire ${a.ref}</p><p style="margin-top:4px">${esc(a.desc)}</p>
+  <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">PU HT</th><th class="r">Total HT</th></tr></thead><tbody>
+  <tr><td><strong>${esc(a.titre)}</strong> — fabrication sur mesure</td><td class="r">${a.qty}</td><td class="r">${eur(t.ht/a.qty,2)}</td><td class="r">${eur(t.ht)}</td></tr>
+  ${t.g.mat?`<tr class="sub"><td colspan="3">dont matières et composants</td><td class="r">${eur(t.g.mat*k)}</td></tr>`:''}
+  ${t.g.mo?`<tr class="sub"><td colspan="3">dont fabrication atelier (${hf(t.h)})</td><td class="r">${eur(t.g.mo*k)}</td></tr>`:''}
+  ${t.g.st?`<tr class="sub"><td colspan="3">dont traitements et sous-traitance</td><td class="r">${eur(t.g.st*k)}</td></tr>`:''}
+  </tbody></table><div class="tot"><div><span>Total HT</span><span>${eur(t.ht,2)}</span></div><div><span>TVA 20 %</span><span>${eur(t.tva,2)}</span></div><div class="b"><span>Total TTC</span><span>${eur(t.ttc,2)}</span></div></div>
+  <p style="margin-top:12px">Délai de fabrication estimé : ${wk} semaine(s) après commande. Validité de l'offre : 30 jours. Acompte de 30 % à la commande, solde à la livraison.</p>
+  <div class="sign"><div>Bon pour accord — date, cachet et signature</div></div>`);
+}
+function arcDoc(a){const t=tot(a);return docShell('Accusé de réception de commande',a.commande.arc,cl(a),`<p>Nous accusons réception de votre commande <strong>${esc(a.commande.num)}</strong> du ${fd(a.commande.date)} relative à notre devis ${a.devis.num}.</p>
+  <table><thead><tr><th>Désignation</th><th class="r">Qté</th><th class="r">Total HT</th></tr></thead><tbody><tr><td>${esc(a.titre)}</td><td class="r">${a.qty}</td><td class="r">${eur(t.ht)}</td></tr></tbody></table>
+  <div class="tot"><div><span>Total HT</span><span>${eur(t.ht,2)}</span></div><div class="b"><span>Total TTC</span><span>${eur(t.ttc,2)}</span></div><div><span>Acompte 30 % TTC</span><span>${eur(t.ttc*.3,2)}</span></div></div>
+  <p style="margin-top:12px">Date de livraison convenue : <strong>${fd(a.ech)}</strong>. Référence à rappeler : ${a.ref}.</p>`)}
+function bcDoc(bc){
+  const rows=[];S.affaires.forEach(a=>a.achats.forEach(x=>{if(x.bc===bc)rows.push([a,x])}));if(!rows.length)return '';
+  const f=rows[0][1].four,sum=rows.reduce((s,p)=>s+p[1].qte*p[1].pu,0);
+  return docShell('Bon de commande fournisseur',bc,{n:f,c:'Service commercial',a:''},`<table><thead><tr><th>Affaire</th><th>Article</th><th class="r">Qté</th><th class="r">PU HT</th><th class="r">Total HT</th><th>Livraison souhaitée</th></tr></thead><tbody>
+  ${rows.map(([a,x])=>`<tr><td>${a.ref}</td><td>${esc(x.lib)}</td><td class="r">${nf(x.qte)} ${esc(x.unite)}</td><td class="r">${eur(x.pu,2)}</td><td class="r">${eur(x.qte*x.pu,2)}</td><td>${fd(x.prevu)}</td></tr>`).join('')}
+  </tbody></table><div class="tot"><div class="b"><span>Total HT</span><span>${eur(sum,2)}</span></div></div><p style="margin-top:10px">Merci de rappeler le numéro de bon de commande et la référence d'affaire sur votre bon de livraison.</p>`);
+}
+function blDoc(a){const kg=a.emb.colis.reduce((s,c)=>s+(+c.kg||0),0);return docShell('Bon de livraison',a.livr.bl,cl(a),`<p>Votre commande : <strong>${esc(a.commande.num)}</strong> · Affaire ${a.ref} · Expédition du ${fd(a.livr.date)} — ${esc(a.livr.mode)}${a.livr.transp?' ('+esc(a.livr.transp)+')':''}</p>
+  <table><thead><tr><th>Désignation</th><th class="r">Qté</th></tr></thead><tbody><tr><td>${esc(a.titre)}</td><td class="r">${a.qty}</td></tr></tbody></table>
+  <table><thead><tr><th>Colis</th><th>Contenu</th><th>Dimensions</th><th class="r">Poids</th></tr></thead><tbody>${a.emb.colis.map((c,i)=>`<tr><td>${i+1}/${a.emb.colis.length}</td><td>${esc(c.d)}</td><td>${c.L}×${c.l}×${c.h} cm</td><td class="r">${nf(c.kg)} kg</td></tr>`).join('')}</tbody></table>
+  <p>Conditionnement : ${esc(a.emb.type)} · Poids total : ${nf(kg)} kg</p><div class="sign"><div>Réserves éventuelles</div><div>Reçu par — date et signature</div></div>`)}
+function etiqDoc(a){const c=cl(a),n=a.emb.colis.length;return `<div class="doc"><div class="labels">${a.emb.colis.map((k,i)=>`<div class="label"><div style="color:#555">Expéditeur : ${EMET.n}</div><div style="margin:6px 0"><strong>${esc(c.n)}</strong><br>${esc(c.a)}</div><div class="big">${a.ref}</div><div>Colis <strong>${i+1}/${n}</strong> · ${nf(k.kg)} kg · ${k.L}×${k.l}×${k.h} cm</div><div style="color:#555">${esc(k.d)}</div></div>`).join('')}</div></div>`}
+
+/* ---------- Modales métier ---------- */
+function modalNewAff(){
+  const opts=S.affaires.filter(a=>a.devis.lignes.length).map(a=>`<option value="${a.id}">${a.ref} — ${esc(a.titre)}</option>`).join('');
+  openModal('Nouvelle affaire',`<form id="fNew" class="fgrid" novalidate>
+  <div class="field full"><label for="nC">Client <span class="req">*</span></label><select id="nC" name="client" required><option value="">— Choisir —</option>${CLIENTS.map(c=>`<option>${esc(c.n)}</option>`).join('')}<option value="__new">Nouveau client…</option></select></div>
+  <div class="field full" id="nNewWrap" hidden><label for="nN">Nom du nouveau client <span class="req">*</span></label><input type="text" id="nN" name="newc"></div>
+  <div class="field full"><label for="nT">Produit à fabriquer <span class="req">*</span></label><input type="text" id="nT" name="titre" required placeholder="ex. Table élévatrice inox 1 200 x 800"></div>
+  <div class="field full"><label for="nD">Description / cahier des charges</label><textarea id="nD" name="desc" placeholder="Matière, dimensions, finition, contraintes…"></textarea></div>
+  <div class="field"><label for="nQ">Quantité <span class="req">*</span></label><input type="number" id="nQ" name="qty" min="1" step="1" value="1" required></div>
+  <div class="field"><label for="nE">Livraison souhaitée <span class="req">*</span></label><input type="date" id="nE" name="ech" min="${addWD(TODAY,5)}" value="${addWD(TODAY,25)}" required></div>
+  <div class="field full"><label for="nF">Partir du chiffrage d'une affaire similaire</label><select id="nF" name="from"><option value="">Devis vierge</option>${opts}</select><span class="hint">Les lignes sont copiées puis modifiables : utile quand le produit ressemble à un précédent.</span></div>
+  <p class="err full" id="nErr" role="alert"></p>
+  <div class="full actions"><button type="submit" class="btn primary">Créer et chiffrer</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>`,b=>{
+    const sel=b.querySelector('#nC');sel.addEventListener('change',()=>{b.querySelector('#nNewWrap').hidden=sel.value!=='__new'});
+    b.querySelector('#fNew').addEventListener('submit',e=>{e.preventDefault();const fm=e.target,v=Object.fromEntries(new FormData(fm));
+      fm.querySelectorAll('[aria-invalid]').forEach(x=>x.removeAttribute('aria-invalid'));
+      const bad=[];if(!v.client)bad.push('nC');if(v.client==='__new'&&!String(v.newc).trim())bad.push('nN');if(!String(v.titre).trim())bad.push('nT');if(!(+v.qty>=1))bad.push('nQ');if(!v.ech||v.ech<TODAY)bad.push('nE');
+      if(bad.length){bad.forEach(id=>b.querySelector('#'+id).setAttribute('aria-invalid','true'));b.querySelector('#nErr').textContent='Merci de compléter les champs obligatoires.';b.querySelector('#'+bad[0]).focus();return}
+      let client=v.client;if(client==='__new'){client=String(v.newc).trim();CLIENTS.push({n:client,c:'',a:'Adresse à compléter'})}
+      const src=v.from?getAff(v.from):null;
+      const a=newAff({client,titre:String(v.titre).trim(),desc:String(v.desc).trim(),qty:Math.round(+v.qty),ech:v.ech,lines:src?src.devis.lignes.map(l=>{const c=Object.assign({},l);delete c.id;return c}):[],marge:src?src.devis.marge:25});
+      log(a,'Affaire créée'+(src?` à partir du chiffrage ${src.ref}`:''));save();closeModal();toast(`Affaire ${a.ref} créée`);openAff(a.id,'devis');
+    });
+  });
+}
+function modalAccept(a){
+  openModal('Devis accepté',`<form id="fAcc" class="fgrid" novalidate>
+  <div class="field"><label for="aN">N° de commande client <span class="req">*</span></label><input type="text" id="aN" name="num" required placeholder="ex. PO-12345"></div>
+  <div class="field"><label for="aD">Date de commande <span class="req">*</span></label><input type="date" id="aD" name="date" value="${TODAY}" max="${TODAY}" required></div>
+  <div class="note teal full">${I('zap')}<span>À la validation : création de la commande et de l'ARC, ${a.devis.lignes.filter(l=>l.type!=='mo').length} besoin(s) d'achat générés, ${a.devis.lignes.filter(l=>l.type==='mo').length+1} opérations planifiées selon la charge des postes.</span></div>
+  <p class="err full" id="aErr" role="alert"></p>
+  <div class="full actions"><button type="submit" class="btn ok">${I('check')}Valider la commande</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>`,b=>{
+    b.querySelector('#fAcc').addEventListener('submit',e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target));const n=b.querySelector('#aN');
+      if(!String(v.num).trim()){n.setAttribute('aria-invalid','true');b.querySelector('#aErr').textContent='Le numéro de commande client est obligatoire.';n.focus();return}
+      accept(a,String(v.num).trim(),v.date&&v.date<=TODAY?v.date:TODAY);save();closeModal();toast('Commande créée — achats et planning générés automatiquement');UI.step='commande';render();});
+  });
+}
+function modalRefuse(a){
+  openModal('Devis refusé',`<form id="fRef" class="fgrid" novalidate><div class="field full"><label for="rM">Motif <span class="req">*</span></label><select id="rM" name="m" required><option value="">— Choisir —</option><option>Prix trop élevé</option><option>Délai trop long</option><option>Projet abandonné</option><option>Concurrent retenu</option></select></div>
+  <p class="err full" id="rErr" role="alert"></p><div class="full actions"><button type="submit" class="btn danger">Enregistrer le refus</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>`,b=>{
+    b.querySelector('#fRef').addEventListener('submit',e=>{e.preventDefault();const m=b.querySelector('#rM');if(!m.value){m.setAttribute('aria-invalid','true');b.querySelector('#rErr').textContent='Choisissez un motif.';return}
+      a.devis.statut='refuse';a.devis.motif=m.value;log(a,'Devis refusé : '+m.value);save();closeModal();render();});
+  });
+}
+function modalOp(a,o){
+  const can=a.stage==='production';
+  openModal(`${a.ref} — ${o.lib}`,`<dl class="dl"><dt>Affaire</dt><dd>${esc(a.titre)}</dd><dt>Client</dt><dd>${esc(a.client)}</dd><dt>Poste</dt><dd>${PM[o.poste].n}</dd><dt>Durée</dt><dd>${hf(o.h)}</dd><dt>Planifiée</dt><dd>${fdw(o.jour)}${opEnd(o)!==o.jour?' → '+fdw(opEnd(o)):''}</dd><dt>Statut</dt><dd>${o.fait?'Terminée le '+fd(o.faitLe):'À faire'}</dd></dl>
+  ${a.stage==='achats'?`<div class="note warn">${I('clock')}<span>Prévisionnel : les achats de l'affaire ne sont pas tous reçus.</span></div>`:''}
+  ${!o.fait?`<form id="fMv" class="fgrid" novalidate><div class="field"><label for="mvD">Déplacer au</label><input type="date" id="mvD" value="${o.jour}" min="${TODAY}" required></div><div class="field" style="justify-content:flex-end"><button type="submit" class="btn">${I('cal')}Déplacer</button></div><p class="err full" id="mvErr" role="alert"></p></form>`:''}
+  <div class="actions">${can?`<button type="button" class="btn ${o.fait?'':'ok'}" data-act="opToggle" data-id="${a.id}" data-o="${o.id}" data-m="1">${o.fait?'Rouvrir l\'opération':I('check')+'Marquer terminée'}</button>`:''}<button type="button" class="btn" data-act="open" data-id="${a.id}" data-step="production">Ouvrir l'affaire</button></div>`,b=>{
+    const f=b.querySelector('#fMv');if(f)f.addEventListener('submit',e=>{e.preventDefault();const v=b.querySelector('#mvD').value;
+      if(!v||v<TODAY||isWE(pd(v))){b.querySelector('#mvD').setAttribute('aria-invalid','true');b.querySelector('#mvErr').textContent='Choisissez un jour ouvré à partir d\'aujourd\'hui.';return}
+      o.jour=v;log(a,`Opération déplacée au ${fd(v)} : ${o.lib}`);save();closeModal();toast('Opération déplacée');render();});
+  });
+}
+
+/* ---------- Rendu ---------- */
+function render(){
+  renderNav();
+  ({dash:renderDash,affaires:renderAffaires,aff:renderFiche,planning:renderPlanning,achats:renderAchats,expe:renderExpe})[UI.view]();
+}
+
+/* ---------- Événements ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const d=b.dataset,act=d.act,a=UI.view==='aff'?getAff(UI.aff):null;
+  if(b.tagName==='TR'&&e.target.closest('button'))return;
+  switch(act){
+    case 'nav':closeModal();go(d.v,d.v==='affaires'?{stage:d.s||''}:{});break;
+    case 'close':closeModal();break;
+    case 'newAff':modalNewAff();break;
+    case 'open':closeModal();openAff(d.id,d.step);break;
+    case 'stageFilter':go('affaires',{stage:d.s});break;
+    case 'mode':UI.mode=d.m;renderAffaires();break;
+    case 'step':UI.step=d.s;render();break;
+    case 'addLine':{const t=d.t;a.devis.lignes.push(t==='mo'?MO('','soud',1):t==='st'?ST('','Thermolaquage Martin',1,'forfait',0,5):M('','',1,'u',0,5));a.devis.lignes[a.devis.lignes.length-1].id=uid();if(t==='mo')a.devis.lignes[a.devis.lignes.length-1].lib='';save();render();const ins=document.querySelectorAll('.t-devis [data-f="lib"]');if(ins.length)ins[ins.length-1].focus();break}
+    case 'delLine':a.devis.lignes=a.devis.lignes.filter(l=>l.id!==d.lid);save();render();break;
+    case 'pvDevis':previewDoc('Devis '+a.devis.num,devisDoc(a));break;
+    case 'sendDevis':{const er=validateDevis(a);if(er){$('#devErr').textContent=er;$('#devErr').scrollIntoView({block:'center'});return}sendDevis(a);save();render();toast(`Devis envoyé à ${a.client} par email (simulation)`);break}
+    case 'relance':log(a,'Relance client envoyée');save();render();toast('Email de relance envoyé (simulation)');break;
+    case 'toDraft':a.devis.statut='brouillon';a.devis.motif='';log(a,'Devis repassé en brouillon');save();render();break;
+    case 'accept':modalAccept(a);break;
+    case 'refuse':modalRefuse(a);break;
+    case 'pvArc':previewDoc('Accusé de réception',arcDoc(a));break;
+    case 'sendArc':log(a,'ARC envoyé au client');save();render();toast('Accusé de réception envoyé par email (simulation)');break;
+    case 'cmdOne':{const x=getAff(d.id),y=x.achats.find(z=>z.id===d.x);commanderLot([[x,y]]);save();render();toast(`Bon de commande ${y.bc} envoyé à ${y.four} (simulation)`);break}
+    case 'cmdAff':{const n=commanderLot(a.achats.filter(x=>x.statut==='a_commander').map(x=>[a,x]));save();render();toast(`${n} bon(s) de commande envoyé(s) aux fournisseurs (simulation)`);break}
+    case 'cmdBulk':{const n=commanderLot(achPairs().filter(p=>p[1].statut==='a_commander'));save();render();toast(`${n} bon(s) de commande envoyé(s) — un par fournisseur (simulation)`);break}
+    case 'recv':{const x=getAff(d.id);recevoir(x,x.achats.find(z=>z.id===d.x));save();render();break}
+    case 'pvBc':previewDoc('Bon de commande '+d.bc,bcDoc(d.bc));break;
+    case 'opToggle':{const x=getAff(d.id),o=x.ops.find(z=>z.id===d.o);setOp(x,o,!o.fait);save();if(d.m)closeModal();render();break}
+    case 'op':{const x=getAff(d.id);modalOp(x,x.ops.find(z=>z.id===d.o));break}
+    case 'replanAff':schedule(a);log(a,'Replanification automatique de l\'affaire');save();render();toast('Affaire replanifiée selon la charge actuelle');break;
+    case 'replanAll':{const n=replanAll();S.log.unshift({d:TODAY,t:`Replanification automatique de l'atelier (${n} affaires, priorité aux échéances)`,a:'',ref:''});save();render();toast(`${n} affaire(s) replanifiée(s) par ordre d'échéance`);break}
+    case 'toPlanning':{const wk=curWeek()[0],dd=d.d||TODAY;const diff=Math.floor((pd(dd)-pd(wk))/864e5/7);go('planning',{week:diff});break}
+    case 'wk':UI.week=d.d==='0'?0:UI.week+(+d.d);renderPlanning();break;
+    case 'span':UI.span=+d.n;renderPlanning();break;
+    case 'achF':UI.achF=d.f;renderAchats();break;
+    case 'delColis':a.emb.colis=a.emb.colis.filter(c=>c.id!==d.c);save();render();break;
+    case 'pvEtiq':previewDoc('Étiquettes colis',etiqDoc(a));break;
+    case 'validEmb':{const er=!a.emb.colis.length?'Ajoutez au moins un colis.':a.emb.checks.length<CHECKS.length?'Cochez tous les points de la check-list.':'';if(er){$('#embErr').textContent=er;return}
+      a.stage='livraison';S.auto.emb++;log(a,`Emballage validé (${a.emb.colis.length} colis, ${a.emb.type.toLowerCase()})`);log(a,'Automatisme : expédition à planifier, étiquettes prêtes');save();UI.step='livraison';render();toast('Emballage validé — expédition à planifier');break}
+    case 'pvBl':previewDoc('Bon de livraison '+a.livr.bl,blDoc(a));break;
+    case 'print':{$('#printzone').innerHTML=$('#docSrc').innerHTML;window.print();break}
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.q==='aff'){UI.q=t.value;$('#affRes').innerHTML=affResults();return}
+  if(t.dataset.q==='ach'){UI.achQ=t.value;$('#achRes').innerHTML=achResults();return}
+  const a=UI.view==='aff'?getAff(UI.aff):null;if(!a)return;
+  const tr=t.closest('tr[data-lid]');
+  if(tr&&t.dataset.f){const l=a.devis.lignes.find(x=>x.id===tr.dataset.lid);if(!l)return;const f=t.dataset.f;let v=t.value;
+    if(['qte','pu','delai'].includes(f))v=parseFloat(String(v).replace(',','.'))||0;l[f]=v;
+    if(f==='poste'){l.pu=PM[v].t;tr.querySelector('[data-f="pu"]').value=l.pu}
+    tr.querySelector('[data-tot]').textContent=eur((+l.qte||0)*(+l.pu||0),2);$('#devErr').textContent='';updTotals(a);save();return}
+  if(t.hasAttribute('data-marge')){a.devis.marge=parseFloat(t.value)||0;updTotals(a);save()}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.sel==='stage'){UI.stage=t.value;$('#affRes').innerHTML=affResults();return}
+  if(t.dataset.sel==='four'){UI.achFour=t.value;$('#achRes').innerHTML=achResults();return}
+  const a=UI.view==='aff'?getAff(UI.aff):null;if(!a)return;
+  if(t.dataset.emb==='type'){a.emb.type=t.value;save()}
+  if(t.dataset.chk!==undefined){const c=CHECKS[+t.dataset.chk];a.emb.checks=a.emb.checks.filter(x=>x!==c);if(t.checked)a.emb.checks.push(c);const er=$('#embErr');if(er)er.textContent='';save()}
+});
+document.addEventListener('submit',e=>{
+  const f=e.target,k=f.dataset.form;if(!k)return;e.preventDefault();
+  const a=getAff(UI.aff);if(!a)return;const v=Object.fromEntries(new FormData(f));
+  f.querySelectorAll('[aria-invalid]').forEach(x=>x.removeAttribute('aria-invalid'));
+  const fail=(id,msg,inp)=>{f.querySelector('#'+id).textContent=msg;if(inp){inp.setAttribute('aria-invalid','true');inp.focus()}};
+  if(k==='ech'){if(!v.ech){f.ech.setAttribute('aria-invalid','true');return}a.ech=v.ech;log(a,'Date de livraison convenue : '+fd(v.ech));save();render();toast('Date de livraison mise à jour')}
+  if(k==='colis'){
+    for(const n of ['d','L','l','h','kg']){const inp=f.elements[n];if(!String(v[n]).trim()||(n!=='d'&&!(parseFloat(v[n])>0))){fail('colErr','Renseignez le contenu, les dimensions et le poids.',inp);return}}
+    a.emb.colis.push({id:uid(),d:String(v.d).trim(),L:+v.L,l:+v.l,h:+v.h,kg:parseFloat(v.kg)});save();render();const n=document.getElementById('cD');if(n)n.focus();
+  }
+  if(k==='expe'){
+    if(v.mode==='Transporteur'&&!String(v.transp).trim()){fail('expErr','Indiquez le transporteur.',f.elements.transp);return}
+    if(!v.date||v.date<TODAY){fail('expErr','Choisissez une date d\'expédition à partir d\'aujourd\'hui.',f.elements.date);return}
+    a.livr.mode=v.mode;a.livr.transp=String(v.transp).trim();a.livr.date=v.date;a.livr.statut='expedie';a.livr.bl='BL-26-00'+(S.bl++);
+    log(a,`Expédition ${a.livr.bl} — ${a.livr.mode}${a.livr.transp?' ('+a.livr.transp+')':''}`);save();render();toast(`BL ${a.livr.bl} édité — avis d'expédition envoyé au client (simulation)`);
+  }
+  if(k==='livre'){
+    if(!String(v.recep).trim()){fail('livErr','Indiquez qui a réceptionné.',f.elements.recep);return}
+    if(!v.d||v.d>TODAY){fail('livErr','Date de réception invalide.',f.elements.d);return}
+    a.livr.recep=String(v.recep).trim();a.livr.livreLe=v.d;a.livr.statut='livre';a.stage='livre';S.auto.liv++;
+    log(a,`Livraison confirmée — réceptionnée par ${a.livr.recep}`,v.d);log(a,'Automatisme : facture de solde à émettre (simulation)');save();render();toast('Livraison confirmée — facture à émettre (simulation)');
+  }
+});
+$('#resetBtn').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch(e){}S=seed();save();Object.assign(UI,{view:'dash',aff:null,step:null,q:'',stage:'',achF:'actifs',achFour:'',achQ:'',week:0});closeModal();render();toast('Démo réinitialisée')});
+window.addEventListener('afterprint',()=>{$('#printzone').innerHTML=''});
+
+loadState();save();render();
+})();
+</script>
 </body>
 </html>
