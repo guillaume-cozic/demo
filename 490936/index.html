@@ -2,20 +2,955 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Paiements sécurisés sur rendez-vous</title>
+<meta name="description" content="Plateforme SaaS multi-structures pour professionnels sur rendez-vous : dossiers, acceptation des conditions financières par lien ou QR code, empreinte bancaire Stripe Connect et encaissement différé, relances automatiques, PDF, double authentification et journal d’audit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F4F5F7;--panel:#FFFFFF;--panel-2:#F7F8FA;--ink:#141C26;--muted:#56606D;--line:#E1E4E9;--line-2:#C3C9D2;
+  --accent:#2547A6;--accent-ink:#FFFFFF;--accent-soft:#E7ECF9;--accent-text:#1E3D8F;
+  --ok:#17734A;--ok-soft:#DCF2E5;--warn:#8A5000;--warn-soft:#FBEED6;--bad:#B3261E;--bad-soft:#FCE3E0;
+  --info:#1D5E99;--info-soft:#E0EDF9;--vio:#5A3EA6;--vio-soft:#EDE7FA;--gray:#4B5563;--gray-soft:#ECEEF1;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 2px 8px rgba(16,24,40,.05);
+  --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E131A;--panel:#151B24;--panel-2:#1B232E;--ink:#E6EAF0;--muted:#A2ACB9;--line:#273040;--line-2:#3B4657;
+  --accent:#8EAEFF;--accent-ink:#0A1838;--accent-soft:#1A2948;--accent-text:#AFC5FF;
+  --ok:#6FD6A0;--ok-soft:#12301F;--warn:#F2BE6B;--warn-soft:#33260F;--bad:#FF9C92;--bad-soft:#3D1A17;
+  --info:#8EC5F5;--info-soft:#13283D;--vio:#C4B2F5;--vio-soft:#272040;--gray:#B8C0CC;--gray-soft:#232A35;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main:focus{outline:none}
+h1,h2,h3{margin:0;line-height:1.25;letter-spacing:-.01em}
+p{margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.92em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--warn-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 24px;padding:10px clamp(16px,2.2vw,32px);background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none;font-weight:800;font-size:14px}
+.mark svg{width:20px;height:20px}
+.ctx{margin-left:auto;display:flex;gap:12px;flex-wrap:wrap;min-width:0}
+.sel{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sel label{font-size:12px;color:var(--muted);font-weight:600}
+.sel select{min-height:44px;max-width:320px}
+@media (max-width:680px){.ctx{margin-left:0;width:100%}.sel{flex:1 1 150px}.sel select{width:100%;max-width:none}}
+
+.layout{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:calc(100vh - 110px)}
+#nav{border-right:1px solid var(--line);background:var(--panel);padding:16px 12px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}
+#nav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav-i{width:100%;min-height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:0;background:none;border-radius:10px;font-weight:600;color:var(--muted);cursor:pointer;text-align:left}
+.nav-i:hover{background:var(--panel-2);color:var(--ink)}
+.nav-i[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{margin-left:auto;background:var(--bad-soft);color:var(--bad);border-radius:999px;font-size:12px;font-weight:700;padding:0 8px}
+.nav-foot{display:flex;flex-direction:column;gap:10px;font-size:13px}
+.who-card{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}
+.who-card div{display:flex;flex-direction:column;min-width:0}
+.who-card span{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.sec-state{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:12.5px}
+.sec-state.on{color:var(--ok)}
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  #nav{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line);padding:6px clamp(16px,2.2vw,32px);flex-direction:row;overflow-x:auto}
+  #nav ul{flex-direction:row}
+  .nav-i{white-space:nowrap}
+  .nav-foot{display:none}
+}
+main{padding:24px clamp(16px,2.2vw,32px) 64px;min-width:0}
+
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-h h1{font-size:clamp(22px,2.4vw,28px);font-weight:800}
+.page-h p{margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.6;cursor:wait}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;color:var(--ink);flex:none}
+.icon-btn:hover{background:var(--panel-2)}
+.dlg-h .icon-btn{border-color:transparent}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.actions.between{justify-content:space-between}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin-bottom:12px}
+.card-h h2{font-size:16px;display:flex;align-items:center;gap:8px}
+.pill{font-size:12px;font-weight:700;background:var(--gray-soft);color:var(--gray);border-radius:999px;padding:1px 8px}
+.empty{display:flex;gap:8px;align-items:center;color:var(--muted);padding:16px 0}
+
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+@media (max-width:1050px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi-l{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--muted)}
+.kpi-v{font-size:clamp(19px,2vw,26px);font-weight:700;font-family:var(--font);letter-spacing:-.02em;overflow-wrap:anywhere}
+.kpi-s{font-size:12.5px;color:var(--muted)}
+.kpi-bad .kpi-v{color:var(--bad)}
+@media (max-width:420px){.kpi{padding:12px}.kpi-l{font-size:12px}}
+
+.g-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-bottom:16px}
+@media (min-width:1180px){.g-dash{grid-template-columns:minmax(0,2.3fr) minmax(0,1fr)}}
+.g-3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.g-side{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:1180px){.g-side{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}.g-side.alt{grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}}
+.g-sec{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));margin-bottom:16px;align-items:start}
+
+.cal-l{margin:-6px 0 10px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:170px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.day-h{font-size:12.5px;font-weight:600;color:var(--muted);text-transform:capitalize;display:flex;gap:4px;align-items:baseline}
+.day-h b{font-size:16px;color:var(--ink)}
+.day-e{color:var(--muted);font-size:13px}
+.ev{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:1px;width:100%;min-height:44px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);border-left:4px solid var(--c);background:var(--panel);cursor:pointer;font-size:12.5px;min-width:0;line-height:1.3}
+.ev:hover{border-color:var(--c)}
+.ev-t{font-weight:700;color:var(--c)}
+.ev-n{font-weight:700;overflow-wrap:anywhere}
+.ev-s{color:var(--muted);overflow-wrap:anywhere}
+.ev-x .ev-n{text-decoration:line-through}
+.c-ok{--c:var(--ok);--cs:var(--ok-soft)}.c-warn{--c:var(--warn);--cs:var(--warn-soft)}.c-bad{--c:var(--bad);--cs:var(--bad-soft)}.c-info{--c:var(--info);--cs:var(--info-soft)}.c-vio{--c:var(--vio);--cs:var(--vio-soft)}.c-gray{--c:var(--gray);--cs:var(--gray-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12.5px;color:var(--muted);list-style:none;padding:0}
+.legend li{display:flex;gap:6px;align-items:center}
+.legend i{width:10px;height:10px;border-radius:3px;background:var(--c);display:inline-block}
+@media (max-width:900px){.week{grid-template-columns:minmax(0,1fr)}.day{min-height:0}}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:600;line-height:1.4;background:var(--cs);color:var(--c)}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.badge.nodot::before{display:none}
+.badge svg{width:14px;height:14px}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent-text)}
+
+.alerts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.al{width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer;text-align:left;min-height:56px}
+.al:hover{background:var(--panel-2)}
+.al-i{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;flex:none;background:var(--cs);color:var(--c)}
+.al-b{flex:1;min-width:0;display:flex;flex-direction:column}
+.al-b span{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-size:10px;font-family:var(--font)}
+.chart .v{fill:var(--ink);font-weight:700}
+.chart .bar{fill:var(--accent)}
+.chart .base{stroke:var(--line-2)}
+.stack{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--gray-soft);margin:6px 0 14px}
+.stack span{display:block;height:100%;background:var(--c)}
+.st-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.st-list button{width:100%;display:flex;align-items:center;gap:10px;min-height:44px;padding:0 8px;border:0;background:none;border-radius:8px;cursor:pointer;text-align:left}
+.st-list button:hover{background:var(--panel-2)}
+.st-list i{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.st-list b{margin-left:auto}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.feed li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px}
+.feed .fi{width:32px;height:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.feed div{min-width:0;display:flex;flex-direction:column}
+.feed span{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+
+.filters{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.filters .grow{flex:1 1 260px}
+.filters .field{flex:0 1 240px}
+.filters .grow.field{flex:1 1 260px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:13.5px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip .num{color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip[aria-pressed="true"] .num{color:inherit}
+
+.tbl-wrap{overflow-x:auto;position:relative}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);font-weight:700}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+.tbl tbody tr:hover{background:var(--panel-2)}
+.tbl td svg{vertical-align:-4px}
+.sub{display:block;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.lnk{background:none;border:0;padding:0 2px;min-height:44px;color:var(--accent-text);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-align:left;overflow-wrap:anywhere}
+.matrix th[scope="row"]{text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);font-weight:500}
+.matrix td{text-align:center}
+.yes{color:var(--ok);display:inline-flex}
+.no{color:var(--muted)}
+@media (max-width:760px){
+  .tbl.resp thead{display:none}
+  .tbl.resp,.tbl.resp tbody{display:block}
+  .tbl.resp tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+  .tbl.resp td{display:block;padding:0;border:0;min-width:0}
+  .tbl.resp td[data-l]::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .tbl.resp td.c-main{grid-column:1/-1}
+  .tbl.resp .lnk{min-height:36px}
+}
+
+.form{display:flex;flex-direction:column;gap:16px}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{font-weight:700;font-size:14px;margin-bottom:8px;padding:0}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.g2{grid-template-columns:minmax(0,1fr)}}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-weight:600;font-size:13.5px}
+.field.inline{flex-direction:row;align-items:center;gap:8px}
+.req{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{color:var(--bad);font-size:13px;font-weight:600}
+input,select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 12px;width:100%;min-width:0}
+input[readonly]{background:var(--panel-2)}
+input[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-weight:500}
+.chk input{width:20px;height:20px;min-height:0;accent-color:var(--accent);flex:none;margin:0}
+.checks{display:flex;flex-wrap:wrap;gap:4px 20px}
+.inp-ic{position:relative}
+.inp-ic svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.inp-ic input{padding-left:40px}
+
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(580px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.wide{width:min(1000px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(10,16,24,.55)}
+.dlg-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 10px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:18px;overflow-wrap:anywhere;display:flex;gap:8px;align-items:center;min-width:0}
+.dlg-b{padding:20px 22px 22px}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding-top:6px}
+@media (max-width:560px){dialog,dialog.wide{width:100vw;max-width:100vw;max-height:100dvh;border-radius:0;margin:auto 0 0}.dlg-b{padding:16px}}
+
+.dt-top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:4px}
+.dt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+@media (max-width:820px){.dt-grid{grid-template-columns:minmax(0,1fr)}}
+.box{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel-2);min-width:0}
+.box h3,.sec-t{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;font-weight:700}
+.sec-t{margin:20px 0 10px}
+dl.kv{margin:0;display:grid;gap:6px;font-size:14px}
+dl.kv div{display:flex;justify-content:space-between;gap:12px}
+dl.kv dt{color:var(--muted)}
+dl.kv dd{margin:0;text-align:right;font-weight:600;overflow-wrap:anywhere;min-width:0}
+.prog{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:14px 0 4px;list-style:none;padding:0}
+.prog li{font-size:12.5px;font-weight:600;color:var(--muted);padding-top:8px;border-top:4px solid var(--line);display:flex;gap:6px;align-items:flex-start}
+.prog li.done{border-color:var(--ok);color:var(--ok)}
+.prog li.ko{border-color:var(--bad);color:var(--bad)}
+.prog li svg{width:16px;height:16px}
+@media (max-width:520px){.prog{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tl{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:0 0 12px 12px;font-size:14px}
+.tl li::before{content:"";position:absolute;left:-25px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--panel);border:2px solid var(--accent)}
+.tl time,.tl .by{font-size:12.5px;color:var(--muted)}
+
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);font-size:14px}
+.note>svg{margin-top:2px}
+.note.ok{background:var(--ok-soft);border-color:transparent}.note.ok>svg{color:var(--ok)}
+.note.warn{background:var(--warn-soft);border-color:transparent}.note.warn>svg{color:var(--warn)}
+.note.bad{background:var(--bad-soft);border-color:transparent}.note.bad>svg{color:var(--bad)}
+.note.info{background:var(--info-soft);border-color:transparent}.note.info>svg{color:var(--info)}
+
+.qr-wrap{display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px;align-items:start;margin-top:12px}
+.qr{display:flex;flex-direction:column;gap:6px;align-items:center}
+.qr svg{width:170px;height:170px;border-radius:8px;border:1px solid var(--line)}
+.qr-info{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (max-width:560px){.qr-wrap{grid-template-columns:minmax(0,1fr)}}
+pre.msg{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.55 var(--font);background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0 0}
+
+.rules{list-style:none;margin:0;padding:0}
+.rules li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rule-b{display:flex;flex-direction:column;gap:3px;min-width:0}
+.rule-b span:not(.tag){font-size:13px;color:var(--muted)}
+.rule-b .tag{align-self:flex-start}
+.switch{width:56px;height:44px;background:none;border:0;position:relative;cursor:pointer;flex:none;padding:0}
+.switch span{position:absolute;inset:8px 2px;border-radius:999px;background:var(--line-2);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.switch[aria-checked="true"] span{background:var(--accent)}
+.switch[aria-checked="true"] span::after{transform:translateX(24px)}
+.ulist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ulist li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ulist li>div{display:flex;flex-direction:column;min-width:0;flex:1 1 140px}
+.ulist li>div span{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.ulist li.cur{background:var(--accent-soft);border-radius:10px;padding:10px;border-color:transparent}
+.av{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+
+.portal{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.pcard{padding:clamp(18px,4vw,32px)}
+.pcard h1{font-size:clamp(22px,3vw,28px);font-weight:800}
+.p-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+.p-org{display:flex;gap:10px;align-items:center}
+.p-org div{display:flex;flex-direction:column}
+.p-org span{font-size:12.5px;color:var(--muted)}
+.secure{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ok);font-weight:600}
+.psteps{list-style:none;padding:0;margin:16px 0;display:flex;gap:8px}
+.psteps li{flex:1;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+.psteps li>span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-2);flex:none;font-size:13px}
+.psteps li>span svg{width:14px;height:14px}
+.psteps li.cur{color:var(--ink)}
+.psteps li.cur>span{border-color:var(--accent);color:var(--accent-text)}
+.psteps li.done>span{background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.recap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0;padding:16px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line)}
+.recap dt{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.recap dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+@media (max-width:480px){.recap{grid-template-columns:minmax(0,1fr)}}
+.conds{border:1px solid var(--line);border-radius:12px;padding:16px}
+.conds h2{font-size:16px}
+.conds ul{padding-left:20px;margin:10px 0 0;display:flex;flex-direction:column;gap:6px;font-size:14.5px}
+.paybox{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.paybox-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.success{text-align:center;padding:8px 0 4px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.big-ic{width:56px;height:56px;border-radius:50%;background:var(--cs);color:var(--c);display:grid;place-items:center}
+.big-ic svg{width:28px;height:28px}
+details.test summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--accent-text)}
+details.test ul{margin:0;padding-left:20px;font-size:13.5px;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--mono);font-size:.88em;background:var(--panel-2);padding:1px 5px;border-radius:5px;border:1px solid var(--line);overflow-wrap:anywhere}
+
+.doc{background:#fff;color:#141414;border:1px solid var(--line);border-radius:8px;padding:clamp(16px,4vw,32px);font-size:14px;line-height:1.55}
+.doc h2{font-size:18px;margin:20px 0 10px;color:#1E3D8F}
+.doc-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2px solid #1E3D8F;padding-bottom:12px}
+.doc-t{width:100%;border-collapse:collapse;margin:12px 0}
+.doc-t th,.doc-t td{border:1px solid #c9c9c9;padding:6px 8px;text-align:left;overflow-wrap:anywhere;vertical-align:top}
+.doc-t th{background:#f2f4f8;width:38%}
+.doc p{margin:8px 0}
+.doc-foot{font-size:11px;color:#555;margin-top:18px;overflow-wrap:anywhere}
+#print{display:none}
+
+#toasts{position:fixed;inset:auto 16px 16px 16px;margin:0;padding:0;border:0;background:transparent;width:auto;height:auto;overflow:visible;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:100;pointer-events:none}
+.toast{pointer-events:auto;display:flex;gap:10px;align-items:center;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:440px;font-size:14px;font-weight:500;animation:tin .25s ease;transition:opacity .3s,transform .3s}
+.toast.out{opacity:0;transform:translateY(8px)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{
+  body>*:not(#print){display:none!important}
+  #print{display:block!important}
+  #print .doc{border:0;padding:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="resetBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.3L3 16M3 21v-5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8.5 15l2.5 2.5 4.5-5"/></svg></span><span>Tempo<small>Paiements sécurisés sur rendez-vous</small></span></div>
+  <div class="ctx">
+    <div class="sel"><label for="selS">Structure</label><select id="selS"></select></div>
+    <div class="sel"><label for="selR">Connecté en tant que</label><select id="selR"></select></div>
+  </div>
+</header>
+<div class="layout">
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<dialog id="otp" aria-labelledby="otpT"></dialog>
+<div id="toasts" popover="manual" role="status" aria-live="polite"></div>
+<div id="print"></div>
+<script>
+(()=>{'use strict';
+const KEY='demo-490936-v1',DAY=864e5,HR=36e5;
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n||0);
+const fD=t=>new Date(t).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const fDL=t=>new Date(t).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const fT=t=>new Date(t).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const fDT=t=>fD(t)+' · '+fT(t);
+const fFull=t=>new Date(t).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'});
+const sameDay=(a,b)=>new Date(a).toDateString()===new Date(b).toDateString();
+const isoDate=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const isoTime=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+const r2=n=>Math.round(n*100)/100;
+const first=n=>n.split(' ')[0];
+const initials=n=>n.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();
+const tok=(n=12)=>Array.from({length:n},()=>'abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random()*55)]).join('');
+function rel(t){const a=new Date();a.setHours(0,0,0,0);const b=new Date(t);b.setHours(0,0,0,0);const n=Math.round((b-a)/DAY);
+  if(n===0)return 'aujourd’hui à '+fT(t);if(n===1)return 'demain à '+fT(t);if(n===-1)return 'hier à '+fT(t);return n>0?'dans '+n+' jours':'il y a '+(-n)+' jours';}
+
+const P={
+dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+zap:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+qr:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM21 14v.01M14 21h.01M17 21h4v-4"/>',
+cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.01"/>',
+check:'<path d="m5 12 5 5 9-10"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',
+download:'<path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/>',
+refresh:'<path d="M3 12a9 9 0 0 1 15.5-6.3L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.3L3 16M3 21v-5h5"/>',
+euro:'<path d="M17 6.5A7 7 0 1 0 17 17.5M4 10h9M4 14h9"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+sms:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+print:'<path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M7 14h10v7H7z"/>',
+left:'<path d="m15 6-6 6 6 6"/>',
+right:'<path d="m9 6 6 6-6 6"/>',
+undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+link:'<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+play:'<path d="M7 4v16l13-8z"/>',
+key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3"/>',
+building:'<path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h4v12M8 7h4M8 11h4M8 15h4M2 21h20"/>',
+bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+
+const ST={attente:['Acceptation en attente','warn'],empreinte:['Empreinte validée','info'],a_valider:['Prestation à valider','vio'],encaisse:['Encaissé','ok'],incident:['Incident de paiement','bad'],annule:['Annulé','gray'],rembourse:['Remboursé','gray']};
+const PT={empreinte:['Empreinte autorisée','info'],capture:['Encaissement','ok'],echec:['Échec d’encaissement','bad'],refus:['Carte refusée','bad'],liberation:['Empreinte libérée','gray'],remboursement:['Remboursement','vio']};
+const badge=(k,map=ST)=>`<span class="badge c-${map[k][1]}">${map[k][0]}</span>`;
+const ROLE_L={gestionnaire:'Gestionnaire',assistant:'Assistant(e)',pro:'Professionnel',client:'Client'};
+const PERM={
+  gestionnaire:{create:1,amount:1,report:1,cancel:1,capture:1,refund:1,payments:1,export:1,auto:1,secu:1,stripe:1},
+  assistant:{create:1,amount:1,report:1,cancel:1,payments:1},
+  pro:{report:1,capture:1},client:{}
+};
+const NAV={gestionnaire:['dash','dossiers','paiements','auto','secu'],assistant:['dash','dossiers','paiements'],pro:['dash','dossiers'],client:['portail']};
+const NAVL={dash:['Tableau de bord','dash'],dossiers:['Dossiers','folder'],paiements:['Paiements','card'],auto:['Automatisations','zap'],secu:['Sécurité & journal','shield'],portail:['Espace client','user']};
+const DOCL={att:'Attestation d’acceptation',just:'Justificatif de paiement',recap:'Récapitulatif du dossier'};
+
+const STRUCTS=[
+ {id:'s1',name:'Cabinet Les Tilleuls',sub:'Santé & bien-être · Nantes',addr:'14 rue des Tilleuls, 44000 Nantes',siret:'812 345 678 00021',prefix:'TIL',policy:{h:24,pct:100},users:{gestionnaire:'Claire Morel',assistant:'Hugo Bernard'},
+  services:[['Consultation d’ostéopathie',65,45],['Bilan diététique',80,60],['Séance de sophrologie',55,50],['Forfait 4 séances d’ostéopathie',240,45]]},
+ {id:'s2',name:'Studio Encre & Ligne',sub:'Tatouage · Lyon',addr:'3 montée de la Grande-Côte, 69001 Lyon',siret:'903 456 789 00014',prefix:'ENC',policy:{h:72,pct:50},users:{gestionnaire:'Sofia Lambert',assistant:'Nathan Petit'},
+  services:[['Tatouage avant-bras (3 h)',360,180],['Projet dos — séance 1/3',650,300],['Retouche',80,60],['Flash du mois',140,90]]}
+];
+const PROS=[
+ {id:'p1',sid:'s1',name:'Léa Fontaine',job:'Ostéopathe',stripe:'actif',acct:'acct_1Q2fLt8aZkP0Xw'},
+ {id:'p2',sid:'s1',name:'Marc Dumont',job:'Diététicien',stripe:'actif',acct:'acct_1Q2fMa3bRtY7Vn'},
+ {id:'p3',sid:'s1',name:'Inès Garnier',job:'Sophrologue',stripe:'incomplet',acct:'acct_1Q4hNc9dWqE2Ks'},
+ {id:'p4',sid:'s2',name:'Yanis Roux',job:'Tatoueur',stripe:'actif',acct:'acct_1P9kRe2fGhJ5Lm'},
+ {id:'p5',sid:'s2',name:'Camille Vidal',job:'Tatoueuse',stripe:'actif',acct:'acct_1P9kSv6gLmN8Qa'}
+];
+const CLIENTS=[['Julien','Roche'],['Emma','Lefèvre'],['Thomas','Girard'],['Chloé','Martin'],['Antoine','Mercier'],['Manon','Robin'],['Lucas','Faure'],['Sarah','Blanc'],['Pauline','Chevalier'],['Maxime','André'],['Léna','Perrin'],['Nicolas','Gauthier'],['Zoé','Lemoine'],['Bastien','Colin'],['Alice','Renaud'],['Romain','Masson'],['Jade','Dupuis'],['Olivier','Brun'],['Clara','Fabre'],['Inès','Bertin'],['Victor','Arnaud'],['Margaux','Picard'],['Hugo','Lacroix'],['Elsa','Marchand']];
+const RULES=[
+ {id:'r1',on:true,ch:'E-mail + SMS',t:'Envoi du lien d’acceptation',w:'À la création du dossier'},
+ {id:'r2',on:true,ch:'E-mail',t:'Relance des conditions non acceptées',w:'24 h après l’envoi, puis toutes les 24 h'},
+ {id:'r3',on:true,ch:'SMS',t:'Rappel de rendez-vous',w:'La veille du rendez-vous'},
+ {id:'r4',on:true,ch:'E-mail',t:'Demande de validation au professionnel',w:'À la fin du rendez-vous (mise à jour de l’échéance)'},
+ {id:'r5',on:true,ch:'E-mail + SMS',t:'Relance après incident de paiement',w:'Immédiatement, puis J+1 et J+3'},
+ {id:'r6',on:true,ch:'E-mail',t:'Envoi du justificatif de paiement',w:'Après chaque encaissement'}
+];
+
+let S,ui;
+const defUi=()=>({sid:'s1',who:'gestionnaire',view:'dash',week:0,q:'',st:'all',pf:'all',pt:'all',secOnly:false,twofa:false,clientDossier:null,cstep:{},pending:null,code:''});
+const mail=(f,l)=>(f+'.'+l).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()+'@exemple.fr';
+const phone=()=>'06 '+[0,0,0,0].map(()=>String(10+Math.floor(Math.random()*90))).join(' ');
+const link=d=>'https://rdv.exemple.fr/c/'+d.token;
+const structOf=d=>S.structures.find(x=>x.id===d.sid);
+const proById=id=>S.pros.find(p=>p.id===id);
+const byId=id=>S.dossiers.find(d=>d.id===id);
+const rule=id=>S.rules.find(r=>r.id===id).on;
+function pay(d,type,amount,detail,at){S.payments.push({id:(type==='empreinte'||type==='capture'||type==='echec'||type==='refus'?'pi_':type==='remboursement'?'re_':'pi_')+tok(18),did:d.id,sid:d.sid,type,amount:r2(amount),at:at||Date.now(),detail:detail||''});}
+function msgLink(d,relance){const s=structOf(d),p=proById(d.proId);return{
+  subj:(relance?'Rappel : ':'')+'Confirmez votre rendez-vous du '+fD(d.date),
+  body:`Bonjour ${first(d.client.name)},\n\n${s.name} vous invite à confirmer votre rendez-vous :\n• ${d.service} avec ${p.name}\n• ${fDL(d.date)} à ${fT(d.date)}\n• Montant : ${eur(d.amount)}\n\nAcceptez les conditions financières et enregistrez votre moyen de paiement depuis votre lien personnel :\n${link(d)}\n\nAucun débit n’est effectué avant la prestation.`,
+  sms:`${s.name} : confirmez votre RDV du ${fD(d.date)} à ${fT(d.date)} (${eur(d.amount)}) : ${link(d)}`};}
+function msgFix(d){const s=structOf(d);return{subj:'Votre paiement n’a pas abouti — '+d.id,
+  body:`Bonjour ${first(d.client.name)},\n\nLe règlement de ${eur(d.amount)} pour « ${d.service} » du ${fDL(d.date)} a été refusé par votre banque.\nMerci d’enregistrer un nouveau moyen de paiement depuis votre espace :\n${link(d)}\n\n${s.name}`,
+  sms:`${s.name} : votre paiement de ${eur(d.amount)} a été refusé. Mettez à jour votre carte : ${link(d)}`};}
+
+function seed(){
+  S={v:1,seq:{s1:140,s2:60},structures:JSON.parse(JSON.stringify(STRUCTS)),pros:JSON.parse(JSON.stringify(PROS)),dossiers:[],payments:[],outbox:[],audit:[],rules:JSON.parse(JSON.stringify(RULES))};
+  const plan={
+    s1:[[0,0,0,-12,9,'encaisse'],[1,1,1,-9,14,'encaisse'],[2,0,0,-7,10,'encaisse'],[3,2,2,-6,17,'annule'],[4,0,3,-5,11,'encaisse'],[5,1,1,-3,15,'incident'],[6,0,0,-1,16,'a_valider'],[7,2,2,0,18,'empreinte'],[8,1,1,1,9,'attente',2],[9,0,0,1,14,'empreinte'],[10,0,3,2,11,'empreinte'],[11,2,2,3,17,'attente',0],[12,1,1,4,10,'empreinte'],[13,0,0,6,15,'empreinte'],[14,0,0,8,9,'attente',1],[15,1,1,2,16,'empreinte'],[16,0,0,3,10,'empreinte']],
+    s2:[[15,0,0,-10,14,'encaisse'],[16,1,1,-8,10,'encaisse'],[17,0,3,-4,16,'encaisse'],[12,0,2,-5,13,'incident'],[18,1,2,-2,11,'a_valider'],[1,1,3,0,15,'empreinte'],[19,0,1,1,10,'empreinte'],[3,1,0,2,14,'attente',3],[6,0,3,5,15,'empreinte'],[9,1,1,9,10,'empreinte']]
+  };
+  [-15,-17,-20,-23,-27,-31,-34,-38,-41,-45,-48,-52].forEach((o,i)=>{const pi=i%3;plan.s1.push([17+i,pi,pi===0&&i%2===0?3:pi,o,9+(i*2)%8,'encaisse']);});
+  [-16,-22,-29,-35,-43,-50].forEach((o,i)=>plan.s2.push([20+i,i%2,i%4,o,10+(i*3)%7,'encaisse']));
+  Object.entries(plan).forEach(([sid,arr])=>arr.sort((a,b)=>a[3]-b[3]).forEach(x=>mk(sid,...x)));
+  const now=Date.now();
+  S.structures.forEach(s=>{
+    const L=S.dossiers.filter(d=>d.sid===s.id),pr=S.pros.filter(p=>p.sid===s.id);
+    const A=(h,who,role,action,ref,sens)=>S.audit.push({at:now-h*HR,sid:s.id,who,role,action,ref:ref||'',sens});
+    A(2,s.users.gestionnaire,'Gestionnaire','Connexion (mot de passe + code 2FA)','',true);
+    A(5,s.users.assistant,'Assistant(e)','Connexion (mot de passe + code 2FA)','',true);
+    A(27,s.users.assistant,'Assistant(e)','Modification de montant ('+eur(s.services[0][1]-10)+' → '+eur(s.services[0][1])+')',L[L.length-3].id,true);
+    A(50,s.users.gestionnaire,'Gestionnaire','Export des paiements (CSV)','',true);
+    A(75,s.users.gestionnaire,'Gestionnaire','Invitation d’un utilisateur : '+pr[pr.length-1].name+' (Professionnel)','',true);
+    A(120,'Système','Sécurité','3 tentatives de connexion échouées — compte temporairement bloqué (IP 185.22.x.x)','',true);
+  });
+  S.audit.sort((a,b)=>b.at-a.at);S.outbox.sort((a,b)=>b.at-a.at);S.payments.sort((a,b)=>b.at-a.at);
+  return S;
+}
+function mk(sid,ci,pi,si,off,h,status,sentAgo){
+  const st=S.structures.find(x=>x.id===sid),pros=S.pros.filter(p=>p.sid===sid),pro=pros[pi%pros.length],sv=st.services[si];
+  const dt=new Date();dt.setHours(h,0,0,0);dt.setDate(dt.getDate()+off);if(dt.getDay()===0)dt.setDate(dt.getDate()+(off<0?-1:1));
+  const t=dt.getTime(),now=Date.now();const[fn,ln]=CLIENTS[ci%CLIENTS.length];
+  const created=status==='attente'?now-(sentAgo||0)*DAY-2*HR:Math.min(t-9*DAY,now-2*DAY);
+  const D={id:st.prefix+'-'+new Date().getFullYear()+'-'+String(++S.seq[sid]).padStart(4,'0'),sid,proId:pro.id,client:{name:fn+' '+ln,email:mail(fn,ln),phone:phone()},service:sv[0],amount:sv[1],captured:0,refunded:0,date:t,duration:sv[2],status,createdAt:created,acceptedAt:null,card:null,fail:false,token:tok(),history:[],lastSent:created,reminded:false,reportAsked:false};
+  const H=(at,txt,by)=>D.history.push({at,txt,by});
+  const O=(at,ch,to,subj,body)=>S.outbox.push({at,sid,ch,to,subj,body,ref:D.id});
+  H(created,'Dossier créé — '+sv[0]+' · '+eur(sv[1]),st.users.assistant);
+  H(created+6e4,'Lien d’acceptation envoyé par e-mail et SMS','Automatisation');
+  const recent=off>-14;
+  if(status==='attente'||recent){const m=msgLink(D);O(created+6e4,'email',D.client.email,m.subj,m.body);if(status==='attente')O(created+6e4,'sms',D.client.phone,'Lien personnel',m.sms);}
+  if(status!=='attente'){
+    const acc=created+5*HR;D.acceptedAt=acc;D.card={brand:'Visa',last4:['4242','1881','0077','5556','3184','7310'][ci%6]};
+    H(acc,'Conditions financières acceptées via lien personnel',D.client.name);
+    H(acc+3e4,'Empreinte bancaire autorisée — '+D.card.brand+' •••• '+D.card.last4+' · '+eur(D.amount),'Stripe');
+    pay(D,'empreinte',D.amount,'Autorisation (capture différée)',acc+3e4);
+  }
+  const end=t+D.duration*6e4+20*6e4;
+  if(status==='encaisse'){D.captured=D.amount;H(end,'Prestation validée',pro.name);pay(D,'capture',D.amount,'Encaissement différé',end+5e3);H(end+5e3,'Encaissement de '+eur(D.amount)+' effectué','Stripe');
+    if(recent){O(end+6e3,'email',D.client.email,'Votre justificatif de paiement '+D.id,`Bonjour ${fn},\n\nNous confirmons l’encaissement de ${eur(D.amount)} pour « ${D.service} ».\nVotre justificatif est disponible dans votre espace : ${link(D)}`);
+      S.audit.push({at:end,sid,who:pro.name,role:'Professionnel',action:'Encaissement de '+eur(D.amount),ref:D.id,sens:true});}}
+  if(status==='incident'){D.fail=true;H(end,'Prestation validée',pro.name);pay(D,'echec',D.amount,'Fonds insuffisants (card_declined)',end+5e3);H(end+5e3,'Échec de l’encaissement : fonds insuffisants','Stripe');const m=msgFix(D);O(end+6e3,'email',D.client.email,m.subj,m.body);O(end+6e3,'sms',D.client.phone,'Incident de paiement',m.sms);D.lastSent=end+6e3;}
+  if(status==='annule'){const at=t-3*DAY;H(at,'Annulation à l’initiative du client, plus de '+st.policy.h+' h avant — sans frais',st.users.assistant);pay(D,'liberation',D.amount,'Annulation sans frais',at+5e3);H(at+5e3,'Empreinte libérée','Stripe');}
+  if(status==='a_valider')H(t+D.duration*6e4,'Rendez-vous terminé — en attente de validation de la prestation','Automatisation');
+  S.dossiers.push(D);return D;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.S&&o.S.v===1){S=o.S;ui=Object.assign(defUi(),o.ui||{});return;}}}catch(e){}seed();ui=defUi();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,ui:{sid:ui.sid,who:ui.who,view:ui.view}}));}catch(e){}}
+
+const st=()=>S.structures.find(s=>s.id===ui.sid);
+const role=()=>ui.who.startsWith('pro:')?'pro':ui.who;
+const can=p=>!!PERM[role()][p];
+const myPro=()=>proById(ui.who.slice(4));
+function clientD(){let d=ui.clientDossier&&byId(ui.clientDossier);if(!d||d.sid!==ui.sid){const L=S.dossiers.filter(x=>x.sid===ui.sid);d=L.find(x=>x.status==='attente')||L.find(x=>x.status==='incident')||L[0];ui.clientDossier=d?d.id:null;}return d;}
+function meName(){const r=role();if(r==='pro')return myPro().name;if(r==='client'){const d=clientD();return d?d.client.name:'Client';}return st().users[r];}
+const scoped=()=>S.dossiers.filter(d=>d.sid===ui.sid&&(role()!=='pro'||d.proId===ui.who.slice(4)));
+function log(d,txt,by){d.history.push({at:Date.now(),txt,by:by||meName()});}
+function audit(action,ref,sens){S.audit.unshift({at:Date.now(),sid:ui.sid,who:meName(),role:ROLE_L[role()],action,ref:ref||'',sens:!!sens});}
+function send(d,ch,to,subj,body){S.outbox.unshift({at:Date.now(),sid:d?d.sid:ui.sid,ch,to,subj,body,ref:d?d.id:''});}
+function sendLink(d,relance,chs){chs=chs||['email','sms'];const m=msgLink(d,relance);
+  if(chs.includes('email'))send(d,'email',d.client.email,m.subj,m.body);if(chs.includes('sms'))send(d,'sms',d.client.phone,'Lien personnel',m.sms);
+  d.lastSent=Date.now();toast((chs.length>1?'E-mail et SMS envoyés':chs[0]==='email'?'E-mail envoyé':'SMS envoyé')+' à '+d.client.name+' (simulation)','info');}
+function sendFix(d){const m=msgFix(d);send(d,'email',d.client.email,m.subj,m.body);send(d,'sms',d.client.phone,'Incident de paiement',m.sms);d.lastSent=Date.now();log(d,'Demande de nouveau moyen de paiement envoyée (e-mail + SMS)','Automatisation');}
+
+const toastBox=$('#toasts');
+function toast(m,k='ok'){const t=document.createElement('div');t.className='toast';t.innerHTML=ic(k==='bad'?'alert':k==='info'?'bell':'check')+'<span>'+esc(m)+'</span>';toastBox.append(t);
+  try{if(toastBox.matches(':popover-open'))toastBox.hidePopover();toastBox.showPopover();}catch(e){}
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>{t.remove();if(!toastBox.children.length){try{toastBox.hidePopover();}catch(e){}}},320);},4200);}
+
+const dlg=$('#dlg');
+function openDlg(title,html,wide){dlg.className=wide?'wide':'';dlg.innerHTML=`<div class="dlg-h"><h2 id="dlgT">${title}</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic('x')}</button></div><div class="dlg-b">${html}</div>`;
+  if(!dlg.open)dlg.showModal();dlg.scrollTop=0;const f=dlg.querySelector('[data-autofocus]');if(f)f.focus();}
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close();});
+
+function fld(n,l,type,v,o={}){const id='f-'+n;return `<div class="field${o.full?' full':''}"><label for="${id}">${l}${o.req?' <span class="req" aria-hidden="true">*</span>':''}</label><input id="${id}" name="${n}" type="${type}" value="${esc(v)}"${o.ac?` autocomplete="${o.ac}"`:''}${o.step?` step="${o.step}"`:''}${o.min!=null?` min="${o.min}"`:''}${o.max!=null?` max="${o.max}"`:''}${o.ph?` placeholder="${esc(o.ph)}"`:''}${o.req?' aria-required="true"':''}${o.im?` inputmode="${o.im}"`:''}${o.fmt?` data-fmt="${o.fmt}"`:''}${o.af?' data-autofocus':''}${o.hint?` aria-describedby="${id}-h"`:''}>${o.hint?`<p class="hint" id="${id}-h">${o.hint}</p>`:''}<p class="err" id="${id}-e" hidden></p></div>`;}
+function setErr(f,n,msg){const el=f.elements[n],e=f.querySelector('#f-'+n+'-e');if(!el||!e)return;const db=(el.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!==e.id);
+  if(msg){el.setAttribute('aria-invalid','true');e.textContent=msg;e.hidden=false;db.push(e.id);}else{el.removeAttribute('aria-invalid');e.hidden=true;}
+  if(db.length)el.setAttribute('aria-describedby',db.join(' '));else el.removeAttribute('aria-describedby');}
+function check(f,rules){let bad=null;for(const[n,fn]of Object.entries(rules)){const m=fn(f.elements[n].value.trim());setErr(f,n,m);if(m&&!bad)bad=f.elements[n];}if(bad)bad.focus();return !bad;}
+
+/* ---------- rendu ---------- */
+function render(){
+  const a=document.activeElement;let fid=null,pos=null;
+  if(a&&a.id&&!a.closest('dialog')){fid=a.id;try{pos=a.selectionStart;}catch(e){}}
+  if(!NAV[role()].includes(ui.view))ui.view=NAV[role()][0];
+  renderHeader();renderNav();
+  $('#main').innerHTML=VIEWS[ui.view]();
+  if(fid){const el=document.getElementById(fid);if(el){el.focus({preventScroll:true});if(pos!=null)try{el.setSelectionRange(pos,pos);}catch(e){}}}
+}
+function renderHeader(){
+  $('#selS').innerHTML=S.structures.map(s=>`<option value="${s.id}"${s.id===ui.sid?' selected':''}>${esc(s.name)}</option>`).join('');
+  const s=st(),pros=S.pros.filter(p=>p.sid===s.id);
+  const opts=[['gestionnaire',s.users.gestionnaire+' — Gestionnaire'],['assistant',s.users.assistant+' — Assistant(e)'],...pros.map(p=>['pro:'+p.id,p.name+' — '+p.job]),['client','Client final (lien personnel)']];
+  $('#selR').innerHTML=opts.map(([v,l])=>`<option value="${v}"${v===ui.who?' selected':''}>${esc(l)}</option>`).join('');
+}
+function renderNav(){
+  const r=role(),n=r==='client'?0:alerts(scoped()).length;
+  $('#nav').innerHTML=`<ul>${NAV[r].map(v=>`<li><button type="button" id="nav-${v}" class="nav-i" data-act="nav" data-v="${v}"${ui.view===v?' aria-current="page"':''}>${ic(NAVL[v][1])}<span>${NAVL[v][0]}</span>${v==='dash'&&n?`<span class="cnt">${n}<span class="sr"> alertes</span></span>`:''}</button></li>`).join('')}</ul>
+  <div class="nav-foot"><div class="who-card"><span class="av">${initials(meName())}</span><div><b>${esc(meName())}</b><span>${ROLE_L[r]} · ${esc(st().name)}</span></div></div>
+  ${r!=='client'?`<p class="sec-state${ui.twofa?' on':''}">${ic(ui.twofa?'shield':'lock')}<span>${ui.twofa?'Session revalidée par 2FA':'Code 2FA demandé pour les opérations sensibles'}</span></p>`:`<p class="sec-state on">${ic('lock')}<span>Accès par lien personnel, sans mot de passe</span></p>`}</div>`;
+}
+const pageH=(t,sub,act)=>`<div class="page-h"><div><h1>${t}</h1>${sub?`<p class="muted">${sub}</p>`:''}</div>${act?`<div class="actions">${act}</div>`:''}</div>`;
+const newBtn=()=>can('create')?`<button type="button" class="btn primary" data-act="create">${ic('plus')}Nouveau dossier</button>`:'';
+const kpi=(i,l,v,s,k)=>`<div class="kpi${k?' kpi-'+k:''}"><span class="kpi-l">${ic(i)}${l}</span><b class="kpi-v num">${v}</b><span class="kpi-s">${s}</span></div>`;
+
+function alerts(L){
+  const now=Date.now(),A=[];
+  L.forEach(d=>{
+    if(d.status==='incident')A.push({d,k:'bad',i:'alert',t:'Paiement refusé',s:d.id+' · '+d.client.name+' · '+eur(d.amount)});
+    if(d.status==='a_valider')A.push({d,k:'vio',i:'check',t:'Prestation à valider',s:d.id+' · '+d.client.name+' · RDV '+rel(d.date)});
+    if(d.status==='attente'&&d.date-now<72*HR)A.push({d,k:'warn',i:'clock',t:'Conditions non acceptées',s:d.id+' · '+d.client.name+' · RDV '+rel(d.date)});
+    if(d.reportAsked&&!['annule','encaisse','rembourse'].includes(d.status))A.push({d,k:'info',i:'cal',t:'Demande de report du client',s:d.id+' · '+d.client.name});
+  });
+  if(can('payments'))S.pros.filter(p=>p.sid===ui.sid&&p.stripe!=='actif').forEach(p=>A.push({k:'warn',i:'card',t:'Compte Stripe Connect incomplet',s:p.name+' ne peut pas recevoir de virements'}));
+  return A;
+}
+
+/* ---------- tableau de bord ---------- */
+function vDash(){
+  const L=scoped(),now=Date.now(),r=role(),ids=new Set(L.map(d=>d.id)),Pm=S.payments.filter(p=>ids.has(p.did));
+  const cap=Pm.filter(p=>p.at>now-30*DAY&&(p.type==='capture'||p.type==='remboursement')).reduce((s,p)=>s+(p.type==='capture'?p.amount:-p.amount),0);
+  const held=L.filter(d=>d.status==='empreinte'||d.status==='a_valider'),inc=L.filter(d=>d.status==='incident');
+  const live=L.filter(d=>d.status!=='annule'),rate=live.length?Math.round(live.filter(d=>d.acceptedAt).length/live.length*100):0;
+  const up=L.filter(d=>d.date>now&&d.status!=='annule').length;
+  const sub=r==='pro'?'Vos rendez-vous · '+myPro().name+', '+myPro().job.toLowerCase():st().name+' · '+fDL(now);
+  return pageH('Tableau de bord',esc(sub),newBtn())+
+  `<div class="kpis">${kpi('euro','Encaissé sur 30 jours',eur(cap),Pm.filter(p=>p.type==='capture'&&p.at>now-30*DAY).length+' encaissement(s)')}${kpi('card','Empreintes en cours',eur(held.reduce((s,d)=>s+d.amount,0)),held.length+' rendez-vous garantis')}${kpi('alert','Incidents de paiement',eur(inc.reduce((s,d)=>s+d.amount,0)),inc.length+' dossier(s) à relancer',inc.length?'bad':'')}${kpi('check','Taux d’acceptation',rate+' %',up+' rendez-vous à venir')}</div>
+  <div class="g-dash">${calendar(L)}${alertsCard(L)}</div>
+  <div class="g-3">${chartCard(Pm)}${statusCard(L)}${feedCard(ids)}</div>`;
+}
+function calendar(L){
+  const b=new Date();b.setHours(0,0,0,0);b.setDate(b.getDate()-((b.getDay()+6)%7)+ui.week*7);
+  const days=[...Array(7)].map((_,i)=>{const d=new Date(b);d.setDate(b.getDate()+i);return d;});
+  const lbl='Semaine du '+days[0].toLocaleDateString('fr-FR',{day:'numeric',month:'long'})+' au '+days[6].toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  return `<section class="card" aria-labelledby="calT"><div class="card-h"><h2 id="calT">${ic('cal')}Calendrier des rendez-vous</h2><div class="actions"><button type="button" id="wk-p" class="icon-btn" data-act="week" data-d="-1" aria-label="Semaine précédente">${ic('left')}</button><button type="button" id="wk-t" class="btn sm" data-act="week" data-d="0">Aujourd’hui</button><button type="button" id="wk-n" class="icon-btn" data-act="week" data-d="1" aria-label="Semaine suivante">${ic('right')}</button></div></div>
+  <p class="muted small cal-l" aria-live="polite">${lbl}</p>
+  <div class="week">${days.map(d=>{const it=L.filter(x=>sameDay(x.date,d)).sort((a,c)=>a.date-c.date),td=sameDay(d,Date.now());
+    return `<div class="day${td?' today':''}"><h3 class="day-h"><span>${d.toLocaleDateString('fr-FR',{weekday:'short'})}</span><b>${d.getDate()}</b>${td?'<span class="sr">(aujourd’hui)</span>':''}</h3>${it.length?it.map(x=>`<button type="button" class="ev c-${ST[x.status][1]}${x.status==='annule'?' ev-x':''}" data-act="open" data-id="${x.id}"><span class="ev-t num">${fT(x.date)}</span><span class="ev-n">${esc(x.client.name)}</span><span class="ev-s">${esc(x.service)}</span><span class="sr">, ${ST[x.status][0]}</span></button>`).join(''):'<p class="day-e">Aucun rendez-vous</p>'}</div>`;}).join('')}</div>
+  <ul class="legend">${Object.keys(ST).filter(k=>k!=='rembourse').map(k=>`<li class="c-${ST[k][1]}"><i></i>${ST[k][0]}</li>`).join('')}</ul></section>`;
+}
+function alertsCard(L){const A=alerts(L);
+  return `<section class="card" aria-labelledby="alT"><div class="card-h"><h2 id="alT">${ic('bell')}À traiter <span class="pill">${A.length}</span></h2></div>${A.length?`<ul class="alerts">${A.map(a=>`<li><button type="button" class="al c-${a.k}" ${a.d?`data-act="open" data-id="${a.d.id}"`:`data-act="nav" data-v="paiements"`}><span class="al-i">${ic(a.i)}</span><span class="al-b"><b>${a.t}</b><span>${esc(a.s)}</span></span>${ic('right')}</button></li>`).join('')}</ul>`:`<p class="empty">${ic('check')}Aucun dossier ne nécessite d’intervention.</p>`}</section>`;}
+function chartCard(Pm){
+  const b=new Date();b.setHours(0,0,0,0);b.setDate(b.getDate()-((b.getDay()+6)%7));
+  const W=[];for(let i=7;i>=0;i--){const s=b.getTime()-i*7*DAY,e=s+7*DAY;W.push({s,v:Pm.filter(p=>p.at>=s&&p.at<e).reduce((a,p)=>a+(p.type==='capture'?p.amount:p.type==='remboursement'?-p.amount:0),0)});}
+  const max=Math.max(100,...W.map(w=>w.v)),tot=W.reduce((a,w)=>a+w.v,0);
+  const bars=W.map((w,i)=>{const h=Math.max(0,w.v/max*104),x=10+i*39,y=128-h;return `<rect class="bar" x="${x}" y="${y}" width="26" height="${h}" rx="3"/>${w.v?`<text class="v" x="${x+13}" y="${y-4}" text-anchor="middle">${w.v>=1000?(w.v/1000).toFixed(1).replace('.',',')+' k':Math.round(w.v)}</text>`:''}<text x="${x+13}" y="144" text-anchor="middle">${new Date(w.s).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}</text>`;}).join('');
+  return `<section class="card" aria-labelledby="chT"><div class="card-h"><h2 id="chT">${ic('euro')}Encaissements par semaine</h2><span class="muted small">8 sem. · ${eur(tot)}</span></div><svg class="chart" viewBox="0 0 330 150" role="img" aria-label="Encaissements nets des 8 dernières semaines : ${W.map(w=>eur(w.v)).join(', ')}"><line class="base" x1="4" x2="326" y1="128.5" y2="128.5"/>${bars}</svg></section>`;
+}
+function statusCard(L){const c={};L.forEach(d=>c[d.status]=(c[d.status]||0)+1);const n=L.length||1;
+  return `<section class="card" aria-labelledby="stT"><div class="card-h"><h2 id="stT">${ic('folder')}Répartition des dossiers</h2><span class="muted small">${L.length} dossiers</span></div><div class="stack" aria-hidden="true">${Object.keys(ST).map(k=>c[k]?`<span class="c-${ST[k][1]}" style="width:${c[k]/n*100}%"></span>`:'').join('')}</div><ul class="st-list">${Object.keys(ST).map(k=>`<li><button type="button" class="c-${ST[k][1]}" data-act="stgo" data-k="${k}"><i></i>${ST[k][0]}<b class="num">${c[k]||0}</b></button></li>`).join('')}</ul></section>`;}
+function feedCard(ids){const O=S.outbox.filter(m=>m.sid===ui.sid&&(role()!=='pro'||ids.has(m.ref))).slice(0,6);
+  return `<section class="card" aria-labelledby="fdT"><div class="card-h"><h2 id="fdT">${ic('send')}Dernières notifications</h2></div>${O.length?`<ul class="feed">${O.map(m=>`<li><span class="fi">${ic(m.ch==='email'?'mail':'sms')}</span><div><b class="wrap">${esc(m.subj)}</b><span>${m.ch==='email'?'E-mail':'SMS'} · ${esc(m.to)} · ${fFull(m.at)}</span></div></li>`).join('')}</ul>`:'<p class="empty">Aucun envoi.</p>'}</section>`;}
+
+/* ---------- dossiers ---------- */
+function vDossiers(){
+  const L=scoped(),c={};L.forEach(d=>c[d.status]=(c[d.status]||0)+1);
+  const pros=S.pros.filter(p=>p.sid===ui.sid),q=ui.q.trim().toLowerCase();
+  const R=L.filter(d=>(ui.st==='all'||d.status===ui.st)&&(ui.pf==='all'||d.proId===ui.pf)&&(!q||(d.id+' '+d.client.name+' '+d.client.email+' '+d.service).toLowerCase().includes(q))).sort((a,b)=>b.date-a.date);
+  return pageH('Dossiers',role()==='pro'?'Vos rendez-vous et leur état de paiement':'Création, suivi, conditions financières et paiement des prestations',newBtn()+(can('export')?`<button type="button" class="btn" data-act="export" data-k="dossiers">${ic('download')}Export CSV</button>`:''))+
+  `<div class="card"><div class="filters"><div class="field grow"><label for="q">Rechercher</label><div class="inp-ic">${ic('search')}<input id="q" type="search" value="${esc(ui.q)}" placeholder="Référence, client, prestation…" autocomplete="off"></div></div>
+  ${role()!=='pro'?`<div class="field"><label for="pf">Professionnel</label><select id="pf"><option value="all">Tous</option>${pros.map(p=>`<option value="${p.id}"${ui.pf===p.id?' selected':''}>${esc(p.name)}</option>`).join('')}</select></div>`:''}</div>
+  <div class="chips" role="group" aria-label="Filtrer par statut">${[['all','Tous',L.length],...Object.keys(ST).map(k=>[k,ST[k][0],c[k]||0])].map(([k,l,n])=>`<button type="button" id="chip-${k}" class="chip" data-act="st" data-k="${k}" aria-pressed="${ui.st===k}">${l} <span class="num">${n}</span></button>`).join('')}</div>
+  <div class="tbl-wrap">${R.length?`<table class="tbl resp"><caption class="sr">Liste des dossiers</caption><thead><tr><th>Référence</th><th>Client</th><th>Prestation</th><th>Professionnel</th><th>Rendez-vous</th><th>Montant</th><th>Statut</th></tr></thead><tbody>${R.map(d=>`<tr><td class="c-main" data-l="Référence"><button type="button" class="lnk num" data-act="open" data-id="${d.id}">${d.id}</button></td><td data-l="Client"><b>${esc(d.client.name)}</b><span class="sub">${esc(d.client.phone)}</span></td><td data-l="Prestation">${esc(d.service)}</td><td data-l="Professionnel">${esc(proById(d.proId).name)}</td><td data-l="Rendez-vous">${fDT(d.date)}</td><td data-l="Montant" class="num">${eur(d.amount)}</td><td data-l="Statut">${badge(d.status)}</td></tr>`).join('')}</tbody></table>`:`<p class="empty">${ic('search')}Aucun dossier ne correspond à ces filtres.</p>`}</div>
+  <p class="muted small" aria-live="polite" style="margin-top:10px">${R.length} dossier(s) affiché(s)</p></div>`;
+}
+
+function openDossier(id){
+  const d=byId(id);if(!d)return;const s=structOf(d),p=proById(d.proId),r=role(),x=d.status;
+  const steps=[['Conditions acceptées',!!d.acceptedAt],['Empreinte bancaire',!!d.acceptedAt&&!!d.card],['Prestation validée',['encaisse','incident','rembourse'].includes(x)],['Encaissé',['encaisse','rembourse'].includes(x)]];
+  const b=(act,label,icn,cls)=>`<button type="button" class="btn ${cls||''}" data-act="${act}" data-id="${d.id}">${ic(icn)}${label}</button>`;
+  const A=[];
+  if(['empreinte','a_valider'].includes(x)&&can('capture'))A.push(b('capture','Valider la prestation','check','primary'));
+  if(x==='incident'&&r!=='pro')A.push(b('resend','Demander une nouvelle carte','send','primary'));
+  if(x==='incident'&&can('capture'))A.push(b('retry','Réessayer l’encaissement','refresh'));
+  if(['attente','empreinte','incident'].includes(x))A.push(b('link','Lien & QR code','qr'));
+  if(x==='attente'&&r!=='pro')A.push(b('resend','Relancer le client','send'));
+  if(['attente','empreinte','a_valider'].includes(x)&&can('amount'))A.push(b('amount','Modifier le montant','edit'));
+  if(['attente','empreinte','a_valider'].includes(x)&&can('report'))A.push(b('report','Reporter','cal'));
+  if(['attente','empreinte','a_valider','incident'].includes(x)&&can('cancel'))A.push(b('cancel','Annuler','x','danger'));
+  if(x==='encaisse'&&can('refund'))A.push(b('refund','Rembourser','undo'));
+  if(['attente','empreinte','incident','encaisse','a_valider'].includes(x))A.push(b('asclient','Voir côté client','eye','ghost'));
+  const dc=k=>`<button type="button" class="btn sm" data-act="doc" data-doc="${k}" data-id="${d.id}">${ic('file')}${DOCL[k]}</button>`;
+  const docs=[dc('recap')];if(d.acceptedAt)docs.push(dc('att'));if(d.captured>0)docs.push(dc('just'));
+  const kv=(k,v)=>`<div><dt>${k}</dt><dd>${v}</dd></div>`;
+  openDlg('Dossier <span class="num">'+d.id+'</span>',`
+  <div class="dt-top">${badge(x)}${d.reportAsked&&!['annule','encaisse','rembourse'].includes(x)?'<span class="badge c-info">Report demandé par le client</span>':''}<span class="muted small">Créé le ${fFull(d.createdAt)}</span></div>
+  ${x==='annule'?'':`<ol class="prog" aria-label="Avancement du paiement">${steps.map(([l,ok],i)=>`<li class="${ok?'done':x==='incident'&&i===3?'ko':''}">${ok?ic('check'):x==='incident'&&i===3?ic('alert'):''}${l}${ok?'<span class="sr"> (fait)</span>':''}</li>`).join('')}</ol>`}
+  ${x==='incident'?`<p class="note bad">${ic('alert')}<span>Le dernier encaissement a été refusé (fonds insuffisants). Le client a reçu un lien pour enregistrer une nouvelle carte ; l’encaissement est relancé automatiquement dès qu’elle est validée.</span></p>`:''}
+  <div class="dt-grid">
+   <section class="box"><h3>Client</h3><dl class="kv">${kv('Nom',esc(d.client.name))}${kv('E-mail',esc(d.client.email))}${kv('Mobile',esc(d.client.phone))}</dl></section>
+   <section class="box"><h3>Rendez-vous</h3><dl class="kv">${kv('Prestation',esc(d.service))}${kv('Avec',esc(p.name))}${kv('Date',fDT(d.date))}${kv('Durée',d.duration+' min')}</dl></section>
+   <section class="box"><h3>Paiement</h3><dl class="kv">${kv('Montant',`<span class="num">${eur(d.amount)}</span>`)}${kv('Carte',d.card?esc(d.card.brand)+' •••• '+d.card.last4:'Non enregistrée')}${kv('Encaissé',`<span class="num">${eur(d.captured)}</span>`)}${d.refunded?kv('Remboursé',`<span class="num">${eur(d.refunded)}</span>`):''}${kv('Accepté le',d.acceptedAt?fFull(d.acceptedAt):'—')}${kv('Annulation',`&lt; ${s.policy.h} h : ${s.policy.pct} %`)}</dl></section>
+  </div>
+  ${A.length?`<div class="actions">${A.join('')}</div>`:''}
+  <h3 class="sec-t">Documents</h3><div class="actions">${docs.join('')}</div>
+  <h3 class="sec-t">Historique</h3><ol class="tl">${d.history.slice().reverse().map(h=>`<li><time>${fFull(h.at)}</time> <span class="by">· ${esc(h.by)}</span><br>${esc(h.txt)}</li>`).join('')}</ol>`,true);
+}
+
+/* ---------- formulaires dossier ---------- */
+function createDlg(){
+  const s=st(),pros=S.pros.filter(p=>p.sid===s.id),t=Date.now()+DAY;
+  openDlg('Nouveau dossier',`<form data-form="create" novalidate class="form">
+  <fieldset><legend>Client</legend><div class="g2">${fld('cname','Nom et prénom','text','',{req:1,ac:'off',af:1,ph:'Ex. : Camille Durand'})}${fld('cemail','E-mail','email','',{req:1,ac:'off',ph:'nom@exemple.fr'})}${fld('cphone','Téléphone mobile','tel','',{req:1,ac:'off',ph:'06 12 34 56 78',hint:'Pour l’envoi du lien par SMS'})}</div></fieldset>
+  <fieldset><legend>Prestation</legend><div class="g2">
+   <div class="field"><label for="f-pro">Professionnel</label><select id="f-pro" name="pro">${pros.map(p=>`<option value="${p.id}">${esc(p.name)} — ${esc(p.job)}</option>`).join('')}</select></div>
+   <div class="field"><label for="f-svc">Prestation</label><select id="f-svc" name="svc">${s.services.map((v,i)=>`<option value="${i}">${esc(v[0])} — ${eur(v[1])}</option>`).join('')}</select></div>
+   ${fld('amount','Montant TTC (€)','number',s.services[0][1],{req:1,step:'0.01',min:1,hint:'Montant de l’empreinte bancaire, ajustable avant acceptation'})}
+   ${fld('date','Date du rendez-vous','date',isoDate(t),{req:1})}${fld('time','Heure','time','10:00',{req:1})}
+  </div></fieldset>
+  <fieldset><legend>Envoi du lien personnel</legend><div class="checks"><label class="chk"><input type="checkbox" name="em" checked>Par e-mail</label><label class="chk"><input type="checkbox" name="sm" checked>Par SMS</label></div></fieldset>
+  <div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button type="submit" class="btn primary">${ic('send')}Créer et envoyer le lien</button></div></form>`);
+}
+function linkDlg(id,fresh){const d=byId(id);
+  openDlg('Lien personnel du client',`${fresh?`<p class="note ok">${ic('check')}<span>Dossier <b class="num">${d.id}</b> créé${rule('r1')?' et lien envoyé au client (simulation)':''}.</span></p>`:''}
+  <div class="qr-wrap"><div class="qr">${qr(d.token)}<span class="small muted">QR code (simulation)</span></div>
+  <div class="qr-info"><p>${esc(d.client.name)} accède à son espace sécurisé sans créer de compte : par ce lien unique ou en scannant le QR code (à imprimer ou à afficher à l’accueil).</p>
+  <div class="field"><label for="lnk">Lien personnel</label><input id="lnk" readonly value="${link(d)}" class="num"></div><p class="hint">Jeton à usage personnel, expiré automatiquement après le rendez-vous.</p>
+  <div class="actions"><button type="button" class="btn sm" data-act="copy" data-id="${d.id}">${ic('link')}Copier</button><button type="button" class="btn sm" data-act="sendch" data-ch="email" data-id="${d.id}">${ic('mail')}Renvoyer par e-mail</button><button type="button" class="btn sm" data-act="sendch" data-ch="sms" data-id="${d.id}">${ic('sms')}Par SMS</button></div></div></div>
+  <div class="dlg-f" style="margin-top:16px"><button type="button" class="btn" data-act="open" data-id="${d.id}">Voir le dossier</button><button type="button" class="btn primary" data-act="asclient" data-id="${d.id}">${ic('eye')}Ouvrir comme le client</button></div>`);}
+function qr(seed){const n=25;let h=7;for(const c of seed)h=(Math.imul(h,31)+c.charCodeAt(0))>>>0;const rb=()=>{h=(Math.imul(h,1103515245)+12345)>>>0;return (h>>>16)&1;};
+  const inF=(x,y)=>(x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9);let s='';
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){if(inF(x,y))continue;if(rb())s+=`M${x} ${y}h1v1h-1z`;}
+  const f=(x,y)=>`M${x} ${y}h7v7h-7zM${x+1} ${y+1}v5h5v-5zM${x+2} ${y+2}h3v3h-3z`;
+  return `<svg viewBox="-2 -2 29 29" role="img" aria-label="QR code du lien personnel"><rect x="-2" y="-2" width="29" height="29" fill="#fff"/><path fill="#111" fill-rule="evenodd" d="${s}${f(0,0)}${f(n-7,0)}${f(0,n-7)}"/></svg>`;}
+const backBtn=id=>`<button type="button" class="btn" data-act="open" data-id="${id}">Retour</button>`;
+function amountDlg(id){const d=byId(id);
+  openDlg('Modifier le montant',`<form data-form="amount" data-id="${id}" novalidate class="form">${d.status!=='attente'?`<p class="note warn">${ic('alert')}<span>Le client a déjà accepté ${eur(d.amount)}. Modifier le montant libère l’empreinte actuelle et lui envoie un nouveau lien : une nouvelle acceptation sera nécessaire.</span></p>`:''}
+  <div class="g2">${fld('amount','Nouveau montant TTC (€)','number',d.amount,{req:1,step:'0.01',min:1,af:1})}${fld('motif','Motif de la modification','text','',{req:1,ph:'Ex. : séance prolongée'})}</div>
+  <div class="dlg-f">${backBtn(id)}<button type="submit" class="btn primary">Enregistrer</button></div></form>`);}
+function reportDlg(id){const d=byId(id);
+  openDlg('Reporter le rendez-vous',`<form data-form="report" data-id="${id}" novalidate class="form"><p>Rendez-vous actuel : <b>${fDL(d.date)} à ${fT(d.date)}</b>. Le client est prévenu par e-mail et SMS ; les conditions financières acceptées restent valables.</p>
+  <div class="g2">${fld('date','Nouvelle date','date',isoDate(Math.max(d.date,Date.now())+DAY),{req:1,af:1})}${fld('time','Heure','time',isoTime(d.date),{req:1})}</div>
+  <div class="dlg-f">${backBtn(id)}<button type="submit" class="btn primary">${ic('cal')}Reporter</button></div></form>`);}
+function feeOf(d,who){const s=structOf(d),hrs=(d.date-Date.now())/HR;if(who!=='client'||!d.card||d.fail||d.status==='attente')return 0;return hrs<s.policy.h?r2(d.amount*s.policy.pct/100):0;}
+function feeHTML(d,who){const s=structOf(d),fee=feeOf(d,who);
+  if(fee>0)return `${ic('euro')}<span>Annulation à moins de ${s.policy.h} h du rendez-vous : ${s.policy.pct} % facturés selon les conditions acceptées le ${fFull(d.acceptedAt)}, soit <b>${eur(fee)}</b> prélevés sur l’empreinte.${fee<d.amount?' Le solde est libéré.':''}</span>`;
+  return `${ic('check')}<span>Annulation sans frais : ${d.card&&d.status!=='attente'?'l’empreinte de '+eur(d.amount)+' sera libérée.':'aucun moyen de paiement à débiter.'}</span>`;}
+function cancelDlg(id){const d=byId(id),past=d.date<Date.now();
+  openDlg('Annuler le rendez-vous',`<form data-form="cancel" data-id="${id}" novalidate class="form"><fieldset><legend>À l’initiative de</legend><div class="checks"><label class="chk"><input type="radio" name="who" value="client" checked>${past?'Client (absence)':'Client'}</label><label class="chk"><input type="radio" name="who" value="struct">Structure ou professionnel</label></div></fieldset>
+  <p class="note ${feeOf(d,'client')?'warn':'info'}" id="feeBox" aria-live="polite">${feeHTML(d,'client')}</p>
+  ${fld('motif','Motif','text','',{req:1,ph:'Ex. : empêchement professionnel'})}
+  <div class="dlg-f">${backBtn(id)}<button type="submit" class="btn danger">Confirmer l’annulation</button></div></form>`);}
+function captureDlg(id){const d=byId(id);
+  openDlg('Valider la prestation',`<form data-form="capture" data-id="${id}" novalidate class="form"><p>La prestation <b>${esc(d.service)}</b> du ${fDT(d.date)} avec ${esc(d.client.name)} a bien eu lieu ? L’encaissement est déclenché sur l’empreinte bancaire (${esc(d.card.brand)} •••• ${d.card.last4}).</p>
+  <div class="g2">${fld('final','Montant à encaisser (€)','number',d.amount,{req:1,step:'0.01',min:1,max:d.amount,af:1,hint:'Au plus '+eur(d.amount)+' (montant autorisé). Le solde éventuel est libéré.'})}</div>
+  ${d.date>Date.now()?`<p class="note info">${ic('clock')}<span>Le rendez-vous est à venir : la validation anticipée est autorisée pour la démonstration.</span></p>`:''}
+  <div class="dlg-f">${backBtn(id)}<button type="submit" class="btn primary">${ic('euro')}Valider et encaisser</button></div></form>`);}
+function refundDlg(id){const d=byId(id),max=r2(d.captured-d.refunded);
+  openDlg('Rembourser',`<form data-form="refund" data-id="${id}" novalidate class="form"><p>Encaissé : <b>${eur(d.captured)}</b>${d.refunded?' · déjà remboursé : '+eur(d.refunded):''}. Le remboursement est émis sur la carte ${esc(d.card.brand)} •••• ${d.card.last4}.</p>
+  <div class="g2">${fld('amt','Montant à rembourser (€)','number',max,{req:1,step:'0.01',min:1,max,af:1})}${fld('motif','Motif','text','',{req:1,ph:'Ex. : geste commercial'})}</div>
+  <div class="dlg-f">${backBtn(id)}<button type="submit" class="btn primary">${ic('undo')}Rembourser</button></div></form>`);}
+
+function doCapture(d,amt){
+  if(d.fail){d.status='incident';pay(d,'echec',amt,'Fonds insuffisants (card_declined)');log(d,'Échec de l’encaissement de '+eur(amt)+' : fonds insuffisants','Stripe');if(rule('r5'))sendFix(d);audit('Tentative d’encaissement refusée ('+eur(amt)+')',d.id,true);
+    toast('Paiement refusé par la banque : le client est invité à mettre à jour sa carte','bad');return false;}
+  d.status='encaisse';d.captured=amt;pay(d,'capture',amt,'Encaissement différé');if(amt<d.amount)pay(d,'liberation',d.amount-amt,'Solde de l’empreinte libéré');
+  log(d,'Prestation validée — encaissement de '+eur(amt)+' effectué');
+  if(rule('r6'))send(d,'email',d.client.email,'Votre justificatif de paiement '+d.id,`Bonjour ${first(d.client.name)},\n\nNous confirmons l’encaissement de ${eur(amt)} pour « ${d.service} » du ${fDL(d.date)}.\nVotre justificatif est disponible dans votre espace : ${link(d)}`);
+  audit('Encaissement de '+eur(amt),d.id,true);toast('Encaissement de '+eur(amt)+' effectué'+(rule('r6')?' · justificatif envoyé (simulation)':''));return true;}
+
+function sensitive(label,fn){
+  if(ui.twofa||role()==='client')return fn();
+  ui.pending=fn;ui.code=String(Math.floor(100000+Math.random()*900000));const o=$('#otp');
+  o.innerHTML=`<div class="dlg-h"><h2 id="otpT">${ic('shield')}Double authentification</h2><button type="button" class="icon-btn" data-act="otpclose" aria-label="Fermer">${ic('x')}</button></div><div class="dlg-b"><form data-form="otp" class="form" novalidate><p>« ${esc(label)} » est une opération sensible. Saisissez le code à 6 chiffres reçu par SMS.</p><p class="note info">${ic('sms')}<span>SMS simulé reçu au 06 •• •• •• 47 : <b class="num">${ui.code}</b></span></p>${fld('otp','Code de vérification','text','',{req:1,ac:'one-time-code',im:'numeric',ph:'123456'})}<div class="dlg-f"><button type="button" class="btn" data-act="otpclose">Annuler</button><button type="submit" class="btn primary">Vérifier</button></div></form></div>`;
+  o.showModal();$('#f-otp',o).focus();}
+
+const FORMS={
+  otp(f){const v=f.elements.otp.value.replace(/\s/g,'');if(v!==ui.code){setErr(f,'otp',v?'Code incorrect. Vérifiez le SMS reçu.':'Saisissez le code reçu.');audit('Échec de vérification 2FA','',true);f.elements.otp.focus();return;}
+    const fn=ui.pending;ui.pending=null;ui.twofa=true;$('#otp').close();audit('Double authentification validée','',true);if(fn)fn();save();render();},
+  create(f){const v=n=>f.elements[n].value.trim();
+    if(!check(f,{cname:x=>x.length<3?'Indiquez le nom et le prénom du client.':'',
+      cemail:x=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(x)?'':'Adresse e-mail invalide (ex. : nom@exemple.fr).',
+      cphone:x=>/^(?:\+33\s?|0)[67](?:[\s.-]?\d{2}){4}$/.test(x)?'':'Numéro mobile invalide (ex. : 06 12 34 56 78).',
+      amount:x=>(+x>0&&+x<=10000)?'':'Indiquez un montant entre 1 et 10 000 €.',
+      date:x=>x?'':'Choisissez une date.',
+      time:x=>{if(!x)return 'Choisissez une heure.';if(!v('date'))return '';return new Date(v('date')+'T'+x).getTime()>Date.now()?'':'Le rendez-vous doit être dans le futur.';}}))return;
+    const s=st(),sv=s.services[+v('svc')],chs=[f.elements.em.checked&&'email',f.elements.sm.checked&&'sms'].filter(Boolean);
+    const d={id:s.prefix+'-'+new Date().getFullYear()+'-'+String(++S.seq[s.id]).padStart(4,'0'),sid:s.id,proId:v('pro'),client:{name:v('cname'),email:v('cemail'),phone:v('cphone')},service:sv[0],amount:r2(+v('amount')),captured:0,refunded:0,date:new Date(v('date')+'T'+v('time')).getTime(),duration:sv[2],status:'attente',createdAt:Date.now(),acceptedAt:null,card:null,fail:false,token:tok(),history:[],lastSent:Date.now(),reminded:false,reportAsked:false};
+    S.dossiers.push(d);log(d,'Dossier créé — '+d.service+' · '+eur(d.amount));
+    if(chs.length&&rule('r1')){sendLink(d,false,chs);log(d,'Lien d’acceptation envoyé ('+chs.map(c=>c==='email'?'e-mail':'SMS').join(' + ')+')','Automatisation');}
+    audit('Création du dossier',d.id,false);save();render();linkDlg(d.id,true);},
+  amount(f){const d=byId(f.dataset.id),nv=r2(+f.elements.amount.value);
+    if(!check(f,{amount:x=>!(+x>0&&+x<=10000)?'Indiquez un montant entre 1 et 10 000 €.':r2(+x)===d.amount?'Le montant est identique au montant actuel.':'',motif:x=>x.length<3?'Précisez le motif (visible dans l’historique).':''}))return;
+    const motif=f.elements.motif.value.trim();
+    sensitive('Modification du montant',()=>{const old=d.amount;d.amount=nv;
+      if(d.status!=='attente'){if(d.card)pay(d,'liberation',old,'Empreinte libérée (montant modifié)');d.status='attente';d.acceptedAt=null;d.card=null;d.fail=false;}
+      log(d,'Montant modifié : '+eur(old)+' → '+eur(nv)+' ('+motif+'). Nouvelle acceptation requise.');sendLink(d,false);
+      audit('Modification de montant ('+eur(old)+' → '+eur(nv)+')',d.id,true);save();render();openDossier(d.id);});},
+  report(f){const d=byId(f.dataset.id),v=n=>f.elements[n].value;
+    if(!check(f,{date:x=>x?'':'Choisissez une date.',time:x=>{if(!x)return 'Choisissez une heure.';if(!v('date'))return '';const t=new Date(v('date')+'T'+x).getTime();return t<=Date.now()?'Le nouveau rendez-vous doit être dans le futur.':t===d.date?'C’est la date actuelle.':'';}}))return;
+    const old=d.date;d.date=new Date(v('date')+'T'+v('time')).getTime();if(d.status==='a_valider')d.status='empreinte';d.reminded=false;d.reportAsked=false;
+    log(d,'Rendez-vous reporté du '+fDT(old)+' au '+fDT(d.date));
+    send(d,'email',d.client.email,'Votre rendez-vous est reporté au '+fD(d.date),`Bonjour ${first(d.client.name)},\n\nVotre rendez-vous « ${d.service} » est reporté au ${fDL(d.date)} à ${fT(d.date)}.\nVos conditions financières restent inchangées.\n\n${structOf(d).name}`);
+    send(d,'sms',d.client.phone,'Report',`${structOf(d).name} : votre RDV est reporté au ${fD(d.date)} à ${fT(d.date)}.`);
+    audit('Report du rendez-vous',d.id,false);save();render();openDossier(d.id);toast('Rendez-vous reporté · client prévenu par e-mail et SMS (simulation)');},
+  cancel(f){const d=byId(f.dataset.id);if(!check(f,{motif:x=>x.length<3?'Précisez le motif de l’annulation.':''}))return;
+    const who=f.elements.who.value,fee=feeOf(d,who),motif=f.elements.motif.value.trim();
+    if(fee>0){d.captured=fee;pay(d,'capture',fee,'Frais d’annulation tardive');if(fee<d.amount)pay(d,'liberation',d.amount-fee,'Solde de l’empreinte libéré');}
+    else if(d.card&&d.status!=='attente'&&d.status!=='incident')pay(d,'liberation',d.amount,'Annulation sans frais');
+    d.status='annule';log(d,'Annulation à l’initiative '+(who==='client'?'du client':'de la structure')+' ('+motif+')'+(fee?' — frais de '+eur(fee)+' prélevés':' — sans frais'));
+    send(d,'email',d.client.email,'Annulation de votre rendez-vous '+d.id,`Bonjour ${first(d.client.name)},\n\nVotre rendez-vous du ${fDL(d.date)} est annulé.\n${fee?'Conformément aux conditions acceptées, '+eur(fee)+' ont été prélevés.':'Aucun frais ne vous est facturé.'}\n\n${structOf(d).name}`);
+    audit('Annulation du rendez-vous'+(fee?' avec frais ('+eur(fee)+')':''),d.id,fee>0);save();render();openDossier(d.id);toast('Rendez-vous annulé'+(fee?' · '+eur(fee)+' de frais encaissés':' sans frais')+' · client prévenu (simulation)');},
+  capture(f){const d=byId(f.dataset.id);if(!check(f,{final:x=>(+x>0&&r2(+x)<=d.amount)?'':'Montant entre 1 € et '+eur(d.amount)+'.'}))return;
+    const amt=r2(+f.elements.final.value);sensitive('Encaissement de la prestation',()=>{doCapture(d,amt);save();render();openDossier(d.id);});},
+  refund(f){const d=byId(f.dataset.id),max=r2(d.captured-d.refunded);if(!check(f,{amt:x=>(+x>0&&r2(+x)<=max)?'':'Montant entre 1 € et '+eur(max)+'.',motif:x=>x.length<3?'Précisez le motif.':''}))return;
+    const amt=r2(+f.elements.amt.value),motif=f.elements.motif.value.trim();
+    sensitive('Remboursement',()=>{d.refunded=r2(d.refunded+amt);pay(d,'remboursement',amt,motif);if(d.refunded>=d.captured)d.status='rembourse';
+      log(d,'Remboursement de '+eur(amt)+' ('+motif+')');send(d,'email',d.client.email,'Remboursement de '+eur(amt),`Bonjour ${first(d.client.name)},\n\nUn remboursement de ${eur(amt)} a été émis sur votre carte. Il apparaîtra sous 5 à 10 jours.\n\n${structOf(d).name}`);
+      audit('Remboursement de '+eur(amt),d.id,true);save();render();openDossier(d.id);toast('Remboursement de '+eur(amt)+' émis (mode test)');});},
+  accept(f){const d=byId(f.dataset.id),e=$('#f-ok-e',f);if(!f.elements.ok.checked){e.textContent='Vous devez accepter les conditions financières pour continuer.';e.hidden=false;f.elements.ok.setAttribute('aria-invalid','true');f.elements.ok.focus();return;}
+    ui.cstep[d.id]=2;render();const c=$('#f-cn');if(c)c.focus();},
+  card(f){const d=byId(f.dataset.id),num=validCard(f);if(!num)return;
+    if(refused(f,d,num))return;
+    busy(f,()=>{d.card={brand:brand(num),last4:num.slice(-4)};d.fail=num==='4000000000009995';d.acceptedAt=Date.now();d.status=d.date+d.duration*6e4<Date.now()?'a_valider':'empreinte';
+      log(d,'Conditions financières acceptées via lien personnel (attestation horodatée)',d.client.name);log(d,'Empreinte bancaire autorisée — '+d.card.brand+' •••• '+d.card.last4+' · '+eur(d.amount),'Stripe');
+      pay(d,'empreinte',d.amount,'Autorisation (capture différée)');
+      send(d,'email',d.client.email,'Rendez-vous confirmé — '+d.id,`Bonjour ${first(d.client.name)},\n\nVotre rendez-vous du ${fDL(d.date)} à ${fT(d.date)} est confirmé.\nUne empreinte de ${eur(d.amount)} a été réalisée sur votre carte •••• ${d.card.last4} : aucun débit avant la prestation.\nVotre attestation d’acceptation est jointe (PDF).\n\n${structOf(d).name}`);
+      audit('Acceptation des conditions financières et empreinte bancaire',d.id,true);ui.cstep[d.id]=3;save();render();toast('Empreinte autorisée · e-mail de confirmation envoyé (simulation)');const h=$('#pT');if(h){h.setAttribute('tabindex','-1');h.focus();}});},
+  cardfix(f){const d=byId(f.dataset.id),num=validCard(f);if(!num)return;if(refused(f,d,num))return;
+    busy(f,()=>{d.card={brand:brand(num),last4:num.slice(-4)};d.fail=num==='4000000000009995';log(d,'Nouveau moyen de paiement enregistré — '+d.card.brand+' •••• '+d.card.last4,d.client.name);
+      audit('Mise à jour du moyen de paiement',d.id,true);doCapture(d,d.amount);save();render();});}
+};
+function brand(n){return n[0]==='4'?'Visa':n[0]==='5'?'Mastercard':n[0]==='3'?'American Express':'Carte';}
+function busy(f,fn){const b=f.querySelector('[type=submit]');b.disabled=true;b.textContent='Autorisation en cours…';setTimeout(fn,700);}
+function refused(f,d,num){if(num!=='4000000000000002')return false;setErr(f,'cnum','Carte refusée par la banque (simulation). Essayez une autre carte.');pay(d,'refus',d.amount,'Autorisation refusée (card_declined)');log(d,'Tentative d’autorisation refusée par la banque','Stripe');save();f.elements.cnum.focus();return true;}
+function validCard(f){const num=f.elements.cnum.value.replace(/\D/g,'');
+  return check(f,{cn:x=>x.length<2?'Indiquez le nom du titulaire.':'',cnum:()=>num.length===16?'':'Numéro de carte incomplet (16 chiffres).',
+    cexp:x=>{const m=x.match(/^(\d{2})\s*\/\s*(\d{2})$/);if(!m||+m[1]<1||+m[1]>12)return 'Format attendu : MM/AA.';return new Date(2000+ +m[2],+m[1],1).getTime()>Date.now()?'':'Cette carte est expirée.';},
+    ccvc:x=>/^\d{3,4}$/.test(x)?'':'3 chiffres au dos de la carte.'})?num:null;}
+
+/* ---------- documents ---------- */
+function fakeHash(s){let h=0x811c9dc5,o='';for(let i=0;i<8;i++){for(const c of s+i)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;o+=h.toString(16).padStart(8,'0');}return o;}
+function docHTML(k,d){const s=structOf(d),p=proById(d.proId),row=(a,b)=>`<tr><th>${a}</th><td>${b}</td></tr>`;
+  const head=`<div class="doc-h"><div><b>${esc(s.name)}</b><br>${esc(s.addr)}<br>SIRET ${s.siret}</div><div>Réf. <b>${d.id}</b><br>Édité le ${fFull(Date.now())}</div></div>`;
+  const foot=`<p class="doc-foot">Document généré automatiquement — empreinte SHA-256 : ${fakeHash(d.id+k+d.token)}</p>`;
+  if(k==='att')return head+`<h2>Attestation d’acceptation des conditions financières</h2><p><b>${esc(d.client.name)}</b> (${esc(d.client.email)}) a pris connaissance et accepté les conditions financières suivantes :</p><table class="doc-t">${row('Prestation',esc(d.service))}${row('Professionnel',esc(p.name)+', '+esc(p.job.toLowerCase()))}${row('Date du rendez-vous',fDL(d.date)+' à '+fT(d.date))}${row('Montant autorisé',eur(d.amount))}${row('Modalité de paiement','Empreinte bancaire, encaissement après validation de la prestation')}${row('Annulation ou report','À moins de '+s.policy.h+' h du rendez-vous : '+s.policy.pct+' % du montant facturé. Au-delà : sans frais.')}</table><p>Acceptation électronique horodatée le <b>${fFull(d.acceptedAt)}</b> via lien personnel sécurisé (jeton ${d.token.slice(0,4)}••••), moyen de paiement enregistré : ${d.card?esc(d.card.brand)+' •••• '+d.card.last4:'—'}.</p>`+foot;
+  if(k==='just'){const L=S.payments.filter(x=>x.did===d.id&&(x.type==='capture'||x.type==='remboursement')).sort((a,b)=>a.at-b.at);
+    return head+`<h2>Justificatif de paiement</h2><table class="doc-t">${row('Client',esc(d.client.name))}${row('Prestation',esc(d.service)+' — '+fDL(d.date))}${row('Professionnel',esc(p.name))}</table><table class="doc-t"><thead><tr><th>Date</th><th>Opération</th><th>Montant</th></tr></thead><tbody>${L.map(x=>`<tr><td>${fFull(x.at)}</td><td>${PT[x.type][0]}${x.detail?' — '+esc(x.detail):''}<br><small>${x.id}</small></td><td>${x.type==='remboursement'?'− ':''}${eur(x.amount)}</td></tr>`).join('')}</tbody></table><p><b>Total net réglé : ${eur(d.captured-d.refunded)} TTC</b> — carte ${esc(d.card.brand)} •••• ${d.card.last4}. Paiement traité par Stripe (mode test).</p>`+foot;}
+  return head+`<h2>Récapitulatif du dossier</h2><table class="doc-t">${row('Statut',ST[d.status][0])}${row('Client',esc(d.client.name)+' — '+esc(d.client.email)+' — '+esc(d.client.phone))}${row('Prestation',esc(d.service)+' ('+d.duration+' min)')}${row('Professionnel',esc(p.name))}${row('Rendez-vous',fDL(d.date)+' à '+fT(d.date))}${row('Montant',eur(d.amount))}${row('Encaissé',eur(d.captured))}${row('Remboursé',eur(d.refunded))}</table><table class="doc-t"><thead><tr><th>Date</th><th>Événement</th></tr></thead><tbody>${d.history.map(h=>`<tr><td>${fFull(h.at)}</td><td>${esc(h.txt)} <small>(${esc(h.by)})</small></td></tr>`).join('')}</tbody></table>`+foot;}
+function docDlg(k,id){const d=byId(id);
+  openDlg(DOCL[k],`<div class="doc">${docHTML(k,d)}</div><div class="dlg-f" style="margin-top:14px">${role()==='client'?'<button type="button" class="btn" data-act="close">Fermer</button>':backBtn(id)}<button type="button" class="btn primary" data-act="print" data-doc="${k}" data-id="${id}">${ic('print')}Imprimer / enregistrer en PDF</button></div>`,true);}
+function printDoc(k,id){const d=byId(id);$('#print').innerHTML=`<div class="doc">${docHTML(k,d)}</div>`;audit('Génération PDF : '+DOCL[k],d.id,false);save();dlg.close();setTimeout(()=>window.print(),80);}
+
+function exportCSV(kind){sensitive('Export administratif',()=>{
+  const n=x=>Number(x).toFixed(2).replace('.',',');let rows;
+  if(kind==='dossiers')rows=[['Référence','Client','E-mail','Téléphone','Prestation','Professionnel','Rendez-vous','Montant','Encaissé','Remboursé','Statut','Accepté le']].concat(scoped().map(d=>[d.id,d.client.name,d.client.email,d.client.phone,d.service,proById(d.proId).name,fFull(d.date),n(d.amount),n(d.captured),n(d.refunded),ST[d.status][0],d.acceptedAt?fFull(d.acceptedAt):'']));
+  else if(kind==='paiements')rows=[['Date','Identifiant','Dossier','Client','Opération','Montant','Détail']].concat(S.payments.filter(p=>p.sid===ui.sid).map(p=>{const d=byId(p.did);return[fFull(p.at),p.id,p.did,d.client.name,PT[p.type][0],n(p.amount),p.detail];}));
+  else rows=[['Date','Utilisateur','Rôle','Opération','Dossier','Sensible']].concat(S.audit.filter(a=>a.sid===ui.sid).map(a=>[fFull(a.at),a.who,a.role,a.action,a.ref,a.sens?'oui':'non']));
+  const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=kind+'-'+st().prefix.toLowerCase()+'-'+isoDate(Date.now())+'.csv';document.body.append(a);a.click();a.remove();
+  audit('Export '+kind+' (CSV)','',true);save();render();toast('Export CSV téléchargé ('+(rows.length-1)+' lignes)');});}
+
+/* ---------- paiements ---------- */
+function vPaiements(){
+  const L=scoped(),ids=new Set(L.map(d=>d.id)),Pm=S.payments.filter(p=>ids.has(p.did)).sort((a,b)=>b.at-a.at),now=Date.now();
+  const sum=(arr)=>arr.reduce((s,p)=>s+p.amount,0);
+  const held=L.filter(d=>['empreinte','a_valider'].includes(d.status)).reduce((s,d)=>s+d.amount,0);
+  const fails=L.filter(d=>d.status==='incident');
+  const R=Pm.filter(p=>ui.pt==='all'||p.type===ui.pt),pros=S.pros.filter(p=>p.sid===ui.sid);
+  return pageH('Paiements','Stripe Connect · empreintes, encaissements différés, refus et remboursements',can('export')?`<button type="button" class="btn" data-act="export" data-k="paiements">${ic('download')}Export comptable</button>`:'')+
+  `<div class="kpis">${kpi('card','Empreintes en cours',eur(held),'Montants garantis, non débités')}${kpi('euro','Encaissé sur 30 jours',eur(sum(Pm.filter(p=>p.type==='capture'&&p.at>now-30*DAY))),'Commission plateforme : '+eur(sum(Pm.filter(p=>p.type==='capture'&&p.at>now-30*DAY))*0.015))}${kpi('alert','Impayés en cours',eur(fails.reduce((s,d)=>s+d.amount,0)),fails.length+' incident(s) ouvert(s)',fails.length?'bad':'')}${kpi('undo','Remboursé',eur(sum(Pm.filter(p=>p.type==='remboursement'))),Pm.filter(p=>p.type==='refus').length+' carte(s) refusée(s) à l’autorisation')}</div>
+  <div class="g-side"><section class="card" aria-labelledby="mvT"><div class="card-h"><h2 id="mvT">${ic('card')}Mouvements</h2><div class="field inline"><label for="pt">Type</label><select id="pt"><option value="all">Tous</option>${Object.entries(PT).map(([k,v])=>`<option value="${k}"${ui.pt===k?' selected':''}>${v[0]}</option>`).join('')}</select></div></div>
+  <div class="tbl-wrap"><table class="tbl resp"><caption class="sr">Mouvements de paiement</caption><thead><tr><th>Date</th><th>Dossier</th><th>Client</th><th>Opération</th><th>Montant</th><th>Identifiant Stripe</th></tr></thead><tbody>${R.slice(0,80).map(p=>{const d=byId(p.did);return `<tr><td data-l="Date">${fFull(p.at)}</td><td data-l="Dossier"><button type="button" class="lnk num" data-act="open" data-id="${d.id}">${d.id}</button></td><td data-l="Client">${esc(d.client.name)}</td><td data-l="Opération" class="c-main">${badge(p.type,PT)}${p.detail?`<span class="sub">${esc(p.detail)}</span>`:''}</td><td data-l="Montant" class="num">${p.type==='capture'?'+ ':p.type==='remboursement'?'− ':''}${eur(p.amount)}</td><td data-l="Identifiant Stripe" class="num small wrap">${p.id}</td></tr>`;}).join('')}</tbody></table></div>${R.length?'':`<p class="empty">Aucun mouvement de ce type.</p>`}</section>
+  <section class="card" aria-labelledby="acT"><div class="card-h"><h2 id="acT">${ic('building')}Comptes Stripe Connect</h2></div><p class="muted small">Chaque professionnel est payé sur son compte connecté ; la plateforme prélève 1,5 % par encaissement.</p>
+  <ul class="ulist">${pros.map(p=>`<li><span class="av">${initials(p.name)}</span><div><b>${esc(p.name)}</b><span class="num">${p.acct}</span></div>${p.stripe==='actif'?`<span class="badge c-ok">Actif · virements J+2</span>`:`<span class="badge c-warn">Pièce d’identité manquante</span>${can('stripe')?`<button type="button" class="btn sm" data-act="onboard" data-id="${p.id}">Relancer l’onboarding</button>`:''}`}</li>`).join('')}</ul></section></div>`;
+}
+
+/* ---------- automatisations ---------- */
+function vAuto(){const O=S.outbox.filter(m=>m.sid===ui.sid);
+  return pageH('Automatisations','E-mails, SMS, relances programmées et mise à jour automatique des échéances',`<button type="button" class="btn primary" data-act="run">${ic('play')}Lancer le planificateur</button>`)+
+  `<div class="g-side alt"><section class="card" aria-labelledby="ruT"><div class="card-h"><h2 id="ruT">${ic('zap')}Règles</h2></div><ul class="rules">${S.rules.map(r=>`<li><div class="rule-b"><b id="rl-${r.id}">${r.t}</b><span>${r.w}</span><span class="tag">${r.ch}</span></div><button type="button" id="sw-${r.id}" class="switch" role="switch" aria-checked="${r.on}" aria-labelledby="rl-${r.id}" data-act="rule" data-id="${r.id}"><span></span></button></li>`).join('')}</ul><p class="hint" style="margin-top:10px">En production, le planificateur tourne toutes les 15 minutes (file de tâches) ; ici, déclenchez-le à la main.</p></section>
+  <section class="card" aria-labelledby="obT"><div class="card-h"><h2 id="obT">${ic('send')}Messages envoyés <span class="pill">${O.length}</span></h2><span class="muted small">Envois simulés</span></div><div class="tbl-wrap"><table class="tbl resp"><caption class="sr">Messages envoyés</caption><thead><tr><th>Date</th><th>Canal</th><th>Destinataire</th><th>Objet</th><th><span class="sr">Action</span></th></tr></thead><tbody>${O.slice(0,50).map(m=>`<tr><td data-l="Date">${fFull(m.at)}</td><td data-l="Canal">${m.ch==='email'?ic('mail')+' E-mail':ic('sms')+' SMS'}</td><td data-l="Destinataire" class="wrap">${esc(m.to)}</td><td data-l="Objet" class="wrap c-main">${esc(m.subj)}</td><td><button type="button" class="btn sm" data-act="msg" data-i="${S.outbox.indexOf(m)}">Voir<span class="sr"> le message</span></button></td></tr>`).join('')}</tbody></table></div></section></div>`;}
+function runScheduler(){const now=Date.now();let n=0;
+  S.dossiers.filter(d=>d.sid===ui.sid).forEach(d=>{
+    if(d.status==='empreinte'&&d.date+d.duration*6e4<now){d.status='a_valider';n++;log(d,'Rendez-vous terminé — échéance mise à jour : prestation à valider','Automatisation');
+      if(rule('r4')){const p=proById(d.proId);send(d,'email',p.name,'Validez la prestation '+d.id,`Bonjour ${first(p.name)},\n\nLe rendez-vous de ${d.client.name} (${d.service}) est terminé. Validez la prestation pour déclencher l’encaissement de ${eur(d.amount)}.`);}}
+    if(d.status==='attente'&&rule('r2')&&now-d.lastSent>24*HR){const m=msgLink(d,true);send(d,'email',d.client.email,m.subj,m.body);d.lastSent=now;n++;log(d,'Relance automatique : conditions non acceptées','Automatisation');}
+    if(d.status==='empreinte'&&rule('r3')&&!d.reminded&&d.date>now&&d.date-now<36*HR){send(d,'sms',d.client.phone,'Rappel de rendez-vous',`${structOf(d).name} : rappel de votre RDV ${rel(d.date)} avec ${proById(d.proId).name}.`);d.reminded=true;n++;log(d,'Rappel SMS de rendez-vous envoyé','Automatisation');}
+    if(d.status==='incident'&&rule('r5')&&now-(d.lastSent||0)>24*HR){sendFix(d);n++;}
+  });
+  audit('Exécution du planificateur ('+n+' action(s))','',false);save();render();toast(n?n+' action(s) automatique(s) exécutée(s) : relances, rappels, échéances (simulation)':'Aucune action en attente : tout est à jour',n?'ok':'info');}
+function msgDlg(i){const m=S.outbox[i];if(!m)return;
+  openDlg(m.ch==='email'?'E-mail envoyé':'SMS envoyé',`<dl class="kv"><div><dt>Destinataire</dt><dd>${esc(m.to)}</dd></div><div><dt>Objet</dt><dd>${esc(m.subj)}</dd></div><div><dt>Envoyé le</dt><dd>${fFull(m.at)}</dd></div>${m.ref?`<div><dt>Dossier</dt><dd class="num">${m.ref}</dd></div>`:''}</dl><pre class="msg">${esc(m.body)}</pre><p class="hint" style="margin-top:10px">Envoi simulé : en production, via le fournisseur e-mail / SMS avec suivi de délivrance.</p>`);}
+
+/* ---------- sécurité ---------- */
+function vSecu(){const s=st(),pros=S.pros.filter(p=>p.sid===s.id),J=S.audit.filter(a=>a.sid===ui.sid&&(!ui.secOnly||a.sens));
+  const users=[[s.users.gestionnaire,'Gestionnaire','Application TOTP'],[s.users.assistant,'Assistant(e)','SMS'],...pros.map(p=>[p.name,p.job,'Application TOTP'])];
+  const PL=[['create','Créer un dossier'],['amount','Modifier un montant'],['report','Reporter un rendez-vous'],['cancel','Annuler un rendez-vous'],['capture','Valider une prestation (encaisser)'],['refund','Rembourser'],['payments','Consulter les paiements'],['export','Exports administratifs'],['auto','Paramétrer les automatisations'],['secu','Sécurité et journal']];
+  return pageH('Sécurité & journal','Double authentification, autorisations, isolation des données et traçabilité',`<button type="button" class="btn" data-act="relock">${ic('lock')}Verrouiller la session</button><button type="button" class="btn" data-act="export" data-k="journal">${ic('download')}Exporter le journal</button>`)+
+  `<div class="g-sec"><section class="card" aria-labelledby="faT"><div class="card-h"><h2 id="faT">${ic('key')}Double authentification</h2></div><ul class="ulist">${users.map(u=>`<li><span class="av">${initials(u[0])}</span><div><b>${esc(u[0])}</b><span>${esc(u[1])} · ${u[2]}</span></div><span class="badge c-ok">2FA active</span></li>`).join('')}</ul><p class="note info" style="margin-top:12px">${ic('shield')}<span>2FA obligatoire pour tous les comptes. Montants, encaissements, remboursements et exports redemandent un code si la session n’a pas été revalidée.</span></p></section>
+  <section class="card" aria-labelledby="peT"><div class="card-h"><h2 id="peT">${ic('lock')}Autorisations par rôle</h2></div><div class="tbl-wrap"><table class="tbl matrix"><thead><tr><th>Action</th><th>Gest.</th><th>Assist.</th><th>Pro</th></tr></thead><tbody>${PL.map(([k,l])=>`<tr><th scope="row">${l}</th>${['gestionnaire','assistant','pro'].map(r=>`<td>${PERM[r][k]?`<span class="yes">${ic('check')}<span class="sr">Autorisé</span></span>`:`<span class="no" aria-hidden="true">—</span><span class="sr">Non autorisé</span>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="hint" style="margin-top:8px">Un professionnel ne voit que ses dossiers ; le client n’accède qu’au sien, via son lien personnel.</p></section>
+  <section class="card" aria-labelledby="isT"><div class="card-h"><h2 id="isT">${ic('building')}Isolation des données</h2></div><p class="small">Chaque requête est filtrée par structure (Row Level Security PostgreSQL) ; les clés Stripe et documents sont cloisonnés par structure. Basculez de structure en haut de page : aucune donnée n’est partagée.</p>
+  <ul class="ulist" style="margin-top:8px">${S.structures.map(x=>`<li class="${x.id===ui.sid?'cur':''}"><span class="av">${initials(x.name)}</span><div><b>${esc(x.name)}</b><span>${S.dossiers.filter(d=>d.sid===x.id).length} dossiers · ${S.pros.filter(p=>p.sid===x.id).length} professionnels</span></div>${x.id===ui.sid?'<span class="badge c-info">Espace courant</span>':'<span class="badge c-gray">Inaccessible depuis cet espace</span>'}</li>`).join('')}</ul></section></div>
+  <section class="card" aria-labelledby="joT"><div class="card-h"><h2 id="joT">${ic('file')}Journal des opérations</h2><label class="chk"><input type="checkbox" id="secOnly"${ui.secOnly?' checked':''}>Opérations sensibles uniquement</label></div>
+  <div class="tbl-wrap"><table class="tbl resp"><caption class="sr">Journal des opérations</caption><thead><tr><th>Date</th><th>Utilisateur</th><th>Opération</th><th>Dossier</th></tr></thead><tbody>${J.slice(0,100).map(a=>`<tr><td data-l="Date">${fFull(a.at)}</td><td data-l="Utilisateur"><b>${esc(a.who)}</b><span class="sub">${esc(a.role)}</span></td><td data-l="Opération" class="c-main">${a.sens?'<span class="badge c-warn nodot">Sensible</span> ':''}${esc(a.action)}</td><td data-l="Dossier">${a.ref&&byId(a.ref)?`<button type="button" class="lnk num" data-act="open" data-id="${a.ref}">${a.ref}</button>`:'—'}</td></tr>`).join('')}</tbody></table></div><p class="hint" style="margin-top:8px">Journal en ajout seul, horodaté et conservé 5 ans.</p></section>`;}
+
+/* ---------- espace client ---------- */
+function cardFields(d){return `${fld('cn','Titulaire de la carte','text','',{req:1,ac:'cc-name'})}${fld('cnum','Numéro de carte','text','',{req:1,ac:'cc-number',im:'numeric',fmt:'card',ph:'4242 4242 4242 4242'})}
+  <div class="g2">${fld('cexp','Expiration (MM/AA)','text','',{req:1,ac:'cc-exp',im:'numeric',fmt:'exp',ph:'12/29'})}${fld('ccvc','Cryptogramme','text','',{req:1,ac:'cc-csc',im:'numeric',ph:'123'})}</div>
+  <details class="test"><summary>Cartes de test</summary><ul><li><code>4242 4242 4242 4242</code> : acceptée</li><li><code>4000 0000 0000 9995</code> : acceptée, mais encaissement refusé (fonds insuffisants)</li><li><code>4000 0000 0000 0002</code> : refusée par la banque</li></ul></details>
+  <button type="button" class="btn sm ghost" data-act="filltest" data-id="${d.id}">Remplir avec une carte de test</button>`;}
+function vPortail(){
+  const d=clientD();if(!d)return '<p>Aucun dossier.</p>';
+  const s=st(),p=proById(d.proId),L=S.dossiers.filter(x=>x.sid===ui.sid&&x.status!=='annule').sort((a,b)=>a.date-b.date),x=d.status;
+  const recap=`<dl class="recap"><div><dt>Prestation</dt><dd>${esc(d.service)}</dd></div><div><dt>Avec</dt><dd>${esc(p.name)}, ${esc(p.job.toLowerCase())}</dd></div><div><dt>Date</dt><dd>${fDL(d.date)} à ${fT(d.date)}</dd></div><div><dt>Montant</dt><dd class="num">${eur(d.amount)}</dd></div><div><dt>Référence</dt><dd class="num">${d.id}</dd></div><div><dt>Adresse</dt><dd>${esc(s.addr)}</dd></div></dl>`;
+  const step=x==='attente'?Math.min(ui.cstep[d.id]||1,2):3;
+  const stepper=`<ol class="psteps" aria-label="Étapes">${['Conditions','Paiement','Confirmation'].map((l,i)=>`<li class="${i+1<step||(step===3&&x!=='attente')?'done':i+1===step?'cur':''}"${i+1===step?' aria-current="step"':''}><span>${i+1<step||(step===3&&x!=='attente')?ic('check'):i+1}</span>${l}</li>`).join('')}</ol>`;
+  let body='';
+  if(x==='attente'&&step===1)body=stepper+`<p>Pour confirmer votre rendez-vous, vérifiez le récapitulatif et acceptez les conditions financières.</p>${recap}
+    <form data-form="accept" data-id="${d.id}" novalidate class="form"><section class="conds" aria-labelledby="cdT"><h2 id="cdT">Conditions financières</h2><ul>
+    <li>Une <b>empreinte bancaire de ${eur(d.amount)}</b> est réalisée aujourd’hui : aucun débit immédiat.</li>
+    <li>Le montant est encaissé <b>après validation de la prestation</b> par ${esc(p.name)} ; il peut être inférieur à l’empreinte, jamais supérieur.</li>
+    <li>Annulation ou report à moins de <b>${s.policy.h} h</b> du rendez-vous, ou absence : <b>${s.policy.pct} %</b> du montant facturé.</li>
+    <li>Au-delà de ce délai, l’annulation est sans frais et l’empreinte est libérée.</li></ul></section>
+    <label class="chk"><input type="checkbox" name="ok" id="f-ok" aria-describedby="f-ok-e">J’ai lu et j’accepte les conditions financières ci-dessus.</label><p class="err" id="f-ok-e" hidden></p>
+    <button type="submit" class="btn primary block">Continuer</button></form>`;
+  else if(x==='attente'&&step===2)body=stepper+`<form data-form="card" data-id="${d.id}" novalidate class="form"><div class="paybox"><div class="paybox-h"><b>${ic('lock')} Moyen de paiement</b><span class="badge c-warn">Mode test</span></div><p class="muted small">Empreinte de ${eur(d.amount)} : aucun débit avant la validation de la prestation. Paiement sécurisé par Stripe (3-D Secure).</p>${cardFields(d)}</div>
+    <div class="actions between"><button type="button" class="btn" data-act="cstep" data-s="1" data-id="${d.id}">Retour</button><button type="submit" class="btn primary">${ic('lock')}Autoriser ${eur(d.amount)}</button></div></form>`;
+  else if(x==='empreinte'||x==='a_valider')body=(ui.cstep[d.id]===3?stepper:'')+`<div class="success c-ok"><span class="big-ic">${ic('check')}</span><h2>Votre rendez-vous est confirmé</h2><p class="muted">Carte ${esc(d.card.brand)} •••• ${d.card.last4} enregistrée. ${eur(d.amount)} seront encaissés uniquement après validation de la prestation par ${esc(p.name)}.</p></div>${recap}
+    ${x==='a_valider'?`<p class="note info">${ic('clock')}<span>Votre rendez-vous est passé : l’encaissement interviendra dès que ${esc(p.name)} aura validé la prestation.</span></p>`:''}
+    <div class="actions" style="margin-top:12px"><button type="button" class="btn" data-act="doc" data-doc="att" data-id="${d.id}">${ic('file')}Mon attestation d’acceptation</button>${x==='empreinte'?(d.reportAsked?'<span class="badge c-info">Demande de report envoyée</span>':`<button type="button" class="btn ghost" data-act="askreport" data-id="${d.id}">${ic('cal')}Demander un report</button>`):''}</div>`;
+  else if(x==='incident')body=`<p class="note bad">${ic('alert')}<span>Le paiement de ${eur(d.amount)} pour votre rendez-vous du ${fD(d.date)} n’a pas abouti (fonds insuffisants). Enregistrez un autre moyen de paiement : le règlement sera relancé immédiatement.</span></p>${recap}
+    <form data-form="cardfix" data-id="${d.id}" novalidate class="form"><div class="paybox"><div class="paybox-h"><b>${ic('lock')} Nouveau moyen de paiement</b><span class="badge c-warn">Mode test</span></div>${cardFields(d)}</div><button type="submit" class="btn primary block">${ic('euro')}Régler ${eur(d.amount)}</button></form>`;
+  else if(x==='encaisse'||x==='rembourse')body=`<div class="success c-ok"><span class="big-ic">${ic('check')}</span><h2>Prestation réglée</h2><p class="muted">${eur(d.captured)} encaissés${d.refunded?' · '+eur(d.refunded)+' remboursés':''}. Merci pour votre confiance.</p></div>${recap}<div class="actions"><button type="button" class="btn primary" data-act="doc" data-doc="just" data-id="${d.id}">${ic('file')}Mon justificatif de paiement</button><button type="button" class="btn" data-act="doc" data-doc="att" data-id="${d.id}">${ic('file')}Attestation d’acceptation</button></div>`;
+  else body=`<p class="note">${ic('x')}<span>Ce rendez-vous a été annulé${d.captured?' ; '+eur(d.captured)+' de frais ont été prélevés':''}.</span></p>${recap}`;
+  return `<div class="portal"><div class="card"><div class="field"><label for="selC">Simuler l’ouverture du lien personnel de</label><select id="selC">${L.map(y=>`<option value="${y.id}"${y.id===d.id?' selected':''}>${esc(y.client.name)} — ${fD(y.date)} · ${ST[y.status][0]}</option>`).join('')}</select></div><p class="hint" style="margin-top:6px">En production, le client arrive directement ici depuis l’e-mail, le SMS ou le QR code, sans mot de passe.</p></div>
+  <article class="card pcard" aria-labelledby="pT"><header class="p-head"><div class="p-org"><span class="mark">${initials(s.name)}</span><div><b>${esc(s.name)}</b><span>${esc(s.sub)}</span></div></div><span class="secure">${ic('lock')}Lien personnel sécurisé</span></header>
+  <h1 id="pT">Bonjour ${esc(first(d.client.name))},</h1>${body}</article></div>`;
+}
+const VIEWS={dash:vDash,dossiers:vDossiers,paiements:vPaiements,auto:vAuto,secu:vSecu,portail:vPortail};
+
+/* ---------- évènements ---------- */
+function asClient(id){ui.who='client';ui.clientDossier=id;ui.view='portail';if(dlg.open)dlg.close();save();render();window.scrollTo(0,0);toast('Vous voyez maintenant l’espace du client '+byId(id).client.name,'info');}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id,d=id?byId(id):null;
+  const H={
+    nav:()=>{ui.view=b.dataset.v;if(dlg.open)dlg.close();save();render();$('#main').focus();window.scrollTo(0,0);},
+    close:()=>dlg.close(),otpclose:()=>{$('#otp').close();ui.pending=null;},
+    create:createDlg,open:()=>openDossier(id),link:()=>linkDlg(id),amount:()=>amountDlg(id),report:()=>reportDlg(id),cancel:()=>cancelDlg(id),capture:()=>captureDlg(id),refund:()=>refundDlg(id),
+    resend:()=>{if(d.status==='incident'){sendFix(d);toast('E-mail et SMS envoyés à '+d.client.name+' (simulation)','info');}else{sendLink(d,true);log(d,'Relance manuelle envoyée au client');}audit('Relance client',d.id,false);save();render();openDossier(id);},
+    retry:()=>sensitive('Nouvelle tentative d’encaissement',()=>{doCapture(d,d.amount);save();render();openDossier(id);}),
+    doc:()=>docDlg(b.dataset.doc,id),print:()=>printDoc(b.dataset.doc,id),asclient:()=>asClient(id),
+    copy:()=>{const inp=$('#lnk');const done=()=>toast('Lien copié dans le presse-papiers');if(navigator.clipboard)navigator.clipboard.writeText(link(d)).then(done,()=>{inp.select();done();});else{inp.select();done();}},
+    sendch:()=>{sendLink(d,true,[b.dataset.ch]);log(d,'Lien renvoyé par '+(b.dataset.ch==='email'?'e-mail':'SMS'));save();render();},
+    week:()=>{const v=+b.dataset.d;ui.week=v===0?0:ui.week+v;render();},
+    st:()=>{ui.st=b.dataset.k;render();},
+    stgo:()=>{ui.st=b.dataset.k;ui.view='dossiers';render();$('#main').focus();},
+    export:()=>exportCSV(b.dataset.k),
+    onboard:()=>{const p=proById(id);p.stripe='actif';audit('Onboarding Stripe Connect finalisé : '+p.name,'',true);save();render();toast('Compte Stripe Connect de '+p.name+' activé (simulation)');},
+    rule:()=>{const r=S.rules.find(x=>x.id===id);r.on=!r.on;audit((r.on?'Activation':'Désactivation')+' de la règle « '+r.t+' »','',false);save();render();toast('Règle « '+r.t+' » '+(r.on?'activée':'désactivée'),'info');},
+    run:runScheduler,msg:()=>msgDlg(+b.dataset.i),
+    relock:()=>{ui.twofa=false;audit('Session verrouillée manuellement','',false);save();render();toast('Session verrouillée : le code 2FA sera redemandé','info');},
+    cstep:()=>{ui.cstep[id]=+b.dataset.s;render();},
+    filltest:()=>{const f=b.closest('form');f.elements.cn.value=d.client.name;f.elements.cnum.value='4242 4242 4242 4242';f.elements.cexp.value='12/29';f.elements.ccvc.value='123';f.querySelector('[type=submit]').focus();},
+    askreport:()=>{d.reportAsked=true;log(d,'Demande de report envoyée par le client',d.client.name);send(d,'email',structOf(d).name+' (accueil)','Demande de report — '+d.id,`${d.client.name} souhaite reporter son rendez-vous du ${fDL(d.date)} à ${fT(d.date)}.`);audit('Demande de report',d.id,false);save();render();toast('Demande de report transmise à la structure (simulation)','info');}
+  };
+  if(H[a]){e.preventDefault();H[a]();}
+});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='selS'){ui.sid=t.value;if(role()==='pro')ui.who='pro:'+S.pros.find(p=>p.sid===ui.sid).id;ui.clientDossier=null;ui.pf='all';ui.st='all';ui.q='';save();render();toast('Espace « '+st().name+' » : données isolées par structure','info');}
+  else if(t.id==='selR'){ui.who=t.value;if(role()==='client')ui.view='portail';save();render();}
+  else if(t.id==='pf'){ui.pf=t.value;render();}
+  else if(t.id==='pt'){ui.pt=t.value;render();}
+  else if(t.id==='secOnly'){ui.secOnly=t.checked;render();}
+  else if(t.id==='selC'){ui.clientDossier=t.value;render();}
+  else if(t.id==='f-svc'){t.form.elements.amount.value=st().services[+t.value][1];}
+  else if(t.id==='f-ok'&&t.checked){const e2=$('#f-ok-e');if(e2)e2.hidden=true;t.removeAttribute('aria-invalid');}
+  else if(t.name==='who'&&t.form&&t.form.dataset.form==='cancel'){const d=byId(t.form.dataset.id),box=$('#feeBox');box.innerHTML=feeHTML(d,t.value);box.className='note '+(feeOf(d,t.value)?'warn':'info');}
+});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.id==='q'){ui.q=t.value;render();}
+  else if(t.dataset.fmt==='card'){const v=t.value.replace(/\D/g,'').slice(0,16);t.value=v.replace(/(.{4})(?=.)/g,'$1 ');}
+  else if(t.dataset.fmt==='exp'){let v=t.value.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);t.value=v;}
+});
+document.addEventListener('submit',e=>{const f=e.target,k=f.dataset.form;if(FORMS[k]){e.preventDefault();FORMS[k](f);}});
+$('#otp').addEventListener('close',()=>{ui.pending=null;});
+$('#resetBtn').addEventListener('click',()=>{try{localStorage.removeItem(KEY);}catch(e){}seed();ui=defUi();if(dlg.open)dlg.close();render();toast('Démo réinitialisée');});
+
+load();render();
+})();
+</script>
 </body>
 </html>
