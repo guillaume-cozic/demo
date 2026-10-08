@@ -2,20 +2,935 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Réservation d'activités enfants</title>
+<meta name="description" content="Application mobile de réservation d'activités pour enfants : recherche par quartier, âge, catégorie et date, fiche activité, paiement en mode test, historique et rappels côté parents, espace organisateur (activités, créneaux, tarifs, participants) et back-office d'administration (validations, utilisateurs, réservations).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F3EE;--panel:#FFFFFF;--panel-2:#FAF8F4;--ink:#1F1C19;--muted:#5D564E;--line:#E7E1D7;--line-2:#CDC4B6;
+  --accent:#B1442A;--accent-ink:#FFFFFF;--accent-soft:#FBE8E0;--accent-text:#95371F;
+  --teal:#1D6767;--teal-soft:#DCEFEC;
+  --ok:#21703F;--ok-soft:#DFF1E5;--warn:#875000;--warn-soft:#FBEED4;--bad:#AF2530;--bad-soft:#FBE3E3;--info:#2A5690;--info-soft:#E2EAF6;--gray-soft:#EFEBE4;
+  --frame:#1E1B18;
+  --shadow:0 1px 2px rgba(30,24,18,.05),0 4px 14px rgba(30,24,18,.06);
+  --font:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141210;--panel:#1C1A17;--panel-2:#23201C;--ink:#EEE9E2;--muted:#ADA59A;--line:#302C27;--line-2:#4A443D;
+  --accent:#F08B6D;--accent-ink:#2A0E05;--accent-soft:#3B2219;--accent-text:#F6AC93;
+  --teal:#7BCFC6;--teal-soft:#17302E;
+  --ok:#78D59D;--ok-soft:#163020;--warn:#F2BA62;--warn-soft:#352714;--bad:#FF959B;--bad-soft:#3C1C1F;--info:#9CC1F1;--info-soft:#172A40;--gray-soft:#2A2622;
+  --frame:#000;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+.wrap{overflow-wrap:anywhere}
+.print-only{display:none}
+
+.demo-band{background:var(--warn-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:8px 20px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.brand small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.mark svg{width:22px;height:22px}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0;margin-left:auto}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:12px;border:0;background:transparent;font-weight:700;color:var(--muted);white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 7px;font-weight:800}
+main{padding:20px clamp(16px,2vw,32px) 56px}
+@media (max-width:820px){#nav{margin-left:0;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel);font-weight:700;color:var(--ink);text-align:center;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.teal{background:var(--teal);border-color:var(--teal);color:var(--panel)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent-text);font-weight:700;text-decoration:underline;min-height:0}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--muted);flex:none;position:relative}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.flabel{font-weight:700;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:12.5px;color:var(--bad);font-weight:700}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=time],input[type=search],input[type=tel],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{min-height:110px;resize:vertical}
+[aria-invalid="true"]{border-color:var(--bad)!important}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.check{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:10px 0}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:800;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--info-soft);color:var(--info)}.b-gray{background:var(--gray-soft);color:var(--muted)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* ===== Parent : téléphone ===== */
+.pl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:28px;align-items:start}
+.phone{position:sticky;top:84px;width:392px;height:min(820px,calc(100vh - 120px));min-height:620px;border:10px solid var(--frame);border-radius:46px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(30,24,18,.18)}
+.notch{height:34px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-size:12px;font-weight:800;background:var(--panel)}
+.notch .cam{width:90px;height:22px;border-radius:12px;background:var(--frame)}
+.screen{flex:1;overflow-y:auto;overscroll-behavior:contain;position:relative;min-width:0}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);background:var(--panel);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:800;border:0;background:none;color:var(--muted);position:relative}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button[aria-current="page"]{color:var(--accent-text)}
+.tabbar .dot{position:absolute;top:6px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;display:grid;place-items:center;padding:0 4px}
+.push{position:absolute;top:42px;left:10px;right:10px;z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;animation:drop .3s ease}
+.push .pi{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.push b{display:block;font-size:13.5px}
+.push span{font-size:13px;color:var(--muted)}
+@keyframes drop{from{transform:translateY(-20px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.push{animation:none}}
+
+.pad{padding:16px}
+.app-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 16px 6px}
+.app-t{font-size:22px;font-weight:800}
+.bar-h{display:flex;align-items:center;gap:6px;padding:8px 8px 8px 6px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.bar-h h1{font-size:17px;font-weight:800;min-width:0}
+.icon-btn .bdg{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:5px;background:var(--accent);border:2px solid var(--panel)}
+.loc{display:flex;gap:8px;align-items:flex-end;padding:6px 16px}
+.loc .field{flex:1}
+.loc .field.r{flex:0 0 96px}
+.search{position:relative;margin:6px 16px}
+.search svg{position:absolute;left:12px;top:13px;color:var(--muted)}
+.search input{padding-left:40px;border-radius:14px;background:var(--panel)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:6px 16px 8px;scrollbar-width:none}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:700;font-size:14px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.frow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:0 16px 6px}
+.rc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px 4px}
+.rc-row select{width:auto;min-height:44px;font-size:14px}
+.rc{font-weight:800}
+#results{display:grid;gap:12px;padding:6px 16px 20px}
+.ac{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.ac:hover{border-color:var(--line-2)}
+.ac-img{aspect-ratio:16/7;overflow:hidden}
+.ac-img svg,.gal-img svg,.th svg{display:block;width:100%;height:100%}
+.ac-b{padding:10px 14px 14px;display:grid;gap:4px}
+.ac h3{font-size:17px;font-weight:800}
+.stretch{border:0;background:none;padding:0;text-align:left;font-weight:800;color:inherit}
+.stretch::after{content:"";position:absolute;inset:0;border-radius:18px}
+.stretch:focus-visible{outline:none}
+.stretch:focus-visible::after{outline:3px solid var(--accent);outline-offset:-3px}
+.ac-m{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--muted)}
+.ac-f{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.ac-f b{font-size:17px}
+.tag{display:inline-block;font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px;justify-self:start}
+.t-creatif{background:#FCEFD6;color:#7A4E00}.t-sport{background:#DDEBF8;color:#1D4F7E}.t-musique{background:#ECE3F7;color:#5B3392}.t-nature{background:#DFF0E3;color:#22603A}.t-sciences{background:#FBE3D9;color:#8C3A18}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);display:grid;gap:10px;justify-items:center}
+
+.gal{position:relative;aspect-ratio:16/10;background:var(--panel-2)}
+.gal-img{position:absolute;inset:0}
+.gal .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:22px;border:0;background:rgba(255,255,255,.92);color:#1F1C19;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.gal .prev{left:10px}.gal .next{right:10px}
+.gal .back{position:absolute;top:10px;left:10px;width:44px;height:44px;border-radius:22px;border:0;background:rgba(255,255,255,.92);color:#1F1C19;display:grid;place-items:center}
+.gal .count{position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,.62);color:#fff;font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.fact{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 10px;display:flex;gap:8px;align-items:center;font-size:13.5px;min-width:0}
+.fact svg{color:var(--accent-text)}
+.fact b{display:block;font-size:14px}
+.sec-t{font-size:15px;font-weight:800;margin:18px 0 8px}
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.slot{min-height:64px;border:1.5px solid var(--line-2);border-radius:14px;background:var(--panel);padding:8px 10px;text-align:left;display:grid;gap:1px;font-size:13px}
+.slot b{font-size:14px}
+.slot[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.slot:disabled{opacity:.55;cursor:not-allowed}
+.pl-ok{color:var(--ok);font-weight:800}.pl-low{color:var(--warn);font-weight:800}.pl-full{color:var(--bad);font-weight:800}
+.kid{display:flex;align-items:center;gap:10px;min-height:52px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:6px 12px;margin-bottom:8px}
+.kid input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.kid .kn{flex:1;min-width:0}
+.kid.off{opacity:.6}
+.org-box{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel);display:grid;gap:4px;margin-top:8px}
+.cta{position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:4}
+.cta b{font-size:19px;display:block}
+.cta .btn{flex:0 0 auto;min-width:140px}
+.test-banner{display:flex;gap:8px;align-items:center;background:var(--warn-soft);color:var(--warn);font-weight:800;font-size:13px;padding:8px 12px;border-radius:12px;margin-bottom:12px}
+.recap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:6px;margin-bottom:14px}
+.recap .row{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.recap .row span:last-child{text-align:right;font-weight:700;overflow-wrap:anywhere}
+.recap .tot{border-top:1px dashed var(--line-2);padding-top:6px;font-size:16px}
+.form{display:grid;gap:12px}
+.success{text-align:center;padding:28px 16px;display:grid;gap:10px;justify-items:center}
+.success .ok-ic{width:72px;height:72px;border-radius:36px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.success .ok-ic svg{width:36px;height:36px;stroke-width:2.5}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;background:var(--gray-soft);padding:4px;border-radius:14px;margin:8px 16px}
+.seg button{min-height:44px;border:0;border-radius:11px;background:transparent;font-weight:800;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.bk{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:8px;margin-bottom:12px}
+.bk-top{display:flex;gap:12px;align-items:flex-start}
+.th{width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none}
+.bk-top>div{min-width:0;flex:1}
+.bk h3{font-size:15.5px;font-weight:800}
+.nt{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:flex-start}
+.nt .ni{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--gray-soft);color:var(--muted)}
+.nt.n-confirm .ni{background:var(--ok-soft);color:var(--ok)}.nt.n-rappel .ni{background:var(--info-soft);color:var(--info)}.nt.n-cancel .ni{background:var(--bad-soft);color:var(--bad)}.nt.n-info .ni{background:var(--accent-soft);color:var(--accent-text)}
+.nt.unread{background:var(--panel)}
+.nt .nb{flex:1;min-width:0}
+.nt .ud{width:10px;height:10px;border-radius:5px;background:var(--accent);margin-top:6px;flex:none}
+.prof{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:6px}
+.avatar{width:52px;height:52px;border-radius:26px;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
+.li{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 6px 6px 12px;margin-bottom:8px}
+.li>div{flex:1;min-width:0}
+.auth-hero{border-radius:0 0 26px 26px;overflow:hidden;aspect-ratio:16/9;position:relative}
+.auth-hero .ov{position:absolute;inset:auto 0 0 0;padding:14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff}
+.auth-hero .ov b{font-size:20px;display:block;line-height:1.2}
+
+.side{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;align-content:start;min-width:0}
+.steps{margin:0;padding-left:20px;display:grid;gap:8px}
+.journal{list-style:none;margin:0;padding:0;display:grid;gap:2px;max-height:420px;overflow-y:auto}
+.journal li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;align-items:flex-start}
+.journal .t{font-variant-numeric:tabular-nums;color:var(--muted);flex:none;font-size:12.5px;padding-top:1px}
+.journal .k{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--gray-soft);color:var(--muted);flex:none}
+.journal .k svg{width:15px;height:15px}
+.journal .k-email{background:var(--info-soft);color:var(--info)}.journal .k-push{background:var(--accent-soft);color:var(--accent-text)}.journal .k-pay{background:var(--ok-soft);color:var(--ok)}.journal .k-admin{background:var(--teal-soft);color:var(--teal)}
+.journal li>span:last-child{min-width:0;overflow-wrap:anywhere}
+.tech{display:grid;gap:10px;margin:0}
+.tech dt{font-weight:800;font-size:13.5px}
+.tech dd{margin:0;color:var(--muted);font-size:13.5px}
+
+@media (max-width:760px){
+  .pl{grid-template-columns:minmax(0,1fr)}
+  .phone{position:relative;top:0;width:auto;height:auto;min-height:0;border:1px solid var(--line);border-radius:20px;overflow:visible;box-shadow:var(--shadow)}
+  .notch{display:none}
+  .screen{overflow:visible}
+  .tabbar{position:sticky;bottom:0;z-index:20;border-radius:0 0 20px 20px}
+  .cta{bottom:58px}
+  .push{position:fixed;top:10px;left:12px;right:12px;z-index:100}
+  .bar-h{top:0;border-radius:20px 20px 0 0}
+  .auth-hero{border-radius:20px 20px 26px 26px}
+}
+
+/* ===== Back-office ===== */
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 20px;flex-wrap:wrap;margin-bottom:14px}
+.page-h h1{font-size:24px;font-weight:800}
+.page-h .field{min-width:min(100%,280px)}
+.subnav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px;scrollbar-width:none}
+.subnav button{min-height:46px;padding:0 14px;border:0;background:none;font-weight:800;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;display:inline-flex;gap:8px;align-items:center}
+.subnav button[aria-current="page"]{color:var(--accent-text);border-bottom-color:var(--accent)}
+.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;margin-bottom:16px;font-size:14px}
+.alert.warn{background:var(--warn-soft);color:var(--warn)}
+.alert.info{background:var(--info-soft);color:var(--info)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-width:0}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:700}
+.kpi .v{font-size:26px;font-weight:800;line-height:1.2;margin-top:2px}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+.cols.eq{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:1000px){.cols,.cols.eq{grid-template-columns:minmax(0,1fr)}}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.toolbar .field{flex:1 1 200px}
+.toolbar .field.s{flex:0 1 220px}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:640px;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:800;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+.fill{display:flex;align-items:center;gap:8px;min-width:120px}
+.fill .b{flex:1;height:8px;border-radius:4px;background:var(--gray-soft);overflow:hidden}
+.fill .b i{display:block;height:100%;background:var(--teal);border-radius:4px}
+.fill .b i.full{background:var(--accent)}
+.num-in{width:90px!important}
+.oacts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:16px}
+.oa{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.oa .ac-img{aspect-ratio:16/6}
+.oa .b{padding:12px 14px 14px;display:grid;gap:6px;flex:1}
+.oa h3{font-size:16px;font-weight:800}
+.oa .actions{margin-top:auto;padding-top:6px}
+.vl{display:grid;gap:12px}
+.vi{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:6px;background:var(--panel-2)}
+.vi h3{font-size:15.5px;font-weight:800}
+.bars{display:grid;gap:10px}
+.bars .r{display:grid;grid-template-columns:130px minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:13.5px}
+.bars .t{height:12px;border-radius:6px;background:var(--gray-soft);overflow:hidden}
+.bars .t i{display:block;height:100%;border-radius:6px}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-size:11px;font-family:var(--font)}
+.mini-list{list-style:none;margin:0;padding:0}
+.mini-list li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mini-list li:last-child{border-bottom:0}
+.mini-list li>div{min-width:0}
+
+dialog{border:0;border-radius:18px;padding:0;width:min(600px,calc(100vw - 24px));max-height:calc(100vh - 32px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(20,16,12,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 14px 10px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:18px}
+.dlg-b{padding:16px 20px}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding:12px 20px 18px}
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:200;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-weight:700;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:10px;align-items:center}
+.toast.bad{background:var(--bad);color:#fff}
+
+@media print{
+  .demo-band,.top,.subnav,.page-h,.toolbar,.no-print,#toasts,.btn{display:none!important}
+  .print-only{display:block}
+  body{background:#fff;color:#000}
+  .tw{border:0}
+  main{padding:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-a="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></span><span>Récréa<small>Activités enfants · Rennes</small></span></div>
+  <nav id="nav" aria-label="Espaces"></nav>
+</header>
+<main id="app"></main>
+<div id="toasts" aria-live="polite"></div>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const KEY='recrea-demo-v1';
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const off=n=>{const d=new Date(TODAY);d.setDate(d.getDate()+n);return iso(d)};
+const pISO=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const diff=s=>Math.round((pISO(s)-TODAY)/864e5);
+const fD=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const fDL=new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const fmtD=s=>fD.format(pISO(s));
+const fmtDL=s=>fDL.format(pISO(s));
+const eur=n=>Number(n).toLocaleString('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+const km=d=>d.toFixed(1).replace('.',',')+' km';
+const addMin=(t,m)=>{const[h,mi]=t.split(':').map(Number);const x=h*60+mi+m;return pad(Math.floor(x/60)%24)+':'+pad(x%60)};
+const hash=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- Icônes ---------- */
+const IC={
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+pin:'<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 4 6"/>',
+bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+ticket:'<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10"/>',
+left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+check:'<path d="m5 12 5 5 9-10"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',
+card:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h4"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>',
+download:'<path d="M12 3v12m-5-5 5 5 5-5M4 21h16"/>',
+logout:'<path d="M9 4H5v16h4M14 8l4 4-4 4M18 12H9"/>',
+chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+building:'<path d="M4 21V5l8-2v18M12 8h8v13M8 8v.01M8 12v.01M8 16v.01M16 12v.01M16 16v.01M2 21h20"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+child:'<circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0M9 9.5v.01M15 9.5v.01"/>',
+euro:'<path d="M17 6a7 7 0 1 0 0 12M4 10h9M4 14h9"/>',
+list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+home:'<path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/>',
+hourglass:'<path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+
+/* ---------- Référentiels ---------- */
+const QUARTIERS={'Centre':[0,0],'Thabor':[1.2,0.5],'Saint-Hélier':[1.4,-1.1],'Bréquigny':[-0.4,-2.6],'Villejean':[-2.3,1.5],'Beaulieu':[3.1,0.9],'Cleunay':[-2.1,-0.7],'Maurepas':[1.7,2.0]};
+const CATS={creatif:{label:'Ateliers créatifs',c:'#D08A12',bg:'#FCEFD6'},sport:{label:'Sport',c:'#2F78B8',bg:'#DDEBF8'},musique:{label:'Musique',c:'#8257BD',bg:'#ECE3F7'},nature:{label:'Nature',c:'#3C8A53',bg:'#DFF0E3'},sciences:{label:'Sciences',c:'#C45A33',bg:'#FBE3D9'}};
+const CATIC={
+creatif:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+sport:'<circle cx="12" cy="12" r="9"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18"/>',
+musique:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+nature:'<path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19 14 10"/>',
+sciences:'<path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/>'
+};
+function art(cat,v=0,label=''){
+  const C=CATS[cat]||CATS.creatif;const r=rng(hash(cat)+v*977);v=v%3;
+  let b='';for(let i=0;i<6;i++){b+=`<circle cx="${Math.round(r()*320)}" cy="${Math.round(r()*180)}" r="${18+Math.round(r()*48)}" fill="${C.c}" opacity="${(.1+r()*.16).toFixed(2)}"/>`}
+  const ix=[160,105,220][v],iy=[88,92,84][v];
+  let deco='';
+  if(v===1)deco=`<path d="M0 150 Q80 120 160 148 T320 145 V180 H0Z" fill="${C.c}" opacity=".28"/>`;
+  if(v===2){for(let i=0;i<14;i++)deco+=`<rect x="${Math.round(r()*310)}" y="${Math.round(r()*170)}" width="7" height="7" rx="2" fill="${C.c}" opacity=".45" transform="rotate(${Math.round(r()*90)} 160 90)"/>`}
+  const a=label?`role="img" aria-label="${esc(label)}"`:'aria-hidden="true"';
+  return `<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" ${a}><rect width="320" height="180" fill="${C.bg}"/>${b}${deco}<circle cx="${ix}" cy="${iy}" r="46" fill="#fff" opacity=".9"/><g transform="translate(${ix-30} ${iy-30}) scale(2.5)" fill="none" stroke="${C.c}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${CATIC[cat]||''}</g></svg>`;
+}
+
+/* ---------- Données ---------- */
+let S,BM=null;
+function seed(){
+  const R=rng(20261008);
+  const pick=a=>a[Math.floor(R()*a.length)];
+  const orgs=[
+    {id:'o1',name:'Atelier Pinceaux & Cie',type:'Association',contact:'Hélène Garnier',email:'contact@pinceaux-cie.exemple',phone:'02 99 41 18 07',quartier:'Centre',address:'12 rue de la Monnaie',description:"Atelier d'arts plastiques pour les 4–14 ans : peinture, collage, modelage et BD, en petits groupes de 8 enfants maximum.",status:'valide',createdAt:off(-240)},
+    {id:'o2',name:'Club Sportif des Prairies',type:'Club sportif',contact:'Julien Le Bihan',email:'accueil@cs-prairies.exemple',phone:'02 99 52 33 10',quartier:'Bréquigny',address:'3 allée des Sports',description:"Club omnisports : multisports, escalade et jeux d'opposition encadrés par des éducateurs diplômés.",status:'valide',createdAt:off(-200)},
+    {id:'o3',name:'La Clé de Sol',type:'École de musique',contact:'Marion Kerleau',email:'bonjour@cledesol.exemple',phone:'02 99 30 64 21',quartier:'Thabor',address:'8 rue des Lilas',description:"École de musique associative : éveil musical dès 3 ans, initiation aux instruments et pratique collective.",status:'valide',createdAt:off(-180)},
+    {id:'o4',name:'Les Petits Explorateurs',type:'Association',contact:'Yann Morvan',email:'sorties@petits-explorateurs.exemple',phone:'06 71 22 48 90',quartier:'Maurepas',address:'Maison de quartier, 21 rue des Saules',description:"Sorties nature encadrées par des animateurs diplômés : forêt, mares, jardins partagés et jeux de piste.",status:'valide',createdAt:off(-150)},
+    {id:'o5',name:'Labo des Curieux',type:'Micro-entreprise',contact:'Sarah Diallo',email:'hello@labo-curieux.exemple',phone:'06 45 18 77 02',quartier:'Beaulieu',address:'5 rue des Sciences',description:"Ateliers scientifiques et numériques : robotique, chimie amusante, astronomie, pour les 6–12 ans.",status:'valide',createdAt:off(-120)},
+    {id:'o6',name:'Studio Arabesque',type:'École de danse',contact:'Clara Fontaine',email:'studio@arabesque.exemple',phone:'02 99 67 11 45',quartier:'Cleunay',address:"40 boulevard de l'Ouest",description:"Cours de danse modern'jazz et éveil corporel pour enfants, dans une salle de 120 m² avec parquet.",status:'attente',createdAt:off(-2)},
+    {id:'o7',name:'Ludothèque Les Dés Joyeux',type:'Association',contact:'Mehdi Amrani',email:'ludo@desjoyeux.exemple',phone:'06 12 90 55 31',quartier:'Villejean',address:'2 place du Marché',description:"Après-midi jeux de société et jeux coopératifs animés pour les familles et les enfants dès 5 ans.",status:'attente',createdAt:off(-1)}
+  ];
+  const AD=[
+    ['a1','o1','Atelier peinture & collage','creatif',4,7,18,90,[3,6],'14:00',8,'publiee',"Les enfants explorent couleurs et matières : peinture à la gouache, collage de papiers, tampons. Chaque enfant repart avec sa création. Tablier fourni."],
+    ['a2','o1','Poterie et modelage','creatif',7,12,24,120,[6],'10:00',8,'publiee',"Initiation au modelage de l'argile : pinch-pot, colombins et plaques. Les pièces sont cuites puis récupérées deux semaines plus tard."],
+    ['a3','o2','Multisports du mercredi','sport',6,11,15,120,[3],'14:00',16,'publiee',"Jeux collectifs, athlétisme, jeux de raquettes : plusieurs sports à découvrir à chaque séance, encadrés par deux éducateurs diplômés."],
+    ['a4','o2','Initiation escalade','sport',8,14,16,90,[3,6],'16:00',10,'publiee',"Séance sur mur d'escalade en salle : nœuds, assurage et premières voies. Chaussons et baudriers fournis."],
+    ['a5','o3','Éveil musical','musique',3,5,12,45,[3,6],'10:00',8,'publiee',"Comptines, percussions corporelles et petits instruments pour découvrir le rythme et l'écoute. Un parent peut rester pendant la séance."],
+    ['a6','o3','Découverte du ukulélé','musique',7,12,16,60,[6],'11:00',6,'publiee',"Premiers accords et chansons simples en petit groupe. Ukulélés prêtés pendant la séance, aucune connaissance requise."],
+    ['a7','o4','Balade nature & cabanes','nature',5,10,10,150,[3,0],'14:00',12,'publiee',"Sortie en forêt avec un animateur nature : construction de cabanes, reconnaissance des arbres et jeux de piste. Prévoir bottes et goûter."],
+    ['a8','o4','Petites bêtes de la mare','nature',4,8,8,90,[6],'14:30',10,'publiee',"Observation des insectes et petites bêtes aquatiques avec loupes et épuisettes, puis remise à l'eau. Maintenue par pluie légère."],
+    ['a9','o5','Robotique LEGO','sciences',8,12,22,120,[3],'14:00',8,'publiee',"Construction et programmation de robots LEGO sur tablette : capteurs, moteurs et défis en équipe. Matériel fourni."],
+    ['a10','o5','Petits chimistes','sciences',6,10,18,90,[6],'10:30',10,'publiee',"Expériences sans danger : volcans, cristaux, encre invisible. Blouse et lunettes de protection fournies."],
+    ['a11','o6',"Danse modern'jazz",'sport',6,10,14,60,[3],'15:00',12,'attente',"Cours de danse ludique : échauffement, coordination et petite chorégraphie présentée aux parents en fin de trimestre."],
+    ['a12','o1','Atelier BD & manga','creatif',9,14,20,120,[3],'16:00',8,'attente',"Création de personnages, découpage en cases et encrage : chaque participant réalise une planche complète en trois séances."]
+  ];
+  const acts=[],slots=[];let sid=1;
+  for(const d of AD){
+    const o=orgs.find(x=>x.id===d[1]);
+    acts.push({id:d[0],orgId:d[1],title:d[2],cat:d[3],ageMin:d[4],ageMax:d[5],price:d[6],duration:d[7],quartier:o.quartier,address:o.address,desc:d[12],status:d[11],createdAt:d[11]==='attente'?off(-1):off(-100)});
+    for(let k=-14;k<=24;k++){const ds=off(k);if(d[8].includes(pISO(ds).getDay()))slots.push({id:'s'+(sid++),actId:d[0],date:ds,start:d[9],end:addMin(d[9],d[7]),cap:d[10]})}
+  }
+  const PF=['Thomas','Sophie','Karim','Julie','Antoine','Nadia','Pierre','Émilie','Mathieu','Laura','Youssef','Claire','Nicolas','Aurélie','Sébastien','Fatou','Romain','Céline','Hugo','Marine','Damien','Elsa','Olivier','Amandine','Bastien','Ophélie'];
+  const PL=['Bernard','Lefèvre','Haddad','Moreau','Roux','Benali','Petit','Durand','Leroy','Simon','Laurent','Michel','Lemoine','Fournier','Girard','Bonnet','Dupuis','Lambert','Rousseau','Vincent','Muller','Faure','Mercier','Le Goff','Guérin','Tanguy'];
+  const KN=['Lucas','Emma','Jade','Gabriel','Louise','Raphaël','Alice','Arthur','Chloé','Jules','Lina','Adam','Rose','Nathan','Mia','Sacha','Zoé','Noah','Lou','Timéo','Anna','Malo','Léna','Tom','Nina','Paul','Manon','Eden','Romy','Axel'];
+  const parents=[{id:'p1',name:'Camille Martin',email:'camille.martin@exemple.fr',pw:'demo1234',phone:'06 12 34 56 78',kids:[{n:'Léo',a:6},{n:'Inès',a:9}],status:'actif',createdAt:off(-64),prefs:{j1:true,h2:false,news:true}}];
+  PF.forEach((f,i)=>{const nk=R()<.45?2:1,kids=[];for(let j=0;j<nk;j++)kids.push({n:pick(KN),a:3+Math.floor(R()*11)});
+    parents.push({id:'p'+(i+2),name:f+' '+PL[i],email:norm(f).replace(/[^a-z]/g,'')+'.'+norm(PL[i]).replace(/[^a-z]/g,'')+'@exemple.fr',pw:'demo1234',phone:'06 '+[0,0,0,0].map(()=>pad(Math.floor(R()*100))).join(' '),kids,status:i===19?'suspendu':'actif',createdAt:off(-(10+Math.floor(R()*280))),prefs:{j1:true,h2:false,news:false}})});
+  const bookings=[];let ref=10421;
+  const mk=(p,s,a,kids,created,status='confirmee')=>{bookings.push({id:'b'+ref,ref:'RC-'+(ref++),pid:p.id,actId:a.id,slotId:s.id,kids,qty:kids.length,amount:a.price*kids.length,status,createdAt:created})};
+  for(const s of slots){
+    const a=acts.find(x=>x.id===s.actId);if(a.status!=='publiee')continue;
+    const dd=diff(s.date);let ratio=dd<0?.6+R()*.4:dd<7?.45+R()*.5:.1+R()*.5;if(R()<.13)ratio=1;
+    const target=Math.min(s.cap,Math.round(s.cap*ratio));let n=0;
+    while(n<target){const p=parents[1+Math.floor(R()*(parents.length-1))];const q=(R()<.22&&target-n>=2&&p.kids.length>1)?2:1;
+      const kids=p.kids.slice(0,q).map(k=>({n:k.n,a:Math.min(a.ageMax,Math.max(a.ageMin,k.a))}));
+      const c=Math.min(0,dd-1-Math.floor(R()*12));mk(p,s,a,kids,off(c),R()<.04?'annulee':'confirmee');n+=q}
+  }
+  const cam=parents[0];
+  const sl=aid=>slots.filter(s=>s.actId===aid);
+  const A=id=>acts.find(a=>a.id===id);
+  const s6=sl('a6').find(s=>diff(s.date)>=2);if(s6){s6.cap++;mk(cam,s6,A('a6'),[{n:'Inès',a:9}],off(-3))}
+  const s1=sl('a1').filter(s=>diff(s.date)<0).pop();if(s1){s1.cap++;mk(cam,s1,A('a1'),[{n:'Léo',a:6}],off(diff(s1.date)-6))}
+  const s7=sl('a7').filter(s=>diff(s.date)<-5).pop();if(s7){s7.cap+=2;mk(cam,s7,A('a7'),[{n:'Léo',a:6},{n:'Inès',a:9}],off(diff(s7.date)-8))}
+  const notifs=[];
+  if(s6)notifs.push({id:'n1',pid:'p1',type:'confirm',title:'Réservation confirmée',body:`Découverte du ukulélé — ${fmtD(s6.date)} à ${s6.start} · Inès`,at:off(-3)+' 18:42',read:false});
+  if(s1)notifs.push({id:'n2',pid:'p1',type:'rappel',title:'Rappel : c’est demain',body:`Atelier peinture & collage — ${fmtD(s1.date)} à ${s1.start} · Léo`,at:off(diff(s1.date)-1)+' 18:00',read:true});
+  notifs.push({id:'n3',pid:'p1',type:'info',title:'Nouveau près de chez vous',body:'Robotique LEGO au Labo des Curieux : des places le mercredi après-midi.',at:off(-1)+' 10:15',read:false});
+  const journal=[
+    {at:off(-1)+' 09:12',kind:'admin',text:'Nouvel organisateur inscrit : Ludothèque Les Dés Joyeux (en attente de validation).'},
+    {at:off(-2)+' 17:30',kind:'admin',text:"Activité soumise à validation : Danse modern'jazz (Studio Arabesque)."}
+  ];
+  return {orgs,acts,slots,parents,bookings,notifs,journal,session:null,seq:ref};
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);if(d&&d.acts&&d.parents)return d}}catch(e){}return seed()}
+function save(){BM=null;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S=load();
+
+const org=id=>S.orgs.find(o=>o.id===id);
+const act=id=>S.acts.find(a=>a.id===id);
+const slot=id=>S.slots.find(s=>s.id===id);
+const bySlot=(x,y)=>(x.date+x.start).localeCompare(y.date+y.start);
+const slotsOf=aid=>S.slots.filter(s=>s.actId===aid).sort(bySlot);
+const future=aid=>slotsOf(aid).filter(s=>diff(s.date)>=0);
+function bk(id){if(!BM){BM={};for(const b of S.bookings)if(b.status==='confirmee')BM[b.slotId]=(BM[b.slotId]||0)+b.qty}return BM[id]||0}
+const left=s=>Math.max(0,s.cap-bk(s.id));
+const visibleAct=a=>a.status==='publiee'&&org(a.orgId)?.status==='valide';
+const me=()=>S.parents.find(p=>p.id===S.session);
+function journal(kind,text){S.journal.unshift({at:off(0)+' '+nowHM(),kind,text});S.journal=S.journal.slice(0,60)}
+function bStatus(b){const s=slot(b.slotId);if(b.status==='annulee')return['Annulée','b-bad'];if(s&&diff(s.date)<0)return['Terminée','b-gray'];return['Confirmée','b-ok']}
+
+/* ---------- UI ---------- */
+const initUI=()=>({role:'parent',
+  p:{screen:S.session?'explore':'auth',auth:'login',actId:null,slotId:null,kids:[],gal:0,all:false,bTab:'up',last:null,paying:false},
+  f:{q:'',near:'Centre',radius:'10',age:'',cat:'',when:'all',date:'',sort:'dist'},
+  o:{orgId:'o1',tab:'dash',actId:null,insAct:null,insSlot:null},
+  a:{tab:'overview',uq:'',urole:'',bq:'',bst:'',blim:40}});
+let ui=initUI();
+const app=$('#app');
+
+function toast(msg,bad){const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.innerHTML=ic(bad?'info':'check')+'<span>'+esc(msg)+'</span>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),3800)}
+let pushT;
+function push(title,body){const p=$('#push');if(!p)return;p.innerHTML=`<span class="pi">${ic('bell')}</span><div><b>${esc(title)}</b><span>${esc(body)}</span></div>`;p.hidden=false;p.setAttribute('role','status');clearTimeout(pushT);pushT=setTimeout(()=>{const q=$('#push');if(q)q.hidden=true},4500)}
+
+function renderNav(){
+  const pend=S.orgs.filter(o=>o.status==='attente').length+S.acts.filter(a=>a.status==='attente').length;
+  const T=[['parent','home','Application parents'],['org','building','Espace organisateur'],['admin','shield','Administration']];
+  $('#nav').innerHTML=T.map(([r,i,l])=>`<button type="button" class="tab" data-a="role" data-r="${r}" ${ui.role===r?'aria-current="page"':''}>${ic(i)}${l}${r==='admin'&&pend?` <span class="cnt" aria-label="${pend} à valider">${pend}</span>`:''}</button>`).join('');
+}
+function render(){
+  const fid=document.activeElement&&document.activeElement.id;
+  renderNav();
+  if(ui.role==='parent')renderParent();else if(ui.role==='org')renderOrg();else renderAdmin();
+  if(fid){const el=document.getElementById(fid);if(el&&el!==document.activeElement)el.focus({preventScroll:true})}
+}
+
+/* ================= PARENT ================= */
+function renderParent(){
+  const m=me();
+  if(m&&m.status==='suspendu'){S.session=null;save();ui.p.screen='auth';toast('Ce compte a été suspendu par l’administration.',true)}
+  if(!me())ui.p.screen='auth';
+  const sc=ui.p.screen,key=sc+(ui.p.actId||'');
+  const old=$('#screen');const keep=old&&old.dataset.k===key;const top=keep?old.scrollTop:0;
+  const u=me()?S.notifs.filter(n=>n.pid===S.session&&!n.read).length:0;
+  app.innerHTML=`<div class="pl"><div class="phone" id="phone"><div class="notch" aria-hidden="true"><span>9:41</span><span class="cam"></span><span>4G · 87 %</span></div><div class="push" id="push" hidden></div><div class="screen" id="screen" data-k="${esc(key)}">${SCR[sc]()}</div>${me()?tabbar(u):''}</div>${side()}</div>`;
+  $('#screen').scrollTop=top;
+  if(!keep){const ph=$('#phone');if(ph.getBoundingClientRect().top<0)ph.scrollIntoView()}
+  if(sc==='explore')renderResults();
+}
+function tabbar(u){
+  const g={explore:'explore',activity:'explore',pay:'explore',success:'bookings',bookings:'bookings',notifs:'notifs',profile:'profile'}[ui.p.screen];
+  const T=[['explore','compass','Explorer'],['bookings','ticket','Réservations'],['notifs','bell','Notifications'],['profile','user','Profil']];
+  return `<nav class="tabbar" aria-label="Navigation de l'application">${T.map(([s,i,l])=>`<button type="button" data-a="go" data-s="${s}" ${g===s?'aria-current="page"':''}>${ic(i)}${l}${s==='notifs'&&u?`<span class="dot" aria-label="${u} non lues">${u}</span>`:''}</button>`).join('')}</nav>`;
+}
+function side(){
+  const J=S.journal.slice(0,25);const K={email:'mail',push:'bell',pay:'card',admin:'shield'};
+  return `<aside class="side" aria-label="Coulisses de la démo">
+  <section class="card"><h2>${ic('list')}Parcours à tester</h2><ol class="steps">
+    <li>Connectez-vous avec le compte démo (pré-rempli) ou créez un compte.</li>
+    <li>Filtrez par quartier, âge, catégorie et date.</li>
+    <li>Ouvrez une fiche, choisissez un créneau et un enfant, payez en mode test.</li>
+    <li>Retrouvez la réservation et sa notification ; annulez-la si besoin.</li>
+    <li>Ouvrez l’<button type="button" class="linkbtn" data-a="role" data-r="org">espace organisateur</button> pour voir l’inscrit, puis l’<button type="button" class="linkbtn" data-a="role" data-r="admin">administration</button>.</li>
+  </ol><div class="actions" style="margin-top:14px"><button type="button" class="btn" data-a="simRemind">${ic('bell')}Simuler le rappel de la veille</button></div></section>
+  <section class="card"><h2>${ic('mail')}Journal serveur <span class="muted small">(simulation)</span></h2>${J.length?`<ul class="journal">${J.map(j=>`<li><span class="t">${esc(j.at.slice(11))}</span><span class="k k-${j.kind}">${ic(K[j.kind]||'info')}</span><span>${esc(j.text)}</span></li>`).join('')}</ul>`:'<p class="muted small">Aucun événement pour l’instant.</p>'}</section>
+  <section class="card"><h2>${ic('info')}Proposition technique</h2><dl class="tech">
+    <div><dt>App iOS et Android</dt><dd>React Native + TypeScript : une seule base de code, publication App Store et Google Play.</dd></div>
+    <div><dt>API et données</dt><dd>NestJS + PostgreSQL (recherche géographique PostGIS), cache Redis.</dd></div>
+    <div><dt>Back-office web</dt><dd>React, sur la même API : organisateurs et administration.</dd></div>
+    <div><dt>Paiements</dt><dd>Paiement en ligne avec commission et reversements aux organisateurs (type Stripe Connect), modalités à définir ensemble.</dd></div>
+    <div><dt>Notifications</dt><dd>Push (Firebase Cloud Messaging) et emails transactionnels : confirmation, rappel J-1.</dd></div>
+  </dl></section></aside>`;
+}
+const SCR={};
+SCR.auth=()=>{
+  const L=ui.p.auth==='login';
+  return `<div class="auth-hero">${art('nature',1)}<div class="ov"><b>Les activités de vos enfants, près de chez vous</b><span class="small">Ateliers, sport, musique, nature — à Rennes</span></div></div>
+  <div class="seg" role="tablist" aria-label="Accès au compte"><button type="button" role="tab" id="t-login" aria-selected="${L}" data-a="authTab" data-t="login">Connexion</button><button type="button" role="tab" id="t-signup" aria-selected="${!L}" data-a="authTab" data-t="signup">Créer un compte</button></div>
+  <div class="pad" role="tabpanel" aria-labelledby="${L?'t-login':'t-signup'}">${L?`
+  <form class="form" data-form="login" novalidate>
+    <div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" autocomplete="email" value="camille.martin@exemple.fr" aria-describedby="e-l-email"><span class="err" id="e-l-email" data-err="email"></span></div>
+    <div class="field"><label for="l-pw">Mot de passe</label><input id="l-pw" name="pw" type="password" autocomplete="current-password" value="demo1234" aria-describedby="e-l-pw"><span class="err" id="e-l-pw" data-err="pw"></span></div>
+    <button class="btn primary block" type="submit">Se connecter</button>
+    <p class="hint">Compte démo pré-rempli : camille.martin@exemple.fr / demo1234</p>
+  </form>`:`
+  <form class="form" data-form="signup" novalidate>
+    <div class="field"><label for="s-name">Prénom et nom</label><input id="s-name" name="name" type="text" autocomplete="name" aria-describedby="e-s-name"><span class="err" id="e-s-name" data-err="name"></span></div>
+    <div class="field"><label for="s-email">Email</label><input id="s-email" name="email" type="email" autocomplete="email" aria-describedby="e-s-email"><span class="err" id="e-s-email" data-err="email"></span></div>
+    <div class="field"><label for="s-pw">Mot de passe</label><input id="s-pw" name="pw" type="password" autocomplete="new-password" aria-describedby="h-s-pw e-s-pw"><span class="hint" id="h-s-pw">8 caractères minimum</span><span class="err" id="e-s-pw" data-err="pw"></span></div>
+    <div class="grid2"><div class="field"><label for="s-kid">Prénom de l’enfant</label><input id="s-kid" name="kid" type="text" aria-describedby="e-s-kid"><span class="err" id="e-s-kid" data-err="kid"></span></div>
+    <div class="field"><label for="s-age">Âge</label><select id="s-age" name="age">${ageOpts(6)}</select></div></div>
+    <label class="check"><input type="checkbox" name="cgu" aria-describedby="e-s-cgu"><span class="small">J’accepte les conditions d’utilisation et la politique de confidentialité.</span></label><span class="err" id="e-s-cgu" data-err="cgu"></span>
+    <button class="btn primary block" type="submit">Créer mon compte</button>
+  </form>`}</div>`;
+};
+const ageOpts=sel=>Array.from({length:15},(_,i)=>i+2).map(a=>`<option value="${a}" ${a===sel?'selected':''}>${a} ans</option>`).join('');
+
+SCR.explore=()=>{
+  const m=me(),f=ui.f;const u=S.notifs.filter(n=>n.pid===m.id&&!n.read).length;
+  const cats=[['','Toutes'],...Object.entries(CATS).map(([k,v])=>[k,v.label])];
+  return `<header class="app-h"><div><p class="muted small">Bonjour ${esc(m.name.split(' ')[0])}</p><h1 class="app-t">Trouver une activité</h1></div><button type="button" class="icon-btn" data-a="go" data-s="notifs" aria-label="Notifications${u?` (${u} non lues)`:''}">${ic('bell')}${u?'<span class="bdg"></span>':''}</button></header>
+  <div class="loc"><div class="field"><label for="f-near">${ic('pin')} Autour de (Rennes)</label><select id="f-near" data-f="near">${Object.keys(QUARTIERS).map(q=>`<option ${q===f.near?'selected':''}>${q}</option>`).join('')}</select></div>
+  <div class="field r"><label for="f-radius">Rayon</label><select id="f-radius" data-f="radius">${['2','5','10'].map(r=>`<option value="${r}" ${r===f.radius?'selected':''}>${r} km</option>`).join('')}</select></div></div>
+  <div class="search">${ic('search')}<label class="sr" for="f-q">Rechercher une activité</label><input id="f-q" type="search" placeholder="Poterie, escalade, éveil musical…" value="${esc(f.q)}" autocomplete="off"></div>
+  <div class="chips" role="group" aria-label="Catégorie">${cats.map(([k,l])=>`<button type="button" class="chip" id="chip-${k||'all'}" data-a="cat" data-v="${k}" aria-pressed="${f.cat===k}">${l}</button>`).join('')}</div>
+  <div class="frow"><div class="field"><label for="f-age">Âge</label><select id="f-age" data-f="age"><option value="">Tous âges</option>${m.kids.length?`<optgroup label="Mes enfants">${m.kids.map(k=>`<option value="${k.a}" ${String(k.a)===f.age?'selected':''}>${esc(k.n)} (${k.a} ans)</option>`).join('')}</optgroup>`:''}<optgroup label="Âge">${Array.from({length:12},(_,i)=>i+3).map(a=>`<option value="${a}" ${String(a)===f.age&&!m.kids.some(k=>String(k.a)===f.age)?'selected':''}>${a} ans</option>`).join('')}</optgroup></select></div>
+  <div class="field"><label for="f-when">Date</label><select id="f-when" data-f="when">${[['all','Toutes les dates'],['today',"Aujourd'hui"],['tomorrow','Demain'],['weekend','Ce week-end'],['week','7 prochains jours'],['date','Choisir une date…']].map(([v,l])=>`<option value="${v}" ${f.when===v?'selected':''}>${l}</option>`).join('')}</select></div>
+  ${f.when==='date'?`<div class="field full" style="grid-column:1/-1"><label for="f-date">Date précise</label><input id="f-date" type="date" data-f="date" min="${off(0)}" value="${esc(f.date)}"></div>`:''}</div>
+  <div class="rc-row"><p class="rc" id="rc" aria-live="polite"></p><label class="sr" for="f-sort">Trier par</label><select id="f-sort" data-f="sort"><option value="dist" ${f.sort==='dist'?'selected':''}>Plus proches</option><option value="date" ${f.sort==='date'?'selected':''}>Plus tôt</option><option value="price" ${f.sort==='price'?'selected':''}>Prix croissant</option></select></div>
+  <div id="results"></div>`;
+};
+function ageSel(){const v=ui.f.age;return v===''?null:+v}
+function weekendDays(){const d=TODAY.getDay();if(d===0)return[0];if(d===6)return[0,1];const s=6-d;return[s,s+1]}
+function matchSlots(a){
+  const f=ui.f;let s=future(a.id);
+  if(f.when==='today')s=s.filter(x=>diff(x.date)===0);
+  else if(f.when==='tomorrow')s=s.filter(x=>diff(x.date)===1);
+  else if(f.when==='weekend'){const w=weekendDays();s=s.filter(x=>w.includes(diff(x.date)))}
+  else if(f.when==='week')s=s.filter(x=>diff(x.date)<=6);
+  else if(f.when==='date'&&f.date)s=s.filter(x=>x.date===f.date);
+  return s;
+}
+function dist(a){const p=QUARTIERS[ui.f.near]||[0,0],q=QUARTIERS[a.quartier]||[0,0];return Math.hypot(p[0]-q[0],p[1]-q[1])+.4}
+function placesTag(l){if(l<=0)return '<span class="pl-full small">Complet</span>';if(l<=2)return `<span class="pl-low small">Plus que ${l} place${l>1?'s':''}</span>`;return `<span class="pl-ok small">${l} places</span>`}
+function renderResults(){
+  const box=$('#results');if(!box)return;const f=ui.f,age=ageSel(),q=norm(f.q.trim());
+  let L=S.acts.filter(visibleAct).map(a=>({a,d:dist(a),s:matchSlots(a)})).filter(x=>x.s.length&&x.d<=+f.radius&&(!f.cat||x.a.cat===f.cat)&&(age===null||(age>=x.a.ageMin&&age<=x.a.ageMax))&&(!q||norm(x.a.title+' '+org(x.a.orgId).name+' '+CATS[x.a.cat].label+' '+x.a.desc+' '+x.a.quartier).includes(q)));
+  L.forEach(x=>x.n=x.s.find(s=>left(s)>0)||x.s[0]);
+  L.sort(f.sort==='price'?(x,y)=>x.a.price-y.a.price:f.sort==='date'?(x,y)=>bySlot(x.n,y.n):(x,y)=>x.d-y.d);
+  $('#rc').textContent=L.length+' activité'+(L.length>1?'s':'')+' trouvée'+(L.length>1?'s':'');
+  box.innerHTML=L.length?L.map(({a,d,n})=>`<article class="ac"><div class="ac-img">${art(a.cat,hash(a.id)%3)}</div><div class="ac-b"><span class="tag t-${a.cat}">${CATS[a.cat].label}</span><h3><button type="button" class="stretch" data-a="openAct" data-id="${a.id}">${esc(a.title)}</button></h3><p class="small muted">${esc(org(a.orgId).name)} · ${esc(a.quartier)} · ${km(d)}</p><p class="small ac-m">${ic('child')}${a.ageMin}–${a.ageMax} ans <span aria-hidden="true">·</span> ${ic('cal')}${fmtD(n.date)} à ${n.start}</p><div class="ac-f"><b>${eur(a.price)}</b>${placesTag(left(n))}</div></div></article>`).join('')
+  :`<div class="empty">${ic('search')}<p>Aucune activité ne correspond à ces critères.</p><button type="button" class="btn" data-a="clearF">Effacer les filtres</button></div>`;
+}
+
+SCR.activity=()=>{
+  const a=act(ui.p.actId);if(!a){ui.p.screen='explore';return SCR.explore()}
+  const o=org(a.orgId),m=me(),slots=future(a.id),sel=slots.find(s=>s.id===ui.p.slotId);
+  const G=['l’atelier','le groupe','le lieu'];const g=ui.p.gal;
+  const shown=ui.p.all?slots:slots.slice(0,6);
+  const already=n=>sel&&S.bookings.some(b=>b.pid===m.id&&b.slotId===sel.id&&b.status==='confirmee'&&b.kids.some(k=>k.n===n));
+  ui.p.kids=ui.p.kids.filter(n=>{const k=m.kids.find(x=>x.n===n);return k&&k.a>=a.ageMin&&k.a<=a.ageMax&&!already(n)});
+  const qty=ui.p.kids.length,tot=qty*a.price;
+  const why=!sel?'Choisissez un créneau':!qty?'Sélectionnez au moins un enfant':qty>left(sel)?'Pas assez de places sur ce créneau':'';
+  return `<div class="gal"><div class="gal-img">${art(a.cat,g,`Photo ${g+1} sur 3 : ${G[g]} — ${a.title}`)}</div>
+  <button type="button" class="back" data-a="go" data-s="explore" aria-label="Retour aux résultats">${ic('left')}</button>
+  <button type="button" class="nav prev" data-a="gal" data-d="-1" aria-label="Photo précédente">${ic('left')}</button><button type="button" class="nav next" data-a="gal" data-d="1" aria-label="Photo suivante">${ic('right')}</button>
+  <span class="count" aria-hidden="true">${g+1} / 3</span></div>
+  <div class="pad"><span class="tag t-${a.cat}">${CATS[a.cat].label}</span><h1 style="font-size:22px;font-weight:800;margin-top:6px">${esc(a.title)}</h1><p class="muted small">${esc(o.name)} · ${esc(a.quartier)}</p>
+  <div class="facts"><div class="fact">${ic('child')}<div><b>${a.ageMin}–${a.ageMax} ans</b>Âge</div></div><div class="fact">${ic('clock')}<div><b>${a.duration>=60?Math.floor(a.duration/60)+' h'+(a.duration%60?' '+pad(a.duration%60):''):a.duration+' min'}</b>Durée</div></div><div class="fact">${ic('euro')}<div><b>${eur(a.price)}</b>par enfant</div></div><div class="fact">${ic('pin')}<div><b>${km(dist(a))}</b>de ${esc(ui.f.near)}</div></div></div>
+  <h2 class="sec-t">Description</h2><p>${esc(a.desc)}</p>
+  <h2 class="sec-t" id="slots-t">Créneaux disponibles</h2>
+  ${slots.length?`<div class="slots" role="group" aria-labelledby="slots-t">${shown.map(s=>{const l=left(s);return `<button type="button" class="slot" id="slot-${s.id}" data-a="pickSlot" data-id="${s.id}" aria-pressed="${s.id===ui.p.slotId}" ${l<=0?'disabled':''}><b>${fmtD(s.date)}</b><span>${s.start} – ${s.end}</span>${placesTag(l)}</button>`}).join('')}</div>${slots.length>6?`<button type="button" class="btn ghost sm" style="margin-top:6px" data-a="allSlots">${ui.p.all?'Afficher moins':'Voir les '+slots.length+' créneaux'}</button>`:''}`:'<p class="muted">Aucun créneau à venir.</p>'}
+  <h2 class="sec-t">Qui participe ?</h2>
+  ${m.kids.length?m.kids.map((k,i)=>{const ok=k.a>=a.ageMin&&k.a<=a.ageMax,al=already(k.n);const note=!ok?`Hors tranche d’âge (${a.ageMin}–${a.ageMax} ans)`:al?'Déjà inscrit sur ce créneau':'';return `<label class="kid ${ok&&!al?'':'off'}"><input type="checkbox" id="kid-${i}" data-c="kid" value="${esc(k.n)}" ${ui.p.kids.includes(k.n)?'checked':''} ${ok&&!al?'':'disabled'}><span class="kn"><b>${esc(k.n)}</b> <span class="muted small">${k.a} ans</span>${note?`<br><span class="small muted">${note}</span>`:''}</span></label>`}).join(''):`<p class="muted small">Ajoutez un enfant dans votre <button type="button" class="linkbtn" data-a="go" data-s="profile">profil</button>.</p>`}
+  <h2 class="sec-t">Lieu et organisateur</h2><p class="small">${ic('pin')} ${esc(a.address)}, ${esc(a.quartier)}, Rennes</p>
+  <div class="org-box"><b>${esc(o.name)}</b><span class="small muted">${esc(o.type)}</span><span class="small">${esc(o.description)}</span></div></div>
+  <div class="cta"><div><span class="small muted">${qty} enfant${qty>1?'s':''} × ${eur(a.price)}</span><b>${eur(tot)}</b></div><div style="display:grid;justify-items:end;gap:2px"><button type="button" class="btn primary" data-a="toPay" ${why?'disabled aria-describedby="cta-why"':''}>Réserver</button>${why?`<span class="small muted" id="cta-why">${why}</span>`:''}</div></div>`;
+};
+
+SCR.pay=()=>{
+  const a=act(ui.p.actId),s=slot(ui.p.slotId);if(!a||!s){ui.p.screen='explore';return SCR.explore()}
+  const tot=a.price*ui.p.kids.length;
+  return `<div class="bar-h"><button type="button" class="icon-btn" data-a="go" data-s="activity" aria-label="Retour à la fiche">${ic('left')}</button><h1>Paiement</h1></div>
+  <div class="pad"><div class="test-banner">${ic('info')}Mode test — aucun débit réel</div>
+  <div class="recap"><div class="row"><span class="muted">Activité</span><span>${esc(a.title)}</span></div><div class="row"><span class="muted">Créneau</span><span>${fmtD(s.date)}, ${s.start} – ${s.end}</span></div><div class="row"><span class="muted">Participant${ui.p.kids.length>1?'s':''}</span><span>${esc(ui.p.kids.join(', '))}</span></div><div class="row tot"><span>Total</span><span>${eur(tot)}</span></div></div>
+  <form class="form" data-form="pay" novalidate>
+    <div class="field"><label for="c-name">Titulaire de la carte</label><input id="c-name" name="name" type="text" autocomplete="cc-name" value="${esc(me().name)}" aria-describedby="e-c-name"><span class="err" id="e-c-name" data-err="name"></span></div>
+    <div class="field"><label for="c-num">Numéro de carte</label><input id="c-num" name="num" type="text" inputmode="numeric" autocomplete="cc-number" value="4242 4242 4242 4242" aria-describedby="e-c-num"><span class="err" id="e-c-num" data-err="num"></span></div>
+    <div class="grid2"><div class="field"><label for="c-exp">Expiration (MM/AA)</label><input id="c-exp" name="exp" type="text" inputmode="numeric" autocomplete="cc-exp" value="12/28" aria-describedby="e-c-exp"><span class="err" id="e-c-exp" data-err="exp"></span></div>
+    <div class="field"><label for="c-cvc">Cryptogramme</label><input id="c-cvc" name="cvc" type="text" inputmode="numeric" autocomplete="cc-csc" value="123" aria-describedby="e-c-cvc"><span class="err" id="e-c-cvc" data-err="cvc"></span></div></div>
+    <button class="btn primary block" type="submit" id="pay-btn" ${ui.p.paying?'disabled':''}>${ic('lock')}${ui.p.paying?'Paiement en cours…':'Payer '+eur(tot)}</button>
+    <p class="hint">Paiement sécurisé par un prestataire certifié ; le montant est reversé à l’organisateur après l’activité, déduction faite de la commission (modalités à définir).</p>
+  </form></div>`;
+};
+SCR.success=()=>{
+  const b=S.bookings.find(x=>x.id===ui.p.last);if(!b){ui.p.screen='bookings';return SCR.bookings()}
+  const a=act(b.actId),s=slot(b.slotId),m=me();
+  return `<div class="success"><span class="ok-ic">${ic('check')}</span><h1 style="font-size:22px">Réservation confirmée</h1><p class="muted">Référence <b class="wrap">${b.ref}</b></p>
+  <div class="recap" style="width:100%;text-align:left"><div class="row"><span class="muted">Activité</span><span>${esc(a.title)}</span></div><div class="row"><span class="muted">Date</span><span>${fmtDL(s.date)}, ${s.start}</span></div><div class="row"><span class="muted">Participants</span><span>${esc(b.kids.map(k=>k.n).join(', '))}</span></div><div class="row"><span class="muted">Lieu</span><span>${esc(a.address)}</span></div><div class="row tot"><span>Payé</span><span>${eur(b.amount)}</span></div></div>
+  <p class="small muted">Un email de confirmation a été envoyé à ${esc(m.email)} (simulation).${m.prefs.j1?' Un rappel vous sera envoyé la veille à 18 h.':''}</p>
+  <div class="actions" style="justify-content:center"><button type="button" class="btn" data-a="cal">${ic('cal')}Ajouter au calendrier</button><button type="button" class="btn primary" data-a="go" data-s="bookings">Mes réservations</button></div></div>`;
+};
+SCR.bookings=()=>{
+  const m=me(),up=ui.p.bTab==='up';
+  let L=S.bookings.filter(b=>b.pid===m.id).map(b=>({b,s:slot(b.slotId),a:act(b.actId)})).filter(x=>x.s&&x.a);
+  L=L.filter(x=>up?(x.b.status==='confirmee'&&diff(x.s.date)>=0):(x.b.status!=='confirmee'||diff(x.s.date)<0));
+  L.sort((x,y)=>up?bySlot(x.s,y.s):bySlot(y.s,x.s));
+  return `<header class="app-h"><h1 class="app-t">Mes réservations</h1></header>
+  <div class="seg" role="tablist" aria-label="Période"><button type="button" role="tab" id="bt-up" aria-selected="${up}" data-a="bTab" data-t="up">À venir</button><button type="button" role="tab" id="bt-past" aria-selected="${!up}" data-a="bTab" data-t="past">Historique</button></div>
+  <div class="pad" role="tabpanel" aria-labelledby="${up?'bt-up':'bt-past'}">${L.length?L.map(({b,s,a})=>{const[st,cl]=bStatus(b);const can=up&&diff(s.date)>=1;return `<article class="bk"><div class="bk-top"><div class="th">${art(a.cat,hash(a.id)%3)}</div><div><h3>${esc(a.title)}</h3><p class="small">${ic('cal')} ${fmtD(s.date)}, ${s.start} – ${s.end}</p><p class="small muted">${esc(b.kids.map(k=>k.n).join(', '))} · ${eur(b.amount)}</p></div></div><div class="actions" style="justify-content:space-between"><span class="small muted wrap">${b.ref}</span><span class="badge ${cl}">${st}</span></div>${up?`<div class="actions"><button type="button" class="btn sm" data-a="openAct" data-id="${a.id}">Voir la fiche</button>${can?`<button type="button" class="btn sm danger" data-a="cancelB" data-id="${b.id}">Annuler</button>`:'<span class="small muted">Annulation impossible moins de 24 h avant</span>'}</div>`:''}</article>`}).join(''):`<div class="empty">${ic('ticket')}<p>${up?'Aucune réservation à venir.':'Aucune réservation passée.'}</p>${up?'<button type="button" class="btn primary" data-a="go" data-s="explore">Trouver une activité</button>':''}</div>`}</div>`;
+};
+SCR.notifs=()=>{
+  const L=S.notifs.filter(n=>n.pid===S.session).sort((x,y)=>y.at.localeCompare(x.at));const u=L.some(n=>!n.read);
+  const I={confirm:'check',rappel:'clock',cancel:'x',info:'info'};
+  return `<header class="app-h"><h1 class="app-t">Notifications</h1>${u?'<button type="button" class="btn ghost sm" data-a="readAll">Tout marquer comme lu</button>':''}</header>
+  ${L.length?`<div>${L.map(n=>`<div class="nt n-${n.type} ${n.read?'':'unread'}"><span class="ni">${ic(I[n.type]||'bell')}</span><div class="nb"><b>${esc(n.title)}</b>${n.read?'':' <span class="sr">(non lue)</span>'}<p class="small">${esc(n.body)}</p><p class="small muted">${fmtD(n.at.slice(0,10))} · ${n.at.slice(11)}</p></div>${n.read?'':'<span class="ud" aria-hidden="true"></span>'}</div>`).join('')}</div>`:`<div class="empty">${ic('bell')}<p>Aucune notification.</p></div>`}`;
+};
+SCR.profile=()=>{
+  const m=me();const ini=m.name.split(' ').map(x=>x[0]).slice(0,2).join('');
+  return `<header class="app-h"><h1 class="app-t">Profil</h1></header><div class="pad" style="padding-top:6px">
+  <div class="prof"><span class="avatar" aria-hidden="true">${esc(ini)}</span><div style="min-width:0"><b>${esc(m.name)}</b><p class="small muted wrap">${esc(m.email)}</p></div></div>
+  <h2 class="sec-t">Mes enfants</h2>${m.kids.map((k,i)=>`<div class="li"><div><b>${esc(k.n)}</b> <span class="muted small">${k.a} ans</span></div><button type="button" class="icon-btn" data-a="rmKid" data-i="${i}" aria-label="Retirer ${esc(k.n)}">${ic('trash')}</button></div>`).join('')||'<p class="muted small">Aucun enfant enregistré.</p>'}
+  <form class="form" data-form="addKid" novalidate style="margin-top:8px"><div class="grid2"><div class="field"><label for="k-n">Prénom</label><input id="k-n" name="n" type="text" aria-describedby="e-k-n"><span class="err" id="e-k-n" data-err="n"></span></div><div class="field"><label for="k-a">Âge</label><select id="k-a" name="a">${ageOpts(5)}</select></div></div><button type="submit" class="btn">${ic('plus')}Ajouter un enfant</button></form>
+  <h2 class="sec-t">Notifications</h2>
+  <label class="check"><input type="checkbox" data-c="pref" value="j1" ${m.prefs.j1?'checked':''}><span>Rappel la veille à 18 h</span></label>
+  <label class="check"><input type="checkbox" data-c="pref" value="h2" ${m.prefs.h2?'checked':''}><span>Rappel 2 h avant l’activité</span></label>
+  <label class="check"><input type="checkbox" data-c="pref" value="news" ${m.prefs.news?'checked':''}><span>Nouvelles activités près de chez moi</span></label>
+  <button type="button" class="btn block" style="margin-top:12px" data-a="logout">${ic('logout')}Se déconnecter</button></div>`;
+};
+
+/* ================= ORGANISATEUR ================= */
+function renderOrg(){
+  const os=S.orgs.filter(o=>o.status!=='refuse');if(!org(ui.o.orgId)||org(ui.o.orgId).status==='refuse')ui.o.orgId=os[0].id;
+  const o=org(ui.o.orgId);
+  const T=[['dash','chart','Tableau de bord'],['acts','list','Activités'],['slots','cal','Créneaux et tarifs'],['ins','users','Inscriptions'],['profile','building','Profil de la structure']];
+  const V={dash:orgDash,acts:orgActs,slots:orgSlots,ins:orgIns,profile:orgProfile};
+  app.innerHTML=`<div class="page-h"><div><h1>Espace organisateur</h1><p class="muted">${esc(o.name)} · ${esc(o.type)} · ${esc(o.quartier)}</p></div><div class="field"><label for="o-sel">Structure connectée</label><select id="o-sel" data-c="orgSel">${os.map(x=>`<option value="${x.id}" ${x.id===o.id?'selected':''}>${esc(x.name)}${x.status==='attente'?' (en attente)':x.status==='suspendu'?' (suspendue)':''}</option>`).join('')}</select></div></div>
+  ${o.status==='attente'?`<div class="alert warn">${ic('hourglass')}<span>Votre structure est en cours de validation par l’équipe. Vos activités seront visibles par les parents une fois la structure et les activités validées.</span></div>`:o.status==='suspendu'?`<div class="alert warn">${ic('info')}<span>Structure suspendue par l’administration : vos activités ne sont plus visibles.</span></div>`:''}
+  <nav class="subnav" aria-label="Sections organisateur">${T.map(([k,i,l])=>`<button type="button" data-a="oTab" data-t="${k}" ${ui.o.tab===k?'aria-current="page"':''}>${ic(i)}${l}</button>`).join('')}</nav>
+  <div id="oview">${V[ui.o.tab](o)}</div>`;
+}
+const oActs=o=>S.acts.filter(a=>a.orgId===o.id);
+const actStatus=a=>({publiee:['Publiée','b-ok'],attente:['En attente de validation','b-warn'],refusee:['Refusée','b-bad']}[a.status]||['—','b-gray']);
+function fillBar(b,c){const p=c?Math.min(100,Math.round(b/c*100)):0;return `<div class="fill"><div class="b" aria-hidden="true"><i class="${b>=c?'full':''}" style="width:${p}%"></i></div><span class="small">${b}/${c}</span></div>`}
+function orgDash(o){
+  const ids=oActs(o).map(a=>a.id);const fs=S.slots.filter(s=>ids.includes(s.actId)&&diff(s.date)>=0).sort(bySlot);
+  const bs=S.bookings.filter(b=>ids.includes(b.actId)&&b.status==='confirmee');
+  const part=fs.reduce((t,s)=>t+bk(s.id),0),cap=fs.reduce((t,s)=>t+s.cap,0);
+  const ca=bs.filter(b=>diff(b.createdAt)>=-30).reduce((t,b)=>t+b.amount,0);
+  const last=[...S.bookings.filter(b=>ids.includes(b.actId))].sort((x,y)=>y.createdAt.localeCompare(x.createdAt)||y.ref.localeCompare(x.ref)).slice(0,7);
+  return `<div class="kpis"><div class="kpi"><div class="l">Inscrits à venir</div><div class="v">${part}</div><div class="s">sur ${fs.length} créneaux</div></div><div class="kpi"><div class="l">Remplissage moyen</div><div class="v">${cap?Math.round(part/cap*100):0} %</div><div class="s">${part} / ${cap} places</div></div><div class="kpi"><div class="l">Ventes (30 derniers jours)</div><div class="v">${eur(ca)}</div><div class="s">${bs.filter(b=>diff(b.createdAt)>=-30).length} réservations</div></div><div class="kpi"><div class="l">Reversement estimé</div><div class="v">${eur(Math.round(ca*.92))}</div><div class="s">après commission (hypothèse 8 %)</div></div></div>
+  <div class="cols"><section class="card"><h2>${ic('cal')}Prochains créneaux</h2>${fs.length?`<div class="tw"><table><thead><tr><th>Date</th><th>Activité</th><th>Horaire</th><th>Remplissage</th><th><span class="sr">Action</span></th></tr></thead><tbody>${fs.slice(0,8).map(s=>`<tr><td>${fmtD(s.date)}</td><td>${esc(act(s.actId).title)}</td><td>${s.start} – ${s.end}</td><td>${fillBar(bk(s.id),s.cap)}</td><td><button type="button" class="btn sm" data-a="goIns" data-act="${s.actId}" data-id="${s.id}">Participants</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Aucun créneau à venir. Ajoutez-en depuis l’onglet « Créneaux et tarifs ».</p>'}</section>
+  <section class="card"><h2>${ic('ticket')}Dernières réservations</h2>${last.length?`<ul class="mini-list">${last.map(b=>{const p=S.parents.find(x=>x.id===b.pid),s=slot(b.slotId);const[st,cl]=bStatus(b);return `<li><div><b>${esc(b.kids.map(k=>k.n).join(', '))}</b> <span class="muted small">— ${esc(p?p.name:'')}</span><br><span class="small muted">${esc(act(b.actId).title)} · ${s?fmtD(s.date):''}</span></div><div style="text-align:right"><span class="badge ${cl}">${st}</span><br><span class="small">${eur(b.amount)}</span></div></li>`}).join('')}</ul>`:'<p class="muted">Pas encore de réservation.</p>'}</section></div>`;
+}
+function orgActs(o){
+  const L=oActs(o);
+  return `<div class="toolbar"><p class="muted" style="flex:1;min-width:200px">${L.length} activité${L.length>1?'s':''}. Toute nouvelle activité est vérifiée par l’équipe avant publication.</p><button type="button" class="btn primary" data-a="actForm">${ic('plus')}Nouvelle activité</button></div>
+  ${L.length?`<div class="oacts">${L.map(a=>{const[st,cl]=actStatus(a);const fs=future(a.id);const b=fs.reduce((t,s)=>t+bk(s.id),0),c=fs.reduce((t,s)=>t+s.cap,0);return `<article class="oa"><div class="ac-img">${art(a.cat,hash(a.id)%3)}</div><div class="b"><div class="actions" style="justify-content:space-between"><span class="tag t-${a.cat}">${CATS[a.cat].label}</span><span class="badge ${cl}">${st}</span></div><h3>${esc(a.title)}</h3><p class="small muted">${a.ageMin}–${a.ageMax} ans · ${eur(a.price)} · ${a.duration} min · ${esc(a.quartier)}</p><p class="small">${fs.length} créneau${fs.length>1?'x':''} à venir · ${b}/${c} places réservées</p>${a.status==='refusee'&&a.reason?`<p class="small" style="color:var(--bad)">Motif : ${esc(a.reason)}</p>`:''}<div class="actions"><button type="button" class="btn sm" data-a="actForm" data-id="${a.id}">${ic('edit')}Modifier</button><button type="button" class="btn sm" data-a="goSlots" data-id="${a.id}">${ic('cal')}Créneaux</button><button type="button" class="btn sm" data-a="goIns" data-act="${a.id}">${ic('users')}Inscrits</button></div></div></article>`}).join('')}</div>`:`<div class="card empty">${ic('list')}<p>Aucune activité pour l’instant.</p></div>`}`;
+}
+function orgSlots(o){
+  const L=oActs(o);if(!L.length)return `<div class="card empty"><p>Créez d’abord une activité.</p><button type="button" class="btn primary" data-a="actForm">${ic('plus')}Nouvelle activité</button></div>`;
+  if(!L.find(a=>a.id===ui.o.actId))ui.o.actId=L[0].id;const a=act(ui.o.actId);const fs=future(a.id);const past=slotsOf(a.id).length-fs.length;
+  return `<div class="toolbar"><div class="field s" style="flex:1 1 280px"><label for="sl-act">Activité</label><select id="sl-act" data-c="slAct">${L.map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></div>
+  <form data-form="price" class="actions" style="align-items:flex-end" novalidate><div class="field"><label for="pr">Tarif par enfant (€)</label><input id="pr" name="price" type="number" min="0" max="500" step="0.5" value="${a.price}" class="num-in" style="width:130px!important"></div><button type="submit" class="btn">Enregistrer le tarif</button></form></div>
+  <div class="cols"><section class="card"><h2>${ic('cal')}Créneaux à venir <span class="muted small">${fs.length} créneau${fs.length>1?'x':''}${past?` · ${past} passé${past>1?'s':''}`:''}</span></h2>${fs.length?`<div class="tw"><table><thead><tr><th>Date</th><th>Horaire</th><th>Places</th><th>Inscrits</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${fs.map(s=>{const b=bk(s.id);return `<tr><td>${fmtD(s.date)}</td><td>${s.start} – ${s.end}</td><td><label class="sr" for="cap-${s.id}">Nombre de places, ${fmtD(s.date)}</label><input id="cap-${s.id}" class="num-in" type="number" min="${Math.max(1,b)}" max="60" value="${s.cap}" data-c="cap" data-id="${s.id}"></td><td>${fillBar(b,s.cap)}</td><td><button type="button" class="btn sm danger" data-a="delSlot" data-id="${s.id}" ${b?'disabled':''} aria-label="Supprimer le créneau du ${fmtD(s.date)}">${ic('trash')}Supprimer</button></td></tr>`}).join('')}</tbody></table></div><p class="hint" style="margin-top:8px">La capacité ne peut pas descendre sous le nombre d’inscrits ; un créneau avec des inscrits ne peut pas être supprimé.</p>`:'<p class="muted">Aucun créneau à venir.</p>'}</section>
+  <section class="card"><h2>${ic('plus')}Ajouter un créneau</h2><form class="form" data-form="addSlot" novalidate>
+    <div class="field"><label for="ns-date">Date</label><input id="ns-date" name="date" type="date" min="${off(0)}" value="${off(7)}" aria-describedby="e-ns-date"><span class="err" id="e-ns-date" data-err="date"></span></div>
+    <div class="grid2"><div class="field"><label for="ns-start">Début</label><input id="ns-start" name="start" type="time" value="${a.status?fs[0]?.start||'14:00':'14:00'}"></div><div class="field"><label for="ns-end">Fin</label><input id="ns-end" name="end" type="time" value="${addMin(fs[0]?.start||'14:00',a.duration)}" aria-describedby="e-ns-end"><span class="err" id="e-ns-end" data-err="end"></span></div></div>
+    <div class="field"><label for="ns-cap">Nombre de places</label><input id="ns-cap" name="cap" type="number" min="1" max="60" value="${fs[0]?.cap||10}" aria-describedby="e-ns-cap"><span class="err" id="e-ns-cap" data-err="cap"></span></div>
+    <label class="check"><input type="checkbox" name="weekly"><span>Répéter chaque semaine pendant 4 semaines</span></label>
+    <button type="submit" class="btn primary">${ic('plus')}Ajouter</button></form></section></div>`;
+}
+function orgIns(o){
+  const L=oActs(o).filter(a=>slotsOf(a.id).length);if(!L.length)return `<div class="card empty"><p>Aucune activité avec des créneaux.</p></div>`;
+  if(!L.find(a=>a.id===ui.o.insAct))ui.o.insAct=L[0].id;const a=act(ui.o.insAct);const all=slotsOf(a.id);
+  if(!all.find(s=>s.id===ui.o.insSlot))ui.o.insSlot=(future(a.id)[0]||all[all.length-1]).id;const s=slot(ui.o.insSlot);
+  const rows=[];S.bookings.filter(b=>b.slotId===s.id&&b.status==='confirmee').forEach(b=>{const p=S.parents.find(x=>x.id===b.pid);b.kids.forEach(k=>rows.push({k,p,b}))});
+  const opt=x=>`<option value="${x.id}" ${x.id===s.id?'selected':''}>${fmtD(x.date)} · ${x.start} (${bk(x.id)}/${x.cap})</option>`;
+  return `<div class="toolbar"><div class="field"><label for="in-act">Activité</label><select id="in-act" data-c="insAct">${L.map(x=>`<option value="${x.id}" ${x.id===a.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></div>
+  <div class="field"><label for="in-slot">Créneau</label><select id="in-slot" data-c="insSlot"><optgroup label="À venir">${all.filter(x=>diff(x.date)>=0).map(opt).join('')}</optgroup><optgroup label="Passés">${all.filter(x=>diff(x.date)<0).reverse().map(opt).join('')}</optgroup></select></div>
+  <div class="actions"><button type="button" class="btn" data-a="print">${ic('print')}Imprimer la liste</button><button type="button" class="btn" data-a="csv">${ic('download')}Exporter (CSV)</button></div></div>
+  <section class="card"><div class="print-only"><h2>${esc(o.name)} — ${esc(a.title)}</h2><p>${fmtDL(s.date)}, ${s.start} – ${s.end} · ${esc(a.address)}</p></div>
+  <h2>${ic('users')}Participants — ${fmtDL(s.date)}, ${s.start} <span class="badge ${bk(s.id)>=s.cap?'b-acc':'b-info'}">${bk(s.id)} / ${s.cap} places</span></h2>
+  ${rows.length?`<div class="tw"><table><thead><tr><th>Enfant</th><th>Âge</th><th>Parent</th><th>Téléphone</th><th>Email</th><th>Réservation</th></tr></thead><tbody>${rows.map(({k,p,b})=>`<tr><td><b>${esc(k.n)}</b></td><td>${k.a} ans</td><td>${esc(p?p.name:'—')}</td><td>${esc(p?p.phone:'')}</td><td>${esc(p?p.email:'')}</td><td>${b.ref}<br><span class="small muted">payé ${eur(b.amount)}</span></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Aucun inscrit sur ce créneau.</p>'}</section>`;
+}
+function orgProfile(o){
+  return `<div class="cols"><section class="card"><h2>${ic('building')}Présentation de la structure</h2><form class="form" data-form="orgProfile" novalidate>
+  <div class="grid2"><div class="field"><label for="op-name">Nom de la structure</label><input id="op-name" name="name" type="text" value="${esc(o.name)}" aria-describedby="e-op-name"><span class="err" id="e-op-name" data-err="name"></span></div>
+  <div class="field"><label for="op-type">Type</label><select id="op-type" name="type">${['Association','Club sportif','École de musique','École de danse','Micro-entreprise','Collectivité'].map(t=>`<option ${t===o.type?'selected':''}>${t}</option>`).join('')}</select></div>
+  <div class="field"><label for="op-contact">Responsable</label><input id="op-contact" name="contact" type="text" value="${esc(o.contact)}"></div>
+  <div class="field"><label for="op-phone">Téléphone</label><input id="op-phone" name="phone" type="tel" value="${esc(o.phone)}"></div>
+  <div class="field"><label for="op-email">Email de contact</label><input id="op-email" name="email" type="email" value="${esc(o.email)}" aria-describedby="e-op-email"><span class="err" id="e-op-email" data-err="email"></span></div>
+  <div class="field"><label for="op-q">Quartier</label><select id="op-q" name="quartier">${Object.keys(QUARTIERS).map(q=>`<option ${q===o.quartier?'selected':''}>${q}</option>`).join('')}</select></div>
+  <div class="field full"><label for="op-addr">Adresse</label><input id="op-addr" name="address" type="text" value="${esc(o.address)}"></div>
+  <div class="field full"><label for="op-desc">Présentation</label><textarea id="op-desc" name="description" aria-describedby="e-op-desc">${esc(o.description)}</textarea><span class="err" id="e-op-desc" data-err="description"></span></div></div>
+  <div class="actions"><button type="submit" class="btn primary">Enregistrer</button></div></form></section>
+  <section class="card"><h2>${ic('user')}Aperçu côté parents</h2><div class="org-box" style="margin:0"><b>${esc(o.name)}</b><span class="small muted">${esc(o.type)} · ${esc(o.quartier)}</span><span class="small">${esc(o.description)}</span><span class="small">${ic('pin')} ${esc(o.address)}</span></div><p class="hint" style="margin-top:10px">Ces informations apparaissent sur chaque fiche activité.</p></section></div>`;
+}
+function actFormDlg(id){
+  const o=org(ui.o.orgId),a=id?act(id):{title:'',cat:'creatif',ageMin:6,ageMax:10,price:15,duration:90,quartier:o.quartier,address:o.address,desc:''};
+  openDlg(`<form data-form="actForm" novalidate><input type="hidden" name="id" value="${id||''}"><div class="dlg-h"><h2 id="dlg-title">${id?'Modifier l’activité':'Nouvelle activité'}</h2><button type="button" class="icon-btn" data-a="close" aria-label="Fermer">${ic('x')}</button></div>
+  <div class="dlg-b form"><div class="field"><label for="af-title">Titre</label><input id="af-title" name="title" type="text" value="${esc(a.title)}" aria-describedby="e-af-title"><span class="err" id="e-af-title" data-err="title"></span></div>
+  <div class="grid2"><div class="field"><label for="af-cat">Catégorie</label><select id="af-cat" name="cat">${Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${k===a.cat?'selected':''}>${v.label}</option>`).join('')}</select></div>
+  <div class="field"><label for="af-dur">Durée</label><select id="af-dur" name="duration">${[45,60,90,120,150,180,240].map(d=>`<option value="${d}" ${d===a.duration?'selected':''}>${d} min</option>`).join('')}</select></div></div>
+  <div class="grid3"><div class="field"><label for="af-min">Âge min.</label><input id="af-min" name="ageMin" type="number" min="1" max="17" value="${a.ageMin}" aria-describedby="e-af-age"></div><div class="field"><label for="af-max">Âge max.</label><input id="af-max" name="ageMax" type="number" min="1" max="17" value="${a.ageMax}" aria-describedby="e-af-age"></div><div class="field"><label for="af-price">Tarif (€)</label><input id="af-price" name="price" type="number" min="0" step="0.5" value="${a.price}" aria-describedby="e-af-price"></div></div>
+  <span class="err" id="e-af-age" data-err="ageMin"></span><span class="err" id="e-af-price" data-err="price"></span>
+  <div class="grid2"><div class="field"><label for="af-q">Quartier</label><select id="af-q" name="quartier">${Object.keys(QUARTIERS).map(q=>`<option ${q===a.quartier?'selected':''}>${q}</option>`).join('')}</select></div><div class="field"><label for="af-addr">Adresse</label><input id="af-addr" name="address" type="text" value="${esc(a.address)}"></div></div>
+  <div class="field"><label for="af-desc">Description</label><textarea id="af-desc" name="desc" aria-describedby="h-af-desc e-af-desc">${esc(a.desc)}</textarea><span class="hint" id="h-af-desc">30 caractères minimum : contenu, matériel fourni, à prévoir.</span><span class="err" id="e-af-desc" data-err="desc"></span></div>
+  <p class="hint">${ic('info')} Photos : en production, ajout de 1 à 6 photos depuis le téléphone ou l’ordinateur.</p></div>
+  <div class="dlg-f"><button type="button" class="btn" data-a="close">Annuler</button><button type="submit" class="btn primary">${id?'Enregistrer':'Soumettre à validation'}</button></div></form>`);
+}
+
+/* ================= ADMIN ================= */
+function renderAdmin(){
+  const pend=S.orgs.filter(o=>o.status==='attente').length+S.acts.filter(a=>a.status==='attente').length;
+  const T=[['overview','chart','Vue d’ensemble'],['valid','shield','Validations'],['users','users','Utilisateurs'],['books','ticket','Réservations']];
+  const V={overview:admOverview,valid:admValid,users:admUsers,books:admBooks};
+  app.innerHTML=`<div class="page-h"><div><h1>Administration</h1><p class="muted">Pilotage de la plateforme · Rennes</p></div></div>
+  <nav class="subnav" aria-label="Sections administration">${T.map(([k,i,l])=>`<button type="button" data-a="aTab" data-t="${k}" ${ui.a.tab===k?'aria-current="page"':''}>${ic(i)}${l}${k==='valid'&&pend?` <span class="cnt">${pend}</span>`:''}</button>`).join('')}</nav><div id="aview">${V[ui.a.tab]()}</div>`;
+}
+function admOverview(){
+  const b30=S.bookings.filter(b=>b.status==='confirmee'&&diff(b.createdAt)>=-30);const vol=b30.reduce((t,b)=>t+b.amount,0);
+  const pend=S.orgs.filter(o=>o.status==='attente').length,pa=S.acts.filter(a=>a.status==='attente').length;
+  const days=Array.from({length:14},(_,i)=>off(i-13));const cnt=days.map(d=>S.bookings.filter(b=>b.createdAt===d&&b.status==='confirmee').length);const mx=Math.max(1,...cnt);
+  const W=700,H=220,bw=W/14;
+  const svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Réservations par jour sur 14 jours : ${cnt.join(', ')}">${cnt.map((c,i)=>{const h=Math.round(c/mx*150);return `<rect x="${i*bw+8}" y="${180-h}" width="${bw-16}" height="${h}" rx="5" style="fill:var(--teal)"/><text x="${i*bw+bw/2}" y="${172-h}" text-anchor="middle">${c}</text><text x="${i*bw+bw/2}" y="200" text-anchor="middle">${pISO(days[i]).getDate()}</text>`}).join('')}<line x1="0" y1="180.5" x2="${W}" y2="180.5" style="stroke:var(--line-2)"/></svg>`;
+  const bc={};S.bookings.filter(b=>b.status==='confirmee').forEach(b=>{const a=act(b.actId);if(a)bc[a.cat]=(bc[a.cat]||0)+b.qty});const bm=Math.max(1,...Object.values(bc));
+  return `<div class="kpis"><div class="kpi"><div class="l">Familles inscrites</div><div class="v">${S.parents.length}</div><div class="s">${S.parents.filter(p=>p.status==='suspendu').length} compte(s) suspendu(s)</div></div><div class="kpi"><div class="l">Organisateurs validés</div><div class="v">${S.orgs.filter(o=>o.status==='valide').length}</div><div class="s">${pend} en attente</div></div><div class="kpi"><div class="l">Activités publiées</div><div class="v">${S.acts.filter(visibleAct).length}</div><div class="s">${pa} en attente</div></div><div class="kpi"><div class="l">Réservations (30 j)</div><div class="v">${b30.length}</div><div class="s">${b30.reduce((t,b)=>t+b.qty,0)} enfants</div></div><div class="kpi"><div class="l">Volume de paiements (30 j)</div><div class="v">${eur(vol)}</div><div class="s">panier moyen ${eur(b30.length?Math.round(vol/b30.length*10)/10:0)}</div></div><div class="kpi"><div class="l">Commission estimée</div><div class="v">${eur(Math.round(vol*.08))}</div><div class="s">hypothèse 8 % — à définir</div></div></div>
+  <div class="cols"><section class="card chart"><h2>${ic('chart')}Réservations par jour (14 derniers jours)</h2>${svg}</section>
+  <div style="display:grid;gap:18px;min-width:0"><section class="card"><h2>${ic('list')}Participants par catégorie</h2><div class="bars">${Object.entries(CATS).map(([k,v])=>`<div class="r"><span>${v.label}</span><div class="t" aria-hidden="true"><i style="width:${Math.round((bc[k]||0)/bm*100)}%;background:${v.c}"></i></div><b>${bc[k]||0}</b></div>`).join('')}</div></section>
+  <section class="card"><h2>${ic('shield')}À traiter</h2><ul class="mini-list"><li><span>Organisateurs à valider</span><b>${pend}</b></li><li><span>Activités à valider</span><b>${pa}</b></li></ul><button type="button" class="btn primary" style="margin-top:10px" data-a="aTab" data-t="valid">Ouvrir les validations</button></section></div></div>`;
+}
+function admValid(){
+  const po=S.orgs.filter(o=>o.status==='attente'),pa=S.acts.filter(a=>a.status==='attente');
+  return `<div class="cols eq"><section class="card"><h2>${ic('building')}Organisateurs en attente <span class="badge b-warn">${po.length}</span></h2>${po.length?`<div class="vl">${po.map(o=>`<article class="vi"><h3>${esc(o.name)}</h3><p class="small muted">${esc(o.type)} · ${esc(o.quartier)} · inscrit le ${fmtD(o.createdAt)}</p><p class="small">${esc(o.description)}</p><p class="small wrap">${ic('user')} ${esc(o.contact)} · ${esc(o.email)} · ${esc(o.phone)}</p><p class="small muted">Pièces fournies : statuts, attestation d’assurance RC, SIRET (simulation).</p><div class="actions"><button type="button" class="btn teal sm" data-a="valOrg" data-id="${o.id}">${ic('check')}Valider</button><button type="button" class="btn sm danger" data-a="refuse" data-k="org" data-id="${o.id}">Refuser</button></div></article>`).join('')}</div>`:'<p class="muted">Aucun organisateur en attente.</p>'}</section>
+  <section class="card"><h2>${ic('list')}Activités en attente <span class="badge b-warn">${pa.length}</span></h2>${pa.length?`<div class="vl">${pa.map(a=>{const o=org(a.orgId),ok=o.status==='valide';return `<article class="vi"><div class="actions" style="justify-content:space-between"><span class="tag t-${a.cat}">${CATS[a.cat].label}</span><span class="small muted">soumise le ${fmtD(a.createdAt)}</span></div><h3>${esc(a.title)}</h3><p class="small muted">${esc(o.name)} · ${a.ageMin}–${a.ageMax} ans · ${eur(a.price)} · ${slotsOf(a.id).filter(s=>diff(s.date)>=0).length} créneaux</p><p class="small">${esc(a.desc)}</p>${ok?'':`<p class="small" style="color:var(--warn);font-weight:700" id="h-va-${a.id}">Validez d’abord l’organisateur.</p>`}<div class="actions"><button type="button" class="btn sm" data-a="preview" data-id="${a.id}">Aperçu</button><button type="button" class="btn teal sm" data-a="valAct" data-id="${a.id}" ${ok?'':`disabled aria-describedby="h-va-${a.id}"`}>${ic('check')}Valider</button><button type="button" class="btn sm danger" data-a="refuse" data-k="act" data-id="${a.id}">Refuser</button></div></article>`}).join('')}</div>`:'<p class="muted">Aucune activité en attente.</p>'}</section></div>`;
+}
+function admUsers(){
+  return `<div class="toolbar"><div class="field"><label for="u-q">Rechercher</label><input id="u-q" type="search" data-i="uq" placeholder="Nom, email, structure…" value="${esc(ui.a.uq)}"></div><div class="field s"><label for="u-role">Rôle</label><select id="u-role" data-c="urole"><option value="">Tous</option><option value="parent" ${ui.a.urole==='parent'?'selected':''}>Parents</option><option value="org" ${ui.a.urole==='org'?'selected':''}>Organisateurs</option></select></div></div><div id="u-tbl">${usersTbl()}</div>`;
+}
+function usersTbl(){
+  const q=norm(ui.a.uq);const R=[];
+  if(ui.a.urole!=='org')S.parents.forEach(p=>R.push({k:'parent',id:p.id,name:p.name,sub:p.kids.map(k=>k.n+' ('+k.a+' ans)').join(', '),email:p.email,date:p.createdAt,n:S.bookings.filter(b=>b.pid===p.id).length+' réserv.',st:p.status}));
+  if(ui.a.urole!=='parent')S.orgs.forEach(o=>R.push({k:'org',id:o.id,name:o.contact,sub:o.name,email:o.email,date:o.createdAt,n:oActs(o).length+' activité(s)',st:o.status}));
+  const L=R.filter(r=>!q||norm(r.name+' '+r.sub+' '+r.email).includes(q)).sort((x,y)=>y.date.localeCompare(x.date));
+  const SB={actif:['Actif','b-ok'],valide:['Validé','b-ok'],attente:['En attente','b-warn'],suspendu:['Suspendu','b-bad'],refuse:['Refusé','b-bad']};
+  return `<p class="muted small" style="margin-bottom:8px" aria-live="polite">${L.length} utilisateur${L.length>1?'s':''}</p><div class="tw"><table><thead><tr><th>Nom</th><th>Rôle</th><th>Email</th><th>Inscription</th><th>Activité</th><th>Statut</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${L.map(r=>{const[s,c]=SB[r.st]||[r.st,'b-gray'];return `<tr><td><b>${esc(r.name)}</b><br><span class="small muted">${esc(r.sub)}</span></td><td>${r.k==='parent'?'Parent':'Organisateur'}</td><td class="wrap">${esc(r.email)}</td><td>${fmtD(r.date)}</td><td>${r.n}</td><td><span class="badge ${c}">${s}</span></td><td>${r.st==='attente'?`<button type="button" class="btn sm" data-a="aTab" data-t="valid">Examiner</button>`:r.st==='refuse'?'':`<button type="button" class="btn sm ${r.st==='suspendu'?'':'danger'}" data-a="suspend" data-k="${r.k}" data-id="${r.id}">${r.st==='suspendu'?'Réactiver':'Suspendre'}</button>`}</td></tr>`}).join('')||'<tr><td colspan="7" class="muted">Aucun résultat.</td></tr>'}</tbody></table></div>`;
+}
+function admBooks(){
+  return `<div class="toolbar"><div class="field"><label for="b-q">Rechercher</label><input id="b-q" type="search" data-i="bq" placeholder="Référence, parent, activité…" value="${esc(ui.a.bq)}"></div><div class="field s"><label for="b-st">Statut</label><select id="b-st" data-c="bst">${[['','Tous'],['up','Confirmées à venir'],['done','Terminées'],['cancel','Annulées']].map(([v,l])=>`<option value="${v}" ${ui.a.bst===v?'selected':''}>${l}</option>`).join('')}</select></div></div><div id="b-tbl">${booksTbl()}</div>`;
+}
+function booksTbl(){
+  const q=norm(ui.a.bq),st=ui.a.bst;
+  const L=S.bookings.map(b=>({b,s:slot(b.slotId),a:act(b.actId),p:S.parents.find(x=>x.id===b.pid)})).filter(x=>x.s&&x.a).filter(({b,s})=>!st||(st==='cancel'?b.status==='annulee':st==='done'?b.status==='confirmee'&&diff(s.date)<0:b.status==='confirmee'&&diff(s.date)>=0)).filter(({b,a,p})=>!q||norm(b.ref+' '+a.title+' '+(p?p.name:'')+' '+b.kids.map(k=>k.n).join(' ')+' '+org(a.orgId).name).includes(q)).sort((x,y)=>y.b.createdAt.localeCompare(x.b.createdAt)||y.b.ref.localeCompare(x.b.ref));
+  const tot=L.filter(x=>x.b.status==='confirmee').reduce((t,x)=>t+x.b.amount,0);
+  return `<p class="muted small" style="margin-bottom:8px" aria-live="polite">${L.length} réservation${L.length>1?'s':''} · ${eur(tot)} encaissés</p><div class="tw"><table><thead><tr><th>Référence</th><th>Réservée le</th><th>Activité</th><th>Créneau</th><th>Parent</th><th>Enfants</th><th>Montant</th><th>Statut</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${L.slice(0,ui.a.blim).map(({b,s,a,p})=>{const[t,c]=bStatus(b);return `<tr><td class="wrap"><b>${b.ref}</b></td><td>${fmtD(b.createdAt)}</td><td>${esc(a.title)}<br><span class="small muted">${esc(org(a.orgId).name)}</span></td><td>${fmtD(s.date)} ${s.start}</td><td>${esc(p?p.name:'—')}</td><td>${esc(b.kids.map(k=>k.n).join(', '))}</td><td>${eur(b.amount)}</td><td><span class="badge ${c}">${t}</span></td><td>${b.status==='confirmee'&&diff(s.date)>=0?`<button type="button" class="btn sm danger" data-a="admCancel" data-id="${b.id}">Annuler</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="9" class="muted">Aucune réservation.</td></tr>'}</tbody></table></div>${L.length>ui.a.blim?`<div class="actions" style="justify-content:center;margin-top:12px"><button type="button" class="btn" data-a="moreB">Afficher plus (${L.length-ui.a.blim} restantes)</button></div>`:''}`;
+}
+
+/* ---------- Dialogues ---------- */
+const dlg=$('#dlg');let dlgOk=null,dlgRet=null;
+function openDlg(html){dlgRet=document.activeElement;dlg.innerHTML=html;dlg.showModal();const f=dlg.querySelector('input:not([type=hidden]),textarea,select,.dlg-f .btn');f&&f.focus()}
+function closeDlg(){if(dlg.open)dlg.close()}
+dlg.addEventListener('close',()=>{dlgOk=null;if(dlgRet&&document.contains(dlgRet))dlgRet.focus()});
+function confirmDlg(title,text,ok,cb,danger=true){dlgOk=cb;openDlg(`<div class="dlg-h"><h2 id="dlg-title">${esc(title)}</h2><button type="button" class="icon-btn" data-a="close" aria-label="Fermer">${ic('x')}</button></div><div class="dlg-b"><p>${text}</p></div><div class="dlg-f"><button type="button" class="btn" data-a="close">Retour</button><button type="button" class="btn ${danger?'danger':'primary'}" data-a="dlgOk">${esc(ok)}</button></div>`)}
+
+/* ---------- Validation ---------- */
+function showErrs(form,E){form.querySelectorAll('[data-err]').forEach(e=>e.textContent='');form.querySelectorAll('[aria-invalid]').forEach(e=>e.removeAttribute('aria-invalid'));
+  let first=null;for(const[k,v]of Object.entries(E)){const e=form.querySelector(`[data-err="${k}"]`);if(e)e.textContent=v;const i=form.querySelector(`[name="${k}"]`);if(i){i.setAttribute('aria-invalid','true');first=first||i}}
+  if(first)first.focus();return !Object.keys(E).length}
+const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+/* ---------- Actions ---------- */
+function cancelBooking(b,by){
+  b.status='annulee';const a=act(b.actId),s=slot(b.slotId),p=S.parents.find(x=>x.id===b.pid);
+  S.notifs.push({id:'n'+Date.now(),pid:b.pid,type:'cancel',title:'Réservation annulée',body:`${a.title} — ${fmtD(s.date)} · remboursement de ${eur(b.amount)} en cours`,at:off(0)+' '+nowHM(),read:false});
+  journal('pay',`Remboursement ${eur(b.amount)} — ${b.ref}${by?' (par l’administration)':''}.`);
+  journal('email',`Email d’annulation envoyé à ${p?p.email:''} et à ${org(a.orgId).name}.`);
+  save();
+}
+const A={
+  reset(){try{localStorage.removeItem(KEY)}catch(e){}S=seed();BM=null;const r=ui.role;ui=initUI();ui.role=r;save();render();toast('Démo réinitialisée')},
+  role(t){ui.role=t.dataset.r;render();window.scrollTo(0,0)},
+  go(t){ui.p.screen=t.dataset.s;if(t.dataset.s==='explore'){ui.p.slotId=null}render()},
+  authTab(t){ui.p.auth=t.dataset.t;render();$('#t-'+t.dataset.t)?.focus()},
+  cat(t){ui.f.cat=t.dataset.v;render()},
+  clearF(){ui.f={...ui.f,q:'',cat:'',age:'',when:'all',date:'',radius:'10'};render()},
+  openAct(t){ui.p.actId=t.dataset.id;ui.p.slotId=null;ui.p.kids=[];ui.p.gal=0;ui.p.all=false;ui.p.screen='activity';render();$('.gal .back')?.focus()},
+  gal(t){ui.p.gal=(ui.p.gal+ +t.dataset.d+3)%3;render();$(t.dataset.d==='1'?'.gal .next':'.gal .prev')?.focus()},
+  allSlots(){ui.p.all=!ui.p.all;render()},
+  pickSlot(t){ui.p.slotId=t.dataset.id;const m=me(),a=act(ui.p.actId);if(!ui.p.kids.length){const el=m.kids.filter(k=>k.a>=a.ageMin&&k.a<=a.ageMax);if(el.length===1)ui.p.kids=[el[0].n]}render()},
+  toPay(){const s=slot(ui.p.slotId);if(!s||!ui.p.kids.length)return;if(ui.p.kids.length>left(s)){toast('Plus assez de places sur ce créneau.',true);return}ui.p.screen='pay';ui.p.paying=false;render()},
+  cal(){toast('Événement ajouté au calendrier (simulation)')},
+  bTab(t){ui.p.bTab=t.dataset.t;render();$('#bt-'+t.dataset.t)?.focus()},
+  cancelB(t){const b=S.bookings.find(x=>x.id===t.dataset.id);const a=act(b.actId);confirmDlg('Annuler la réservation ?',`<b>${esc(a.title)}</b> — ${fmtD(slot(b.slotId).date)}.<br>Le montant de ${eur(b.amount)} sera remboursé sur votre carte (simulation).`,'Annuler la réservation',()=>{cancelBooking(b);render();toast('Réservation annulée, remboursement lancé');push('Réservation annulée',a.title)})},
+  readAll(){S.notifs.forEach(n=>{if(n.pid===S.session)n.read=true});save();render()},
+  rmKid(t){const m=me();const k=m.kids[+t.dataset.i];m.kids.splice(+t.dataset.i,1);save();render();toast(k.n+' retiré du profil')},
+  logout(){S.session=null;save();ui.p.screen='auth';ui.p.auth='login';render();toast('Vous êtes déconnecté')},
+  simRemind(){const m=me();if(!m){toast('Connectez-vous d’abord dans l’application.',true);return}
+    const L=S.bookings.filter(b=>b.pid===m.id&&b.status==='confirmee').map(b=>({b,s:slot(b.slotId)})).filter(x=>x.s&&diff(x.s.date)>=0).sort((x,y)=>bySlot(x.s,y.s));
+    if(!L.length){toast('Aucune réservation à venir à rappeler.',true);return}
+    const{b,s}=L[0],a=act(b.actId);const body=`${a.title} — ${fmtD(s.date)} à ${s.start} · ${b.kids.map(k=>k.n).join(', ')}. Adresse : ${a.address}.`;
+    S.notifs.push({id:'n'+Date.now(),pid:m.id,type:'rappel',title:'Rappel : c’est demain',body,at:off(0)+' '+nowHM(),read:false});journal('push',`Rappel J-1 envoyé à ${m.name} (${b.ref}).`);save();
+    if(ui.role!=='parent')ui.role='parent';render();push('Rappel : c’est demain',body)},
+  oTab(t){ui.o.tab=t.dataset.t;render()},
+  actForm(t){actFormDlg(t.dataset.id||null)},
+  goSlots(t){ui.o.actId=t.dataset.id;ui.o.tab='slots';render()},
+  goIns(t){ui.o.insAct=t.dataset.act;ui.o.insSlot=t.dataset.id||null;ui.o.tab='ins';render()},
+  delSlot(t){const s=slot(t.dataset.id);confirmDlg('Supprimer ce créneau ?',`${fmtDL(s.date)}, ${s.start} – ${s.end}`,'Supprimer',()=>{S.slots=S.slots.filter(x=>x.id!==s.id);save();render();toast('Créneau supprimé')})},
+  print(){window.print()},
+  csv(){const s=slot(ui.o.insSlot),a=act(s.actId);const rows=[['Enfant','Âge','Parent','Téléphone','Email','Référence']];
+    S.bookings.filter(b=>b.slotId===s.id&&b.status==='confirmee').forEach(b=>{const p=S.parents.find(x=>x.id===b.pid);b.kids.forEach(k=>rows.push([k.n,k.a,p?.name||'',p?.phone||'',p?.email||'',b.ref]))});
+    const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+    const u=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const l=document.createElement('a');l.href=u;l.download=`participants-${norm(a.title).replace(/[^a-z0-9]+/g,'-')}-${s.date}.csv`;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);toast('Liste exportée en CSV')},
+  aTab(t){ui.a.tab=t.dataset.t;if(ui.role!=='admin')ui.role='admin';render()},
+  valOrg(t){const o=org(t.dataset.id);o.status='valide';journal('admin',`Organisateur validé : ${o.name}.`);journal('email',`Email « Votre structure est validée » envoyé à ${o.email}.`);save();render();toast(o.name+' validé')},
+  valAct(t){const a=act(t.dataset.id);a.status='publiee';delete a.reason;journal('admin',`Activité publiée : ${a.title}.`);journal('email',`Email « Activité en ligne » envoyé à ${org(a.orgId).email}.`);save();render();toast('Activité publiée : visible dans l’application')},
+  refuse(t){const k=t.dataset.k,id=t.dataset.id,n=k==='org'?org(id).name:act(id).title;
+    openDlg(`<form data-form="refuse" novalidate><input type="hidden" name="k" value="${k}"><input type="hidden" name="id" value="${id}"><div class="dlg-h"><h2 id="dlg-title">Refuser « ${esc(n)} »</h2><button type="button" class="icon-btn" data-a="close" aria-label="Fermer">${ic('x')}</button></div><div class="dlg-b form"><div class="field"><label for="rf-m">Motif communiqué à l’organisateur</label><textarea id="rf-m" name="motif" aria-describedby="e-rf-m" placeholder="Ex. : attestation d’assurance manquante"></textarea><span class="err" id="e-rf-m" data-err="motif"></span></div></div><div class="dlg-f"><button type="button" class="btn" data-a="close">Annuler</button><button type="submit" class="btn danger">Refuser</button></div></form>`)},
+  preview(t){const a=act(t.dataset.id),o=org(a.orgId);openDlg(`<div class="dlg-h"><h2 id="dlg-title">Aperçu de la fiche</h2><button type="button" class="icon-btn" data-a="close" aria-label="Fermer">${ic('x')}</button></div><div style="aspect-ratio:16/7;overflow:hidden">${art(a.cat,0,'Illustration de l’activité')}</div><div class="dlg-b"><span class="tag t-${a.cat}">${CATS[a.cat].label}</span><h3 style="font-size:20px;margin:6px 0 2px">${esc(a.title)}</h3><p class="small muted">${esc(o.name)} · ${esc(a.address)}, ${esc(a.quartier)}</p><p class="small" style="margin:10px 0">${a.ageMin}–${a.ageMax} ans · ${a.duration} min · ${eur(a.price)} par enfant</p><p>${esc(a.desc)}</p><p class="small muted" style="margin-top:10px">Créneaux à venir : ${future(a.id).slice(0,5).map(s=>fmtD(s.date)+' '+s.start).join(' · ')||'aucun'}</p></div><div class="dlg-f"><button type="button" class="btn" data-a="close">Fermer</button></div>`)},
+  suspend(t){const k=t.dataset.k,x=k==='parent'?S.parents.find(p=>p.id===t.dataset.id):org(t.dataset.id);
+    const sus=x.status==='suspendu';const nm=k==='parent'?x.name:x.name;
+    const go=()=>{x.status=sus?(k==='parent'?'actif':'valide'):'suspendu';journal('admin',`Compte ${sus?'réactivé':'suspendu'} : ${nm}.`);save();render();toast(`Compte ${sus?'réactivé':'suspendu'} : ${nm}`)};
+    if(sus)go();else confirmDlg('Suspendre ce compte ?',`<b>${esc(nm)}</b> ne pourra plus se connecter${k==='org'?' et ses activités seront masquées':''}.`,'Suspendre',go)},
+  admCancel(t){const b=S.bookings.find(x=>x.id===t.dataset.id);confirmDlg('Annuler et rembourser ?',`Réservation <b>${b.ref}</b> — ${eur(b.amount)} seront remboursés au parent (simulation).`,'Annuler la réservation',()=>{cancelBooking(b,true);render();toast('Réservation annulée et remboursée')})},
+  moreB(){ui.a.blim+=40;const el=$('#b-tbl');if(el)el.innerHTML=booksTbl()},
+  close(){closeDlg()},
+  dlgOk(){const f=dlgOk;closeDlg();f&&f()}
+};
+const F={
+  login(f){const e=f.email.value.trim().toLowerCase(),pw=f.pw.value,E={};if(!emailOk(e))E.email='Adresse email invalide.';if(!pw)E.pw='Saisissez votre mot de passe.';
+    const p=S.parents.find(x=>x.email.toLowerCase()===e);if(!E.email&&!E.pw){if(!p||p.pw!==pw)E.pw='Email ou mot de passe incorrect.';else if(p.status==='suspendu')E.email='Ce compte a été suspendu par l’administration.'}
+    if(!showErrs(f,E))return;S.session=p.id;save();ui.p.screen='explore';render();toast('Bienvenue '+p.name.split(' ')[0])},
+  signup(f){const v={name:f.name.value.trim(),email:f.email.value.trim().toLowerCase(),pw:f.pw.value,kid:f.kid.value.trim(),age:+f.age.value},E={};
+    if(v.name.length<3)E.name='Indiquez votre prénom et votre nom.';if(!emailOk(v.email))E.email='Adresse email invalide.';else if(S.parents.some(p=>p.email.toLowerCase()===v.email))E.email='Un compte existe déjà avec cet email.';
+    if(v.pw.length<8)E.pw='Le mot de passe doit contenir au moins 8 caractères.';if(!v.kid)E.kid='Indiquez le prénom d’au moins un enfant.';if(!f.cgu.checked)E.cgu='Vous devez accepter les conditions.';
+    if(!showErrs(f,E))return;const p={id:'p'+Date.now(),name:v.name,email:v.email,pw:v.pw,phone:'—',kids:[{n:v.kid,a:v.age}],status:'actif',createdAt:off(0),prefs:{j1:true,h2:false,news:true}};
+    S.parents.push(p);S.session=p.id;S.notifs.push({id:'n'+Date.now(),pid:p.id,type:'info',title:'Bienvenue sur Récréa',body:'Votre compte est créé. Trouvez une première activité près de chez vous.',at:off(0)+' '+nowHM(),read:false});
+    journal('email',`Email de bienvenue envoyé à ${p.email}.`);save();ui.p.screen='explore';ui.f.age=String(v.age);render();toast('Compte créé — bienvenue !')},
+  pay(f){const num=f.num.value.replace(/\s/g,''),exp=f.exp.value.trim(),E={};
+    if(f.name.value.trim().length<3)E.name='Nom du titulaire requis.';if(!/^\d{16}$/.test(num))E.num='Numéro de carte à 16 chiffres.';else if(num==='4000000000000002')E.num='Carte refusée (carte de test de refus).';
+    const m=exp.match(/^(\d{2})\/(\d{2})$/);if(!m||+m[1]<1||+m[1]>12)E.exp='Format MM/AA.';else{const d=new Date(2000+ +m[2],+m[1],0);if(d<TODAY)E.exp='Carte expirée.'}
+    if(!/^\d{3}$/.test(f.cvc.value.trim()))E.cvc='3 chiffres.';
+    if(!showErrs(f,E))return;const s=slot(ui.p.slotId),a=act(ui.p.actId),m2=me();if(ui.p.kids.length>left(s)){toast('Le créneau vient d’être complété.',true);ui.p.screen='activity';render();return}
+    ui.p.paying=true;render();
+    setTimeout(()=>{const ref='RC-'+(S.seq++);const b={id:'b'+Date.now(),ref,pid:m2.id,actId:a.id,slotId:s.id,kids:ui.p.kids.map(n=>({n,a:m2.kids.find(k=>k.n===n).a})),qty:ui.p.kids.length,amount:a.price*ui.p.kids.length,status:'confirmee',createdAt:off(0)};
+      S.bookings.push(b);const when=`${fmtD(s.date)} à ${s.start}`;
+      S.notifs.push({id:'n'+Date.now(),pid:m2.id,type:'confirm',title:'Réservation confirmée',body:`${a.title} — ${when} · ${b.kids.map(k=>k.n).join(', ')}`,at:off(0)+' '+nowHM(),read:false});
+      journal('pay',`Paiement accepté (mode test) : ${eur(b.amount)} — ${ref}.`);journal('email',`Email de confirmation envoyé à ${m2.email}.`);journal('push',`Notification « Réservation confirmée » envoyée à ${m2.name}.`);journal('email',`Nouvelle inscription signalée à ${org(a.orgId).name}.`);
+      if(m2.prefs.j1)journal('push',`Rappel programmé la veille à 18:00 (${ref}).`);if(m2.prefs.h2)journal('push',`Rappel programmé 2 h avant (${ref}).`);
+      save();ui.p.last=b.id;ui.p.paying=false;ui.p.kids=[];ui.p.slotId=null;ui.p.screen='success';render();push('Réservation confirmée',`${a.title} — ${when}`)},900)},
+  addKid(f){const n=f.n.value.trim(),E={};if(!n)E.n='Prénom requis.';else if(me().kids.some(k=>norm(k.n)===norm(n)))E.n='Cet enfant est déjà enregistré.';if(!showErrs(f,E))return;me().kids.push({n,a:+f.a.value});save();render();toast(n+' ajouté')},
+  actForm(f){const g=k=>f[k].value.trim();const v={title:g('title'),cat:g('cat'),duration:+g('duration'),ageMin:+g('ageMin'),ageMax:+g('ageMax'),price:+g('price'),quartier:g('quartier'),address:g('address'),desc:g('desc')},E={};
+    if(v.title.length<4)E.title='Titre trop court (4 caractères minimum).';if(!(v.ageMin>=1&&v.ageMax<=17&&v.ageMin<=v.ageMax))E.ageMin='Tranche d’âge invalide (1 à 17 ans, min ≤ max).';if(!(v.price>=0)||g('price')==='')E.price='Tarif invalide.';if(v.desc.length<30)E.desc=`Description trop courte (${v.desc.length}/30).`;
+    if(!showErrs(f,E))return;const id=g('id');
+    if(id){const a=act(id);Object.assign(a,v);if(a.status==='refusee'){a.status='attente';delete a.reason;journal('admin',`Activité resoumise à validation : ${a.title}.`)}save();closeDlg();render();toast('Activité mise à jour')}
+    else{const a={id:'a'+Date.now(),orgId:ui.o.orgId,...v,status:'attente',createdAt:off(0)};S.acts.push(a);journal('admin',`Nouvelle activité à valider : ${a.title} (${org(a.orgId).name}).`);save();closeDlg();ui.o.actId=a.id;ui.o.tab='slots';render();toast('Activité soumise à validation — ajoutez vos créneaux')}},
+  price(f){const p=+f.price.value;if(!(p>=0)||f.price.value===''){toast('Tarif invalide',true);return}act(ui.o.actId).price=p;save();render();toast('Tarif mis à jour : '+eur(p))},
+  addSlot(f){const a=act(ui.o.actId),v={date:f.date.value,start:f.start.value,end:f.end.value,cap:+f.cap.value},E={};
+    if(!v.date)E.date='Date requise.';else if(diff(v.date)<0)E.date='La date doit être aujourd’hui ou plus tard.';if(!v.start||!v.end||v.end<=v.start)E.end='L’heure de fin doit suivre l’heure de début.';if(!(v.cap>=1&&v.cap<=60))E.cap='Entre 1 et 60 places.';
+    if(!E.date&&S.slots.some(s=>s.actId===a.id&&s.date===v.date&&s.start===v.start))E.date='Un créneau existe déjà à cette date et heure.';
+    if(!showErrs(f,E))return;const n=f.weekly.checked?4:1;let c=0;
+    for(let i=0;i<n;i++){const d=pISO(v.date);d.setDate(d.getDate()+7*i);const ds=iso(d);if(S.slots.some(s=>s.actId===a.id&&s.date===ds&&s.start===v.start))continue;S.slots.push({id:'s'+Date.now()+i,actId:a.id,date:ds,start:v.start,end:v.end,cap:v.cap});c++}
+    save();render();toast(c>1?`${c} créneaux ajoutés`:'Créneau ajouté')},
+  orgProfile(f){const o=org(ui.o.orgId),g=k=>f[k].value.trim(),E={};if(g('name').length<3)E.name='Nom requis.';if(!emailOk(g('email')))E.email='Email invalide.';if(g('description').length<20)E.description='Présentation trop courte (20 caractères minimum).';
+    if(!showErrs(f,E))return;['name','type','contact','phone','email','quartier','address','description'].forEach(k=>o[k]=g(k));save();render();toast('Profil de la structure enregistré')},
+  refuse(f){const m=f.motif.value.trim();if(!showErrs(f,m.length<5?{motif:'Précisez le motif (5 caractères minimum).'}:{}))return;const k=f.k.value,id=f.id.value;
+    if(k==='org'){const o=org(id);o.status='refuse';o.reason=m;journal('admin',`Organisateur refusé : ${o.name}.`);journal('email',`Email de refus envoyé à ${o.email} (motif : ${m}).`)}
+    else{const a=act(id);a.status='refusee';a.reason=m;journal('admin',`Activité refusée : ${a.title}.`);journal('email',`Email de refus envoyé à ${org(a.orgId).email}.`)}
+    save();closeDlg();render();toast('Refus enregistré, organisateur notifié')}
+};
+const C={
+  kid(t){const n=t.value;ui.p.kids=t.checked?[...new Set([...ui.p.kids,n])]:ui.p.kids.filter(x=>x!==n);render()},
+  pref(t){me().prefs[t.value]=t.checked;save();toast('Préférence enregistrée')},
+  orgSel(t){ui.o.orgId=t.value;ui.o.actId=null;ui.o.insAct=null;ui.o.insSlot=null;render()},
+  slAct(t){ui.o.actId=t.value;render()},
+  insAct(t){ui.o.insAct=t.value;ui.o.insSlot=null;render()},
+  insSlot(t){ui.o.insSlot=t.value;render()},
+  cap(t){const s=slot(t.dataset.id),b=bk(s.id),v=+t.value;if(!(v>=Math.max(1,b)&&v<=60)){toast(`Capacité entre ${Math.max(1,b)} et 60 places`,true);t.value=s.cap;return}s.cap=v;save();render();toast('Capacité mise à jour')},
+  urole(t){ui.a.urole=t.value;$('#u-tbl').innerHTML=usersTbl()},
+  bst(t){ui.a.bst=t.value;ui.a.blim=40;$('#b-tbl').innerHTML=booksTbl()}
+};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;const f=A[t.dataset.a];if(f){e.preventDefault();f(t,e)}});
+document.addEventListener('submit',e=>{const f=F[e.target.dataset.form];if(f){e.preventDefault();f(e.target)}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.f){ui.f[t.dataset.f]=t.value;if(t.dataset.f==='when')render();else renderResults();return}if(t.dataset.c&&C[t.dataset.c])C[t.dataset.c](t)});
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='f-q'){ui.f.q=t.value;renderResults()}else if(t.dataset.i==='uq'){ui.a.uq=t.value;$('#u-tbl').innerHTML=usersTbl()}else if(t.dataset.i==='bq'){ui.a.bq=t.value;ui.a.blim=40;$('#b-tbl').innerHTML=booksTbl()}});
+render();
+})();
+</script>
 </body>
 </html>
