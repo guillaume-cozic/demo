@@ -4,18 +4,708 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Plateforme d’auto-coaching émotionnel</title>
+<meta name="description" content="Plateforme d’auto-coaching émotionnel : site vitrine avec abonnement Stripe en mode test, espace membre avec programmes protégés (vidéo, audio, PDF, exercices), journal de bord analysé par IA et tableau de bord multi-coachs collaboratif.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{color-scheme:light dark;--bg:#f6f4ef;--surf:#fff;--surf2:#efece5;--line:#dcd7cc;--tx:#1d2723;--mut:#56615c;--pri:#2c6650;--pri-tx:#fff;--pri-soft:#e1eee8;--acc:#9c4f2b;--warn:#875800;--warn-soft:#fbf0d9;--dng:#a8322b;--dng-soft:#fbe5e2;--e-tri:#3f62a3;--e-anx:#a26700;--e-col:#b23a33;--e-joi:#2c7a5a;--rad:14px;--pad:clamp(16px,3vw,32px)}
+@media (prefers-color-scheme:dark){:root{--bg:#111614;--surf:#18201c;--surf2:#212b26;--line:#33403a;--tx:#e6ebe8;--mut:#a5b1ab;--pri:#83c9ad;--pri-tx:#0d1a14;--pri-soft:#1f3a2f;--acc:#e8a77f;--warn:#ebc06a;--warn-soft:#3a2e14;--dng:#f39d95;--dng-soft:#43211d;--e-tri:#93b2ec;--e-anx:#e9b755;--e-col:#f2928a;--e-joi:#7fd0ab}}
+*{box-sizing:border-box}
+html{scroll-padding-top:90px}
+body{margin:0;font:15.5px/1.55 'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1.2;margin:0 0 .45em}
+h1{font-size:clamp(1.6rem,3vw,2.1rem)}h2{font-size:1.25rem}h3{font-size:1.05rem}
+p{margin:0 0 .8em}
+a{color:var(--pri)}
+.i{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.muted{color:var(--mut)}.small{font-size:13.5px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button{font:inherit;color:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--surf);color:var(--tx);cursor:pointer;font-weight:500;text-decoration:none;text-align:center}
+.btn:hover{border-color:var(--pri)}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:var(--pri-tx)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.dng{color:var(--dng)}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--pri);font-weight:700;cursor:pointer;text-align:left;min-height:44px;overflow-wrap:anywhere}
+.demo-band{display:flex;align-items:center;justify-content:center;gap:4px 14px;flex-wrap:wrap;padding:0 16px;background:var(--surf2);font-size:13.5px;border-bottom:1px solid var(--line)}
+.demo-band button{display:inline-flex;align-items:center;gap:6px;min-height:44px;background:none;border:0;color:var(--pri);font-weight:700;cursor:pointer;padding:0 6px}
+.demo-band .i{width:16px;height:16px}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;padding:8px var(--pad);background:color-mix(in srgb,var(--surf) 94%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:inline-flex;align-items:center;gap:10px;background:none;border:0;cursor:pointer;min-height:44px;padding:0;font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600}
+.brand svg{width:30px;height:30px;color:var(--pri)}
+.tnav{display:flex;gap:4px}
+.tnav a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;color:var(--tx);text-decoration:none;border-radius:8px}
+.tnav a:hover{background:var(--surf2)}
+.roles{display:flex;gap:4px;padding:4px;background:var(--surf2);border-radius:12px;margin-left:auto;min-width:0}
+.roles button{min-height:44px;padding:0 14px;border:0;border-radius:9px;background:none;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.roles button[aria-pressed=true]{background:var(--surf);color:var(--pri);font-weight:700;box-shadow:0 1px 3px rgb(0 0 0/.12)}
+@media (max-width:900px){.tnav{display:none}}
+@media (max-width:520px){.roles{margin-left:0;width:100%}.roles button{flex:1;padding:0 6px;justify-content:center}.roles .lg{display:none}.roles .sh{display:inline!important}}
+.roles .sh{display:none}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--rad);padding:20px;min-width:0}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
+.grid>*{min-width:0}
+.stack>*+*{margin-top:16px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row>*{min-width:0}
+.sp{flex:1}
+.kicker{text-transform:uppercase;letter-spacing:.08em;font-size:12.5px;font-weight:700;color:var(--acc);margin-bottom:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:700;background:var(--surf2);color:var(--tx);white-space:nowrap}
+.b-ok{background:var(--pri-soft);color:var(--pri)}.b-watch{background:var(--warn-soft);color:var(--warn)}.b-prio{background:var(--dng-soft);color:var(--dng)}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;border:1px solid var(--line);font-size:12.5px;color:var(--mut)}
+.prog{height:8px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.prog span{display:block;height:100%;background:var(--pri);border-radius:99px}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--pri-soft);color:var(--pri);font-weight:700;flex:0 0 auto}
+/* forms */
+label{font-weight:600;display:block;margin-bottom:6px}
+.fld{margin-bottom:14px;min-width:0}
+input[type=text],input[type=email],textarea,select{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--tx);font:inherit}
+textarea{min-height:130px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--pri)}
+[aria-invalid=true]{border-color:var(--dng)!important}
+.err{color:var(--dng);font-size:13.5px;margin-top:4px;min-height:0}
+input[type=range]{width:100%;height:44px;accent-color:var(--pri)}
+.chk{display:flex;align-items:center;gap:10px;font-weight:500;min-height:44px;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--pri)}
+.f2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+/* app */
+.app{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;padding:24px var(--pad) 48px}
+.side{display:flex;flex-direction:column;gap:4px;position:sticky;top:90px;align-self:start;min-width:0}
+.side button.nv{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font-weight:500}
+.side button.nv:hover{background:var(--surf2)}
+.side button.nv[aria-current=page]{background:var(--pri-soft);color:var(--pri);font-weight:700}
+.side .as{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.content{min-width:0}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin-bottom:20px}
+.ph>*{min-width:0}
+.ph h1{margin:0}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:12px}.side{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}.side button.nv{flex:0 0 auto}.side .as{display:none}}
+.cols{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.cols{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}.cols.det{grid-template-columns:minmax(0,7fr) minmax(0,6fr)}}
+.cols>*{min-width:0}
+/* emotions */
+.emo{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr) 42px;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+.emo .bar{height:9px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.emo .bar span{display:block;height:100%;border-radius:99px;background:var(--c)}
+.emo b{text-align:right;font-weight:600}
+.e-tristesse{--c:var(--e-tri)}.e-anxiete{--c:var(--e-anx)}.e-colere{--c:var(--e-col)}.e-joie{--c:var(--e-joi)}
+.edot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px}
+.ai{border:1px solid var(--line);border-left:4px solid var(--pri);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--pri-soft) 40%,var(--surf))}
+.ai-h{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:8px;flex-wrap:wrap}
+.callout{border-radius:10px;padding:12px 14px;background:var(--dng-soft);color:var(--dng);font-weight:500;display:flex;gap:10px;margin-top:12px}
+.skel{height:12px;border-radius:6px;background:var(--surf2);margin:10px 0;animation:pl 1.2s ease-in-out infinite}
+@keyframes pl{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+.entries{list-style:none;margin:0;padding:0}
+.entries li{border-top:1px solid var(--line);padding:14px 0}
+.entries li:first-child{border-top:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.filt{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.filt button{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surf);cursor:pointer}
+.filt button[aria-pressed=true]{background:var(--pri);border-color:var(--pri);color:var(--pri-tx);font-weight:700}
+.chart{width:100%;height:auto;display:block}
+.chart .gl{stroke:var(--line)}.chart .gt{fill:var(--mut);font-size:15px;font-family:'DM Sans',sans-serif}
+.chart .cl{fill:none;stroke:var(--pri);stroke-width:3}.chart .ca{fill:var(--pri);opacity:.1}.chart .cd{fill:var(--surf);stroke:var(--pri);stroke-width:3}
+/* modules */
+.mods{list-style:none;margin:0;padding:0}
+.mods li{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.mods li:first-child{border-top:0}
+.mods .ty{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--surf2);color:var(--pri);flex:0 0 auto}
+.mods .tt{flex:1 1 200px;min-width:0}
+.done-ic{color:var(--pri)}
+.pcard[aria-current=true]{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri)}
+/* table */
+.tbl-wrap{overflow-x:auto;position:relative}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);font-weight:700}
+tr.sel td{background:var(--pri-soft)}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));margin-bottom:16px}
+.kpi{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.kpi b{display:block;font-size:1.6rem;font-family:'Fraunces',serif}
+.toolbar{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));margin-bottom:12px}
+.notes{list-style:none;padding:0;margin:0 0 12px}
+.notes li{padding:10px 12px;border-radius:10px;background:var(--surf2);margin-bottom:8px}
+/* dialog */
+dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100% - 20px));max-height:calc(100% - 20px);background:var(--surf);color:var(--tx);box-shadow:0 20px 60px rgb(0 0 0/.3)}
+dialog.wide{width:min(880px,calc(100% - 20px))}
+dialog::backdrop{background:rgb(10 15 13/.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px 10px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surf);z-index:3}
+.dlg-h h2{margin:0;font-size:1.15rem}
+.icon-btn{width:44px;height:44px;border:0;border-radius:10px;background:none;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+.icon-btn:hover{background:var(--surf2)}
+#dlgB{padding:20px}
+.dlg-f{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+.test{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:var(--warn);font-weight:700;font-size:12.5px;padding:3px 10px;border-radius:999px}
+/* player & protected content */
+.player{position:relative;border-radius:12px;overflow:hidden;background:#17201c;color:#e9efec;padding:18px;user-select:none}
+.player.video{aspect-ratio:16/9;display:grid;place-items:center}
+.player .ctl{position:relative;z-index:2;display:flex;align-items:center;gap:12px;width:100%}
+.player.video .ctl{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;background:linear-gradient(transparent,rgb(0 0 0/.55))}
+.player .big{position:relative;z-index:2;width:72px;height:72px;border-radius:50%;border:0;background:rgb(255 255 255/.92);color:#17201c;display:grid;place-items:center;cursor:pointer}
+.player .big .i{width:30px;height:30px}
+.player .pb{flex:1;height:6px;background:rgb(255 255 255/.25);border-radius:9px;overflow:hidden}
+.player .pb span{display:block;height:100%;background:#9fd8c0}
+.player .sm{width:44px;height:44px;border-radius:50%;border:0;background:#e9efec;color:#17201c;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.wave{display:flex;align-items:center;gap:3px;height:60px;margin-bottom:12px;position:relative;z-index:2}
+.wave i{flex:1;background:#9fd8c0;opacity:.55;border-radius:2px}
+.wm{position:absolute;inset:-40%;display:flex;flex-wrap:wrap;gap:30px 60px;align-content:space-around;justify-content:space-around;transform:rotate(-20deg);opacity:.13;pointer-events:none;font-size:13px;z-index:1}
+.page{position:relative;overflow:hidden;background:#fffdf8;color:#26302b;border-radius:8px;padding:28px clamp(18px,4vw,40px);border:1px solid var(--line);user-select:none;min-height:320px}
+.page .wm{color:#26302b;opacity:.09}
+.page h3{font-family:'Fraunces',serif}
+.prot{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--mut);margin-top:12px;flex-wrap:wrap}
+/* toast */
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;width:min(440px,calc(100% - 24px))}
+.toast{background:var(--tx);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgb(0 0 0/.25);font-weight:500;display:flex;gap:10px;align-items:center}
+/* landing */
+.land section{padding:56px var(--pad)}
+.wrap{max-width:1200px;margin:0 auto}
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:center}
+.hero h1{font-size:clamp(2rem,4.5vw,3.1rem);letter-spacing:-.01em}
+.hero p.lead{font-size:1.12rem;color:var(--mut);max-width:56ch}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+.alt{background:var(--surf2)}
+.sec-h{max-width:640px;margin-bottom:28px}
+.pill-ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--pri-soft);color:var(--pri);margin-bottom:12px}
+.price{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:600}
+.plan ul{padding:0;list-style:none;margin:14px 0 18px}
+.plan li{display:flex;gap:8px;padding:4px 0}
+.plan li .i{color:var(--pri);margin-top:2px}
+.plan.feat{border:2px solid var(--pri)}
+details{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;min-height:52px;display:flex;align-items:center;font-weight:700;padding:6px 0}
+details p{color:var(--mut)}
+.serp{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:16px;font-family:Arial,sans-serif}
+.serp .u{font-size:13px;color:var(--mut)}.serp .t{color:#2b56c4;font-size:19px;margin:2px 0}
+@media (prefers-color-scheme:dark){.serp .t{color:#9db8ff}}
+footer.foot{padding:28px var(--pad);border-top:1px solid var(--line);font-size:14px;color:var(--mut)}
+#printArea{display:none}
+.inv{font-family:'DM Sans',sans-serif;color:#1d2723;background:#fff;padding:24px;border:1px solid var(--line);border-radius:8px}
+.inv table{min-width:0}
+@media print{body>*:not(#printArea){display:none!important}#printArea{display:block!important}.inv{border:0}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top" id="top"></header>
+<main id="main"></main>
+<dialog id="dlg" aria-labelledby="dlgT"><div class="dlg-h"><h2 id="dlgT"></h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div><div id="dlgB"></div></dialog>
+<div id="toasts" aria-live="polite"></div>
+<div id="printArea"></div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY=864e5;
+const today=()=>{const d=new Date();d.setHours(12,0,0,0);return d.getTime()};
+const fmtD=t=>new Date(t).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+const fmtL=t=>new Date(t).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const fmtF=t=>new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+const IC={
+home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7"/>',
+pen:'<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',
+card:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+team:'<circle cx="12" cy="7" r="3"/><circle cx="5" cy="10" r="2.2"/><circle cx="19" cy="10" r="2.2"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0M1.5 18a3.5 3.5 0 0 1 4-3.4M22.5 18a3.5 3.5 0 0 0-4-3.4"/>',
+play:'<path d="M7 4.5v15l12-7.5z"/>',pause:'<path d="M8 5v14M16 5v14"/>',
+video:'<rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
+audio:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+pdf:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+exo:'<path d="M9 5h10M9 12h10M9 19h10M4 5l1 1 2-2M4 12l1 1 2-2M4 19l1 1 2-2"/>',
+check:'<path d="M5 12.5l4.5 4.5L19 7"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+alert:'<path d="M12 3l10 18H2zM12 10v4M12 17.5v.5"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+send:'<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',note:'<path d="M5 3h10l4 4v14H5zM9 11h6M9 15h6"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+print:'<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/>',
+up:'<path d="M5 15l7-7 7 7"/>',down:'<path d="M5 9l7 7 7-7"/>',flat:'<path d="M5 12h14"/>',
+leaf:'<path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15zM5 19c3-5 6-8 10-10"/>',
+heart:'<path d="M12 20s-8-4.6-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.4 12 20 12 20z"/>',
+eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',x:'<path d="M18 6L6 18M6 6l12 12"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+
+const COACHES=[{id:'lea',n:'Léa Martin',s:'Gestion des émotions'},{id:'hugo',n:'Hugo Benali',s:'Anxiété et stress'},{id:'sophie',n:'Sophie Garnier',s:'Relations et deuil'}];
+const CO=id=>COACHES.find(c=>c.id===id)||COACHES[0];
+const ini=n=>n.split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpperCase();
+const TYPES={video:'Vidéo',audio:'Audio',pdf:'PDF',exo:'Exercice'};
+const PROGRAMS=[
+ {id:'p1',t:'Apaiser l’anxiété',sub:'6 semaines pour comprendre et réguler le stress au quotidien.',plan:'essentiel',mods:[
+  {id:'p1m1',t:'Comprendre le cycle de l’anxiété',type:'video',d:'12 min'},
+  {id:'p1m2',t:'Respiration 4-7-8 guidée',type:'audio',d:'8 min'},
+  {id:'p1m3',t:'Carnet des déclencheurs',type:'pdf',d:'6 pages'},
+  {id:'p1m4',t:'Identifier mes pensées automatiques',type:'exo',d:'15 min'},
+  {id:'p1m5',t:'Scan corporel du soir',type:'audio',d:'14 min'},
+  {id:'p1m6',t:'Bilan et plan d’action',type:'exo',d:'10 min'}]},
+ {id:'p2',t:'Se reconnecter à soi',sub:'Estime de soi, besoins et limites : retrouver sa boussole intérieure.',plan:'essentiel',mods:[
+  {id:'p2m1',t:'Ce que disent mes émotions',type:'video',d:'15 min'},
+  {id:'p2m2',t:'La roue des besoins',type:'pdf',d:'4 pages'},
+  {id:'p2m3',t:'Lettre à soi bienveillante',type:'exo',d:'20 min'},
+  {id:'p2m4',t:'Méditation de l’ancrage',type:'audio',d:'10 min'},
+  {id:'p2m5',t:'Poser une limite sans culpabiliser',type:'video',d:'11 min'}]},
+ {id:'p3',t:'Traverser une séparation',sub:'Accueillir le deuil relationnel, accompagné par un coach.',plan:'accompagnement',mods:[
+  {id:'p3m1',t:'Les étapes du deuil relationnel',type:'video',d:'14 min'},
+  {id:'p3m2',t:'Ce qui m’appartient, ce qui ne m’appartient pas',type:'exo',d:'20 min'},
+  {id:'p3m3',t:'Audio : accueillir le manque',type:'audio',d:'12 min'},
+  {id:'p3m4',t:'Guide : reconstruire ses repères',type:'pdf',d:'8 pages'},
+  {id:'p3m5',t:'Séance de bilan avec mon coach',type:'exo',d:'45 min'}]}];
+const PROG=id=>PROGRAMS.find(p=>p.id===id);
+const MOD=id=>{for(const p of PROGRAMS){const m=p.mods.find(x=>x.id===id);if(m)return{...m,p}}};
+const PLANS={
+ essentiel:{n:'Essentiel',p:19,per:'mois',f:['Programmes Anxiété et Estime de soi','Journal de bord avec analyse IA','Vidéos, audios, PDF et exercices','Sans engagement']},
+ annuel:{n:'Essentiel annuel',p:190,per:'an',f:['Tout le contenu Essentiel','2 mois offerts','Bilan émotionnel trimestriel','Paiement unique annuel']},
+ accompagnement:{n:'Accompagnement',p:59,per:'mois',f:['Tous les programmes','Un coach référent dédié','Suivi de vos journaux par l’équipe','2 séances visio par mois']}};
+const access=pid=>{const pl=S.user.plan;if(!pl)return false;return pl.id==='accompagnement'||PROG(pid).plan==='essentiel'};
+const EXO={
+ p1m4:['Décrivez une situation récente qui a déclenché de l’anxiété.','Quelle pensée automatique est apparue à ce moment-là ?','Quelle pensée plus nuancée pourriez-vous lui opposer ?'],
+ p1m6:['Qu’est-ce qui vous aide le plus à vous apaiser aujourd’hui ?','Quels signaux d’alerte avez-vous appris à reconnaître ?','Votre plan pour les 4 prochaines semaines :'],
+ p2m3:['Écrivez à la personne que vous étiez il y a un an.','Qu’aimeriez-vous qu’elle sache aujourd’hui ?'],
+ p3m2:['Ce qui m’appartient dans cette séparation :','Ce qui ne m’appartient pas :'],
+ p3m5:['Ce que je souhaite aborder lors de la séance :']};
+
+/* ---------- IA simulée ---------- */
+const EL={tristesse:'Tristesse',anxiete:'Anxiété',colere:'Colère',joie:'Apaisement'};
+const LEX={
+ tristesse:['triste','pleur','seul','vide','lourd','manque','perdu','déçu','rechute','mélancol'],
+ anxiete:['angoiss','stress','peur','inquiet','inquiète','nerveu','panique','tendu','dors mal','insomni','rumin','pas à la hauteur'],
+ colere:['colère','énerv','injuste','frustr','agac','rage','irrit'],
+ joie:['heureu','content','fier','fière','joie','apais','serein','calme','soulag','léger','légère','sourire','gratitude','reconnaiss','réussi']};
+const THEMES={Travail:['travail','bureau','manager','collègue','réunion','poste','présentation','mails'],Famille:['mère','père','famille','enfant','fils','fille','sœur','frère'],Couple:['couple','rupture','conjoint','compagn'],Sommeil:['dors','sommeil','nuit','insomni','réveil'],'Estime de soi':['pas à la hauteur','confiance','honte','fier','fière','limite'],Corps:['fatigu','corps','respir','cœur','sport','marche']};
+const ALERT=['plus envie','à bout','disparaître','n’en peux plus',"n'en peux plus",'craquer'];
+const SUGG={
+ anxiete:{t:'Respiration 4-7-8 guidée',d:'8 minutes pour faire redescendre la tension avant de dormir.',m:'p1m2'},
+ tristesse:{t:'Lettre à soi bienveillante',d:'Écrire à soi-même comme à un ami proche aide à accueillir la peine.',m:'p2m3'},
+ colere:{t:'Ce que dit ma colère',d:'Identifier le besoin non satisfait derrière l’irritation.',m:'p2m1'},
+ joie:{t:'Ancrer ce moment',d:'Notez trois éléments qui ont contribué à cette journée : ce sont vos ressources.',m:'p2m4'}};
+function analyze(text,mood){
+ const s=(text||'').toLowerCase();const sc={};let sum=0;
+ const base={tristesse:Math.max(0,6-mood)*.5,anxiete:Math.max(0,6-mood)*.45,colere:Math.max(0,5-mood)*.3,joie:Math.max(0,mood-4)*.6};
+ for(const k in LEX){const n=LEX[k].reduce((c,w)=>c+(s.split(w).length-1),0);sc[k]=n*2+base[k]+.2;sum+=sc[k]}
+ const emo=Object.keys(LEX).map(k=>({k,v:Math.round(sc[k]/sum*100)})).sort((a,b)=>b.v-a.v);
+ const themes=Object.keys(THEMES).filter(t=>THEMES[t].some(w=>s.includes(w)));
+ const alert=ALERT.some(w=>s.includes(w));
+ const neg=emo.filter(e=>e.k!=='joie').reduce((n,e)=>n+e.v,0);
+ const risk=alert||mood<=2?'prio':(mood<=4||(neg>=70&&mood<=5))?'watch':'ok';
+ return{emo,dom:emo[0].k,themes,alert,risk,sugg:SUGG[emo[0].k]};
+}
+function aiSummary(a,mood){
+ let t=`Votre texte exprime surtout ${EL[a.dom].toLowerCase()==='apaisement'?'de l’apaisement':'de la '+EL[a.dom].toLowerCase()}`.replace('de la anxiété','de l’anxiété').replace('de la colère','de la colère');
+ if(a.themes.length)t+=`, en lien avec : ${a.themes.join(', ').toLowerCase()}`;
+ t+='. ';
+ t+=mood>=7?'Belle énergie aujourd’hui : repérez ce qui l’a rendue possible.':mood>=5?'Vous semblez traverser des émotions mêlées, sans être submergé·e.':'La journée a été éprouvante ; prenez soin de vos besoins de base (repos, contact, mouvement).';
+ return t;
+}
+
+/* ---------- État ---------- */
+const KEY='eclore-demo-v1';
+function seed(){
+ const T=today();
+ const mk=(id,name,prog,coach,pct,moods,texts,since)=>({id,name,prog,coach,pct,since:T-since*DAY,hist:moods.map((m,i)=>({id:id+'-'+i,t:T-(13-i)*DAY,mood:m,text:texts[i]||'',shared:true}))});
+ const members=[
+  mk('m1','Julien Moreau','p1','hugo',50,[6,6,5,6,5,5,4,5,4,4,3,4,3,3],{9:'Réunion avec mon manager encore repoussée, je rumine toute la soirée. Je dors mal depuis lundi.',11:'Stress énorme au travail, peur de ne pas être à la hauteur sur le nouveau projet.',13:'Angoisse dès le réveil, le cœur qui bat vite avant d’aller au bureau. Respiration guidée faite, un peu soulagé ensuite.'},64),
+  mk('m2','Inès Haddad','p3','sophie',40,[5,4,4,5,4,3,4,3,3,2,3,2,3,2],{9:'La maison est vide depuis la rupture. Je pleure souvent le soir.',11:'Je me sens seule, même entourée de ma famille. Tout me paraît lourd.',13:'Je suis à bout, je n’en peux plus de faire semblant au travail.'},38),
+  mk('m3','Thomas Lefèvre','p2','lea',80,[5,6,6,6,7,6,7,7,7,8,7,8,8,8],{11:'Bonne marche ce matin, je me sens plus calme et fier d’avoir posé une limite avec un collègue.',13:'Journée sereine. Gratitude pour le repas avec mon frère.'},120),
+  mk('m4','Nadia Belkacem','p1','lea',33,[6,5,6,5,5,6,5,4,5,4,5,4,4,4],{10:'Agacée par les remarques de ma mère, je me sens frustrée et pas écoutée.',13:'Nuit courte, inquiète pour mon fils. Fatiguée et tendue toute la journée.'},45),
+  mk('m5','Marc Dupuis','p2','hugo',60,[6,6,7,6,6,7,6,7,7,6,7,7,6,7],{13:'Semaine plutôt calme. Content d’avoir repris le sport.'},90),
+  mk('m6','Élodie Fabre','p3','sophie',100,[3,3,4,4,4,5,5,5,6,5,6,6,7,6],{11:'Moins triste qu’il y a un mois. Je recommence à sortir, je me sens plus légère.',13:'Petite rechute en voyant des photos du couple, mais je me suis apaisée en écrivant.'},150),
+  mk('m7','Karim Saïdi','p1','hugo',17,[5,5,5,4,5,4,4,5,4,4,4,3,4,4],{12:'Panique dans le métro ce matin, j’ai dû descendre. Peur que ça recommence.',13:'Un peu moins tendu aujourd’hui, mais toujours inquiet pour demain.'},21),
+  mk('m8','Pauline Mercier','p2','lea',100,[7,7,6,7,7,8,7,7,8,7,8,8,7,8],{13:'Je me sens à ma place dans mon nouveau poste. Reconnaissante pour le soutien de mon équipe.'},200)];
+ const J=[[1,4,'Grosse journée au travail, je me suis sentie stressée et pas à la hauteur pendant la réunion. Je rumine encore ce soir.'],[3,5,'Nuit difficile, je dors mal quand je pense au bureau. J’ai essayé la respiration guidée, un peu soulagée ensuite.'],[5,4,'Remarque de ma mère au téléphone, je me suis sentie agacée et triste à la fois.'],[7,5,'J’ai repéré un déclencheur : les mails du soir. Je me sens un peu plus calme quand je coupe tout à 20 h.'],[9,6,'Marche avec une amie, journée plus légère. Fière d’avoir dit non à une réunion de trop.'],[11,5,'Inquiète pour la présentation de vendredi, le stress revient mais je le reconnais plus vite.'],[12,7,'Présentation réussie ! Soulagée et contente, gratitude pour le soutien de mon équipe.']];
+ const journal=J.map(([d,m,t],i)=>({id:'j'+i,t:T-(13-d)*DAY,mood:m,text:t,shared:i!==2}));
+ return{role:'site',mv:'home',cv:'members',prog:'p1',
+  user:{name:'Camille Roux',email:'camille.roux@exemple.fr',prog:'p1',coach:'lea',since:T-75*DAY,card:'4242',plan:{id:'essentiel',status:'active',next:T+19*DAY}},
+  done:{p1m1:1,p1m2:1,p1m3:1},journal,members,
+  notes:[
+   {id:'n1',mid:'me',c:'lea',t:T-6*DAY,x:'Bonne implication sur le programme anxiété. Continuer le carnet des déclencheurs (mails du soir).'},
+   {id:'n2',mid:'me',c:'hugo',t:T-3*DAY,x:'Vue en remplacement : la respiration 4-7-8 est bien acquise. À encourager avant les présentations.'},
+   {id:'n3',mid:'m2',c:'sophie',t:T-2*DAY,x:'Isolement très présent. Séance prévue jeudi ; proposer le groupe de parole du mardi.'},
+   {id:'n4',mid:'m1',c:'hugo',t:T-4*DAY,x:'Ruminations liées au travail. Travailler la restructuration cognitive (module 4).'},
+   {id:'n5',mid:'m4',c:'lea',t:T-5*DAY,x:'Tension familiale récurrente. Avis d’Hugo souhaité sur la gestion du sommeil.'}],
+  invoices:[{id:'FAC-2026-0612-00418',t:T-116*DAY,a:19,p:'Essentiel'},{id:'FAC-2026-0712-00597',t:T-86*DAY,a:19,p:'Essentiel'},{id:'FAC-2026-0811-00782',t:T-56*DAY,a:19,p:'Essentiel'},{id:'FAC-2026-0910-00961',t:T-26*DAY,a:19,p:'Essentiel'}],
+  coachId:'lea',fCoach:'all',fRisk:'all',q:'',sel:null,jf:'all',lastA:null};
+}
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+if(!S||!S.user||!S.members)S=seed();
+let busy={a:false,regen:null};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- Helpers ---------- */
+function toast(msg){const d=document.createElement('div');d.className='toast';d.innerHTML=ic('check')+`<span>${esc(msg)}</span>`;$('#toasts').append(d);setTimeout(()=>d.remove(),3800)}
+const RISK={ok:['b-ok','Stable'],watch:['b-watch','À surveiller'],prio:['b-prio','Prioritaire']};
+const badge=r=>`<span class="badge ${RISK[r][0]}"><span class="dot"></span>${RISK[r][1]}</span>`;
+const moodL=m=>m<=2?'Très difficile':m<=4?'Difficile':m<=6?'Mitigé':m<=8?'Plutôt bien':'Très bien';
+const progPct=p=>Math.round(p.mods.filter(m=>S.done[m.id]).length/p.mods.length*100);
+function chart(pts,label){
+ pts=pts.slice(-14);if(!pts.length)return'<p class="muted">Pas encore de données.</p>';
+ const W=600,H=190,l=36,r=14,t=14,b=32,n=pts.length;
+ const x=i=>n===1?(l+W-r)/2:l+i*(W-l-r)/(n-1),y=v=>t+(10-v)*(H-t-b)/10;
+ let g='';for(const v of[2,4,6,8,10])g+=`<line class="gl" x1="${l}" x2="${W-r}" y1="${y(v)}" y2="${y(v)}"/><text class="gt" x="${l-10}" y="${y(v)+5}" text-anchor="end">${v}</text>`;
+ const P=pts.map((q,i)=>[x(i).toFixed(1),y(q.mood).toFixed(1)]);
+ const line=P.map(p=>p.join(',')).join(' ');
+ const area=`M${P[0][0]},${y(0)} L${P.map(p=>p.join(',')).join(' L')} L${P[n-1][0]},${y(0)} Z`;
+ const lab=[0,Math.floor((n-1)/2),n-1].filter((v,i,a)=>a.indexOf(v)===i).map(i=>`<text class="gt" x="${x(i)}" y="${H-6}" text-anchor="${i===0&&n>1?'start':i===n-1&&n>1?'end':'middle'}">${fmtD(pts[i].t)}</text>`).join('');
+ const avg=(pts.reduce((s,p)=>s+p.mood,0)/n).toFixed(1).replace('.',',');
+ return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)} : ${n} relevés, moyenne ${avg} sur 10, dernier ${pts[n-1].mood} sur 10">${g}<path class="ca" d="${area}"/><polyline class="cl" points="${line}"/>${P.map(p=>`<circle class="cd" cx="${p[0]}" cy="${p[1]}" r="5"/>`).join('')}${lab}</svg>`;
+}
+function emoBars(emo){return emo.map(e=>`<div class="emo e-${e.k}"><span><span class="edot"></span>${EL[e.k]}</span><span class="bar"><span style="width:${Math.round(e.v)}%"></span></span><b>${Math.round(e.v)} %</b></div>`).join('')}
+
+/* ---------- En-tête ---------- */
+function renderTop(){
+ const r=[['site','Site','vitrine',IC.home],['membre','Membre','Espace',IC.heart],['coach','Coach','Espace',IC.team]];
+ $('#top').innerHTML=`<button type="button" class="brand" data-act="role" data-r="site" aria-label="Éclore — accueil du site">${ic('leaf','')}<span>Éclore</span></button>
+ ${S.role==='site'?'<nav class="tnav" aria-label="Site"><a href="#programmes">Programmes</a><a href="#methode">Méthode</a><a href="#tarifs">Tarifs</a><a href="#faq">FAQ</a></nav>':''}
+ <div class="roles" role="group" aria-label="Choisir un espace">${r.map(([k,a,b])=>`<button type="button" data-act="role" data-r="${k}" aria-pressed="${S.role===k}"><span class="lg">${k==='site'?'Site vitrine':b+' '+a.toLowerCase()}</span><span class="sh">${a}</span></button>`).join('')}</div>`;
+}
+function render(focus){
+ renderTop();
+ $('#main').innerHTML=S.role==='site'?vSite():S.role==='membre'?vMember():vCoach();
+ save();
+ if(focus){const h=$('#main h1');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}window.scrollTo(0,0)}
+}
+
+/* ---------- Site vitrine ---------- */
+function vSite(){
+ const pl=Object.entries(PLANS);
+ return`<div class="land">
+ <section><div class="wrap hero">
+  <div><p class="kicker">Auto-coaching &amp; guérison émotionnelle</p>
+  <h1>Apprenez à accueillir vos émotions, à votre rythme.</h1>
+  <p class="lead">Des programmes guidés, un journal de bord éclairé par l’IA et une équipe de coachs qui suivent votre progression. Pour aller mieux, durablement.</p>
+  <div class="row" style="margin-top:22px"><button type="button" class="btn pri" data-act="checkout" data-plan="essentiel">Commencer l’essai de 7 jours ${ic('arrow')}</button><a class="btn" href="#programmes">Voir les programmes</a></div>
+  <p class="small muted" style="margin-top:14px">Sans engagement · Résiliable en un clic · Données hébergées en France</p></div>
+  <div class="card" aria-label="Aperçu du journal de bord">
+   <div class="row"><span class="av">CR</span><div><b>Journal de bord</b><div class="small muted">Aujourd’hui · humeur 6/10</div></div></div>
+   <p style="margin:14px 0;font-style:italic">« Marche avec une amie, journée plus légère. Fière d’avoir dit non à une réunion de trop. »</p>
+   <div class="ai"><div class="ai-h">${ic('spark')}Analyse émotionnelle</div>${emoBars(analyze('Marche avec une amie, journée plus légère. Fière d’avoir dit non à une réunion de trop.',6).emo)}</div>
+  </div>
+ </div></section>
+ <section class="alt" id="methode"><div class="wrap">
+  <div class="sec-h"><p class="kicker">La méthode</p><h2>Trois piliers pour avancer</h2></div>
+  <div class="grid">
+   <div class="card"><div class="pill-ic">${ic('book')}</div><h3>Programmes guidés</h3><p class="muted">Vidéos, audios, fiches PDF et exercices progressifs, conçus par des coachs certifiés et accessibles dans votre espace sécurisé.</p></div>
+   <div class="card"><div class="pill-ic">${ic('spark')}</div><h3>Journal analysé par IA</h3><p class="muted">Écrivez librement : l’assistant repère les émotions et thèmes récurrents et vous suggère l’exercice adapté.</p></div>
+   <div class="card"><div class="pill-ic">${ic('team')}</div><h3>Suivi collaboratif</h3><p class="muted">Votre coach référent et son équipe suivent votre évolution et se relaient, avec votre accord sur chaque entrée partagée.</p></div>
+  </div></div></section>
+ <section id="programmes"><div class="wrap">
+  <div class="sec-h"><p class="kicker">Programmes</p><h2>Choisissez votre chemin</h2></div>
+  <div class="grid">${PROGRAMS.map(p=>{const c={};p.mods.forEach(m=>c[m.type]=(c[m.type]||0)+1);return`<article class="card"><h3>${esc(p.t)}</h3><p class="muted">${esc(p.sub)}</p><div class="chips">${Object.entries(c).map(([k,v])=>`<span class="chip">${v} ${TYPES[k].toLowerCase()}${v>1&&k!=='audio'&&k!=='pdf'?'s':''}</span>`).join('')}</div><p class="small muted" style="margin:12px 0 0">Inclus dans : ${p.plan==='essentiel'?'toutes les offres':'Accompagnement'}</p></article>`}).join('')}</div></div></section>
+ <section class="alt" id="tarifs"><div class="wrap">
+  <div class="sec-h"><p class="kicker">Tarifs</p><h2>Une offre pour chaque besoin</h2><p class="muted">Paiement sécurisé, facture automatique, changement d’offre à tout moment.</p></div>
+  <div class="grid">${pl.map(([k,p])=>`<article class="card plan ${k==='accompagnement'?'feat':''}">${k==='accompagnement'?'<span class="badge b-ok">Le plus complet</span>':''}<h3 style="margin-top:8px">${p.n}</h3><div><span class="price">${p.p} €</span> <span class="muted">/ ${p.per}</span></div><ul>${p.f.map(f=>`<li>${ic('check')}<span>${f}</span></li>`).join('')}</ul><button type="button" class="btn ${k==='accompagnement'?'pri':''}" style="width:100%" data-act="checkout" data-plan="${k}">Choisir ${p.n}</button></article>`).join('')}</div></div></section>
+ <section><div class="wrap">
+  <div class="sec-h"><p class="kicker">Témoignages</p><h2>Ils ont fait le premier pas</h2></div>
+  <div class="grid">${[['Amandine, 34 ans','Le journal m’a aidée à voir que mes angoisses revenaient toujours le dimanche soir. Rien que ça, ça a tout changé.'],['Bastien, 41 ans','Les audios du soir sont devenus un rituel. Et savoir qu’un coach lit mes entrées me rassure.'],['Sarah, 28 ans','Après ma séparation, le programme m’a donné des repères concrets, semaine après semaine.']].map(([n,q])=>`<figure class="card" style="margin:0"><blockquote style="margin:0 0 12px">« ${q} »</blockquote><figcaption class="muted small">${n} · témoignage fictif</figcaption></figure>`).join('')}</div></div></section>
+ <section class="alt" id="faq"><div class="wrap" style="display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr))">
+  <div><p class="kicker">Questions fréquentes</p><h2>FAQ</h2>
+   <details><summary>Éclore remplace-t-il un suivi thérapeutique ?</summary><p>Non. Éclore est un outil d’auto-coaching. En cas de détresse, contactez le 3114 (24 h/24, gratuit) ou votre médecin.</p></details>
+   <details><summary>Qui peut lire mon journal ?</summary><p>Vous seul·e, sauf pour les entrées que vous choisissez de partager avec votre équipe de coachs.</p></details>
+   <details><summary>Comment fonctionne l’analyse IA ?</summary><p>Un modèle de langage repère les émotions et thèmes dominants de vos textes. Les résultats sont indicatifs et relus par les coachs.</p></details>
+   <details><summary>Puis-je résilier à tout moment ?</summary><p>Oui, depuis votre espace « Abonnement », en un clic. L’accès reste actif jusqu’à la fin de la période payée.</p></details>
+  </div>
+  <div><p class="kicker">Côté technique</p><h2>Pensé pour le référencement</h2>
+   <div class="serp" aria-label="Aperçu dans un moteur de recherche"><div class="u">eclore.exemple › programmes › apaiser-anxiete</div><div class="t">Apaiser l’anxiété : programme d’auto-coaching en 6 semaines</div><div class="small">Vidéos, audios guidés et journal émotionnel analysé par IA. Essai gratuit 7 jours, accompagnement par des coachs certifiés.</div></div>
+   <ul class="plan" style="padding:0;list-style:none;margin-top:14px">${['Pages statiques rapides (Core Web Vitals au vert)','Données structurées Course, FAQPage et Organization','Sitemap, balises canoniques et Open Graph','Blog de contenus éditoriaux par thématique émotionnelle'].map(x=>`<li style="display:flex;gap:8px;padding:4px 0">${ic('check')}<span>${x}</span></li>`).join('')}</ul>
+  </div></div></section>
+ <footer class="foot"><div class="row"><span>© 2026 Éclore — plateforme fictive</span><span class="sp"></span><span>Besoin d’aide immédiate ? Appelez le 3114</span></div></footer></div>`;
+}
+
+/* ---------- Espace membre ---------- */
+function vMember(){
+ const nav=[['home','Tableau de bord','home'],['progs','Programmes','book'],['journal','Journal de bord','pen'],['sub','Abonnement','card']];
+ const body={home:mHome,progs:mProgs,journal:mJournal,sub:mSub}[S.mv]();
+ return`<div class="app"><nav class="side" aria-label="Espace membre">${nav.map(([k,l,i])=>`<button type="button" class="nv" data-act="mnav" data-v="${k}" ${S.mv===k?'aria-current="page"':''}>${ic(i)}${l}</button>`).join('')}
+ <div class="as small muted"><div class="row">${ic('shield')}<span>Espace sécurisé</span></div><p style="margin-top:6px">Connecté·e : ${esc(S.user.email)}</p></div></nav>
+ <div class="content">${body}</div></div>`;
+}
+function mHome(){
+ const p=PROG(S.user.prog),pct=progPct(p),next=p.mods.find(m=>!S.done[m.id]);
+ const last=S.journal.at(-1),a=last?analyze(last.text,last.mood):null,c=CO(S.user.coach);
+ const first=S.user.name.split(' ')[0];
+ return`<div class="ph"><div><p class="kicker">${fmtL(today())}</p><h1>Bonjour ${esc(first)}</h1><p class="muted" style="margin:6px 0 0">Prenez un instant pour vous. Votre parcours avance à votre rythme.</p></div><button type="button" class="btn pri" data-act="mnav" data-v="journal">${ic('pen')}Écrire dans mon journal</button></div>
+ <div class="grid">
+  <section class="card"><p class="kicker">Programme en cours</p><h2>${esc(p.t)}</h2><div class="prog" role="progressbar" aria-label="Progression" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div><p class="small muted" style="margin-top:6px">${p.mods.filter(m=>S.done[m.id]).length} / ${p.mods.length} modules terminés</p>
+   ${next?`<p style="margin-bottom:12px">Prochaine étape : <b>${esc(next.t)}</b> <span class="muted">· ${TYPES[next.type]}, ${next.d}</span></p><button type="button" class="btn pri" data-act="mod" data-id="${next.id}">${ic('play')}Continuer</button>`:`<p>Programme terminé, bravo !</p><button type="button" class="btn" data-act="mnav" data-v="progs">Choisir un autre programme</button>`}</section>
+  <section class="card"><p class="kicker">Dernière analyse IA</p>${a?`<h2>${EL[a.dom]}</h2>${emoBars(a.emo.slice(0,3))}<p class="small muted" style="margin-top:10px">Suggestion : <b>${a.sugg.t}</b></p><button type="button" class="btn" data-act="mod" data-id="${a.sugg.m}">Ouvrir l’exercice</button>`:'<p class="muted">Écrivez votre première entrée pour obtenir une analyse.</p>'}</section>
+  <section class="card"><p class="kicker">Mon coach référent</p><div class="row" style="margin-bottom:12px"><span class="av">${ini(c.n)}</span><div><b>${c.n}</b><div class="small muted">${c.s}</div></div></div><p class="small muted">L’équipe suit vos entrées partagées et se relaie en cas d’absence.</p><button type="button" class="btn" data-act="msg" data-to="${c.n}">${ic('send')}Écrire à ${c.n.split(' ')[0]}</button></section>
+ </div>
+ <section class="card" style="margin-top:16px"><div class="row"><h2 style="margin:0">Mon humeur sur 14 jours</h2><span class="sp"></span><span class="small muted">${S.journal.length} entrées</span></div>${chart(S.journal,'Évolution de mon humeur')}</section>`;
+}
+function mProgs(){
+ const sel=PROG(S.prog),ok=access(sel.id);
+ return`<div class="ph"><div><h1>Mes programmes</h1><p class="muted" style="margin:6px 0 0">Contenus protégés : lecture en ligne uniquement, filigrane personnel.</p></div></div>
+ <div class="grid" style="margin-bottom:20px">${PROGRAMS.map(p=>{const a=access(p.id),pc=progPct(p);return`<article class="card pcard" aria-current="${S.prog===p.id}"><div class="row"><h2 style="margin:0">${esc(p.t)}</h2><span class="sp"></span>${a?'':`<span class="badge">${ic('lock')}Accompagnement</span>`}</div><p class="muted small" style="margin:6px 0 12px">${esc(p.sub)}</p>${a?`<div class="prog"><span style="width:${pc}%"></span></div><p class="small muted" style="margin:6px 0 12px">${pc} % terminé</p>`:''}<button type="button" class="btn ${S.prog===p.id?'pri':''}" data-act="prog" data-id="${p.id}" aria-pressed="${S.prog===p.id}">${S.prog===p.id?'Programme affiché':'Voir le programme'}</button></article>`}).join('')}</div>
+ <section class="card"><div class="row"><h2 style="margin:0">${esc(sel.t)}</h2><span class="sp"></span>${ok&&S.user.prog!==sel.id?`<button type="button" class="btn" data-act="setprog" data-id="${sel.id}">Définir comme programme en cours</button>`:''}</div>
+ ${ok?'':`<div class="callout" style="background:var(--warn-soft);color:var(--warn)">${ic('lock')}<div>Ce programme est réservé à l’offre Accompagnement.<div style="margin-top:8px"><button type="button" class="btn pri" data-act="changeplan">Changer d’offre</button></div></div></div>`}
+ <ol class="mods" style="margin-top:10px">${sel.mods.map((m,i)=>`<li><span class="ty">${ic(m.type)}</span><div class="tt"><b>${i+1}. ${esc(m.t)}</b><div class="small muted">${TYPES[m.type]} · ${m.d}</div></div>${ok?(S.done[m.id]?`<span class="badge b-ok">${ic('check')}Terminé</span><button type="button" class="btn ghost" data-act="mod" data-id="${m.id}">Revoir</button>`:`<button type="button" class="btn" data-act="mod" data-id="${m.id}">${ic('play')}Ouvrir</button>`):`<span class="muted" aria-label="Verrouillé">${ic('lock')}</span>`}</li>`).join('')}</ol></section>`;
+}
+function analysisCard(e){
+ const a=analyze(e.text,e.mood);
+ return`<div class="ai"><div class="ai-h">${ic('spark')}Analyse émotionnelle IA <span class="sp"></span>${badge(a.risk)}</div>
+ ${emoBars(a.emo)}
+ ${a.themes.length?`<div class="chips" style="margin:10px 0">${a.themes.map(t=>`<span class="chip">${t}</span>`).join('')}</div>`:''}
+ <p style="margin-top:10px">${esc(aiSummary(a,e.mood))}</p>
+ <p class="small" style="margin-bottom:10px"><b>Suggestion :</b> ${a.sugg.t} — ${a.sugg.d}</p>
+ <button type="button" class="btn" data-act="mod" data-id="${a.sugg.m}">${ic('play')}Faire l’exercice</button>
+ ${a.alert||a.risk==='prio'?`<div class="callout">${ic('alert')}<div>Votre équipe de coachs a été prévenue. Si vous êtes en détresse, appelez le <b>3114</b> (24 h/24, gratuit).</div></div>`:''}
+ <p class="small muted" style="margin:10px 0 0">Analyse indicative, elle ne remplace pas un avis médical.</p></div>`;
+}
+function mJournal(){
+ const last=S.journal.find(j=>j.id===S.lastA);
+ const list=[...S.journal].reverse().filter(j=>S.jf==='all'||analyze(j.text,j.mood).dom===S.jf);
+ return`<div class="ph"><div><h1>Journal de bord</h1><p class="muted" style="margin:6px 0 0">Écrivez librement ; l’assistant IA vous aide à mettre des mots sur vos émotions.</p></div></div>
+ <div class="cols"><div class="stack">
+  <form class="card" data-form="journal" novalidate><h2>Nouvelle entrée</h2>
+   <div class="fld"><label for="j-mood">Mon humeur : <output id="j-out" for="j-mood">6 / 10 — ${moodL(6)}</output></label><input type="range" id="j-mood" name="mood" min="1" max="10" value="6" data-in="mood"></div>
+   <div class="fld"><label for="j-text">Ce que je ressens aujourd’hui</label><textarea id="j-text" name="text" aria-describedby="j-err j-hint" placeholder="Ex. : réunion stressante ce matin, mais une belle marche ce soir…"></textarea><div id="j-hint" class="small muted">20 caractères minimum.</div><div id="j-err" class="err"></div></div>
+   <label class="chk"><input type="checkbox" name="share" checked> Partager cette entrée avec mon équipe de coachs</label>
+   <div class="dlg-f" style="margin-top:8px"><button class="btn pri" ${busy.a?'disabled':''}>${ic('spark')}Enregistrer et analyser</button></div>
+  </form>
+  ${busy.a?`<div class="ai" aria-busy="true"><div class="ai-h">${ic('spark')}Analyse émotionnelle en cours…</div><div class="skel" style="width:90%"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:80%"></div></div>`:last?analysisCard(last):''}
+ </div>
+ <section class="card"><h2>Mon historique</h2>${chart(S.journal,'Évolution de mon humeur')}
+  <div class="filt" role="group" aria-label="Filtrer par émotion dominante">${[['all','Toutes'],...Object.entries(EL)].map(([k,l])=>`<button type="button" data-act="jf" data-k="${k}" aria-pressed="${S.jf===k}">${l}</button>`).join('')}</div>
+  <ul class="entries">${list.map(j=>{const a=analyze(j.text,j.mood);return`<li><div class="row small"><b>${fmtL(j.t)}</b><span class="sp"></span><span class="muted">Humeur ${j.mood}/10</span><span class="chip">${j.shared?'Partagée':'Privée'}</span></div><p style="margin:6px 0">${esc(j.text)}</p><div class="chips"><span class="chip e-${a.dom}"><span class="edot"></span>${EL[a.dom]}</span>${a.themes.map(t=>`<span class="chip">${t}</span>`).join('')}</div></li>`}).join('')||'<li class="muted">Aucune entrée pour ce filtre.</li>'}</ul>
+ </section></div>`;
+}
+function mSub(){
+ const pl=S.user.plan,P=PLANS[pl.id];
+ return`<div class="ph"><div><h1>Abonnement</h1><p class="muted" style="margin:6px 0 0">Géré via Stripe — <span class="test">${ic('alert')}mode test</span></p></div></div>
+ <div class="grid">
+  <section class="card"><p class="kicker">Offre actuelle</p><h2>${P.n}</h2><p><span class="price">${P.p} €</span> <span class="muted">/ ${P.per}</span></p>
+   <p>${pl.status==='active'?`${badge('ok').replace('Stable','Actif')} Prochain prélèvement le <b>${fmtF(pl.next)}</b>`:`<span class="badge b-watch">Résiliation programmée</span> Accès jusqu’au <b>${fmtF(pl.next)}</b>`}</p>
+   <div class="row"><button type="button" class="btn" data-act="changeplan">Changer d’offre</button>${pl.status==='active'?'<button type="button" class="btn dng" data-act="cancel">Résilier</button>':'<button type="button" class="btn pri" data-act="reactivate">Réactiver</button>'}</div></section>
+  <section class="card"><p class="kicker">Moyen de paiement</p><div class="row">${ic('card')}<b>Visa •••• ${S.user.card}</b><span class="muted">exp. 12/28</span></div><p class="small muted" style="margin-top:10px">Les données de carte sont stockées par le prestataire de paiement, jamais sur nos serveurs.</p></section>
+ </div>
+ <section class="card" style="margin-top:16px"><h2>Factures</h2><div class="tbl-wrap"><table style="min-width:520px"><thead><tr><th>Numéro</th><th>Date</th><th>Offre</th><th>Montant</th><th><span class="sr">Action</span></th></tr></thead><tbody>${[...S.invoices].reverse().map(f=>`<tr><td>${f.id}</td><td>${fmtF(f.t)}</td><td>${f.p}</td><td>${f.a} €</td><td><button type="button" class="btn ghost" data-act="invoice" data-id="${f.id}">${ic('eye')}Voir</button></td></tr>`).join('')}</tbody></table></div></section>`;
+}
+
+/* ---------- Espace coach ---------- */
+function allMembers(){
+ return[{id:'me',name:S.user.name,prog:S.user.prog,coach:S.user.coach,pct:progPct(PROG(S.user.prog)),since:S.user.since,hist:S.journal},...S.members];
+}
+function stats(m){
+ const T=today(),h=m.hist,av=a=>a.length?a.reduce((s,x)=>s+x.mood,0)/a.length:0;
+ const w1=h.filter(x=>x.t>T-7*DAY),w0=h.filter(x=>x.t<=T-7*DAY&&x.t>T-14*DAY);
+ const a1=av(w1)||av(h.slice(-3)),a0=av(w0)||a1;
+ const an=h.filter(x=>x.text&&x.shared).slice(-5).map(x=>analyze(x.text,x.mood));
+ const emo={tristesse:0,anxiete:0,colere:0,joie:0};an.forEach(a=>a.emo.forEach(e=>emo[e.k]+=e.v/an.length));
+ const ord=Object.keys(emo).sort((a,b)=>emo[b]-emo[a]);
+ const th={};an.forEach(a=>a.themes.forEach(t=>th[t]=(th[t]||0)+1));
+ const rec=an.slice(-2);let risk='ok';
+ if(rec.some(a=>a.risk==='prio'))risk='prio';else if(rec.some(a=>a.risk==='watch')||a1<4.5)risk='watch';
+ return{avg:a1,trend:a1-a0,dom:an.length?ord[0]:'joie',emo:ord.map(k=>({k,v:emo[k]})),themes:Object.keys(th).sort((a,b)=>th[b]-th[a]),risk,last:h.at(-1)?.t,priv:h.filter(x=>x.text&&!x.shared).length,n:an.length};
+}
+const PISTE={anxiete:'Assigner l’audio « Respiration 4-7-8 » et le carnet des déclencheurs.',tristesse:'Proposer la « Lettre à soi bienveillante » et vérifier le réseau de soutien.',colere:'Explorer le besoin derrière la colère (exercice « Ce que disent mes émotions »).',joie:'Ancrer les ressources : inviter à noter ce qui a aidé cette semaine.'};
+function pistes(st){
+ const o=[];
+ if(st.risk==='prio')o.push('Prendre contact sous 24 h et rappeler les ressources d’urgence (3114).');
+ if(st.trend<-.6)o.push('Humeur en baisse : proposer un échange individuel cette semaine.');
+ if(st.trend>.6)o.push('Progrès nets : valoriser les efforts et proposer le module suivant.');
+ o.push(PISTE[st.dom]);
+ if(st.themes[0])o.push(`Thème récurrent « ${st.themes[0]} » : l’explorer lors de la prochaine séance.`);
+ return o.slice(0,4);
+}
+const trendIc=t=>t>.4?`<span style="color:var(--pri)" title="En hausse">${ic('up')}<span class="sr">en hausse</span></span>`:t<-.4?`<span style="color:var(--dng)" title="En baisse">${ic('down')}<span class="sr">en baisse</span></span>`:`<span class="muted" title="Stable">${ic('flat')}<span class="sr">stable</span></span>`;
+const RO={prio:0,watch:1,ok:2};
+function vCoach(){
+ const nav=[['members','Suivi des membres','users'],['team','Équipe','team']];
+ return`<div class="app"><nav class="side" aria-label="Espace coach">${nav.map(([k,l,i])=>`<button type="button" class="nv" data-act="cnav" data-v="${k}" ${S.cv===k?'aria-current="page"':''}>${ic(i)}${l}</button>`).join('')}
+ <div class="as"><label for="as-coach" class="small">Connecté·e en tant que</label><select id="as-coach" data-chg="coachId">${COACHES.map(c=>`<option value="${c.id}" ${S.coachId===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div></nav>
+ <div class="content">${S.cv==='members'?cMembers():cTeam()}</div></div>`;
+}
+function cMembers(){
+ const all=allMembers().map(m=>({...m,st:stats(m)}));
+ const q=S.q.trim().toLowerCase();
+ const list=all.filter(m=>(S.fCoach==='all'||m.coach===S.fCoach)&&(S.fRisk==='all'||m.st.risk===S.fRisk)&&(!q||m.name.toLowerCase().includes(q))).sort((a,b)=>RO[a.st.risk]-RO[b.st.risk]||a.name.localeCompare(b.name));
+ const sel=all.find(m=>m.id===S.sel);
+ const k7=all.reduce((n,m)=>n+m.hist.filter(x=>x.text&&x.t>today()-7*DAY).length,0);
+ return`<div class="ph"><div><p class="kicker">Tableau de bord multi-coachs</p><h1>Suivi des membres</h1></div>
+  <div class="row"><label for="cs-coach" class="sr">Connecté·e en tant que</label><select id="cs-coach" data-chg="coachId" style="width:auto">${COACHES.map(c=>`<option value="${c.id}" ${S.coachId===c.id?'selected':''}>Vue de ${c.n}</option>`).join('')}</select></div></div>
+ <div class="kpis">
+  <div class="kpi"><span class="small muted">Membres suivis</span><b>${all.length}</b></div>
+  <div class="kpi"><span class="small muted">Prioritaires</span><b style="color:var(--dng)">${all.filter(m=>m.st.risk==='prio').length}</b></div>
+  <div class="kpi"><span class="small muted">À surveiller</span><b style="color:var(--warn)">${all.filter(m=>m.st.risk==='watch').length}</b></div>
+  <div class="kpi"><span class="small muted">Entrées (7 jours)</span><b>${k7}</b></div>
+  <div class="kpi"><span class="small muted">Mes membres</span><b>${all.filter(m=>m.coach===S.coachId).length}</b></div>
+ </div>
+ <div class="cols det"><section class="card">
+  <div class="toolbar">
+   <div><label for="f-q">Rechercher</label><input type="text" id="f-q" data-in="q" value="${esc(S.q)}" placeholder="Nom du membre" autocomplete="off"></div>
+   <div><label for="f-c">Coach référent</label><select id="f-c" data-chg="fCoach"><option value="all">Tous les coachs</option>${COACHES.map(c=>`<option value="${c.id}" ${S.fCoach===c.id?'selected':''}>${c.n}${c.id===S.coachId?' (moi)':''}</option>`).join('')}</select></div>
+   <div><label for="f-r">Signal IA</label><select id="f-r" data-chg="fRisk"><option value="all">Tous</option>${Object.entries(RISK).map(([k,v])=>`<option value="${k}" ${S.fRisk===k?'selected':''}>${v[1]}</option>`).join('')}</select></div>
+  </div>
+  <p class="small muted" aria-live="polite">${list.length} membre${list.length>1?'s':''} affiché${list.length>1?'s':''}</p>
+  <div class="tbl-wrap"><table><thead><tr><th>Membre</th><th>Coach</th><th>Dernière entrée</th><th>Humeur 7 j</th><th>Signal IA</th></tr></thead><tbody>
+  ${list.map(m=>`<tr class="${S.sel===m.id?'sel':''}"><td><button type="button" class="link" data-act="sel" data-id="${m.id}" aria-pressed="${S.sel===m.id}">${esc(m.name)}${m.id==='me'?' <span class="chip">vous côté membre</span>':''}</button><div class="small muted">${esc(PROG(m.prog).t)}</div></td><td>${CO(m.coach).n}</td><td>${m.st.last?fmtD(m.st.last):'—'}</td><td><span class="row" style="gap:4px;flex-wrap:nowrap">${m.st.avg.toFixed(1).replace('.',',')}/10 ${trendIc(m.st.trend)}</span></td><td>${badge(m.st.risk)}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Aucun membre ne correspond.</td></tr>'}
+  </tbody></table></div></section>
+  <div id="detail">${sel?cDetail(sel):`<section class="card"><h2>Fiche membre</h2><p class="muted">Sélectionnez un membre pour voir son évolution, la synthèse IA de ses journaux et les notes partagées de l’équipe.</p></section>`}</div>
+ </div>`;
+}
+function cDetail(m){
+ const st=m.st,notes=S.notes.filter(n=>n.mid===m.id).sort((a,b)=>b.t-a.t);
+ const ent=m.hist.filter(x=>x.text).slice(-4).reverse();
+ return`<section class="card stack" aria-labelledby="d-name">
+ <div class="row"><span class="av">${ini(m.name)}</span><div style="flex:1;min-width:0"><h2 id="d-name" style="margin:0">${esc(m.name)}</h2><div class="small muted">Membre depuis le ${fmtF(m.since)} · ${esc(PROG(m.prog).t)} (${m.pct} %)</div></div>${badge(st.risk)}<button type="button" class="icon-btn" data-act="sel" data-id="" aria-label="Fermer la fiche">${ic('x')}</button></div>
+ <div class="f2"><div class="fld"><label for="d-coach">Coach référent</label><select id="d-coach" data-chg="assign" data-id="${m.id}">${COACHES.map(c=>`<option value="${c.id}" ${m.coach===c.id?'selected':''}>${c.n}</option>`).join('')}</select></div>
+ <div class="fld"><span style="display:block;font-weight:600;margin-bottom:6px">Contact</span><button type="button" class="btn" style="width:100%" data-act="msg" data-to="${esc(m.name)}">${ic('send')}Message</button></div></div>
+ <div><h3>Humeur sur 14 jours</h3>${chart(m.hist,'Humeur de '+m.name)}</div>
+ <div class="ai">${busy.regen===m.id?`<div class="ai-h">${ic('spark')}Synthèse en cours de génération…</div><div class="skel"></div><div class="skel" style="width:75%"></div><div class="skel" style="width:85%"></div>`:`<div class="ai-h">${ic('spark')}Synthèse IA · aide à la décision<span class="sp"></span><button type="button" class="btn ghost" data-act="regen" data-id="${m.id}">Régénérer</button></div>
+  <p>Humeur moyenne <b>${st.avg.toFixed(1).replace('.',',')}/10</b> sur 7 jours (${st.trend>=0?'+':''}${st.trend.toFixed(1).replace('.',',')} vs semaine précédente). Émotion dominante : <b>${EL[st.dom].toLowerCase()}</b>${st.themes.length?`. Thèmes récurrents : ${st.themes.slice(0,3).join(', ').toLowerCase()}`:''}. ${st.n} entrée${st.n>1?'s':''} partagée${st.n>1?'s':''} analysée${st.n>1?'s':''}${st.priv?`, ${st.priv} privée${st.priv>1?'s':''} non lue${st.priv>1?'s':''}`:''}.</p>
+  ${emoBars(st.emo.slice(0,3))}
+  <h3 style="margin-top:12px">Pistes suggérées</h3><ul style="margin:0;padding-left:20px">${pistes(st).map(p=>`<li>${esc(p)}</li>`).join('')}</ul>
+  <p class="small muted" style="margin:10px 0 0">Généré à partir des journaux partagés. Décision finale au coach.</p>`}</div>
+ <div><h3>Dernières entrées</h3><ul class="entries">${ent.map(e=>{if(!e.shared)return`<li><div class="row small"><b>${fmtD(e.t)}</b><span class="sp"></span><span class="muted">Humeur ${e.mood}/10</span></div><p class="muted" style="margin:6px 0 0">${ic('lock')} Entrée privée, non partagée par le membre.</p></li>`;const a=analyze(e.text,e.mood);return`<li><div class="row small"><b>${fmtD(e.t)}</b><span class="sp"></span><span class="muted">Humeur ${e.mood}/10</span>${a.risk!=='ok'?badge(a.risk):''}</div><p style="margin:6px 0">${esc(e.text)}</p><div class="chips"><span class="chip e-${a.dom}"><span class="edot"></span>${EL[a.dom]}</span>${a.themes.map(t=>`<span class="chip">${t}</span>`).join('')}</div></li>`}).join('')||'<li class="muted">Aucune entrée.</li>'}</ul></div>
+ <div><h3>Notes partagées de l’équipe</h3><ul class="notes">${notes.map(n=>`<li><div class="row small"><b>${CO(n.c).n}</b><span class="sp"></span><span class="muted">${fmtD(n.t)}</span></div><div style="margin-top:4px">${esc(n.x)}</div></li>`).join('')||'<li class="muted">Aucune note pour l’instant.</li>'}</ul>
+ <form data-form="note" data-id="${m.id}" novalidate><div class="fld"><label for="n-x">Ajouter une note (visible par tous les coachs)</label><textarea id="n-x" name="x" style="min-height:90px" aria-describedby="n-err"></textarea><div id="n-err" class="err"></div></div><div class="dlg-f" style="margin:0"><button class="btn pri">${ic('note')}Publier en tant que ${CO(S.coachId).n}</button></div></form></div>
+ </section>`;
+}
+function cTeam(){
+ const all=allMembers().map(m=>({...m,st:stats(m)}));
+ const feed=[...S.notes].sort((a,b)=>b.t-a.t).slice(0,8);
+ const nm=id=>(all.find(m=>m.id===id)||{}).name||'';
+ return`<div class="ph"><div><p class="kicker">Collaboration</p><h1>Équipe de coachs</h1></div></div>
+ <div class="grid" style="margin-bottom:16px">${COACHES.map(c=>{const ms=all.filter(m=>m.coach===c.id);return`<section class="card"><div class="row"><span class="av">${ini(c.n)}</span><div><h2 style="margin:0;font-size:1.1rem">${c.n}${c.id===S.coachId?' <span class="chip">moi</span>':''}</h2><div class="small muted">${c.s}</div></div></div>
+  <div class="kpis" style="margin:14px 0"><div class="kpi"><span class="small muted">Membres</span><b>${ms.length}</b></div><div class="kpi"><span class="small muted">Prioritaires</span><b style="color:var(--dng)">${ms.filter(m=>m.st.risk==='prio').length}</b></div></div>
+  <p class="small muted">${ms.map(m=>esc(m.name)).join(', ')||'Aucun membre'}</p>
+  <button type="button" class="btn" data-act="seecoach" data-id="${c.id}">Voir ses membres</button></section>`}).join('')}</div>
+ <div class="cols"><section class="card"><h2>Alertes à traiter</h2><ul class="entries">${all.filter(m=>m.st.risk!=='ok').sort((a,b)=>RO[a.st.risk]-RO[b.st.risk]).map(m=>`<li class="row"><div style="flex:1;min-width:0"><b>${esc(m.name)}</b><div class="small muted">Coach : ${CO(m.coach).n} · ${EL[m.st.dom]}</div></div>${badge(m.st.risk)}<button type="button" class="btn" data-act="open" data-id="${m.id}">Ouvrir la fiche</button></li>`).join('')||'<li class="muted">Aucune alerte.</li>'}</ul></section>
+ <section class="card"><h2>Fil des notes partagées</h2><ul class="notes">${feed.map(n=>`<li><div class="row small"><b>${CO(n.c).n}</b><span class="muted">sur</span><button type="button" class="link" data-act="open" data-id="${n.mid}">${esc(nm(n.mid))}</button><span class="sp"></span><span class="muted">${fmtD(n.t)}</span></div><div style="margin-top:4px">${esc(n.x)}</div></li>`).join('')}</ul></section></div>`;
+}
+
+/* ---------- Dialogues ---------- */
+const dlg=$('#dlg');
+function openDlg(t,h,wide){$('#dlgT').textContent=t;$('#dlgB').innerHTML=h;dlg.classList.toggle('wide',!!wide);if(!dlg.open)dlg.showModal();const f=$('#dlgB').querySelector('input,textarea,select');(f||dlg.querySelector('.icon-btn')).focus()}
+dlg.addEventListener('close',stopPlayer);
+const PL={timer:null,pos:0,mid:null};
+function stopPlayer(){clearInterval(PL.timer);PL.timer=null}
+function wm(){return`<div class="wm" aria-hidden="true">${Array(24).fill(esc(S.user.email)).map(x=>`<span>${x}</span>`).join('')}</div>`}
+function openModule(id){
+ const m=MOD(id);if(!m)return;
+ if(!access(m.p.id)){openChangePlan();return}
+ stopPlayer();PL.pos=S.done[id]?100:0;PL.mid=id;
+ const prot=`<p class="prot">${ic('shield')}Contenu protégé · lecture en ligne uniquement · lien signé valable 15 min · filigrane nominatif</p>`;
+ const ctl=`<div class="ctl"><button type="button" class="sm" data-act="play" id="pbtn" aria-label="Lecture">${ic('play')}</button><div class="pb" role="progressbar" aria-label="Progression de lecture" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${PL.pos}"><span id="pbar" style="width:${PL.pos}%"></span></div><span id="ptime" class="small">${PL.pos}%</span></div>`;
+ let h='';
+ if(m.type==='video')h=`<div class="player video">${wm()}<button type="button" class="big" data-act="play" aria-label="Lire la vidéo">${ic('play')}</button>${ctl}</div>${prot}`;
+ else if(m.type==='audio')h=`<div class="player">${wm()}<div class="wave" aria-hidden="true">${Array.from({length:48},(_,i)=>`<i style="height:${20+Math.round(Math.abs(Math.sin(i*1.7))*70)}%"></i>`).join('')}</div>${ctl}</div>${prot}`;
+ else if(m.type==='pdf')h=`<div class="page">${wm()}<p class="kicker" style="color:#8a4524">${esc(m.p.t)} · fiche</p><h3>${esc(m.t)}</h3><p>Pendant une semaine, notez chaque moment où vous ressentez une montée de tension. Pour chacun : l’heure, le lieu, ce qui venait de se passer, l’intensité de 0 à 10 et la sensation dans le corps.</p><p><b>Exemple :</b> 21 h 40, canapé, lecture d’un mail professionnel, intensité 7, gorge serrée.</p><p>À la fin de la semaine, entourez les déclencheurs qui reviennent : ce sont vos premiers leviers d’action.</p><p class="small" style="opacity:.7">Page 1 / ${parseInt(m.d)||4}</p></div>${prot}<div class="dlg-f"><button type="button" class="btn pri" data-act="markdone">${ic('check')}Marquer comme lu</button></div>`;
+ else{const qs=EXO[id]||['Qu’avez-vous retenu de ce module ?'];h=`<form data-form="exo" data-id="${id}" novalidate><p class="muted">Vos réponses sont privées ; vous pourrez les partager avec votre coach.</p>${qs.map((q,i)=>`<div class="fld"><label for="ex${i}">${esc(q)}</label><textarea id="ex${i}" name="q${i}" style="min-height:90px" aria-describedby="ex${i}e">${esc((S.exo&&S.exo[id]&&S.exo[id][i])||'')}</textarea><div class="err" id="ex${i}e"></div></div>`).join('')}<label class="chk"><input type="checkbox" name="share" checked> Partager avec mon coach</label><div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button class="btn pri">Enregistrer l’exercice</button></div></form>`}
+ openDlg(`${TYPES[m.type]} — ${m.t}`,h,m.type!=='exo');
+}
+function playTick(){
+ PL.pos=Math.min(100,PL.pos+2.5);
+ const b=$('#pbar');if(b){b.style.width=PL.pos+'%';b.parentElement.setAttribute('aria-valuenow',PL.pos);$('#ptime').textContent=Math.round(PL.pos)+'%'}
+ if(PL.pos>=100){stopPlayer();setPlayBtn();markDone(PL.mid)}
+}
+function setPlayBtn(){const b=$('#pbtn');if(b){b.innerHTML=ic(PL.timer?'pause':'play');b.setAttribute('aria-label',PL.timer?'Pause':'Lecture')}const g=$('.player .big');if(g)g.hidden=!!PL.timer||PL.pos>0}
+function markDone(id){if(!S.done[id]){S.done[id]=1;toast('Module terminé — progression enregistrée');render()}}
+function openCheckout(planId){
+ const P=PLANS[planId];
+ openDlg('Paiement sécurisé',`<div class="row" style="margin-bottom:14px"><span class="test">${ic('alert')}Mode test — aucun débit réel</span></div>
+ <div class="card" style="padding:14px;margin-bottom:16px;background:var(--surf2)"><div class="row"><b>${P.n}</b><span class="sp"></span><b>${P.p} € / ${P.per}</b></div><div class="small muted">${planId==='annuel'?'Paiement annuel':'7 jours d’essai offerts, puis prélèvement mensuel'}</div></div>
+ <form data-form="checkout" data-plan="${planId}" novalidate>
+  <div class="fld"><label for="co-n">Prénom et nom</label><input type="text" id="co-n" name="n" autocomplete="name" aria-describedby="co-n-e"><div class="err" id="co-n-e"></div></div>
+  <div class="fld"><label for="co-e">Email</label><input type="email" id="co-e" name="e" autocomplete="email" aria-describedby="co-e-e"><div class="err" id="co-e-e"></div></div>
+  <div class="fld"><label for="co-c">Numéro de carte</label><input type="text" id="co-c" name="c" inputmode="numeric" data-in="card" placeholder="4242 4242 4242 4242" aria-describedby="co-c-h co-c-e"><div class="small muted" id="co-c-h">Carte de test : 4242 4242 4242 4242</div><div class="err" id="co-c-e"></div></div>
+  <div class="f2"><div class="fld"><label for="co-x">Expiration</label><input type="text" id="co-x" name="x" inputmode="numeric" placeholder="MM/AA" maxlength="5" data-in="exp" aria-describedby="co-x-e"><div class="err" id="co-x-e"></div></div>
+  <div class="fld"><label for="co-v">CVC</label><input type="text" id="co-v" name="v" inputmode="numeric" maxlength="4" placeholder="123" aria-describedby="co-v-e"><div class="err" id="co-v-e"></div></div></div>
+  <div class="dlg-f"><button type="button" class="btn" data-act="fill">Remplir avec la carte de test</button><button class="btn pri" id="co-go">${ic('lock')}Payer ${P.p} €</button></div>
+ </form>`);
+}
+function openChangePlan(){
+ const cur=S.user.plan?.id;
+ openDlg('Changer d’offre',`<form data-form="plan" novalidate><fieldset style="border:0;padding:0;margin:0"><legend class="muted" style="margin-bottom:10px">Le prorata est calculé automatiquement par le prestataire de paiement.</legend>
+ ${Object.entries(PLANS).map(([k,p])=>`<label class="chk card" style="margin-bottom:10px;padding:12px 16px"><input type="radio" name="p" value="${k}" ${k===cur?'checked':''}><span style="flex:1">${p.n}<span class="small muted" style="display:block;font-weight:400">${p.f.slice(0,2).join(' · ')}</span></span><b>${p.p} € / ${p.per}</b></label>`).join('')}</fieldset>
+ <div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button class="btn pri">Confirmer</button></div></form>`);
+}
+function invoiceHTML(f){return`<div class="inv"><div class="row"><b style="font-family:Fraunces,serif;font-size:1.3rem">Éclore</b><span class="sp"></span><b>Facture ${f.id}</b></div><p style="margin-top:12px">Date : ${fmtF(f.t)}<br>Client : ${esc(S.user.name)} — ${esc(S.user.email)}</p><table style="width:100%;border-collapse:collapse"><thead><tr><th>Désignation</th><th>Qté</th><th>Montant TTC</th></tr></thead><tbody><tr><td>Abonnement ${f.p} — 1 ${f.p.includes('annuel')?'an':'mois'}</td><td>1</td><td>${f.a},00 €</td></tr><tr><td colspan="2" style="text-align:right"><b>Total TTC</b></td><td><b>${f.a},00 €</b></td></tr></tbody></table><p class="small" style="margin-top:12px;opacity:.75">Payé par carte •••• ${S.user.card}. Document fictif — démonstration.</p></div>`}
+
+/* ---------- Actions ---------- */
+const ACT={
+ reset(){try{localStorage.removeItem(KEY)}catch(e){}S=seed();busy={a:false,regen:null};if(dlg.open)dlg.close();render(true);toast('Démo réinitialisée')},
+ role(b){S.role=b.dataset.r;render(true)},
+ mnav(b){S.mv=b.dataset.v;S.role='membre';if(dlg.open)dlg.close();render(true)},
+ cnav(b){S.cv=b.dataset.v;render(true)},
+ prog(b){S.prog=b.dataset.id;render()},
+ setprog(b){S.user.prog=b.dataset.id;render();toast('Programme en cours mis à jour')},
+ mod(b){openModule(b.dataset.id)},
+ close(){dlg.close()},
+ play(){if(PL.timer){stopPlayer()}else{if(PL.pos>=100)PL.pos=0;PL.timer=setInterval(playTick,160)}setPlayBtn()},
+ markdone(){markDone(PL.mid);dlg.close()},
+ jf(b){S.jf=b.dataset.k;render()},
+ checkout(b){openCheckout(b.dataset.plan)},
+ fill(){$('#co-c').value='4242 4242 4242 4242';$('#co-x').value='12/28';$('#co-v').value='123';if(!$('#co-n').value)$('#co-n').value='Camille Roux';if(!$('#co-e').value)$('#co-e').value='camille.roux@exemple.fr'},
+ changeplan(){openChangePlan()},
+ cancel(){openDlg('Résilier l’abonnement',`<p>Votre accès restera actif jusqu’au <b>${fmtF(S.user.plan.next)}</b>. Vos journaux restent exportables à tout moment.</p><div class="dlg-f"><button type="button" class="btn" data-act="close">Garder mon abonnement</button><button type="button" class="btn pri" data-act="docancel">Confirmer la résiliation</button></div>`)},
+ docancel(){S.user.plan.status='cancel';dlg.close();render();toast('Résiliation programmée — email de confirmation envoyé (simulation)')},
+ reactivate(){S.user.plan.status='active';render();toast('Abonnement réactivé')},
+ invoice(b){const f=S.invoices.find(x=>x.id===b.dataset.id);openDlg('Facture '+f.id,invoiceHTML(f)+`<div class="dlg-f"><button type="button" class="btn pri" data-act="print" data-id="${f.id}">${ic('print')}Imprimer / Enregistrer en PDF</button></div>`,true)},
+ print(b){$('#printArea').innerHTML=invoiceHTML(S.invoices.find(x=>x.id===b.dataset.id));window.print()},
+ msg(b){openDlg('Message à '+b.dataset.to,`<form data-form="msg" data-to="${esc(b.dataset.to)}" novalidate><div class="fld"><label for="m-x">Votre message</label><textarea id="m-x" name="x" aria-describedby="m-e"></textarea><div class="err" id="m-e"></div></div><div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button class="btn pri">${ic('send')}Envoyer</button></div></form>`)},
+ sel(b){S.sel=b.dataset.id||null;render();if(S.sel){const d=$('#detail');if(d&&innerWidth<1100)d.scrollIntoView({behavior:'smooth',block:'start'});const h=$('#d-name');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}},
+ open(b){S.role='coach';S.cv='members';S.fCoach='all';S.fRisk='all';S.q='';S.sel=b.dataset.id;render(true)},
+ seecoach(b){S.cv='members';S.fCoach=b.dataset.id;S.sel=null;render(true)},
+ regen(b){busy.regen=b.dataset.id;render();setTimeout(()=>{busy.regen=null;render();toast('Synthèse IA mise à jour')},900)}
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const f=ACT[b.dataset.act];if(f){e.preventDefault();f(b,e)}});
+document.addEventListener('input',e=>{
+ const t=e.target,k=t.dataset.in;if(!k)return;
+ if(k==='mood'){$('#j-out').textContent=`${t.value} / 10 — ${moodL(+t.value)}`}
+ else if(k==='q'){S.q=t.value;const pos=t.selectionStart;render();const n=$('#f-q');n.focus();n.setSelectionRange(pos,pos)}
+ else if(k==='card'){t.value=t.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})(?=.)/g,'$1 ')}
+ else if(k==='exp'){let v=t.value.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);t.value=v}
+});
+document.addEventListener('change',e=>{
+ const t=e.target,k=t.dataset.chg;if(!k)return;
+ if(k==='assign'){const id=t.dataset.id,old=id==='me'?S.user.coach:S.members.find(m=>m.id===id).coach;if(id==='me')S.user.coach=t.value;else S.members.find(m=>m.id===id).coach=t.value;
+  S.notes.push({id:'n'+Date.now(),mid:id,c:S.coachId,t:Date.now(),x:`Réaffectation : ${CO(old).n} → ${CO(t.value).n}.`});render();toast(`${CO(t.value).n} est désormais référent·e — notification envoyée (simulation)`);$('#d-coach')?.focus()}
+ else{S[k]=t.value;render();const n=document.getElementById(t.id);if(n)n.focus()}
+});
+function setErr(f,name,errId,msg){const el=f.elements[name];el.setAttribute('aria-invalid',msg?'true':'false');$('#'+errId).textContent=msg||'';return!msg}
+const FORMS={
+ journal(f){
+  const text=f.text.value.trim(),mood=+f.mood.value;
+  if(!setErr(f,'text','j-err',text.length<20?'Écrivez au moins 20 caractères pour permettre l’analyse.':'')){f.text.focus();return}
+  const e={id:'j'+Date.now(),t:Date.now(),mood,text,shared:f.share.checked};
+  S.journal.push(e);S.lastA=e.id;S.jf='all';busy.a=true;render();
+  setTimeout(()=>{busy.a=false;render();const a=analyze(text,mood);toast(e.shared?(a.risk==='prio'?'Entrée analysée — votre coach a été alerté·e':'Entrée analysée et partagée avec votre équipe'):'Entrée analysée — gardée privée');document.querySelector('.ai')?.scrollIntoView({behavior:'smooth',block:'nearest'})},1000);
+ },
+ note(f){
+  const x=f.x.value.trim();if(!setErr(f,'x','n-err',x.length<3?'La note est vide.':'')){f.x.focus();return}
+  S.notes.push({id:'n'+Date.now(),mid:f.dataset.id,c:S.coachId,t:Date.now(),x});render();toast('Note publiée pour toute l’équipe');$('#n-x')?.focus();
+ },
+ msg(f){const x=f.x.value.trim();if(!setErr(f,'x','m-e',x?'':'Le message est vide.')){f.x.focus();return}dlg.close();toast(`Message envoyé à ${f.dataset.to} (simulation)`)},
+ exo(f){
+  const id=f.dataset.id,qs=EXO[id]||[1];let ok=true,first=null;const ans=[];
+  qs.forEach((_,i)=>{const v=f['q'+i].value.trim();ans.push(v);const good=setErr(f,'q'+i,`ex${i}e`,v?'':'Merci de répondre à cette question.');if(!good&&!first)first=f['q'+i];ok=ok&&good});
+  if(!ok){first.focus();return}
+  S.exo=S.exo||{};S.exo[id]=ans;const sh=f.share.checked;dlg.close();
+  if(!S.done[id]){S.done[id]=1;render()}save();toast(sh?'Exercice enregistré et partagé avec votre coach':'Exercice enregistré');
+ },
+ plan(f){const v=f.p.value;if(!v)return;const P=PLANS[v];S.user.plan={id:v,status:'active',next:S.user.plan?.next||today()+30*DAY};dlg.close();render();toast(`Offre modifiée : ${P.n}. Prorata appliqué (simulation)`)},
+ checkout(f){
+  const n=f.n.value.trim(),em=f.e.value.trim(),c=f.c.value.replace(/\s/g,''),x=f.x.value,v=f.v.value.trim();
+  const [mm,aa]=x.split('/').map(Number);const now=new Date(),expOk=/^\d{2}\/\d{2}$/.test(x)&&mm>=1&&mm<=12&&(2000+aa>now.getFullYear()||(2000+aa===now.getFullYear()&&mm>=now.getMonth()+1));
+  const r=[setErr(f,'n','co-n-e',n.length<2?'Indiquez votre nom.':''),setErr(f,'e','co-e-e',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)?'':'Adresse email invalide.'),setErr(f,'c','co-c-e',c.length!==16?'Le numéro doit comporter 16 chiffres.':c!=='4242424242424242'?'Carte refusée en mode test : utilisez 4242 4242 4242 4242.':''),setErr(f,'x','co-x-e',expOk?'':'Date invalide ou expirée (MM/AA).'),setErr(f,'v','co-v-e',/^\d{3,4}$/.test(v)?'':'3 ou 4 chiffres.')];
+  const bad=['n','e','c','x','v'][r.indexOf(false)];if(bad){f[bad].focus();return}
+  const btn=$('#co-go');btn.disabled=true;btn.textContent='Paiement en cours…';
+  setTimeout(()=>{const plan=f.dataset.plan,P=PLANS[plan],T=today();
+   S.user.name=n;S.user.email=em;S.user.card=c.slice(-4);S.user.plan={id:plan,status:'active',next:T+(plan==='annuel'?365:plan==='essentiel'?7:30)*DAY};
+   S.invoices.push({id:`FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-8,-4)}-${String(Date.now()).slice(-4)}`,t:T,a:plan==='essentiel'?0:P.p,p:P.n+(plan==='essentiel'?' (essai)':'')});
+   S.role='membre';S.mv='home';dlg.close();render(true);toast('Abonnement activé — email de bienvenue envoyé (simulation)')},1200);
+ }
+};
+document.addEventListener('submit',e=>{const f=e.target;if(f.dataset.form&&FORMS[f.dataset.form]){e.preventDefault();FORMS[f.dataset.form](f)}});
+render();
+</script>
 </body>
 </html>
