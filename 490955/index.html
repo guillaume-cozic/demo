@@ -2,20 +2,871 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>CRM conciergerie haut de gamme</title>
+<meta name="description" content="CRM de conciergerie haut de gamme : pipeline des demandes, propositions avec coûts et marges, portail client multilingue (FR, EN, RU, AR en RTL), revenus, gifting, prestataires, apporteurs d’affaires et assistant IA validé par l’humain.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F5F3EE;--panel:#FFFFFF;--panel-2:#FAF8F3;--ink:#1B1D22;--muted:#596069;--line:#E3DED3;--line-2:#C9C2B3;
+  --accent:#22304F;--accent-ink:#FFFFFF;--accent-soft:#E7EAF2;--accent-text:#22304F;
+  --gold:#7A5B1E;--gold-soft:#F5EDDC;--int:#FBF7EE;--int-line:#D5BF92;
+  --s1:#22304F;--s2:#B08A3E;
+  --ok:#1D6B43;--ok-soft:#DFF0E6;--warn:#8A4A00;--warn-soft:#FBEBD3;--bad:#A3262E;--bad-soft:#F9E2E3;--info:#24508A;--info-soft:#E2EAF6;--vio:#5B3F96;--vio-soft:#ECE7F7;--gray:#4F535B;--gray-soft:#ECEAE4;
+  --shadow:0 1px 2px rgba(20,22,30,.05),0 4px 14px rgba(20,22,30,.05);
+  --serif:"Cormorant Garamond",Georgia,serif;--font:"Inter",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F1116;--panel:#171A21;--panel-2:#1C2029;--ink:#ECE8DF;--muted:#A7ABB4;--line:#2A2F3A;--line-2:#414757;
+  --accent:#D4B574;--accent-ink:#1A1405;--accent-soft:#2B2617;--accent-text:#E4CB91;
+  --gold:#E4CB91;--gold-soft:#2B2617;--int:#1E1B14;--int-line:#5C4C2A;
+  --s1:#D4B574;--s2:#7FA7D9;
+  --ok:#7AD3A0;--ok-soft:#14301F;--warn:#F0B866;--warn-soft:#352614;--bad:#FF959B;--bad-soft:#3B1C1F;--info:#9BC0F0;--info-soft:#172A40;--vio:#C5B2F2;--vio-soft:#29233F;--gray:#BAC0C7;--gray-soft:#262A31;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(27px,3vw,36px);letter-spacing:-.005em}
+h2{font-size:16px;font-weight:650}
+h3{font-size:14px;font-weight:650}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+[dir=rtl] svg.flip{transform:scaleX(-1)}
+
+.demo-band{background:var(--gold-soft);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--gold)}
+.demo-band button{min-height:36px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:8px 16px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-family:var(--serif);font-size:24px;font-weight:700;line-height:1;display:block}
+.brand small{display:block;font-size:11.5px;color:var(--muted)}
+.mark{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.nav{display:flex;gap:2px;flex-wrap:wrap;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 12px;border-radius:10px;border:0;background:transparent;font-weight:550;color:var(--muted);cursor:pointer}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current=page]{background:var(--accent-soft);color:var(--accent-text)}
+.tools{margin-inline-start:auto;display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;min-width:0}
+.ctl{display:flex;align-items:center;gap:6px;min-width:0}
+.ctl label{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.ctl select{width:auto;max-width:330px}
+@media (max-width:980px){.tools{margin-inline-start:0;width:100%}.ctl{flex:1 1 160px}.ctl select{flex:1;width:0;max-width:none}.nav{order:3;width:100%}}
+@media (max-width:560px){.tab{padding:0 10px;font-size:14px}.tab svg{display:none}}
+main{padding:20px clamp(16px,2vw,32px) 64px}
+
+.page-head{display:flex;gap:12px 16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+.page-head>div{min-width:0}
+.page-head p{margin-top:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;gap:8px 10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.card-h h2{display:flex;gap:8px;align-items:center}
+.card.int{background:var(--int);border:1px dashed var(--int-line)}
+.card.ai{border-color:var(--accent)}
+.stack{display:grid;gap:16px;min-width:0;align-content:start}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+@media (max-width:1200px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1000px){.grid2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.grid3{grid-template-columns:minmax(0,1fr)}}
+.sec{margin:24px 0 12px;font-size:15px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:550}
+.kpi .v{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px;overflow-wrap:anywhere}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.kpi.big .v{font-size:28px;font-family:var(--serif);font-weight:700}
+.kpi.hl{border-color:var(--accent);background:var(--accent-soft)}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--gray-soft);color:var(--gray);line-height:1.5}
+.b-info{background:var(--info-soft);color:var(--info)}.b-vio{background:var(--vio-soft);color:var(--vio)}.b-gold{background:var(--gold-soft);color:var(--gold)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-gray{background:var(--gray-soft);color:var(--gray)}
+.tag{display:inline-flex;gap:4px;align-items:center;font-size:11.5px;font-weight:650;padding:2px 8px;border-radius:999px}
+.tag svg{width:13px;height:13px}
+.tag.int{color:var(--gold);background:var(--gold-soft)}
+.tag.vis{color:var(--ok);background:var(--ok-soft)}
+.chip{display:inline-flex;padding:2px 10px;border-radius:999px;border:1px solid var(--line-2);font-size:12.5px;margin:2px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent-text);font-weight:600;cursor:pointer;text-align:start;text-decoration:underline;text-underline-offset:3px;min-height:44px;overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;flex-wrap:wrap;background:var(--panel)}
+.seg button{min-height:44px;border:0;background:transparent;padding:0 14px;cursor:pointer;font-weight:550;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+input,select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{min-height:96px;resize:vertical}
+[aria-invalid=true]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.ferr{color:var(--bad);font-size:12.5px;font-weight:550}
+.ferr:empty{display:none}
+.check{display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer}
+.check input{width:20px;height:20px;min-height:0;accent-color:var(--accent);flex:none}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:12px}
+.toolbar{display:flex;gap:10px 12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.toolbar .field{flex:1 1 180px}
+.toolbar .field.q{flex:2 1 240px}
+
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;padding-bottom:6px;align-items:start;position:relative}
+@media (max-width:760px){.board{grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:minmax(0,1fr)}}
+.col{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0;display:grid;gap:8px;align-content:start}
+.col-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 4px 4px;font-weight:650;font-size:13.5px}
+.kcard{display:grid;gap:6px;text-align:start;width:100%;background:var(--panel);border:1px solid var(--line);border-inline-start:4px solid var(--c,var(--line-2));border-radius:12px;padding:12px;cursor:pointer;box-shadow:var(--shadow);min-width:0}
+.kcard:hover{border-color:var(--line-2);border-inline-start-color:var(--c)}
+.kcard strong{font-weight:650}
+.kmeta{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center;font-size:12.5px}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);font-size:11px;font-weight:700;display:inline-grid;place-items:center;flex:none}
+.due{display:inline-flex;gap:4px;align-items:center;color:var(--muted)}
+.due.late{color:var(--bad);font-weight:600}.due.soon{color:var(--warn);font-weight:600}
+.empty{color:var(--muted);font-size:14px;padding:10px 4px}
+
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 12px;text-align:start;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:650;background:var(--panel-2)}
+td.r,th.r{text-align:end}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{font-weight:650;background:var(--panel-2)}
+.tbl-wrap table{min-width:620px}
+.tbl-wrap.narrow table{min-width:0}
+h1[tabindex]:focus{outline:none}
+
+.list{display:grid;margin:0;padding:0;list-style:none}
+.list>li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;min-width:0;flex-wrap:wrap}
+.list>li:last-child{border-bottom:0}
+.list>li>div{min-width:0;flex:1 1 200px}
+.rem{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);flex-wrap:wrap}
+.rem>div{flex:1 1 220px;min-width:0}
+.rems{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none}
+
+.thread{display:grid;gap:10px;max-height:400px;overflow-y:auto;padding:4px;margin-bottom:10px}
+.bub{max-width:88%;padding:10px 12px;border-radius:14px;background:var(--panel-2);border:1px solid var(--line);overflow-wrap:anywhere;justify-self:start}
+.bub.me{justify-self:end;background:var(--accent-soft);border-color:transparent}
+.bub .meta{font-size:11.5px;color:var(--muted);margin-bottom:3px}
+.bub .tr{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
+
+.steps{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;counter-reset:s}
+.steps li{position:relative;padding-top:32px;font-size:12px;text-align:center;color:var(--muted);overflow-wrap:anywhere;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:26px;border-radius:50%;border:2px solid var(--line-2);background:var(--panel);display:grid;place-items:center;font-size:12px;font-weight:700;z-index:1}
+.steps li::after{content:"";position:absolute;top:12px;inset-inline-start:50%;width:100%;height:2px;background:var(--line-2)}
+.steps li:last-child::after{display:none}
+.steps li.done::before{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);content:"✓"}
+.steps li.done::after{background:var(--accent)}
+.steps li.cur{color:var(--ink);font-weight:650}
+.steps li.cur::before{border-color:var(--accent);color:var(--accent-text)}
+
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
+.pcard,.ccard{display:grid;gap:8px;text-align:start;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;box-shadow:var(--shadow);min-width:0}
+.pcard:hover,.ccard:hover{border-color:var(--line-2)}
+.pcard.need{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-width:0}
+
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:10px 16px;margin:0}
+.dl dt{font-size:12px;color:var(--muted)}
+.dl dd{margin:0;font-weight:550;overflow-wrap:anywhere}
+.totals{display:grid;gap:6px;margin-top:12px;padding:12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line)}
+.totals>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.totals>div.strong{font-weight:700;border-top:1px solid var(--line-2);padding-top:6px}
+.ai-out{margin-top:12px;padding:12px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line)}
+.ai-out ul{margin:6px 0 0;padding-inline-start:20px}
+.ai-out li{margin:3px 0}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:var(--panel-2);border:1px solid var(--line);padding:10px;border-radius:8px;margin:8px 0 0}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;font-size:13px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.pref{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pref>div{flex:1 1 200px;min-width:0}
+.pref:last-child{border-bottom:0}
+
+.chart{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;align-items:end;height:220px;border-bottom:1px solid var(--line-2);margin-top:8px}
+.chart .c{display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%;min-width:0}
+.chart .b{width:min(16px,42%);border-radius:4px 4px 0 0;background:var(--s1);min-height:2px}
+.chart .b.m{background:var(--s2)}
+.chart-x{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;background:var(--s1)}
+.legend i.m{background:var(--s2)}
+.bar{height:10px;border-radius:99px;background:var(--gray-soft);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--s1)}
+.bar>i.m{background:var(--s2)}
+
+#modal .bg{position:fixed;inset:0;background:rgba(10,12,18,.55);display:grid;place-items:center;padding:12px;z-index:100;overflow-y:auto}
+.modal{background:var(--panel);border-radius:16px;width:min(660px,100%);max-height:calc(100vh - 24px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--line)}
+.modal.wide{width:min(960px,100%)}
+.mhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.mhead h2{font-size:18px}
+.mbody{padding:18px}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.testmode{display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-weight:600;font-size:13.5px;margin-bottom:14px}
+.toasts{position:fixed;bottom:16px;inset-inline:16px;display:grid;justify-items:end;gap:8px;z-index:200;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);max-width:440px;font-size:14px}
+
+.doc{background:#fff;color:#1B1D22;padding:28px;border:1px solid #DDD;border-radius:8px;font-size:14px}
+.doc table{font-size:13.5px;margin:14px 0}
+.doc th{background:#F4F1EA;color:#555;border-color:#E3DED3}
+.doc td{border-color:#E3DED3}
+.doc-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2px solid #22304F;padding-bottom:12px;margin-bottom:14px}
+.doc-brand{font-family:var(--serif);font-size:28px;color:#22304F}
+.doc .small{color:#555}
+#print{display:none}
+body.nofin .fin{display:none!important}
+@media print{
+  body{background:#fff}
+  body>*:not(#print){display:none!important}
+  #print{display:block!important}
+  .doc{border:0;padding:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top" id="top"></header>
+<main id="main"></main>
+<div id="modal" hidden></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<div id="print"></div>
+<script>
+(function(){
+'use strict';
+const KEY='conc490955-v1';
+const TODAY=new Date(2026,9,8,12);
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const dAdd=(n,b=TODAY)=>{const d=new Date(b);d.setDate(d.getDate()+n);return iso(d)};
+const parseD=s=>{const p=s.slice(0,10).split('-').map(Number);return new Date(p[0],p[1]-1,p[2],12)};
+const daysTo=s=>Math.round((parseD(s)-TODAY)/864e5);
+const nowAt=()=>{const d=new Date();return iso(TODAY)+'T'+pad(d.getHours())+':'+pad(d.getMinutes())};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LOC={fr:'fr-FR',en:'en-GB',ru:'ru-RU',ar:'ar-u-nu-latn'};
+const LANGN={fr:'Français',en:'English',ru:'Русский',ar:'العربية'};
+const fmtE=(n,loc='fr-FR')=>new Intl.NumberFormat(loc,{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(n||0));
+const pctf=v=>(Math.round(v*1000)/10).toLocaleString('fr-FR')+' %';
+function fd(s,loc='fr-FR',o){if(!s)return '—';return parseD(s).toLocaleDateString(loc,o||{day:'numeric',month:'short',year:'numeric'})}
+function fdt(s,loc='fr-FR'){if(!s)return '—';const tm=s.slice(11,16);return parseD(s).toLocaleDateString(loc,{day:'numeric',month:'short'})+(tm?' · '+tm:'')}
+function frange(a,b,loc){if(!a)return '—';return b&&b!==a?fd(a,loc)+' – '+fd(b,loc):fd(a,loc)}
+
+const P={home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',inbox:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 14h5l2 3h4l2-3h5"/>',users:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/>',brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 13h18"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/>',gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8S10 3 7.5 4 9 8 12 8zM12 8s2-5 4.5-4S15 8 12 8z"/>',spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 3v4M17 5h4"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',plus:'<path d="M12 5v14M5 12h14"/>',back:'<path d="M15 18l-6-6 6-6"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',send:'<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>',check:'<path d="M20 6L9 17l-5-5"/>',file:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>',msg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',phone:'<path d="M5 3h4l2 5-3 2a11 11 0 0 0 6 6l2-3 5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/>',star:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17.5v.01"/>',key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',pin:'<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',euro:'<path d="M17 6a7 7 0 1 0 0 12M4 10h9M4 14h9"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
+
+/* ---------- i18n portail ---------- */
+const TR={
+nav_reqs:['Mes demandes','My requests','Мои запросы','طلباتي'],
+nav_new:['Nouvelle demande','New request','Новый запрос','طلب جديد'],
+nav_docs:['Documents','Documents','Документы','المستندات'],
+nav_msgs:['Messages','Messages','Сообщения','الرسائل'],
+nav_prefs:['Préférences','Preferences','Предпочтения','التفضيلات'],
+lang:['Langue','Language','Язык','اللغة'],
+view_as:['Vue','View','Режим','العرض'],
+hello:['Bonjour','Hello','Здравствуйте,','مرحباً'],
+intro:['Suivez vos demandes, validez nos propositions et retrouvez vos documents.','Track your requests, approve our proposals and access your documents.','Следите за запросами, утверждайте наши предложения и получайте документы.','تابع طلباتك، ووافق على عروضنا، واطّلع على مستنداتك.'],
+active:['En cours','In progress','В работе','قيد التنفيذ'],
+past:['Terminées','Completed','Завершённые','المكتملة'],
+none:['Aucune demande en cours.','No request in progress.','Нет активных запросов.','لا توجد طلبات قيد التنفيذ.'],
+st_nouvelle:['Reçue','Received','Получен','تم الاستلام'],
+st_recherche:['En recherche','In research','Поиск вариантов','قيد البحث'],
+st_proposition:['Proposition disponible','Proposal available','Предложение готово','العرض متاح'],
+st_attente:['En attente de paiement','Awaiting payment','Ожидает оплаты','بانتظار الدفع'],
+st_confirmee:['Confirmée','Confirmed','Подтверждён','مؤكَّد'],
+st_realisee:['Réalisée','Completed','Выполнен','منجز'],
+st_annulee:['Annulée','Cancelled','Отменён','ملغى'],
+s_prop:['Proposition','Proposal','Предложение','العرض'],
+action:['Action requise','Action required','Требуется действие','إجراء مطلوب'],
+back:['Retour','Back','Назад','رجوع'],
+details:['Détails','Details','Детали','التفاصيل'],
+dest:['Destination','Destination','Направление','الوجهة'],
+dates:['Dates','Dates','Даты','التواريخ'],
+guests:['Personnes','Guests','Гостей','عدد الأشخاص'],
+budget:['Budget indicatif','Indicative budget','Ориентировочный бюджет','الميزانية التقديرية'],
+desc:['Votre demande','Your request','Ваш запрос','طلبك'],
+proposal:['Notre proposition','Our proposal','Наше предложение','عرضنا'],
+total:['Total','Total','Итого','المجموع'],
+service:['Prestation','Service','Услуга','الخدمة'],
+price:['Prix','Price','Цена','السعر'],
+validate:['Valider la proposition','Approve the proposal','Утвердить предложение','الموافقة على العرض'],
+change:['Demander une modification','Request a change','Запросить изменения','طلب تعديل'],
+change_ph:['Précisez les modifications souhaitées','Describe the changes you would like','Опишите желаемые изменения','صف التعديلات المطلوبة'],
+send:['Envoyer','Send','Отправить','إرسال'],
+prop_wait:['Notre équipe prépare votre proposition. Vous serez prévenu par email dès qu’elle sera prête.','Our team is preparing your proposal. You will be notified by email as soon as it is ready.','Наша команда готовит предложение. Мы сообщим вам по email, как только оно будет готово.','يعمل فريقنا على إعداد عرضك. سنُعلمك عبر البريد الإلكتروني فور جاهزيته.'],
+validated:['Proposition validée le','Proposal approved on','Предложение утверждено','تمت الموافقة على العرض في'],
+deposit:['Acompte à régler (30 %)','Deposit due (30%)','Предоплата (30 %)','الدفعة المقدمة (30%)'],
+pay:['Régler l’acompte','Pay the deposit','Оплатить предоплату','دفع الدفعة المقدمة'],
+pay_title:['Paiement sécurisé','Secure payment','Безопасная оплата','دفع آمن'],
+test:['Mode test — aucun débit réel','Test mode — no real charge','Тестовый режим — без реального списания','وضع الاختبار — لا يتم أي خصم فعلي'],
+c_name:['Titulaire de la carte','Cardholder name','Владелец карты','اسم حامل البطاقة'],
+c_num:['Numéro de carte','Card number','Номер карты','رقم البطاقة'],
+c_exp:['Expiration (MM/AA)','Expiry (MM/YY)','Срок действия (ММ/ГГ)','تاريخ الانتهاء (MM/YY)'],
+c_cvc:['Cryptogramme','CVC','CVC','رمز التحقق'],
+pay_btn:['Payer','Pay','Оплатить','ادفع'],
+paid:['Paiement reçu : votre réservation est confirmée.','Payment received: your booking is confirmed.','Оплата получена: бронирование подтверждено.','تم استلام الدفع: تم تأكيد حجزك.'],
+paid_badge:['Acompte réglé','Deposit paid','Предоплата внесена','تم دفع الدفعة المقدمة'],
+cancel:['Annuler','Cancel','Отмена','إلغاء'],
+close:['Fermer','Close','Закрыть','إغلاق'],
+docs_intro:['Confirmations, bons de réservation et factures.','Confirmations, booking vouchers and invoices.','Подтверждения, ваучеры и счета.','التأكيدات وقسائم الحجز والفواتير.'],
+view:['Consulter','View','Открыть','عرض'],
+print:['Imprimer / PDF','Print / PDF','Печать / PDF','طباعة / PDF'],
+d_confirmation:['Confirmation','Confirmation','Подтверждение','تأكيد'],
+d_facture:['Facture','Invoice','Счёт','فاتورة'],
+d_voucher:['Bon de réservation','Booking voucher','Ваучер','قسيمة حجز'],
+d_fichier:['Fichier','File','Файл','ملف'],
+inv_src:['Facture issue de notre outil de facturation, synchronisée automatiquement.','Invoice issued by our invoicing system, synchronised automatically.','Счёт выставлен нашей бухгалтерской системой и синхронизирован автоматически.','فاتورة صادرة عن نظام الفوترة لدينا ومُزامنة تلقائياً.'],
+no_docs:['Aucun document pour le moment.','No documents yet.','Документов пока нет.','لا توجد مستندات حالياً.'],
+no_prev:['Aperçu non disponible pour ce fichier (démonstration).','Preview unavailable for this file (demo).','Предпросмотр недоступен (демо).','المعاينة غير متاحة لهذا الملف (عرض توضيحي).'],
+msgs_intro:['Échangez avec votre équipe dédiée.','Chat with your dedicated team.','Общайтесь с вашей персональной командой.','تواصل مع فريقك المخصص.'],
+msg_ph:['Votre message','Your message','Ваше сообщение','رسالتك'],
+subject:['Sujet','Subject','Тема','الموضوع'],
+general:['Général','General','Общее','عام'],
+team:['Équipe','Team','Команда','الفريق'],
+you:['Vous','You','Вы','أنت'],
+prefs_intro:['Ces informations nous aident à personnaliser chaque prestation.','This information helps us tailor every service.','Эти данные помогают нам персонализировать каждую услугу.','تساعدنا هذه المعلومات على تخصيص كل خدمة.'],
+contact:['Coordonnées','Contact details','Контакты','بيانات الاتصال'],
+phone:['Téléphone','Phone','Телефон','الهاتف'],
+email:['Email','Email','Email','البريد الإلكتروني'],
+diet:['Régime et allergies','Diet and allergies','Питание и аллергии','النظام الغذائي والحساسية'],
+rooms:['Hébergement','Accommodation','Проживание','الإقامة'],
+travel:['Voyages et transports','Travel and transport','Поездки и транспорт','السفر والتنقل'],
+notes:['Autres souhaits','Other wishes','Другие пожелания','رغبات أخرى'],
+notif:['Notifications par email','Email notifications','Уведомления по email','إشعارات البريد الإلكتروني'],
+n_prop:['Nouvelle proposition','New proposal','Новое предложение','عرض جديد'],
+n_status:['Changement de statut','Status update','Изменение статуса','تحديث الحالة'],
+n_msg:['Nouveau message','New message','Новое сообщение','رسالة جديدة'],
+save:['Enregistrer','Save','Сохранить','حفظ'],
+saved:['Préférences enregistrées.','Preferences saved.','Предпочтения сохранены.','تم حفظ التفضيلات.'],
+cat:['Type de demande','Request type','Тип запроса','نوع الطلب'],
+cat_sejour:['Séjour','Stay','Проживание','إقامة'],
+cat_aviation:['Aviation privée','Private aviation','Частная авиация','طيران خاص'],
+cat_evenement:['Événement','Event','Мероприятие','فعالية'],
+cat_reservation:['Réservation','Reservation','Бронирование','حجز'],
+cat_yacht:['Yachting','Yachting','Яхтинг','اليخوت'],
+cat_transport:['Chauffeur et sécurité','Chauffeur and security','Водитель и охрана','سائق وأمن'],
+cat_lifestyle:['Lifestyle','Lifestyle','Лайфстайл','أسلوب الحياة'],
+title_f:['Intitulé','Title','Название','العنوان'],
+from:['Du','From','С','من'],
+to:['Au','To','По','إلى'],
+submit:['Envoyer la demande','Submit request','Отправить запрос','إرسال الطلب'],
+sent_ok:['Demande envoyée. Email de confirmation envoyé (simulation).','Request sent. Confirmation email sent (simulation).','Запрос отправлен. Письмо-подтверждение отправлено (симуляция).','تم إرسال الطلب. أُرسل بريد التأكيد (محاكاة).'],
+req:['Champ obligatoire','Required field','Обязательное поле','حقل مطلوب'],
+err_card:['Numéro invalide (16 chiffres)','Invalid number (16 digits)','Неверный номер (16 цифр)','رقم غير صالح (16 رقماً)'],
+err_exp:['Format MM/AA','Format MM/YY','Формат ММ/ГГ','الصيغة MM/YY'],
+err_cvc:['3 chiffres','3 digits','3 цифры','3 أرقام'],
+err_dates:['La date de fin doit suivre la date de début','End date must be after start date','Дата окончания должна быть позже даты начала','يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء'],
+auto_reply:['Merci pour votre message, nous revenons vers vous très rapidement.','Thank you for your message, we will get back to you shortly.','Спасибо за сообщение, мы скоро с вами свяжемся.','شكراً لرسالتك، سنعود إليك قريباً جداً.'],
+validated_ok:['Proposition validée — acompte à régler.','Proposal approved — deposit due.','Предложение утверждено — внесите предоплату.','تمت الموافقة على العرض — يرجى دفع الدفعة المقدمة.'],
+change_ok:['Demande de modification transmise.','Change request sent.','Запрос на изменения отправлен.','تم إرسال طلب التعديل.'],
+ref:['Référence','Reference','Номер','المرجع'],
+amount:['Montant','Amount','Сумма','المبلغ'],
+date:['Date','Date','Дата','التاريخ'],
+type:['Type','Type','Тип','النوع'],
+your_contact:['Votre contact','Your contact','Ваш менеджер','جهة الاتصال'],
+assigning:['Attribution en cours','Being assigned','Назначается','قيد التعيين'],
+desc_ph:['Décrivez votre projet : occasion, envies, contraintes…','Describe your plans: occasion, wishes, constraints…','Опишите ваши планы: повод, пожелания, ограничения…','صف مشروعك: المناسبة، الرغبات، القيود…'],
+new_intro:['Notre équipe vous répond sous 2 heures, 7 j/7.','Our team replies within 2 hours, 7 days a week.','Наша команда отвечает в течение 2 часов, 7 дней в неделю.','يرد فريقنا خلال ساعتين، طوال أيام الأسبوع.'],
+docs_req:['Documents liés','Related documents','Связанные документы','المستندات المرتبطة'],
+msgs_req:['Échanges','Messages','Переписка','المراسلات'],
+deposit_lbl:['Acompte (30 %)','Deposit (30%)','Предоплата (30 %)','الدفعة المقدمة (30%)'],
+amounts_ttc:['Montants TTC.','Amounts include VAT.','Суммы указаны с НДС.','المبالغ شاملة الضريبة.'],
+created:['Envoyée le','Sent on','Отправлен','أُرسل في'],
+open:['Voir le détail','View details','Подробнее','عرض التفاصيل']
+};
+const LI={fr:0,en:1,ru:2,ar:3};
+const tl=(lang,k)=>{const v=TR[k];return v?(v[LI[lang]]!=null?v[LI[lang]]:v[0]):k};
+const t=k=>tl(U.lang,k);
+
+/* ---------- référentiels ---------- */
+const TEAM={cm:{n:'Camille Moreau',i:'CM'},ar:{n:'Adrien Roux',i:'AR'},ls:{n:'Léa Sorel',i:'LS'},yb:{n:'Yanis Benali',i:'YB'}};
+const ROLES=[
+ {id:'t-cm',kind:'team',member:'cm',fin:true,label:'Équipe · Camille Moreau (direction)'},
+ {id:'t-ls',kind:'team',member:'ls',fin:false,label:'Équipe · Léa Sorel (sans accès aux marges)'},
+ {id:'c-c2',kind:'client',client:'c2',label:'Portail client · Sophia Lindqvist (EN)'},
+ {id:'c-c1',kind:'client',client:'c1',label:'Portail client · Alexandre Volkov (RU)'},
+ {id:'c-c3',kind:'client',client:'c3',label:'Portail client · Nour Al-Hamadi (AR, RTL)'},
+ {id:'c-c4',kind:'client',client:'c4',label:'Portail client · Hélène Darcourt (FR)'}];
+const CATS={sejour:'Séjour',aviation:'Aviation privée',evenement:'Événement',reservation:'Réservation',yacht:'Yachting',transport:'Chauffeur & sécurité',lifestyle:'Lifestyle'};
+const ST=[['nouvelle','Nouvelle','info'],['recherche','En recherche','vio'],['proposition','Proposition envoyée','gold'],['attente','Attente validation / paiement','warn'],['confirmee','Confirmée','ok'],['realisee','Réalisée','gray'],['annulee','Annulée','bad']];
+const STL=Object.fromEntries(ST.map(s=>[s[0],s[1]])),STC=Object.fromEntries(ST.map(s=>[s[0],s[2]]));
+const CLOSED=['realisee','annulee'],WON=['confirmee','realisee'];
+const PCATS=['Hébergement','Gastronomie','Allergies & régime','Transport','Loisirs','Communication'];
+const PK={diet:'Allergies & régime',rooms:'Hébergement',travel:'Transport'};
+const DESTS=['Paris','Courchevel','Cap-Ferrat','Saint-Tropez','Cannes','Monaco','Nice','Genève','Londres','London','Milan','Méribel','Reims'];
+const NEXT={sejour:'Interroger 2 à 3 hôtels ou villas et poser des options',aviation:'Demander 2 devis d’affrètement (light et midsize)',evenement:'Valider le lieu et consulter le chef pour le menu',reservation:'Contacter 2 adresses avec salon privé',yacht:'Consulter les disponibilités auprès du broker',transport:'Réserver chauffeur et agent, envoyer le programme',lifestyle:'Qualifier le besoin par téléphone'};
+const CATALOG=[
+ {n:'Kōen Omakase',t:'Restaurant japonais, salon privé 8 couverts',city:'Genève',tags:['japonais','gastronomie','discrétion']},
+ {n:'Le Jardin des Ormes',t:'Table étoilée, salon discret',city:'Paris',tags:['gastronomie','française','discrétion']},
+ {n:'Villa Orangeraie',t:'Villa 6 chambres, piscine, vue mer',city:'Cap-Ferrat',tags:['vue mer','famille','discrétion','piscine'],prov:'p1'},
+ {n:'Chalet Altitude',t:'Chalet ski-in/ski-out, spa privatif',city:'Courchevel',tags:['ski','famille','spa'],prov:'p5'},
+ {n:'M/Y Solenne, 42 m',t:'Yacht avec équipage',city:'Monaco',tags:['yacht','vue mer','fête'],prov:'p6'},
+ {n:'Thermes de Lavaux',t:'Spa, soins privatisés',city:'Genève',tags:['spa','bien-être']},
+ {n:'Atelier Verre & Lumière',t:'Visite privée de galerie',city:'Paris',tags:['art','culture']},
+ {n:'Loges de l’Opéra',t:'Loges privées et accès coulisses',city:'Paris',tags:['culture','opéra']},
+ {n:'Dîner du chef Merlin',t:'Chef à domicile, menus sur mesure',city:'Paris / Côte d’Azur',tags:['gastronomie','discrétion','famille','halal'],prov:'p4'},
+ {n:'Maison Safran',t:'Haute cuisine halal',city:'Paris',tags:['halal','gastronomie']},
+ {n:'Domaine des Crayères',t:'Hôtel spa et maison de Champagne',city:'Reims',tags:['spa','bien-être','gastronomie']}];
+const MISS={dest:['la destination souhaitée','your preferred destination','желаемое направление','الوجهة المفضلة'],dates:['les dates exactes','the exact dates','точные даты','التواريخ الدقيقة'],guests:['le nombre de personnes','the number of guests','количество гостей','عدد الأشخاص'],budget:['le budget envisagé','your intended budget','предполагаемый бюджет','الميزانية المتوقعة'],diet:['les éventuels régimes ou allergies','any dietary requirements or allergies','особенности питания или аллергии','أي متطلبات غذائية أو حساسية'],pass:['les copies des passeports des passagers','passport copies for all passengers','копии паспортов пассажиров','نسخ جوازات سفر الركاب'],bags:['le volume de bagages','the luggage volume','объём багажа','حجم الأمتعة'],arrival:['l’heure d’arrivée prévue','your expected arrival time','ожидаемое время прибытия','موعد الوصول المتوقع'],rooms:['la répartition des chambres','the room configuration','распределение спален','توزيع الغرف'],venue:['le type de lieu souhaité','the preferred type of venue','желаемый тип площадки','نوع المكان المفضل']};
+const MISSFR={dest:'Destination',dates:'Dates exactes',guests:'Nombre de personnes',budget:'Budget indicatif',diet:'Régimes / allergies (absents de la fiche)',pass:'Passeports des passagers',bags:'Volume de bagages',arrival:'Heure d’arrivée',rooms:'Répartition des chambres',venue:'Type de lieu'};
+
+/* ---------- données ---------- */
+let S,U;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const L=(l,p,cost,price,comm=0)=>({l,p,cost,price,comm});
+const pf=(id,cat,text,st,src,pk)=>({id,cat,text,st,src,pk});
+function seed(){
+ const r=rng(490955);
+ const clients=[
+ {id:'c1',n:'Alexandre Volkov',email:'a.volkov@mail.example',tel:'+41 79 555 01 23',city:'Genève',lang:'ru',tier:'Privilège',since:'2021-04-12',refBy:'a1',recBy:null,habits:'Voyage en famille (épouse Irina, deux enfants de 9 et 12 ans). Réserve souvent à J-15. Préfère la messagerie, jamais d’appel avant 10 h.',dates:[{l:'Anniversaire d’Irina (épouse)',d:'10-21'},{l:'Anniversaire',d:'11-02'}],tags:['ski','famille','japonais','discrétion','spa'],prefs:[pf('f1','Hébergement','Chalet ou villa privatisé, 4 chambres minimum','confirmee','Portail client','rooms'),pf('f2','Gastronomie','Apprécie la cuisine japonaise (omakase)','supposee','Agent IA — historique des réservations'),pf('f3','Transport','Vols privés au départ de Genève, catégorie midsize minimum','confirmee','Portail client','travel'),pf('f4','Allergies & régime','Allergie aux fruits à coque (fils cadet)','confirmee','Portail client','diet')],sugg:[{id:'g1',cat:'Loisirs',text:'Réserve un moniteur de ski privé à chaque séjour à la montagne',src:'Agent IA — 3 séjours analysés'}],notif:{prop:true,status:true,msg:true},pnotes:''},
+ {id:'c2',n:'Sophia Lindqvist',email:'sophia.l@mail.example',tel:'+44 7700 900 412',city:'Londres',lang:'en',tier:'Signature',since:'2023-02-03',refBy:'a2',recBy:null,habits:'Voyage le plus souvent en couple avec son mari Erik. Préfère les hôtels de caractère aux grandes chaînes.',dates:[{l:'Anniversaire',d:'10-26'},{l:'Anniversaire de mariage',d:'03-12'}],tags:['gastronomie','art','spa','culture','discrétion'],prefs:[pf('f5','Hébergement','Suite en étage élevé, lit king size, oreillers hypoallergéniques','confirmee','Portail client','rooms'),pf('f6','Allergies & régime','Pescétarienne','confirmee','Portail client','diet'),pf('f7','Loisirs','Préfère les galeries privées aux grands musées','supposee','Agent IA — échanges')],sugg:[{id:'g2',cat:'Gastronomie',text:'Champagne rosé apprécié lors du dernier séjour',src:'Retour client du '+fd(dAdd(-39))}],notif:{prop:true,status:true,msg:true},pnotes:''},
+ {id:'c3',n:'Nour Al-Hamadi',email:'n.alhamadi@mail.example',tel:'+971 50 555 0187',city:'Dubaï',lang:'ar',tier:'Privilège',since:'2022-06-20',refBy:'a1',recBy:null,habits:'Longs séjours en Europe l’été et en fin d’année. Délègue souvent à son assistante, Mme Rania S.',dates:[{l:'Anniversaire de mariage',d:'12-05'},{l:'Anniversaire de sa fille Layla',d:'10-30'}],tags:['vue mer','halal','famille','discrétion','yacht'],prefs:[pf('f8','Allergies & régime','Cuisine halal exclusivement','confirmee','Portail client','diet'),pf('f9','Hébergement','Villa avec piscine privée et personnel de maison féminin','confirmee','Portail client','rooms'),pf('f10','Transport','Sécurité rapprochée lors des déplacements à Paris','confirmee','Retour DEM-2025-0118'),pf('f11','Transport','Préfère les vols de nuit','supposee','Agent IA — historique')],sugg:[],notif:{prop:true,status:true,msg:true},pnotes:''},
+ {id:'c4',n:'Hélène Darcourt',email:'h.darcourt@mail.example',tel:'+33 6 55 50 12 48',city:'Paris',lang:'fr',tier:'Signature',since:'2020-09-14',refBy:null,recBy:null,habits:'Organise chaque année le gala de sa fondation. Très attentive aux détails de table et à la discrétion.',dates:[{l:'Gala annuel de sa fondation',d:'11-14'},{l:'Anniversaire',d:'06-30'}],tags:['gastronomie','française','culture','opéra','art'],prefs:[pf('f12','Gastronomie','Table discrète, jamais en terrasse','confirmee','Retour client'),pf('f13','Gastronomie','Champagne blanc de blancs','supposee','Agent IA — échanges'),pf('f14','Allergies & régime','Sans gluten','confirmee','Portail client','diet')],sugg:[],notif:{prop:true,status:true,msg:false},pnotes:''},
+ {id:'c5',n:'James Whitford',email:'j.whitford@mail.example',tel:'+1 212 555 0148',city:'New York',lang:'en',tier:'Essentiel',since:'2024-11-02',refBy:'p5',recBy:null,habits:'Déplacements professionnels entre Londres et la Côte d’Azur, souvent avec deux collaborateurs.',dates:[{l:'Anniversaire',d:'01-17'}],tags:['ski','yacht','fête'],prefs:[pf('f15','Transport','Avion : Gulfstream ou équivalent','confirmee','Portail client','travel')],sugg:[],notif:{prop:true,status:true,msg:true},pnotes:''},
+ {id:'c6',n:'Isabella Marchetti',email:'i.marchetti@mail.example',tel:'+39 347 555 0193',city:'Milan',lang:'en',tier:'Essentiel',since:'2025-03-18',refBy:null,recBy:'c2',habits:'Passionnée d’opéra et d’art contemporain. Séjours courts à Paris.',dates:[{l:'Anniversaire',d:'12-09'}],tags:['culture','opéra','art','gastronomie'],prefs:[],sugg:[],notif:{prop:true,status:true,msg:true},pnotes:''},
+ {id:'c7',n:'Mathilde Van Acker',email:'m.vanacker@mail.example',tel:'+32 470 55 01 66',city:'Bruxelles',lang:'fr',tier:'Essentiel',since:'2025-08-01',refBy:null,recBy:'c4',habits:'Week-ends bien-être et gastronomie avec son mari.',dates:[{l:'Anniversaire',d:'11-20'}],tags:['spa','bien-être','gastronomie'],prefs:[],sugg:[],notif:{prop:true,status:true,msg:true},pnotes:''}];
+ const provs=[
+ {id:'p1',n:'Villa Azur Collection',types:['prestataire'],svc:['Location de villas'],dest:['Saint-Tropez','Cap-Ferrat','Cannes'],contact:'Marion Gauthier',email:'resa@villa-azur.example',tel:'+33 4 94 55 12 34',cond:'Commission de 12 % reversée sur le loyer · acompte 30 % · annulation sans frais jusqu’à J-45',tarif:'De 18 000 € à 95 000 € / semaine selon saison',react:3,qual:4.8,dates:[{l:'Anniversaire de Marion Gauthier',d:'10-28'}],ex:[{at:dAdd(-20)+'T10:00',text:'Point annuel : accord pour garder la commission à 12 % en 2027.'}]},
+ {id:'p2',n:'Jet Riviera',types:['prestataire'],svc:['Aviation privée'],dest:['Nice','Genève','Londres','Paris'],contact:'Thomas Keller',email:'charter@jetriviera.example',tel:'+33 4 93 55 70 70',cond:'Remise de 6 % sur tarif public · paiement intégral à la réservation · repositionnement offert sous 48 h',tarif:'Light jet dès 4 800 €/h · Midsize dès 6 900 €/h',react:1,qual:4.5,dates:[],ex:[{at:dAdd(-45)+'T15:30',text:'Retard de 40 min sur Nice – Genève : geste commercial obtenu (-500 €).'}]},
+ {id:'p3',n:'Maison Florale Saint-Honoré',types:['prestataire'],svc:['Fleurs','Gifting'],dest:['Paris'],contact:'Inès Lambert',email:'atelier@maisonflorale.example',tel:'+33 1 55 55 20 20',cond:'Tarif partenaire −15 % · livraison Paris offerte',tarif:'Compositions de 150 € à 2 500 €',react:2,qual:4.9,dates:[],ex:[]},
+ {id:'p4',n:'Chef Lucas Merlin',types:['prestataire'],svc:['Chef privé','Événements'],dest:['Paris','Côte d’Azur','Cap-Ferrat'],contact:'Lucas Merlin',email:'contact@chefmerlin.example',tel:'+33 6 55 50 44 10',cond:'Forfait par convive · brigade incluse dès 20 convives · acompte 40 %',tarif:'De 180 € à 420 € par convive',react:6,qual:4.7,dates:[],ex:[]},
+ {id:'p5',n:'Alpine Lodges Courchevel',types:['prestataire','apporteur'],rate:8,svc:['Chalets','Conciergerie montagne'],dest:['Courchevel','Méribel'],contact:'Bastien Rey',email:'bastien@alpinelodges.example',tel:'+33 4 79 55 08 08',cond:'Commission 10 % reversée · accord d’apport réciproque : 8 % des revenus générés par les clients apportés',tarif:'Chalets de 25 000 € à 140 000 € / semaine',react:4,qual:4.6,dates:[],ex:[{at:dAdd(-12)+'T09:15',text:'Option posée sur le chalet Altitude pour Noël (client A. Volkov).'}]},
+ {id:'p6',n:'Riviera Yachting',types:['prestataire'],svc:['Yachts'],dest:['Cannes','Monaco','Saint-Tropez'],contact:'Giulia Ferri',email:'charter@rivierayachting.example',tel:'+377 99 55 10 10',cond:'Commission 15 % (contrat MYBA) · avance sur frais (APA) 30 % non incluse',tarif:'Yachts 30–60 m, de 45 000 € à 220 000 € / semaine',react:5,qual:4.4,dates:[],ex:[]},
+ {id:'p7',n:'Étoile Chauffeurs & Sécurité',types:['prestataire'],svc:['Chauffeurs','Sécurité rapprochée'],dest:['Paris','Monaco','Genève','Nice','Cap-Ferrat'],contact:'Karim Haddad',email:'dispatch@etoile-cs.example',tel:'+33 1 55 55 90 90',cond:'Tarif journalier négocié −10 % · mise à disposition 10 h',tarif:'Chauffeur 950 €/jour · agent de sécurité 1 300 €/jour',react:1,qual:4.8,dates:[],ex:[]},
+ {id:'p8',n:'Hôtel Le Faubourg Royal',types:['prestataire'],svc:['Hôtellerie'],dest:['Paris'],contact:'Service grands comptes',email:'vip@faubourgroyal.example',tel:'+33 1 55 55 30 00',cond:'Commission 10 % · surclassement selon disponibilité · petit-déjeuner offert',tarif:'Suites de 2 400 € à 9 000 € / nuit',react:2,qual:4.7,dates:[],ex:[]},
+ {id:'a1',n:'Victor Lacombe',org:'Family office, Genève',types:['apporteur'],rate:10,svc:[],dest:['Genève'],contact:'Victor Lacombe',email:'v.lacombe@fo-geneve.example',tel:'+41 22 555 40 40',cond:'Commission de 10 % des revenus réels générés pendant 24 mois',dates:[{l:'Remerciements de fin d’année',d:'12-15'}],ex:[{at:dAdd(-30)+'T17:00',text:'Déjeuner trimestriel : présentera un nouveau client en novembre.'}]},
+ {id:'a2',n:'Clara Nguyen',org:'Chef concierge, hôtel partenaire à Londres',types:['apporteur'],rate:8,svc:[],dest:['Londres'],contact:'Clara Nguyen',email:'clara.n@hotel-london.example',tel:'+44 20 7946 0321',cond:'Commission de 8 % des revenus réels · règlement trimestriel',dates:[],ex:[]}];
+ const COMM={p1:.12,p5:.10,p6:.15,p8:.10};
+ const H=[['Villa à Saint-Tropez, 7 nuits','sejour','p1',36000,'comm','Saint-Tropez'],['Vol privé Nice – Genève','aviation','p2',12500,'mk','Nice'],['Chalet à Courchevel, 1 semaine','sejour','p5',48000,'comm','Courchevel'],['Dîner privé avec chef à domicile','evenement','p4',5200,'mk','Paris'],['Suite au Faubourg Royal, 4 nuits','sejour','p8',11800,'comm','Paris'],['Yacht 3 jours, Cannes – Monaco','yacht','p6',42000,'comm','Cannes'],['Chauffeur et sécurité, 3 jours','transport','p7',6800,'mk','Paris']];
+ const plan={c1:[2,1,2,3,5,0,1],c2:[4,3,4,6,4],c3:[0,5,6,4,0,6],c4:[3,4,3,6],c5:[2,1,5],c6:[4,3,6],c7:[4,3]};
+ const reqs=[],docs=[];let n=101;const own=['cm','ar','ls','yb'];
+ for(const cid in plan){plan[cid].forEach(ti=>{const h=H[ti];const age=25+Math.floor(r()*500);const created=dAdd(-age-14),conf=dAdd(-age-7),done=dAdd(-age);const cost=Math.round(h[3]*(.85+r()*.35)/50)*50;const main=h[4]==='comm'?L(h[0],h[2],cost,cost,Math.round(cost*COMM[h[2]])):L(h[0],h[2],cost,Math.round(cost*1.15/10)*10);const fee=L('Honoraires de conciergerie',null,0,Math.round(main.price*.06/10)*10);const cancel=r()<.1;const id='DEM-'+created.slice(0,4)+'-0'+(n++);
+  reqs.push({id,c:cid,t:h[0],cat:h[1],dest:h[5],from:done,to:'',guests:2+Math.floor(r()*4),budget:null,desc:'',status:cancel?'annulee':'realisee',owner:own[Math.floor(r()*4)],created,due:conf,confAt:cancel?null:conf,doneAt:done,sent:created,lines:[main,fee],sat:cancel?null:(r()<.7?5:4),notes:[],px:[],next:'',nextD:'',log:[{at:created+'T10:00',text:'Demande créée'},{at:(cancel?conf:done)+'T18:00',text:cancel?'Annulée par le client':'Prestation réalisée'}]});
+  if(!cancel){const tot=main.price+fee.price;docs.push({id:'DOC-'+n,c:cid,r:id,type:'facture',title:'Facture F-'+done.slice(0,4)+'-'+(n+400),date:done,amount:tot,visible:true});}
+ });}
+ const A=[
+ {id:'DEM-2026-0232',c:'c2',t:'Birthday weekend in Paris',cat:'sejour',status:'nouvelle',owner:null,created:dAdd(0),due:dAdd(3),dest:'Paris',from:'2026-10-24',to:'2026-10-26',guests:null,budget:null,desc:'For my birthday I would love a weekend in Paris for 2 people with Erik: a beautiful suite, a memorable dinner and perhaps a private gallery visit. Something intimate rather than flashy.',lines:[],notes:[],px:[],next:'',nextD:'',log:[{at:dAdd(0)+'T08:42',text:'Demande soumise depuis le portail client'}]},
+ {id:'DEM-2026-0231',c:'c1',t:'Restaurant japonais samedi soir',cat:'reservation',status:'nouvelle',owner:'yb',created:dAdd(-1),due:dAdd(2),dest:'Genève',from:'2026-10-10',to:'',guests:null,budget:null,desc:'Ужин в японском ресторане в субботу вечером, желательно в отдельном зале.',descFr:'Dîner dans un restaurant japonais samedi soir, de préférence en salon privé.',lines:[],notes:[],px:[],next:'Proposer 2 adresses avec salon privé',nextD:dAdd(0),log:[{at:dAdd(-1)+'T19:05',text:'Demande soumise depuis le portail client'},{at:dAdd(-1)+'T19:30',text:'Attribuée à Yanis Benali'}]},
+ {id:'DEM-2026-0230',c:'c7',t:'Week-end spa et gastronomie en Champagne',cat:'sejour',status:'recherche',owner:'ls',created:dAdd(-4),due:dAdd(-1),dest:'Reims',from:'2026-11-20',to:'2026-11-22',guests:2,budget:6000,desc:'Week-end pour l’anniversaire de Mathilde : hôtel avec spa, dîner étoilé et visite privée d’une maison de Champagne.',lines:[],notes:[{who:'ls',at:dAdd(-3)+'T16:10',text:'Mathilde ne boit pas d’alcool fort : privilégier une visite axée dégustation légère.'}],px:[],next:'Envoyer 2 options d’hôtel spa',nextD:dAdd(-1),log:[{at:dAdd(-4)+'T11:20',text:'Demande créée par Léa Sorel (appel téléphonique)'}]},
+ {id:'DEM-2026-0233',c:'c6',t:'Loges à l’Opéra Garnier et dîner privé',cat:'evenement',status:'recherche',owner:'ls',created:dAdd(-2),due:dAdd(5),dest:'Paris',from:dAdd(31),to:'',guests:4,budget:12000,desc:'Isabella souhaite inviter trois amis à une soirée de ballet à l’Opéra Garnier, suivie d’un dîner privé dans un lieu d’exception.',lines:[],notes:[{who:'ls',at:dAdd(-1)+'T18:20',text:'Ballet complet en catégorie 1 — piste des loges de côté via le contact billetterie.'}],px:[{p:'p4',at:dAdd(-1)+'T11:05',dir:'in',text:'Chef Merlin disponible le soir même, menu à quatre mains possible.'}],next:'Obtenir la disponibilité des loges auprès de la billetterie',nextD:dAdd(1),log:[{at:dAdd(-2)+'T09:30',text:'Demande créée'}]},
+ {id:'DEM-2026-0228',c:'c1',t:'Chalet à Courchevel pour Noël en famille',cat:'sejour',status:'recherche',owner:'ar',created:dAdd(-6),due:dAdd(7),dest:'Courchevel',from:'2026-12-20',to:'2026-12-27',guests:6,budget:120000,desc:'Шале в Куршевеле на Рождество для всей семьи (6 человек), ski-in/ski-out, с поваром и няней.',descFr:'Chalet à Courchevel pour Noël pour toute la famille (6 personnes), ski-in/ski-out, avec chef et nounou.',lines:[L('Chalet Altitude, 5 chambres, ski-in/ski-out, 7 nuits','p5',96000,96000,9600)],notes:[{who:'ar',at:dAdd(-5)+'T11:00',text:'Ne pas reproposer le chalet de l’an dernier : bruit de la route signalé par le client.'}],px:[{p:'p5',at:dAdd(-4)+'T14:20',dir:'in',text:'Altitude disponible, option posée jusqu’au '+fd(dAdd(4))+'.'}],next:'Chiffrer chef et nounou, puis envoyer la proposition',nextD:dAdd(1),log:[{at:dAdd(-6)+'T09:12',text:'Demande soumise depuis le portail client'},{at:dAdd(-6)+'T09:40',text:'Statut : En recherche'}]},
+ {id:'DEM-2026-0225',c:'c3',t:'Villa à Cap-Ferrat pour les fêtes de fin d’année',cat:'sejour',status:'proposition',owner:'cm',created:dAdd(-9),due:dAdd(4),dest:'Cap-Ferrat',from:'2026-12-22',to:'2027-01-02',guests:8,budget:150000,sent:dAdd(-2),desc:'فيلا فاخرة في كاب فيرا لعطلة نهاية العام، لثمانية أشخاص، مع مسبح خاص وطاقم نسائي وطاهٍ يقدم طعاماً حلالاً.',descFr:'Villa de luxe à Cap-Ferrat pour les fêtes, 8 personnes, piscine privée, personnel féminin et chef cuisinant halal.',lines:[L('Villa Orangeraie, 6 chambres, 11 nuits','p1',92000,92000,11040),L('Personnel de maison féminin (3 personnes)','p1',9800,11500),L('Chef privé, cuisine halal, 11 jours','p4',12600,14800),L('Chauffeur et agent de sécurité','p7',14300,16400),L('Honoraires de conciergerie',null,0,9500)],notes:[{who:'cm',at:dAdd(-3)+'T12:00',text:'Cliente sensible au prix du personnel : marge réduite volontairement sur cette ligne.'}],px:[{p:'p1',at:dAdd(-7)+'T10:30',dir:'out',text:'Demande de disponibilité Orangeraie 22/12 – 02/01.'},{p:'p1',at:dAdd(-6)+'T09:05',dir:'in',text:'Disponible. Option 7 jours, commission 12 % confirmée.'}],next:'Relancer la cliente si pas de retour',nextD:dAdd(1),log:[{at:dAdd(-9)+'T08:00',text:'Demande soumise depuis le portail client'},{at:dAdd(-2)+'T17:30',text:'Proposition envoyée au client'}]},
+ {id:'DEM-2026-0224',c:'c5',t:'Vol privé Londres – Nice',cat:'aviation',status:'attente',owner:'ar',created:dAdd(-5),due:dAdd(6),dest:'Nice',from:'2026-10-30',to:'2026-11-03',guests:3,budget:40000,sent:dAdd(-3),validated:dAdd(-1),desc:'Return flight London Farnborough – Nice for three people, departure Friday morning.',lines:[L('Jet midsize aller-retour Farnborough – Nice','p2',31200,35400),L('Transferts aéroport – hôtel','p7',900,1100),L('Honoraires de conciergerie',null,0,1800)],notes:[],px:[{p:'p2',at:dAdd(-4)+'T16:00',dir:'in',text:'Citation XLS+ confirmée, valable 72 h.'}],next:'Vérifier la réception de l’acompte',nextD:dAdd(1),log:[{at:dAdd(-5)+'T10:00',text:'Demande créée'},{at:dAdd(-3)+'T12:00',text:'Proposition envoyée au client'},{at:dAdd(-1)+'T09:00',text:'Proposition validée par le client (portail)'}]},
+ {id:'DEM-2026-0219',c:'c4',t:'Dîner de gala de la fondation — 40 convives',cat:'evenement',status:'confirmee',owner:'cm',created:dAdd(-24),due:'2026-11-14',dest:'Paris',from:'2026-11-14',to:'',guests:40,budget:45000,sent:dAdd(-15),validated:dAdd(-12),confAt:dAdd(-10),paid:true,desc:'Dîner de gala annuel de la fondation pour 40 convives, dans un hôtel particulier.',lines:[L('Chef Lucas Merlin, menu 5 temps, brigade','p4',12800,15200),L('Décoration florale','p3',4200,5100),L('Voituriers et chauffeurs','p7',2900,3400),L('Honoraires de conciergerie',null,0,4500)],notes:[{who:'cm',at:dAdd(-11)+'T18:00',text:'Trois couverts sans gluten, dont Mme Darcourt : discrétion absolue au service.'}],px:[{p:'p4',at:dAdd(-10)+'T10:00',dir:'out',text:'Confirmation du menu et des 3 couverts sans gluten.'}],next:'Valider le plan de table avec la cliente',nextD:dAdd(10),log:[{at:dAdd(-24)+'T10:00',text:'Demande créée'},{at:dAdd(-10)+'T15:00',text:'Acompte reçu — Confirmée'}]},
+ {id:'DEM-2026-0229',c:'c3',t:'Chauffeur et sécurité à Paris, 5 jours',cat:'transport',status:'confirmee',owner:'yb',created:dAdd(-8),due:dAdd(12),dest:'Paris',from:dAdd(14),to:dAdd(18),guests:3,budget:15000,sent:dAdd(-6),validated:dAdd(-5),confAt:dAdd(-4),paid:true,desc:'سائق وحارس أمن شخصي في باريس لمدة خمسة أيام.',descFr:'Chauffeur et agent de sécurité à Paris pendant cinq jours.',lines:[L('Chauffeur et agent de sécurité, 5 jours','p7',10350,12400),L('Honoraires de conciergerie',null,0,1200)],notes:[],px:[],next:'Envoyer le programme détaillé au prestataire',nextD:dAdd(7),log:[{at:dAdd(-4)+'T11:00',text:'Acompte reçu — Confirmée'}]},
+ {id:'DEM-2026-0226',c:'c4',t:'Yacht à Cannes pour un week-end',cat:'yacht',status:'annulee',owner:'ls',created:dAdd(-30),due:dAdd(-20),dest:'Cannes',from:dAdd(-10),to:dAdd(-8),guests:6,budget:50000,sent:dAdd(-26),desc:'Week-end en yacht entre Cannes et Saint-Tropez pour six personnes.',lines:[L('M/Y Solenne, 42 m, 2 jours','p6',38000,38000,5700),L('Honoraires de conciergerie',null,0,2600)],notes:[{who:'ls',at:dAdd(-21)+'T09:00',text:'Annulé : la cliente a préféré reporter au printemps.'}],px:[],next:'',nextD:'',log:[{at:dAdd(-21)+'T09:00',text:'Annulée par le client'}]}];
+ A.forEach(x=>{x.confAt=x.confAt||null;x.doneAt=null;x.sat=null;reqs.push(x)});
+ docs.push({id:'DOC-901',c:'c4',r:'DEM-2026-0219',type:'confirmation',title:'Confirmation — Dîner de gala',date:dAdd(-10),amount:28200,visible:true},{id:'DOC-902',c:'c4',r:'DEM-2026-0219',type:'facture',title:'Facture F-2026-0587 (acompte)',date:dAdd(-10),amount:8460,visible:true},{id:'DOC-903',c:'c3',r:'DEM-2026-0229',type:'confirmation',title:'Confirmation — Chauffeur et sécurité',date:dAdd(-4),amount:13600,visible:true},{id:'DOC-904',c:'c3',r:'DEM-2026-0229',type:'voucher',title:'Bon de réservation — Étoile Chauffeurs',date:dAdd(-4),amount:null,visible:true},{id:'DOC-905',c:'c3',r:'DEM-2026-0225',type:'fichier',title:'Plan et photos de la villa Orangeraie.pdf',date:dAdd(-2),amount:null,visible:true},{id:'DOC-906',c:'c3',r:'DEM-2026-0225',type:'fichier',title:'Contrat Villa Azur — conditions négociées.pdf',date:dAdd(-6),amount:null,visible:false});
+ const msgs=[
+ {c:'c1',r:'DEM-2026-0228',from:'client',at:dAdd(-6)+'T09:20',text:'Пожалуйста, только не то шале, что в прошлом году: там было шумно из-за дороги.',fr:'Surtout pas le chalet de l’an dernier : il était bruyant à cause de la route.'},
+ {c:'c1',r:'DEM-2026-0228',from:'team',who:'ar',at:dAdd(-5)+'T10:40',text:'Разумеется, Александр. Мы подбираем тихие шале ski-in/ski-out и вернёмся с вариантами на этой неделе.',fr:'Bien sûr, Alexandre. Nous sélectionnons des chalets calmes ski-in/ski-out et revenons vers vous cette semaine.'},
+ {c:'c3',r:'DEM-2026-0225',from:'client',at:dAdd(-9)+'T08:05',text:'نرغب في فيلا هادئة مع مسبح خاص وطاقم نسائي، لثمانية أشخاص ابتداءً من 22 ديسمبر.',fr:'Nous souhaitons une villa calme avec piscine privée et personnel féminin, pour huit personnes à partir du 22 décembre.'},
+ {c:'c3',r:'DEM-2026-0225',from:'team',who:'cm',at:dAdd(-2)+'T17:31',text:'شكراً سيدتي. عرضنا لفيلا في كاب فيرا متاح الآن في مساحتك الخاصة.',fr:'Merci Madame. Notre proposition de villa à Cap-Ferrat est disponible dans votre espace.'},
+ {c:'c5',r:'DEM-2026-0224',from:'team',who:'ar',at:dAdd(-3)+'T12:02',text:'Dear James, our proposal for your London – Nice flight is now available in your client area.'},
+ {c:'c5',r:'DEM-2026-0224',from:'client',at:dAdd(-1)+'T09:01',text:'Looks perfect, approved. I will settle the deposit shortly.'},
+ {c:'c4',r:'DEM-2026-0219',from:'client',at:dAdd(-12)+'T14:00',text:'Pouvez-vous prévoir un menu sans gluten pour moi et deux invités ?'},
+ {c:'c4',r:'DEM-2026-0219',from:'team',who:'cm',at:dAdd(-11)+'T09:30',text:'C’est noté : le chef Merlin prépare trois couverts sans gluten, servis à l’identique des autres.'},
+ {c:'c2',r:null,from:'team',who:'ls',at:dAdd(-40)+'T11:00',text:'Dear Sophia, we hope you enjoyed your stay. Do not hesitate to share your feedback with us.'},
+ {c:'c2',r:null,from:'client',at:dAdd(-39)+'T20:15',text:'It was wonderful, thank you! The rosé champagne in the suite was a lovely touch.'}].map((m,i)=>Object.assign({id:'M'+i},m));
+ const gifts=[[-351,'c1','Anniversaire d’Irina','Pivoines et coffret de thés rares','p3',620],[-340,'c3','Anniversaire de mariage','Coffret parfum sur mesure',null,1450],[-298,'a1','Remerciements de fin d’année','Magnum de Champagne millésimé',null,480],[-286,'p1','Fin d’année','Coffret gastronomique',null,320],[-264,'c5','Anniversaire','Cours de ski privé offert','p5',900],[-210,'c2','Anniversaire de mariage','Fleurs et dîner surprise','p3',780],[-100,'c4','Anniversaire','Lithographie signée',null,1200],[-95,'a2','Nouvelle cliente apportée','Coffret thés et fleurs','p3',260],[-60,'p5','Ouverture de saison','Coffret de grands vins',null,410],[-45,'c6','Bienvenue','Livre d’art dédicacé',null,340],[-20,'c7','Bienvenue','Soin spa en duo',null,520]].map((g,i)=>({id:'G'+i,d:dAdd(g[0]),to:g[1],occ:g[2],item:g[3],prov:g[4],cost:g[5]}));
+ return {v:1,clients,provs,reqs,docs,msgs,gifts,pays:[],giftBudget:15000,seq:234,mseq:100};
+}
+function finalizeSeed(){['a1','a2','p5'].forEach((a,i)=>{const st=aStats(a);const amt=Math.round(st.due*[.62,.5,.4][i]/10)*10;if(amt>0)S.pays.push({a,d:dAdd(-60-i*20),amount:amt,mode:'Virement'})})}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&o.v===1)return o}}catch(e){}return null}
+function defaultsU(){return{role:'t-cm',view:'home',id:null,lang:'fr',q:'',owner:'',cat:'',closed:false,mode:'board',cq:'',ptab:'prest',pq:'',psvc:'',per:'y',sort:'rev',gf:'all',ai:null,pchg:false,pmsgReq:''}}
+
+/* ---------- accès & calculs ---------- */
+const cl=id=>S.clients.find(c=>c.id===id);
+const pv=id=>S.provs.find(p=>p.id===id);
+const rq=id=>S.reqs.find(r=>r.id===id);
+const rec=id=>cl(id)||pv(id);
+const role=()=>ROLES.find(r=>r.id===U.role)||ROLES[0];
+const lineRev=l=>l.price-l.cost+(l.comm||0);
+const rDate=r=>r.confAt||r.created;
+const msgsOf=r=>S.msgs.filter(m=>m.c===r.c&&m.r===r.id).sort((a,b)=>a.at.localeCompare(b.at));
+function fin(r){let booked=0,fees=0,comm=0,resale=0,cost=0;for(const l of r.lines){booked+=l.price;cost+=l.cost;if(!l.p)fees+=l.price-l.cost;else{resale+=l.price-l.cost;comm+=l.comm||0}}const rev=fees+comm+resale;const c=cl(r.c);const ap=c&&c.refBy?pv(c.refBy):null;const apc=ap?Math.round(rev*(ap.rate||0)/100):0;const direct=apc+(r.extra||0);return{booked,fees,comm,resale,rev,apc,ap,direct,margin:rev-direct,cost}}
+function inPer(d,p){if(p==='all')return true;if(p==='m')return d.slice(0,7)===iso(TODAY).slice(0,7);const n=-daysTo(d);return n<=(p==='q'?90:365)}
+const PER={m:'Ce mois-ci',q:'90 derniers jours',y:'12 derniers mois',all:'Cumul'};
+function cStats(cid,per='y'){const rs=S.reqs.filter(r=>r.c===cid);const won=rs.filter(r=>WON.includes(r.status));const Pw=won.filter(r=>inPer(rDate(r),per));const sum=(a,k)=>a.reduce((s,r)=>s+fin(r)[k],0);const decided=rs.filter(r=>['proposition','attente','confirmee','realisee','annulee'].includes(r.status)).length;const sats=rs.filter(r=>r.sat).map(r=>r.sat);const last=rs.map(r=>r.created).concat(S.msgs.filter(m=>m.c===cid).map(m=>m.at.slice(0,10))).sort().pop();
+ return{rev:sum(Pw,'rev'),margin:sum(Pw,'margin'),booked:sum(Pw,'booked'),revAll:sum(won,'rev'),marginAll:sum(won,'margin'),freq:won.filter(r=>inPer(rDate(r),'y')).length,basket:won.length?sum(won,'booked')/won.length:0,conv:decided?won.length/decided:0,last,sat:sats.length?sats.reduce((a,b)=>a+b,0)/sats.length:null,recos:S.clients.filter(c=>c.recBy===cid).length,active:rs.filter(r=>!CLOSED.includes(r.status)).length,n:rs.length,wonN:won.length}}
+function pStats(pid){const set=new Set();let vol=0,marg=0;S.reqs.filter(r=>WON.includes(r.status)).forEach(r=>r.lines.forEach(l=>{if(l.p===pid){set.add(r.id);vol+=l.cost;marg+=lineRev(l)}}));return{n:set.size,vol,marg}}
+function aStats(aid){const cs=S.clients.filter(c=>c.refBy===aid);const rs=S.reqs.filter(r=>cs.some(c=>c.id===r.c));const won=rs.filter(r=>WON.includes(r.status));const decided=rs.filter(r=>['proposition','attente','confirmee','realisee','annulee'].includes(r.status)).length;let rev=0,margin=0,due=0;won.forEach(r=>{const f=fin(r);rev+=f.rev;margin+=f.margin;due+=f.apc});const paid=S.pays.filter(x=>x.a===aid).reduce((a,x)=>a+x.amount,0);return{cs,n:rs.length,conv:decided?won.length/decided:0,rev,margin,due,paid,bal:Math.max(0,due-paid)}}
+function nextOcc(md){const y=TODAY.getFullYear();let d=y+'-'+md;if(daysTo(d)<0)d=(y+1)+'-'+md;return d}
+function upcoming(days){const out=[];S.clients.forEach(c=>c.dates.forEach(x=>{const d=nextOcc(x.d),n=daysTo(d);if(n<=days)out.push({id:c.id,kind:'Client',who:c.n,l:x.l,d,n})}));S.provs.forEach(p=>(p.dates||[]).forEach(x=>{const d=nextOcc(x.d),n=daysTo(d);if(n<=days)out.push({id:p.id,kind:'Partenaire',who:p.n,l:x.l,d,n})}));return out.sort((a,b)=>a.n-b.n)}
+function recoFor(c){return CATALOG.map(x=>({x,m:x.tags.filter(g=>c.tags.includes(g))})).filter(o=>o.m.length).sort((a,b)=>b.m.length-a.m.length)}
+function addLog(r,text){r.log=r.log||[];r.log.push({at:nowAt(),text})}
+function addDoc(r,type,title,amount,visible=true){const d={id:'DOC-N'+(S.mseq++),c:r.c,r:r.id,type,title,date:iso(TODAY),amount,visible};S.docs.push(d);return d}
+function me(){return role().member||'cm'}
+
+/* ---------- UI helpers ---------- */
+function toast(m){const el=document.createElement('div');el.className='toast';el.textContent=m;$('#toasts').appendChild(el);setTimeout(()=>el.remove(),4200)}
+let lastFocus=null;
+function openModal(title,body,wide){lastFocus=document.activeElement;const M=$('#modal');M.innerHTML=`<div class="bg" data-act="modal-bg"><div class="modal${wide?' wide':''}" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mhead"><h2 id="mTitle">${title}</h2><button type="button" class="icon-btn" data-act="close-modal" aria-label="${esc(role().kind==='client'?t('close'):'Fermer')}">${ic('x')}</button></div><div class="mbody">${body}</div></div></div>`;M.hidden=false;const f=M.querySelector('.mbody input:not([type=hidden]),.mbody select,.mbody textarea,.mbody button')||M.querySelector('.icon-btn');f&&f.focus()}
+function closeModal(){const M=$('#modal');M.hidden=true;M.innerHTML='';if(lastFocus&&document.body.contains(lastFocus))lastFocus.focus()}
+function FB(p){return{
+ f:(n,label,ctrl,o={})=>`<div class="field${o.full?' full':''}"><label for="${p}-${n}">${label}${o.req?' <span class="req" aria-hidden="true">*</span>':''}</label>${ctrl}${o.hint?`<span class="hint">${o.hint}</span>`:''}<span class="ferr" id="${p}-e-${n}"></span></div>`,
+ i:(n,v='',type='text',x='')=>`<input id="${p}-${n}" name="${n}" type="${type}" value="${esc(v==null?'':v)}" aria-describedby="${p}-e-${n}" ${x}>`,
+ s:(n,opts,v,x='')=>`<select id="${p}-${n}" name="${n}" aria-describedby="${p}-e-${n}" ${x}>${opts.map(o=>Array.isArray(o)?`<option value="${esc(o[0])}"${String(o[0])===String(v==null?'':v)?' selected':''}>${esc(o[1])}</option>`:o).join('')}</select>`,
+ t:(n,v='',x='')=>`<textarea id="${p}-${n}" name="${n}" aria-describedby="${p}-e-${n}" ${x}>${esc(v||'')}</textarea>`}}
+function clearErr(f){f.querySelectorAll('.ferr').forEach(e=>e.textContent='');f.querySelectorAll('[aria-invalid]').forEach(e=>e.removeAttribute('aria-invalid'))}
+function err(f,n,msg){const i=f.querySelector(`[name="${n}"]`);if(i){i.setAttribute('aria-invalid','true');const e=document.getElementById(i.getAttribute('aria-describedby'));if(e)e.textContent=msg}return false}
+function focusErr(f){const i=f.querySelector('[aria-invalid=true]');i&&i.focus()}
+const kpi=(l,v,s='',cls='')=>`<div class="kpi ${cls}"><div class="l">${l}</div><div class="v">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+const stBadge=s=>`<span class="badge b-${STC[s]}">${STL[s]}</span>`;
+const pBadge=s=>`<span class="badge b-${STC[s]}">${t('st_'+s)}</span>`;
+const avatar=o=>o?`<span class="av" role="img" aria-label="Attribuée à ${esc(TEAM[o].n)}" title="${esc(TEAM[o].n)}">${TEAM[o].i}</span>`:`<span class="badge b-info">À attribuer</span>`;
+function dueChip(r){if(CLOSED.includes(r.status)||!r.due)return '';const n=daysTo(r.due);const cls=n<0?'late':n<=3?'soon':'';const txt=n<0?'En retard ('+fd(r.due,'fr-FR',{day:'numeric',month:'short'})+')':n===0?'Échéance aujourd’hui':n===1?'Échéance demain':'Échéance '+fd(r.due,'fr-FR',{day:'numeric',month:'short'});return `<span class="due ${cls}">${ic('cal')} ${txt}</span>`}
+const sat=v=>v==null?'—':`${ic('star')} ${v.toLocaleString('fr-FR',{maximumFractionDigits:1})} / 5`;
+const tagVis=()=>`<span class="tag vis">${ic('eye')} Visible par le client</span>`;
+const tagInt=()=>`<span class="tag int">${ic('lock')} Interne</span>`;
+const catOpts=lang=>Object.keys(CATS).map(k=>[k,lang?tl(lang,'cat_'+k):CATS[k]]);
+const teamOpts=()=>[['','Non attribuée'],...Object.entries(TEAM).map(([k,v])=>[k,v.n])];
+const provOpts=(blank='— Aucun —')=>[['',blank],...S.provs.filter(p=>p.types.includes('prestataire')).map(p=>[p.id,p.n])];
+
+/* ---------- rendu ---------- */
+function render(focus){const R=role(),portal=R.kind==='client';
+ if(!portal&&!R.fin&&U.view==='revenue')U.view='home';
+ document.documentElement.lang=portal?U.lang:'fr';document.documentElement.dir=portal&&U.lang==='ar'?'rtl':'ltr';
+ document.body.classList.toggle('nofin',!portal&&!R.fin);
+ renderTop();
+ const V={home:vHome,reqs:vReqs,req:vReq,clients:vClients,client:vClient,partners:vPartners,revenue:vRevenue,gifting:vGifting,'p-reqs':vPReqs,'p-req':vPReq,'p-new':vPNew,'p-docs':vPDocs,'p-msgs':vPMsgs,'p-prefs':vPPrefs};
+ $('#main').innerHTML=(V[U.view]||(portal?vPReqs:vHome))();
+ document.querySelectorAll('.thread').forEach(t=>t.scrollTop=t.scrollHeight);
+ if(focus){window.scrollTo(0,0);const h=$('#main h1');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}}
+function go(view,id){U.view=view;U.id=id||null;U.pchg=false;render(true)}
+function renderTop(){const R=role(),portal=R.kind==='client';
+ const items=portal?[['p-reqs',t('nav_reqs'),'inbox'],['p-new',t('nav_new'),'plus'],['p-docs',t('nav_docs'),'file'],['p-msgs',t('nav_msgs'),'msg'],['p-prefs',t('nav_prefs'),'sliders']]:[['home','Accueil','home'],['reqs','Demandes','inbox'],['clients','Clients','users'],['partners','Prestataires & apporteurs','brief'],['revenue','Revenus','chart'],['gifting','Gifting','gift']].filter(x=>R.fin||x[0]!=='revenue');
+ const cur={req:'reqs',client:'clients','p-req':'p-reqs'}[U.view]||U.view;
+ $('#top').innerHTML=`<div class="brand"><span class="mark">${ic('key')}</span><div><b>Aurèle</b><small>${portal?'Private concierge':'Conciergerie privée · back-office'}</small></div></div>
+ <nav class="nav" aria-label="${portal?'Menu':'Navigation principale'}">${items.map(i=>`<button type="button" class="tab" data-act="go" data-view="${i[0]}"${cur===i[0]?' aria-current="page"':''}>${ic(i[2])}${esc(i[1])}</button>`).join('')}</nav>
+ <div class="tools">${portal?`<div class="ctl"><label for="langSel">${ic('globe')} ${t('lang')}</label><select id="langSel" data-chg="lang">${Object.keys(LANGN).map(l=>`<option value="${l}"${l===U.lang?' selected':''}>${LANGN[l]}</option>`).join('')}</select></div>`:''}
+ <div class="ctl"><label for="roleSel">${portal?t('view_as'):'Vue'}</label><select id="roleSel" data-chg="role">${ROLES.map(r=>`<option value="${r.id}"${r.id===U.role?' selected':''}>${esc(r.label)}</option>`).join('')}</select></div></div>`}
+
+/* ===== Accueil ===== */
+function reminders(){const R=role(),out=[];const act=S.reqs.filter(r=>!CLOSED.includes(r.status));
+ act.filter(r=>!r.owner).forEach(r=>out.push({lvl:'info',ico:'inbox',text:`Nouvelle demande de ${cl(r.c).n} à attribuer : « ${r.t} »`,sub:'Reçue le '+fd(r.created)+' · l’assistant peut préparer la fiche',act:'open-req',id:r.id,btn:'Ouvrir'}));
+ act.filter(r=>r.due&&daysTo(r.due)<0).forEach(r=>out.push({lvl:'bad',ico:'alert',text:`Échéance dépassée : « ${r.t} »`,sub:cl(r.c).n+' · prévue le '+fd(r.due)+(r.owner?' · '+TEAM[r.owner].n:''),act:'open-req',id:r.id,btn:'Traiter'}));
+ act.filter(r=>r.status==='proposition'&&r.sent&&daysTo(r.sent)<=-2).forEach(r=>out.push({lvl:'warn',ico:'clock',text:`Proposition sans réponse depuis ${-daysTo(r.sent)} jours — relance suggérée`,sub:cl(r.c).n+' · '+r.t,act:'open-req',id:r.id,btn:'Préparer une relance'}));
+ act.filter(r=>r.status==='attente'&&!r.paid).forEach(r=>out.push({lvl:'warn',ico:'card',text:`Acompte en attente : ${r.t}`,sub:cl(r.c).n+' · validée le '+fd(r.validated),act:'open-req',id:r.id,btn:'Voir'}));
+ act.filter(r=>r.nextD&&daysTo(r.nextD)<=0&&daysTo(r.due)>=0).forEach(r=>out.push({lvl:'info',ico:'check',text:`Action du jour : ${r.next}`,sub:r.t+(r.owner?' · '+TEAM[r.owner].n:''),act:'open-req',id:r.id,btn:'Ouvrir'}));
+ upcoming(21).forEach(u=>out.push({lvl:'gold',ico:'gift',text:`${u.l} — ${u.who} ${u.n===0?'aujourd’hui':'dans '+u.n+' jour'+(u.n>1?'s':'')}`,sub:'Occasion de gifting · '+fd(u.d),act:'gift-new',id:u.id,occ:u.l,btn:'Préparer un cadeau'}));
+ if(R.fin)['a1','a2','p5'].forEach(a=>{const st=aStats(a);if(st.bal>0)out.push({lvl:'gray',ico:'euro',text:`Commission à verser à ${pv(a).n} : ${fmtE(st.bal)}`,sub:'Apporteur d’affaires · '+st.cs.length+' client(s) apporté(s)',act:'pay-app',id:a,btn:'Enregistrer un règlement'})});
+ return out}
+function vHome(){const R=role(),m=R.member,act=S.reqs.filter(r=>!CLOSED.includes(r.status));
+ const nUn=act.filter(r=>!r.owner).length,nWait=act.filter(r=>['proposition','attente'].includes(r.status)).length,nDue=act.filter(r=>daysTo(r.due)<=3).length,nLate=act.filter(r=>daysTo(r.due)<0).length;
+ const won=S.reqs.filter(r=>WON.includes(r.status)&&inPer(rDate(r),'m'));const mr=won.reduce((a,r)=>a+fin(r).rev,0);
+ const rem=reminders();const mine=act.filter(r=>r.owner===m).sort((a,b)=>a.due.localeCompare(b.due));const up=upcoming(45).slice(0,6);
+ return `<div class="page-head"><div><p class="muted small">${TODAY.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p><h1>Bonjour ${esc(TEAM[m].n.split(' ')[0])}</h1></div><div class="actions"><button type="button" class="btn primary" data-act="new-req">${ic('plus')} Nouvelle demande</button></div></div>
+ <div class="kpis">${kpi('Demandes actives',act.length,act.filter(r=>r.status==='nouvelle').length+' nouvelle(s)')}${kpi('À attribuer',nUn,'sans responsable')}${kpi('En attente client',nWait,'proposition ou paiement')}${kpi('Échéances ≤ 3 jours',nDue,nLate+' en retard')}${kpi('Revenus réels du mois',fmtE(mr),won.length+' confirmation(s)','fin')}</div>
+ <div class="grid2"><section class="card ai" aria-labelledby="hRem"><div class="card-h"><h2 id="hRem">${ic('spark')} Rappels de l’assistant</h2><span class="hint">Suggestions — chaque action reste validée par l’équipe</span></div>
+ ${rem.length?`<ul class="rems">${rem.map(x=>`<li class="rem"><span class="dot b-${x.lvl}">${ic(x.ico)}</span><div><p class="wrap">${esc(x.text)}</p><p class="small muted wrap">${esc(x.sub)}</p></div><button type="button" class="btn sm" data-act="${x.act}" data-id="${x.id}"${x.occ?` data-occ="${esc(x.occ)}"`:''}>${x.btn}</button></li>`).join('')}</ul>`:'<p class="empty">Rien à signaler.</p>'}</section>
+ <div class="stack"><section class="card"><div class="card-h"><h2>Mes demandes (${mine.length})</h2><button type="button" class="btn sm ghost" data-act="go" data-view="reqs">Voir le pipeline</button></div>${mine.length?`<ul class="list">${mine.map(r=>`<li><div><button type="button" class="linkbtn" data-act="open-req" data-id="${r.id}">${esc(r.t)}</button><p class="small muted">${esc(cl(r.c).n)} · ${dueChip(r)}</p></div>${stBadge(r.status)}</li>`).join('')}</ul>`:'<p class="empty">Aucune demande attribuée.</p>'}</section>
+ <section class="card"><div class="card-h"><h2>${ic('cal')} Dates importantes (45 jours)</h2></div><ul class="list">${up.map(u=>`<li><div><strong>${esc(u.who)}</strong> <span class="badge">${u.kind}</span><p class="small muted">${esc(u.l)} · ${fd(u.d,'fr-FR',{day:'numeric',month:'long'})}</p></div><span class="small ${u.n<=7?'due soon':'muted'}">J-${u.n}</span></li>`).join('')}</ul></section></div></div>`}
+
+/* ===== Pipeline ===== */
+function filtReqs(){const q=U.q.trim().toLowerCase();return S.reqs.filter(r=>{if(!U.closed&&CLOSED.includes(r.status))return false;if(U.owner==='-'&&r.owner)return false;if(U.owner&&U.owner!=='-'&&r.owner!==U.owner)return false;if(U.cat&&r.cat!==U.cat)return false;if(q){const c=cl(r.c);if(!(r.id+' '+r.t+' '+c.n+' '+(r.dest||'')).toLowerCase().includes(q))return false}return true})}
+function kcard(r){const c=cl(r.c),F=fin(r);return `<button type="button" class="kcard" style="--c:var(--${STC[r.status]})" data-act="open-req" data-id="${r.id}"><span class="small muted wrap">${r.id} · ${CATS[r.cat]}</span><strong class="wrap">${esc(r.t)}</strong><span class="small wrap">${esc(c.n)}${r.dest?' · '+esc(r.dest):''}</span>${r.next&&!CLOSED.includes(r.status)?`<span class="small muted wrap">${ic('clock')} ${esc(r.next)}</span>`:''}<span class="kmeta">${avatar(r.owner)}${dueChip(r)}${F.booked?`<span class="num">${fmtE(F.booked)}</span><span class="fin num muted">marge ${fmtE(F.margin)}</span>`:''}</span></button>`}
+function vReqs(){const rs=filtReqs();const cols=ST.filter(s=>U.closed||!CLOSED.includes(s[0]));const fb=FB('flt');
+ const board=`<div class="board" role="list">${cols.map(s=>{let items=rs.filter(r=>r.status===s[0]).sort((a,b)=>CLOSED.includes(s[0])?(b.doneAt||b.created).localeCompare(a.doneAt||a.created):(a.due||'').localeCompare(b.due||''));const more=CLOSED.includes(s[0])&&items.length>6?items.length-6:0;if(more)items=items.slice(0,6);return `<section class="col" role="listitem" aria-label="${s[1]}"><div class="col-h"><span class="badge b-${s[2]}">${s[1]}</span><span class="muted small">${items.length+more}</span></div>${items.map(kcard).join('')||'<p class="empty">Aucune</p>'}${more?`<p class="small muted">+ ${more} plus ancienne(s) — voir la vue liste</p>`:''}</section>`}).join('')}</div>`;
+ const list=`<div class="tbl-wrap"><table><thead><tr><th>Réf.</th><th>Demande</th><th>Client</th><th>Statut</th><th>Responsable</th><th>Échéance</th><th class="r">Montant</th><th class="r fin">Marge</th></tr></thead><tbody>${rs.sort((a,b)=>b.created.localeCompare(a.created)).map(r=>{const F=fin(r);return `<tr><td class="small num">${r.id}</td><td><button type="button" class="linkbtn" data-act="open-req" data-id="${r.id}">${esc(r.t)}</button></td><td>${esc(cl(r.c).n)}</td><td>${stBadge(r.status)}</td><td>${r.owner?esc(TEAM[r.owner].n):'—'}</td><td>${CLOSED.includes(r.status)?fd(r.doneAt||r.due):dueChip(r)}</td><td class="r num">${F.booked?fmtE(F.booked):'—'}</td><td class="r num fin">${F.booked?fmtE(F.margin):'—'}</td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Aucune demande ne correspond.</td></tr>'}</tbody></table></div>`;
+ return `<div class="page-head"><div><h1>Pipeline des demandes</h1><p class="muted">${rs.length} demande(s) affichée(s)</p></div><div class="actions"><div class="seg" role="group" aria-label="Affichage"><button type="button" data-act="mode" data-m="board" aria-pressed="${U.mode==='board'}">Kanban</button><button type="button" data-act="mode" data-m="list" aria-pressed="${U.mode==='list'}">Liste</button></div><button type="button" class="btn primary" data-act="new-req">${ic('plus')} Nouvelle demande</button></div></div>
+ <div class="toolbar"><div class="field q"><label for="fq">Rechercher</label><input id="fq" type="search" data-inp="q" value="${esc(U.q)}" placeholder="Client, référence, destination…"></div>
+ <div class="field"><label for="fo">Responsable</label><select id="fo" data-chg="owner">${[['','Toute l’équipe'],['-','Non attribuées'],...Object.entries(TEAM).map(([k,v])=>[k,v.n])].map(o=>`<option value="${o[0]}"${o[0]===U.owner?' selected':''}>${o[1]}</option>`).join('')}</select></div>
+ <div class="field"><label for="fc">Type</label><select id="fc" data-chg="cat"><option value="">Tous les types</option>${Object.entries(CATS).map(([k,v])=>`<option value="${k}"${k===U.cat?' selected':''}>${v}</option>`).join('')}</select></div>
+ <label class="check"><input type="checkbox" data-chg="closed"${U.closed?' checked':''}> Afficher réalisées et annulées</label></div>
+ ${U.mode==='board'?board:list}`}
+
+/* ===== Détail demande ===== */
+function vReq(){const r=rq(U.id);if(!r)return '<p>Demande introuvable.</p>';const c=cl(r.c),F=fin(r),R=role(),fb=FB('ln');const locked=CLOSED.includes(r.status);
+ const ms=msgsOf(r),docs=S.docs.filter(d=>d.r===r.id);
+ const lines=r.lines.length?`<div class="tbl-wrap"><table><thead><tr><th>Prestation</th><th>Prestataire</th><th class="r fin">Coût d’achat</th><th class="r">Prix de vente</th><th class="r fin">Commission</th><th class="r fin">Marge</th><th class="fin"><span class="sr">Actions</span></th></tr></thead><tbody>${r.lines.map((l,i)=>`<tr><td>${esc(l.l)}</td><td>${l.p?esc(pv(l.p).n):'<span class="muted">Honoraires</span>'}</td><td class="r num fin">${fmtE(l.cost)}</td><td class="r num">${fmtE(l.price)}</td><td class="r num fin">${l.comm?fmtE(l.comm):'—'}</td><td class="r num fin">${fmtE(lineRev(l))}</td><td class="fin">${locked?'':`<button type="button" class="icon-btn" data-act="del-line" data-i="${i}" aria-label="Supprimer la ligne ${esc(l.l)}">${ic('trash')}</button>`}</td></tr>`).join('')}</tbody></table></div>`:'<p class="empty">Aucune ligne de prestation pour le moment.</p>';
+ const addLine=locked?'':`<form data-form="add-line" class="fin" novalidate style="margin-top:14px"><h3 style="margin-bottom:8px">Ajouter une ligne</h3><div class="fgrid">${fb.f('l','Prestation',fb.i('l','','text','required'),{req:1,full:1})}${fb.f('p','Prestataire',fb.s('p',provOpts('Aucun (honoraires)'),''))}${fb.f('cost','Coût d’achat (€)',fb.i('cost','','number','min="0" step="10" inputmode="decimal"'))}${fb.f('price','Prix de vente (€)',fb.i('price','','number','min="0" step="10" inputmode="decimal"'),{req:1})}${fb.f('comm','Commission prestataire (€)',fb.i('comm','','number','min="0" step="10" inputmode="decimal"'),{hint:'Reversée par le prestataire'})}</div><div class="actions" style="margin-top:10px"><button class="btn" type="submit">${ic('plus')} Ajouter la ligne</button></div></form>`;
+ const totals=`<div class="totals"><div><span>Total client</span><strong class="num">${fmtE(F.booked)}</strong></div><div class="fin"><span>Revenus réels (honoraires ${fmtE(F.fees)} + commissions ${fmtE(F.comm)} + marge revente ${fmtE(F.resale)})</span><strong class="num">${fmtE(F.rev)}</strong></div><div class="fin"><span>Commission apporteur${F.ap?' ('+esc(F.ap.n)+', '+F.ap.rate+' %)':''}</span><strong class="num">− ${fmtE(F.apc)}</strong></div><div class="fin strong"><span>Marge après coûts directs</span><strong class="num">${fmtE(F.margin)}${F.booked?' · '+pctf(F.margin/F.booked):''}</strong></div></div>`;
+ const canSend=r.lines.length&&!locked&&r.status!=='confirmee';
+ const ai=U.ai&&U.ai.id===r.id?U.ai:null;
+ return `<div class="page-head"><div><button type="button" class="btn ghost sm" data-act="go" data-view="reqs">${ic('back','flip')} Pipeline</button><p class="muted small num wrap">${r.id} · ${CATS[r.cat]} · créée le ${fd(r.created)}</p><h1 class="wrap">${esc(r.t)}</h1><p>Client : <button type="button" class="linkbtn" data-act="open-client" data-id="${c.id}">${esc(c.n)}</button> <span class="badge">${LANGN[c.lang]}</span> <span class="badge b-gold">${esc(c.tier)}</span></p></div><div class="actions"><button type="button" class="btn" data-act="edit-req">${ic('edit')} Modifier la demande</button></div></div>
+ <section class="card" style="margin-bottom:16px" aria-label="Pilotage"><div class="fgrid"><div class="field"><label for="r-status">Statut</label><select id="r-status" data-chg="r-status">${ST.map(s=>`<option value="${s[0]}"${s[0]===r.status?' selected':''}>${s[1]}</option>`).join('')}</select></div><div class="field"><label for="r-owner">Responsable</label><select id="r-owner" data-chg="r-owner">${teamOpts().map(o=>`<option value="${o[0]}"${o[0]===(r.owner||'')?' selected':''}>${o[1]}</option>`).join('')}</select></div><div class="field"><label for="r-due">Échéance</label><input id="r-due" type="date" data-chg="r-due" value="${r.due||''}"></div><div class="field"><span class="flabel">Montant client</span><strong class="num" style="font-size:20px">${fmtE(F.booked)}</strong></div><div class="field fin"><span class="flabel">Marge après coûts directs</span><strong class="num" style="font-size:20px">${fmtE(F.margin)}</strong></div></div></section>
+ <div class="grid2"><div class="stack">
+ <section class="card"><div class="card-h"><h2>Demande du client</h2>${tagVis()}</div><p dir="auto" class="wrap">${esc(r.desc||'—')}</p>${r.descFr?`<p class="small muted" style="margin-top:6px">Traduction : ${esc(r.descFr)}</p>`:''}<dl class="dl" style="margin-top:14px"><div><dt>Destination</dt><dd>${esc(r.dest||'—')}</dd></div><div><dt>Dates</dt><dd>${frange(r.from,r.to)}</dd></div><div><dt>Personnes</dt><dd>${r.guests||'—'}</dd></div><div><dt>Budget indicatif</dt><dd>${r.budget?fmtE(r.budget):'—'}</dd></div></dl></section>
+ <section class="card"><div class="card-h"><h2>Proposition</h2><span class="actions"><span class="tag vis">${ic('eye')} Libellés et prix visibles</span><span class="tag int fin">${ic('lock')} Coûts et marges internes</span></span></div>${lines}${totals}<p class="hint" style="margin-top:8px">Le client ne voit jamais les prestataires, coûts d’achat, commissions ni marges.</p>${R.fin?'':'<p class="hint">Tarification et marges réservées à la direction.</p>'}${addLine}
+ <div class="actions" style="margin-top:14px"><button type="button" class="btn" data-act="client-preview"${r.lines.length?'':' disabled'}>${ic('eye')} Aperçu côté client</button><button type="button" class="btn primary" data-act="send-prop"${canSend?'':' disabled'}>${ic('send')} ${r.sent?'Renvoyer la proposition':'Envoyer la proposition au client'}</button>${r.sent?`<span class="small muted">Envoyée le ${fd(r.sent)}${r.validated?' · validée le '+fd(r.validated):''}${r.paid?' · acompte reçu':''}</span>`:''}</div></section>
+ <section class="card"><div class="card-h"><h2>${ic('msg')} Messages avec le client</h2>${tagVis()}</div><div class="thread">${ms.map(m=>bubble(m,'team')).join('')||'<p class="empty">Aucun message sur cette demande.</p>'}</div><form data-form="msg-team" novalidate>${FB('mt').f('text','Répondre au client',FB('mt').t('text','','rows="3"'),{hint:'Le client reçoit une notification email.'})}<div class="actions" style="margin-top:8px"><button type="submit" class="btn primary">${ic('send')} Envoyer</button><button type="button" class="btn" data-act="ai" data-k="draft">${ic('spark')} Brouillon IA</button></div></form></section>
+ <section class="card"><div class="card-h"><h2>${ic('file')} Documents</h2></div>${docs.length?`<ul class="list">${docs.map(d=>`<li><div><p class="wrap"><strong>${esc(d.title)}</strong></p><p class="small muted">${tl('fr','d_'+d.type)} · ${fd(d.date)}</p></div>${d.visible?tagVis():tagInt()}<button type="button" class="btn sm" data-act="view-doc" data-id="${d.id}">Voir</button></li>`).join('')}</ul>`:'<p class="empty">Aucun document.</p>'}
+ <form data-form="add-doc" novalidate style="margin-top:10px"><div class="fgrid">${FB('dc').f('title','Nom du document',FB('dc').i('title','','text','placeholder="ex. Devis prestataire.pdf"'),{req:1})}<label class="check"><input type="checkbox" name="visible" checked> Visible dans le portail client</label></div><div class="actions" style="margin-top:8px"><button type="submit" class="btn">${ic('plus')} Joindre (simulation)</button></div></form></section>
+ </div><div class="stack">
+ <section class="card"><div class="card-h"><h2>${ic('check')} Prochaine action</h2>${tagInt()}</div><form data-form="next" novalidate><div class="fgrid">${FB('nx').f('next','Action',FB('nx').i('next',r.next),{full:1})}${FB('nx').f('nextD','Pour le',FB('nx').i('nextD',r.nextD,'date'))}</div><div class="actions" style="margin-top:8px"><button class="btn" type="submit">Enregistrer</button></div></form></section>
+ <section class="card ai"><div class="card-h"><h2>${ic('spark')} Assistant IA</h2></div><p class="hint">Données pseudonymisées avant envoi au modèle (hébergé dans l’UE). Aucune action engageante sans validation humaine.</p>
+ <div class="actions" style="margin-top:10px"><button type="button" class="btn sm" data-act="ai" data-k="sum">Résumer les échanges</button><button type="button" class="btn sm" data-act="ai" data-k="miss">Infos manquantes</button><button type="button" class="btn sm" data-act="ai" data-k="prep">Préparer la fiche</button><button type="button" class="btn sm" data-act="ai" data-k="draft">Brouillon de réponse</button></div>
+ <div aria-live="polite">${ai?`<div class="ai-out">${ai.loading?'<span class="spin" aria-hidden="true"></span> Analyse en cours…':ai.html}</div>`:''}</div>
+ <details><summary>Voir les données envoyées au modèle</summary><pre>${esc(JSON.stringify(aiPayload(r),null,1))}</pre></details></section>
+ <section class="card int"><div class="card-h"><h2>${ic('lock')} Notes internes</h2>${tagInt()}</div>${r.notes.length?`<ul class="list">${r.notes.map(n=>`<li><div><p class="wrap">${esc(n.text)}</p><p class="small muted">${esc(TEAM[n.who]?TEAM[n.who].n:n.who)} · ${fdt(n.at)}</p></div></li>`).join('')}</ul>`:'<p class="empty">Aucune note.</p>'}<form data-form="note" novalidate style="margin-top:8px">${FB('nt').f('text','Ajouter une note interne',FB('nt').t('text','','rows="2"'))}<div class="actions" style="margin-top:8px"><button class="btn" type="submit">Ajouter</button></div></form></section>
+ <section class="card int"><div class="card-h"><h2>${ic('brief')} Échanges prestataires</h2>${tagInt()}</div>${r.px.length?`<ul class="list">${r.px.map(x=>`<li><div><p class="wrap"><strong>${esc(pv(x.p).n)}</strong> <span class="badge">${x.dir==='out'?'Envoyé':'Reçu'}</span></p><p class="wrap">${esc(x.text)}</p><p class="small muted">${fdt(x.at)}</p></div></li>`).join('')}</ul>`:'<p class="empty">Aucun échange.</p>'}<form data-form="px" novalidate style="margin-top:8px"><div class="fgrid">${FB('px').f('p','Prestataire',FB('px').s('p',provOpts('Choisir…'),''),{req:1})}${FB('px').f('dir','Sens',FB('px').s('dir',[['out','Envoyé'],['in','Reçu']],'out'))}${FB('px').f('text','Résumé de l’échange',FB('px').t('text','','rows="2"'),{req:1,full:1})}</div><div class="actions" style="margin-top:8px"><button class="btn" type="submit">Consigner</button></div></form></section>
+ <section class="card"><div class="card-h"><h2>${ic('clock')} Historique</h2></div><ul class="list">${(r.log||[]).slice().reverse().map(l=>`<li><div><p class="wrap">${esc(l.text)}</p><p class="small muted">${fdt(l.at)}</p></div></li>`).join('')||'<li>—</li>'}</ul></section>
+ </div></div>`}
+function bubble(m,side){const c=cl(m.c);const mine=side==='team'?m.from==='team':m.from==='client';const L=side==='team'?'fr':U.lang;const who=m.from==='team'?(TEAM[m.who]?TEAM[m.who].n:'')+' — '+tl(L,'team'):(side==='client'?tl(L,'you'):c.n);const r=m.r&&side==='client'?rq(m.r):null;return `<div class="bub${mine?' me':''}"><div class="meta">${esc(who)} · ${fdt(m.at,LOC[L])}${r?' · '+esc(r.t):''}</div><div dir="auto">${esc(m.text).replace(/\n/g,'<br>')}</div>${side==='team'&&m.fr&&m.fr!==m.text?`<div class="tr">Traduction : ${esc(m.fr)}</div>`:''}</div>`}
+
+/* ===== IA (simulée) ===== */
+function aiPayload(r){const c=cl(r.c);const alias='CLIENT_'+(parseInt(c.id.replace(/\D/g,''),10)*7919||4242).toString(16).toUpperCase();const first=c.n.split(' ')[0];return{client:alias,langue:c.lang,categorie:r.cat,destination:r.dest||null,dates:[r.from||null,r.to||null],personnes:r.guests||null,budget_indicatif:r.budget||null,demande:(r.descFr||r.desc||'').split(first).join('[PRÉNOM]'),preferences_confirmees:c.prefs.filter(p=>p.st==='confirmee').map(p=>p.text),nb_messages:msgsOf(r).length,exclus:['nom','email','téléphone','notes internes','coûts et marges']}}
+function missing(r){const c=cl(r.c),k=[];if(!r.dest)k.push('dest');if(!r.from)k.push('dates');if(!r.guests)k.push('guests');if(!r.budget)k.push('budget');
+ if(r.cat==='sejour'){if((r.guests||0)>2)k.push('rooms');k.push('arrival')}
+ if(r.cat==='aviation'){k.push('pass','bags')}
+ if(['evenement','reservation','sejour'].includes(r.cat)&&!c.prefs.some(p=>p.cat==='Allergies & régime'))k.push('diet');
+ if(r.cat==='evenement'&&!/lieu|venue|hôtel|salon/i.test(r.desc||''))k.push('venue');
+ return k}
+function joinL(arr,lang){const and={fr:' et ',en:' and ',ru:' и ',ar:' و'}[lang];return arr.length<2?arr.join(''):arr.slice(0,-1).join(', ')+and+arr[arr.length-1]}
+function draftText(r,keys){const c=cl(r.c),lg=c.lang,first=c.n.split(' ')[0],sig=TEAM[me()].n;const list=joinL((keys||[]).map(k=>MISS[k][LI[lg]]),lg);
+ const G={fr:['Bonjour '+first+',','Bien cordialement,'],en:['Dear '+first+',','Kind regards,'],ru:['Здравствуйте, '+first+'!','С уважением,'],ar:['مرحباً '+first+'،','مع أطيب التحيات،']}[lg];
+ const B={ask:{fr:`Merci pour votre demande « ${r.t} ». Pour vous proposer les meilleures options, pourriez-vous nous préciser ${list} ?`,en:`Thank you for your request “${r.t}”. To offer you the best options, could you please confirm ${list}?`,ru:`Благодарим за ваш запрос «${r.t}». Чтобы предложить лучшие варианты, уточните, пожалуйста, ${list}.`,ar:`شكراً على طلبك «${r.t}». حتى نقدّم لك أفضل الخيارات، هل يمكنك تأكيد ${list}؟`},
+ ok:{fr:`Merci pour votre demande « ${r.t} ». Nous avons toutes les informations nécessaires et revenons vers vous très vite avec une proposition.`,en:`Thank you for your request “${r.t}”. We have everything we need and will come back to you shortly with a proposal.`,ru:`Благодарим за запрос «${r.t}». У нас есть вся необходимая информация, и мы скоро пришлём предложение.`,ar:`شكراً على طلبك «${r.t}». لدينا كل المعلومات اللازمة وسنعود إليك قريباً بعرض مناسب.`},
+ prop:{fr:`Notre proposition pour « ${r.t} » est disponible dans votre espace client. Nous restons à votre disposition pour l’ajuster.`,en:`Our proposal for “${r.t}” is available in your client area. We remain at your disposal to adjust it.`,ru:`Наше предложение по запросу «${r.t}» доступно в личном кабинете. Мы готовы его скорректировать.`,ar:`عرضنا بخصوص «${r.t}» متاح الآن في مساحتك الخاصة. نحن في خدمتك لتعديله.`},
+ pay:{fr:`Merci d’avoir validé notre proposition. L’acompte peut être réglé depuis votre espace client afin de confirmer les réservations.`,en:`Thank you for approving our proposal. The deposit can be paid from your client area to confirm the bookings.`,ru:`Спасибо, что утвердили предложение. Предоплату можно внести в личном кабинете, чтобы подтвердить бронирования.`,ar:`شكراً لموافقتك على عرضنا. يمكنك دفع الدفعة المقدمة من مساحتك الخاصة لتأكيد الحجوزات.`},
+ conf:{fr:`Tout est confirmé pour « ${r.t} ». Vous retrouverez les confirmations dans votre espace client.`,en:`Everything is confirmed for “${r.t}”. You will find all confirmations in your client area.`,ru:`Всё подтверждено по запросу «${r.t}». Подтверждения доступны в личном кабинете.`,ar:`تم تأكيد كل شيء بخصوص «${r.t}». ستجد التأكيدات في مساحتك الخاصة.`}};
+ const sit=keys&&keys.length?'ask':r.status==='proposition'?'prop':r.status==='attente'?'pay':WON.includes(r.status)?'conf':'ok';
+ return `${G[0]}\n\n${B[sit][lg]}\n\n${G[1]}\n${sig} — Aurèle`}
+function aiRun(r,k){const c=cl(r.c);let html='';
+ if(k==='sum'){const ms=msgsOf(r),lc=ms.filter(m=>m.from==='client').pop(),lt=ms.filter(m=>m.from==='team').pop();const prefs=c.prefs.filter(p=>p.st==='confirmee').map(p=>p.text);
+  html=`<h3>Résumé</h3><ul><li><b>Besoin :</b> ${esc(CATS[r.cat])} — ${esc(r.dest||'destination à préciser')}, ${frange(r.from,r.to)}, ${r.guests?r.guests+' pers.':'nb de personnes inconnu'}, budget ${r.budget?fmtE(r.budget):'non précisé'}.</li><li><b>Demande initiale :</b> ${esc(r.descFr||r.desc||'—')}</li><li><b>Dernier message client :</b> ${lc?'« '+esc(lc.fr||lc.text)+' » ('+fdt(lc.at)+')':'aucun en dehors de la demande'}</li><li><b>Dernière réponse équipe :</b> ${lt?'« '+esc(lt.fr||lt.text)+' » ('+fdt(lt.at)+')':'aucune — à faire'}</li>${r.notes.length?`<li><b>Point d’attention interne :</b> ${esc(r.notes[r.notes.length-1].text)}</li>`:''}${r.px.length?`<li><b>Prestataires :</b> ${r.px.length} échange(s), dernier avec ${esc(pv(r.px[r.px.length-1].p).n)}.</li>`:''}${prefs.length?`<li><b>À respecter :</b> ${esc(prefs.join(' ; '))}</li>`:''}<li><b>État :</b> ${STL[r.status]}, ${r.owner?TEAM[r.owner].n:'non attribuée'}, échéance ${fd(r.due)}${r.next?' — prochaine action : '+esc(r.next):''}.</li></ul>`}
+ if(k==='miss'){const m=missing(r);U.aiMiss=m;const internal=[];if(r.status==='recherche'&&!r.px.length)internal.push('Aucun prestataire consulté à ce stade');if(!r.owner)internal.push('Aucun responsable attribué');if(!r.next)internal.push('Pas de prochaine action définie');
+  html=`<h3>Informations manquantes</h3>${m.length?`<ul>${m.map(x=>`<li>${MISSFR[x]}</li>`).join('')}</ul>`:'<p>La demande est complète côté client.</p>'}${internal.length?`<p style="margin-top:8px"><b>Côté équipe :</b></p><ul>${internal.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}${m.length?`<div class="actions" style="margin-top:10px"><button type="button" class="btn sm" data-act="ai-next">Créer la prochaine action</button><button type="button" class="btn sm primary" data-act="ai" data-k="draft">Rédiger la question au client</button></div>`:''}`}
+ if(k==='draft'){const m=['nouvelle','recherche'].includes(r.status)?missing(r).filter(x=>['dest','dates','guests','budget','diet','pass','bags','arrival','rooms','venue'].includes(x)).slice(0,3):[];const txt=draftText(r,m);
+  html=`<h3>Brouillon de réponse (${LANGN[c.lang]})</h3><p class="hint">Rédigé dans la langue du client. Relisez et modifiez avant envoi.</p><div class="field" style="margin-top:8px"><label for="ai-draft">Brouillon modifiable</label><textarea id="ai-draft" rows="8" dir="auto">${esc(txt)}</textarea></div><div class="actions" style="margin-top:8px"><button type="button" class="btn primary sm" data-act="ai-send">${ic('check')} Valider et envoyer au client</button><button type="button" class="btn sm" data-act="ai-clear">Ignorer</button></div>`}
+ if(k==='prep'){const d=(r.desc||'')+' '+(r.descFr||'')+' '+r.t;const s={};
+  if(!r.guests){const mm=d.match(/(\d+)\s*(personnes|pers\.?|people|guests|persons|человек|гостей|أشخاص|convives)/i);if(mm)s.guests=+mm[1]}
+  if(!r.dest){const kk=DESTS.find(x=>d.toLowerCase().includes(x.toLowerCase()));if(kk)s.dest=kk}
+  if(!r.budget){const mm=d.match(/(\d[\d\s.,]*)\s*(k€|€|eur|euros)/i);if(mm){let v=parseFloat(mm[1].replace(/[\s.,]/g,''));if(/k/i.test(mm[2]))v*=1000;s.budget=v}}
+  if(!r.owner){const load=Object.keys(TEAM).map(x=>[x,S.reqs.filter(y=>y.owner===x&&!CLOSED.includes(y.status)).length]).sort((a,b)=>a[1]-b[1]);s.owner=load[0][0]}
+  if(!r.next){s.next=NEXT[r.cat];s.nextD=dAdd(1)}
+  const dest=r.dest||s.dest;const provs=S.provs.filter(p=>p.types.includes('prestataire')&&p.dest.includes(dest)).slice(0,4);const recos=recoFor(c).filter(o=>!dest||o.x.city.includes(dest)).slice(0,3);U.aiPrep=s;
+  const rows=[];if(s.guests)rows.push(`Personnes : <b>${s.guests}</b> (détecté dans la demande)`);if(s.dest)rows.push(`Destination : <b>${esc(s.dest)}</b>`);if(s.budget)rows.push(`Budget : <b>${fmtE(s.budget)}</b>`);if(s.owner)rows.push(`Responsable : <b>${TEAM[s.owner].n}</b> (charge la plus faible)`);if(s.next)rows.push(`Prochaine action : <b>${esc(s.next)}</b> pour le ${fd(s.nextD)}`);
+  html=`<h3>Fiche préparée</h3>${rows.length?`<ul>${rows.map(x=>`<li>${x}</li>`).join('')}</ul>`:'<p>Les champs principaux sont déjà renseignés.</p>'}<p style="margin-top:8px"><b>Prestataires pertinents :</b> ${provs.length?provs.map(p=>esc(p.n)+' (qualité '+String(p.qual).replace('.',',')+')').join(' · '):'aucun référencé sur cette destination'}</p>${recos.length?`<p style="margin-top:6px"><b>Selon les goûts du client :</b> ${recos.map(o=>esc(o.x.n)+' — '+esc(o.m.join(', '))).join(' · ')}</p>`:''}<p style="margin-top:6px"><b>Budget habituel :</b> panier moyen ${fmtE(cStats(c.id).basket)}.</p>${rows.length?`<div class="actions" style="margin-top:10px"><button type="button" class="btn sm primary" data-act="ai-apply">${ic('check')} Appliquer les suggestions</button></div>`:''}`}
+ return html}
+
+/* ===== Clients ===== */
+function vClients(){const q=U.cq.trim().toLowerCase();const cs=S.clients.filter(c=>!q||(c.n+' '+c.city+' '+c.email).toLowerCase().includes(q));
+ return `<div class="page-head"><div><h1>Clients</h1><p class="muted">${S.clients.length} fiches · clientèle internationale</p></div><button type="button" class="btn primary" data-act="new-client">${ic('plus')} Nouveau client</button></div>
+ <div class="toolbar"><div class="field q"><label for="cq">Rechercher un client</label><input id="cq" type="search" data-inp="cq" value="${esc(U.cq)}" placeholder="Nom, ville, email…"></div></div>
+ <div class="pgrid">${cs.map(c=>{const st=cStats(c.id,'y');return `<button type="button" class="ccard" data-act="open-client" data-id="${c.id}"><span class="row"><strong style="font-size:16px">${esc(c.n)}</strong><span class="badge b-gold">${esc(c.tier)}</span></span><span class="small muted">${esc(c.city)} · ${LANGN[c.lang]} · client depuis ${c.since.slice(0,4)}</span><span class="kmeta"><span class="badge b-info">${st.active} en cours</span><span class="fin">Revenus cumulés <b class="num">${fmtE(st.revAll)}</b></span><span>${sat(st.sat)}</span></span><span class="small muted">Dernière activité : ${fd(st.last)}</span></button>`}).join('')||'<p class="empty">Aucun client.</p>'}</div>`}
+function vClient(){const c=cl(U.id);if(!c)return '<p>Client introuvable.</p>';const st=cStats(c.id,'y');const rs=S.reqs.filter(r=>r.c===c.id).sort((a,b)=>b.created.localeCompare(a.created));const ap=c.refBy?pv(c.refBy):null,rb=c.recBy?cl(c.recBy):null;const gifts=S.gifts.filter(g=>g.to===c.id).sort((a,b)=>b.d.localeCompare(a.d));const recos=recoFor(c).slice(0,4);
+ const groups=PCATS.map(cat=>[cat,c.prefs.filter(p=>p.cat===cat)]).filter(g=>g[1].length);
+ return `<div class="page-head"><div><button type="button" class="btn ghost sm" data-act="go" data-view="clients">${ic('back','flip')} Clients</button><h1>${esc(c.n)}</h1><p class="muted">${esc(c.city)} · ${LANGN[c.lang]} · client depuis ${fd(c.since)} <span class="badge b-gold">${esc(c.tier)}</span></p></div><div class="actions"><button type="button" class="btn" data-act="edit-client">${ic('edit')} Modifier</button><button type="button" class="btn primary" data-act="new-req" data-c="${c.id}">${ic('plus')} Nouvelle demande</button></div></div>
+ <div class="kpis">${kpi('Revenus réels · 12 mois',fmtE(st.rev),'','fin')}${kpi('Marge · 12 mois',fmtE(st.margin),'','fin')}${kpi('Revenus cumulés',fmtE(st.revAll),'marge cumulée '+fmtE(st.marginAll),'fin')}${kpi('Fréquence',st.freq+' / an',st.wonN+' prestations au total')}${kpi('Panier moyen',fmtE(st.basket),'montant réservé')}${kpi('Taux de conversion',pctf(st.conv),'propositions → confirmées')}${kpi('Dernière activité',fd(st.last))}${kpi('Satisfaction',sat(st.sat))}${kpi('Recommandations apportées',st.recos,st.recos?S.clients.filter(x=>x.recBy===c.id).map(x=>x.n).join(', '):'')}</div>
+ <div class="grid3">
+ <div class="stack"><section class="card"><div class="card-h"><h2>${ic('user')} Coordonnées et habitudes</h2></div><dl class="dl"><div><dt>Email</dt><dd>${esc(c.email)}</dd></div><div><dt>Téléphone</dt><dd dir="ltr">${esc(c.tel)}</dd></div><div><dt>Apporteur</dt><dd>${ap?`<button type="button" class="linkbtn" data-act="open-contact" data-id="${ap.id}">${esc(ap.n)}</button>`:'—'}</dd></div><div><dt>Recommandé par</dt><dd>${rb?`<button type="button" class="linkbtn" data-act="open-client" data-id="${rb.id}">${esc(rb.n)}</button>`:'—'}</dd></div></dl><p style="margin-top:12px" class="wrap">${esc(c.habits)}</p><p style="margin-top:10px">${c.tags.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</p></section>
+ <section class="card"><div class="card-h"><h2>${ic('cal')} Dates importantes</h2></div><ul class="list">${c.dates.map((d,i)=>{const n=nextOcc(d.d);return `<li><div><strong>${esc(d.l)}</strong><p class="small muted">${fd(n,'fr-FR',{day:'numeric',month:'long'})} · dans ${daysTo(n)} j</p></div><button type="button" class="btn sm" data-act="gift-new" data-id="${c.id}" data-occ="${esc(d.l)}">${ic('gift')} Cadeau</button><button type="button" class="icon-btn" data-act="date-del" data-i="${i}" aria-label="Supprimer la date ${esc(d.l)}">${ic('trash')}</button></li>`}).join('')||'<li class="empty">Aucune date.</li>'}</ul>
+ <form data-form="date-add" novalidate style="margin-top:8px"><div class="fgrid">${FB('da').f('l','Occasion',FB('da').i('l','','text','placeholder="ex. Anniversaire"'),{req:1})}${FB('da').f('d','Date',FB('da').i('d','','date'),{req:1})}</div><div class="actions" style="margin-top:8px"><button class="btn" type="submit">${ic('plus')} Ajouter</button></div></form></section></div>
+ <div class="stack"><section class="card int"><div class="card-h"><h2>${ic('spark')} Base de connaissance</h2>${tagInt()}</div><p class="hint">Enrichie à chaque demande et retour. Les préférences « supposées » ne sont jamais présentées au client comme acquises.</p>
+ ${groups.map(g=>`<h3 style="margin-top:12px">${esc(g[0])}</h3>${g[1].map(p=>`<div class="pref"><div><p class="wrap">${esc(p.text)}</p><p class="small muted">Source : ${esc(p.src)}</p></div><span class="badge ${p.st==='confirmee'?'b-ok':'b-warn'}">${p.st==='confirmee'?'Confirmée':'Supposée'}</span><span class="actions"><button type="button" class="btn sm" data-act="pref-toggle" data-id="${p.id}">${p.st==='confirmee'?'Repasser en supposée':'Confirmer'}</button><button type="button" class="icon-btn" data-act="pref-edit" data-id="${p.id}" aria-label="Corriger : ${esc(p.text)}">${ic('edit')}</button><button type="button" class="icon-btn" data-act="pref-del" data-id="${p.id}" aria-label="Supprimer : ${esc(p.text)}">${ic('trash')}</button></span></div>`).join('')}`).join('')||'<p class="empty">Aucune préférence enregistrée.</p>'}
+ ${c.sugg.length?`<h3 style="margin-top:14px">Détecté par l’assistant — à valider</h3>${c.sugg.map(s=>`<div class="pref"><div><p class="wrap">${esc(s.text)}</p><p class="small muted">${esc(s.cat)} · ${esc(s.src)}</p></div><span class="actions"><button type="button" class="btn sm" data-act="sugg" data-k="supposee" data-id="${s.id}">Ajouter (supposée)</button><button type="button" class="btn sm" data-act="sugg" data-k="confirmee" data-id="${s.id}">Confirmer</button><button type="button" class="btn sm ghost" data-act="sugg" data-k="no" data-id="${s.id}">Rejeter</button></span></div>`).join('')}`:''}
+ <form data-form="pref-add" novalidate style="margin-top:12px"><h3 style="margin-bottom:6px">Ajouter une préférence</h3><div class="fgrid">${FB('pa').f('cat','Catégorie',FB('pa').s('cat',PCATS.map(x=>[x,x]),PCATS[0]))}${FB('pa').f('st','Fiabilité',FB('pa').s('st',[['confirmee','Confirmée par le client'],['supposee','Supposée']],'supposee'))}${FB('pa').f('text','Préférence',FB('pa').i('text'),{req:1,full:1})}</div><div class="actions" style="margin-top:8px"><button class="btn" type="submit">${ic('plus')} Ajouter</button></div></form></section></div>
+ <div class="stack"><section class="card ai"><div class="card-h"><h2>${ic('spark')} Recommandations</h2></div><p class="hint">Selon goûts, budget habituel (${fmtE(st.basket)}) et historique.</p><ul class="list">${recos.map(o=>`<li><div><strong>${esc(o.x.n)}</strong> ${o.x.prov?`<span class="badge b-info">Prestataire référencé</span>`:''}<p class="small muted">${esc(o.x.t)} · ${esc(o.x.city)}</p><p class="small">Correspond à : ${o.m.map(esc).join(', ')}</p></div></li>`).join('')||'<li class="empty">Pas assez de données.</li>'}</ul></section>
+ <section class="card"><div class="card-h"><h2>${ic('gift')} Cadeaux offerts</h2><button type="button" class="btn sm" data-act="gift-new" data-id="${c.id}">${ic('plus')} Enregistrer</button></div><ul class="list">${gifts.map(g=>`<li><div><strong>${esc(g.item)}</strong><p class="small muted">${esc(g.occ)} · ${fd(g.d)}</p></div><span class="num">${fmtE(g.cost)}</span></li>`).join('')||'<li class="empty">Aucun cadeau.</li>'}</ul></section></div></div>
+ <h2 class="sec">Historique des demandes et prestations (${rs.length})</h2><div class="tbl-wrap"><table><thead><tr><th>Réf.</th><th>Demande</th><th>Statut</th><th>Date</th><th class="r">Montant</th><th class="r fin">Revenus</th><th class="r fin">Marge</th><th>Satisfaction</th></tr></thead><tbody>${rs.map(r=>{const F=fin(r);return `<tr><td class="small num">${r.id}</td><td><button type="button" class="linkbtn" data-act="open-req" data-id="${r.id}">${esc(r.t)}</button></td><td>${stBadge(r.status)}</td><td>${fd(r.doneAt||r.created)}</td><td class="r num">${fmtE(F.booked)}</td><td class="r num fin">${fmtE(F.rev)}</td><td class="r num fin">${fmtE(F.margin)}</td><td>${r.sat?sat(r.sat):'—'}</td></tr>`}).join('')}</tbody></table></div>`}
+
+/* ===== Prestataires & apporteurs ===== */
+function vPartners(){const R=role();const q=U.pq.trim().toLowerCase();const isP=U.ptab==='prest';
+ const list=S.provs.filter(p=>p.types.includes(isP?'prestataire':'apporteur')).filter(p=>!q||(p.n+' '+(p.svc||[]).join(' ')+' '+(p.dest||[]).join(' ')+' '+(p.org||'')).toLowerCase().includes(q)).filter(p=>!isP||!U.psvc||p.svc.includes(U.psvc));
+ const svcs=[...new Set(S.provs.flatMap(p=>p.types.includes('prestataire')?p.svc:[]))].sort();
+ const both=p=>p.types.length>1?' <span class="badge b-vio">Prestataire + apporteur</span>':'';
+ const tbl=isP?`<div class="tbl-wrap"><table><thead><tr><th>Prestataire</th><th>Services</th><th>Destinations</th><th class="r">Réservations confiées</th><th class="r fin">Volume d’achats</th><th class="r fin">Marge générée</th><th>Réactivité</th><th>Qualité</th></tr></thead><tbody>${list.map(p=>{const s=pStats(p.id);return `<tr><td><button type="button" class="linkbtn" data-act="open-contact" data-id="${p.id}">${esc(p.n)}</button>${both(p)}<div class="small muted">${esc(p.contact)}</div></td><td>${p.svc.map(esc).join(', ')}</td><td>${p.dest.map(esc).join(', ')}</td><td class="r num">${s.n}</td><td class="r num fin">${fmtE(s.vol)}</td><td class="r num fin">${fmtE(s.marg)}</td><td>${p.react} h en moyenne</td><td>${sat(p.qual)}</td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Aucun résultat.</td></tr>'}</tbody></table></div>`
+ :`<div class="tbl-wrap"><table><thead><tr><th>Apporteur</th><th class="r">Clients apportés</th><th class="r">Demandes</th><th class="r">Conversion</th><th class="r fin">Revenus générés</th><th class="r fin">Marge générée</th><th class="r fin">Commissions dues</th><th class="r fin">Réglé</th><th class="r fin">Solde</th><th class="fin"><span class="sr">Actions</span></th></tr></thead><tbody>${list.map(p=>{const s=aStats(p.id);return `<tr><td><button type="button" class="linkbtn" data-act="open-contact" data-id="${p.id}">${esc(p.n)}</button>${both(p)}<div class="small muted">${esc(p.org||p.svc.join(', '))} · ${p.rate} %</div></td><td class="r num">${s.cs.length}</td><td class="r num">${s.n}</td><td class="r num">${pctf(s.conv)}</td><td class="r num fin">${fmtE(s.rev)}</td><td class="r num fin">${fmtE(s.margin)}</td><td class="r num fin">${fmtE(s.due)}</td><td class="r num fin">${fmtE(s.paid)}</td><td class="r num fin"><b>${fmtE(s.bal)}</b></td><td class="fin">${s.bal>0?`<button type="button" class="btn sm" data-act="pay-app" data-id="${p.id}">Régler</button>`:'<span class="badge b-ok">À jour</span>'}</td></tr>`}).join('')}</tbody></table></div>`;
+ return `<div class="page-head"><div><h1>Prestataires et apporteurs</h1><p class="muted">Un même contact peut être prestataire et apporteur d’affaires.</p></div><div class="seg" role="group" aria-label="Type de contact"><button type="button" data-act="ptab" data-k="prest" aria-pressed="${isP}">Prestataires</button><button type="button" data-act="ptab" data-k="app" aria-pressed="${!isP}">Apporteurs d’affaires</button></div></div>
+ <div class="toolbar"><div class="field q"><label for="pq">Rechercher</label><input id="pq" type="search" data-inp="pq" value="${esc(U.pq)}" placeholder="Nom, service, destination…"></div>${isP?`<div class="field"><label for="psvc">Service</label><select id="psvc" data-chg="psvc"><option value="">Tous les services</option>${svcs.map(s=>`<option${s===U.psvc?' selected':''}>${esc(s)}</option>`).join('')}</select></div>`:''}</div>${tbl}`}
+function contactBody(p){const R=role();const isP=p.types.includes('prestataire'),isA=p.types.includes('apporteur');const gifts=S.gifts.filter(g=>g.to===p.id);
+ let h=`<p>${p.types.map(x=>`<span class="badge ${x==='apporteur'?'b-vio':'b-info'}">${x==='apporteur'?'Apporteur d’affaires':'Prestataire'}</span>`).join(' ')}</p><dl class="dl" style="margin-top:12px"><div><dt>Contact</dt><dd>${esc(p.contact)}</dd></div><div><dt>Email</dt><dd>${esc(p.email)}</dd></div><div><dt>Téléphone</dt><dd dir="ltr">${esc(p.tel)}</dd></div>${p.org?`<div><dt>Structure</dt><dd>${esc(p.org)}</dd></div>`:''}</dl>`;
+ if(isP){const s=pStats(p.id);const rs=S.reqs.filter(r=>r.lines.some(l=>l.p===p.id)).sort((a,b)=>b.created.localeCompare(a.created)).slice(0,6);h+=`<h3 style="margin-top:16px">Services et conditions négociées</h3><p>${p.svc.map(esc).join(', ')} · ${p.dest.map(esc).join(', ')}</p><p class="wrap" style="margin-top:4px">${esc(p.cond)}</p><p class="muted small">${esc(p.tarif)}</p><div class="kpis" style="margin-top:12px">${kpi('Réservations confiées',s.n)}${kpi('Volume d’achats',fmtE(s.vol),'','fin')}${kpi('Marge générée',fmtE(s.marg),'','fin')}${kpi('Réactivité',p.react+' h','délai moyen de réponse')}${kpi('Qualité',sat(p.qual))}</div><h3>Dernières demandes</h3><ul class="list">${rs.map(r=>`<li><div><button type="button" class="linkbtn" data-act="open-req" data-id="${r.id}">${esc(r.t)}</button><p class="small muted">${esc(cl(r.c).n)} · ${fd(r.created)}</p></div>${stBadge(r.status)}</li>`).join('')||'<li class="empty">Aucune.</li>'}</ul>`}
+ if(isA){const s=aStats(p.id);const pays=S.pays.filter(x=>x.a===p.id);h+=`<h3 style="margin-top:16px">Apport d’affaires</h3><p class="wrap">${esc(p.cond)}</p><div class="kpis" style="margin-top:12px">${kpi('Clients apportés',s.cs.length,s.cs.map(c=>c.n).join(', '))}${kpi('Conversion',pctf(s.conv))}${kpi('Revenus générés',fmtE(s.rev),'','fin')}${kpi('Commissions dues',fmtE(s.due),'réglé '+fmtE(s.paid),'fin')}${kpi('Solde à verser',fmtE(s.bal),'','fin hl')}</div><div class="fin"><h3>Règlements</h3><ul class="list">${pays.map(x=>`<li><div>${fd(x.d)} · ${esc(x.mode)}</div><span class="num">${fmtE(x.amount)}</span></li>`).join('')||'<li class="empty">Aucun règlement.</li>'}</ul>${s.bal>0?`<button type="button" class="btn" data-act="pay-app" data-id="${p.id}">Enregistrer un règlement</button>`:''}</div>`}
+ h+=`<h3 style="margin-top:16px">Historique des échanges</h3><ul class="list">${(p.ex||[]).slice().reverse().map(x=>`<li><div><p class="wrap">${esc(x.text)}</p><p class="small muted">${fdt(x.at)}</p></div></li>`).join('')||'<li class="empty">Aucun échange.</li>'}</ul><form data-form="contact-ex" novalidate><input type="hidden" name="id" value="${p.id}">${FB('cx').f('text','Consigner un échange',FB('cx').t('text','','rows="2"'),{req:1})}<div class="actions" style="margin-top:8px"><button class="btn" type="submit">Ajouter</button></div></form>
+ <h3 style="margin-top:16px">Gifting</h3><ul class="list">${gifts.map(g=>`<li><div><strong>${esc(g.item)}</strong><p class="small muted">${esc(g.occ)} · ${fd(g.d)}</p></div><span class="num">${fmtE(g.cost)}</span></li>`).join('')||'<li class="empty">Aucun cadeau.</li>'}</ul><button type="button" class="btn" data-act="gift-new" data-id="${p.id}">${ic('gift')} Enregistrer un cadeau</button>`;
+ return h}
+
+/* ===== Revenus ===== */
+function vRevenue(){const p=U.per;const won=S.reqs.filter(r=>WON.includes(r.status)&&inPer(rDate(r),p));const A={booked:0,fees:0,comm:0,resale:0,rev:0,apc:0,margin:0};won.forEach(r=>{const f=fin(r);for(const k in A)A[k]+=f[k]});
+ const neg=S.reqs.filter(r=>['proposition','attente'].includes(r.status)).reduce((a,r)=>a+fin(r).booked,0);
+ const months=[];for(let i=11;i>=0;i--){const d=new Date(TODAY.getFullYear(),TODAY.getMonth()-i,1);months.push({k:d.getFullYear()+'-'+pad(d.getMonth()+1),l:d.toLocaleDateString('fr-FR',{month:'short'}),y:d.getFullYear(),rev:0,mar:0,bk:0})}
+ S.reqs.filter(r=>WON.includes(r.status)).forEach(r=>{const m=months.find(x=>x.k===rDate(r).slice(0,7));if(m){const f=fin(r);m.rev+=f.rev;m.mar+=f.margin;m.bk+=f.booked}});const mx=Math.max(1,...months.map(m=>m.rev));
+ const rows=S.clients.map(c=>({c,s:cStats(c.id,p)}));const key=U.sort;rows.sort((a,b)=>(b.s[key]||0)-(a.s[key]||0));
+ const bk=[['Honoraires',A.fees],['Commissions prestataires',A.comm],['Marge sur revente',A.resale]];
+ return `<div class="page-head"><div><h1>Revenus et indicateurs</h1><p class="muted">Période : ${PER[p]} · demandes confirmées et réalisées</p></div><div class="seg" role="group" aria-label="Période">${Object.entries(PER).map(([k,v])=>`<button type="button" data-act="per" data-k="${k}" aria-pressed="${k===p}">${v}</button>`).join('')}</div></div>
+ <div class="kpis">${kpi('Montant total réservé',fmtE(A.booked),won.length+' demande(s) · encaissé pour le compte des prestataires','big')}${kpi('Revenus réels de l’entreprise',fmtE(A.rev),'honoraires + commissions + marge revente · '+(A.booked?pctf(A.rev/A.booked):'—')+' du réservé','big hl')}${kpi('Marge après coûts directs',fmtE(A.margin),'après '+fmtE(A.apc)+' de commissions apporteurs','big')}${kpi('En négociation',fmtE(neg),'propositions envoyées ou en attente de paiement')}</div>
+ <div class="grid2"><section class="card"><div class="card-h"><h2>Évolution sur 12 mois</h2><div class="legend"><span><i></i>Revenus réels</span><span><i class="m"></i>Marge après coûts directs</span></div></div>
+ <div class="chart" role="img" aria-label="Revenus réels et marge par mois sur 12 mois">${months.map(m=>`<div class="c" title="${m.l} ${m.y} : revenus ${fmtE(m.rev)}, marge ${fmtE(m.mar)}"><span class="b" style="height:${m.rev/mx*100}%"></span><span class="b m" style="height:${Math.max(0,m.mar)/mx*100}%"></span></div>`).join('')}</div><div class="chart-x" aria-hidden="true">${months.map(m=>`<span>${m.l.replace('.','')}</span>`).join('')}</div>
+ <details style="margin-top:8px"><summary>Voir les données du graphique</summary><div class="tbl-wrap narrow"><table><thead><tr><th>Mois</th><th class="r">Réservé</th><th class="r">Revenus réels</th><th class="r">Marge</th></tr></thead><tbody>${months.map(m=>`<tr><td>${m.l} ${m.y}</td><td class="r num">${fmtE(m.bk)}</td><td class="r num">${fmtE(m.rev)}</td><td class="r num">${fmtE(m.mar)}</td></tr>`).join('')}</tbody></table></div></details></section>
+ <section class="card"><div class="card-h"><h2>Décomposition des revenus</h2></div><ul class="list">${bk.map(b=>`<li><div><div class="row"><span>${b[0]}</span><b class="num">${fmtE(b[1])}</b></div><div class="bar" style="margin-top:6px"><i style="width:${A.rev?b[1]/A.rev*100:0}%"></i></div></div></li>`).join('')}<li><div><div class="row"><span>Commissions apporteurs (coût direct)</span><b class="num">− ${fmtE(A.apc)}</b></div><div class="bar" style="margin-top:6px"><i class="m" style="width:${A.rev?A.apc/A.rev*100:0}%"></i></div></div></li><li><div class="row" style="width:100%"><strong>Marge après coûts directs</strong><strong class="num">${fmtE(A.margin)}</strong></div></li></ul><p class="hint" style="margin-top:8px">Le montant réservé inclut les sommes reversées aux prestataires : il n’est pas un revenu.</p></section></div>
+ <div class="page-head" style="margin-top:24px;margin-bottom:12px"><h2>Indicateurs par client</h2><div class="field"><label for="sortSel">Trier par</label><select id="sortSel" data-chg="sort">${[['rev','Revenus (période)'],['margin','Marge (période)'],['revAll','Revenus cumulés'],['basket','Panier moyen'],['conv','Conversion'],['freq','Fréquence'],['sat','Satisfaction']].map(o=>`<option value="${o[0]}"${o[0]===key?' selected':''}>${o[1]}</option>`).join('')}</select></div></div>
+ <div class="tbl-wrap"><table><thead><tr><th>Client</th><th class="r">Revenus période</th><th class="r">Marge période</th><th class="r">Revenus cumulés</th><th class="r">Marge cumulée</th><th class="r">Fréquence (12 mois)</th><th class="r">Panier moyen</th><th class="r">Conversion</th><th>Dernière activité</th><th>Satisfaction</th><th class="r">Recommandations</th></tr></thead><tbody>${rows.map(({c,s})=>`<tr><td><button type="button" class="linkbtn" data-act="open-client" data-id="${c.id}">${esc(c.n)}</button></td><td class="r num">${fmtE(s.rev)}</td><td class="r num">${fmtE(s.margin)}</td><td class="r num">${fmtE(s.revAll)}</td><td class="r num">${fmtE(s.marginAll)}</td><td class="r num">${s.freq}</td><td class="r num">${fmtE(s.basket)}</td><td class="r num">${pctf(s.conv)}</td><td>${fd(s.last)}</td><td>${sat(s.sat)}</td><td class="r num">${s.recos}</td></tr>`).join('')}</tbody></table></div>`}
+
+/* ===== Gifting ===== */
+function vGifting(){const y=String(TODAY.getFullYear());const gy=S.gifts.filter(g=>g.d.startsWith(y));const isC=g=>!!cl(g.to);const sc=gy.filter(isC).reduce((a,g)=>a+g.cost,0),sp=gy.filter(g=>!isC(g)).reduce((a,g)=>a+g.cost,0),B=S.giftBudget;
+ const hist=S.gifts.filter(g=>U.gf==='all'||(U.gf==='c'?isC(g):!isC(g))).sort((a,b)=>b.d.localeCompare(a.d));const up=upcoming(60);
+ return `<div class="page-head"><div><h1>Gifting</h1><p class="muted">Occasions, cadeaux offerts et budget ${y} — clients et partenaires</p></div><button type="button" class="btn primary" data-act="gift-new">${ic('plus')} Enregistrer un cadeau</button></div>
+ <div class="kpis">${kpi('Budget annuel '+y,fmtE(B))}${kpi('Dépensé',fmtE(sc+sp),pctf((sc+sp)/B)+' du budget')}${kpi('Clients',fmtE(sc),gy.filter(isC).length+' cadeau(x)')}${kpi('Partenaires',fmtE(sp),gy.filter(g=>!isC(g)).length+' cadeau(x)')}${kpi('Restant',fmtE(B-sc-sp),'','hl')}</div>
+ <div class="bar" style="height:12px;margin-bottom:20px" role="img" aria-label="Budget consommé : ${pctf((sc+sp)/B)}"><i style="width:${Math.min(100,(sc+sp)/B*100)}%"></i></div>
+ <div class="grid2"><section class="card"><div class="card-h"><h2>Historique des cadeaux</h2><div class="seg" role="group" aria-label="Filtrer">${[['all','Tous'],['c','Clients'],['p','Partenaires']].map(o=>`<button type="button" data-act="gf" data-k="${o[0]}" aria-pressed="${U.gf===o[0]}">${o[1]}</button>`).join('')}</div></div>
+ <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Destinataire</th><th>Occasion</th><th>Cadeau</th><th>Fournisseur</th><th class="r">Coût</th></tr></thead><tbody>${hist.map(g=>{const r=rec(g.to);return `<tr><td>${fd(g.d)}</td><td><button type="button" class="linkbtn" data-act="${cl(g.to)?'open-client':'open-contact'}" data-id="${g.to}">${esc(r?r.n:'—')}</button><div class="small muted">${cl(g.to)?'Client':'Partenaire'}</div></td><td>${esc(g.occ)}</td><td>${esc(g.item)}</td><td>${g.prov?esc(pv(g.prov).n):'—'}</td><td class="r num">${fmtE(g.cost)}</td></tr>`}).join('')}</tbody></table></div></section>
+ <section class="card"><div class="card-h"><h2>${ic('cal')} Occasions à venir (60 jours)</h2></div><ul class="list">${up.map(u=>{const done=S.gifts.some(g=>g.to===u.id&&g.occ===u.l&&daysTo(g.d)>-30);return `<li><div><strong>${esc(u.who)}</strong> <span class="badge">${u.kind}</span><p class="small muted">${esc(u.l)} · ${fd(u.d,'fr-FR',{day:'numeric',month:'long'})} · J-${u.n}</p></div>${done?'<span class="badge b-ok">Cadeau prévu</span>':`<button type="button" class="btn sm" data-act="gift-new" data-id="${u.id}" data-occ="${esc(u.l)}">${ic('gift')} Préparer</button>`}</li>`}).join('')||'<li class="empty">Aucune occasion.</li>'}</ul></section></div>`}
+
+/* ===== Portail client ===== */
+function pClient(){return cl(role().client)}
+function steps(r){if(r.status==='annulee')return '';const idx={nouvelle:0,recherche:1,proposition:2,attente:2,confirmee:3,realisee:5}[r.status];const lab=[t('st_nouvelle'),t('st_recherche'),t('s_prop'),t('st_confirmee'),t('st_realisee')];return `<ol class="steps">${lab.map((l,i)=>`<li class="${i<idx?'done':i===idx?'cur':''}"${i===idx?' aria-current="step"':''}>${esc(l)}</li>`).join('')}</ol>`}
+function pcard(r){const loc=LOC[U.lang];const need=r.status==='proposition'||(r.status==='attente'&&!r.paid);return `<button type="button" class="pcard${need?' need':''}" data-act="p-open" data-id="${r.id}"><span class="row"><span class="small muted wrap">${r.id} · ${t('cat_'+r.cat)}</span>${pBadge(r.status)}</span><strong class="wrap" dir="auto" style="font-size:16px">${esc(r.t)}</strong><span class="small muted">${r.dest?esc(r.dest)+' · ':''}${frange(r.from,r.to,loc)}</span>${need?`<span class="badge b-gold">${ic('alert')} ${t('action')} : ${r.status==='proposition'?t('validate'):t('pay')}</span>`:''}${CLOSED.includes(r.status)?'':steps(r)}</button>`}
+function vPReqs(){const c=pClient();const rs=S.reqs.filter(r=>r.c===c.id).sort((a,b)=>b.created.localeCompare(a.created));const act=rs.filter(r=>!CLOSED.includes(r.status)),past=rs.filter(r=>CLOSED.includes(r.status));
+ return `<div class="page-head"><div><h1>${t('hello')} ${esc(c.n.split(' ')[0])}</h1><p class="muted">${t('intro')}</p></div><button type="button" class="btn primary" data-act="go" data-view="p-new">${ic('plus')} ${t('nav_new')}</button></div>
+ <h2 class="sec">${t('active')} (${act.length})</h2>${act.length?`<div class="pgrid">${act.map(pcard).join('')}</div>`:`<p class="empty">${t('none')}</p>`}
+ ${past.length?`<h2 class="sec">${t('past')} (${past.length})</h2><div class="pgrid">${past.map(pcard).join('')}</div>`:''}`}
+function vPReq(){const c=pClient();const r=rq(U.id);if(!r||r.c!==c.id)return vPReqs();const loc=LOC[U.lang];const tot=r.lines.reduce((a,l)=>a+l.price,0);const showProp=r.sent&&r.lines.length&&['proposition','attente','confirmee','realisee'].includes(r.status);const docs=S.docs.filter(d=>d.r===r.id&&d.visible);const ms=msgsOf(r);const fb=FB('pc');
+ let prop='';if(showProp){prop=`<div class="tbl-wrap narrow"><table><thead><tr><th>${t('service')}</th><th class="r">${t('price')}</th></tr></thead><tbody>${r.lines.map(l=>`<tr><td>${esc(l.l)}</td><td class="r num">${fmtE(l.price,loc)}</td></tr>`).join('')}</tbody><tfoot><tr><td>${t('total')}</td><td class="r num">${fmtE(tot,loc)}</td></tr></tfoot></table></div><p class="hint" style="margin-top:6px">${t('amounts_ttc')}</p>`;
+  if(r.status==='proposition')prop+=`<div class="actions" style="margin-top:12px"><button type="button" class="btn primary" data-act="p-validate">${ic('check')} ${t('validate')}</button><button type="button" class="btn" data-act="p-change" aria-expanded="${U.pchg}">${t('change')}</button></div>${U.pchg?`<form data-form="p-change" novalidate style="margin-top:12px">${fb.f('text',t('change_ph'),fb.t('text','','rows="3" dir="auto"'),{req:1})}<div class="actions" style="margin-top:8px"><button class="btn primary" type="submit">${ic('send','flip')} ${t('send')}</button></div></form>`:''}`;
+  if(r.status==='attente'&&!r.paid)prop+=`<div class="totals" style="margin-top:12px"><div><span>${t('validated')} ${fd(r.validated,loc)}</span></div><div class="strong"><span>${t('deposit')}</span><strong class="num">${fmtE(Math.round(tot*.3),loc)}</strong></div></div><div class="actions" style="margin-top:12px"><button type="button" class="btn primary" data-act="p-pay">${ic('card')} ${t('pay')}</button></div>`;
+  if(r.paid)prop+=`<p style="margin-top:12px"><span class="badge b-ok">${ic('check')} ${t('paid_badge')}</span></p>`}
+ else if(!CLOSED.includes(r.status))prop=`<p class="muted">${t('prop_wait')}</p>`;
+ return `<div class="page-head"><div><button type="button" class="btn ghost sm" data-act="go" data-view="p-reqs">${ic('back','flip')} ${t('back')}</button><p class="muted small wrap">${r.id} · ${t('cat_'+r.cat)} · ${t('created')} ${fd(r.created,loc)}</p><h1 class="wrap" dir="auto">${esc(r.t)}</h1></div>${pBadge(r.status)}</div>
+ ${steps(r)?`<section class="card" style="margin-bottom:16px">${steps(r)}</section>`:''}
+ <div class="grid2"><div class="stack"><section class="card"><div class="card-h"><h2>${t('proposal')}</h2></div>${prop||'—'}</section>
+ <section class="card"><div class="card-h"><h2>${t('details')}</h2></div><p dir="auto" class="wrap">${esc(r.desc||'—')}</p><dl class="dl" style="margin-top:12px"><div><dt>${t('dest')}</dt><dd>${esc(r.dest||'—')}</dd></div><div><dt>${t('dates')}</dt><dd>${frange(r.from,r.to,loc)}</dd></div><div><dt>${t('guests')}</dt><dd>${r.guests||'—'}</dd></div><div><dt>${t('your_contact')}</dt><dd>${r.owner?esc(TEAM[r.owner].n):t('assigning')}</dd></div></dl></section></div>
+ <div class="stack"><section class="card"><div class="card-h"><h2>${t('docs_req')}</h2></div>${docs.length?`<ul class="list">${docs.map(d=>`<li><div><strong class="wrap">${esc(d.title)}</strong><p class="small muted">${t('d_'+d.type)} · ${fd(d.date,loc)}</p></div><button type="button" class="btn sm" data-act="view-doc" data-id="${d.id}">${t('view')}</button></li>`).join('')}</ul>`:`<p class="empty">${t('no_docs')}</p>`}</section>
+ <section class="card"><div class="card-h"><h2>${t('msgs_req')}</h2></div><div class="thread">${ms.map(m=>bubble(m,'client')).join('')}</div><form data-form="p-msg" novalidate><input type="hidden" name="r" value="${r.id}">${FB('pm').f('text',t('msg_ph'),FB('pm').t('text','','rows="3" dir="auto"'),{req:1})}<div class="actions" style="margin-top:8px"><button class="btn primary" type="submit">${ic('send','flip')} ${t('send')}</button></div></form></section></div></div>`}
+function vPNew(){const fb=FB('pn');return `<div class="page-head"><div><h1>${t('nav_new')}</h1><p class="muted">${t('new_intro')}</p></div></div>
+ <section class="card"><form data-form="p-new" novalidate><div class="fgrid">${fb.f('cat',t('cat'),fb.s('cat',[['',' — '],...catOpts(U.lang)],''),{req:1})}${fb.f('t',t('title_f'),fb.i('t','','text','dir="auto"'),{req:1})}${fb.f('dest',t('dest'),fb.i('dest','','text','dir="auto"'))}${fb.f('from',t('from'),fb.i('from','','date'),{req:1})}${fb.f('to',t('to'),fb.i('to','','date'))}${fb.f('guests',t('guests'),fb.i('guests','','number','min="1" inputmode="numeric"'))}${fb.f('budget',t('budget')+' (€)',fb.i('budget','','number','min="0" step="100" inputmode="numeric"'))}${fb.f('desc',t('desc'),fb.t('desc','','rows="5" dir="auto" placeholder="'+esc(t('desc_ph'))+'"'),{req:1,full:1})}</div><div class="actions" style="margin-top:14px"><button class="btn primary" type="submit">${ic('send','flip')} ${t('submit')}</button></div></form></section>`}
+function vPDocs(){const c=pClient(),loc=LOC[U.lang];const ds=S.docs.filter(d=>d.c===c.id&&d.visible).sort((a,b)=>b.date.localeCompare(a.date));
+ return `<div class="page-head"><div><h1>${t('nav_docs')}</h1><p class="muted">${t('docs_intro')}</p></div></div>${ds.length?`<div class="tbl-wrap"><table><thead><tr><th>${t('type')}</th><th>${t('nav_docs')}</th><th>${t('ref')}</th><th>${t('date')}</th><th class="r">${t('amount')}</th><th><span class="sr">${t('view')}</span></th></tr></thead><tbody>${ds.map(d=>`<tr><td><span class="badge ${d.type==='facture'?'b-info':d.type==='confirmation'?'b-ok':'b-gray'}">${t('d_'+d.type)}</span></td><td>${esc(d.title)}${d.type==='facture'?`<div class="small muted">${t('inv_src')}</div>`:''}</td><td class="small">${esc(d.r||'—')}</td><td>${fd(d.date,loc)}</td><td class="r num">${d.amount?fmtE(d.amount,loc):'—'}</td><td><button type="button" class="btn sm" data-act="view-doc" data-id="${d.id}">${t('view')}</button></td></tr>`).join('')}</tbody></table></div>`:`<p class="empty">${t('no_docs')}</p>`}`}
+function vPMsgs(){const c=pClient();const ms=S.msgs.filter(m=>m.c===c.id).sort((a,b)=>a.at.localeCompare(b.at));const rs=S.reqs.filter(r=>r.c===c.id&&!CLOSED.includes(r.status));const fb=FB('pg');
+ return `<div class="page-head"><div><h1>${t('nav_msgs')}</h1><p class="muted">${t('msgs_intro')}</p></div></div><section class="card"><div class="thread" style="max-height:480px">${ms.map(m=>bubble(m,'client')).join('')}</div><form data-form="p-msg" novalidate><div class="fgrid">${fb.f('r',t('subject'),fb.s('r',[['',t('general')],...rs.map(r=>[r.id,r.t])],U.pmsgReq))}${fb.f('text',t('msg_ph'),fb.t('text','','rows="3" dir="auto"'),{req:1,full:1})}</div><div class="actions" style="margin-top:8px"><button class="btn primary" type="submit">${ic('send','flip')} ${t('send')}</button></div></form></section>`}
+function vPPrefs(){const c=pClient();const fb=FB('pp');const pv_=k=>{const p=c.prefs.find(x=>x.pk===k);return p?p.text:''};
+ return `<div class="page-head"><div><h1>${t('nav_prefs')}</h1><p class="muted">${t('prefs_intro')}</p></div></div><form data-form="p-prefs" novalidate><div class="grid2"><section class="card"><div class="card-h"><h2>${t('nav_prefs')}</h2></div><div class="fgrid">${fb.f('diet',t('diet'),fb.t('diet',pv_('diet'),'rows="2" dir="auto"'),{full:1})}${fb.f('rooms',t('rooms'),fb.t('rooms',pv_('rooms'),'rows="2" dir="auto"'),{full:1})}${fb.f('travel',t('travel'),fb.t('travel',pv_('travel'),'rows="2" dir="auto"'),{full:1})}${fb.f('notes',t('notes'),fb.t('notes',c.pnotes,'rows="2" dir="auto"'),{full:1})}</div></section>
+ <div class="stack"><section class="card"><div class="card-h"><h2>${t('contact')}</h2></div><div class="fgrid">${fb.f('email',t('email'),fb.i('email',c.email,'email','dir="ltr"'),{req:1})}${fb.f('tel',t('phone'),fb.i('tel',c.tel,'tel','dir="ltr"'))}${fb.f('lang',t('lang'),fb.s('lang',Object.entries(LANGN),c.lang))}</div></section>
+ <section class="card"><div class="card-h"><h2>${ic('mail')} ${t('notif')}</h2></div>${['prop','status','msg'].map(k=>`<label class="check"><input type="checkbox" name="n_${k}"${c.notif[k]?' checked':''}> ${t('n_'+k)}</label>`).join('')}</section>
+ <div class="actions"><button class="btn primary" type="submit">${ic('check')} ${t('save')}</button></div></div></div></form>`}
+
+/* ===== Documents (aperçu imprimable) ===== */
+function docHTML(d,lang){const r=d.r?rq(d.r):null,c=cl(d.c),loc=LOC[lang],L=k=>tl(lang,k);const tot=r?r.lines.reduce((a,l)=>a+l.price,0):0;
+ let body='';if(d.type==='fichier')body=`<p>${L('no_prev')}</p>`;else if(r){body=`<table><thead><tr><th>${L('service')}</th><th class="r">${L('price')}</th></tr></thead><tbody>${r.lines.map(l=>`<tr><td>${esc(l.l)}</td><td class="r">${fmtE(l.price,loc)}</td></tr>`).join('')}</tbody><tfoot><tr><td>${L('total')}</td><td class="r">${fmtE(tot,loc)}</td></tr>${d.type==='facture'&&d.amount&&d.amount<tot?`<tr><td>${L('deposit_lbl')}</td><td class="r">${fmtE(d.amount,loc)}</td></tr>`:''}</tfoot></table>`}
+ return `<div class="doc" dir="${lang==='ar'?'rtl':'ltr'}" lang="${lang}"><div class="doc-h"><div><div class="doc-brand">Aurèle</div><div class="small">Conciergerie privée · 12 rue de l’Exemple, 75008 Paris</div></div><div><b>${L('d_'+d.type)}</b><div class="small">${esc(d.title)}</div><div class="small">${fd(d.date,loc)}</div></div></div><p><b>${esc(c.n)}</b><br>${L('ref')} : ${esc(d.r||'—')}${r?' · '+esc(r.t):''}</p>${r?`<p class="small">${L('dates')} : ${frange(r.from,r.to,loc)} · ${L('dest')} : ${esc(r.dest||'—')}</p>`:''}${body}${d.type==='facture'?`<p class="small">${L('inv_src')}</p>`:''}<p class="small" style="margin-top:14px">${L('amounts_ttc')}</p></div>`}
+
+/* ===== Actions ===== */
+const ACT={
+ 'go':el=>go(el.dataset.view,el.dataset.id),
+ 'reset':()=>{try{localStorage.removeItem(KEY)}catch(e){}S=seed();finalizeSeed();const r=U.role;U=defaultsU();U.role=r;const R=role();if(R.kind==='client'){U.view='p-reqs';U.lang=cl(R.client).lang}save();closeModal();render(true);toast('Démo réinitialisée')},
+ 'modal-bg':(el,e)=>{if(e.target===el)closeModal()},
+ 'close-modal':()=>closeModal(),
+ 'open-req':el=>{closeModal();U.ai=null;go('req',el.dataset.id)},
+ 'open-client':el=>{closeModal();go('client',el.dataset.id)},
+ 'open-contact':el=>{const p=pv(el.dataset.id);openModal(esc(p.n),contactBody(p),true)},
+ 'mode':el=>{U.mode=el.dataset.m;render()},
+ 'ptab':el=>{U.ptab=el.dataset.k;render()},
+ 'per':el=>{U.per=el.dataset.k;render()},
+ 'gf':el=>{U.gf=el.dataset.k;render()},
+ 'new-req':el=>reqModal(null,el.dataset.c),
+ 'edit-req':()=>reqModal(rq(U.id)),
+ 'del-line':el=>{const r=rq(U.id);const l=r.lines.splice(+el.dataset.i,1)[0];addLog(r,'Ligne supprimée : '+l.l);save();render();toast('Ligne supprimée')},
+ 'client-preview':()=>{const r=rq(U.id),c=cl(r.c),lg=c.lang,loc=LOC[lg];const tot=r.lines.reduce((a,l)=>a+l.price,0);openModal('Aperçu côté client ('+LANGN[lg]+')',`<p class="hint" style="margin-bottom:10px">Exactement ce que verra ${esc(c.n)} dans son portail : ni prestataire, ni coût d’achat, ni commission, ni marge, ni note interne.</p><div dir="${lg==='ar'?'rtl':'ltr'}" lang="${lg}"><h3 dir="auto">${esc(r.t)}</h3><div class="tbl-wrap narrow" style="margin-top:8px"><table><thead><tr><th>${tl(lg,'service')}</th><th class="r">${tl(lg,'price')}</th></tr></thead><tbody>${r.lines.map(l=>`<tr><td>${esc(l.l)}</td><td class="r num">${fmtE(l.price,loc)}</td></tr>`).join('')}</tbody><tfoot><tr><td>${tl(lg,'total')}</td><td class="r num">${fmtE(tot,loc)}</td></tr></tfoot></table></div><div class="actions" style="margin-top:10px"><span class="btn primary" aria-hidden="true">${tl(lg,'validate')}</span><span class="btn" aria-hidden="true">${tl(lg,'change')}</span></div></div>`)},
+ 'send-prop':()=>{const r=rq(U.id),c=cl(r.c);r.sent=iso(TODAY);r.status='proposition';r.validated=null;addLog(r,'Proposition envoyée au client');S.msgs.push({id:'M'+(S.mseq++),c:r.c,r:r.id,from:'team',who:me(),at:nowAt(),text:draftText(r,[])});save();render();toast(c.notif.prop?'Proposition publiée dans le portail — email envoyé à '+c.n+' (simulation)':'Proposition publiée dans le portail')},
+ 'ai':el=>{const r=rq(U.id);const k=el.dataset.k;U.ai={id:r.id,k,loading:true};render();const sec=document.querySelector('.card.ai');sec&&sec.scrollIntoView({block:'nearest',behavior:'smooth'});setTimeout(()=>{if(U.view!=='req'||U.id!==r.id)return;U.ai={id:r.id,k,html:aiRun(r,k)};render();const ta=document.getElementById('ai-draft');if(ta)ta.focus()},650)},
+ 'ai-clear':()=>{U.ai=null;render()},
+ 'ai-next':()=>{const r=rq(U.id);const m=U.aiMiss||missing(r);r.next='Obtenir du client : '+m.map(x=>MISSFR[x].toLowerCase()).join(', ');r.nextD=dAdd(1);addLog(r,'Prochaine action créée depuis l’assistant');save();render();toast('Prochaine action enregistrée')},
+ 'ai-apply':()=>{const r=rq(U.id),s=U.aiPrep||{};['guests','dest','budget','next','nextD'].forEach(k=>{if(s[k]!=null)r[k]=s[k]});if(s.owner&&!r.owner){r.owner=s.owner;addLog(r,'Attribuée à '+TEAM[s.owner].n)}addLog(r,'Fiche complétée avec l’assistant (validée par '+TEAM[me()].n+')');U.ai=null;save();render();toast('Suggestions appliquées')},
+ 'ai-send':()=>{const r=rq(U.id),c=cl(r.c);const v=(document.getElementById('ai-draft')||{}).value||'';if(!v.trim()){toast('Le brouillon est vide');return}S.msgs.push({id:'M'+(S.mseq++),c:r.c,r:r.id,from:'team',who:me(),at:nowAt(),text:v.trim()});addLog(r,'Réponse envoyée (brouillon IA validé)');U.ai=null;save();render();toast(c.notif.msg?'Message envoyé — email de notification (simulation)':'Message envoyé')},
+ 'view-doc':el=>{const d=S.docs.find(x=>x.id===el.dataset.id);const portal=role().kind==='client';const lg=portal?U.lang:'fr';U.printDoc=d.id;openModal(esc(portal?t('d_'+d.type):'Aperçu du document'),docHTML(d,lg)+`<div class="mfoot"><button type="button" class="btn" data-act="close-modal">${portal?t('close'):'Fermer'}</button><button type="button" class="btn primary" data-act="print-doc">${ic('print')} ${portal?t('print'):'Imprimer / PDF'}</button></div>`,true)},
+ 'print-doc':()=>{const d=S.docs.find(x=>x.id===U.printDoc);if(!d)return;$('#print').innerHTML=docHTML(d,role().kind==='client'?U.lang:'fr');window.print()},
+ 'pref-toggle':el=>{const c=cl(U.id),p=c.prefs.find(x=>x.id===el.dataset.id);p.st=p.st==='confirmee'?'supposee':'confirmee';p.src='Corrigé par '+TEAM[me()].n+' le '+fd(iso(TODAY));save();render();toast(p.st==='confirmee'?'Préférence confirmée':'Préférence repassée en supposée')},
+ 'pref-edit':el=>{const c=cl(U.id),p=c.prefs.find(x=>x.id===el.dataset.id);const fb=FB('pe');openModal('Corriger la préférence',`<form data-form="pref-edit" novalidate><input type="hidden" name="id" value="${p.id}"><div class="fgrid">${fb.f('cat','Catégorie',fb.s('cat',PCATS.map(x=>[x,x]),p.cat))}${fb.f('st','Fiabilité',fb.s('st',[['confirmee','Confirmée'],['supposee','Supposée']],p.st))}${fb.f('text','Préférence',fb.t('text',p.text,'rows="3"'),{req:1,full:1})}</div><div class="mfoot"><button type="button" class="btn" data-act="close-modal">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`)},
+ 'pref-del':el=>{const c=cl(U.id);c.prefs=c.prefs.filter(x=>x.id!==el.dataset.id);save();render();toast('Préférence supprimée')},
+ 'sugg':el=>{const c=cl(U.id),s=c.sugg.find(x=>x.id===el.dataset.id);c.sugg=c.sugg.filter(x=>x!==s);if(el.dataset.k!=='no'){c.prefs.push(pf('f'+Date.now(),s.cat,s.text,el.dataset.k,s.src+' · validé par '+TEAM[me()].n));toast('Ajoutée à la base de connaissance')}else toast('Suggestion rejetée');save();render()},
+ 'date-del':el=>{const c=cl(U.id);c.dates.splice(+el.dataset.i,1);save();render()},
+ 'edit-client':()=>{const c=cl(U.id),fb=FB('ec');openModal('Modifier la fiche client',`<form data-form="edit-client" novalidate><div class="fgrid">${fb.f('n','Nom',fb.i('n',c.n),{req:1})}${fb.f('email','Email',fb.i('email',c.email,'email'),{req:1})}${fb.f('tel','Téléphone',fb.i('tel',c.tel,'tel'))}${fb.f('city','Ville',fb.i('city',c.city))}${fb.f('lang','Langue',fb.s('lang',Object.entries(LANGN),c.lang))}${fb.f('tier','Niveau',fb.s('tier',[['Essentiel','Essentiel'],['Signature','Signature'],['Privilège','Privilège']],c.tier))}${fb.f('habits','Habitudes',fb.t('habits',c.habits,'rows="3"'),{full:1})}${fb.f('tags','Goûts (séparés par des virgules)',fb.i('tags',c.tags.join(', ')),{full:1,hint:'Utilisés pour les recommandations'})}</div><div class="mfoot"><button type="button" class="btn" data-act="close-modal">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`)},
+ 'new-client':()=>{const fb=FB('nc');openModal('Nouveau client',`<form data-form="new-client" novalidate><div class="fgrid">${fb.f('n','Nom complet',fb.i('n'),{req:1})}${fb.f('email','Email',fb.i('email','','email'),{req:1})}${fb.f('tel','Téléphone',fb.i('tel','','tel'))}${fb.f('city','Ville',fb.i('city'))}${fb.f('lang','Langue du portail',fb.s('lang',Object.entries(LANGN),'fr'))}${fb.f('refBy','Apporteur d’affaires',fb.s('refBy',[['','Aucun'],...S.provs.filter(p=>p.types.includes('apporteur')).map(p=>[p.id,p.n])],''))}${fb.f('recBy','Recommandé par un client',fb.s('recBy',[['','Aucun'],...S.clients.map(c=>[c.id,c.n])],''))}</div><p class="hint" style="margin-top:10px">Un accès au portail client sera proposé par email (simulation).</p><div class="mfoot"><button type="button" class="btn" data-act="close-modal">Annuler</button><button class="btn primary" type="submit">Créer la fiche</button></div></form>`)},
+ 'gift-new':el=>{const fb=FB('gf');const to=el.dataset.id||'',occ=el.dataset.occ||'';openModal('Enregistrer un cadeau',`<form data-form="gift" novalidate><div class="fgrid">${fb.f('to','Destinataire',fb.s('to',[['','Choisir…'],`<optgroup label="Clients">${S.clients.map(c=>`<option value="${c.id}"${c.id===to?' selected':''}>${esc(c.n)}</option>`).join('')}</optgroup>`,`<optgroup label="Partenaires">${S.provs.map(p=>`<option value="${p.id}"${p.id===to?' selected':''}>${esc(p.n)}</option>`).join('')}</optgroup>`],to),{req:1})}${fb.f('occ','Occasion',fb.i('occ',occ),{req:1})}${fb.f('item','Cadeau',fb.i('item','','text','placeholder="ex. Bouquet et coffret de thés"'),{req:1,full:1})}${fb.f('prov','Fournisseur',fb.s('prov',provOpts(),''))}${fb.f('cost','Coût (€)',fb.i('cost','','number','min="1" inputmode="decimal"'),{req:1})}${fb.f('d','Date',fb.i('d',iso(TODAY),'date'),{req:1})}</div><div class="mfoot"><button type="button" class="btn" data-act="close-modal">Annuler</button><button class="btn primary" type="submit">Enregistrer</button></div></form>`)},
+ 'pay-app':el=>{const p=pv(el.dataset.id),s=aStats(p.id),fb=FB('ap');openModal('Règlement — '+esc(p.n),`<form data-form="app-pay" novalidate><input type="hidden" name="id" value="${p.id}"><p>Commissions dues : <b>${fmtE(s.due)}</b> · déjà réglé : ${fmtE(s.paid)} · solde : <b>${fmtE(s.bal)}</b></p><div class="fgrid" style="margin-top:12px">${fb.f('amount','Montant (€)',fb.i('amount',s.bal,'number','min="1" inputmode="decimal"'),{req:1})}${fb.f('d','Date',fb.i('d',iso(TODAY),'date'),{req:1})}${fb.f('mode','Mode',fb.s('mode',[['Virement','Virement'],['Compensation','Compensation']],'Virement'))}</div><div class="mfoot"><button type="button" class="btn" data-act="close-modal">Annuler</button><button class="btn primary" type="submit">Enregistrer le règlement</button></div></form>`)},
+ 'p-open':el=>{U.pchg=false;go('p-req',el.dataset.id)},
+ 'p-validate':()=>{const r=rq(U.id);r.status='attente';r.validated=iso(TODAY);addLog(r,'Proposition validée par le client (portail)');save();render();toast(t('validated_ok'))},
+ 'p-change':()=>{U.pchg=!U.pchg;render();const f=document.getElementById('pc-text');f&&f.focus()},
+ 'p-pay':()=>{const r=rq(U.id),c=pClient(),loc=LOC[U.lang],tot=r.lines.reduce((a,l)=>a+l.price,0),fb=FB('py');openModal(t('pay_title'),`<div class="testmode">${ic('alert')} ${t('test')}</div><p>${esc(r.t)} — <b>${t('deposit_lbl')} : ${fmtE(Math.round(tot*.3),loc)}</b></p><form data-form="p-pay" novalidate style="margin-top:12px"><div class="fgrid">${fb.f('name',t('c_name'),fb.i('name',c.n,'text','autocomplete="off"'),{req:1,full:1})}${fb.f('num',t('c_num'),fb.i('num','4242 4242 4242 4242','text','inputmode="numeric" dir="ltr" autocomplete="off"'),{req:1,full:1})}${fb.f('exp',t('c_exp'),fb.i('exp','12/28','text','inputmode="numeric" dir="ltr" autocomplete="off"'),{req:1})}${fb.f('cvc',t('c_cvc'),fb.i('cvc','123','text','inputmode="numeric" dir="ltr" autocomplete="off"'),{req:1})}</div><div class="mfoot"><button type="button" class="btn" data-act="close-modal">${t('cancel')}</button><button class="btn primary" type="submit">${ic('card')} ${t('pay_btn')} ${fmtE(Math.round(tot*.3),loc)}</button></div></form>`)}
+};
+function reqModal(r,cid){const fb=FB('rq');const edit=!!r;r=r||{c:cid||'',t:'',cat:'',dest:'',from:'',to:'',guests:'',budget:'',desc:'',owner:'',due:dAdd(3)};
+ openModal(edit?'Modifier la demande':'Nouvelle demande',`<form data-form="req" novalidate><input type="hidden" name="edit" value="${edit?r.id:''}"><div class="fgrid">${edit?'':fb.f('c','Client',fb.s('c',[['','Choisir…'],...S.clients.map(c=>[c.id,c.n])],r.c),{req:1})}${fb.f('t','Intitulé',fb.i('t',r.t),{req:1,full:1})}${fb.f('cat','Type',fb.s('cat',[['','Choisir…'],...catOpts()],r.cat),{req:1})}${fb.f('dest','Destination',fb.i('dest',r.dest))}${fb.f('from','Du',fb.i('from',r.from,'date'))}${fb.f('to','Au',fb.i('to',r.to,'date'))}${fb.f('guests','Personnes',fb.i('guests',r.guests,'number','min="1"'))}${fb.f('budget','Budget indicatif (€)',fb.i('budget',r.budget,'number','min="0" step="100"'))}${edit?'':fb.f('owner','Responsable',fb.s('owner',teamOpts(),''))}${edit?'':fb.f('due','Échéance',fb.i('due',r.due,'date'),{req:1})}${fb.f('desc','Description de la demande (visible par le client)',fb.t('desc',r.desc,'rows="4" dir="auto"'),{full:1})}</div><div class="mfoot"><button type="button" class="btn" data-act="close-modal">Annuler</button><button class="btn primary" type="submit">${edit?'Enregistrer':'Créer la demande'}</button></div></form>`,true)}
+
+const CHG={
+ role:el=>{U.role=el.value;const R=role();U.ai=null;if(R.kind==='client'){U.lang=cl(R.client).lang;U.view='p-reqs'}else U.view='home';U.id=null;closeModal();render(true);toast(R.kind==='client'?'Vous voyez le portail tel que le client le voit':'Vue équipe : '+TEAM[R.member].n)},
+ lang:el=>{U.lang=el.value;render()},
+ owner:el=>{U.owner=el.value;render()},
+ cat:el=>{U.cat=el.value;render()},
+ closed:el=>{U.closed=el.checked;render()},
+ psvc:el=>{U.psvc=el.value;render()},
+ sort:el=>{U.sort=el.value;render();const s=document.getElementById('sortSel');s&&s.focus()},
+ 'r-status':el=>{const r=rq(U.id),c=cl(r.c),v=el.value;if(v===r.status)return;r.status=v;addLog(r,'Statut : '+STL[v]);
+  if(v==='confirmee'&&!r.confAt){r.confAt=iso(TODAY);addDoc(r,'confirmation','Confirmation — '+r.t,r.lines.reduce((a,l)=>a+l.price,0))}
+  if(v==='realisee'){r.doneAt=iso(TODAY);if(!r.confAt)r.confAt=iso(TODAY);addDoc(r,'facture','Facture F-2026-0'+(S.mseq+600),r.lines.reduce((a,l)=>a+l.price,0));c.sugg.push({id:'g'+Date.now(),cat:'Loisirs',text:CATS[r.cat]+(r.dest?' à '+r.dest:'')+' réalisé : destination et format à reproposer',src:'Retour '+r.id+' — à confirmer avec le client'})}
+  save();render();const s=document.getElementById('r-status');s&&s.focus();toast('Statut mis à jour'+(c.notif.status?' — client notifié par email (simulation)':''))},
+ 'r-owner':el=>{const r=rq(U.id);r.owner=el.value||null;addLog(r,r.owner?'Attribuée à '+TEAM[r.owner].n:'Désattribuée');save();render();const s=document.getElementById('r-owner');s&&s.focus();toast('Responsable mis à jour')},
+ 'r-due':el=>{const r=rq(U.id);if(!el.value)return;r.due=el.value;addLog(r,'Échéance : '+fd(r.due));save();toast('Échéance mise à jour')}
+};
+
+const num=v=>v===''||v==null?null:Number(v);
+const FORMS={
+ 'req':(f,d)=>{let ok=true;if(!d.edit&&!d.c)ok=err(f,'c','Choisissez un client');if(!d.t.trim())ok=err(f,'t','Champ obligatoire');if(!d.cat)ok=err(f,'cat','Choisissez un type');if(!d.edit&&!d.due)ok=err(f,'due','Champ obligatoire');if(d.from&&d.to&&d.to<d.from)ok=err(f,'to','La date de fin doit suivre la date de début');if(!ok)return focusErr(f);
+  if(d.edit){const r=rq(d.edit);Object.assign(r,{t:d.t.trim(),cat:d.cat,dest:d.dest.trim(),from:d.from,to:d.to,guests:num(d.guests),budget:num(d.budget),desc:d.desc.trim()});addLog(r,'Demande modifiée');save();closeModal();render();toast('Demande mise à jour');return}
+  const r={id:'DEM-2026-0'+(S.seq++),c:d.c,t:d.t.trim(),cat:d.cat,status:'nouvelle',owner:d.owner||null,created:iso(TODAY),due:d.due,dest:d.dest.trim(),from:d.from,to:d.to,guests:num(d.guests),budget:num(d.budget),desc:d.desc.trim(),lines:[],notes:[],px:[],next:'',nextD:'',confAt:null,doneAt:null,sat:null,log:[]};addLog(r,'Demande créée par '+TEAM[me()].n);S.reqs.push(r);save();closeModal();U.ai=null;go('req',r.id);toast('Demande '+r.id+' créée')},
+ 'add-line':(f,d)=>{let ok=true;if(!d.l.trim())ok=err(f,'l','Champ obligatoire');const price=Number(d.price),cost=Number(d.cost||0),comm=Number(d.comm||0);if(!d.price||price<=0)ok=err(f,'price','Indiquez un prix de vente positif');if(cost<0)ok=err(f,'cost','Valeur invalide');if(comm<0)ok=err(f,'comm','Valeur invalide');if(!ok)return focusErr(f);
+  const r=rq(U.id);r.lines.push(L(d.l.trim(),d.p||null,cost,price,comm));addLog(r,'Ligne ajoutée : '+d.l.trim());save();render();toast('Ligne ajoutée — marge '+fmtE(price-cost+comm));const n=document.getElementById('ln-l');n&&n.focus()},
+ 'msg-team':(f,d)=>{if(!d.text.trim())return err(f,'text','Écrivez un message'),focusErr(f);const r=rq(U.id),c=cl(r.c);S.msgs.push({id:'M'+(S.mseq++),c:r.c,r:r.id,from:'team',who:me(),at:nowAt(),text:d.text.trim()});save();render();toast(c.notif.msg?'Message envoyé — email de notification (simulation)':'Message envoyé')},
+ 'add-doc':(f,d)=>{if(!d.title.trim())return err(f,'title','Nommez le document'),focusErr(f);const r=rq(U.id);addDoc(r,'fichier',d.title.trim(),null,!!d.visible);addLog(r,'Document joint : '+d.title.trim());save();render();toast(d.visible?'Document visible dans le portail client':'Document interne ajouté')},
+ 'next':(f,d)=>{const r=rq(U.id);r.next=d.next.trim();r.nextD=d.nextD;addLog(r,'Prochaine action : '+(r.next||'—'));save();render();toast('Prochaine action enregistrée')},
+ 'note':(f,d)=>{if(!d.text.trim())return err(f,'text','Note vide'),focusErr(f);const r=rq(U.id);r.notes.push({who:me(),at:nowAt(),text:d.text.trim()});save();render();toast('Note interne ajoutée')},
+ 'px':(f,d)=>{let ok=true;if(!d.p)ok=err(f,'p','Choisissez un prestataire');if(!d.text.trim())ok=err(f,'text','Champ obligatoire');if(!ok)return focusErr(f);const r=rq(U.id);r.px.push({p:d.p,dir:d.dir,at:nowAt(),text:d.text.trim()});save();render();toast('Échange consigné')},
+ 'pref-add':(f,d)=>{if(!d.text.trim())return err(f,'text','Champ obligatoire'),focusErr(f);const c=cl(U.id);c.prefs.push(pf('f'+Date.now(),d.cat,d.text.trim(),d.st,'Saisie par '+TEAM[me()].n));save();render();toast('Préférence ajoutée')},
+ 'pref-edit':(f,d)=>{if(!d.text.trim())return err(f,'text','Champ obligatoire'),focusErr(f);const c=cl(U.id),p=c.prefs.find(x=>x.id===d.id);Object.assign(p,{cat:d.cat,st:d.st,text:d.text.trim(),src:'Corrigé par '+TEAM[me()].n+' le '+fd(iso(TODAY))});save();closeModal();render();toast('Préférence corrigée')},
+ 'date-add':(f,d)=>{let ok=true;if(!d.l.trim())ok=err(f,'l','Champ obligatoire');if(!d.d)ok=err(f,'d','Choisissez une date');if(!ok)return focusErr(f);cl(U.id).dates.push({l:d.l.trim(),d:d.d.slice(5)});save();render();toast('Date ajoutée')},
+ 'edit-client':(f,d)=>{let ok=true;if(!d.n.trim())ok=err(f,'n','Champ obligatoire');if(!/^\S+@\S+\.\S+$/.test(d.email))ok=err(f,'email','Email invalide');if(!ok)return focusErr(f);const c=cl(U.id);Object.assign(c,{n:d.n.trim(),email:d.email.trim(),tel:d.tel.trim(),city:d.city.trim(),lang:d.lang,tier:d.tier,habits:d.habits.trim(),tags:d.tags.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean)});save();closeModal();render();toast('Fiche mise à jour')},
+ 'new-client':(f,d)=>{let ok=true;if(!d.n.trim())ok=err(f,'n','Champ obligatoire');if(!/^\S+@\S+\.\S+$/.test(d.email))ok=err(f,'email','Email invalide');if(!ok)return focusErr(f);const c={id:'c'+Date.now().toString(36),n:d.n.trim(),email:d.email.trim(),tel:d.tel.trim(),city:d.city.trim()||'—',lang:d.lang,tier:'Essentiel',since:iso(TODAY),refBy:d.refBy||null,recBy:d.recBy||null,habits:'',dates:[],tags:[],prefs:[],sugg:[],notif:{prop:true,status:true,msg:true},pnotes:''};S.clients.push(c);save();closeModal();go('client',c.id);toast('Fiche créée — invitation au portail envoyée (simulation)')},
+ 'gift':(f,d)=>{let ok=true;if(!d.to)ok=err(f,'to','Choisissez un destinataire');if(!d.occ.trim())ok=err(f,'occ','Champ obligatoire');if(!d.item.trim())ok=err(f,'item','Champ obligatoire');if(!(Number(d.cost)>0))ok=err(f,'cost','Indiquez un coût');if(!d.d)ok=err(f,'d','Champ obligatoire');if(!ok)return focusErr(f);S.gifts.push({id:'G'+Date.now(),d:d.d,to:d.to,occ:d.occ.trim(),item:d.item.trim(),prov:d.prov||null,cost:Number(d.cost)});save();closeModal();render();toast('Cadeau enregistré')},
+ 'app-pay':(f,d)=>{const s=aStats(d.id);const a=Number(d.amount);if(!(a>0))return err(f,'amount','Montant invalide'),focusErr(f);if(a>s.bal+0.5)return err(f,'amount','Supérieur au solde dû ('+fmtE(s.bal)+')'),focusErr(f);S.pays.push({a:d.id,d:d.d,amount:a,mode:d.mode});save();closeModal();render();toast('Règlement enregistré')},
+ 'contact-ex':(f,d)=>{if(!d.text.trim())return err(f,'text','Champ obligatoire'),focusErr(f);const p=pv(d.id);p.ex=p.ex||[];p.ex.push({at:nowAt(),text:d.text.trim()});save();openModal(esc(p.n),contactBody(p),true);toast('Échange consigné')},
+ 'p-new':(f,d)=>{let ok=true;const R=t('req');if(!d.cat)ok=err(f,'cat',R);if(!d.t.trim())ok=err(f,'t',R);if(!d.from)ok=err(f,'from',R);if(d.from&&d.to&&d.to<d.from)ok=err(f,'to',t('err_dates'));if(!d.desc.trim())ok=err(f,'desc',R);if(!ok)return focusErr(f);
+  const c=pClient();const r={id:'DEM-2026-0'+(S.seq++),c:c.id,t:d.t.trim(),cat:d.cat,status:'nouvelle',owner:null,created:iso(TODAY),due:dAdd(3),dest:d.dest.trim(),from:d.from,to:d.to,guests:num(d.guests),budget:num(d.budget),desc:d.desc.trim(),lines:[],notes:[],px:[],next:'',nextD:'',confAt:null,doneAt:null,sat:null,log:[]};addLog(r,'Demande soumise depuis le portail client');S.reqs.push(r);save();go('p-req',r.id);toast(t('sent_ok'))},
+ 'p-msg':(f,d)=>{if(!d.text.trim())return err(f,'text',t('req')),focusErr(f);const c=pClient();const rid=d.r||null;U.pmsgReq=d.r||'';S.msgs.push({id:'M'+(S.mseq++),c:c.id,r:rid,from:'client',at:nowAt(),text:d.text.trim()});save();render();
+  const lang=U.lang;setTimeout(()=>{const r=rid?rq(rid):null;S.msgs.push({id:'M'+(S.mseq++),c:c.id,r:rid,from:'team',who:(r&&r.owner)||'cm',at:nowAt(),text:tl(c.lang,'auto_reply')});save();if(role().kind==='client'&&['p-msgs','p-req'].includes(U.view)){render();}toast(tl(lang,'n_msg'))},1400)},
+ 'p-change':(f,d)=>{if(!d.text.trim())return err(f,'text',t('req')),focusErr(f);const r=rq(U.id);S.msgs.push({id:'M'+(S.mseq++),c:r.c,r:r.id,from:'client',at:nowAt(),text:d.text.trim()});r.status='recherche';addLog(r,'Modification demandée par le client');U.pchg=false;save();render();toast(t('change_ok'))},
+ 'p-pay':(f,d)=>{let ok=true;if(!d.name.trim())ok=err(f,'name',t('req'));if(!/^\d{16}$/.test(d.num.replace(/\s/g,'')))ok=err(f,'num',t('err_card'));const m=d.exp.match(/^(\d{2})\/(\d{2})$/);if(!m||+m[1]<1||+m[1]>12)ok=err(f,'exp',t('err_exp'));if(!/^\d{3}$/.test(d.cvc))ok=err(f,'cvc',t('err_cvc'));if(!ok)return focusErr(f);
+  const r=rq(U.id);const tot=r.lines.reduce((a,l)=>a+l.price,0);r.paid=true;r.status='confirmee';r.confAt=iso(TODAY);addDoc(r,'confirmation','Confirmation — '+r.t,tot);addDoc(r,'facture','Facture F-2026-0'+(S.mseq+600)+' (acompte)',Math.round(tot*.3));addLog(r,'Acompte payé en ligne (mode test) — Confirmée');save();closeModal();render();toast(t('paid'))},
+ 'p-prefs':(f,d)=>{if(!/^\S+@\S+\.\S+$/.test(d.email))return err(f,'email',t('req')),focusErr(f);const c=pClient();c.email=d.email.trim();c.tel=d.tel.trim();c.pnotes=d.notes.trim();c.notif={prop:!!d.n_prop,status:!!d.n_status,msg:!!d.n_msg};
+  ['diet','rooms','travel'].forEach(k=>{const v=d[k].trim();let p=c.prefs.find(x=>x.pk===k);if(!v){if(p)c.prefs=c.prefs.filter(x=>x!==p);return}if(p){if(p.text!==v){p.text=v;p.st='confirmee';p.src='Portail client — '+fd(iso(TODAY))}}else c.prefs.push(pf('f'+Date.now()+k,PK[k],v,'confirmee','Portail client — '+fd(iso(TODAY)),k))});
+  const langChanged=d.lang!==c.lang;c.lang=d.lang;if(langChanged)U.lang=d.lang;save();render();toast(t('saved'))}
+};
+
+/* ---------- événements ---------- */
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(f)f(el,e)});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-chg]');if(el&&CHG[el.dataset.chg])CHG[el.dataset.chg](el)});
+document.addEventListener('input',e=>{const el=e.target.closest('[data-inp]');if(!el)return;U[el.dataset.inp]=el.value;const id=el.id,pos=el.selectionStart;render();const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}});
+document.addEventListener('submit',e=>{const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();clearErr(f);const h=FORMS[f.dataset.form];if(h)h(f,Object.fromEntries(new FormData(f)))});
+document.addEventListener('keydown',e=>{const M=$('#modal');if(M.hidden)return;if(e.key==='Escape'){closeModal();return}if(e.key==='Tab'){const fs=[...M.querySelectorAll('button,input:not([type=hidden]),select,textarea,summary,[href]')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!fs.length)return;const a=fs[0],z=fs[fs.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
+window.addEventListener('afterprint',()=>{$('#print').innerHTML=''});
+
+/* ---------- init ---------- */
+U=defaultsU();S=load();if(!S){S=seed();finalizeSeed();save()}
+render();
+})();
+</script>
 </body>
 </html>
