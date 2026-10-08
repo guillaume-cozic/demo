@@ -2,20 +2,1036 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Café-couture : réservations et boutique</title>
+<meta name="description" content="Site d'un café-couture à Aix-en-Provence : vitrine, réservation de machines avec jauge, ateliers, forfaits d'heures, paiement Stripe en mode test, dépôt de patrons PDF A0, boutique de mercerie et vue journée du back-office.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<script type="application/ld+json" id="ld">{"@context":"https://schema.org","@type":"CafeOrCoffeeShop","name":"La Bobine — café-couture","description":"Café, salon de thé et atelier de couture : machines en accès libre, ateliers, impression de patrons A0 et mercerie.","address":{"@type":"PostalAddress","streetAddress":"21 rue des Couturières","postalCode":"13100","addressLocality":"Aix-en-Provence","addressCountry":"FR"},"geo":{"@type":"GeoCoordinates","latitude":43.5283,"longitude":5.4497},"telephone":"+33 4 42 00 00 00","openingHours":["Tu-Sa 09:30-19:00","Su 10:00-18:00"],"priceRange":"€€","areaServed":"Aix-en-Provence"}</script>
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#FAF6F0;--panel:#FFFFFF;--panel-2:#F3ECE2;--ink:#2B211C;--muted:#655950;--line:#E7DDD0;--line-2:#CDBFAE;
+  --accent:#A13F27;--accent-ink:#FFFFFF;--accent-soft:#F7E4DA;--accent-text:#8C3520;
+  --olive:#4C6027;--olive-soft:#E6ECD8;
+  --ok:#2D6A35;--ok-soft:#DDEFDD;--warn:#875100;--warn-soft:#FBEBCF;--bad:#A3282B;--bad-soft:#F9E0DF;--gray:#5A5048;--gray-soft:#EEE7DE;--info:#2B5878;--info-soft:#E0EBF3;
+  --shadow:0 1px 2px rgba(60,40,20,.06),0 6px 18px rgba(60,40,20,.06);
+  --serif:"Fraunces",Georgia,serif;--sans:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#191412;--panel:#221C19;--panel-2:#2B2420;--ink:#F2EAE2;--muted:#B8AA9E;--line:#382E29;--line-2:#4F433C;
+  --accent:#E8906F;--accent-ink:#2A1209;--accent-soft:#3D251C;--accent-text:#F3AC90;
+  --olive:#B7CB8C;--olive-soft:#2B3220;
+  --ok:#88D394;--ok-soft:#1B3020;--warn:#F2BE6A;--warn-soft:#382912;--bad:#FF9A93;--bad-soft:#3E1D1C;--gray:#C7BCB2;--gray-soft:#2F2824;--info:#9CC6EA;--info-soft:#1A2B39;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.55 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1,.h2,.serif{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h1{font-size:clamp(26px,3.2vw,36px)}
+.h2{font-size:clamp(21px,2.2vw,26px);margin-bottom:14px}
+.h3{font-size:17px;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}.small{font-size:13.5px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+ul.plain{list-style:none;margin:0;padding:0}
+
+.demo-band{background:var(--olive-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--olive)}
+.demo-band button{min-height:32px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2.5vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-family:var(--serif);font-size:20px;font-weight:600;display:block;line-height:1.1}
+.brand small{display:block;font-size:12px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:7px;align-items:center;padding:0 12px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.top-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:11px;padding:2px;background:var(--panel-2)}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 12px;font-weight:600;cursor:pointer;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.cart-btn{position:relative}
+.cart-btn .badge-n{position:absolute;top:2px;right:2px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+@media (max-width:860px){#nav{order:3;width:100%}.brand small{display:none}}
+main{padding:22px clamp(16px,2.5vw,32px) 56px}
+footer{padding:22px clamp(16px,2.5vw,32px) 90px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+footer button{background:none;border:0;color:var(--accent-text);text-decoration:underline;cursor:pointer;min-height:44px;padding:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.icon-btn.bd{border-color:var(--line-2)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card>h2,.card>.hrow{margin-bottom:12px}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head p{margin-top:4px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+@media (min-width:1020px){.layout{grid-template-columns:minmax(0,1fr) 360px}}
+@media (min-width:1500px){.layout{grid-template-columns:minmax(0,1fr) 400px}}
+.col,.side{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (min-width:1020px){.side.sticky{position:sticky;top:90px}}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px}
+.sec{margin-top:34px}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.legend{font-weight:600;font-size:14px}
+input[type=text],input[type=email],input[type=number],input[type=search],input[type=date],input[type=time],select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 12px;width:100%;min-width:0}
+input[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{color:var(--bad);font-weight:600;font-size:14px}
+.err:empty{display:none}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:520px){.g3{grid-template-columns:minmax(0,1fr)}}
+fieldset{border:0;padding:0;margin:0;min-width:0}
+legend{padding:0;margin-bottom:6px;font-weight:600;font-size:14px}
+.radios{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.rcard{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line-2);border-radius:12px;padding:12px;cursor:pointer;min-height:44px}
+.rcard:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.rcard input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.rcard b{display:block}
+.rcard small{color:var(--muted)}
+form h2{margin:18px 0 10px}
+form h2:first-child{margin-top:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;background:var(--gray-soft);color:var(--gray)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}.badge.warn{background:var(--warn-soft);color:var(--warn)}.badge.bad{background:var(--bad-soft);color:var(--bad)}.badge.info{background:var(--info-soft);color:var(--info)}.badge.olive{background:var(--olive-soft);color:var(--olive)}.badge.acc{background:var(--accent-soft);color:var(--accent-text)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;font-weight:600;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.subtabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.subtabs button{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.subtabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* Vitrine */
+.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:center}
+@media (min-width:960px){.hero{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
+.hero-txt{padding:18px 0}
+.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12.5px;font-weight:700;color:var(--accent-text);margin-bottom:10px}
+.hero h1{font-size:clamp(30px,4.6vw,54px);line-height:1.06;max-width:16ch}
+.lead{font-size:17.5px;color:var(--muted);margin:16px 0 22px;max-width:60ch}
+.live-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.live-row:last-child{border-bottom:0}
+.act-card .ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);margin-bottom:12px}
+.act-card .ico svg{width:24px;height:24px}
+.act-card h3{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:6px}
+.act-card p{color:var(--muted);margin-bottom:12px}
+.price-list{width:100%;border-collapse:collapse}
+.price-list td{padding:9px 0;border-bottom:1px dashed var(--line-2);vertical-align:top;overflow-wrap:anywhere}
+.price-list td:last-child{text-align:right;font-weight:700;padding-left:10px}
+.price-list tr:last-child td{border-bottom:0}
+.menu-h{font-weight:700;color:var(--accent-text);margin:12px 0 2px;font-size:14px;text-transform:uppercase;letter-spacing:.06em}
+.team{display:flex;gap:14px;align-items:center}
+.av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:20px;font-weight:600;flex:none;background:var(--olive-soft);color:var(--olive)}
+.infos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:18px}
+.infos h3{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+
+/* Réservation */
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin;margin-bottom:12px}
+.day{flex:none;width:76px;min-height:80px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px}
+.day span{font-size:12.5px;color:var(--muted);text-transform:capitalize}
+.day b{font-size:21px;font-family:var(--serif);font-weight:600}
+.day small{font-size:11.5px;color:var(--olive);font-weight:700}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.day[aria-pressed="true"] span,.day[aria-pressed="true"] small{color:var(--accent-ink)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:12px;margin-top:12px}
+.slot{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.slot.complet,.slot.passé,.slot.fermé{background:var(--panel-2)}
+.slot-h{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.slot-h b{font-size:17px}
+.gauge{display:flex;gap:5px;flex-wrap:wrap}
+.gauge span{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line-2);background:var(--panel)}
+.gauge span.on{background:var(--accent);border-color:var(--accent)}
+.slot-f{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.slot-f .field{width:96px}
+.slot-f .btn{flex:1}
+.bar{height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.bar span{display:block;height:100%;background:var(--olive);border-radius:4px}
+.bar.hot span{background:var(--accent)}
+.atl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px}
+.at{display:flex;gap:14px;padding:16px}
+.at-date{flex:none;width:58px;text-align:center;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);padding:8px 4px;align-self:flex-start}
+.at-date b{display:block;font-family:var(--serif);font-size:24px;line-height:1}
+.at-date span{font-size:12.5px;font-weight:700;text-transform:uppercase}
+.at-body{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
+.at-body h3{font-size:17px}
+.at-f{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:4px}
+.at-f .field{width:110px}
+.price{font-family:var(--serif);font-size:22px;font-weight:600;margin-right:auto;align-self:center}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.solde{display:flex;gap:12px;align-items:baseline}
+.solde b{font-family:var(--serif);font-size:34px;font-weight:600;line-height:1}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.pass{display:flex;flex-direction:column;gap:10px;position:relative}
+.pass.best{border:2px solid var(--accent)}
+.pass .big{font-family:var(--serif);font-size:38px;font-weight:600;line-height:1}
+
+/* A0 */
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:2px dashed var(--line-2);border-radius:14px;padding:26px 16px;cursor:pointer;background:var(--panel-2)}
+.drop:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop svg{width:30px;height:30px;color:var(--accent-text)}
+.drop u{color:var(--accent-text);font-weight:600}
+.fileinfo{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 12px;margin-top:10px;background:var(--panel)}
+.fileinfo>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.sumrows{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;justify-content:space-between;gap:12px}
+.row span:first-child{min-width:0;overflow-wrap:anywhere}
+.row span:last-child{white-space:nowrap}
+.row.tot{border-top:1px solid var(--line);padding-top:10px;margin-top:4px;font-weight:700;font-size:17px}
+.row.disc{color:var(--ok)}
+
+/* Boutique */
+.toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:14px}
+.prod{display:flex;flex-direction:column;padding:0;overflow:hidden}
+.sw{height:110px;display:grid;place-items:center;background:color-mix(in srgb,var(--sw) 20%,var(--panel));color:color-mix(in srgb,var(--sw) 70%,var(--ink))}
+.sw svg{width:40px;height:40px;stroke-width:1.4}
+.prod-b{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.prod-b h3{font-size:16px}
+.prod-f{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:8px;flex-wrap:wrap}
+.prod-f .price{font-size:19px;margin:0}
+.ci{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:center}
+.stepper{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line-2);border-radius:10px}
+.stepper span{min-width:28px;text-align:center;font-weight:700}
+.promo-row{display:flex;gap:8px}
+.promo-row input{flex:1}
+
+/* Compte & BO */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px;margin-bottom:18px}
+.kpi{padding:14px 16px}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600;display:flex;gap:6px;align-items:center}
+.kpi .v{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.15;margin-top:4px}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.bo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:start}
+@media (min-width:1180px){.span2{grid-column:span 2}}
+.list>li{padding:12px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.list>li:last-child{border-bottom:0}
+.li-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.li-h b{min-width:0;overflow-wrap:anywhere}
+.bo-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.bo-slot{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.names{display:flex;gap:5px;flex-wrap:wrap}
+.cs{font-size:12.5px;border-radius:7px;padding:2px 7px;background:var(--panel-2);border:1px solid var(--line)}
+.cs.me{background:var(--accent-soft);color:var(--accent-text);border-color:transparent;font-weight:700}
+.daynav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.daynav b{min-width:0;text-transform:capitalize}
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+.t th,.t td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+.t th{font-size:12.5px;color:var(--muted);background:var(--panel-2);font-weight:700}
+.t tr:last-child td{border-bottom:0}
+.t input{width:90px;min-height:40px}
+pre.ld{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;max-height:260px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.mail{display:flex;gap:10px;align-items:flex-start}
+.mail svg{margin-top:3px;color:var(--muted)}
+.empty{color:var(--muted);padding:10px 0}
+
+/* Dialog */
+dialog{border:0;padding:0;border-radius:18px;background:var(--panel);color:var(--ink);width:min(560px,calc(100vw - 20px));max-height:calc(100dvh - 20px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(25,18,14,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dlg-h h2{font-family:var(--serif);font-size:20px;font-weight:600}
+.dlg-b{padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px}
+.sum{background:var(--panel-2);border-radius:12px;padding:12px 14px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line-2);border-radius:12px;padding:12px;cursor:pointer}
+.opt input{width:20px;height:20px;accent-color:var(--accent);margin:2px 0 0;flex:none}
+.opt b,.opt small{display:block}.opt small{color:var(--muted)}
+.opt:has(input:disabled){opacity:.6;cursor:not-allowed}
+.stripe{border:1px solid var(--line-2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.stripe-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;font-size:14px}
+.stripe-h span:first-child{display:inline-flex;gap:6px;align-items:center}
+.wallets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wallet{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wallet:hover{background:var(--ink);opacity:.9}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.success{align-items:center;text-align:center}
+.ok-ic{width:60px;height:60px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.ok-ic svg{width:30px;height:30px;stroke-width:2.5}
+.note{display:flex;gap:8px;align-items:center;background:var(--info-soft);color:var(--info);border-radius:10px;padding:10px 12px;font-size:14px;text-align:left}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;width:min(440px,calc(100vw - 24px));pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:11px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 26px rgba(0,0,0,.25);font-size:14px;transition:opacity .3s,transform .3s}
+.toast.out{opacity:0;transform:translateY(8px)}
+.cookie{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;max-width:620px;margin-left:auto}
+.cookie p{margin-bottom:12px;font-size:14px}
+.cookie .btn{flex:1}
+
+#print-area{display:none}
+@media print{
+  body>*:not(#print-area){display:none!important}
+  #print-area{display:block;color:#000;font:11pt/1.5 Georgia,serif;padding:10mm}
+  #print-area table{width:100%;border-collapse:collapse;margin:14px 0}
+  #print-area td,#print-area th{border-bottom:1px solid #999;padding:6px 0;text-align:left}
+  #print-area td:last-child,#print-area th:last-child{text-align:right}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10M7 21h10M8.5 3v18M15.5 3v18M8.5 8l7 3M8.5 13l7 3"/></svg></span><div><b>La Bobine</b><small>Café-couture · Aix-en-Provence</small></div></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="top-right">
+    <div class="seg" role="group" aria-label="Espace affiché">
+      <button type="button" data-act="mode" data-v="client">Site client</button>
+      <button type="button" data-act="mode" data-v="admin">Back-office</button>
+    </div>
+    <button type="button" class="icon-btn bd cart-btn" id="cartBtn" data-act="go" data-v="boutique"></button>
+  </div>
+</header>
+<main id="app"></main>
+<footer>
+  <span><b>La Bobine</b> — 21 rue des Couturières, 13100 Aix-en-Provence · 04 42 00 00 00</span>
+  <span>Mentions légales · Confidentialité (RGPD)</span>
+  <button type="button" data-act="ckCustom">Gérer les cookies</button>
+</footer>
+<dialog id="dlg" aria-labelledby="dlg-t"></dialog>
+<div id="toasts" aria-live="polite"></div>
+<div id="cookie"></div>
+<div id="print-area"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=n=>(+n).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const cap1=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const pl=(n,w)=>`${n} ${w}${n>1?'s':''}`;
+const P={
+ cup:'<path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v3M12 3v3"/>',
+ machine:'<path d="M3 20h18"/><path d="M5 20V8a3 3 0 0 1 3-3h10a2 2 0 0 1 2 2v4h-6v3"/><path d="M14 14v3M8 9h6"/>',
+ cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ printer:'<path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/>',
+ bag:'<path d="M5 7h14l1 14H4z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ ticket:'<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10"/>',
+ dash:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+ sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+ tag:'<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>',
+ chevL:'<path d="m15 18-6-6 6-6"/>', chevR:'<path d="m9 18 6-6-6-6"/>',
+ upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/>',
+ file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+ mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
+ scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+ spool:'<path d="M7 3h10M7 21h10M8.5 3v18M15.5 3v18M8.5 8l7 3M8.5 13l7 3"/>',
+ recycle:'<path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L7 10"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.6-2.7L19 13"/><path d="m14 16-3 3 3 3"/><path d="M8.3 13.6 7 10l-3.7 1.2"/><path d="m9.3 5.6 1.1-1.9a1.8 1.8 0 0 1 3.1 0l3.6 6.2"/><path d="m13.4 9.8 3.9.4.4-3.9"/>',
+ alert:'<path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18h.01"/>',
+ download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>',
+ receipt:'<path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]||''}</svg>`;
+
+/* ---------- Dates ---------- */
+const T0=new Date();T0.setHours(0,0,0,0);
+const dk=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const pd=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const addD=(n,b=T0)=>{const d=new Date(b);d.setDate(d.getDate()+n);return d};
+const isOpen=k=>pd(k).getDay()!==1;
+const fmtDay=k=>pd(k).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const fmtShort=k=>pd(k).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const startOf=(k,h,m=0)=>{const d=pd(k);d.setHours(h,m,0,0);return d};
+function openDays(n=14,from=0){const r=[];for(let i=from;r.length<n&&i<60;i++){const k=dk(addD(i));if(isOpen(k))r.push(k)}return r}
+const TODAY=dk(T0);
+const SLOTS=[{s:10,e:12},{s:13,e:15},{s:15,e:17},{s:17,e:19}];
+const slotLabel=i=>`${SLOTS[i].s}h – ${SLOTS[i].e}h`;
+
+/* ---------- Données ---------- */
+const KEY='labobine-demo-v1';
+function seed(){
+ let r=11;const rn=()=>(r=(r*9301+49297)%233280)/233280;
+ const names=['Julie M.','Hugo B.','Sarah L.','Nora K.','Élodie P.','Manon T.','Lucas R.','Chloé D.','Inès G.','Paul V.','Aïcha B.','Léna F.','Zoé C.','Thomas A.','Clara N.','Yasmine O.','Agathe S.','Émile J.','Rose H.','Mathis L.'];
+ const s={v:1,seedDay:TODAY,seq:1200,
+  settings:{cap:6,hour:8,a0nb:5,a0col:9,postal:7.9},
+  passes:[{id:'p5',name:'Carte 5 heures',h:5,price:38,desc:'Pour finir un projet ou découvrir les machines.'},
+          {id:'p10',name:'Forfait 10 heures',h:10,price:70,desc:'Le plus choisi : 7 € de l’heure, valable 6 mois.',best:true},
+          {id:'p20',name:'Abonnement 20 h / mois',h:20,price:120,desc:'Renouvelé chaque mois, sans engagement.'}],
+  capOv:{},blocked:{},bookings:[],ateliers:[],credits:2,avoir:0,prints:[],orders:[],passBuys:[],emails:[],ledger:[],cart:{},promo:null,ship:'retrait',cookie:null,
+  user:{name:'Camille Roux',email:'camille.roux@exemple.fr'},
+  products:[
+   {id:'m1',name:'Ciseaux de couturière 21 cm',cat:'Mercerie',price:24.9,stock:6,c:'#A13F27',desc:'Acier forgé, lame micro-dentée.'},
+   {id:'m2',name:'Épingles tête verre ×100',cat:'Mercerie',price:4.5,stock:18,c:'#4C6027',desc:'Résistent au fer à repasser.'},
+   {id:'m3',name:'Craies tailleur ×3',cat:'Mercerie',price:3.9,stock:9,c:'#2B5878',desc:'Blanc, bleu et rouge.'},
+   {id:'m4',name:'Mètre ruban 150 cm',cat:'Mercerie',price:2.8,stock:2,c:'#B7862B',desc:'Double graduation cm / pouces.'},
+   {id:'f1',name:'Fil polyester 500 m — Terracotta',cat:'Fils',price:3.2,stock:14,c:'#B5532F',desc:'Pour la machine et la main.'},
+   {id:'f2',name:'Fil polyester 500 m — Écru',cat:'Fils',price:3.2,stock:22,c:'#A8946F',desc:'Le basique de l’atelier.'},
+   {id:'f3',name:'Cônes à surjeter ×4',cat:'Fils',price:14.9,stock:3,c:'#6B4E8A',desc:'Assortiment neutre, 4 × 2 500 m.'},
+   {id:'s1',name:'Boutons nacre vintage (lot de 12)',cat:'Seconde main',price:6,stock:1,c:'#8A7A6A',desc:'Pièce unique, chinée en Provence.'},
+   {id:'s2',name:'Coupon de lin lavé 1,5 m',cat:'Seconde main',price:12,stock:1,c:'#6F8A5E',desc:'Vert sauge, 140 cm de laize.'},
+   {id:'s3',name:'Machine à coudre révisée',cat:'Seconde main',price:145,stock:1,c:'#4F5B66',desc:'Révisée à l’atelier, garantie 6 mois.'},
+   {id:'p1',name:'Patron robe portefeuille',cat:'Patrons papier',price:16,stock:7,c:'#A13F27',desc:'Du 34 au 50, niveau intermédiaire.'},
+   {id:'p2',name:'Patron blouse col Claudine',cat:'Patrons papier',price:14,stock:4,c:'#2B5878',desc:'Du 36 au 46, niveau débutant.'},
+   {id:'p3',name:'Patron pantalon large',cat:'Patrons papier',price:15,stock:0,c:'#4C6027',desc:'Du 34 au 48, taille élastiquée.'}
+  ],
+  promos:[{code:'BIENVENUE10',pct:10,active:true,uses:4},{code:'RENTREE15',pct:15,active:false,uses:11}]
+ };
+ const nid=p=>p+'-'+(s.seq++);
+ const now=new Date().toISOString();
+ const days=openDays(14);
+ const uk=days[3];
+ s.bookings.push({id:nid('b'),ref:'RES-1199',type:'libre',date:uk,slot:1,qty:1,name:s.user.name,user:true,status:'confirmée',
+  title:'Accès libre — 1 poste machine',lines:[[`${cap1(fmtShort(uk))} · ${slotLabel(1)} · 1 poste`,16]],total:16,pay:{credits:2,card:0,avoir:0},payTxt:'2 h déduites du forfait',at:now});
+ days.forEach((k,di)=>SLOTS.forEach((sl,si)=>{
+  const used=s.bookings.filter(b=>b.date===k&&b.slot===si).length;
+  let n=Math.floor(rn()*(di<2?7:5.5));
+  if(di===0&&si===2)n=6;
+  n=Math.min(n,6-used);
+  for(let j=0;j<n;j++)s.bookings.push({id:nid('b'),ref:'RES-'+(1000+s.bookings.length),type:'libre',date:k,slot:si,qty:1,name:names[Math.floor(rn()*names.length)],user:false,status:'confirmée',total:16});
+ }));
+ const defs=[
+  ['Initiation à la machine à coudre','Débutant',1,'10:00',2.5,45,6,4,'Léa'],
+  ['Tote bag doublé à poche zippée','Accessoires',2,'14:00',3,55,6,6,'Sofia'],
+  ['Ourlets & finitions invisibles','Retouche',4,'18:30',2,35,6,2,'Léa'],
+  ['Coussin zippé — enfants 8-12 ans','Enfants',6,'10:00',2,30,5,1,'Sofia'],
+  ['Lire, décalquer et adapter un patron','Patronage',8,'14:00',3,50,6,3,'Léa'],
+  ['Upcycling : une chemise devient un top','Upcycling',10,'15:00',3,48,6,5,'Sofia'],
+  ['Robe portefeuille — journée complète','Vêtement',13,'10:00',6,110,5,2,'Léa'],
+  ['Retouches jean : ourlet et taille','Retouche',16,'18:30',2,35,6,0,'Sofia']];
+ defs.forEach((d,i)=>{let o=d[2];while(!isOpen(dk(addD(o))))o++;
+  s.ateliers.push({id:'at'+i,title:d[0],theme:d[1],date:dk(addD(o)),h:d[3],dur:d[4],price:d[5],cap:d[6],others:d[7],anim:d[8]})});
+ const a=s.ateliers[2];
+ s.bookings.push({id:nid('b'),ref:'RES-1198',type:'atelier',aid:a.id,date:a.date,qty:1,name:s.user.name,user:true,status:'confirmée',
+  title:'Atelier — '+a.title,lines:[[a.title+' · 1 place',35]],total:35,pay:{credits:0,card:35,avoir:0},payTxt:'35,00 € par carte (mode test)',at:now});
+ s.emails.push({at:now,subject:'Confirmation de réservation RES-1198',body:`Atelier « ${a.title} », ${fmtDay(a.date)} à ${a.h.replace(':','h')}.`});
+ s.prints=[
+  {ref:'A0-1181',client:'Nora K.',file:'robe-trapeze-taille38.pdf',pages:4,copies:1,mode:'couleur',delivery:'postal',city:'Marseille',status:'À imprimer',date:TODAY,total:43.9},
+  {ref:'A0-1180',client:'Hugo B.',file:'veste-kimono-A0.pdf',pages:2,copies:1,mode:'nb',delivery:'retrait',status:'À imprimer',date:TODAY,total:10},
+  {ref:'A0-1179',client:'Élodie P.',file:'combinaison-lin-A0-calques.pdf',pages:3,copies:2,mode:'nb',delivery:'retrait',status:'Prêt au retrait',date:dk(addD(-1)),total:30}];
+ s.orders=[{ref:'CMD-1177',client:'Clara N.',items:[['Fil polyester 500 m — Terracotta',3],['Mètre ruban 150 cm',1]],total:12.4,ship:'retrait',status:'À préparer',date:TODAY}];
+ s.ledger=[{date:TODAY,amount:112,label:'Accès libre'},{date:TODAY,amount:90,label:'Ateliers'},{date:TODAY,amount:53.9,label:'Impressions A0'},{date:TODAY,amount:12.4,label:'Boutique'},{date:TODAY,amount:70,label:'Forfaits'}];
+ return s;
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1&&s.seedDay===TODAY)return s}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load()||seed();
+const freshV=()=>({mode:'client',page:'accueil',bo:'jour',res:'libre',day:openDays(1)[0],theme:'Tous',cat:'Tous',q:'',boDay:TODAY,
+ a0:{file:null,detected:null,pages:'',copies:1,mode:'nb',delivery:'retrait',addr:'',cp:'',city:''}});
+let V=freshV();
+const ref=p=>`${p}-${S.seq++}`;
+
+/* ---------- Règles métier ---------- */
+const capOf=(k,s)=>S.capOv[k+'_'+s]??S.settings.cap;
+const occ=(k,s)=>S.bookings.reduce((n,b)=>n+(b.type==='libre'&&b.date===k&&b.slot===s&&b.status==='confirmée'?b.qty:0),0);
+function slotState(k,s){
+ if(!isOpen(k)||S.blocked[k+'_'+s])return 'fermé';
+ if(startOf(k,SLOTS[s].s)<new Date())return 'passé';
+ return occ(k,s)>=capOf(k,s)?'complet':'ouvert';
+}
+const atTaken=a=>a.others+S.bookings.reduce((n,b)=>n+(b.type==='atelier'&&b.aid===a.id&&b.status==='confirmée'?b.qty:0),0);
+const atStart=a=>{const[h,m]=a.h.split(':').map(Number);return startOf(a.date,h,m)};
+const atById=id=>S.ateliers.find(a=>a.id===id);
+const bStart=b=>b.type==='libre'?startOf(b.date,SLOTS[b.slot].s):atStart(atById(b.aid));
+const bWhen=b=>b.type==='libre'?`${cap1(fmtDay(b.date))} · ${slotLabel(b.slot)}`:`${cap1(fmtDay(b.date))} · ${atById(b.aid).h.replace(':','h')}`;
+const durTxt=h=>h%1?`${Math.floor(h)} h 30`:`${h} h`;
+function cancelOutcome(b){
+ const h=(bStart(b)-Date.now())/36e5;
+ if(h<0)return null;
+ if(b.pay.credits)return h>=24?{kind:'credits',txt:`${b.pay.credits} h recréditées sur votre forfait.`}:{kind:'none',txt:'Annulation à moins de 24 h : les heures ne sont pas recréditées.'};
+ const money=b.pay.card+b.pay.avoir;
+ if(h>=48)return {kind:'refund',txt:`Remboursement intégral : ${eur(b.pay.card)} sur votre carte${b.pay.avoir?` et ${eur(b.pay.avoir)} reversés sur votre avoir`:''}.`};
+ if(h>=24)return {kind:'avoir',amount:money,txt:`Avoir de ${eur(money)} valable 6 mois sur toute réservation.`};
+ return {kind:'none',txt:'Annulation à moins de 24 h : non remboursable.'};
+}
+const RULES=`<ul class="rules small"><li><b>Plus de 48 h avant</b> : remboursement intégral sur votre carte (heures recréditées si payé avec un forfait).</li><li><b>Entre 24 h et 48 h</b> : avoir du montant payé, valable 6 mois.</li><li><b>Moins de 24 h</b> : non remboursable.</li></ul>`;
+function mail(subject,body,silent){S.emails.unshift({at:new Date().toISOString(),subject,body});if(!silent)toast(`E-mail « ${subject} » envoyé (simulation)`)}
+function remind(when,subject,body){S.emails.unshift({at:new Date().toISOString(),subject,body,scheduled:when.toISOString()})}
+
+/* ---------- UI helpers ---------- */
+function toast(msg,err){const t=document.createElement('div');t.className='toast';t.innerHTML=ic(err?'alert':'check')+`<span>${esc(msg)}</span>`;$('#toasts').append(t);setTimeout(()=>t.classList.add('out'),3800);setTimeout(()=>t.remove(),4200)}
+const dlg=$('#dlg');
+function openDlg(html){dlg.innerHTML=html;if(!dlg.open)dlg.showModal();const f=dlg.querySelector('[autofocus]')||dlg.querySelector('.dlg-b button,.dlg-b input');f&&f.focus()}
+function closeDlg(){if(dlg.open)dlg.close()}
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeDlg()});
+const dlgHead=t=>`<div class="dlg-h"><h2 id="dlg-t">${esc(t)}</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic('x')}</button></div>`;
+function badgeFor(st,l){
+ if(st==='ouvert')return l<=2?`<span class="badge warn">Plus que ${l}</span>`:'<span class="badge ok">Disponible</span>';
+ return {complet:'<span class="badge bad">Complet</span>',fermé:'<span class="badge">Fermé</span>',passé:'<span class="badge">Terminé</span>'}[st];
+}
+const stBadge=s=>{const m={'À imprimer':'warn','Imprimé':'info','Prêt au retrait':'ok','Expédié':'olive','Retiré':'','À préparer':'warn','Prête':'ok','Remise':'','confirmée':'ok','annulée':'bad'};return `<span class="badge ${m[s]??''}">${esc(cap1(s))}</span>`};
+
+/* ---------- Paiement (Stripe simulé) ---------- */
+let PAY=null;
+function pay(o){
+ const credOk=o.credits>0&&S.credits>=o.credits;
+ PAY={o};
+ openDlg(dlgHead(o.title)+`<div class="dlg-b" id="paybox">
+  <div class="sum sumrows">${o.lines.map(([l,a])=>`<div class="row${a<0?' disc':''}"><span>${esc(l)}</span><span class="num">${eur(a)}</span></div>`).join('')}<div class="row tot"><span>Total</span><span class="num">${eur(o.total)}</span></div></div>
+  ${o.credits>0?`<label class="opt"><input type="checkbox" id="p-cred" ${credOk?'checked':'disabled'}><span><b>Déduire ${o.credits} h de mon forfait</b><small>Solde actuel : ${S.credits} h${credOk?'':' — insuffisant, réglez par carte ou achetez un forfait'}</small></span></label>`:''}
+  ${S.avoir>0?`<label class="opt" id="p-av-w"><input type="checkbox" id="p-av" checked><span><b>Utiliser mon avoir</b><small>Solde disponible : ${eur(S.avoir)}</small></span></label>`:''}
+  <div class="stripe" id="p-card">
+   <div class="stripe-h"><span>${ic('lock')}Paiement sécurisé par Stripe</span><span class="badge warn">Mode test</span></div>
+   <div class="wallets"><button type="button" class="btn wallet" data-act="payGo" data-v="Apple Pay">Apple Pay</button><button type="button" class="btn wallet" data-act="payGo" data-v="Google Pay">Google Pay</button></div>
+   <div class="or">ou par carte bancaire</div>
+   <div class="field"><label for="cc-num">Numéro de carte</label><input type="text" id="cc-num" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234" maxlength="19"></div>
+   <div class="g2"><div class="field"><label for="cc-exp">Expiration (MM/AA)</label><input type="text" id="cc-exp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5"></div>
+   <div class="field"><label for="cc-cvc">CVC</label><input type="text" id="cc-cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"></div></div>
+   <p class="hint">Carte de test : 4242 4242 4242 4242, date future, CVC au choix. 4000 0000 0000 0002 simule un refus.</p>
+   <button type="button" class="btn sm ghost" data-act="fillCard">Remplir avec la carte de test</button>
+  </div>
+  <p class="err" id="p-err" role="alert"></p>
+  <button type="button" class="btn primary block" id="p-go" data-act="payGo">Payer</button>
+ </div>`);
+ updPay();
+}
+function payCalc(){
+ const o=PAY.o;const cred=!!($('#p-cred')?.checked);
+ const av=!cred&&$('#p-av')?.checked?Math.min(S.avoir,o.total):0;
+ return {cred,av:+av.toFixed(2),toPay:cred?0:+Math.max(0,o.total-av).toFixed(2)};
+}
+function updPay(){
+ const c=payCalc();
+ $('#p-card').hidden=c.toPay===0;
+ if($('#p-av-w'))$('#p-av-w').hidden=c.cred;
+ $('#p-go').textContent=c.cred?`Confirmer (−${PAY.o.credits} h)`:c.toPay===0?'Confirmer avec mon avoir':`Payer ${eur(c.toPay)}`;
+}
+function payGo(wallet){
+ const c=payCalc();const err=$('#p-err');err.textContent='';
+ $$('#p-card input').forEach(i=>i.removeAttribute('aria-invalid'));
+ if(c.toPay>0&&!wallet){
+  const num=$('#cc-num').value.replace(/\D/g,''),exp=$('#cc-exp').value,cvc=$('#cc-cvc').value.replace(/\D/g,'');
+  const bad=(id,m)=>{$(id).setAttribute('aria-invalid','true');$(id).focus();err.textContent=m};
+  const luhn=n=>{let s=0;for(let i=0;i<n.length;i++){let d=+n[n.length-1-i];if(i%2){d*=2;if(d>9)d-=9}s+=d}return s%10===0};
+  if(num.length!==16||!luhn(num))return bad('#cc-num','Numéro de carte invalide.');
+  const m=exp.match(/^(\d{2})\/(\d{2})$/);
+  if(!m||+m[1]<1||+m[1]>12||new Date(2000+ +m[2],+m[1],1)<=new Date())return bad('#cc-exp','Date d’expiration invalide ou dépassée.');
+  if(cvc.length<3)return bad('#cc-cvc','CVC invalide.');
+  if(num==='4000000000000002'){err.textContent='Paiement refusé par la banque (carte de test « refus »). Aucun montant débité.';return}
+ }
+ const go=$('#p-go');go.disabled=true;go.textContent='Traitement en cours…';
+ setTimeout(()=>{
+  const res={credits:c.cred?PAY.o.credits:0,card:c.toPay,avoir:c.av,wallet:wallet||null};
+  S.credits-=res.credits;S.avoir=+(S.avoir-res.avoir).toFixed(2);
+  if(res.card>0)S.ledger.push({date:TODAY,amount:res.card,label:PAY.o.title});
+  const rec=PAY.o.onPaid(res);
+  rec.payTxt=payTxt(res);rec.at=new Date().toISOString();
+  save();
+  dlg.innerHTML=dlgHead('Confirmation')+`<div class="dlg-b success"><div class="ok-ic">${ic('check')}</div>
+   <h3 class="h3">${res.card>0?'Paiement accepté':'Réservation confirmée'}</h3>
+   <p>Référence <b class="wrap">${esc(rec.ref)}</b> · ${esc(rec.payTxt)}</p>
+   ${PAY.o.success?`<p class="muted">${esc(PAY.o.success)}</p>`:''}
+   <p class="note">${ic('mail')}<span>E-mail de confirmation envoyé à ${esc(S.user.email)} (simulation)</span></p>
+   <div class="actions"><button type="button" class="btn" data-act="receipt" data-v="${esc(rec.ref)}">${ic('receipt')}Justificatif PDF</button><button type="button" class="btn primary" data-act="close" autofocus>Fermer</button></div></div>`;
+  dlg.querySelector('[autofocus]').focus();
+  render(true);
+ },900);
+}
+function payTxt(r){
+ if(r.credits)return `${r.credits} h déduites du forfait`;
+ const p=[];if(r.card)p.push(`${eur(r.card)} ${r.wallet?'via '+r.wallet:'par carte'} (mode test)`);if(r.avoir)p.push(`${eur(r.avoir)} d’avoir`);
+ return p.join(' + ')||'Gratuit';
+}
+function receipt(rf){
+ const r=[...S.bookings,...S.prints,...S.orders,...S.passBuys].find(x=>x.ref===rf);if(!r)return;
+ $('#print-area').innerHTML=`<h1 style="font-size:20pt">La Bobine — café-couture</h1><p>21 rue des Couturières, 13100 Aix-en-Provence · 04 42 00 00 00</p>
+ <h2 style="margin-top:18px">Justificatif ${esc(r.ref)}</h2><p>${esc(r.title||'')}<br>Client : ${esc(S.user.name)} — ${esc(S.user.email)}<br>Émis le ${new Date(r.at||Date.now()).toLocaleString('fr-FR')}</p>
+ <table>${(r.lines||[]).map(([l,a])=>`<tr><td>${esc(l)}</td><td>${eur(a)}</td></tr>`).join('')}<tr><th>Total TTC</th><th>${eur(r.total)}</th></tr></table>
+ <p>Règlement : ${esc(r.payTxt||'')}</p>${r.status==='annulée'?`<p><b>Annulée</b> — ${esc(r.cancelTxt||'')}</p>`:''}
+ <p style="margin-top:20px;font-size:9pt">Document de démonstration — paiement en mode test, sans valeur comptable.</p>`;
+ window.print();
+}
+
+/* ---------- Navigation ---------- */
+const NAV_C=[['accueil','Le lieu','cup'],['reserver','Réserver','cal'],['pass','Forfaits','ticket'],['a0','Impression A0','printer'],['boutique','Boutique','bag'],['compte','Mon compte','user']];
+const NAV_A=[['jour','Vue journée','dash'],['planning','Planning & tarifs','sliders'],['bshop','Boutique & promos','tag']];
+function renderNav(){
+ const items=V.mode==='client'?NAV_C:NAV_A,cur=V.mode==='client'?V.page:V.bo;
+ $('#nav').innerHTML=items.map(([k,l,i])=>`<button type="button" class="tab" data-act="go" data-v="${k}" ${k===cur?'aria-current="page"':''}>${ic(i)}${l}</button>`).join('');
+ $$('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===V.mode));
+ const n=Object.values(S.cart).reduce((a,b)=>a+b,0),cb=$('#cartBtn');
+ cb.hidden=V.mode!=='client';
+ cb.setAttribute('aria-label',`Panier : ${pl(n,'article')}`);
+ cb.innerHTML=ic('bag')+(n?`<span class="badge-n" aria-hidden="true">${n}</span>`:'');
+}
+const PAGES={};
+function render(keepFocus){
+ renderNav();
+ $('#app').innerHTML=PAGES[V.mode==='client'?V.page:V.bo]();
+ renderCookie();
+ if(!keepFocus)return;
+}
+function go(p){if(V.mode==='client')V.page=p;else V.bo=p;render();window.scrollTo(0,0);const h=$('#app h1');h&&h.focus({preventScroll:true})}
+
+/* ---------- Pages client ---------- */
+function nextSlots(n){const r=[];for(const k of openDays(5)){for(let i=0;i<SLOTS.length;i++){if(slotState(k,i)==='ouvert'){r.push([k,i]);if(r.length>=n)return r}}}return r}
+PAGES.accueil=()=>{
+ const ns=nextSlots(3),st=S.settings;
+ return `<section class="hero">
+ <div class="hero-txt"><p class="eyebrow">Café · Atelier couture · Impression A0</p>
+  <h1 tabindex="-1">On y vient pour coudre, on y reste pour le thé.</h1>
+  <p class="lead">40 m² au cœur d’Aix-en-Provence : ${S.settings.cap} machines en accès libre, des ateliers en petit groupe, l’impression de vos patrons A0 et une mercerie choisie.</p>
+  <div class="actions"><button type="button" class="btn primary" data-act="go" data-v="reserver">${ic('cal')}Réserver une machine</button><button type="button" class="btn" data-act="goAteliers">Voir les ateliers</button><button type="button" class="btn ghost" data-act="go" data-v="a0">${ic('printer')}Imprimer un patron</button></div></div>
+ <aside class="card" aria-labelledby="live-t"><div class="hrow"><h2 id="live-t" class="h3">Places disponibles en direct</h2><span class="badge ok">Temps réel</span></div>
+  <ul class="plain">${ns.map(([k,i])=>{const c=capOf(k,i),l=c-occ(k,i);return `<li class="live-row"><div><b>${cap1(fmtShort(k))}</b> · ${slotLabel(i)}<div class="small muted">${l} poste${l>1?'s':''} libre${l>1?'s':''} sur ${c}</div></div><button type="button" class="btn sm" data-act="pickSlot" data-v="${k}|${i}">Réserver</button></li>`}).join('')||'<li class="empty">Aucun créneau libre ces prochains jours.</li>'}</ul>
+  <p class="small muted" style="margin-top:8px">La jauge se met à jour à chaque réservation ou annulation.</p></aside>
+ </section>
+ <section class="sec"><h2 class="h2">Trois lieux en un</h2><div class="grid3">
+  <article class="card act-card"><div class="ico">${ic('cup')}</div><h3>Le café</h3><p>Café de torréfacteur, thés en vrac et pâtisseries maison, à déguster entre deux coutures ou simplement en passant.</p><a class="btn sm" href="#carte">Voir la carte</a></article>
+  <article class="card act-card"><div class="ico">${ic('machine')}</div><h3>L’atelier</h3><p>Machines à coudre et surjeteuses en accès libre par créneau de 2 h, ateliers thématiques encadrés de 5 à 6 personnes.</p><button type="button" class="btn sm" data-act="go" data-v="reserver">Réserver</button></article>
+  <article class="card act-card"><div class="ico">${ic('printer')}</div><h3>L’impression A0</h3><p>Déposez votre patron PDF, payez en ligne, récupérez-le en boutique ou recevez-le par la poste sous 48 h.</p><button type="button" class="btn sm" data-act="go" data-v="a0">Déposer un PDF</button></article>
+ </div></section>
+ <section class="sec two">
+  <div class="card"><h2 class="h2">Tarifs</h2><table class="price-list"><tbody>
+   <tr><td>Accès libre machine<br><span class="small muted">Créneau de 2 h, fil et entretien compris</span></td><td>${eur(st.hour)} / h</td></tr>
+   ${S.passes.map(p=>`<tr><td>${esc(p.name)}<br><span class="small muted">${eur(p.price/p.h)} de l’heure</span></td><td>${eur(p.price)}</td></tr>`).join('')}
+   <tr><td>Ateliers encadrés<br><span class="small muted">Matériel fourni, 5 à 6 participants</span></td><td>dès ${eur(Math.min(...S.ateliers.map(a=>a.price)))}</td></tr>
+   <tr><td>Impression patron A0<br><span class="small muted">Noir & blanc / couleur, la page</span></td><td>${eur(st.a0nb)} / ${eur(st.a0col)}</td></tr>
+  </tbody></table></div>
+  <div class="card" id="carte"><h2 class="h2">La carte du café</h2>
+   <p class="menu-h">Boissons chaudes</p><table class="price-list"><tbody><tr><td>Espresso</td><td>2,00 €</td></tr><tr><td>Café crème, cappuccino</td><td>3,50 €</td></tr><tr><td>Thés & infusions en vrac</td><td>4,00 €</td></tr><tr><td>Chocolat chaud maison</td><td>4,50 €</td></tr></tbody></table>
+   <p class="menu-h">Fait maison</p><table class="price-list"><tbody><tr><td>Fondant amande & calisson</td><td>4,50 €</td></tr><tr><td>Cookie du jour</td><td>3,00 €</td></tr><tr><td>Tartine du midi, salade de saison</td><td>8,50 €</td></tr><tr><td>Formule couture : boisson + douceur pendant votre créneau</td><td>6,50 €</td></tr></tbody></table>
+  </div>
+ </section>
+ <section class="sec"><h2 class="h2">L’équipe</h2><div class="grid3">
+  ${[['LF','Léa Fabre','Couturière-modéliste, anime les ateliers vêtement et patronage.'],['SR','Sofia Ribeiro','Animatrice couture, imprime vos patrons et tient la mercerie.'],['MP','Margaux Penin','Barista et pâtissière, à l’origine du fondant au calisson.']].map(([i,n,t])=>`<div class="card team"><span class="av" aria-hidden="true">${i}</span><div><b>${n}</b><p class="small muted">${t}</p></div></div>`).join('')}
+ </div></section>
+ <section class="sec card infos" aria-label="Infos pratiques">
+  <div><h3 class="h3">${ic('pin')}Adresse</h3><p>21 rue des Couturières<br>13100 Aix-en-Provence</p><p class="small muted">5 min à pied du cours Mirabeau</p></div>
+  <div><h3 class="h3">${ic('clock')}Horaires</h3><p>Mardi – samedi : 9h30 – 19h<br>Dimanche : 10h – 18h<br>Fermé le lundi</p></div>
+  <div><h3 class="h3">${ic('globe')}Nous trouver</h3><p>Fiche Google Business Profile, avis et itinéraire.</p><p class="small muted">Balisage schema.org « CafeOrCoffeeShop » intégré à la page.</p></div>
+ </section>`;
+};
+
+function sideRes(){
+ return `<div class="card"><h2 class="h3" style="margin-bottom:10px">Mon forfait d’heures</h2>
+  <div class="solde"><b>${S.credits} h</b><span class="muted">disponibles</span></div>
+  ${S.avoir?`<p class="small" style="margin-top:6px">Avoir : <b>${eur(S.avoir)}</b></p>`:''}
+  <p class="small muted" style="margin:8px 0 12px">Déduites automatiquement à la réservation d’un créneau (2 h par poste).</p>
+  <button type="button" class="btn block" data-act="go" data-v="pass">${ic('ticket')}Acheter des heures</button></div>
+  <div class="card"><h2 class="h3" style="margin-bottom:10px">Politique d’annulation</h2>${RULES}<p class="small muted" style="margin-top:8px">Appliquée automatiquement depuis « Mon compte ».</p></div>`;
+}
+function libreHTML(){
+ const days=openDays(14);if(!days.includes(V.day))V.day=days[0];
+ const k=V.day;
+ return `<div class="days" role="group" aria-label="Choisir un jour">${days.map(d=>{const x=pd(d);const free=SLOTS.reduce((n,_,i)=>n+(slotState(d,i)==='ouvert'?capOf(d,i)-occ(d,i):0),0);
+  return `<button type="button" class="day" data-act="day" data-v="${d}" aria-pressed="${d===k}" aria-label="${cap1(fmtDay(d))}, ${free?pl(free,'place')+' libre'+(free>1?'s':''):'complet'}"><span>${x.toLocaleDateString('fr-FR',{weekday:'short'})}</span><b>${x.getDate()}</b><small>${free?free+' pl.':'complet'}</small></button>`}).join('')}</div>
+ <h2 class="h3">${cap1(fmtDay(k))}</h2>
+ <div class="slots">${SLOTS.map((sl,i)=>{const st=slotState(k,i),c=capOf(k,i),o=Math.min(occ(k,i),c),l=Math.max(0,c-occ(k,i)),price=S.settings.hour*(sl.e-sl.s);
+  return `<article class="slot ${st}" id="slot-${i}"><div class="slot-h"><b>${slotLabel(i)}</b>${badgeFor(st,l)}</div>
+  <div class="gauge" role="img" aria-label="${o} postes occupés sur ${c}">${Array.from({length:c},(_,j)=>`<span class="${j<o?'on':''}"></span>`).join('')}</div>
+  <p class="small muted">${st==='ouvert'?`${l} poste${l>1?'s':''} libre${l>1?'s':''} sur ${c}`:st==='complet'?`${c} postes réservés`:st==='fermé'?'Créneau fermé à la réservation':'Créneau terminé'} · ${eur(price)} le poste ou 2 h de forfait</p>
+  ${st==='ouvert'?`<div class="slot-f"><div class="field"><label for="q${i}">Postes</label><select id="q${i}">${Array.from({length:Math.min(2,l)},(_,j)=>`<option>${j+1}</option>`).join('')}</select></div><button type="button" class="btn primary" data-act="bookSlot" data-v="${i}">Réserver</button></div>`:''}
+ </article>`}).join('')}</div>`;
+}
+function ateliersHTML(){
+ const fut=S.ateliers.filter(a=>atStart(a)>new Date()).sort((a,b)=>atStart(a)-atStart(b));
+ const themes=['Tous',...new Set(fut.map(a=>a.theme))];
+ if(!themes.includes(V.theme))V.theme='Tous';
+ const list=fut.filter(a=>V.theme==='Tous'||a.theme===V.theme);
+ return `<div class="chips" role="group" aria-label="Filtrer par thème" style="margin-bottom:14px">${themes.map(t=>`<button type="button" class="chip" data-act="theme" data-v="${esc(t)}" aria-pressed="${t===V.theme}">${esc(t)}</button>`).join('')}</div>
+ <div class="atl">${list.map(a=>{const t=atTaken(a),l=Math.max(0,a.cap-t),d=pd(a.date);
+  return `<article class="card at"><div class="at-date" aria-hidden="true"><b>${d.getDate()}</b><span>${d.toLocaleDateString('fr-FR',{month:'short'})}</span></div>
+  <div class="at-body"><div class="tags"><span class="badge olive">${esc(a.theme)}</span>${l===0?'<span class="badge bad">Complet</span>':l<=2?`<span class="badge warn">Plus que ${l}</span>`:''}</div>
+  <h3>${esc(a.title)}</h3>
+  <p class="small muted">${cap1(fmtDay(a.date))} · ${a.h.replace(':','h')} · ${durTxt(a.dur)} · avec ${esc(a.anim)}</p>
+  <div class="bar${l<=2?' hot':''}" role="img" aria-label="${t} inscrits sur ${a.cap}"><span style="width:${Math.min(100,t/a.cap*100)}%"></span></div>
+  <p class="small"><b>${l}</b> place${l>1?'s':''} restante${l>1?'s':''} sur ${a.cap}</p>
+  <div class="at-f"><span class="price">${eur(a.price)}</span>${l?`<div class="field"><label for="qa-${a.id}">Participants</label><select id="qa-${a.id}">${Array.from({length:Math.min(2,l)},(_,j)=>`<option>${j+1}</option>`).join('')}</select></div><button type="button" class="btn primary" data-act="bookAt" data-v="${a.id}">Réserver</button>`:`<button type="button" class="btn" data-act="wait" data-v="${a.id}">Liste d’attente</button>`}</div>
+  </div></article>`}).join('')||'<p class="empty">Aucun atelier pour ce thème.</p>'}</div>`;
+}
+PAGES.reserver=()=>`<div class="page-head"><div><h1 tabindex="-1">Réserver</h1><p class="muted">Paiement à la réservation, confirmation immédiate et rappel la veille par e-mail.</p></div></div>
+ <div class="subtabs" role="group" aria-label="Type de réservation"><button type="button" data-act="resTab" data-v="libre" aria-pressed="${V.res==='libre'}">${ic('machine')}Accès libre machines</button><button type="button" data-act="resTab" data-v="ateliers" aria-pressed="${V.res==='ateliers'}">${ic('scissors')}Ateliers & cours</button></div>
+ <div class="layout"><div class="col">${V.res==='libre'?libreHTML():ateliersHTML()}</div><aside class="side">${sideRes()}</aside></div>`;
+
+PAGES.pass=()=>`<div class="page-head"><div><h1 tabindex="-1">Cartes & forfaits</h1><p class="muted">Achetez des heures d’accès libre : elles sont déduites automatiquement à chaque réservation.</p></div>
+ <div class="card" style="padding:12px 16px"><div class="solde"><b>${S.credits} h</b><span class="muted">sur votre compte</span></div></div></div>
+ <div class="grid3">${S.passes.map(p=>`<article class="card pass${p.best?' best':''}">${p.best?'<span class="badge acc" style="align-self:flex-start">Le plus choisi</span>':''}
+  <h2 class="h3">${esc(p.name)}</h2><p class="big">${eur(p.price)}</p><p class="muted">${p.h} heures · soit ${eur(p.price/p.h)} / h au lieu de ${eur(S.settings.hour)}</p><p>${esc(p.desc)}</p>
+  <button type="button" class="btn ${p.best?'primary':''} block" data-act="buyPass" data-v="${p.id}" style="margin-top:auto">Acheter</button></article>`).join('')}</div>
+ <div class="card sec"><h2 class="h3" style="margin-bottom:8px">Comment ça marche ?</h2><ol class="rules"><li>Vous achetez une carte ou un abonnement : le solde d’heures est crédité immédiatement.</li><li>À la réservation d’un créneau, cochez « Déduire de mon forfait » : 2 h par poste, aucun paiement.</li><li>Vous annulez plus de 24 h avant ? Les heures sont recréditées automatiquement.</li></ol></div>`;
+
+/* A0 */
+function a0Price(){const a=V.a0,st=S.settings;const unit=a.mode==='nb'?st.a0nb:st.a0col;const n=(+a.pages||0)*(+a.copies||0);const sub=n*unit;const disc=n>=10?+(sub*.1).toFixed(2):0;const ship=a.delivery==='postal'?st.postal:0;return {unit,n,sub,disc,ship,total:+(sub-disc+ship).toFixed(2)}}
+function a0Recap(){const a=V.a0,p=a0Price();
+ return `<div class="sumrows"><div class="row"><span>${a.file?esc(a.file.name):'Aucun fichier'}</span><span></span></div>
+ <div class="row"><span>${p.n} page${p.n>1?'s':''} A0 ${a.mode==='nb'?'noir & blanc':'couleur'} × ${eur(p.unit)}</span><span class="num">${eur(p.sub)}</span></div>
+ ${p.disc?`<div class="row disc"><span>Remise dégressive (10 pages et +) −10 %</span><span class="num">−${eur(p.disc)}</span></div>`:''}
+ <div class="row"><span>${a.delivery==='postal'?'Envoi postal suivi (tube carton)':'Retrait en boutique (Click & Collect)'}</span><span class="num">${p.ship?eur(p.ship):'Gratuit'}</span></div>
+ <div class="row tot"><span>Total</span><span class="num">${eur(p.total)}</span></div></div>`}
+function fileInfo(){const f=V.a0.file;if(!f)return '';
+ return `<div class="fileinfo">${ic('file')}<div><b class="wrap">${esc(f.name)}</b><span class="small muted">${(f.size/1048576).toFixed(1).replace('.',',')} Mo · ${V.a0.detected?`${pl(V.a0.detected,'page')} A0 détectée${V.a0.detected>1?'s':''}`:'nombre de pages non détecté, indiquez-le ci-dessous'}</span></div><button type="button" class="icon-btn" data-act="a0Clear" aria-label="Retirer le fichier">${ic('x')}</button></div>`}
+PAGES.a0=()=>{const a=V.a0,st=S.settings;
+ return `<div class="page-head"><div><h1 tabindex="-1">Impression de patrons A0</h1><p class="muted">Téléversez votre PDF, le nombre de pages est calculé automatiquement. Payez en ligne, on imprime sous 24 à 48 h.</p></div></div>
+ <div class="layout"><form class="card" id="a0f" novalidate>
+  <h2 class="h3">1. Votre fichier PDF</h2>
+  <label class="drop" id="drop" for="a0-file">${ic('upload')}<b>Déposez votre patron ici</b><span>ou <u>parcourir vos fichiers</u></span><span class="small muted">PDF uniquement · 50 Mo maximum · format A0 (84,1 × 118,9 cm)</span><input type="file" id="a0-file" accept="application/pdf,.pdf" class="sr"></label>
+  <div id="a0-fi">${fileInfo()}</div>
+  <button type="button" class="btn ghost sm" data-act="a0Sample" style="margin-top:6px">Pas de PDF sous la main ? Utiliser un patron d’exemple</button>
+  <h2 class="h3">2. Impression</h2>
+  <div class="stack">
+  <div class="g2"><div class="field"><label for="a0-pages">Pages A0</label><input type="number" id="a0-pages" min="1" max="40" value="${esc(a.pages)}" inputmode="numeric"><span class="hint">Pré-rempli d’après le PDF, modifiable.</span></div>
+  <div class="field"><label for="a0-copies">Exemplaires</label><input type="number" id="a0-copies" min="1" max="10" value="${esc(a.copies)}" inputmode="numeric"></div></div>
+  <fieldset><legend>Encre</legend><div class="radios">
+   <label class="rcard"><input type="radio" name="a0mode" value="nb" ${a.mode==='nb'?'checked':''}><span><b>Noir & blanc</b><small>${eur(st.a0nb)} la page A0</small></span></label>
+   <label class="rcard"><input type="radio" name="a0mode" value="couleur" ${a.mode==='couleur'?'checked':''}><span><b>Couleur</b><small>${eur(st.a0col)} la page · tailles multiples lisibles</small></span></label></div></fieldset>
+  </div>
+  <h2 class="h3">3. Réception</h2>
+  <div class="stack"><fieldset><legend>Mode de réception</legend><div class="radios">
+   <label class="rcard"><input type="radio" name="a0del" value="retrait" ${a.delivery==='retrait'?'checked':''}><span><b>Click & Collect</b><small>Gratuit · retrait en boutique, SMS quand c’est prêt</small></span></label>
+   <label class="rcard"><input type="radio" name="a0del" value="postal" ${a.delivery==='postal'?'checked':''}><span><b>Envoi postal</b><small>${eur(st.postal)} · tube carton, suivi, 48–72 h</small></span></label></div></fieldset>
+  <div id="a0-addr" class="stack" ${a.delivery==='postal'?'':'hidden'}>
+   <div class="field"><label for="a0-ad">Adresse</label><input type="text" id="a0-ad" autocomplete="street-address" value="${esc(a.addr)}"></div>
+   <div class="g2"><div class="field"><label for="a0-cp">Code postal</label><input type="text" id="a0-cp" inputmode="numeric" autocomplete="postal-code" maxlength="5" value="${esc(a.cp)}"></div><div class="field"><label for="a0-ci">Ville</label><input type="text" id="a0-ci" autocomplete="address-level2" value="${esc(a.city)}"></div></div>
+  </div></div>
+  <p class="err" id="a0-err" role="alert" style="margin-top:12px"></p>
+ </form>
+ <aside class="side sticky"><div class="card"><h2 class="h3" style="margin-bottom:10px">Récapitulatif</h2><div id="a0-recap">${a0Recap()}</div>
+  <button type="button" class="btn primary block" data-act="a0Pay" style="margin-top:14px">${ic('lock')}Payer et envoyer le fichier</button></div>
+  <div class="card"><h2 class="h3" style="margin-bottom:8px">Grille tarifaire</h2><table class="price-list"><tbody><tr><td>Page A0 noir & blanc</td><td>${eur(st.a0nb)}</td></tr><tr><td>Page A0 couleur</td><td>${eur(st.a0col)}</td></tr><tr><td>À partir de 10 pages</td><td>−10 %</td></tr><tr><td>Envoi postal suivi</td><td>${eur(st.postal)}</td></tr></tbody></table></div></aside></div>`;
+};
+function a0Sync(){const a=V.a0;
+ a.pages=$('#a0-pages').value;a.copies=$('#a0-copies').value;
+ a.mode=$('input[name=a0mode]:checked').value;a.delivery=$('input[name=a0del]:checked').value;
+ a.addr=$('#a0-ad').value;a.cp=$('#a0-cp').value;a.city=$('#a0-ci').value;
+ $('#a0-addr').hidden=a.delivery!=='postal';$('#a0-recap').innerHTML=a0Recap();
+}
+function handleFile(f){
+ const err=$('#a0-err');err.textContent='';
+ if(!f)return;
+ if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){err.textContent='Seuls les fichiers PDF sont acceptés.';return}
+ if(f.size>50*1048576){err.textContent='Fichier trop lourd (50 Mo maximum).';return}
+ V.a0.file={name:f.name,size:f.size};V.a0.detected=null;
+ const rd=new FileReader();
+ rd.onload=()=>{let n=0;try{const s=new TextDecoder('latin1').decode(new Uint8Array(rd.result));n=(s.match(/\/Type\s*\/Page(?![a-zA-Z])/g)||[]).length}catch(e){}
+  V.a0.detected=n||null;if(n){V.a0.pages=n;$('#a0-pages').value=n}
+  $('#a0-fi').innerHTML=fileInfo();$('#a0-recap').innerHTML=a0Recap();toast(n?`${pl(n,'page')} A0 détectée${n>1?'s':''} dans le PDF`:'PDF reçu : indiquez le nombre de pages');};
+ rd.readAsArrayBuffer(f);
+ $('#a0-fi').innerHTML=fileInfo();$('#a0-recap').innerHTML=a0Recap();
+}
+function a0Pay(){
+ a0Sync();const a=V.a0,err=$('#a0-err');err.textContent='';$$('#a0f [aria-invalid]').forEach(i=>i.removeAttribute('aria-invalid'));
+ const bad=(id,m)=>{err.textContent=m;if(id){$(id).setAttribute('aria-invalid','true');$(id).focus()}};
+ if(!a.file)return bad(null,'Ajoutez votre fichier PDF (ou utilisez le patron d’exemple).'),$('#a0-file').focus();
+ if(!/^\d+$/.test(a.pages)||+a.pages<1||+a.pages>40)return bad('#a0-pages','Indiquez un nombre de pages entre 1 et 40.');
+ if(!/^\d+$/.test(String(a.copies))||+a.copies<1||+a.copies>10)return bad('#a0-copies','Entre 1 et 10 exemplaires.');
+ if(a.delivery==='postal'){
+  if(a.addr.trim().length<5)return bad('#a0-ad','Adresse de livraison requise.');
+  if(!/^\d{5}$/.test(a.cp))return bad('#a0-cp','Code postal à 5 chiffres.');
+  if(a.city.trim().length<2)return bad('#a0-ci','Ville requise.');
+ }
+ const p=a0Price();
+ const lines=[[`${a.file.name} · ${a.pages} p. × ${a.copies} ex. · ${a.mode==='nb'?'N&B':'couleur'}`,p.sub]];
+ if(p.disc)lines.push(['Remise dégressive −10 %',-p.disc]);
+ lines.push([a.delivery==='postal'?'Envoi postal suivi':'Retrait en boutique',p.ship]);
+ pay({title:'Commande d’impression A0',lines,total:p.total,credits:0,success:a.delivery==='postal'?'Expédition sous 48 h, numéro de suivi par e-mail.':'Vous recevrez un message dès que votre patron sera prêt au retrait.',
+  onPaid(){const r={ref:ref('A0'),client:S.user.name,user:true,file:a.file.name,pages:+a.pages,copies:+a.copies,mode:a.mode,delivery:a.delivery,city:a.city,status:'À imprimer',date:TODAY,total:p.total,title:'Impression patron A0',lines};
+   S.prints.unshift(r);mail(`Commande d’impression ${r.ref} reçue`,`${r.file} — ${r.pages} page(s) A0 × ${r.copies}.`);
+   V.a0=freshV().a0;return r}});
+}
+
+/* Boutique */
+const CAT_IC={'Mercerie':'scissors','Fils':'spool','Seconde main':'recycle','Patrons papier':'file'};
+function gridHTML(){
+ const q=V.q.trim().toLowerCase();
+ const list=S.products.filter(p=>(V.cat==='Tous'||p.cat===V.cat)&&(!q||(p.name+' '+p.desc+' '+p.cat).toLowerCase().includes(q)));
+ return list.map(p=>{const inC=S.cart[p.id]||0,left=p.stock-inC;
+  const stk=p.stock===0?'<span class="badge bad">Rupture</span>':p.stock<=2?`<span class="badge warn">${p.stock===1?'Pièce unique':'Plus que '+p.stock}</span>`:'<span class="badge ok">En stock</span>';
+  return `<article class="card prod"><div class="sw" style="--sw:${p.c}" aria-hidden="true">${ic(CAT_IC[p.cat])}</div><div class="prod-b">
+  <div class="tags"><span class="badge olive">${esc(p.cat)}</span>${stk}</div><h3>${esc(p.name)}</h3><p class="small muted">${esc(p.desc)}</p>
+  <div class="prod-f"><span class="price">${eur(p.price)}</span><button type="button" class="btn sm ${left>0?'primary':''}" data-act="add" data-v="${p.id}" ${left>0?'':'disabled'} aria-label="Ajouter ${esc(p.name)} au panier">${left>0?ic('plus')+'Ajouter':p.stock===0?'Indisponible':'Max. atteint'}</button></div></div></article>`}).join('')||'<p class="empty">Aucun article ne correspond à votre recherche.</p>';
+}
+function cartCalc(){
+ const items=Object.entries(S.cart).map(([id,q])=>({p:S.products.find(x=>x.id===id),q})).filter(x=>x.p&&x.q>0);
+ const sub=items.reduce((n,x)=>n+x.p.price*x.q,0);
+ const pr=S.promos.find(p=>p.code===S.promo&&p.active);if(!pr)S.promo=null;
+ const disc=pr?+(sub*pr.pct/100).toFixed(2):0;const ship=items.length&&S.ship==='colissimo'?5.9:0;
+ return {items,sub,pr,disc,ship,total:+(sub-disc+ship).toFixed(2)};
+}
+function cartTot(){const c=cartCalc();return `<div class="sumrows"><div class="row"><span>Sous-total</span><span class="num">${eur(c.sub)}</span></div>${c.pr?`<div class="row disc"><span>Code ${esc(c.pr.code)} (−${c.pr.pct} %)</span><span class="num">−${eur(c.disc)}</span></div>`:''}<div class="row"><span>Livraison</span><span class="num">${c.ship?eur(c.ship):'Gratuit'}</span></div><div class="row tot"><span>Total</span><span class="num">${eur(c.total)}</span></div></div>`}
+function cartHTML(){
+ const c=cartCalc();
+ return `<div class="hrow"><h2 class="h3">Panier</h2><span class="muted small">${pl(c.items.reduce((n,x)=>n+x.q,0),'article')}</span></div>
+ ${c.items.length?c.items.map(({p,q})=>`<div class="ci"><div><b class="wrap">${esc(p.name)}</b><div class="small muted">${eur(p.price)} · total ${eur(p.price*q)}</div></div>
+  <div class="stepper" role="group" aria-label="Quantité ${esc(p.name)}"><button type="button" class="icon-btn" data-act="cdec" data-v="${p.id}" aria-label="Retirer un ${esc(p.name)}">${ic('minus')}</button><span>${q}</span><button type="button" class="icon-btn" data-act="add" data-v="${p.id}" ${q>=p.stock?'disabled':''} aria-label="Ajouter un ${esc(p.name)}">${ic('plus')}</button></div></div>`).join(''):'<p class="empty">Votre panier est vide.</p>'}
+ <div class="stack" style="margin-top:12px">
+  ${c.pr?`<div class="row"><span class="badge ok">${ic('tag')}${esc(c.pr.code)} appliqué</span><button type="button" class="btn sm ghost" data-act="promoRm">Retirer</button></div>`:`<div class="field"><label for="promo-in">Code promo</label><div class="promo-row"><input type="text" id="promo-in" autocomplete="off" placeholder="ex. BIENVENUE10"><button type="button" class="btn" data-act="promo">Appliquer</button></div></div>`}
+  <p class="err" id="promo-err" role="alert"></p>
+  <fieldset><legend>Livraison</legend><div class="radios"><label class="rcard"><input type="radio" name="ship" value="retrait" ${S.ship==='retrait'?'checked':''}><span><b>Retrait en boutique</b><small>Gratuit</small></span></label><label class="rcard"><input type="radio" name="ship" value="colissimo" ${S.ship==='colissimo'?'checked':''}><span><b>Colissimo</b><small>5,90 € · 48 h</small></span></label></div></fieldset>
+  <div id="cart-tot">${cartTot()}</div>
+  <button type="button" class="btn primary block" data-act="order" ${c.items.length?'':'disabled'}>${ic('lock')}Commander</button>
+ </div>`;
+}
+PAGES.boutique=()=>`<div class="page-head"><div><h1 tabindex="-1">Mercerie & patrons</h1><p class="muted">Fils, mercerie, trouvailles de seconde main et patrons papier — stock mis à jour en temps réel.</p></div></div>
+ <div class="layout"><div class="col"><div class="toolbar"><div class="field"><label for="shop-q" class="sr">Rechercher un article</label><input type="search" id="shop-q" placeholder="Rechercher un article…" value="${esc(V.q)}"></div>
+ <div class="chips" role="group" aria-label="Catégories">${['Tous','Mercerie','Fils','Seconde main','Patrons papier'].map(c=>`<button type="button" class="chip" data-act="cat" data-v="${c}" aria-pressed="${c===V.cat}">${c}</button>`).join('')}</div></div>
+ <div class="pgrid" id="pgrid">${gridHTML()}</div></div>
+ <aside class="side sticky"><div class="card" id="cart">${cartHTML()}</div></aside></div>`;
+function refreshShop(){if($('#pgrid'))$('#pgrid').innerHTML=gridHTML();if($('#cart'))$('#cart').innerHTML=cartHTML();renderNav()}
+
+/* Compte */
+PAGES.compte=()=>{
+ const mine=S.bookings.filter(b=>b.user).sort((a,b)=>bStart(a)-bStart(b));
+ const fut=mine.filter(b=>b.status==='confirmée'&&bStart(b)>new Date());
+ const others=mine.filter(b=>!fut.includes(b));
+ const bRow=b=>{const canC=b.status==='confirmée'&&bStart(b)>new Date();
+  return `<li><div class="li-h"><b>${esc(b.title)}</b>${stBadge(b.status)}</div><span class="small">${bWhen(b)}</span><span class="small muted wrap">${esc(b.ref)} · ${esc(b.payTxt||'')}${b.cancelTxt?' · '+esc(b.cancelTxt):''}</span>
+  <div class="actions"><button type="button" class="btn sm" data-act="receipt" data-v="${esc(b.ref)}">${ic('receipt')}Justificatif</button>${canC?`<button type="button" class="btn sm" data-act="cancel" data-v="${b.id}">Annuler</button>`:''}</div></li>`};
+ const myP=S.prints.filter(p=>p.user),myO=[...S.orders.filter(o=>o.user),...S.passBuys];
+ return `<div class="page-head"><div><h1 tabindex="-1">Mon compte</h1><p class="muted">${esc(S.user.name)} · ${esc(S.user.email)}</p></div></div>
+ <div class="kpis"><div class="card kpi"><div class="l">${ic('ticket')}Forfait</div><div class="v">${S.credits} h</div><div class="s">heures disponibles</div></div>
+ <div class="card kpi"><div class="l">${ic('receipt')}Avoir</div><div class="v">${eur(S.avoir)}</div><div class="s">utilisable au paiement</div></div>
+ <div class="card kpi"><div class="l">${ic('cal')}À venir</div><div class="v">${fut.length}</div><div class="s">réservation${fut.length>1?'s':''}</div></div>
+ <div class="card kpi"><div class="l">${ic('printer')}Impressions</div><div class="v">${myP.filter(p=>!['Retiré','Expédié'].includes(p.status)).length}</div><div class="s">en cours</div></div></div>
+ <div class="bo-grid">
+  <section class="card"><h2 class="h3">Réservations à venir</h2><ul class="plain list">${fut.map(bRow).join('')||'<li class="empty">Aucune réservation à venir.</li>'}</ul>
+   <button type="button" class="btn block" data-act="go" data-v="reserver" style="margin-top:8px">${ic('cal')}Nouvelle réservation</button></section>
+  <section class="card"><h2 class="h3">Impressions A0</h2><ul class="plain list">${myP.map(p=>`<li><div class="li-h"><b>${esc(p.file)}</b>${stBadge(p.status)}</div><span class="small muted wrap">${esc(p.ref)} · ${p.pages} p. × ${p.copies} · ${p.delivery==='postal'?'envoi postal':'Click & Collect'} · ${eur(p.total)}</span><div class="actions"><button type="button" class="btn sm" data-act="receipt" data-v="${esc(p.ref)}">${ic('receipt')}Justificatif</button></div></li>`).join('')||'<li class="empty">Aucune impression. <button type="button" class="btn sm ghost" data-act="go" data-v="a0">Déposer un PDF</button></li>'}</ul></section>
+  <section class="card"><h2 class="h3">Commandes & forfaits</h2><ul class="plain list">${myO.map(o=>`<li><div class="li-h"><b>${esc(o.title)}</b>${o.status?stBadge(o.status):'<span class="badge ok">Payé</span>'}</div><span class="small muted wrap">${esc(o.ref)} · ${eur(o.total)} · ${esc(o.payTxt||'')}</span><div class="actions"><button type="button" class="btn sm" data-act="receipt" data-v="${esc(o.ref)}">${ic('receipt')}Justificatif</button></div></li>`).join('')||'<li class="empty">Aucune commande pour le moment.</li>'}</ul></section>
+  <section class="card"><h2 class="h3">E-mails reçus <span class="badge info">simulation</span></h2><ul class="plain list">${S.emails.slice(0,8).map(m=>`<li class="mail">${ic(m.scheduled?'clock':'mail')}<div><b class="wrap">${esc(m.subject)}</b><div class="small muted">${m.scheduled?`Programmé le ${new Date(m.scheduled).toLocaleString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`:'Envoyé le '+new Date(m.at).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${esc(m.body)}</div></div></li>`).join('')||'<li class="empty">Aucun e-mail.</li>'}</ul></section>
+  <section class="card"><h2 class="h3">Historique</h2><ul class="plain list">${others.map(bRow).join('')||'<li class="empty">Rien pour le moment.</li>'}</ul></section>
+  <section class="card"><h2 class="h3" style="margin-bottom:8px">Politique d’annulation</h2>${RULES}</section>
+ </div>`;
+};
+
+/* ---------- Back-office ---------- */
+function printNext(p){if(p.status==='À imprimer')return ['Imprimé','Marquer imprimé'];if(p.status==='Imprimé')return p.delivery==='retrait'?['Prêt au retrait','Prévenir : prêt au retrait']:['Expédié','Marquer expédié'];if(p.status==='Prêt au retrait')return ['Retiré','Marquer retiré'];return null}
+PAGES.jour=()=>{
+ const k=V.boDay,open=isOpen(k);
+ const libre=S.bookings.filter(b=>b.type==='libre'&&b.date===k&&b.status==='confirmée');
+ const persons=libre.reduce((n,b)=>n+b.qty,0);
+ const capTot=open?SLOTS.reduce((n,_,i)=>n+(S.blocked[k+'_'+i]?0:capOf(k,i)),0):0;
+ const ats=S.ateliers.filter(a=>a.date>=k).sort((a,b)=>atStart(a)-atStart(b)).slice(0,5);
+ const atsDay=S.ateliers.filter(a=>a.date===k);
+ const prints=S.prints.filter(p=>!['Retiré','Expédié'].includes(p.status));
+ const ords=S.orders.filter(o=>o.status!=='Remise');
+ const cash=S.ledger.filter(l=>l.date===k).reduce((n,l)=>n+l.amount,0);
+ const low=S.products.filter(p=>p.stock<=2);
+ return `<div class="page-head"><div><h1 tabindex="-1">Vue journée</h1><p class="muted">Tout ce qui se passe aujourd’hui, ajustable depuis un téléphone.</p></div>
+ <div class="daynav"><button type="button" class="icon-btn bd" data-act="boDay" data-v="-1" aria-label="Jour précédent">${ic('chevL')}</button><b aria-live="polite">${fmtDay(k)}</b><button type="button" class="icon-btn bd" data-act="boDay" data-v="1" aria-label="Jour suivant">${ic('chevR')}</button>${k!==TODAY?`<button type="button" class="btn sm" data-act="boDay" data-v="0">Aujourd’hui</button>`:''}</div></div>
+ <div class="kpis">
+  <div class="card kpi"><div class="l">${ic('machine')}Accès libre</div><div class="v">${persons}<span class="muted" style="font-size:18px"> / ${capTot}</span></div><div class="s">postes réservés · ${capTot?Math.round(persons/capTot*100):0} % de remplissage</div></div>
+  <div class="card kpi"><div class="l">${ic('scissors')}Ateliers du jour</div><div class="v">${atsDay.length}</div><div class="s">${atsDay.reduce((n,a)=>n+atTaken(a),0)} participants</div></div>
+  <div class="card kpi"><div class="l">${ic('printer')}Impressions A0</div><div class="v">${S.prints.filter(p=>p.status==='À imprimer').length}</div><div class="s">à imprimer · ${prints.length} en cours</div></div>
+  <div class="card kpi"><div class="l">${ic('bag')}Commandes</div><div class="v">${ords.length}</div><div class="s">à préparer ou à remettre</div></div>
+  <div class="card kpi"><div class="l">${ic('receipt')}Encaissé</div><div class="v">${eur(cash)}</div><div class="s">Stripe (mode test)</div></div>
+ </div>
+ <div class="bo-grid">
+  <section class="card span2"><div class="hrow"><h2 class="h3">Créneaux du jour</h2><span class="small muted">Capacité par défaut : ${S.settings.cap} postes</span></div>
+  ${open?`<div class="bo-slots">${SLOTS.map((sl,i)=>{const c=capOf(k,i),o=occ(k,i),st=slotState(k,i),bl=!!S.blocked[k+'_'+i];const list=libre.filter(b=>b.slot===i);
+   return `<div class="bo-slot"><div class="slot-h"><b>${slotLabel(i)}</b>${badgeFor(st,c-o)}</div>
+   <div class="bar${o>=c?' hot':''}" role="img" aria-label="${o} sur ${c}"><span style="width:${Math.min(100,o/c*100)}%"></span></div>
+   <div class="small"><b>${o}</b> / ${c} postes</div>
+   <div class="names">${list.map(b=>`<span class="cs ${b.user?'me':''}">${esc(b.name)}${b.qty>1?' ×'+b.qty:''}</span>`).join('')||'<span class="small muted">Aucune réservation</span>'}</div>
+   <div class="actions"><div class="stepper" role="group" aria-label="Capacité ${slotLabel(i)}"><button type="button" class="icon-btn" data-act="capm" data-v="${i}" aria-label="Retirer une place, ${slotLabel(i)}" ${c<=1?'disabled':''}>${ic('minus')}</button><span class="small">${c} pl.</span><button type="button" class="icon-btn" data-act="capp" data-v="${i}" aria-label="Ajouter une place, ${slotLabel(i)}" ${c>=12?'disabled':''}>${ic('plus')}</button></div>
+   <button type="button" class="btn sm" data-act="block" data-v="${i}">${bl?'Rouvrir':'Fermer le créneau'}</button></div></div>`}).join('')}</div>`:'<p class="empty">Fermé le lundi : aucun créneau.</p>'}</section>
+  <section class="card"><h2 class="h3">Impressions A0 à traiter</h2><ul class="plain list">${prints.map(p=>{const nx=printNext(p);return `<li><div class="li-h"><b>${esc(p.file)}</b>${stBadge(p.status)}</div>
+   <span class="small muted wrap">${esc(p.ref)} · ${esc(p.client)} · ${p.pages} p. × ${p.copies} · ${p.mode==='nb'?'N&B':'couleur'} · ${p.delivery==='postal'?'envoi postal'+(p.city?' ('+esc(p.city)+')':''):'Click & Collect'}</span>
+   <div class="actions"><button type="button" class="btn sm" data-act="dl" data-v="${esc(p.file)}">${ic('download')}PDF</button>${nx?`<button type="button" class="btn sm primary" data-act="printNext" data-v="${esc(p.ref)}">${nx[1]}</button>`:''}</div></li>`}).join('')||'<li class="empty">Rien à imprimer.</li>'}</ul></section>
+  <section class="card"><h2 class="h3">Ateliers à venir</h2><ul class="plain list">${ats.map(a=>{const t=atTaken(a);return `<li><div class="li-h"><b>${esc(a.title)}</b><span class="badge ${t>=a.cap?'bad':'olive'}">${t} / ${a.cap}</span></div><span class="small muted">${cap1(fmtShort(a.date))} · ${a.h.replace(':','h')} · ${esc(a.anim)}</span><div class="bar${t>=a.cap?' hot':''}" aria-hidden="true"><span style="width:${Math.min(100,t/a.cap*100)}%"></span></div></li>`}).join('')||'<li class="empty">Aucun atelier programmé.</li>'}</ul></section>
+  <section class="card"><h2 class="h3">Commandes boutique</h2><ul class="plain list">${ords.map(o=>`<li><div class="li-h"><b>${esc(o.ref)} · ${esc(o.client)}</b>${stBadge(o.status)}</div><span class="small muted">${o.items.map(([n,q])=>esc(n)+' ×'+q).join(', ')} · ${eur(o.total)} · ${o.ship==='colissimo'?'Colissimo':'retrait'}</span><div class="actions"><button type="button" class="btn sm primary" data-act="orderNext" data-v="${esc(o.ref)}">${o.status==='À préparer'?'Marquer prête':o.ship==='colissimo'?'Marquer expédiée':'Marquer remise'}</button></div></li>`).join('')||'<li class="empty">Aucune commande en attente.</li>'}</ul></section>
+  <section class="card"><h2 class="h3">Alertes stock</h2><ul class="plain list">${low.map(p=>`<li><div class="li-h"><b>${esc(p.name)}</b><span class="badge ${p.stock?'warn':'bad'}">${p.stock?p.stock+' en stock':'Rupture'}</span></div></li>`).join('')||'<li class="empty">Stock suffisant partout.</li>'}</ul><button type="button" class="btn sm block" data-act="go" data-v="bshop" style="margin-top:8px">Gérer le stock</button></section>
+ </div>`;
+};
+PAGES.planning=()=>{const st=S.settings;
+ return `<div class="page-head"><div><h1 tabindex="-1">Planning & tarifs</h1><p class="muted">Créneaux, capacités, prix et ateliers : tout se règle ici, y compris depuis un smartphone.</p></div></div>
+ <div class="bo-grid">
+  <section class="card"><h2 class="h3">Accès libre</h2><div class="stack" style="margin-top:12px"><div class="g2"><div class="field"><label for="s-hour">Prix de l’heure (€)</label><input type="number" id="s-hour" min="1" max="50" step="0.5" value="${st.hour}"></div><div class="field"><label for="s-cap">Postes par créneau</label><input type="number" id="s-cap" min="1" max="12" value="${st.cap}"></div></div>
+   <p class="hint">Créneaux : ${SLOTS.map((_,i)=>slotLabel(i)).join(' · ')}. Fermé le lundi. Les ajustements ponctuels se font dans la Vue journée.</p>
+   <p class="err" id="e-acc" role="alert"></p><button type="button" class="btn primary" data-act="saveAcc">Enregistrer</button></div></section>
+  <section class="card"><h2 class="h3">Forfaits d’heures</h2><div class="stack" style="margin-top:12px">${S.passes.map(p=>`<div class="g2"><div class="field"><label for="ph-${p.id}">${esc(p.name)} — heures</label><input type="number" id="ph-${p.id}" min="1" max="100" value="${p.h}"></div><div class="field"><label for="pp-${p.id}">Prix (€)</label><input type="number" id="pp-${p.id}" min="1" max="1000" step="0.5" value="${p.price}"></div></div>`).join('')}
+   <p class="err" id="e-pass" role="alert"></p><button type="button" class="btn primary" data-act="savePass">Enregistrer</button></div></section>
+  <section class="card"><h2 class="h3">Impression A0</h2><div class="stack" style="margin-top:12px"><div class="g3"><div class="field"><label for="s-nb">N&B / page (€)</label><input type="number" id="s-nb" min="0.5" step="0.5" value="${st.a0nb}"></div><div class="field"><label for="s-col">Couleur / page (€)</label><input type="number" id="s-col" min="0.5" step="0.5" value="${st.a0col}"></div><div class="field"><label for="s-post">Envoi postal (€)</label><input type="number" id="s-post" min="0" step="0.1" value="${st.postal}"></div></div>
+   <p class="err" id="e-a0" role="alert"></p><button type="button" class="btn primary" data-act="saveA0">Enregistrer</button></div></section>
+  <section class="card span2"><div class="hrow"><h2 class="h3">Ateliers programmés</h2><span class="small muted">${S.ateliers.length} ateliers</span></div>
+   <div class="tbl-wrap"><table class="t"><thead><tr><th scope="col">Date</th><th scope="col">Atelier</th><th scope="col">Inscrits</th><th scope="col">Places</th><th scope="col">Prix (€)</th></tr></thead><tbody>
+   ${S.ateliers.slice().sort((a,b)=>atStart(a)-atStart(b)).map(a=>`<tr><td>${cap1(fmtShort(a.date))}<br><span class="muted small">${a.h.replace(':','h')}</span></td><td><b>${esc(a.title)}</b><br><span class="muted small">${esc(a.theme)} · ${esc(a.anim)}</span></td><td>${atTaken(a)}</td><td><label class="sr" for="ac-${a.id}">Places ${esc(a.title)}</label><input type="number" id="ac-${a.id}" min="1" max="12" value="${a.cap}"></td><td><label class="sr" for="ap-${a.id}">Prix ${esc(a.title)}</label><input type="number" id="ap-${a.id}" min="0" step="1" value="${a.price}"></td></tr>`).join('')}
+   </tbody></table></div><p class="err" id="e-at" role="alert" style="margin-top:8px"></p><button type="button" class="btn primary" data-act="saveAt" style="margin-top:10px">Enregistrer les ateliers</button></section>
+  <section class="card"><h2 class="h3">Programmer un atelier</h2><form class="stack" id="newAt" novalidate style="margin-top:12px">
+   <div class="field"><label for="n-t">Intitulé</label><input type="text" id="n-t" maxlength="70"></div>
+   <div class="g2"><div class="field"><label for="n-th">Thème</label><select id="n-th">${['Débutant','Accessoires','Retouche','Enfants','Patronage','Upcycling','Vêtement'].map(t=>`<option>${t}</option>`).join('')}</select></div><div class="field"><label for="n-an">Animé par</label><select id="n-an"><option>Léa</option><option>Sofia</option></select></div></div>
+   <div class="g2"><div class="field"><label for="n-d">Date</label><input type="date" id="n-d" min="${dk(addD(1))}"></div><div class="field"><label for="n-h">Heure</label><input type="time" id="n-h" value="14:00"></div></div>
+   <div class="g3"><div class="field"><label for="n-du">Durée (h)</label><input type="number" id="n-du" min="1" max="8" step="0.5" value="2"></div><div class="field"><label for="n-p">Prix (€)</label><input type="number" id="n-p" min="0" value="40"></div><div class="field"><label for="n-c">Places</label><input type="number" id="n-c" min="1" max="12" value="6"></div></div>
+   <p class="err" id="e-new" role="alert"></p><button type="button" class="btn primary" data-act="addAt">${ic('plus')}Publier l’atelier</button></form></section>
+  <section class="card"><h2 class="h3">SEO local</h2><p class="small muted" style="margin:6px 0 10px">Balisage schema.org injecté dans chaque page, cohérent avec la fiche Google Business Profile.</p><pre class="ld">${esc(JSON.stringify(JSON.parse($('#ld').textContent),null,2))}</pre></section>
+  <section class="card"><h2 class="h3">RGPD</h2><p class="small" style="margin:6px 0 10px">Consentement cookies du visiteur : <b>${S.cookie?S.cookie.audience||S.cookie.maps?'partiel ou total':'refusé':'non exprimé'}</b>. Données de réservation conservées 3 ans, export et suppression sur demande.</p><button type="button" class="btn sm" data-act="ckReset">Réafficher le bandeau cookies</button></section>
+ </div>`;
+};
+PAGES.bshop=()=>`<div class="page-head"><div><h1 tabindex="-1">Boutique & promos</h1><p class="muted">Stock, codes promo et commandes.</p></div></div>
+ <div class="bo-grid">
+  <section class="card span2"><h2 class="h3">Stock</h2><div class="tbl-wrap"><table class="t"><thead><tr><th scope="col">Article</th><th scope="col">Catégorie</th><th scope="col">Prix</th><th scope="col">Stock</th></tr></thead><tbody>
+  ${S.products.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.cat)}</td><td>${eur(p.price)}</td><td><div class="stepper" role="group" aria-label="Stock ${esc(p.name)}"><button type="button" class="icon-btn" data-act="stm" data-v="${p.id}" aria-label="Retirer une unité" ${p.stock<=0?'disabled':''}>${ic('minus')}</button><span class="${p.stock<=2?'err':''}">${p.stock}</span><button type="button" class="icon-btn" data-act="stp" data-v="${p.id}" aria-label="Ajouter une unité">${ic('plus')}</button></div></td></tr>`).join('')}
+  </tbody></table></div></section>
+  <section class="card"><h2 class="h3">Codes promo</h2><ul class="plain list">${S.promos.map(p=>`<li><div class="li-h"><b>${esc(p.code)}</b><span class="badge ${p.active?'ok':''}">${p.active?'Actif':'Inactif'}</span></div><span class="small muted">−${p.pct} % sur la boutique · ${pl(p.uses,'utilisation')}</span><div class="actions"><button type="button" class="btn sm" data-act="promoTg" data-v="${esc(p.code)}" aria-pressed="${p.active}">${p.active?'Désactiver':'Activer'}</button></div></li>`).join('')}</ul>
+   <form class="stack" novalidate style="margin-top:10px"><div class="g2"><div class="field"><label for="pc-c">Nouveau code</label><input type="text" id="pc-c" maxlength="15" autocomplete="off" placeholder="NOEL20"></div><div class="field"><label for="pc-p">Remise (%)</label><input type="number" id="pc-p" min="5" max="50" value="10"></div></div><p class="err" id="e-pc" role="alert"></p><button type="button" class="btn primary" data-act="addPromo">${ic('plus')}Créer le code</button></form></section>
+  <section class="card"><h2 class="h3">Commandes</h2><ul class="plain list">${S.orders.map(o=>`<li><div class="li-h"><b>${esc(o.ref)} · ${esc(o.client)}</b>${stBadge(o.status)}</div><span class="small muted">${o.items.map(([n,q])=>esc(n)+' ×'+q).join(', ')} · ${eur(o.total)}</span></li>`).join('')||'<li class="empty">Aucune commande.</li>'}</ul></section>
+ </div>`;
+
+/* ---------- Cookies ---------- */
+function renderCookie(){
+ $('#cookie').innerHTML=S.cookie||V.mode!=='client'?'':`<div class="card cookie" role="region" aria-label="Consentement aux cookies"><p><b>Cookies</b> — nous utilisons des cookies nécessaires (réservation, panier) et, avec votre accord, une mesure d’audience et la carte Google Maps.</p>
+ <div class="actions"><button type="button" class="btn" data-act="ck" data-v="no">Tout refuser</button><button type="button" class="btn" data-act="ckCustom">Personnaliser</button><button type="button" class="btn" data-act="ck" data-v="yes">Tout accepter</button></div></div>`;
+}
+
+/* ---------- Actions ---------- */
+const A={
+ go:v=>go(v),
+ mode:v=>{V.mode=v;render();window.scrollTo(0,0);$('#app h1')?.focus({preventScroll:true})},
+ close:()=>closeDlg(),
+ goAteliers:()=>{V.res='ateliers';go('reserver')},
+ pickSlot:v=>{const[k,i]=v.split('|');V.res='libre';V.day=k;go('reserver');const el=$('#slot-'+i);if(el){el.scrollIntoView({block:'center'});el.querySelector('select,button')?.focus({preventScroll:true})}},
+ resTab:v=>{V.res=v;render()},
+ day:v=>{V.day=v;render()},
+ theme:v=>{V.theme=v;render()},
+ cat:v=>{V.cat=v;$$('[data-act=cat]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));$('#pgrid').innerHTML=gridHTML()},
+ bookSlot:v=>{const i=+v,k=V.day,qty=+$('#q'+i).value;
+  if(slotState(k,i)!=='ouvert'||occ(k,i)+qty>capOf(k,i))return toast('Ce créneau vient d’être complété.',1),render();
+  const total=S.settings.hour*2*qty,lines=[[`${cap1(fmtShort(k))} · ${slotLabel(i)} · ${pl(qty,'poste')}`,total]];
+  pay({title:'Réserver un créneau machine',lines,total,credits:2*qty,success:'Un rappel vous sera envoyé la veille à 18 h.',onPaid(res){
+   const b={id:'b-'+S.seq,ref:ref('RES'),type:'libre',date:k,slot:i,qty,name:S.user.name,user:true,status:'confirmée',title:`Accès libre — ${pl(qty,'poste')} machine`,lines,total,pay:res};
+   S.bookings.push(b);mail(`Confirmation de réservation ${b.ref}`,`${cap1(fmtDay(k))}, ${slotLabel(i)}, ${pl(qty,'poste')}.`);
+   const rm=startOf(k,18);rm.setDate(rm.getDate()-1);remind(rm,`Rappel : votre créneau du ${fmtShort(k)}`,`${slotLabel(i)} — pensez à apporter votre tissu.`);return b}});
+ },
+ bookAt:v=>{const a=atById(v),qty=+$('#qa-'+v).value;
+  if(atTaken(a)+qty>a.cap)return toast('Plus assez de places sur cet atelier.',1),render();
+  const total=a.price*qty,lines=[[`${a.title} · ${pl(qty,'place')}`,total]];
+  pay({title:'Réserver un atelier',lines,total,credits:0,success:`${cap1(fmtDay(a.date))} à ${a.h.replace(':','h')}. Matériel fourni.`,onPaid(res){
+   const b={id:'b-'+S.seq,ref:ref('RES'),type:'atelier',aid:a.id,date:a.date,qty,name:S.user.name,user:true,status:'confirmée',title:'Atelier — '+a.title,lines,total,pay:res};
+   S.bookings.push(b);mail(`Confirmation de réservation ${b.ref}`,`Atelier « ${a.title} », ${fmtDay(a.date)} à ${a.h.replace(':','h')}.`);
+   const rm=atStart(a);rm.setDate(rm.getDate()-1);rm.setHours(18,0);remind(rm,`Rappel : atelier du ${fmtShort(a.date)}`,a.title);return b}});
+ },
+ wait:v=>toast(`Inscription sur liste d’attente : vous serez prévenu(e) par e-mail si une place se libère (simulation).`),
+ buyPass:v=>{const p=S.passes.find(x=>x.id===v);
+  pay({title:'Acheter un forfait',lines:[[p.name,p.price]],total:p.price,credits:0,success:`${p.h} h ajoutées à votre solde.`,onPaid(){S.credits+=p.h;const r={ref:ref('PASS'),title:p.name,lines:[[p.name,p.price]],total:p.price};S.passBuys.unshift(r);mail(`Votre ${p.name.toLowerCase()} est actif`,`${p.h} h créditées sur votre compte.`);return r}});
+ },
+ payGo:v=>payGo(v),
+ fillCard:()=>{$('#cc-num').value='4242 4242 4242 4242';const d=new Date();$('#cc-exp').value=`12/${String((d.getFullYear()+2)%100).padStart(2,'0')}`;$('#cc-cvc').value='123';$('#p-go').focus()},
+ receipt:v=>receipt(v),
+ cancel:v=>{const b=S.bookings.find(x=>x.id===v),o=cancelOutcome(b);if(!o)return;
+  openDlg(dlgHead('Annuler la réservation')+`<div class="dlg-b"><p><b>${esc(b.title)}</b><br>${bWhen(b)}</p><div class="note">${ic('alert')}<span>${esc(o.txt)}</span></div><p class="small muted">Règle appliquée automatiquement selon le délai avant le début.</p>
+  <div class="actions"><button type="button" class="btn" data-act="close" autofocus>Garder ma réservation</button><button type="button" class="btn primary" data-act="cancelOk" data-v="${b.id}">Confirmer l’annulation</button></div></div>`)},
+ cancelOk:v=>{const b=S.bookings.find(x=>x.id===v),o=cancelOutcome(b);if(!o)return closeDlg();
+  b.status='annulée';b.cancelTxt=o.txt;
+  if(o.kind==='credits')S.credits+=b.pay.credits;
+  if(o.kind==='refund'){S.avoir=+(S.avoir+b.pay.avoir).toFixed(2);if(b.pay.card)S.ledger.push({date:TODAY,amount:-b.pay.card,label:'Remboursement '+b.ref})}
+  if(o.kind==='avoir')S.avoir=+(S.avoir+o.amount).toFixed(2);
+  mail(`Annulation de ${b.ref}`,o.txt);save();closeDlg();render();
+ },
+ a0Sample:()=>{V.a0.file={name:'robe-portefeuille-T38-A0.pdf',size:2516582};V.a0.detected=3;V.a0.pages=3;render();toast('Patron d’exemple chargé : 3 pages A0 détectées');$('#a0-pages')?.focus()},
+ a0Clear:()=>{V.a0.file=null;V.a0.detected=null;$('#a0-fi').innerHTML='';$('#a0-file').value='';$('#a0-recap').innerHTML=a0Recap();$('#a0-file').focus()},
+ a0Pay:()=>a0Pay(),
+ add:(v,b)=>{const p=S.products.find(x=>x.id===v);const q=S.cart[v]||0;if(q>=p.stock)return;S.cart[v]=q+1;save();const inCart=!!b.closest('#cart');refreshShop();if(inCart)refocus('add',v,'#cart');else{toast(`${p.name} ajouté au panier`);refocus('add',v,'#pgrid')}},
+ cdec:v=>{S.cart[v]=(S.cart[v]||0)-1;if(S.cart[v]<=0)delete S.cart[v];save();refreshShop();refocus('cdec',v,'#cart')},
+ promo:()=>{const c=$('#promo-in').value.trim().toUpperCase(),p=S.promos.find(x=>x.code===c);
+  if(!c){$('#promo-err').textContent='Saisissez un code.';return}
+  if(!p||!p.active){$('#promo-err').textContent='Code inconnu ou expiré.';$('#promo-in').setAttribute('aria-invalid','true');$('#promo-in').focus();return}
+  S.promo=c;save();refreshShop();toast(`Code ${c} appliqué : −${p.pct} %`)},
+ promoRm:()=>{S.promo=null;save();refreshShop()},
+ order:()=>{const c=cartCalc();if(!c.items.length)return;
+  const bad=c.items.find(x=>x.q>x.p.stock);if(bad)return toast(`Stock insuffisant pour ${bad.p.name}.`,1);
+  const lines=c.items.map(({p,q})=>[`${p.name} × ${q}`,+(p.price*q).toFixed(2)]);if(c.pr)lines.push([`Code ${c.pr.code}`,-c.disc]);lines.push([S.ship==='colissimo'?'Colissimo':'Retrait en boutique',c.ship]);
+  pay({title:'Valider la commande',lines,total:c.total,credits:0,success:S.ship==='colissimo'?'Expédition sous 48 h.':'Nous vous prévenons dès que la commande est prête.',onPaid(){
+   c.items.forEach(({p,q})=>p.stock-=q);if(c.pr)c.pr.uses++;
+   const o={ref:ref('CMD'),client:S.user.name,user:true,items:c.items.map(({p,q})=>[p.name,q]),total:c.total,ship:S.ship,status:'À préparer',date:TODAY,title:'Commande boutique',lines};
+   S.orders.unshift(o);S.cart={};S.promo=null;mail(`Commande ${o.ref} confirmée`,`${o.items.length} article(s), ${eur(o.total)}.`);return o}});
+ },
+ boDay:v=>{V.boDay=v==='0'?TODAY:dk(addD(+v,pd(V.boDay)));render();refocus('boDay',v)},
+ capm:v=>{const k=V.boDay+'_'+v;S.capOv[k]=Math.max(1,capOf(V.boDay,+v)-1);save();render();refocus('capm',v);toast(`Capacité du créneau ${slotLabel(+v)} : ${S.capOv[k]} postes`)},
+ capp:v=>{const k=V.boDay+'_'+v;S.capOv[k]=Math.min(12,capOf(V.boDay,+v)+1);save();render();refocus('capp',v);toast(`Capacité du créneau ${slotLabel(+v)} : ${S.capOv[k]} postes`)},
+ block:v=>{const k=V.boDay+'_'+v;if(S.blocked[k])delete S.blocked[k];else S.blocked[k]=true;save();render();refocus('block',v);toast(S.blocked[k]?'Créneau fermé à la réservation en ligne':'Créneau rouvert')},
+ dl:v=>toast(`Téléchargement de ${v} (simulation)`),
+ printNext:v=>{const p=S.prints.find(x=>x.ref===v),nx=printNext(p);if(!nx)return;p.status=nx[0];
+  if(['Prêt au retrait','Expédié'].includes(p.status)){if(p.user)mail(p.status==='Expédié'?`Votre patron ${p.ref} est expédié`:`Votre patron ${p.ref} est prêt`,p.file,true);toast(`${p.client} prévenu(e) par e-mail et SMS (simulation)`)}else toast(`${p.ref} : ${p.status.toLowerCase()}`);
+  save();render();refocus('printNext',v)},
+ orderNext:v=>{const o=S.orders.find(x=>x.ref===v);o.status=o.status==='À préparer'?'Prête':'Remise';if(o.status==='Prête')toast(`${o.client} prévenu(e) : commande prête (simulation)`);save();render();refocus('orderNext',v)},
+ saveAcc:()=>{const h=+$('#s-hour').value,c=+$('#s-cap').value,e=$('#e-acc');
+  if(!(h>0&&h<=50))return e.textContent='Prix horaire entre 0,50 et 50 €.';
+  if(!(Number.isInteger(c)&&c>=1&&c<=12))return e.textContent='Capacité entière entre 1 et 12.';
+  S.settings.hour=h;S.settings.cap=c;save();e.textContent='';toast('Accès libre mis à jour — visible immédiatement côté client')},
+ savePass:()=>{const e=$('#e-pass');for(const p of S.passes){const h=+$('#ph-'+p.id).value,pr=+$('#pp-'+p.id).value;if(!(Number.isInteger(h)&&h>0)||!(pr>0))return e.textContent=`Valeurs invalides pour « ${p.name} ».`}
+  S.passes.forEach(p=>{p.h=+$('#ph-'+p.id).value;p.price=+$('#pp-'+p.id).value});save();e.textContent='';toast('Forfaits mis à jour')},
+ saveA0:()=>{const nb=+$('#s-nb').value,col=+$('#s-col').value,po=+$('#s-post').value,e=$('#e-a0');
+  if(!(nb>0&&col>0&&po>=0))return e.textContent='Prix invalides.';S.settings.a0nb=nb;S.settings.a0col=col;S.settings.postal=po;save();e.textContent='';toast('Grille d’impression mise à jour')},
+ saveAt:()=>{const e=$('#e-at');for(const a of S.ateliers){const c=+$('#ac-'+a.id).value,p=+$('#ap-'+a.id).value;
+   if(!(Number.isInteger(c)&&c>=1&&c<=12))return e.textContent=`Places invalides pour « ${a.title} ».`;
+   if(c<atTaken(a))return e.textContent=`« ${a.title} » compte déjà ${atTaken(a)} inscrits : impossible de descendre à ${c}.`;
+   if(!(p>=0))return e.textContent=`Prix invalide pour « ${a.title} ».`}
+  S.ateliers.forEach(a=>{a.cap=+$('#ac-'+a.id).value;a.price=+$('#ap-'+a.id).value});save();e.textContent='';toast('Ateliers mis à jour')},
+ addAt:()=>{const e=$('#e-new'),t=$('#n-t').value.trim(),d=$('#n-d').value,h=$('#n-h').value,du=+$('#n-du').value,p=+$('#n-p').value,c=+$('#n-c').value;
+  $$('#newAt [aria-invalid]').forEach(i=>i.removeAttribute('aria-invalid'));
+  const bad=(id,m)=>{e.textContent=m;$(id).setAttribute('aria-invalid','true');$(id).focus()};
+  if(t.length<4)return bad('#n-t','Intitulé trop court.');
+  if(!d||d<=TODAY)return bad('#n-d','Choisissez une date à venir.');
+  if(!isOpen(d))return bad('#n-d','La boutique est fermée le lundi.');
+  if(!/^\d{2}:\d{2}$/.test(h))return bad('#n-h','Heure invalide.');
+  if(!(du>=1&&du<=8))return bad('#n-du','Durée entre 1 et 8 h.');
+  if(!(p>=0))return bad('#n-p','Prix invalide.');
+  if(!(Number.isInteger(c)&&c>=1&&c<=12))return bad('#n-c','Entre 1 et 12 places.');
+  S.ateliers.push({id:'at'+(S.seq++),title:t,theme:$('#n-th').value,date:d,h,dur:du,price:p,cap:c,others:0,anim:$('#n-an').value});save();render();toast('Atelier publié : visible dans l’agenda client')},
+ stm:v=>{const p=S.products.find(x=>x.id===v);p.stock=Math.max(0,p.stock-1);save();render();refocus('stm',v)},
+ stp:v=>{const p=S.products.find(x=>x.id===v);p.stock++;save();render();refocus('stp',v)},
+ promoTg:v=>{const p=S.promos.find(x=>x.code===v);p.active=!p.active;save();render();refocus('promoTg',v)},
+ addPromo:()=>{const c=$('#pc-c').value.trim().toUpperCase(),p=+$('#pc-p').value,e=$('#e-pc');
+  if(!/^[A-Z0-9]{3,15}$/.test(c)){$('#pc-c').setAttribute('aria-invalid','true');$('#pc-c').focus();return e.textContent='3 à 15 lettres ou chiffres, sans espace.'}
+  if(S.promos.some(x=>x.code===c))return e.textContent='Ce code existe déjà.';
+  if(!(Number.isInteger(p)&&p>=5&&p<=50))return e.textContent='Remise entière entre 5 et 50 %.';
+  S.promos.push({code:c,pct:p,active:true,uses:0});save();render();toast(`Code ${c} créé : testez-le dans la boutique côté client`)},
+ ck:v=>{S.cookie={audience:v==='yes',maps:v==='yes'};save();renderCookie();toast('Préférences cookies enregistrées')},
+ ckCustom:()=>{const c=S.cookie||{};openDlg(dlgHead('Préférences cookies')+`<div class="dlg-b">
+  <label class="opt"><input type="checkbox" checked disabled><span><b>Nécessaires</b><small>Réservation, panier, sécurité du paiement. Toujours actifs.</small></span></label>
+  <label class="opt"><input type="checkbox" id="ck-a" ${c.audience?'checked':''}><span><b>Mesure d’audience</b><small>Statistiques anonymes de fréquentation.</small></span></label>
+  <label class="opt"><input type="checkbox" id="ck-m" ${c.maps?'checked':''}><span><b>Carte Google Maps</b><small>Affichage de l’itinéraire sur la page.</small></span></label>
+  <button type="button" class="btn primary" data-act="ckSave">Enregistrer mes choix</button></div>`)},
+ ckSave:()=>{S.cookie={audience:$('#ck-a').checked,maps:$('#ck-m').checked};save();closeDlg();renderCookie();toast('Préférences cookies enregistrées')},
+ ckReset:()=>{S.cookie=null;save();V.mode='client';V.page='accueil';render();toast('Bandeau cookies réaffiché côté client')}
+};
+function refocus(act,v,scope){const el=$(`${scope||''} [data-act="${act}"][data-v="${CSS.escape(v)}"]`);if(el&&!el.disabled)el.focus();}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const f=A[b.dataset.act];if(f){e.preventDefault();f(b.dataset.v,b,e)}});
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.id==='shop-q'){V.q=t.value;$('#pgrid').innerHTML=gridHTML();return}
+ if(t.closest&&t.closest('#a0f')&&t.type!=='file'){a0Sync();return}
+ if(t.id==='cc-num'){const d=t.value.replace(/\D/g,'').slice(0,16);t.value=d.replace(/(.{4})(?=.)/g,'$1 ')}
+ if(t.id==='cc-exp'){let d=t.value.replace(/\D/g,'').slice(0,4);if(d.length>2)d=d.slice(0,2)+'/'+d.slice(2);t.value=d}
+ if(t.id==='promo-in'){t.removeAttribute('aria-invalid');$('#promo-err').textContent=''}
+});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.id==='a0-file'){handleFile(t.files[0]);return}
+ if(t.closest&&t.closest('#a0f')){a0Sync();return}
+ if(t.id==='p-cred'||t.id==='p-av'){updPay();return}
+ if(t.name==='ship'){S.ship=t.value;save();$('#cart-tot').innerHTML=cartTot()}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='promo-in'){e.preventDefault();A.promo()}});
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{const d=e.target.closest&&e.target.closest('#drop');if(d){e.preventDefault();d.classList.add('over')}}));
+document.addEventListener('dragleave',e=>{const d=e.target.closest&&e.target.closest('#drop');if(d)d.classList.remove('over')});
+document.addEventListener('drop',e=>{const d=e.target.closest&&e.target.closest('#drop');if(d){e.preventDefault();d.classList.remove('over');handleFile(e.dataTransfer.files[0])}});
+$('#reset').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch(e){}S=seed();V=freshV();closeDlg();render();window.scrollTo(0,0);toast('Démo réinitialisée')});
+
+render();
+})();
+</script>
 </body>
 </html>
