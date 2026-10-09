@@ -2,20 +2,1106 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Gestion école de danse</title>
+<meta name="description" content="Logiciel de gestion d'école de danse en Suisse romande : inscription en ligne avec tarif selon l'âge et le nombre de cours, QR-factures suisses, rapprochement bancaire CAMT.054, relances automatiques, cartes à points et appel des professeurs sur mobile.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F7F2EA;--panel:#FFFDF9;--panel-2:#F2EBE1;--ink:#2B1A24;--muted:#665560;--line:#E6DCD0;--line-2:#CBBDB0;
+  --accent:#6B2350;--accent-ink:#FFFFFF;--accent-soft:#F3E3EC;--accent-text:#5C1C44;
+  --gold:#7D5E22;--gold-soft:#F5EBD6;
+  --ok:#1D6A44;--ok-soft:#DDEFE4;--warn:#864B00;--warn-soft:#F9EAD3;--bad:#A3232F;--bad-soft:#F8E0E2;--info:#2C548A;--info-soft:#E2EAF5;--gray:#5A5157;--gray-soft:#EEE7E1;
+  --shadow:0 1px 2px rgba(43,26,36,.05),0 4px 14px rgba(43,26,36,.06);
+  --serif:"Cormorant Garamond",Georgia,serif;--sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#160F15;--panel:#1F161E;--panel-2:#291E28;--ink:#F2E9EE;--muted:#BCA9B5;--line:#382A35;--line-2:#54414F;
+  --accent:#D9A3C4;--accent-ink:#2A0E20;--accent-soft:#3B2235;--accent-text:#EEC4DC;
+  --gold:#E2C07E;--gold-soft:#33291A;
+  --ok:#7DD3A2;--ok-soft:#15301F;--warn:#F0B864;--warn-soft:#352613;--bad:#FF979E;--bad-soft:#3D1B1F;--info:#9CC1F2;--info-soft:#172A40;--gray:#C6BAC2;--gray-soft:#2D232C;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,3vw,36px);letter-spacing:-.005em}
+h1:focus{outline:none}
+h2{font-family:var(--serif);font-weight:600;font-size:23px}
+h3{font-size:15.5px;font-weight:600}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.mono{font-family:var(--mono);font-size:.86em;overflow-wrap:anywhere}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.min0{min-width:0}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.band{background:var(--gold-soft);color:var(--ink);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.band b{color:var(--gold)}
+.band button{min-height:36px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.band button svg{width:15px;height:15px}
+
+.top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.top-row{display:flex;align-items:center;gap:10px 18px;padding:10px clamp(16px,2vw,32px) 6px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;margin-right:auto;min-width:0}
+.mark{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--serif);font-size:26px;font-weight:700;flex:none;line-height:1}
+.brand-t{font-family:var(--serif);font-weight:700;font-size:22px;line-height:1.05}
+.brand-t small{display:block;font-family:var(--sans);font-weight:500;font-size:12px;color:var(--muted)}
+.roles{display:flex;gap:4px;padding:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px}
+.roles button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border:0;border-radius:9px;background:transparent;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.roles button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.roles button:not([aria-pressed="true"]):hover{background:var(--panel);color:var(--ink)}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;padding:2px clamp(16px,2vw,32px) 8px}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;font-size:14.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 7px;min-width:20px;text-align:center}
+main{padding:22px clamp(16px,2vw,32px) 64px;outline:none}
+@media (max-width:700px){.top{position:static}.roles{width:100%}.roles button{flex:1;padding:0 6px}}
+
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 20px;flex-wrap:wrap;margin-bottom:18px}
+.page-h>div{min-width:0}
+.page-h p{margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14.5px;cursor:pointer;color:var(--ink);text-align:center;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.panel>h2{margin-bottom:12px}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.split{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1080px){.split{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr))}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;background:var(--gray-soft);color:var(--gray)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}.badge.info{background:var(--info-soft);color:var(--info)}.badge.bad{background:var(--bad-soft);color:var(--bad)}.badge.warn{background:var(--warn-soft);color:var(--warn)}.badge.acc{background:var(--accent-soft);color:var(--accent-text)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.chip .n{font-weight:500;opacity:.85}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.req{color:var(--bad)}
+.in,.field input,.field select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+.field input[aria-invalid="true"],.in[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.err{color:var(--bad);font-size:13px;font-weight:500}
+.hint{font-size:12.5px;color:var(--muted)}
+.fgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr))}
+.fgrid .full{grid-column:1/-1}
+.check{display:flex;gap:10px;align-items:flex-start;min-height:44px;cursor:pointer;padding:8px 0}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+.tbl thead th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;background:var(--panel-2)}
+.tbl tbody tr:last-child>*{border-bottom:0}
+.tbl .r{text-align:right}
+.tbl .num,.tbl .badge{white-space:normal}
+.tbl tr.sel>*{background:var(--accent-soft)}
+.linkbtn{background:none;border:0;padding:0;min-height:44px;font-weight:600;color:var(--accent-text);cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);border-left:4px solid var(--line-2);min-width:0}
+.kpi.ok{border-left-color:var(--ok)}.kpi.bad{border-left-color:var(--bad)}.kpi.acc{border-left-color:var(--accent)}.kpi.info{border-left-color:var(--info)}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:500}
+.kpi .v{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1.15;margin-top:2px;overflow-wrap:anywhere}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.dash{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.dash{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.dash .wide{grid-column:1/-1}}
+@media (min-width:1500px){.dash{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}.dash .wide{grid-column:span 2}}
+.bars{display:grid;gap:10px 28px;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr))}
+.bars li{display:flex;flex-direction:column;gap:4px;min-width:0}
+.bar-l{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.bar-v{display:flex;gap:10px;align-items:center}
+.bar{flex:1;height:10px;border-radius:999px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.bar>span{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar>span.full{background:var(--gold)}
+.stackbar{display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--panel-2);margin:8px 0 12px}
+.stackbar span{display:block;height:100%}
+.legend{display:grid;gap:8px}
+.legend li{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+.todo li+li{border-top:1px solid var(--line)}
+.todo button{width:100%;display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 4px;background:none;border:0;cursor:pointer;text-align:left;color:var(--ink)}
+.todo button:hover{background:var(--panel-2)}
+.todo .ti{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);flex:none}
+.todo .tt{flex:1;min-width:0}
+.rowlist li{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.rowlist li:first-child{border-top:0}
+
+.ins-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ins-el{margin:12px 0;display:flex;flex-direction:column;gap:10px}
+.ins-el li{padding:10px 12px;background:var(--panel-2);border-radius:10px;display:flex;flex-direction:column;gap:6px}
+.cchips{display:flex;flex-wrap:wrap;gap:6px}
+.cchip{font-size:12.5px;padding:3px 9px;border-radius:8px;background:var(--panel);border:1px solid var(--line)}
+.cchip.full{border-color:var(--warn);color:var(--warn)}
+.ins-f{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+.ins-f b{display:block;font-size:18px}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+.empty svg{width:34px;height:34px;color:var(--accent);margin-bottom:8px}
+
+.tarif input{min-width:84px}
+.note{padding:10px 12px;border-radius:10px;background:var(--panel-2);font-size:13.5px;display:flex;gap:8px;align-items:flex-start}
+.note.ok{background:var(--ok-soft);color:var(--ok)}.note.warn{background:var(--warn-soft);color:var(--warn)}.note.bad{background:var(--bad-soft);color:var(--bad)}.note.info{background:var(--info-soft);color:var(--info)}
+.simrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;gap:10px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}
+.qlines{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.qline{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.qline>span:first-child{min-width:0}
+.qline.rem{color:var(--ok)}
+.qtotal{display:flex;justify-content:space-between;gap:10px;align-items:baseline;border-top:2px solid var(--ink);margin-top:10px;padding-top:10px;font-weight:700}
+.qtotal .num{font-family:var(--serif);font-size:28px}
+@media (min-width:1080px){.sticky{position:sticky;top:130px;align-self:start}}
+
+.toolbar{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{position:relative;flex:1 1 240px;min-width:0;max-width:420px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{padding-left:38px}
+
+.stats{display:flex;gap:8px 22px;flex-wrap:wrap;margin-bottom:14px}
+.stats div{display:flex;flex-direction:column}
+.stats b{font-family:var(--serif);font-size:26px;line-height:1.1}
+.sugg{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.sugg .why{display:flex;flex-wrap:wrap;gap:6px}
+dl.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:0}
+dl.kv dt{color:var(--muted);font-size:13px}
+dl.kv dd{margin:0;overflow-wrap:anywhere;font-weight:500}
+pre.xml{background:var(--panel-2);border-radius:10px;padding:12px;overflow:auto;font-size:12px;max-height:320px;margin:10px 0 0;font-family:var(--mono)}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+
+.lvl{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.lvl:first-of-type{border-top:0}
+.lvl-n{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);font-weight:700;font-family:var(--serif);font-size:20px}
+.lvl-f{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,130px),1fr));gap:10px;margin-top:8px}
+.timeline li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.timeline li:first-child{border-top:0}
+.tl-d{font-size:12.5px;color:var(--muted);min-width:76px}
+
+.ctile{display:flex;flex-direction:column;gap:10px}
+.pts{display:flex;align-items:baseline;gap:6px}
+.pts b{font-family:var(--serif);font-size:40px;line-height:1}
+.pdots{display:flex;gap:5px;flex-wrap:wrap}
+.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);display:block}
+.pdots i.on{background:var(--accent)}
+
+.prof-l{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.prof-l{grid-template-columns:420px minmax(0,1fr)}}
+.phone{background:var(--panel);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+@media (min-width:900px){.phone{border:8px solid #2B1A24;border-radius:36px;min-height:760px}}
+@media (min-width:900px) and (prefers-color-scheme:dark){.phone{border-color:#3C2C38}}
+.ph-bar{background:var(--accent);color:var(--accent-ink);padding:14px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.ph-bar b{display:block;font-size:15px}
+.ph-bar .small{opacity:.9}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:600;background:var(--panel);color:var(--ok)}
+.pill.off{color:var(--warn)}
+.pill.sync{color:var(--info)}
+.pill svg{width:15px;height:15px}
+.ph-net{padding:4px 16px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+.sw{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:14px;font-weight:500}
+.sw input{appearance:none;-webkit-appearance:none;width:44px;height:26px;border-radius:999px;background:var(--line-2);position:relative;cursor:pointer;flex:none;margin:0;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.sw input:checked{background:var(--warn)}
+.sw input:checked::after{transform:translateX(18px)}
+.ph-body{padding:14px 16px 20px}
+.ph-course{width:100%;display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px;cursor:pointer;margin-bottom:10px;color:var(--ink);min-height:64px}
+.ph-course:hover{border-color:var(--accent)}
+.ph-course.today{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.ph-time{font-family:var(--serif);font-weight:700;font-size:22px;min-width:62px}
+.ph-head{display:flex;gap:6px;align-items:center;margin:-4px 0 10px -8px}
+.ph-head b{display:block}
+.ph-in{margin-bottom:10px;font-size:14px;color:var(--ok);display:flex;align-items:center;gap:6px;font-weight:600}
+.ph-count{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:6px}
+.roll li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.roll .nm{flex:1;min-width:0}
+.roll .nm b{display:block;overflow-wrap:anywhere}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:12px;overflow:hidden;flex:none}
+.seg button{min-height:48px;min-width:52px;border:0;background:var(--panel);font-weight:700;font-size:13px;cursor:pointer;color:var(--muted);padding:0 8px}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.p[aria-pressed="true"]{background:var(--ok);color:#fff}
+.seg button.a[aria-pressed="true"]{background:var(--bad);color:#fff}
+@media (prefers-color-scheme:dark){.seg button.p[aria-pressed="true"],.seg button.a[aria-pressed="true"]{color:#140b12}}
+.log li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+.log li:first-child{border-top:0}
+.log li.warn{color:var(--warn)}
+
+.steps{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.steps li{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-weight:600;font-size:14px;color:var(--muted)}
+.steps .sn{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--panel-2);font-size:13px}
+.steps .sn svg{width:15px;height:15px}
+.steps li[aria-current="step"]{border-color:var(--accent);color:var(--accent-text)}
+.steps li[aria-current="step"] .sn{background:var(--accent);color:var(--accent-ink)}
+.steps li.done .sn{background:var(--ok-soft);color:var(--ok)}
+@media (max-width:560px){.steps li:not([aria-current]) span:last-child{display:none}.steps li:not([aria-current]){padding-right:6px}}
+.wiz{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.wiz{grid-template-columns:minmax(0,1fr) 380px}}
+.wiz-main h2{margin-bottom:4px}
+.wiz-nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+fieldset.elc{border:1px solid var(--line);border-radius:12px;padding:12px 14px 14px;margin:14px 0 0;min-width:0}
+fieldset.elc legend{font-weight:700;padding:0 6px;font-family:var(--serif);font-size:19px}
+.elc-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));margin-top:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line-2);border-radius:12px;padding:12px;cursor:pointer;background:var(--panel);min-width:0}
+.opt:hover{border-color:var(--accent)}
+.opt input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
+.opt.dis{opacity:.6;cursor:not-allowed}
+.opt-b{display:flex;flex-direction:column;gap:2px;min-width:0}
+.warn-t{color:var(--warn)}
+.ok-t{color:var(--ok)}
+.bad-t{color:var(--bad)}
+.elsec{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.elsec:first-of-type{border-top:0;padding-top:0}
+.recap{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));margin:12px 0}
+.recap>div{background:var(--panel-2);border-radius:12px;padding:12px}
+.success{display:flex;gap:14px;align-items:flex-start}
+.success .ti{width:48px;height:48px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;flex:none}
+.flow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.flow span{font-size:12.5px;padding:3px 10px;border-radius:999px;background:var(--panel-2);color:var(--muted);font-weight:600}
+.flow span.on{background:var(--ok-soft);color:var(--ok)}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;width:min(440px,calc(100vw - 32px));pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:14px;display:flex;gap:10px;align-items:flex-start;animation:tin .2s ease-out}
+.toast svg{margin-top:1px}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+dialog{border:0;padding:0;border-radius:16px;background:var(--panel);color:var(--ink);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:auto}
+dialog.wide{width:min(940px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(30,12,24,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:3}
+.dlg-b{padding:16px 20px}
+.dlg-f{padding:12px 20px 16px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.dlg-tools{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line)}
+.doc-wrap{overflow:auto;position:relative;background:var(--panel-2);padding:12px}
+
+/* Document facture (papier, toujours clair) */
+.doc{width:210mm;min-height:297mm;background:#fff;color:#1a1a1a;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.15);display:flex;flex-direction:column;font:10pt/1.4 var(--sans);position:relative}
+.doc-body{flex:1;padding:16mm 18mm 8mm;display:flex;flex-direction:column}
+.doc-top{display:flex;justify-content:space-between;gap:10mm}
+.doc-brand{display:flex;gap:4mm;align-items:center}
+.doc-brand .mark{background:#6B2350;color:#fff;width:13mm;height:13mm;font-size:22pt}
+.doc-brand b{font-family:var(--serif);font-size:20pt;display:block;line-height:1;color:#5C1C44}
+.doc-brand span{font-size:8.5pt;color:#555}
+.doc-sch{font-size:8.5pt;color:#555;text-align:right}
+.doc-addr{margin:12mm 0 0 105mm;font-size:10pt}
+.doc-title{font-family:var(--serif);font-size:20pt;margin:12mm 0 3mm;color:#1a1a1a}
+.doc-meta{display:grid;grid-template-columns:repeat(4,auto);gap:1mm 6mm;font-size:8.5pt;margin-bottom:6mm;justify-content:start}
+.doc-meta dt{color:#666}
+.doc-meta dd{margin:0;font-weight:600}
+.doc-lines{width:100%;border-collapse:collapse;font-size:9.5pt}
+.doc-lines th{text-align:left;border-bottom:1.5pt solid #1a1a1a;padding:1.5mm 0;font-size:8pt;text-transform:uppercase;letter-spacing:.04em}
+.doc-lines td{border-bottom:.5pt solid #ddd;padding:2mm 0;vertical-align:top}
+.doc-lines .r{text-align:right;white-space:nowrap;padding-left:6mm}
+.doc-lines small{display:block;color:#666;font-size:8pt}
+.doc-total{display:flex;justify-content:flex-end;gap:10mm;font-weight:700;font-size:12pt;margin-top:3mm}
+.doc-note{font-size:8.5pt;color:#555;margin-top:6mm}
+.stamp{position:absolute;top:58mm;right:22mm;border:2.5pt solid #1D6A44;color:#1D6A44;font-weight:800;font-size:16pt;padding:2mm 5mm;border-radius:2mm;transform:rotate(-8deg);letter-spacing:.06em;text-align:center;line-height:1.1}
+.stamp small{display:block;font-size:8pt;letter-spacing:0;font-weight:600}
+.qrbill{display:flex;height:105mm;border-top:.75pt dashed #000;font-family:Arial,Helvetica,sans-serif;color:#000;position:relative;flex:none}
+.qrbill .sc{position:absolute;top:-2.6mm;left:6mm;width:5mm;height:5mm;background:#fff;color:#000}
+.qrbill .sc2{top:6mm;left:59.4mm;transform:rotate(90deg)}
+.qr-rec{width:62mm;padding:5mm;border-right:.75pt dashed #000;display:flex;flex-direction:column;flex:none}
+.qr-pay{width:148mm;padding:5mm;display:flex;gap:5mm;flex:none}
+.qr-pl{width:51mm;display:flex;flex-direction:column;flex:none}
+.qr-pr{flex:1;min-width:0}
+.qr-t{font-size:11pt;font-weight:700;margin-bottom:3.5mm}
+.qr-rec .h{font-size:6pt;font-weight:700;line-height:9pt}
+.qr-rec .v{font-size:8pt;line-height:9pt;margin-bottom:2.8mm}
+.qr-pay .h{font-size:8pt;font-weight:700;line-height:11pt}
+.qr-pay .v{font-size:10pt;line-height:11pt;margin-bottom:3.5mm}
+.qr-amt{display:flex;gap:4mm}
+.qr-rec .qr-amt{margin-top:auto}
+.qr-depot{font-size:6pt;font-weight:700;text-align:right;margin-top:3mm;padding-right:2mm}
+.qr-code{width:46mm;height:46mm;margin:0 0 5mm}
+.qr-code svg{width:100%;height:100%;display:block}
+#print-root{display:none}
+@media print{
+  @page{size:A4;margin:0}
+  html,body{background:#fff!important}
+  body>*:not(#print-root):not(svg){display:none!important}
+  #print-root{display:block!important}
+  .doc{box-shadow:none!important;zoom:1!important;margin:0!important;width:210mm;height:297mm;overflow:hidden}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></symbol>
+  <symbol id="i-userplus" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M19 8v6M16 11h6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10h18L12 4zM5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 1 1 12 0v5l2 2H4zM10 21h4"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 7v2M14 11v2M14 15v2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3"/><path d="M7 14h10v7H7z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6.6M20 4v7h-7"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h0"/></symbol>
+  <symbol id="i-wifioff" viewBox="0 0 24 24"><path d="M3 3l18 18M8.5 16a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 5-2.7M14 9.8a10 10 0 0 1 5 2.7M2 9a15 15 0 0 1 5-3M11 5.1A15 15 0 0 1 22 9M12 19.5h0"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20zM12 10v4M12 17h0"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h0M3 12h0M3 18h0"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1 20 20M8.1 15.9 20 4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-school" viewBox="0 0 24 24"><path d="M3 10 12 5l9 5-9 5zM7 12v5c3 2 7 2 10 0v-5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+</svg>
+
+<div class="band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="top-row">
+    <div class="brand"><span class="mark" aria-hidden="true">A</span><div class="brand-t">Studio Arabesque<small id="ctx">École de danse · Secrétariat</small></div></div>
+    <div class="roles" id="roles" role="group" aria-label="Changer de rôle"></div>
+  </div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+</header>
+<main id="main" tabindex="-1"></main>
+<div id="toasts" role="status" aria-live="polite"></div>
+<dialog id="dlg" aria-labelledby="dlg-title"></dialog>
+<div id="print-root"></div>
+<noscript><p style="padding:20px">Cette démonstration nécessite JavaScript.</p></noscript>
+
+<script>
+'use strict';
+/* ---------- Constantes et utilitaires ---------- */
+const TODAY='2026-10-09';
+const SEM="Semestre d'automne 2026";
+const SEM_P='24.08.2026 – 29.01.2027';
+const KEY='arabesque-demo-v1';
+const JOURS=['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
+const JOURS_L=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic=(n,c='i')=>`<svg class="${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const pad=n=>String(n).padStart(2,'0');
+const sum=(a,f=x=>x)=>a.reduce((s,x)=>s+(+f(x)||0),0);
+const r2=n=>Math.round(n*100)/100;
+const r05=n=>Math.round(n*20)/20;
+const D=s=>new Date(s+'T12:00:00');
+const iso=x=>`${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;
+const addDays=(s,n)=>{const x=D(s);x.setDate(x.getDate()+n);return iso(x)};
+const diffDays=(a,b)=>Math.round((D(b)-D(a))/86400000);
+const fd=s=>{if(!s)return '';const[y,m,d]=s.split('-');return `${d}.${m}.${y}`};
+const fdLong=s=>{const x=D(s);return `${JOURS_L[x.getDay()]} ${x.getDate()} ${MOIS[x.getMonth()]} ${x.getFullYear()}`};
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+function fmt(n){const neg=n<0;n=Math.abs(n);const[i,d]=n.toFixed(2).split('.');return (neg?'− ':'')+i.replace(/\B(?=(\d{3})+(?!\d))/g,'’')+'.'+d}
+const chf=n=>'CHF '+fmt(n);
+const billAmt=n=>{const[i,d]=n.toFixed(2).split('.');return i.replace(/\B(?=(\d{3})+(?!\d))/g,' ')+'.'+d};
+function ageOf(b,ref=TODAY){if(!b||!/^\d{4}-\d{2}-\d{2}$/.test(b))return null;const[y,m,d]=b.split('-').map(Number);const[Y,M,DD]=ref.split('-').map(Number);let a=Y-y;if(M<m||(M===m&&DD<d))a--;return a}
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const slug=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+function mod10(s){const T=[0,9,4,6,8,2,7,1,3,5];let c=0;for(const ch of s)c=T[(c+ +ch)%10];return (10-c)%10}
+function makeQRR(fnum,seq){const b=('2026'+String(fnum).padStart(6,'0')+String(seq).padStart(8,'0')).padStart(26,'0');return b+mod10(b)}
+const fmtQRR=r=>r.slice(0,2)+' '+r.slice(2).match(/.{5}/g).join(' ');
+function iban(iid,acct){const bban=iid+acct;const num=(bban+'CH00').replace(/[A-Z]/g,c=>c.charCodeAt(0)-55);let m=0;for(const ch of num)m=(m*10+ +ch)%97;return 'CH'+pad(98-m)+bban}
+const fmtIban=s=>s.replace(/(.{4})/g,'$1 ').trim();
+
+const SCHOOL={nom:'Studio Arabesque',sous:'École de danse',rue:'Rue de Genève 17',npa:'1003',ville:'Lausanne',tel:'021 555 18 40',email:'secretariat@studio-arabesque.ch',qriban:iban('30123','000456789012')};
+const SITES={L:{nom:'Lausanne — Studio Flon',court:'Lausanne'},G:{nom:'Genève — Studio Plainpalais',court:'Genève'},N:{nom:'Neuchâtel — Studio du Lac',court:'Neuchâtel'}};
+const PROFS=[{id:'p1',nom:'Camille Berset',style:'Classique'},{id:'p2',nom:'Yann Délèze',style:'Jazz'},{id:'p3',nom:'Malik Haddad',style:'Hip-hop'},{id:'p4',nom:'Inès Marchand',style:'Contemporain'}];
+const COURSES=[
+ {id:'c1',nom:'Éveil à la danse',min:4,max:6,jour:3,h:'14:00',duree:45,site:'L',prof:'p1',cap:12},
+ {id:'c2',nom:'Initiation classique',min:6,max:8,jour:3,h:'15:00',duree:60,site:'L',prof:'p1',cap:14},
+ {id:'c3',nom:'Classique enfants',min:8,max:11,jour:5,h:'17:00',duree:60,site:'L',prof:'p1',cap:14},
+ {id:'c4',nom:'Jazz enfants',min:7,max:11,jour:6,h:'10:00',duree:60,site:'G',prof:'p2',cap:14},
+ {id:'c5',nom:'Hip-hop kids',min:8,max:12,jour:5,h:'17:30',duree:60,site:'G',prof:'p3',cap:16},
+ {id:'c6',nom:'Classique ados',min:12,max:17,jour:1,h:'18:00',duree:90,site:'L',prof:'p1',cap:14},
+ {id:'c7',nom:'Contemporain ados',min:12,max:17,jour:4,h:'18:15',duree:75,site:'N',prof:'p4',cap:12},
+ {id:'c8',nom:'Hip-hop ados',min:12,max:17,jour:5,h:'18:45',duree:75,site:'G',prof:'p3',cap:16},
+ {id:'c9',nom:'Jazz ados',min:11,max:16,jour:2,h:'18:00',duree:75,site:'G',prof:'p2',cap:14},
+ {id:'c10',nom:'Classique adultes',min:18,max:99,jour:2,h:'19:30',duree:90,site:'L',prof:'p1',cap:16,carte:true},
+ {id:'c11',nom:'Contemporain adultes',min:18,max:99,jour:5,h:'19:30',duree:90,site:'N',prof:'p4',cap:14,carte:true},
+ {id:'c12',nom:'Barre au sol',min:16,max:99,jour:5,h:'12:15',duree:60,site:'L',prof:'p4',cap:12,carte:true},
+ {id:'c13',nom:'Pointes & répertoire',min:11,max:17,jour:6,h:'11:15',duree:60,site:'L',prof:'p1',cap:10}
+];
+const course=id=>COURSES.find(c=>c.id===id);
+const profName=id=>(PROFS.find(p=>p.id===id)||{}).nom||'';
+
+let state=null;
+const fam=id=>state.families.find(f=>f.id===id);
+const stu=id=>state.students.find(s=>s.id===id);
+const inv=id=>state.invoices.find(i=>i.id===id);
+const card=id=>state.cards.find(c=>c.id===id);
+const enrolled=cid=>state.students.filter(s=>s.actif&&s.cours.includes(cid)).length;
+const paid=i=>sum(i.paiements,p=>p.montant);
+const solde=i=>Math.max(0,r2(i.total-paid(i)));
+function status(i){if(solde(i)<=0.004)return 'payee';return TODAY>i.echeance?'retard':'ouverte'}
+const ST={payee:['Payée','ok'],ouverte:['Ouverte','info'],retard:['En retard','bad']};
+const badge=(t,c='')=>`<span class="badge ${c}">${t}</span>`;
+const stBadge=i=>{const s=status(i);let t=ST[s][0];if(s!=='payee'&&paid(i)>0)t+=' · partiel';return badge(t,ST[s][1])};
+
+/* ---------- Tarification ---------- */
+function trancheFor(age,T=state.tarifs){if(age==null)return null;return T.tranches.find(t=>age>=+t.min&&age<=+t.max)||null}
+const tLabel=t=>t?`${t.label} ${t.min}${+t.max>=99?' ans et +':'–'+t.max+' ans'}`:'hors grille';
+function quote(items,T=state.tarifs){
+  const lines=items.map(it=>{const tr=trancheFor(it.age,T);const base=tr&&it.n>0?(+tr.prix[Math.min(it.n,4)-1]||0):0;return Object.assign({},it,{tr,base,pct:0,remise:0})});
+  lines.filter(l=>l.base>0&&l.age<18).sort((a,b)=>b.base-a.base).forEach((l,i)=>{if(i===0)return;l.pct=i===1?+T.fratrie2:+T.fratrie3;l.remise=r05(l.base*l.pct/100)});
+  const sub=sum(lines,l=>l.base),rem=sum(lines,l=>l.remise),frais=lines.some(l=>l.base>0)?+T.frais:0;
+  return {lines,sub,rem,frais,total:r2(sub-rem+frais)};
+}
+function makeInvoice(f,items,date,ech){
+  const q=quote(items.map(({s,cours})=>({prenom:s.prenom,age:ageOf(s.naissance),n:cours.length,noms:cours.map(id=>course(id).nom).join(', ')})));
+  const lignes=[];
+  q.lines.forEach(l=>{if(!l.base)return;lignes.push({label:`${l.prenom} — ${l.n} cours/semaine (${tLabel(l.tr)})`,detail:l.noms,montant:l.base});if(l.remise)lignes.push({label:`Remise fratrie ${l.pct} % — ${l.prenom}`,montant:-l.remise})});
+  if(q.frais)lignes.push({label:"Frais d'inscription annuels (par famille)",montant:q.frais});
+  const seq=state.seq.inv++;
+  const v={id:'V'+seq,num:'F-2026-'+String(seq).padStart(4,'0'),famId:f.id,date,echeance:ech,lignes,total:r2(q.total),ref:makeQRR(f.num,seq),paiements:[],relances:[],suspendue:false};
+  state.invoices.push(v);return v;
+}
+
+/* ---------- Données de démonstration ---------- */
+function newWiz(){return {step:1,fam:{nom:'',parent:'',email:'',tel:'',adresse:'',npa:'',ville:''},eleves:[{k:1,prenom:'',nom:'',naissance:'',cours:[]}],nk:2,site:'',cgu:false,err:{},done:null}}
+function seed(){
+  const S={v:1,
+    tarifs:{tranches:[{label:'Enfants',min:4,max:11,prix:[360,640,880,1080]},{label:'Adolescents',min:12,max:17,prix:[410,730,1000,1220]},{label:'Adultes',min:18,max:99,prix:[460,820,1120,1360]}],fratrie2:10,fratrie3:15,frais:40,carte10:250,carte5:135},
+    families:[],students:[],inscriptions:[],invoices:[],cards:[],att:{},queue:[],syncLog:[{t:'07:45',msg:"Planning et listes d'élèves du jour téléchargés sur l'appareil"}],relLog:[],
+    bank:{imports:0,txs:[]},
+    rel:{niveaux:[{n:1,label:'Rappel amical',jours:10,canal:'Email',frais:0,actif:true},{n:2,label:'Deuxième rappel',jours:30,canal:'Email + courrier',frais:0,actif:true},{n:3,label:'Mise en demeure',jours:45,canal:'Courrier recommandé',frais:20,actif:true}]},
+    seq:{fam:1001,stu:1,inv:101,ins:1,tx:1,card:1},
+    ui:{role:'ecole',tab:{ecole:'dash',prof:'appel',parent:'inscrire'},ifilt:'attente',ffilt:'toutes',fq:'',dsite:'',txSel:null,profId:'p4',appel:null,online:true,syncing:false,lastSync:'07:45',parentFam:'F1001',sim:[{age:9,n:2},{age:13,n:1}],wiz:newWiz()}
+  };
+  state=S;
+  const R=rng(20261009);
+  const pick=a=>a[Math.floor(R()*a.length)];
+  const MAILS=['bluewin.ch','gmail.com','sunrise.ch','outlook.com','netplus.ch'];
+  const tel=v=>(R()<.5?'079':v==='Genève'?'022':v==='Neuchâtel'?'032':'021')+' 555 '+pad(10+Math.floor(R()*89))+' '+pad(10+Math.floor(R()*89));
+  const addFam=(nom,parent,adresse,npa,ville,kids,actif=true)=>{
+    const f={id:'F'+S.seq.fam,num:S.seq.fam++,nom,parent,adresse,npa,ville,email:slug(parent)+'.'+slug(nom)+'@'+pick(MAILS),tel:tel(ville)};
+    S.families.push(f);
+    const items=kids.map(([prenom,naissance,cours])=>{const s={id:'S'+S.seq.stu++,famId:f.id,prenom,nom,naissance,cours:cours.slice(),actif};S.students.push(s);return {s,cours}});
+    return {f,items};
+  };
+  const addIns=(f,items,date,statut,invId)=>{const x={id:'I'+S.seq.ins++,famId:f.id,date,eleves:items.map(({s,cours})=>({sid:s.id,cours:cours.slice()})),total:quote(items.map(({s,cours})=>({age:ageOf(s.naissance),n:cours.length}))).total,statut,invId:invId||null};S.inscriptions.push(x);return x};
+  const payDate=()=>addDays('2026-08-24',Math.floor(R()*26));
+  const EX=[
+    ['Morel','Julie','Rue de Carouge 48','1205','Genève',[['Léa','2017-03-14',['c4','c5']],['Hugo','2014-06-02',['c8','c9']]],{d:'2026-09-20',e:'2026-10-20'}],
+    ['Rochat','Pierre','Avenue de Rumine 12','1005','Lausanne',[['Emma','2019-05-20',['c2']],['Chloé','2016-01-11',['c3']]],{d:'2026-08-10',e:'2026-08-25',rel:[[1,'2026-09-04'],[2,'2026-09-24']]}],
+    ['Favre','Nathalie','Rue des Parcs 21','2000','Neuchâtel',[['Zoé','2011-09-03',['c7']]],{paid:1}],
+    ['Bonvin','Marc','Chemin de Mornex 6','1003','Lausanne',[['Alice','2021-02-17',['c1']],['Louise','2018-08-30',['c2','c3']]],{paid:1}],
+    ['Pittet','Sandra','Boulevard Carl-Vogt 33','1205','Genève',[['Noah','2015-04-09',['c4','c5']]],{d:'2026-08-17',e:'2026-09-01',rel:[[1,'2026-09-11']]}],
+    ['Chappuis','Olivier',"Avenue d'Ouchy 54",'1006','Lausanne',[['Mila','2012-12-01',['c6','c13']],['Jade','2014-03-22',['c6']]],{paid:1}],
+    ['Gilliéron','Anne','Rue de la Côte 7','2000','Neuchâtel',[['Lina','2010-07-15',['c7']]],{d:'2026-08-13',e:'2026-08-28',rel:[[1,'2026-09-07'],[2,'2026-09-27']],camt:'sansref'}],
+    ['Ferreira','Ana','Rue de Lyon 102','1203','Genève',[['Sofia','2013-05-05',['c8','c9']],['Tiago','2016-10-30',['c5']],['Inês','2019-02-19',['c4']]],{paid:1}],
+    ['Nguyen','Linh','Rue du Simplon 9','1006','Lausanne',[['Maya','2017-11-08',['c2','c3']]],{d:'2026-09-25',e:'2026-10-25',camt:'exact'}],
+    ['Rossier','David','Route de Chêne 15','1207','Genève',[['Eliott','2012-02-14',['c8']]],{d:'2026-08-26',e:'2026-09-25',camt:'partiel'}],
+    ['Jaquet','Claire',"Faubourg de l'Hôpital 30",'2000','Neuchâtel',[['Claire','1986-04-18',['c11']],['Margaux','2011-06-25',['c7']]],{paid:1}],
+    ['Perret','Isabelle','Avenue de Cour 88','1007','Lausanne',[['Isabelle','1979-10-02',['c10','c12']]],{d:'2026-09-25',e:'2026-10-25',camt:'exact'}],
+    ['Mercier','Laurent','Rue de Lausanne 64','1202','Genève',[['Anaïs','2015-09-12',['c4','c9']]],{d:'2026-08-28',e:'2026-09-27',rel:[[1,'2026-10-07']],susp:1}],
+    ['Dubois','Céline','Rue de Bourg 3','1003','Lausanne',[['Romane','2012-04-04',['c6','c13']],['Victor','2018-12-12',['c2']]],{d:'2026-09-25',e:'2026-10-25',camt:'exact'}],
+    ['Golay','Sébastien',"Rue de l'Écluse 12",'2000','Neuchâtel',[['Sébastien','1990-01-23',['c11']]],{paid:1}],
+    ['Monnier','Aline','Avenue de France 20','1004','Lausanne',[['Aline','1995-06-08',['c10','c12']]],{paid:1}]
+  ];
+  EX.forEach(([nom,parent,adr,npa,ville,kids,o],k)=>{
+    const {f,items}=addFam(nom,parent,adr,npa,ville,kids);
+    const d=o.d||'2026-08-20',e=o.e||'2026-09-19';
+    const v=makeInvoice(f,items,d,e);
+    if(o.paid)v.paiements.push({date:payDate(),montant:v.total,source:'CAMT.054 — auto'});
+    (o.rel||[]).forEach(([n,dt])=>{v.relances.push({niveau:n,date:dt});S.relLog.push({date:dt,invId:v.id,txt:S.rel.niveaux[n-1].label+' envoyé — '+S.rel.niveaux[n-1].canal})});
+    if(o.susp){v.suspendue=true;S.relLog.push({date:'2026-10-08',invId:v.id,txt:'Relances suspendues — arrangement de paiement en 2 fois'})}
+    if(o.camt)v.camt=o.camt;
+    addIns(f,items,addDays('2026-06-02',k*4),'validee',v.id);
+  });
+  const LAST=['Aebischer','Baumann','Blanc','Bovet','Cuendet','Delacrétaz','Ducret','Fontana','Gay','Grandjean','Hofer','Jaccard','Lambert','Leuba','Martin','Meylan','Oberson','Pasche','Pernet','Reymond','Richard','Roulin','Schmid','Tschumi','Vautravers','Zbinden'];
+  const KIDS=['Lou','Nina','Lena','Clara','Eva','Rose','Anna','Manon','Elsa','Juliette','Sarah','Iris','Léonie','Ambre','Livia','Tom','Gabriel','Arthur','Liam','Nathan','Samuel','Jules','Malo','Élie','Agathe','Zélie'];
+  const PAR=['Sophie','Nicolas','Valérie','Christophe','Sandrine','Stéphane','Mélanie','Fabrice','Laure','Cédric','Delphine','Patrick'];
+  const STREETS={L:[['Avenue de Béthusy','1005'],['Chemin de Pierrefleur','1004'],['Rue du Valentin','1004'],['Avenue de Florimont','1006'],['Chemin des Fleurettes','1007']],G:[['Rue de Saint-Jean','1203'],['Avenue de Champel','1206'],['Rue des Eaux-Vives','1207'],['Rue de Montbrillant','1202']],N:[["Rue de l'Évole",'2000'],['Avenue des Alpes','2000'],['Rue de Fontaine-André','2000'],['Chemin des Pavés','2000']]};
+  const VILLE={L:'Lausanne',G:'Genève',N:'Neuchâtel'};
+  LAST.forEach((nom,i)=>{
+    const site='LGN'[i%3];const st=pick(STREETS[site]);const nk=R()<.45?2:1;const kids=[];
+    for(let k=0;k<nk;k++){
+      const age=4+Math.floor(R()*14);const el=COURSES.filter(c=>age>=c.min&&age<=c.max);const pref=el.filter(c=>c.site===site);const pool=(pref.length?pref:el).slice();
+      const nc=Math.min(pool.length,R()<.5?2:1);const cs=[];for(let j=0;j<nc;j++)cs.push(pool.splice(Math.floor(R()*pool.length),1)[0].id);
+      kids.push([pick(KIDS),`${2026-age}-${pad(1+Math.floor(R()*9))}-${pad(1+Math.floor(R()*28))}`,cs]);
+    }
+    const {f,items}=addFam(nom,pick(PAR),st[0]+' '+(1+Math.floor(R()*80)),st[1],VILLE[site],kids);
+    if(i===3||i===11||i===17){const v=makeInvoice(f,items,'2026-09-28','2026-10-28');if(i!==17)v.camt='exact'}
+    else{const v=makeInvoice(f,items,'2026-08-20','2026-09-19');v.paiements.push({date:payDate(),montant:v.total,source:'CAMT.054 — auto'})}
+  });
+  let a=addFam('Keller','Adrien','Rue de la Maladière 16','2000','Neuchâtel',[['Élise','2016-05-03',['c3']],['Timéo','2012-08-21',['c7']]],false);addIns(a.f,a.items,'2026-10-07','attente');
+  a=addFam('Dupraz','Hélène','Chemin du Languedoc 8','1007','Lausanne',[['Margot','2019-03-10',['c2']]],false);addIns(a.f,a.items,'2026-10-08','attente');
+  a=addFam('Baud','Raphaël','Rue de Carouge 90','1205','Genève',[['Lisa','2014-02-02',['c9','c8']],['Paul','2017-07-07',['c4']]]);addIns(a.f,a.items,'2026-10-05','validee');
+  [['Sophie Rapin',['c11','c12'],10,7,'2026-09-04'],['Nadia Benali',['c10','c12'],10,2,'2026-08-28'],['Lucas Vuilleumier',['c11'],5,4,'2026-09-25'],['Anne-Laure Duc',['c12'],10,1,'2026-08-25'],['Thomas Girardet',['c10','c11'],10,9,'2026-09-30']].forEach(([nom,cours,total,restant,achat])=>{
+    const [p,...n]=nom.split(' ');const c={id:'K'+S.seq.card++,nom,email:slug(p)+'.'+slug(n.join(''))+'@'+pick(MAILS),cours,total,restant,hist:[{date:achat,txt:`Achat carte ${total} points (${chf(total===10?S.tarifs.carte10:S.tarifs.carte5)})`,delta:total}]};
+    for(let k=0;k<total-restant;k++){const cc=course(cours[k%cours.length]);c.hist.unshift({date:addDays(achat,2+Math.floor(k*3.5)),txt:'Présence — '+cc.nom,delta:-1})}
+    S.cards.push(c);
+  });
+  S.relLog.sort((x,y)=>y.date.localeCompare(x.date));
+  return S;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.v===1){state=s;state.ui.syncing=false;return}}catch(e){}state=seed()}
+
+/* ---------- Rendu général ---------- */
+const ROLES=[['ecole','École','school'],['prof','Professeur','phone'],['parent','Parent','users']];
+const TABS={
+  ecole:[['dash','Tableau de bord','home'],['inscr','Inscriptions','userplus'],['tarifs','Tarifs','sliders'],['fact','Factures','file'],['banque','Rapprochement','bank'],['rel','Relances','bell'],['cartes','Cartes à points','ticket']],
+  prof:[['appel','Appel du jour','check']],
+  parent:[['inscrire','Inscription en ligne','userplus'],['mesinscr','Mes inscriptions','list'],['mesfact','Mes factures','file']]
+};
+const tab=()=>state.ui.tab[state.ui.role];
+function tabCount(r,k){
+  if(r!=='ecole')return 0;
+  if(k==='inscr')return state.inscriptions.filter(x=>x.statut==='attente').length;
+  if(k==='fact')return state.inscriptions.filter(x=>x.statut==='validee'&&!x.invId).length;
+  if(k==='banque')return state.bank.txs.filter(t=>t.statut==='atraiter').length;
+  if(k==='rel')return relDues().length;
+  if(k==='cartes')return state.cards.filter(c=>c.restant<=2).length;
+  return 0;
+}
+function renderHeader(){
+  const r=state.ui.role;
+  $('#roles').innerHTML=ROLES.map(([k,l,i])=>`<button type="button" id="role-${k}" aria-pressed="${r===k}" data-act="role" data-r="${k}">${ic(i)}<span>${l}</span></button>`).join('');
+  $('#nav').innerHTML=TABS[r].map(([k,l,i])=>{const c=tabCount(r,k);return `<button type="button" class="tab" id="tab-${k}" data-act="tab" data-t="${k}" ${tab()===k?'aria-current="page"':''}>${ic(i)}<span>${l}</span>${c?`<span class="cnt" aria-label="${c} à traiter">${c}</span>`:''}</button>`}).join('');
+  const pf=fam(state.ui.parentFam);
+  $('#ctx').textContent=r==='ecole'?'École de danse · Secrétariat':r==='prof'?'Espace professeur · '+profName(state.ui.profId):'Espace famille · '+(pf?'Famille '+pf.nom:'nouvelle famille');
+}
+const VIEWS={ecole:{dash:vDash,inscr:vInscr,tarifs:vTarifs,fact:vFact,banque:vBanque,rel:vRel,cartes:vCartes},prof:{appel:vProf},parent:{inscrire:vInscrire,mesinscr:vMesInscr,mesfact:vMesFact}};
+function render(focusHead){
+  const ae=document.activeElement;const fid=ae&&ae!==document.body&&ae.id?ae.id:null;
+  renderHeader();
+  $('#main').innerHTML=VIEWS[state.ui.role][tab()]();
+  if(focusHead){window.scrollTo(0,0);const h=$('#main h1');if(h)h.focus({preventScroll:true})}
+  else if(fid){const el=document.getElementById(fid);if(el)el.focus({preventScroll:true})}
+  save();
+}
+function toast(msg,kind='ok'){const t=document.createElement('div');t.className='toast';t.innerHTML=ic(kind==='ok'?'check':kind==='mail'?'mail':'alert')+'<span>'+msg+'</span>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200)}
+const dlg=$('#dlg');
+function openDlg(html,cls=''){dlg.className=cls;dlg.innerHTML=html;if(!dlg.open)dlg.showModal()}
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+dlg.addEventListener('close',()=>{dlg.innerHTML=''});
+const dlgHead=t=>`<div class="dlg-h"><h2 id="dlg-title">${t}</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic('x')}</button></div>`;
+function confirmDlg(title,text,ok,act,attrs='',danger){openDlg(`${dlgHead(title)}<div class="dlg-b"><p>${text}</p></div><div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button type="button" class="btn ${danger?'danger':'primary'}" data-act="${act}" ${attrs}>${ok}</button></div>`)}
+const kpi=(l,v,s,t='')=>`<div class="kpi ${t}"><div class="l">${l}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`;
+const pageH=(t,sub,act='')=>`<div class="page-h"><div><h1 tabindex="-1">${t}</h1>${sub?`<p class="muted">${sub}</p>`:''}</div>${act?`<div class="actions">${act}</div>`:''}</div>`;
+const empty=(icn,t)=>`<div class="empty">${ic(icn)}<p>${t}</p></div>`;
+
+/* ---------- École : tableau de bord ---------- */
+function vDash(){
+  const I=state.invoices,fact=sum(I,i=>i.total),enc=sum(I,paid);
+  const late=I.filter(i=>status(i)==='retard'),open=I.filter(i=>status(i)==='ouverte');
+  const impay=sum(late,solde),ouv=sum(open,solde);
+  const pend=state.inscriptions.filter(x=>x.statut==='attente').length,toInv=tabCount('ecole','fact'),dues=relDues().length,atr=tabCount('ecole','banque');
+  const act=state.students.filter(s=>s.actif),fams=new Set(act.map(s=>s.famId)).size,low=state.cards.filter(c=>c.restant<=2).length;
+  const todo=[];
+  if(pend)todo.push(['userplus',`${pend} inscription(s) en ligne à valider`,'Contrôle des places et des tranches d\'âge','inscr']);
+  if(toInv)todo.push(['file',`${toInv} inscription(s) validée(s) à facturer`,'Génération des QR-factures en un clic','fact']);
+  if(!state.bank.imports)todo.push(['bank','Relevé CAMT.054 du jour disponible','Rapprochement automatique par référence QRR','banque']);
+  else if(atr)todo.push(['bank',`${atr} paiement(s) à rapprocher manuellement`,'Suggestions par montant et nom','banque']);
+  if(dues)todo.push(['bell',`${dues} relance(s) à envoyer aujourd'hui`,'Paliers J+10, J+30, J+45','rel']);
+  if(low)todo.push(['ticket',`${low} carte(s) à points presque épuisée(s)`,'Proposer un renouvellement','cartes']);
+  const site=state.ui.dsite,cs=COURSES.filter(c=>!site||c.site===site);
+  const tot=enc+ouv+impay||1;
+  const dow=D(TODAY).getDay();
+  const today=COURSES.filter(c=>c.jour===dow).sort((a,b)=>a.h.localeCompare(b.h));
+  return pageH('Tableau de bord',`${SEM} · situation au ${fdLong(TODAY)}`,`<button type="button" class="btn" data-act="go" data-r="parent" data-t="inscrire">${ic('userplus')}Tester l'inscription parent</button>`)+
+  `<section class="kpis" aria-label="Indicateurs clés">
+    ${kpi("Chiffre d'affaires facturé",chf(fact),`${I.length} factures · ${SEM.toLowerCase()}`,'acc')}
+    ${kpi('Encaissé',chf(enc),`${Math.round(enc/(fact||1)*100)} % du facturé`,'ok')}
+    ${kpi('Impayés en retard',chf(impay),`${late.length} facture(s) échue(s)`,'bad')}
+    ${kpi('À échoir',chf(ouv),`${open.length} facture(s) ouvertes`,'info')}
+    ${kpi('Élèves actifs',act.length,`${fams} familles · ${state.cards.length} cartes à points`)}
+    ${kpi('Inscriptions à valider',pend,pend?'en attente du secrétariat':'tout est à jour',pend?'acc':'')}
+  </section>
+  <div class="dash">
+    <section class="panel" aria-labelledby="h-todo"><h2 id="h-todo">À traiter</h2>
+      ${todo.length?`<ul class="todo">${todo.map(([i,t,s,k])=>`<li><button type="button" data-act="tab" data-t="${k}"><span class="ti">${ic(i)}</span><span class="tt"><b>${t}</b><br><span class="small muted">${s}</span></span>${ic('arrow')}</button></li>`).join('')}</ul>`:empty('check','Rien en attente. Tout est à jour.')}
+    </section>
+    <section class="panel" aria-labelledby="h-fst"><h2 id="h-fst">État des factures</h2>
+      <div class="stackbar" role="img" aria-label="Encaissé ${Math.round(enc/tot*100)} %, à échoir ${Math.round(ouv/tot*100)} %, en retard ${Math.round(impay/tot*100)} %"><span style="width:${enc/tot*100}%;background:var(--ok)"></span><span style="width:${ouv/tot*100}%;background:var(--info)"></span><span style="width:${impay/tot*100}%;background:var(--bad)"></span></div>
+      <ul class="legend">
+        <li><span><span class="dot" style="background:var(--ok)"></span> Encaissé</span><b class="num">${chf(enc)}</b></li>
+        <li><span><span class="dot" style="background:var(--info)"></span> À échoir</span><b class="num">${chf(ouv)}</b></li>
+        <li><span><span class="dot" style="background:var(--bad)"></span> En retard</span><b class="num">${chf(impay)}</b></li>
+      </ul>
+      <p class="small muted" style="margin-top:12px">Encaissements reçus via QR-facture et rapprochés depuis les relevés CAMT.054.</p>
+    </section>
+    <section class="panel" aria-labelledby="h-today"><h2 id="h-today">Cours du jour</h2>
+      <ul class="rowlist">${today.map(c=>{const a=state.att[c.id+'|'+TODAY]||{marks:{}};const n=Object.values(a.marks).filter(v=>v==='p').length;const tot=roster(c).length;return `<li><div class="min0"><b>${c.h} · ${esc(c.nom)}</b><br><span class="small muted">${profName(c.prof)} · ${SITES[c.site].court}</span></div><div class="actions">${a.profIn?badge('Prof. arrivé·e '+a.profIn,'ok'):badge('Prof. non pointé·e','gray')}${Object.keys(a.marks).length?badge(`${n}/${tot} présents`,'acc'):badge('Appel à faire','warn')}</div></li>`}).join('')}</ul>
+    </section>
+    <section class="panel wide" aria-labelledby="h-eff"><div class="panel-h"><h2 id="h-eff">Effectifs par cours</h2>
+      <div class="chips" role="group" aria-label="Filtrer par site">${[['','Tous les sites'],['L','Lausanne'],['G','Genève'],['N','Neuchâtel']].map(([k,l])=>`<button type="button" class="chip" id="ds-${k||'all'}" aria-pressed="${site===k}" data-act="dsite" data-k="${k}">${l}</button>`).join('')}</div></div>
+      <ul class="bars">${cs.map(c=>{const n=enrolled(c.id),p=Math.min(100,Math.round(n/c.cap*100));return `<li><div class="bar-l"><b>${esc(c.nom)}</b><span class="small muted">${JOURS[c.jour]} ${c.h} · ${SITES[c.site].court} · ${profName(c.prof)}</span></div><div class="bar-v"><div class="bar" role="img" aria-label="${n} élèves sur ${c.cap} places"><span class="${p>=90?'full':''}" style="width:${p}%"></span></div><span class="num small">${n}/${c.cap}</span></div></li>`}).join('')}</ul>
+    </section>
+  </div>`;
+}
+
+/* ---------- École : inscriptions ---------- */
+function insCard(x){
+  const f=fam(x.famId);const st={attente:['À valider','warn'],validee:['Validée','ok'],refusee:['Refusée','gray']}[x.statut];
+  let act='';
+  if(x.statut==='attente')act=`<button type="button" class="btn sm" data-act="refuser" data-id="${x.id}">${ic('x')}Refuser</button><button type="button" class="btn sm primary" id="val-${x.id}" data-act="valider" data-id="${x.id}">${ic('check')}Valider</button>`;
+  else if(x.statut==='validee'&&!x.invId)act=`<button type="button" class="btn sm primary" id="gen-${x.id}" data-act="genFact" data-id="${x.id}">${ic('file')}Générer la facture</button>`;
+  else if(x.invId)act=`<button type="button" class="btn sm" data-act="viewInv" data-id="${x.invId}">${ic('eye')}Facture ${inv(x.invId).num}</button>`;
+  return `<article class="panel"><div class="ins-h"><div class="min0"><h3>Famille ${esc(f.nom)}</h3><p class="small muted">${esc(f.parent)} ${esc(f.nom)} · ${esc(f.npa)} ${esc(f.ville)} · reçue le ${fd(x.date)}</p><p class="small muted wrap">${esc(f.email)} · ${esc(f.tel)}</p></div>${badge(st[0],st[1])}</div>
+  <ul class="ins-el">${x.eleves.map(e=>{const s=stu(e.sid),a=ageOf(s.naissance);return `<li><div><b>${esc(s.prenom)} ${esc(s.nom)}</b> <span class="muted small">${a} ans · ${tLabel(trancheFor(a))}</span></div><div class="cchips">${e.cours.map(cid=>{const c=course(cid),full=x.statut==='attente'&&enrolled(cid)>=c.cap;return `<span class="cchip ${full?'full':''}">${esc(c.nom)} · ${JOURS[c.jour]} ${c.h} · ${SITES[c.site].court}${full?' · complet':''}</span>`}).join('')}</div></li>`}).join('')}</ul>
+  <div class="ins-f"><div><span class="small muted">Montant semestriel</span><b class="num">${chf(x.total)}</b></div><div class="actions">${act}</div></div></article>`;
+}
+function vInscr(){
+  const f=state.ui.ifilt;const all=state.inscriptions.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const cnt=k=>all.filter(x=>k==='toutes'||x.statut===k).length;
+  const list=all.filter(x=>f==='toutes'||x.statut===f);
+  const toInv=tabCount('ecole','fact');
+  return pageH('Inscriptions',"Demandes reçues via le formulaire en ligne. La validation active les élèves dans les cours ; la facture est ensuite générée automatiquement.",`<button type="button" class="btn primary" data-act="genFact" ${toInv?'':'disabled'}>${ic('file')}Facturer les validées (${toInv})</button>`)+
+  `<div class="toolbar"><div class="chips" role="group" aria-label="Filtrer par statut">${[['attente','À valider'],['validee','Validées'],['refusee','Refusées'],['toutes','Toutes']].map(([k,l])=>`<button type="button" class="chip" id="if-${k}" aria-pressed="${f===k}" data-act="ifilt" data-k="${k}">${l} <span class="n">${cnt(k)}</span></button>`).join('')}</div></div>
+  ${list.length?`<div class="cols">${list.map(insCard).join('')}</div>`:`<div class="panel">${empty('check',f==='attente'?'Aucune inscription en attente. Passez côté « Parent » pour en créer une.':'Aucune inscription dans cette catégorie.')}</div>`}`;
+}
+
+/* ---------- École : tarifs ---------- */
+function coverage(){
+  const T=state.tarifs.tranches;const gaps=[],over=[];
+  for(let a=4;a<=99;a++){const n=T.filter(t=>a>=+t.min&&a<=+t.max).length;if(!n)gaps.push(a);if(n>1)over.push(a)}
+  if(!gaps.length&&!over.length)return `<span class="note ok">${ic('check')}Toutes les tranches de 4 à 99 ans sont couvertes, sans chevauchement.</span>`;
+  const rg=a=>a.length?a[0]+(a.length>1?'–'+a[a.length-1]:''):'';
+  return `<span class="note warn">${ic('alert')}${gaps.length?'Âges sans tarif : '+rg(gaps)+' ans. ':''}${over.length?'Chevauchement : '+rg(over)+' ans.':''}</span>`;
+}
+function simRes(){
+  const q=quote(state.ui.sim.map((r,i)=>({prenom:'Élève '+(i+1),age:+r.age,n:+r.n})));
+  return `<div class="qlines">${q.lines.map(l=>`<div class="qline"><span>${l.prenom} · ${l.age} ans · ${l.n} cours<br><span class="small muted">${tLabel(l.tr)}</span></span><span class="num">${l.base?chf(l.base):'—'}</span></div>${l.remise?`<div class="qline rem"><span>Remise fratrie ${l.pct} %</span><span class="num">${chf(-l.remise)}</span></div>`:''}`).join('')}
+  ${q.frais?`<div class="qline"><span>Frais d'inscription annuels</span><span class="num">${chf(q.frais)}</span></div>`:''}</div>
+  <div class="qtotal"><span>Total semestre</span><span class="num">${chf(q.total)}</span></div>
+  <p class="small muted" style="margin-top:6px">Soit ${chf(r05(q.total/5))} par mois sur 5 mois. Arrondi au 5 centimes.</p>`;
+}
+function vTarifs(){
+  const T=state.tarifs;
+  const ni=(id,v,inn,attrs,lbl)=>`<label class="sr" for="${id}">${lbl}</label><input class="in" id="${id}" type="number" inputmode="decimal" min="0" value="${esc(v)}" data-in="${inn}" ${attrs}>`;
+  return pageH('Grille tarifaire',"Tarif semestriel par élève selon sa tranche d'âge et le nombre de cours suivis par semaine. Les changements s'appliquent immédiatement aux nouvelles inscriptions et factures.")+
+  `<div class="split"><div class="stack">
+    <section class="panel" aria-labelledby="h-grid"><h2 id="h-grid">Tranche d'âge × cours par semaine (CHF / semestre)</h2>
+      <div class="tbl-wrap"><table class="tbl tarif" style="min-width:680px"><thead><tr><th scope="col">Tranche</th><th scope="col">Âge min.</th><th scope="col">Âge max.</th><th scope="col">1 cours</th><th scope="col">2 cours</th><th scope="col">3 cours</th><th scope="col">4 cours et +</th></tr></thead><tbody>
+      ${T.tranches.map((t,ti)=>`<tr><th scope="row">${esc(t.label)}</th><td>${ni(`ta-${ti}-min`,t.min,'tage',`data-t="${ti}" data-f="min" step="1"`,t.label+', âge minimum')}</td><td>${ni(`ta-${ti}-max`,t.max,'tage',`data-t="${ti}" data-f="max" step="1"`,t.label+', âge maximum')}</td>${t.prix.map((p,k)=>`<td>${ni(`tp-${ti}-${k}`,p,'tp',`data-t="${ti}" data-k="${k}" step="5"`,`${t.label}, ${k+1}${k===3?' cours et plus':' cours'} par semaine`)}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div>
+      <p id="tcheck" style="margin-top:12px">${coverage()}</p>
+    </section>
+    <section class="panel" aria-labelledby="h-rem"><h2 id="h-rem">Remises, frais et cartes à points</h2>
+      <div class="fgrid">
+        ${[['fratrie2','Remise fratrie 2e enfant (%)'],['fratrie3','Remise fratrie 3e enfant et + (%)'],['frais',"Frais d'inscription annuels (CHF)"],['carte10','Carte 10 points (CHF)'],['carte5','Carte 5 points (CHF)']].map(([k,l])=>`<div class="field"><label for="ts-${k}">${l}</label><input id="ts-${k}" type="number" inputmode="decimal" min="0" value="${T[k]}" data-in="tset" data-k="${k}"></div>`).join('')}
+      </div>
+      <p class="note info" style="margin-top:14px">${ic('users')}La remise fratrie s'applique aux élèves mineurs d'une même famille, à partir du 2e tarif le plus élevé. Les adultes paient le plein tarif ou utilisent une carte à points.</p>
+    </section>
+  </div>
+  <section class="panel sticky" aria-labelledby="h-sim"><h2 id="h-sim">Simulateur</h2><p class="small muted">Composez une famille pour vérifier le calcul en direct.</p>
+    <div id="simrows">${state.ui.sim.map((r,i)=>`<div class="simrow"><div class="field"><label for="sa-${i}">Élève ${i+1} — âge</label><input id="sa-${i}" type="number" min="3" max="99" inputmode="numeric" value="${r.age}" data-in="sim" data-i="${i}" data-f="age"></div><div class="field"><label for="sn-${i}">Cours / semaine</label><select id="sn-${i}" data-ch="sim" data-i="${i}" data-f="n">${[1,2,3,4].map(n=>`<option value="${n}" ${+r.n===n?'selected':''}>${n}${n===4?' et +':''}</option>`).join('')}</select></div><button type="button" class="icon-btn" data-act="simDel" data-i="${i}" aria-label="Retirer l'élève ${i+1}" ${state.ui.sim.length<2?'disabled':''}>${ic('trash')}</button></div>`).join('')}</div>
+    <button type="button" class="btn sm" style="margin-top:10px" data-act="simAdd" id="simAdd" ${state.ui.sim.length>=5?'disabled':''}>${ic('plus')}Ajouter un élève</button>
+    <div id="simres" aria-live="polite">${simRes()}</div>
+  </section></div>`;
+}
+
+/* ---------- École : factures ---------- */
+function factRows(){
+  const f=state.ui.ffilt,q=slug(state.ui.fq||'');
+  const list=state.invoices.filter(i=>(f==='toutes'||status(i)===f)&&(!q||slug(fam(i.famId).nom+i.num+i.ref).includes(q))).sort((a,b)=>b.date.localeCompare(a.date)||b.num.localeCompare(a.num));
+  if(!list.length)return `<tr><td colspan="7">${empty('search','Aucune facture ne correspond.')}</td></tr>`;
+  return list.map(i=>{const F=fam(i.famId);return `<tr><td><button type="button" class="linkbtn" data-act="viewInv" data-id="${i.id}">${i.num}</button><br><span class="mono muted">${fmtQRR(i.ref)}</span></td><td>Famille ${esc(F.nom)}<br><span class="small muted">${esc(F.ville)}</span></td><td>${fd(i.date)}</td><td>${fd(i.echeance)}</td><td class="r num">${chf(i.total)}</td><td class="r num">${chf(solde(i))}</td><td>${stBadge(i)}${i.relances.length?`<br><span class="small muted">${i.relances.length} relance(s)</span>`:''}</td></tr>`}).join('');
+}
+function vFact(){
+  const f=state.ui.ffilt,I=state.invoices,toInv=tabCount('ecole','fact');
+  const cnt=k=>I.filter(i=>k==='toutes'||status(i)===k).length;
+  return pageH('Factures',`${SEM} · QR-factures suisses avec référence QRR, payables sur le compte ${fmtIban(SCHOOL.qriban)}`,`<button type="button" class="btn primary" data-act="genFact" ${toInv?'':'disabled'}>${ic('file')}Générer depuis les inscriptions (${toInv})</button>`)+
+  `<div class="toolbar"><div class="search"><label class="sr" for="fq">Rechercher une facture</label>${ic('search')}<input class="in" id="fq" type="search" placeholder="Famille, n° ou référence" value="${esc(state.ui.fq)}" data-in="fq"></div>
+  <div class="chips" role="group" aria-label="Filtrer par statut">${[['toutes','Toutes'],['ouverte','Ouvertes'],['retard','En retard'],['payee','Payées']].map(([k,l])=>`<button type="button" class="chip" id="ff-${k}" aria-pressed="${f===k}" data-act="ffilt" data-k="${k}">${l} <span class="n">${cnt(k)}</span></button>`).join('')}</div></div>
+  <div class="tbl-wrap"><table class="tbl" style="min-width:820px"><thead><tr><th scope="col">Facture / référence QRR</th><th scope="col">Famille</th><th scope="col">Émission</th><th scope="col">Échéance</th><th scope="col" class="r">Montant</th><th scope="col" class="r">Solde</th><th scope="col">Statut</th></tr></thead><tbody id="ftbody">${factRows()}</tbody></table></div>`;
+}
+
+/* ---------- QR-facture ---------- */
+function qrSvg(seedStr){
+  const N=41;let h=7;for(const c of seedStr)h=(h*31+c.charCodeAt(0))|0;const R=rng(h);
+  const m=[];for(let y=0;y<N;y++)m.push(new Array(N).fill(-1));
+  const finder=(x,y)=>{for(let i=-1;i<=7;i++)for(let j=-1;j<=7;j++){const X=x+i,Y=y+j;if(X<0||Y<0||X>=N||Y>=N)continue;const inR=i>=0&&i<=6&&j>=0&&j<=6;m[Y][X]=inR&&(i===0||i===6||j===0||j===6||(i>=2&&i<=4&&j>=2&&j<=4))?1:0}};
+  finder(0,0);finder(N-7,0);finder(0,N-7);
+  for(let i=8;i<N-8;i++){m[6][i]=i%2?0:1;m[i][6]=i%2?0:1}
+  const a=N-9;for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++)m[a+j][a+i]=Math.max(Math.abs(i),Math.abs(j))===1?0:1;
+  let p='';for(let y=0;y<N;y++)for(let x=0;x<N;x++){let v=m[y][x];if(v===-1)v=R()<.5?1:0;if(v)p+=`M${x} ${y}h1v1h-1z`}
+  const c=N/2,s=N*7/46,b=s*.07,w=s*.19,l=s*.6;
+  return `<svg viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges" role="img" aria-label="QR code de paiement (fictif)"><rect width="${N}" height="${N}" fill="#fff"/><path d="${p}" fill="#000"/><g shape-rendering="geometricPrecision"><rect x="${c-s/2}" y="${c-s/2}" width="${s}" height="${s}" fill="#fff"/><rect x="${c-s/2+b}" y="${c-s/2+b}" width="${s-2*b}" height="${s-2*b}" fill="#000"/><rect x="${c-w/2}" y="${c-l/2}" width="${w}" height="${l}" fill="#fff"/><rect x="${c-l/2}" y="${c-w/2}" width="${l}" height="${w}" fill="#fff"/></g></svg>`;
+}
+function docHTML(i){
+  const F=fam(i.famId),st=status(i);
+  const cred=`${fmtIban(SCHOOL.qriban)}<br>${SCHOOL.nom}<br>${SCHOOL.rue}<br>${SCHOOL.npa} ${SCHOOL.ville}`;
+  const deb=`${esc(F.parent)} ${esc(F.nom)}<br>${esc(F.adresse)}<br>${esc(F.npa)} ${esc(F.ville)}`;
+  const amt=billAmt(solde(i)||i.total);
+  const lastPay=i.paiements[i.paiements.length-1];
+  return `<div class="doc">
+  <div class="doc-body">
+    <div class="doc-top"><div class="doc-brand"><span class="mark">A</span><div><b>${SCHOOL.nom}</b><span>${SCHOOL.sous} · Lausanne · Genève · Neuchâtel</span></div></div>
+    <div class="doc-sch">${SCHOOL.rue}<br>${SCHOOL.npa} ${SCHOOL.ville}<br>${SCHOOL.tel}<br>${SCHOOL.email}</div></div>
+    <div class="doc-addr">Famille ${esc(F.nom)}<br>${deb}</div>
+    <h1 class="doc-title">Facture ${i.num}</h1>
+    <dl class="doc-meta"><dt>Date</dt><dt>Échéance</dt><dt>Période</dt><dt>N° famille</dt><dd>${fd(i.date)}</dd><dd>${fd(i.echeance)}</dd><dd>${SEM_P}</dd><dd>${F.num}</dd></dl>
+    <table class="doc-lines"><thead><tr><th>Désignation</th><th class="r">Montant CHF</th></tr></thead><tbody>
+    ${i.lignes.map(l=>`<tr><td>${esc(l.label)}${l.detail?`<small>${esc(l.detail)}</small>`:''}</td><td class="r">${fmt(l.montant)}</td></tr>`).join('')}
+    ${i.paiements.length?`<tr><td>Paiements reçus</td><td class="r">${fmt(-paid(i))}</td></tr>`:''}
+    </tbody></table>
+    <div class="doc-total"><span>${i.paiements.length?'Solde à payer':'Total à payer'}</span><span>CHF ${fmt(solde(i))}</span></div>
+    <p class="doc-note">Payable dans les 30 jours au moyen de la section paiement ci-dessous (QR-facture). Prestations d'enseignement exclues du champ de la TVA. Merci de votre confiance.</p>
+    ${st==='payee'?`<div class="stamp">PAYÉE<small>le ${fd(lastPay?lastPay.date:TODAY)}</small></div>`:''}
+  </div>
+  <div class="qrbill" aria-label="Section QR-facture">
+    <svg class="i sc" aria-hidden="true"><use href="#i-scissors"/></svg><svg class="i sc sc2" aria-hidden="true"><use href="#i-scissors"/></svg>
+    <div class="qr-rec">
+      <div class="qr-t">Récépissé</div>
+      <div class="h">Compte / Payable à</div><div class="v">${cred}</div>
+      <div class="h">Référence</div><div class="v">${fmtQRR(i.ref)}</div>
+      <div class="h">Payable par</div><div class="v">${deb}</div>
+      <div class="qr-amt"><div><div class="h">Monnaie</div><div class="v">CHF</div></div><div><div class="h">Montant</div><div class="v">${amt}</div></div></div>
+      <div class="qr-depot">Point de dépôt</div>
+    </div>
+    <div class="qr-pay">
+      <div class="qr-pl"><div class="qr-t">Section paiement</div><div class="qr-code">${qrSvg(i.ref+amt)}</div>
+        <div class="qr-amt"><div><div class="h">Monnaie</div><div class="v">CHF</div></div><div><div class="h">Montant</div><div class="v">${amt}</div></div></div></div>
+      <div class="qr-pr">
+        <div class="h">Compte / Payable à</div><div class="v">${cred}</div>
+        <div class="h">Référence</div><div class="v">${fmtQRR(i.ref)}</div>
+        <div class="h">Informations supplémentaires</div><div class="v">Facture ${i.num} · ${SEM}</div>
+        <div class="h">Payable par</div><div class="v">${deb}</div>
+      </div>
+    </div>
+  </div></div>`;
+}
+function openInvoice(id){
+  const i=inv(id),F=fam(i.famId);
+  openDlg(`${dlgHead('Facture '+i.num)}<div class="dlg-tools">${stBadge(i)}<span class="small muted" style="margin-right:auto">Famille ${esc(F.nom)} · ${chf(i.total)}</span><button type="button" class="btn sm" data-act="mailInv" data-id="${i.id}">${ic('mail')}Envoyer par email</button><button type="button" class="btn sm primary" data-act="printInv" data-id="${i.id}">${ic('print')}Imprimer / PDF</button></div>
+  <div class="doc-wrap" id="docwrap">${docHTML(i)}</div>
+  <p class="small muted" style="padding:10px 20px 16px">QR code stylisé pour la démonstration (non scannable). En production : bibliothèque conforme aux Swiss Payment Standards (QR-IBAN, référence QRR, données structurées).</p>`,'wide');
+  requestAnimationFrame(()=>{const w=$('#docwrap'),d=w&&w.querySelector('.doc');if(!d)return;const avail=w.clientWidth-24,dw=d.offsetWidth;if(avail<dw)d.style.zoom=(avail/dw).toFixed(3)});
+}
+
+/* ---------- École : rapprochement ---------- */
+function buildCamt(){
+  const first=!state.bank.imports;const txs=[];const unpaid=state.invoices.filter(i=>status(i)!=='payee'&&paid(i)===0);
+  const dbIban=()=>iban('00'+(230+Math.floor(Math.random()*500)),String(Math.floor(1e11+Math.random()*8e11)));
+  const name=i=>{const F=fam(i.famId);return F.parent+' '+F.nom};
+  unpaid.filter(i=>first?(i.camt==='exact'||i.session):(i.session&&!i.camtDone)).forEach(i=>{i.camtDone=true;txs.push({date:TODAY,montant:solde(i),deb:name(i),iban:dbIban(),ref:i.ref,note:''})});
+  if(first){
+    const p=state.invoices.find(i=>i.camt==='partiel'&&status(i)!=='payee');if(p)txs.push({date:'2026-10-08',montant:300,deb:name(p),iban:dbIban(),ref:p.ref,note:'Acompte cours de danse'});
+    const s=state.invoices.find(i=>i.camt==='sansref'&&status(i)!=='payee');if(s)txs.push({date:'2026-10-08',montant:solde(s),deb:name(s),iban:dbIban(),ref:null,note:'Facture danse '+stu(state.students.find(x=>x.famId===s.famId).id).prenom});
+    txs.push({date:TODAY,montant:+state.tarifs.carte5,deb:'Sophie Rapin',iban:dbIban(),ref:null,note:'Carte 5 cours barre au sol'});
+  }
+  txs.forEach(t=>{t.id='T'+state.seq.tx++;t.statut='atraiter';t.invId=null;
+    if(t.ref){const i=state.invoices.find(v=>v.ref===t.ref);if(i){t.invId=i.id;if(t.montant+.004>=solde(i)){i.paiements.push({date:t.date,montant:t.montant,source:'CAMT.054 — auto'});t.statut='auto';t.kind='ok'}else t.kind='partiel'}else t.kind='inconnu'}
+    else t.kind='sansref'});
+  return txs;
+}
+function suggest(t){
+  const out=[];const hay=slug(t.deb+' '+t.note);
+  if(t.kind==='partiel'){const i=inv(t.invId);out.push({type:'inv',i,why:['Référence QRR identique',`Montant partiel : ${chf(t.montant)} sur ${chf(solde(i))}`]});return out}
+  state.invoices.filter(i=>solde(i)>0).forEach(i=>{const F=fam(i.famId);let sc=0;const why=[];if(Math.abs(solde(i)-t.montant)<.01){sc+=2;why.push('Montant identique au solde')}if(hay.includes(slug(F.nom))){sc+=3;why.push('Nom de famille dans le libellé')}const kid=state.students.find(s=>s.famId===F.id&&hay.includes(slug(s.prenom))&&s.prenom.length>3);if(kid){sc+=1;why.push('Prénom de l\'élève cité')}if(sc>=3)out.push({type:'inv',i,sc,why})});
+  state.cards.forEach(c=>{if(hay.includes(slug(c.nom.split(' ').slice(-1)[0]))){[[5,+state.tarifs.carte5],[10,+state.tarifs.carte10]].forEach(([pts,px])=>{if(Math.abs(px-t.montant)<.01)out.push({type:'card',c,pts,sc:5,why:['Titulaire d\'une carte à points',`Montant = carte ${pts} points`]})})}});
+  return out.sort((a,b)=>b.sc-a.sc).slice(0,3);
+}
+function camtXml(){
+  const t=state.bank.txs.slice(0,3);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.054.001.08">
+ <BkToCstmrDbtCdtNtfctn>
+  <Ntfctn>
+   <Acct><Id><IBAN>${SCHOOL.qriban}</IBAN></Id></Acct>
+${t.map(x=>`   <Ntry>
+    <Amt Ccy="CHF">${x.montant.toFixed(2)}</Amt>
+    <CdtDbtInd>CRDT</CdtDbtInd>
+    <BookgDt><Dt>${x.date}</Dt></BookgDt>
+    <NtryDtls><TxDtls>
+     <RltdPties><Dbtr><Pty><Nm>${x.deb}</Nm></Pty></Dbtr><DbtrAcct><Id><IBAN>${x.iban}</IBAN></Id></DbtrAcct></RltdPties>
+     <RmtInf>${x.ref?`<Strd><CdtrRefInf><Tp><CdOrPrtry><Prtry>QRR</Prtry></CdOrPrtry></Tp><Ref>${x.ref}</Ref></CdtrRefInf></Strd>`:`<Ustrd>${x.note}</Ustrd>`}</RmtInf>
+    </TxDtls></NtryDtls>
+   </Ntry>`).join('\n')}
+   …
+  </Ntfctn>
+ </BkToCstmrDbtCdtNtfctn>
+</Document>`;
+}
+const TXST={auto:['Rapproché auto','ok'],manuel:['Rapproché manuellement','acc'],atraiter:['À traiter','warn'],ignore:['Classé hors facture','gray']};
+function txDetail(t){
+  if(!t)return `<p class="muted">Sélectionnez un mouvement pour voir le détail.</p>`;
+  const i=t.invId?inv(t.invId):null;
+  let body=`<dl class="kv"><dt>Date</dt><dd>${fd(t.date)}</dd><dt>Débiteur</dt><dd>${esc(t.deb)}</dd><dt>IBAN</dt><dd class="mono">${fmtIban(t.iban)}</dd><dt>Montant</dt><dd class="num">${chf(t.montant)}</dd><dt>Référence</dt><dd class="mono">${t.ref?fmtQRR(t.ref):'— aucune —'}</dd>${t.note?`<dt>Communication</dt><dd>${esc(t.note)}</dd>`:''}${i?`<dt>Facture</dt><dd><button type="button" class="linkbtn" data-act="viewInv" data-id="${i.id}">${i.num} · Famille ${esc(fam(i.famId).nom)}</button></dd>`:''}${t.cardId?`<dt>Carte</dt><dd>${esc(card(t.cardId).nom)}</dd>`:''}</dl>`;
+  if(t.statut==='atraiter'){
+    const sg=suggest(t);
+    body+=`<p class="note warn" style="margin-top:14px">${ic('alert')}${t.kind==='partiel'?'Référence reconnue mais montant inférieur au solde dû.':'Paiement sans référence QRR : rapprochement manuel nécessaire.'}</p>`;
+    body+=sg.length?`<h3 style="margin-top:14px">Suggestions</h3>`+sg.map(s=>s.type==='inv'?`<div class="sugg"><div><b>${s.i.num} · Famille ${esc(fam(s.i.famId).nom)}</b><br><span class="small muted">Solde ${chf(solde(s.i))} · échéance ${fd(s.i.echeance)} · ${ST[status(s.i)][0]}</span></div><div class="why">${s.why.map(w=>badge(w,'acc')).join('')}</div><div class="actions"><button type="button" class="btn sm primary" data-act="matchTx" data-tx="${t.id}" data-inv="${s.i.id}">${ic('link')}${t.montant+.004<solde(s.i)?'Enregistrer le paiement partiel':'Rapprocher avec cette facture'}</button></div></div>`:`<div class="sugg"><div><b>Carte à points · ${esc(s.c.nom)}</b><br><span class="small muted">Solde actuel ${s.c.restant} point(s)</span></div><div class="why">${s.why.map(w=>badge(w,'acc')).join('')}</div><div class="actions"><button type="button" class="btn sm primary" data-act="cardTx" data-tx="${t.id}" data-card="${s.c.id}" data-pts="${s.pts}">${ic('ticket')}Créditer +${s.pts} points</button></div></div>`).join(''):`<p class="muted" style="margin-top:12px">Aucune facture correspondante.</p>`;
+    body+=`<div class="actions" style="margin-top:12px"><button type="button" class="btn sm ghost" data-act="ignoreTx" data-tx="${t.id}">Classer hors facture</button></div>`;
+  }
+  return body;
+}
+function vBanque(){
+  const B=state.bank,txs=B.txs;
+  const head=pageH('Rapprochement bancaire',`Avis de crédit ISO 20022 (camt.054) reçus sur le compte QR-IBAN ${fmtIban(SCHOOL.qriban)}`,`<button type="button" class="btn primary" id="impBtn" data-act="importCamt">${ic('upload')}${B.imports?'Importer le relevé suivant':'Importer le relevé CAMT.054 (simulé)'}</button>`);
+  if(!txs.length)return head+`<div class="panel">${empty('bank',"Aucun relevé importé. Cliquez sur « Importer le relevé CAMT.054 » : les paiements porteurs d'une référence QRR sont rapprochés automatiquement ; les autres vous sont proposés avec des suggestions.")}<p class="small muted" style="text-align:center">En production : dépôt du fichier, récupération automatique via EBICS ou API bancaire.</p></div>`;
+  const sel=txs.find(t=>t.id===state.ui.txSel)||txs.find(t=>t.statut==='atraiter')||txs[0];
+  const n=k=>txs.filter(t=>t.statut===k).length;
+  return head+`<div class="stats"><div><b class="num">${txs.length}</b><span class="small muted">mouvements</span></div><div><b class="num ok-t">${n('auto')}</b><span class="small muted">rapprochés auto</span></div><div><b class="num">${n('manuel')}</b><span class="small muted">manuels</span></div><div><b class="num warn-t">${n('atraiter')}</b><span class="small muted">à traiter</span></div><div><b class="num">${chf(sum(txs,t=>t.montant))}</b><span class="small muted">crédités</span></div></div>
+  <div class="split"><div class="stack"><div class="tbl-wrap"><table class="tbl" style="min-width:680px"><thead><tr><th scope="col">Date</th><th scope="col">Débiteur</th><th scope="col">Référence / communication</th><th scope="col" class="r">Montant</th><th scope="col">Statut</th></tr></thead><tbody>
+  ${txs.map(t=>`<tr class="${sel&&sel.id===t.id?'sel':''}"><td>${fd(t.date)}</td><td><button type="button" class="linkbtn" id="tx-${t.id}" data-act="selTx" data-id="${t.id}" aria-pressed="${sel&&sel.id===t.id}">${esc(t.deb)}</button></td><td>${t.ref?`<span class="mono">${fmtQRR(t.ref)}</span>`:`<span class="muted">${esc(t.note)}</span>`}</td><td class="r num">${chf(t.montant)}</td><td>${badge(TXST[t.statut][0],TXST[t.statut][1])}${t.statut==='atraiter'?`<br><span class="small muted">${t.kind==='partiel'?'Montant partiel':'Sans référence'}</span>`:''}</td></tr>`).join('')}
+  </tbody></table></div>
+  <details class="panel"><summary>Aperçu du fichier camt.054 importé</summary><pre class="xml">${esc(camtXml())}</pre></details></div>
+  <section class="panel sticky" id="txd" aria-labelledby="h-txd"><h2 id="h-txd">Détail du mouvement</h2>${txDetail(sel)}</section></div>`;
+}
+
+/* ---------- École : relances ---------- */
+function relInfo(i){const ret=diffDays(i.echeance,TODAY);const last=Math.max(0,...i.relances.map(r=>r.niveau));const next=state.rel.niveaux.find(l=>l.n>last&&l.actif);const dueDate=next?addDays(i.echeance,+next.jours):null;return {ret,last,next,dueDate,due:!!next&&ret>=+next.jours&&!i.suspendue}}
+function relDues(){return state.invoices.filter(i=>status(i)==='retard').map(i=>Object.assign({i},relInfo(i))).filter(x=>x.due)}
+function vRel(){
+  const late=state.invoices.filter(i=>status(i)==='retard').map(i=>Object.assign({i},relInfo(i))).sort((a,b)=>b.ret-a.ret);
+  const dues=late.filter(x=>x.due).length;
+  return pageH('Relances automatiques',"Les factures échues sont relancées chaque jour à 06:00 selon les paliers ci-dessous. Une relance peut être suspendue (arrangement de paiement, litige).",`<button type="button" class="btn primary" id="runRel" data-act="runRel" ${dues?'':'disabled'}>${ic('play')}Exécuter les relances du jour (${dues})</button>`)+
+  `<div class="split"><div class="stack">
+  <section class="panel" aria-labelledby="h-late"><h2 id="h-late">Factures en retard</h2>
+  ${late.length?`<div class="tbl-wrap"><table class="tbl" style="min-width:760px"><thead><tr><th scope="col">Facture</th><th scope="col">Famille</th><th scope="col">Échéance</th><th scope="col" class="r">Solde</th><th scope="col">Relances envoyées</th><th scope="col">Prochaine étape</th><th scope="col">Action</th></tr></thead><tbody>
+  ${late.map(x=>{const i=x.i;return `<tr><td><button type="button" class="linkbtn" data-act="viewInv" data-id="${i.id}">${i.num}</button></td><td>Famille ${esc(fam(i.famId).nom)}</td><td>${fd(i.echeance)}<br><span class="small bad-t">${x.ret} j de retard</span></td><td class="r num">${chf(solde(i))}</td><td>${i.relances.length?i.relances.map(r=>badge('N'+r.niveau+' · '+fd(r.date).slice(0,5),'acc')).join(' '):'<span class="muted">aucune</span>'}</td><td>${i.suspendue?badge('Suspendue','gray'):x.next?(x.due?badge(x.next.label+" — aujourd'hui",'warn'):`<span class="small">${x.next.label}<br><span class="muted">le ${fd(x.dueDate)} (J+${x.next.jours})</span></span>`):'<span class="small muted">Dernier palier atteint — transmission au contentieux</span>'}</td><td><button type="button" class="btn sm" id="sus-${i.id}" data-act="suspend" data-id="${i.id}">${ic(i.suspendue?'play':'pause')}${i.suspendue?'Réactiver':'Suspendre'}</button></td></tr>`}).join('')}
+  </tbody></table></div>`:empty('check','Aucune facture en retard.')}
+  </section>
+  <section class="panel" aria-labelledby="h-hist"><h2 id="h-hist">Historique</h2>
+  <ul class="timeline">${state.relLog.slice(0,14).map(e=>{const i=inv(e.invId);return `<li><span class="tl-d">${fd(e.date)}</span><span class="min0"><b>${i?i.num:''} · Famille ${i?esc(fam(i.famId).nom):''}</b><br><span class="small muted">${esc(e.txt)}</span></span></li>`}).join('')||'<li><span></span><span class="muted">Aucun envoi.</span></li>'}</ul></section>
+  </div>
+  <section class="panel sticky" aria-labelledby="h-lvl"><h2 id="h-lvl">Paliers de relance</h2>
+  ${state.rel.niveaux.map((l,k)=>`<div class="lvl"><span class="lvl-n" aria-hidden="true">${l.n}</span><div class="min0"><b>${l.label}</b><br><span class="small muted">${l.canal}</span>
+    <div class="lvl-f"><div class="field"><label for="rj-${k}">Jours après échéance</label><input id="rj-${k}" type="number" min="1" max="365" value="${l.jours}" data-ch="relj" data-k="${k}"></div><div class="field"><label for="rf-${k}">Frais (CHF)</label><input id="rf-${k}" type="number" min="0" step="5" value="${l.frais}" data-ch="relf" data-k="${k}"></div></div>
+    <label class="check"><input type="checkbox" id="ra-${k}" data-ch="rela" data-k="${k}" ${l.actif?'checked':''}><span>Palier actif</span></label></div></div>`).join('')}
+  <p class="note info">${ic('mail')}Emails et courriers générés à partir de modèles personnalisables, avec la QR-facture du solde en annexe.</p>
+  </section></div>`;
+}
+
+/* ---------- École : cartes à points ---------- */
+function vCartes(){
+  const C=state.cards;
+  return pageH('Cartes à points','Cours adultes à la carte : un point est débité automatiquement lorsque le professeur marque la présence.',`<button type="button" class="btn primary" data-act="sellCard">${ic('plus')}Vendre une carte</button>`)+
+  `<section class="kpis">${kpi('Cartes actives',C.filter(c=>c.restant>0).length,`${C.length} au total`,'acc')}${kpi('Points restants',sum(C,c=>c.restant),'à consommer')}${kpi('Presque épuisées',C.filter(c=>c.restant<=2).length,'2 points ou moins','bad')}${kpi('Tarifs',chf(+state.tarifs.carte10),`10 points · 5 points : ${chf(+state.tarifs.carte5)}`)}</section>
+  <div class="cols">${C.map(c=>{const last=c.hist[0];return `<article class="panel ctile"><div class="ins-h"><div class="min0"><h3>${esc(c.nom)}</h3><p class="small muted wrap">${esc(c.email)}</p></div>${c.restant===0?badge('Épuisée','bad'):c.restant<=2?badge('Bientôt épuisée','warn'):badge('Active','ok')}</div>
+  <div class="pts"><b class="num">${c.restant}</b><span class="muted">/ ${c.total} points</span></div>
+  ${c.total<=20?`<div class="pdots" aria-hidden="true">${Array.from({length:c.total},(_,k)=>`<i class="${k<c.restant?'on':''}"></i>`).join('')}</div>`:''}
+  <p class="small muted">Cours : ${c.cours.map(id=>course(id).nom).join(', ')}</p>
+  <p class="small">${last?`Dernier mouvement : ${fd(last.date)} · ${esc(last.txt)}`:''}</p>
+  <div class="actions"><button type="button" class="btn sm" id="deb-${c.id}" data-act="debit" data-id="${c.id}" ${c.restant?'':'disabled'}>${ic('minus')}Débiter 1 point</button><button type="button" class="btn sm" data-act="recharge" data-id="${c.id}">${ic('plus')}Recharger</button><button type="button" class="btn sm ghost" data-act="cardHist" data-id="${c.id}">Historique</button></div></article>`}).join('')}</div>`;
+}
+
+/* ---------- Professeur ---------- */
+function roster(c){
+  const st=state.students.filter(s=>s.actif&&s.cours.includes(c.id)).sort((a,b)=>a.nom.localeCompare(b.nom)).map(s=>({pk:'s:'+s.id,nom:s.prenom+' '+s.nom,meta:ageOf(s.naissance)+' ans'}));
+  const cs=c.carte?state.cards.filter(k=>k.cours.includes(c.id)).map(k=>({pk:'k:'+k.id,nom:k.nom,card:k})):[];
+  return st.concat(cs);
+}
+function getMark(key,pk){for(let i=state.queue.length-1;i>=0;i--){const q=state.queue[i];if(q.k===key&&q.pk===pk)return q.v}const a=state.att[key];return a?a.marks[pk]:undefined}
+function slog(msg,cls=''){state.syncLog.unshift({t:nowHM(),msg,cls});state.syncLog=state.syncLog.slice(0,30)}
+function applyServer(key,pk,v){
+  const a=state.att[key]||(state.att[key]={marks:{},debits:{},profIn:null});a.marks[pk]=v;
+  if(pk.startsWith('k:')){const cid=pk.slice(2),k=card(cid),c=course(key.split('|')[0]);
+    if(v==='p'&&!a.debits[cid]){if(k.restant>0){k.restant--;a.debits[cid]=true;k.hist.unshift({date:key.split('|')[1],txt:'Présence — '+c.nom,delta:-1});slog(`${k.nom} présente : 1 point débité (reste ${k.restant})`)}else slog(`${k.nom} : carte épuisée, présence à régulariser`,'warn')}
+    else if(v==='a'&&a.debits[cid]){k.restant++;delete a.debits[cid];k.hist.unshift({date:key.split('|')[1],txt:'Annulation présence — '+c.nom,delta:1});slog(`${k.nom} : débit annulé (reste ${k.restant})`)}
+  }
+}
+function pill(){const u=state.ui;if(u.syncing)return `<span class="pill sync" role="status">${ic('refresh')}Synchronisation…</span>`;if(!u.online)return `<span class="pill off" role="status">${ic('wifioff')}Hors-ligne · ${state.queue.length} en attente</span>`;return `<span class="pill" role="status">${ic('wifi')}Synchronisé · ${u.lastSync}</span>`}
+function nextDate(c){const dw=D(TODAY).getDay();return addDays(TODAY,(c.jour-dw+7)%7)}
+function vProf(){
+  const u=state.ui,p=PROFS.find(x=>x.id===u.profId);
+  let inner;
+  if(u.appel){
+    const c=course(u.appel.c),date=u.appel.d,key=c.id+'|'+date,a=state.att[key]||{profIn:null},R=roster(c);
+    const ms=R.map(r=>getMark(key,r.pk));const np=ms.filter(m=>m==='p').length,na=ms.filter(m=>m==='a').length;
+    inner=`<div class="ph-head"><button type="button" class="icon-btn" data-act="closeAppel" aria-label="Retour à mes cours">${ic('back')}</button><div class="min0"><b>${esc(c.nom)}</b><span class="small muted">${JOURS_L[c.jour]} ${fd(date)} · ${c.h} · ${SITES[c.site].court}</span></div></div>
+    <div class="ph-in">${a.profIn?`${ic('check')}Votre arrivée est pointée à ${a.profIn}`:`<button type="button" class="btn sm block" id="profIn" data-act="profIn">${ic('clock')}Pointer mon arrivée</button>`}</div>
+    <div class="ph-count"><span><b>${np}</b> présents · <b>${na}</b> absents · ${R.length-np-na} à pointer</span><button type="button" class="btn sm ghost" id="allP" data-act="allP">${ic('check')}Tous présents</button></div>
+    <ul class="roll">${R.map(r=>{const m=getMark(key,r.pk),id=r.pk.replace(':','-');const pend=state.queue.some(q=>q.k===key&&q.pk===r.pk);return `<li><div class="nm"><b>${esc(r.nom)}</b><span class="small ${r.card&&r.card.restant===0?'bad-t':'muted'}">${r.card?`Carte à points · ${r.card.restant} point(s)${r.card.restant===0?' — épuisée':''}`:r.meta}${pend?' · <span class="warn-t">non synchronisé</span>':''}</span></div><div class="seg" role="group" aria-label="Présence de ${esc(r.nom)}"><button type="button" class="p" id="m-${id}-p" data-act="mark" data-pk="${r.pk}" data-v="p" aria-pressed="${m==='p'}">Présent</button><button type="button" class="a" id="m-${id}-a" data-act="mark" data-pk="${r.pk}" data-v="a" aria-pressed="${m==='a'}">Absent</button></div></li>`}).join('')||'<li class="muted">Aucun élève inscrit.</li>'}</ul>
+    <button type="button" class="btn primary block" style="margin-top:14px" id="finish" data-act="finish">Terminer l'appel</button>`;
+  } else {
+    const cs=COURSES.filter(c=>c.prof===p.id).map(c=>({c,d:nextDate(c)})).sort((a,b)=>a.d.localeCompare(b.d)||a.c.h.localeCompare(b.c.h));
+    inner=`<h2 style="font-size:20px;margin-bottom:10px">Mes cours</h2>`+cs.map(({c,d})=>{const key=c.id+'|'+d,a=state.att[key];const done=a&&Object.keys(a.marks).length;return `<button type="button" class="ph-course ${d===TODAY?'today':''}" id="pc-${c.id}" data-act="openAppel" data-c="${c.id}" data-d="${d}"><span class="ph-time">${c.h}</span><span class="min0" style="flex:1"><b>${esc(c.nom)}</b><br><span class="small muted">${d===TODAY?"Aujourd'hui":JOURS_L[c.jour]+' '+fd(d).slice(0,5)} · ${SITES[c.site].court} · ${roster(c).length} élèves</span></span>${done?badge('Appel fait','ok'):ic('arrow')}</button>`}).join('');
+  }
+  const cards=state.cards.filter(k=>k.cours.some(id=>course(id).prof===p.id));
+  return pageH("Appel du professeur","Application mobile installable (PWA) : l'appel fonctionne même sans réseau et se synchronise au retour de la connexion.")+
+  `<div class="prof-l"><div class="phone" aria-label="Écran mobile du professeur"><div class="ph-bar"><div><b>${esc(p.nom)}</b><span class="small">${fdLong(TODAY)}</span></div>${pill()}</div>
+  <div class="ph-net"><label class="sw"><input type="checkbox" role="switch" id="netsw" data-ch="net" ${u.online?'':'checked'}><span>Simuler une coupure réseau</span></label></div>
+  <div class="ph-body">${inner}</div></div>
+  <div class="stack">
+    <section class="panel"><h2>Professeur connecté</h2><div class="field"><label for="profsel">Changer de professeur (démo)</label><select id="profsel" data-ch="prof">${PROFS.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${x.nom} — ${x.style}</option>`).join('')}</select></div>
+    <p class="small muted" style="margin-top:10px">Chaque professeur ne voit que ses cours et ses élèves. Le pointage de son arrivée alimente le suivi des présences des professeurs côté secrétariat.</p></section>
+    <section class="panel" aria-labelledby="h-log"><h2 id="h-log">Journal de synchronisation</h2><ul class="log">${state.syncLog.slice(0,10).map(l=>`<li class="${l.cls||''}"><span class="num muted">${l.t}</span><span>${esc(l.msg)}</span></li>`).join('')}</ul></section>
+    ${cards.length?`<section class="panel" aria-labelledby="h-pc"><h2 id="h-pc">Cartes à points de mes cours</h2><ul class="rowlist">${cards.map(k=>`<li><span>${esc(k.nom)}</span>${badge(k.restant+' point(s)',k.restant===0?'bad':k.restant<=2?'warn':'ok')}</li>`).join('')}</ul></section>`:''}
+  </div></div>`;
+}
+
+/* ---------- Parent : inscription ---------- */
+const W=()=>state.ui.wiz;
+function fld(id,label,val,path,o={}){const e=W().err[id];return `<div class="field ${o.cls||''}"><label for="${id}">${label}${o.opt?'':' <span class="req" aria-hidden="true">*</span>'}</label><input id="${id}" ${o.type?`type="${o.type}"`:''} value="${esc(val)}" data-in="w" data-p="${path}" ${o.attrs||''} ${e?`aria-invalid="true" aria-describedby="${id}-e"`:''}>${e?`<span class="err" id="${id}-e">${e}</span>`:''}</div>`}
+function ageBadge(e){const a=ageOf(e.naissance);if(a==null)return '';const t=trancheFor(a);return a<4?badge(`${a} ans · dès 4 ans`,'bad'):badge(`${a} ans · ${tLabel(t)}`,'acc')}
+function wStep1(){const f=W().fam;return `<h2>Votre famille</h2><p class="small muted">Responsable légal et adresse de facturation.</p>
+  <div class="fgrid" style="margin-top:14px">${fld('w-nom','Nom de famille',f.nom,'fam.nom',{attrs:'autocomplete="family-name"'})}${fld('w-parent','Prénom du responsable',f.parent,'fam.parent',{attrs:'autocomplete="given-name"'})}${fld('w-email','Email',f.email,'fam.email',{type:'email',attrs:'autocomplete="email"'})}${fld('w-tel','Téléphone',f.tel,'fam.tel',{type:'tel',attrs:'autocomplete="tel" placeholder="079 555 12 34"'})}${fld('w-adr','Rue et numéro',f.adresse,'fam.adresse',{cls:'full',attrs:'autocomplete="street-address"'})}${fld('w-npa','NPA',f.npa,'fam.npa',{attrs:'inputmode="numeric" maxlength="4" autocomplete="postal-code"'})}${fld('w-ville','Localité',f.ville,'fam.ville',{attrs:'autocomplete="address-level2"'})}</div>
+  <div class="wiz-nav"><span></span><button type="button" class="btn primary" id="wNext" data-act="wizNext">Continuer ${ic('arrow')}</button></div>`}
+function wStep2(){const w=W();return `<h2>Élèves à inscrire</h2><p class="small muted">L'âge détermine les cours proposés et la tranche tarifaire.</p>
+  ${w.eleves.map((e,i)=>`<fieldset class="elc"><legend>Élève ${i+1}</legend><div class="elc-h"><span id="ab-${i}">${ageBadge(e)}</span>${w.eleves.length>1?`<button type="button" class="btn sm ghost" data-act="delEl" data-i="${i}">${ic('trash')}Retirer</button>`:''}</div>
+  <div class="fgrid">${fld(`we-${i}-p`,'Prénom',e.prenom,`el.${i}.prenom`)}${fld(`we-${i}-n`,'Nom',e.nom,`el.${i}.nom`)}${fld(`we-${i}-d`,'Date de naissance',e.naissance,`el.${i}.naissance`,{type:'date',attrs:`max="${TODAY}" min="1930-01-01"`})}</div></fieldset>`).join('')}
+  <button type="button" class="btn sm" style="margin-top:14px" id="addEl" data-act="addEl" ${w.eleves.length>=4?'disabled':''}>${ic('plus')}Ajouter un enfant</button>
+  <div class="wiz-nav"><button type="button" class="btn" data-act="wizPrev">${ic('back')}Retour</button><button type="button" class="btn primary" id="wNext" data-act="wizNext">Choisir les cours ${ic('arrow')}</button></div>`}
+function wStep3(){const w=W();return `<h2>Choix des cours</h2><p class="small muted">Seuls les cours adaptés à l'âge de chaque élève sont proposés.</p>
+  <div class="field" style="max-width:320px;margin-top:12px"><label for="wsite">Site</label><select id="wsite" data-ch="wsite"><option value="">Tous les sites</option>${Object.entries(SITES).map(([k,s])=>`<option value="${k}" ${w.site===k?'selected':''}>${s.nom}</option>`).join('')}</select></div>
+  ${w.eleves.map((e,i)=>{const a=ageOf(e.naissance);const el=COURSES.filter(c=>a>=c.min&&a<=c.max);const shown=el.filter(c=>!w.site||c.site===w.site||e.cours.includes(c.id));const er=w.err['wc-'+i];
+  return `<section class="elsec" aria-labelledby="ws-${i}"><h3 id="ws-${i}">${esc(e.prenom)} ${esc(e.nom)} · ${a} ans <span class="muted small">— ${el.length} cours adapté(s) sur ${COURSES.length}</span></h3>${er?`<p class="err" id="wc-${i}" tabindex="-1">${er}</p>`:''}
+  <div class="opts">${shown.map(c=>{const rest=c.cap-enrolled(c.id),chk=e.cours.includes(c.id),dis=rest<=0&&!chk;return `<label class="opt ${dis?'dis':''}"><input type="checkbox" data-ch="wc" data-e="${i}" value="${c.id}" ${chk?'checked':''} ${dis?'disabled':''}><span class="opt-b"><b>${esc(c.nom)}</b><span class="small muted">${JOURS_L[c.jour]} ${c.h} · ${c.duree} min · ${c.min}${c.max>=99?' ans et +':'–'+c.max+' ans'}</span><span class="small muted">${SITES[c.site].nom} · ${profName(c.prof)}</span><span class="small ${rest<=0?'bad-t':rest<=3?'warn-t':'ok-t'}">${rest<=0?"Complet — liste d'attente":rest+' place(s) disponible(s)'}</span></span></label>`}).join('')||'<p class="muted">Aucun cours sur ce site pour cet âge.</p>'}</div></section>`}).join('')}
+  <div class="wiz-nav"><button type="button" class="btn" data-act="wizPrev">${ic('back')}Retour</button><button type="button" class="btn primary" id="wNext" data-act="wizNext">Vérifier ${ic('arrow')}</button></div>`}
+function wStep4(){const w=W(),f=w.fam,q=wizQuote();return `<h2>Vérification et envoi</h2>
+  <div class="recap"><div><b>Famille ${esc(f.nom)}</b><p class="small">${esc(f.parent)} ${esc(f.nom)}<br>${esc(f.adresse)}<br>${esc(f.npa)} ${esc(f.ville)}<br><span class="wrap">${esc(f.email)}</span> · ${esc(f.tel)}</p></div>
+  ${w.eleves.map(e=>`<div><b>${esc(e.prenom)} ${esc(e.nom)}</b> <span class="small muted">${ageOf(e.naissance)} ans</span><ul class="small" style="margin-top:6px">${e.cours.map(id=>{const c=course(id);return `<li>• ${esc(c.nom)} — ${JOURS_L[c.jour]} ${c.h}, ${SITES[c.site].court}</li>`}).join('')}</ul></div>`).join('')}</div>
+  <p class="note info">${ic('file')}Après validation par le secrétariat, vous recevrez par email une QR-facture de <b class="num">${chf(q.total)}</b> payable à 30 jours.</p>
+  <label class="check" style="margin-top:10px"><input type="checkbox" id="cgu" data-ch="cgu" ${w.cgu?'checked':''} ${w.err.cgu?'aria-invalid="true" aria-describedby="cgu-e"':''}><span>J'accepte le règlement de l'école et la politique de protection des données (nLPD).</span></label>${w.err.cgu?`<p class="err" id="cgu-e">${w.err.cgu}</p>`:''}
+  <div class="wiz-nav"><button type="button" class="btn" data-act="wizPrev">${ic('back')}Retour</button><button type="button" class="btn primary" id="wNext" data-act="wizSubmit">${ic('check')}Envoyer l'inscription</button></div>`}
+function wizQuote(){return quote(W().eleves.filter(e=>{const a=ageOf(e.naissance);return a!=null&&a>=4}).map(e=>({prenom:e.prenom||'Élève',age:ageOf(e.naissance),n:e.cours.length})))}
+function wizSum(){
+  const w=W(),q=wizQuote();
+  if(!q.lines.length)return `<h2>Votre tarif</h2><p class="small muted" style="margin-top:8px">Le tarif se calcule en direct dès que vous indiquez la date de naissance d'un élève.</p><div class="qtotal"><span>Total semestre</span><span class="num">${chf(0)}</span></div>`;
+  return `<h2>Votre tarif</h2><p class="small muted">${SEM}</p><div class="qlines">${q.lines.map(l=>`<div class="qline"><span>${esc(l.prenom)} · ${l.age} ans<br><span class="small muted">${tLabel(l.tr)} · ${l.n?l.n+' cours/sem.':'aucun cours choisi'}</span></span><span class="num">${l.base?chf(l.base):'—'}</span></div>${l.remise?`<div class="qline rem"><span>Remise fratrie ${l.pct} %</span><span class="num">${chf(-l.remise)}</span></div>`:''}`).join('')}${q.frais?`<div class="qline"><span>Frais d'inscription annuels</span><span class="num">${chf(q.frais)}</span></div>`:''}</div><div class="qtotal"><span>Total semestre</span><span class="num">${chf(q.total)}</span></div><p class="small muted" style="margin-top:8px">Tarif selon l'âge × nombre de cours par semaine, remise fratrie dès le 2e enfant.</p>`;
+}
+const updSum=()=>{const s=$('#wsum');if(s)s.innerHTML=wizSum()};
+function validate(step){
+  const w=W(),e={};
+  if(step===1){const f=w.fam;if(!f.nom.trim())e['w-nom']='Indiquez le nom de famille.';if(!f.parent.trim())e['w-parent']='Indiquez le prénom du responsable.';if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim()))e['w-email']='Adresse email invalide (ex. nom@exemple.ch).';if(!/^[+0-9 ()]{9,}$/.test(f.tel.trim()))e['w-tel']='Numéro de téléphone invalide.';if(!f.adresse.trim())e['w-adr']="Indiquez l'adresse.";if(!/^\d{4}$/.test(f.npa.trim()))e['w-npa']='Le NPA suisse compte 4 chiffres.';if(!f.ville.trim())e['w-ville']='Indiquez la localité.'}
+  if(step===2)w.eleves.forEach((el,i)=>{if(!el.prenom.trim())e[`we-${i}-p`]='Prénom requis.';if(!el.nom.trim())e[`we-${i}-n`]='Nom requis.';const a=ageOf(el.naissance);if(a==null)e[`we-${i}-d`]='Date de naissance requise.';else if(a<4)e[`we-${i}-d`]="L'école accueille les élèves dès 4 ans.";else if(a>95)e[`we-${i}-d`]='Date de naissance improbable.'});
+  if(step===3)w.eleves.forEach((el,i)=>{if(!el.cours.length)e['wc-'+i]=`Choisissez au moins un cours pour ${el.prenom}.`});
+  if(step===4&&!w.cgu)e.cgu="Veuillez accepter le règlement pour envoyer l'inscription.";
+  w.err=e;return !Object.keys(e).length;
+}
+function vInscrire(){
+  const w=W();
+  if(w.done){const x=state.inscriptions.find(i=>i.id===w.done),f=fam(x.famId);
+    return pageH('Inscription envoyée')+`<section class="panel"><div class="success"><span class="ti">${ic('check')}</span><div class="min0"><h2>Merci, famille ${esc(f.nom)} !</h2><p style="margin-top:6px">Votre demande pour ${x.eleves.length} élève(s) a bien été reçue (montant estimé ${chf(x.total)} par semestre). Un email de confirmation vous a été envoyé <span class="muted">(simulation)</span>.</p>
+    <div class="flow" aria-label="Étapes suivantes"><span class="on">Envoyée</span><span>Validée par l'école</span><span>QR-facture émise</span><span>Payée</span></div>
+    <div class="actions" style="margin-top:16px"><button type="button" class="btn primary" data-act="go" data-r="ecole" data-t="inscr">${ic('school')}Passer côté école pour la valider</button><button type="button" class="btn" data-act="tab" data-t="mesinscr">Suivre mes inscriptions</button><button type="button" class="btn ghost" data-act="newWiz">Nouvelle inscription</button></div></div></div></section>`}
+  const steps=['Famille','Élèves','Cours','Envoi'];
+  return pageH('Inscription en ligne',`${SEM} · cours à Lausanne, Genève et Neuchâtel`,`<button type="button" class="btn" data-act="fillEx">${ic('refresh')}Remplir un exemple</button>`)+
+  `<ol class="steps" aria-label="Étapes">${steps.map((s,i)=>`<li ${w.step===i+1?'aria-current="step"':''} class="${w.step>i+1?'done':''}"><span class="sn">${w.step>i+1?ic('check'):i+1}</span><span>${s}</span></li>`).join('')}</ol>
+  <div class="wiz"><section class="panel wiz-main">${[wStep1,wStep2,wStep3,wStep4][w.step-1]()}</section><aside class="panel sticky" aria-label="Calcul du tarif"><div id="wsum" aria-live="polite">${wizSum()}</div></aside></div>`;
+}
+function vMesInscr(){
+  const fid=state.ui.parentFam,F=fam(fid);const list=state.inscriptions.filter(x=>x.famId===fid).sort((a,b)=>b.date.localeCompare(a.date));
+  return pageH('Mes inscriptions',F?`Famille ${esc(F.nom)} · ${esc(F.ville)}`:'')+(list.length?`<div class="cols">${list.map(x=>{const i=x.invId?inv(x.invId):null;const steps=[['Envoyée',true],['Validée par l\'école',x.statut==='validee'],['QR-facture émise',!!i],['Payée',i&&status(i)==='payee']];
+    return `<article class="panel"><div class="ins-h"><h3>Inscription du ${fd(x.date)}</h3>${x.statut==='refusee'?badge('Refusée','gray'):''}</div><ul class="ins-el">${x.eleves.map(e=>{const s=stu(e.sid);return `<li><b>${esc(s.prenom)} ${esc(s.nom)}</b><div class="cchips">${e.cours.map(id=>`<span class="cchip">${esc(course(id).nom)} · ${JOURS[course(id).jour]} ${course(id).h}</span>`).join('')}</div></li>`}).join('')}</ul>
+    <div class="flow">${steps.map(([l,on])=>`<span class="${on?'on':''}">${l}</span>`).join('')}</div>
+    <div class="ins-f" style="margin-top:12px"><div><span class="small muted">Montant semestriel</span><b class="num">${chf(x.total)}</b></div>${i?`<button type="button" class="btn sm" data-act="viewInv" data-id="${i.id}">${ic('eye')}Voir la facture</button>`:'<span class="small muted">Facture après validation</span>'}</div></article>`}).join('')}</div>`:`<div class="panel">${empty('list','Aucune inscription.')}</div>`);
+}
+function vMesFact(){
+  const fid=state.ui.parentFam,F=fam(fid);const list=state.invoices.filter(i=>i.famId===fid);
+  return pageH('Mes factures',F?`Famille ${esc(F.nom)} · paiement par QR-facture depuis votre application bancaire`:'')+(list.length?`<div class="cols">${list.map(i=>`<article class="panel"><div class="ins-h"><div><h3>Facture ${i.num}</h3><p class="small muted">Émise le ${fd(i.date)} · échéance ${fd(i.echeance)}</p></div>${stBadge(i)}</div>
+  <div class="pts" style="margin:12px 0"><b class="num" style="font-size:30px">${chf(solde(i)||i.total)}</b><span class="muted">${status(i)==='payee'?'réglé':'à payer'}</span></div>
+  <p class="small muted">Référence <span class="mono">${fmtQRR(i.ref)}</span></p>
+  <div class="actions" style="margin-top:12px"><button type="button" class="btn sm primary" data-act="viewInv" data-id="${i.id}">${ic('eye')}Voir la QR-facture</button></div></article>`).join('')}</div>`:`<div class="panel">${empty('file','Aucune facture pour le moment. Elle apparaîtra ici dès que le secrétariat aura validé et facturé votre inscription.')}</div>`);
+}
+
+/* ---------- Actions ---------- */
+const H={
+  close:()=>dlg.close(),
+  reset:()=>confirmDlg('Réinitialiser la démo','Toutes les modifications seront effacées et les données fictives restaurées.','Réinitialiser','resetDo','',true),
+  resetDo:()=>{dlg.close();try{localStorage.removeItem(KEY)}catch(e){}state=seed();render(true);toast('Démo réinitialisée')},
+  role:el=>{state.ui.role=el.dataset.r;render(true)},
+  tab:el=>{state.ui.tab[state.ui.role]=el.dataset.t;render(true)},
+  go:el=>{state.ui.role=el.dataset.r;state.ui.tab[el.dataset.r]=el.dataset.t;if(el.dataset.t==='inscr')state.ui.ifilt='attente';render(true)},
+  dsite:el=>{state.ui.dsite=el.dataset.k;render()},
+  ifilt:el=>{state.ui.ifilt=el.dataset.k;render()},
+  ffilt:el=>{state.ui.ffilt=el.dataset.k;render()},
+  valider:el=>{const x=state.inscriptions.find(i=>i.id===el.dataset.id);const full=x.eleves.flatMap(e=>e.cours).filter(id=>enrolled(id)>=course(id).cap);x.statut='validee';x.eleves.forEach(e=>{const s=stu(e.sid);s.actif=true;s.cours=e.cours.slice()});render();toast(`Inscription de la famille ${esc(fam(x.famId).nom)} validée — élèves ajoutés aux cours${full.length?' (dépassement de capacité signalé)':''}`)},
+  refuser:el=>{const x=state.inscriptions.find(i=>i.id===el.dataset.id);confirmDlg("Refuser l'inscription",`La famille ${esc(fam(x.famId).nom)} sera informée par email (simulation). Les places restent disponibles.`,'Refuser','refuserDo',`data-id="${x.id}"`,true)},
+  refuserDo:el=>{const x=state.inscriptions.find(i=>i.id===el.dataset.id);x.statut='refusee';dlg.close();render();toast('Inscription refusée — email envoyé (simulation)','mail')},
+  genFact:el=>{const ids=el.dataset.id?[el.dataset.id]:state.inscriptions.filter(x=>x.statut==='validee'&&!x.invId).map(x=>x.id);let n=0;ids.forEach(id=>{const x=state.inscriptions.find(i=>i.id===id);if(!x||x.invId)return;const v=makeInvoice(fam(x.famId),x.eleves.map(e=>({s:stu(e.sid),cours:e.cours})),TODAY,addDays(TODAY,30));v.session=true;x.invId=v.id;n++});render();if(n)toast(`${n} QR-facture(s) générée(s) et envoyée(s) par email (simulation)`,'mail')},
+  viewInv:el=>openInvoice(el.dataset.id),
+  printInv:el=>{$('#print-root').innerHTML=docHTML(inv(el.dataset.id));window.print()},
+  mailInv:el=>{const i=inv(el.dataset.id);toast(`Facture ${i.num} envoyée à ${esc(fam(i.famId).email)} (simulation)`,'mail')},
+  simAdd:()=>{state.ui.sim.push({age:7,n:1});render()},
+  simDel:el=>{state.ui.sim.splice(+el.dataset.i,1);render()},
+  importCamt:()=>{const t=buildCamt();if(!t.length){toast('Relevé importé : aucun nouveau mouvement','warn');return}state.bank.imports++;state.bank.txs=t.concat(state.bank.txs);const a=t.filter(x=>x.statut==='auto').length;const f=t.find(x=>x.statut==='atraiter');state.ui.txSel=f?f.id:t[0].id;render();toast(`Relevé importé : ${t.length} mouvement(s), ${a} rapproché(s) automatiquement par référence QRR, ${t.length-a} à traiter`)},
+  selTx:el=>{state.ui.txSel=el.dataset.id;render();if(innerWidth<1080){const d=$('#txd');if(d)d.scrollIntoView({behavior:'smooth',block:'start'})}},
+  matchTx:el=>{const t=state.bank.txs.find(x=>x.id===el.dataset.tx),i=inv(el.dataset.inv);i.paiements.push({date:t.date,montant:t.montant,source:'Rapprochement manuel'});t.statut='manuel';t.invId=i.id;const nx=state.bank.txs.find(x=>x.statut==='atraiter');state.ui.txSel=nx?nx.id:t.id;render();toast(`${chf(t.montant)} affecté à la facture ${i.num}${status(i)==='payee'?' — facture soldée':' — solde restant '+chf(solde(i))}`)},
+  cardTx:el=>{const t=state.bank.txs.find(x=>x.id===el.dataset.tx),k=card(el.dataset.card),p=+el.dataset.pts;k.total+=p;k.restant+=p;k.hist.unshift({date:t.date,txt:`Recharge ${p} points (virement ${chf(t.montant)})`,delta:p});t.statut='manuel';t.cardId=k.id;const nx=state.bank.txs.find(x=>x.statut==='atraiter');state.ui.txSel=nx?nx.id:t.id;render();toast(`Carte de ${esc(k.nom)} créditée de ${p} points`)},
+  ignoreTx:el=>{const t=state.bank.txs.find(x=>x.id===el.dataset.tx);t.statut='ignore';render();toast('Mouvement classé hors facture')},
+  runRel:()=>{const d=relDues();d.forEach(({i,next})=>{i.relances.push({niveau:next.n,date:TODAY});if(+next.frais>0){i.lignes.push({label:`Frais de ${next.label.toLowerCase()}`,montant:+next.frais});i.total=r2(i.total+ +next.frais)}state.relLog.unshift({date:TODAY,invId:i.id,txt:`${next.label} envoyé — ${next.canal}${+next.frais>0?' · frais '+chf(+next.frais):''}`})});render();toast(`${d.length} relance(s) envoyée(s) — emails et courriers (simulation)`,'mail')},
+  suspend:el=>{const i=inv(el.dataset.id);i.suspendue=!i.suspendue;state.relLog.unshift({date:TODAY,invId:i.id,txt:i.suspendue?'Relances suspendues par le secrétariat':'Relances réactivées'});render();toast(i.suspendue?`Relances suspendues pour ${i.num}`:`Relances réactivées pour ${i.num}`)},
+  debit:el=>{const k=card(el.dataset.id);if(!k.restant)return;k.restant--;k.hist.unshift({date:TODAY,txt:'Débit manuel (secrétariat)',delta:-1});render();toast(`1 point débité — ${esc(k.nom)} : ${k.restant} restant(s)`)},
+  recharge:el=>{const k=card(el.dataset.id);openDlg(`${dlgHead('Recharger la carte')}<div class="dlg-b"><p>${esc(k.nom)} · solde actuel ${k.restant} point(s)</p><div class="field" style="margin-top:12px"><label for="rc-f">Formule</label><select id="rc-f"><option value="10">10 points — ${chf(+state.tarifs.carte10)}</option><option value="5">5 points — ${chf(+state.tarifs.carte5)}</option></select></div></div><div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button type="button" class="btn primary" data-act="rechargeDo" data-id="${k.id}">Recharger</button></div>`)},
+  rechargeDo:el=>{const k=card(el.dataset.id),p=+$('#rc-f').value;k.total+=p;k.restant+=p;k.hist.unshift({date:TODAY,txt:`Recharge ${p} points (${chf(p===10?+state.tarifs.carte10:+state.tarifs.carte5)})`,delta:p});dlg.close();render();toast(`Carte rechargée — QR-facture envoyée à ${esc(k.email)} (simulation)`,'mail')},
+  cardHist:el=>{const k=card(el.dataset.id);openDlg(`${dlgHead('Historique — '+esc(k.nom))}<div class="dlg-b"><ul class="timeline">${k.hist.map(h=>`<li><span class="tl-d">${fd(h.date)}</span><span class="qline"><span>${esc(h.txt)}</span><b class="num ${h.delta>0?'ok-t':''}">${h.delta>0?'+':'−'}${Math.abs(h.delta)}</b></span></li>`).join('')}</ul></div>`)},
+  sellCard:()=>{openDlg(`${dlgHead('Vendre une carte à points')}<div class="dlg-b"><div class="fgrid"><div class="field"><label for="sc-n">Nom et prénom <span class="req" aria-hidden="true">*</span></label><input id="sc-n" autocomplete="name"></div><div class="field"><label for="sc-e">Email <span class="req" aria-hidden="true">*</span></label><input id="sc-e" type="email"></div><div class="field"><label for="sc-f">Formule</label><select id="sc-f"><option value="10">10 points — ${chf(+state.tarifs.carte10)}</option><option value="5">5 points — ${chf(+state.tarifs.carte5)}</option></select></div></div>
+  <fieldset class="elc"><legend style="font-size:16px">Cours accessibles</legend>${COURSES.filter(c=>c.carte).map(c=>`<label class="check"><input type="checkbox" name="sc-c" value="${c.id}" checked><span>${esc(c.nom)} — ${JOURS_L[c.jour]} ${c.h}, ${SITES[c.site].court}</span></label>`).join('')}</fieldset><p class="err" id="sc-err" role="alert"></p></div>
+  <div class="dlg-f"><button type="button" class="btn" data-act="close">Annuler</button><button type="button" class="btn primary" data-act="sellDo">Créer la carte</button></div>`)},
+  sellDo:()=>{const n=$('#sc-n'),e=$('#sc-e'),cs=[...dlg.querySelectorAll('[name="sc-c"]:checked')].map(x=>x.value);const er=[];[n,e].forEach(x=>x.removeAttribute('aria-invalid'));if(n.value.trim().length<3){er.push('Indiquez le nom.');n.setAttribute('aria-invalid','true')}if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.value.trim())){er.push('Email invalide.');e.setAttribute('aria-invalid','true')}if(!cs.length)er.push('Choisissez au moins un cours.');if(er.length){$('#sc-err').textContent=er.join(' ');return}
+    const p=+$('#sc-f').value;state.cards.unshift({id:'K'+state.seq.card++,nom:n.value.trim(),email:e.value.trim(),cours:cs,total:p,restant:p,hist:[{date:TODAY,txt:`Achat carte ${p} points (${chf(p===10?+state.tarifs.carte10:+state.tarifs.carte5)})`,delta:p}]});dlg.close();render();toast('Carte créée — QR-facture envoyée par email (simulation)','mail')},
+  openAppel:el=>{state.ui.appel={c:el.dataset.c,d:el.dataset.d};render();const b=$('.ph-head .icon-btn');if(b)b.focus()},
+  closeAppel:()=>{const c=state.ui.appel&&state.ui.appel.c;state.ui.appel=null;render();const b=document.getElementById('pc-'+c);if(b)b.focus()},
+  mark:el=>{const {c,d}=state.ui.appel,key=c+'|'+d,pk=el.dataset.pk,v=el.dataset.v;if(state.ui.online){applyServer(key,pk,v);state.ui.lastSync=nowHM()}else state.queue.push({k:key,pk,v});render()},
+  allP:()=>{const {c,d}=state.ui.appel,key=c+'|'+d;roster(course(c)).forEach(r=>{if(!getMark(key,r.pk)){if(state.ui.online)applyServer(key,r.pk,'p');else state.queue.push({k:key,pk:r.pk,v:'p'})}});if(state.ui.online)state.ui.lastSync=nowHM();render()},
+  profIn:()=>{const {c,d}=state.ui.appel,key=c+'|'+d;const a=state.att[key]||(state.att[key]={marks:{},debits:{},profIn:null});a.profIn=nowHM();slog(`${profName(course(c).prof)} : arrivée pointée (${course(c).nom})`);render();toast('Arrivée enregistrée à '+a.profIn)},
+  finish:()=>{const {c,d}=state.ui.appel,key=c+'|'+d;let n=0;roster(course(c)).forEach(r=>{if(!getMark(key,r.pk)){n++;if(state.ui.online)applyServer(key,r.pk,'a');else state.queue.push({k:key,pk:r.pk,v:'a'})}});if(state.ui.online){slog(`Appel terminé : ${course(c).nom}`);state.ui.lastSync=nowHM()}state.ui.appel=null;render();toast(state.ui.online?`Appel enregistré${n?` (${n} non pointé(s) marqué(s) absent(s))`:''}`:'Appel enregistré sur l\'appareil — synchronisation au retour du réseau')},
+  fillEx:()=>{const w=W();w.fam={nom:'Favez',parent:'Mathilde',email:'mathilde.favez@bluewin.ch',tel:'079 555 42 18',adresse:'Avenue de Montchoisi 21',npa:'1006',ville:'Lausanne'};w.eleves=[{k:1,prenom:'Lucie',nom:'Favez',naissance:'2018-04-12',cours:[]},{k:2,prenom:'Jules',nom:'Favez',naissance:'2013-11-03',cours:[]}];w.nk=3;w.err={};render();toast("Exemple rempli : passez aux étapes suivantes")},
+  wizNext:()=>{const w=W();if(!validate(w.step)){render();const f=$('#main [aria-invalid="true"], #main .err[tabindex]');if(f)f.focus();return}if(w.step===1)w.eleves.forEach(e=>{if(!e.nom.trim())e.nom=w.fam.nom.trim()});if(w.step===2)w.eleves.forEach(e=>{const a=ageOf(e.naissance);e.cours=e.cours.filter(id=>{const c=course(id);return a>=c.min&&a<=c.max})});w.step++;render(true)},
+  wizPrev:()=>{const w=W();w.err={};w.step=Math.max(1,w.step-1);render(true)},
+  addEl:()=>{const w=W();w.eleves.push({k:w.nk++,prenom:'',nom:w.fam.nom,naissance:'',cours:[]});render();const i=w.eleves.length-1;const el=document.getElementById(`we-${i}-p`);if(el)el.focus()},
+  delEl:el=>{const w=W();w.eleves.splice(+el.dataset.i,1);w.err={};render();updSum()},
+  wizSubmit:()=>{const w=W();if(!validate(4)){render();const c=$('#cgu');if(c)c.focus();return}
+    const f={id:'F'+state.seq.fam,num:state.seq.fam++,nom:w.fam.nom.trim(),parent:w.fam.parent.trim(),adresse:w.fam.adresse.trim(),npa:w.fam.npa.trim(),ville:w.fam.ville.trim(),email:w.fam.email.trim(),tel:w.fam.tel.trim()};state.families.push(f);
+    const items=w.eleves.map(e=>{const s={id:'S'+state.seq.stu++,famId:f.id,prenom:e.prenom.trim(),nom:e.nom.trim(),naissance:e.naissance,cours:e.cours.slice(),actif:false};state.students.push(s);return {s,cours:e.cours.slice()}});
+    const x={id:'I'+state.seq.ins++,famId:f.id,date:TODAY,eleves:items.map(({s,cours})=>({sid:s.id,cours})),total:wizQuote().total,statut:'attente',invId:null,session:true};state.inscriptions.push(x);
+    state.ui.parentFam=f.id;w.done=x.id;render(true);toast('Inscription envoyée — email de confirmation (simulation)','mail')},
+  newWiz:()=>{state.ui.wiz=newWiz();render(true)}
+};
+const IN={
+  w:el=>{const p=el.dataset.p.split('.'),w=W();if(p[0]==='fam')w.fam[p[1]]=el.value;else{w.eleves[+p[1]][p[2]]=el.value;if(p[2]==='naissance'){const b=document.getElementById('ab-'+p[1]);if(b)b.innerHTML=ageBadge(w.eleves[+p[1]])}}if(el.getAttribute('aria-invalid')){el.removeAttribute('aria-invalid')}updSum();save()},
+  fq:el=>{state.ui.fq=el.value;$('#ftbody').innerHTML=factRows();save()},
+  tp:el=>{const v=parseFloat(el.value);if(isNaN(v)||v<0){el.setAttribute('aria-invalid','true');return}el.removeAttribute('aria-invalid');state.tarifs.tranches[+el.dataset.t].prix[+el.dataset.k]=v;$('#simres').innerHTML=simRes();save()},
+  tage:el=>{const v=parseInt(el.value,10);if(isNaN(v)||v<0||v>120){el.setAttribute('aria-invalid','true');return}el.removeAttribute('aria-invalid');state.tarifs.tranches[+el.dataset.t][el.dataset.f]=v;$('#tcheck').innerHTML=coverage();$('#simres').innerHTML=simRes();save()},
+  tset:el=>{const v=parseFloat(el.value);if(isNaN(v)||v<0||(el.dataset.k.startsWith('fratrie')&&v>100)){el.setAttribute('aria-invalid','true');return}el.removeAttribute('aria-invalid');state.tarifs[el.dataset.k]=v;$('#simres').innerHTML=simRes();save()},
+  sim:el=>{const v=parseInt(el.value,10);if(isNaN(v)||v<3||v>99){el.setAttribute('aria-invalid','true');return}el.removeAttribute('aria-invalid');state.ui.sim[+el.dataset.i].age=v;$('#simres').innerHTML=simRes();save()}
+};
+const CH={
+  sim:el=>{state.ui.sim[+el.dataset.i].n=+el.value;$('#simres').innerHTML=simRes();save()},
+  wc:el=>{const e=W().eleves[+el.dataset.e];if(el.checked){if(!e.cours.includes(el.value))e.cours.push(el.value)}else e.cours=e.cours.filter(x=>x!==el.value);updSum();save()},
+  wsite:el=>{W().site=el.value;render()},
+  cgu:el=>{W().cgu=el.checked;save()},
+  prof:el=>{state.ui.profId=el.value;state.ui.appel=null;render()},
+  net:el=>{const u=state.ui;u.online=!el.checked;if(!u.online){slog('Connexion perdue — enregistrement local activé','warn');render();toast("Hors-ligne : l'appel continue, les présences sont stockées sur l'appareil",'warn');return}
+    u.syncing=true;render();setTimeout(()=>{const n=state.queue.length;state.queue.forEach(q=>applyServer(q.k,q.pk,q.v));state.queue=[];u.syncing=false;u.lastSync=nowHM();slog(`Connexion rétablie : ${n} modification(s) synchronisée(s)`);render();toast(`${n} modification(s) synchronisée(s)`)},1100)},
+  relj:el=>{const v=parseInt(el.value,10);if(isNaN(v)||v<1)return;state.rel.niveaux[+el.dataset.k].jours=v;render()},
+  relf:el=>{const v=parseFloat(el.value);if(isNaN(v)||v<0)return;state.rel.niveaux[+el.dataset.k].frais=v;render()},
+  rela:el=>{state.rel.niveaux[+el.dataset.k].actif=el.checked;render()}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el||el.disabled)return;const f=H[el.dataset.act];if(f){e.preventDefault();f(el,e)}});
+document.addEventListener('input',e=>{const el=e.target.closest('[data-in]');if(el&&IN[el.dataset.in])IN[el.dataset.in](el)});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-ch]');if(el&&CH[el.dataset.ch])CH[el.dataset.ch](el)});
+window.addEventListener('afterprint',()=>{$('#print-root').innerHTML=''});
+
+load();
+render();
+</script>
 </body>
 </html>
