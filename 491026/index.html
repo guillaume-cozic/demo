@@ -2,20 +2,693 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Coordination ménage locations</title>
+<meta name="description" content="Outil multi-tenant de coordination du ménage pour locations courte durée : calendrier multi-logements par plateforme, ménages planifiés automatiquement, missions et application agent, zones, KPI, paie, channel managers et abonnement.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F5F4F8;--panel:#FFFFFF;--panel-2:#F0EEF5;--ink:#1C1A24;--muted:#5B5868;--line:#E2DFEA;--line-2:#C4BFD2;
+  --accent:#4B3F8F;--accent-ink:#FFFFFF;--accent-soft:#E7E3F7;--accent-text:#3C3178;
+  --ok:#1B6A40;--ok-soft:#DCF0E3;--warn:#854A00;--warn-soft:#FBEBD0;--bad:#A3242E;--bad-soft:#FAE0E2;--info:#1F4F8C;--info-soft:#E0EAF7;
+  --p-airbnb:#BF3548;--p-booking:#1F4E9C;--p-abritel:#855600;--p-direct:#2F6B4F;
+  --shadow:0 1px 2px rgba(28,26,36,.05),0 4px 12px rgba(28,26,36,.05);
+  --font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --lw:190px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111016;--panel:#191820;--panel-2:#21202A;--ink:#EAE8F1;--muted:#A5A2B3;--line:#2C2A37;--line-2:#454253;
+  --accent:#B5A8F0;--accent-ink:#1A1436;--accent-soft:#2A2548;--accent-text:#CFC6F8;
+  --ok:#74D29C;--ok-soft:#15301F;--warn:#F0B764;--warn-soft:#352613;--bad:#FF959B;--bad-soft:#3B1B1E;--info:#9AC0F2;--info-soft:#172A40;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{line-height:1.25;letter-spacing:-.01em}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.band{background:var(--warn-soft);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.band b{color:var(--warn)}
+.band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:9px;padding:0 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:10px 18px;padding:10px clamp(16px,2vw,28px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted);letter-spacing:0}
+.mark{width:38px;height:38px;border-radius:11px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.tenant{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0}
+.tenant label{font-size:13px;color:var(--muted);white-space:nowrap}
+.tenant select{max-width:300px}
+.shell{display:grid;grid-template-columns:minmax(0,1fr)}
+#nav{display:flex;gap:4px;overflow-x:auto;padding:8px clamp(16px,2vw,28px);background:var(--panel);border-bottom:1px solid var(--line);min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:9px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;text-align:left}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+main{padding:20px clamp(16px,2vw,28px) 64px;min-width:0}
+@media (min-width:1080px){
+  .shell{grid-template-columns:232px minmax(0,1fr);align-items:start}
+  #nav{flex-direction:column;border-bottom:0;border-right:1px solid var(--line);padding:16px 12px;min-height:calc(100vh - 110px);overflow:visible}
+  .tab{width:100%}
+}
+@media (max-width:640px){.tenant{margin-left:0;width:100%}.tenant select{flex:1;max-width:none;width:0}:root{--lw:112px}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.block{width:100%}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;flex:none}
+.icon-btn:hover{background:var(--panel-2)}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13.5px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=number],input[type=date],input[type=search],input[type=password],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:80px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr))}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:16px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:24px}
+.page-h p{color:var(--muted);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--info-soft);color:var(--info)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}.b-gray{background:var(--panel-2);color:var(--muted)}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+.grid>*{min-width:0}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .k-l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .k-v{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.kpi .k-s{font-size:12.5px;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:flex-end}
+.filters .field{flex:1 1 160px}
+.filters .grow{flex:3 1 240px}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:700;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+tfoot td{font-weight:800;background:var(--panel-2)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+dl.info{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:10px 16px;margin:0 0 14px}
+dl.info dt{font-size:12.5px;color:var(--muted);font-weight:600}
+dl.info dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.note{background:var(--panel-2);border-radius:10px;padding:10px 12px;font-size:13.5px}
+
+/* Calendrier */
+.cal-wrap{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1360px){.cal-wrap{grid-template-columns:minmax(0,1fr) 330px;align-items:start}}
+.cal-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.cal-bar h2{font-size:18px;text-transform:capitalize;min-width:150px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.lg{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;font-weight:600;font-size:13.5px}
+.lg i{width:12px;height:12px;border-radius:4px;flex:none}
+.lg[aria-pressed="false"]{opacity:.55;text-decoration:line-through}
+.cal-scroll{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.cal{min-width:calc(var(--lw) + var(--n) * 44px)}
+.cal-r{display:grid;grid-template-columns:var(--lw) minmax(0,1fr);border-bottom:1px solid var(--line)}
+.cal-r:last-child{border-bottom:0}
+.cal-l{position:sticky;left:0;z-index:3;background:var(--panel);border-right:1px solid var(--line);padding:8px 10px;display:flex;flex-direction:column;justify-content:center;min-width:0;font-weight:700;font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
+.cal-l small{font-weight:500;color:var(--muted);font-size:12px}
+.cal-t{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));min-height:84px}
+.cal-head .cal-t{min-height:0}
+.cal-head .cal-l{font-size:12.5px;color:var(--muted)}
+.cal-z .cal-l,.cal-z .cal-t{background:var(--panel-2);min-height:0}
+.cal-z .cal-l{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:6px 10px}
+.dc{border-right:1px solid var(--line);min-width:0}
+.dc:last-child{border-right:0}
+.dc.we{background:color-mix(in srgb,var(--panel-2) 60%,transparent)}
+.dc.today{background:var(--accent-soft)}
+.dh{display:flex;flex-direction:column;align-items:center;padding:6px 0;font-size:11.5px;color:var(--muted);line-height:1.2}
+.dh b{font-size:14px;color:var(--ink)}
+.dh.today b{color:var(--accent-text)}
+.bar{position:absolute;top:7px;height:34px;border:0;border-radius:9px;color:#fff;font-weight:700;font-size:12.5px;padding:0 9px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;z-index:1}
+.bar:hover{filter:brightness(1.12)}
+.bar.fresh{box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--accent)}
+.p-airbnb{background:var(--p-airbnb)}.p-booking{background:var(--p-booking)}.p-abritel{background:var(--p-abritel)}.p-direct{background:var(--p-direct)}
+.chip{position:absolute;top:45px;height:34px;border-radius:9px;border:1.5px solid currentColor;font-weight:800;font-size:12px;cursor:pointer;z-index:2;padding:0;display:grid;place-items:center}
+.chip.tight{border-width:2.5px}
+.s-todo{background:var(--warn-soft);color:var(--warn);border-style:dashed}
+.s-assigned{background:var(--info-soft);color:var(--info)}
+.s-progress{background:var(--accent-soft);color:var(--accent-text)}
+.s-done{background:var(--ok-soft);color:var(--ok)}
+.s-issue{background:var(--bad-soft);color:var(--bad)}
+.keys{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:10px;align-items:center}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{width:18px;height:14px;border-radius:4px;border:1.5px solid currentColor;display:inline-block}
+.mlist{display:flex;flex-direction:column;gap:8px}
+.mrow{display:flex;gap:10px;align-items:center;justify-content:space-between;width:100%;min-height:52px;text-align:left;border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:8px 12px;cursor:pointer}
+.mrow:hover{border-color:var(--line-2);background:var(--panel-2)}
+.mrow>span:first-child{min-width:0;overflow-wrap:anywhere}
+.mrow b{display:block;font-size:14px}
+.mrow small{color:var(--muted)}
+
+/* Graphiques */
+.vbars{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;align-items:end;height:170px}
+.vb{display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0;gap:2px;text-align:center;font-size:11px;color:var(--muted)}
+.vb .seg{border-radius:4px 4px 0 0;background:var(--accent)}
+.vb .seg.un{background:var(--warn)}
+.vb b{font-size:11.5px;color:var(--ink)}
+.hb{display:grid;grid-template-columns:minmax(0,120px) minmax(0,1fr) auto;gap:10px;align-items:center;margin-bottom:10px;font-size:13.5px}
+.hb .track{height:14px;border-radius:7px;background:var(--panel-2);overflow:hidden}
+.hb .fill{height:100%;border-radius:7px}
+.hb .fill:not([class*="p-"]){background:var(--accent)}
+.prog{height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden;margin:6px 0}
+.prog i{display:block;height:100%;background:var(--ok)}
+.stat3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.stat3 div{background:var(--panel-2);border-radius:10px;padding:8px 10px;min-width:0}
+.stat3 b{display:block;font-size:20px}
+.stat3 span{font-size:12px;color:var(--muted)}
+.plist{list-style:none;margin:0;padding:0}
+.plist li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+
+/* Application agent */
+.agent-wrap{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.agent-wrap{grid-template-columns:400px minmax(0,1fr);align-items:start}}
+.phone{width:min(100%,400px);margin:0 auto;border:8px solid var(--ink);border-radius:34px;background:var(--bg);overflow:hidden;min-height:620px;display:flex;flex-direction:column}
+.ph-top{background:var(--accent);color:var(--accent-ink);padding:16px 16px 14px}
+.ph-top b{font-size:17px;display:block}
+.ph-top span{font-size:13px;opacity:.9}
+.ph-body{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.ph-body h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:6px}
+.ck{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:pointer}
+.ck input{width:20px;height:20px;accent-color:var(--accent);margin:0;flex:none}
+.ck:has(input:disabled){opacity:.6;cursor:default}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+.feed li:first-child{border-top:0}
+.feed time{color:var(--muted);font-variant-numeric:tabular-nums}
+
+.cm{display:flex;flex-direction:column;gap:10px}
+.cm-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.price{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.calc{display:grid;gap:6px;margin:12px 0}
+.calc div{display:flex;justify-content:space-between;gap:12px}
+.calc .tot{border-top:1px solid var(--line);padding-top:8px;font-weight:800}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--accent)}
+
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;background:var(--panel);color:var(--ink);width:min(600px,calc(100vw - 24px));max-height:calc(100vh - 24px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(20,18,30,.55)}
+.dlg{padding:20px}
+.dlg-h{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.dlg-h h2{font-size:19px}
+.dlg-f{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+.test{background:var(--warn-soft);color:var(--warn);font-weight:700;border-radius:9px;padding:8px 12px;font-size:13.5px;margin-bottom:12px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;max-width:calc(100vw - 32px);z-index:99;box-shadow:var(--shadow)}
+@media print{
+  body>*:not(dialog){display:none!important}
+  dialog{position:static;border:0;box-shadow:none;width:auto;max-height:none}
+  .noprint{display:none!important}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="band"><span><b>Démonstration</b> — données fictives</span>
+  <button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Réinitialiser la démo</button>
+</div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 15l2 2 4-4"/></svg></span>
+    <span>Rotéa<small>Coordination ménage · location courte durée</small></span></div>
+  <div class="tenant"><label for="tenant">Espace client</label><select id="tenant"></select></div>
+</header>
+<div class="shell">
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <main id="view"></main>
+</div>
+<dialog id="dlg" aria-labelledby="dlg-t"><div class="dlg" id="dlg-c"></div></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var DAY=864e5,now=new Date(),Y=now.getFullYear(),M=now.getMonth();
+var TODAY=Math.floor(Date.UTC(Y,M,now.getDate())/DAY);
+var $=function(s){return document.querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fmt(i,o){o.timeZone='UTC';return new Intl.DateTimeFormat('fr-FR',o).format(new Date(i*DAY))}
+function fD(i){return fmt(i,{weekday:'short',day:'numeric',month:'short'})}
+function fDs(i){return fmt(i,{day:'numeric',month:'short'})}
+function iso(i){return new Date(i*DAY).toISOString().slice(0,10)}
+function pIso(s){var t=Date.parse(s+'T00:00:00Z');return isNaN(t)?NaN:Math.floor(t/DAY)}
+function mRange(o){return [Math.floor(Date.UTC(Y,M+o,1)/DAY),Math.floor(Date.UTC(Y,M+o+1,1)/DAY)]}
+function mLabel(o){return fmt(mRange(o)[0],{month:'long',year:'numeric'})}
+var RANGE=[mRange(-1)[0],mRange(1)[1]];
+function eur(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:n%1?2:0,maximumFractionDigits:2}).format(n)}
+function hrs(h){var m=Math.round(h*60);return Math.floor(m/60)+' h '+('0'+m%60).slice(-2)}
+function pct(a,b){return b?Math.round(a/b*100):0}
+function hm(){return ('0'+new Date().getHours()).slice(-2)+':'+('0'+new Date().getMinutes()).slice(-2)}
+function ini(n){return n.split(' ').map(function(w){return w[0]}).join('')}
+function prng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+var IC={
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ list:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>',
+ map:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+ pay:'<rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M6 10v5M18 10v5"/>',
+ plug:'<path d="M9 3v5M15 3v5M7 8h10v4a5 5 0 0 1-10 0z"/><path d="M12 17v4"/>',
+ card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+ phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+ sync:'<path d="M21 12a9 9 0 0 1-15.5 6.2M3 12a9 9 0 0 1 15.5-6.2"/><path d="M18 2v4h-4M6 22v-4h4"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ l:'<path d="M15 6l-6 6 6 6"/>',
+ r:'<path d="M9 6l6 6-6 6"/>',
+ wand:'<path d="M4 20L15 9M14 4v3M12.5 5.5h3M19 9v4M17 11h4"/>',
+ dl:'<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>',
+ print:'<path d="M7 9V4h10v5"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v6H7z"/>'
+};
+function ic(n){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}
+
+var PLAT={airbnb:'Airbnb',booking:'Booking',abritel:'Abritel',direct:'Direct'};
+var PW=['airbnb','airbnb','airbnb','airbnb','airbnb','booking','booking','booking','abritel','direct'];
+var GAPS=[0,0,1,1,2,3,4];
+var ST={todo:['À attribuer','warn'],assigned:['Attribuée','info'],progress:['En cours','acc'],done:['Terminée','ok'],issue:['Problème signalé','bad']};
+var CHECK=['Aérer et vider les poubelles','Linge de lit changé','Salle de bain et WC','Cuisine et vaisselle','Sols aspirés et lavés','Consommables réapprovisionnés'];
+var GUESTS=['Camille Roussel','Jonas Weber','Élodie Marchand','Paolo Ricci','Sarah Lindqvist','Mehdi Ziani','Claire Aubert','Tom Hendriks','Julia Kowalska','Antoine Leroux','Marta Soler','Nicolas Brunet','Emma Vasseur','Luca Moretti','Anna Schulz','Karim Haddad','Louise Perret','Oscar Nilsson','Chloé Tessier','David Morel','Inge Jansen','Romain Gaillard','Fanny Colin','Pedro Almeida'];
+var CMS=[['hostaway','Hostaway','Identifiant de compte + clé secrète API'],['smoobu','Smoobu','Clé API du compte'],['beds24','Beds24','Jeton API v2'],['guesty','Guesty','Open API (client ID / secret)'],['lodgify','Lodgify','Clé API publique'],['ical','Flux iCal','Repli sans channel manager : Airbnb, Booking, Abritel']];
+var PRICE={base:59,unit:7};
+var DEFS=[
+ {id:'t1',name:'Conciergerie des Calanques',city:'Marseille',seed:11,cm:'hostaway',
+  zones:[['Marseille centre','Inès Bertin'],['Cassis – La Ciotat','Malo Garnier'],['Aix-en-Provence','Clara Devaux']],
+  props:[[0,'T2 Vieux-Port vue mer','12 quai de Rive-Neuve, Marseille',2],[0,'Studio du Panier','8 rue du Petit-Puits, Marseille',1.5],[0,'Loft rue Paradis','141 rue Paradis, Marseille',2.5],[0,'T3 Corniche','58 corniche Kennedy, Marseille',3],
+   [1,'Villa Les Roches','14 chemin des Roches, Cassis',4],[1,'T2 Port de Cassis','3 quai des Baux, Cassis',2],[1,'Maison Figuerolles','27 avenue de Figuerolles, La Ciotat',3.5],[1,'Studio Calanque','6 rue de l\'Arène, Cassis',1.5],
+   [2,'T2 Cours Mirabeau','19 cours Mirabeau, Aix',2],[2,'T3 Mazarin','11 rue Cardinale, Aix',3],[2,'Studio Rotonde','4 avenue des Belges, Aix',1.5],[2,'Duplex Cardeurs','9 place des Cardeurs, Aix',2.5]],
+  agents:[[0,'Sofia Marques',14.5,'Salariée'],[0,'Yanis Benali',14,'Salarié'],[0,'Léa Fontaine',16,'Indépendante'],[1,'Nadia Okoye',15,'Salariée'],[1,'Hugo Perrin',16.5,'Indépendant'],[2,'Awa Diallo',14.5,'Salariée'],[2,'Théo Lambert',15.5,'Indépendant']]},
+ {id:'t2',name:'Clés d\'Aquitaine',city:'Bordeaux',seed:29,cm:'smoobu',
+  zones:[['Bordeaux Chartrons','Margaux Delmas'],['Bassin d\'Arcachon','Bastien Lafon']],
+  props:[[0,'T2 Quai des Chartrons','44 quai des Chartrons, Bordeaux',2],[0,'Studio Notre-Dame','17 rue Notre-Dame, Bordeaux',1.5],[0,'Échoppe Saint-Seurin','5 rue Capdeville, Bordeaux',3],
+   [1,'Cabane du Moulleau','21 avenue Notre-Dame-des-Passes, Arcachon',3.5],[1,'T2 Ville d\'Hiver','8 allée Faust, Arcachon',2],[1,'Villa Pyla','62 boulevard de l\'Océan, Pyla-sur-Mer',4]],
+  agents:[[0,'Lina Castel',14.5,'Salariée'],[0,'Maël Dupuis',15.5,'Indépendant'],[1,'Rose Etcheverry',15,'Salariée'],[1,'Samir Kaci',16,'Indépendant']]}
+];
+
+var S,ui;
+function build(def){
+  var rnd=prng(def.seed);
+  function ri(a,b){return a+Math.floor(rnd()*(b-a+1))}
+  function pick(a){return a[Math.floor(rnd()*a.length)]}
+  var T={id:def.id,name:def.name,city:def.city,seq:1040,rseq:1,log:[],payOk:{},conn:{},syncs:[],card:{last:'4242',exp:'08/28'},
+    zones:def.zones.map(function(z,i){return {id:i,name:z[0],lead:z[1]}}),
+    props:def.props.map(function(p,i){return {id:i,zone:p[0],name:p[1],addr:p[2],dur:p[3],code:String(ri(1000,9999))}}),
+    agents:def.agents.map(function(a,i){return {id:i,zone:a[0],name:a[1],rate:a[2],type:a[3]}}),res:[],mis:[]};
+  T.conn[def.cm]={account:String(ri(10000,99999)),since:TODAY-ri(40,160)};
+  T.syncs=[{t:'Aujourd\'hui 07:00',text:'Synchronisation planifiée — aucune modification'},{t:'Hier 19:00',text:'1 réservation modifiée (dates), ménage replanifié'},{t:'Hier 07:00',text:'2 réservations importées, 2 ménages planifiés'}];
+  T.props.forEach(function(p,i){
+    var anchor=TODAY+(i%4===0?0:1+(i*2)%5);
+    function mk(a,b){T.res.push({id:'R'+(T.rseq++),ref:'HM'+ri(100000,999999),prop:p.id,in:a,out:b,guest:pick(GUESTS),plat:pick(PW),n:ri(1,p.dur>=3?6:p.dur>=2?4:2),amount:(b-a)*(55+p.dur*28+ri(0,25))})}
+    var out=anchor,n;
+    while(out>RANGE[0]){n=ri(2,6);mk(out-n,out);out-=n+pick(GAPS)}
+    var c=anchor+pick(GAPS);
+    while(c<RANGE[1]){n=ri(2,6);mk(c,c+n);c+=n+pick(GAPS)}
+  });
+  T.res.sort(function(a,b){return a.in-b.in||a.prop-b.prop});
+  var rot={},k=0;
+  T.res.forEach(function(r){
+    if(r.out>=RANGE[1])return;
+    var m=newMission(T,r),z=T.props[r.prop].zone,za=T.agents.filter(function(a){return a.zone===z});
+    rot[z]=(rot[z]||0)+1;var ag=za[rot[z]%za.length].id,d=m.day-TODAY;
+    if(d<0){m.agent=ag;m.status=rnd()<.04?'issue':'done';m.check=CHECK.map(function(){return 1});m.hours=Math.round(m.dur*(.9+rnd()*.25)*4)/4;if(m.status==='issue')m.note='Tache sur le canapé, photo jointe.'}
+    else if(d===0){m.agent=ag;m.status=['assigned','progress','done'][k%3];k++;
+      if(m.status==='progress'){m.start='10:40';m.check=[1,1,1,0,0,0]}
+      if(m.status==='done'){m.check=CHECK.map(function(){return 1});m.hours=m.dur}}
+    else if(d<=3||rnd()<.5){m.agent=ag;m.status='assigned'}
+  });
+  T.log=[{t:'10:40',text:'Mission démarrée sur le terrain'},{t:'09:15',text:'Planning du jour envoyé aux intervenants'},{t:'07:00',text:'Réservations synchronisées'}];
+  return T;
+}
+function newMission(T,r){var m={id:'M-'+(T.seq++),res:r.id,prop:r.prop,day:r.out,dur:T.props[r.prop].dur,agent:null,status:'todo',check:CHECK.map(function(){return 0}),hours:0,note:'',start:'',photos:0};T.mis.push(m);return m}
+function init(){
+  S={};DEFS.forEach(function(d){S[d.id]=build(d)});
+  ui={tenant:'t1',view:'cal',mo:0,zone:'all',plats:{airbnb:1,booking:1,abritel:1,direct:1},mf:{per:'7',st:'all',zone:'all',q:''},agent:null,am:null,issue:false,pm:0,syncing:false,sim:null,syncN:0,scroll:null};
+  pickAgent();
+}
+function cur(){return S[ui.tenant]}
+function pickAgent(){var T=cur(),m=T.mis.filter(function(x){return x.day===TODAY&&x.status==='assigned'})[0];ui.agent=m?m.agent:0;ui.am=null;ui.issue=false}
+function getM(id){return cur().mis.filter(function(m){return m.id===id})[0]}
+function getR(id){return cur().res.filter(function(r){return r.id===id})[0]}
+function nextIn(T,m){var n=null;T.res.forEach(function(r){if(r.prop===m.prop&&r.in>=m.day&&(n===null||r.in<n))n=r.in});return n}
+function tight(T,m){return nextIn(T,m)===m.day}
+function slot(T,m){return tight(T,m)?'11 h – 16 h (arrivée le jour même)':'11 h – 18 h'}
+function load(T,ag,day){return T.mis.filter(function(m){return m.agent===ag&&m.day===day}).length}
+function suggest(T,m){var z=T.props[m.prop].zone;return T.agents.filter(function(a){return a.zone===z}).sort(function(a,b){return load(T,a.id,m.day)-load(T,b.id,m.day)||wk(T,a.id,m.day)-wk(T,b.id,m.day)})[0]}
+function wk(T,ag,day){return T.mis.filter(function(m){return m.agent===ag&&Math.abs(m.day-day)<=3}).length}
+function free(T,p,a,b,skip){return !T.res.some(function(r){return r.prop===p&&r.id!==skip&&r.in<b&&r.out>a})}
+function addRes(T,o){o.id='R'+(T.rseq++);o.ref='HM'+(100000+T.rseq*7919%900000);o.amount=(o.out-o.in)*(60+T.props[o.prop].dur*28);o.fresh=true;T.res.push(o);T.res.sort(function(a,b){return a.in-b.in});return newMission(T,o)}
+function log(T,t){T.log.unshift({t:hm(),text:t});if(T.log.length>30)T.log.pop()}
+function badge(st){return '<span class="badge b-'+ST[st][1]+'">'+ST[st][0]+'</span>'}
+function agName(T,m){return m.agent===null?'<span class="muted">Non attribuée</span>':esc(T.agents[m.agent].name)}
+var tt;
+function toast(t){var el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(tt);tt=setTimeout(function(){el.hidden=true},4200)}
+
+/* ---------- Vues ---------- */
+var NAV=[['cal','Calendrier','cal'],['mis','Missions','list'],['zones','Zones','map'],['kpi','Tableau de bord','chart'],['pay','RH / Paie','pay'],['conn','Channel managers','plug'],['abo','Abonnement','card'],['agent','Application agent','phone']];
+function vCal(){
+  var T=cur(),R=mRange(ui.mo),a=R[0],b=R[1],N=b-a,h='';
+  var props=T.props.filter(function(p){return ui.zone==='all'||p.zone===+ui.zone});
+  var cells='',head='';
+  for(var d=a;d<b;d++){var dow=new Date(d*DAY).getUTCDay(),c=(dow===0||dow===6?' we':'')+(d===TODAY?' today':'');
+    cells+='<div class="dc'+c+'"></div>';
+    head+='<div class="dc dh'+c+'"><span>'+'DLMMJVS'[dow]+'</span><b>'+new Date(d*DAY).getUTCDate()+'</b></div>'}
+  h+='<div class="page-h"><div><h1>Calendrier multi-logements</h1><p>Réservations par plateforme et ménages planifiés automatiquement entre deux séjours.</p></div>'+
+   '<div class="actions"><button class="btn" data-act="sync"'+(ui.syncing?' disabled':'')+'>'+ic('sync')+(ui.syncing?'Synchronisation…':'Synchroniser')+'</button><button class="btn primary" data-act="newres">'+ic('plus')+'Nouvelle réservation</button></div></div>';
+  h+='<div class="cal-wrap"><div class="card"><div class="cal-bar"><button class="icon-btn" data-act="mo" data-v="-1" aria-label="Mois précédent"'+(ui.mo<=-1?' disabled':'')+'>'+ic('l')+'</button><h2>'+mLabel(ui.mo)+'</h2><button class="icon-btn" data-act="mo" data-v="1" aria-label="Mois suivant"'+(ui.mo>=1?' disabled':'')+'>'+ic('r')+'</button><button class="btn" data-act="mo" data-v="0">Aujourd\'hui</button>'+
+   '<div class="field" style="flex:1 1 180px;max-width:280px"><label class="sr" for="f-zone">Zone</label><select id="f-zone"><option value="all">Toutes les zones</option>'+T.zones.map(function(z){return '<option value="'+z.id+'"'+(ui.zone==z.id?' selected':'')+'>'+esc(z.name)+'</option>'}).join('')+'</select></div></div>';
+  h+='<div class="legend" role="group" aria-label="Filtrer par plateforme">'+Object.keys(PLAT).map(function(p){return '<button class="lg" data-act="plat" data-v="'+p+'" aria-pressed="'+(ui.plats[p]?'true':'false')+'"><i class="p-'+p+'"></i>'+PLAT[p]+'</button>'}).join('')+'</div>';
+  h+='<div class="cal-scroll" tabindex="0" role="region" aria-label="Calendrier du mois, défilement horizontal"><div class="cal" style="--n:'+N+'"><div class="cal-r cal-head"><div class="cal-l">Logement</div><div class="cal-t">'+head+'</div></div>';
+  var lastZ=-1;
+  props.forEach(function(p){
+    if(p.zone!==lastZ){lastZ=p.zone;h+='<div class="cal-r cal-z"><div class="cal-l">'+esc(T.zones[p.zone].name)+'</div><div class="cal-t"></div></div>'}
+    var items='';
+    T.res.forEach(function(r){
+      if(r.prop!==p.id||r.out<a||r.in>=b||!ui.plats[r.plat])return;
+      var x0=Math.max(r.in+.5,a)-a,x1=Math.min(r.out+.5,b)-a;if(x1<=x0)return;
+      items+='<button class="bar p-'+r.plat+(r.fresh?' fresh':'')+'" data-act="res" data-id="'+r.id+'" style="left:calc('+(x0/N*100)+'% + 2px);width:calc('+((x1-x0)/N*100)+'% - 4px)" aria-label="Réservation '+PLAT[r.plat]+', '+esc(r.guest)+', du '+fDs(r.in)+' au '+fDs(r.out)+'">'+esc(r.guest)+'</button>'});
+    T.mis.forEach(function(m){
+      if(m.prop!==p.id||m.day<a||m.day>=b)return;
+      items+='<button class="chip s-'+m.status+(tight(T,m)?' tight':'')+'" data-act="mis" data-id="'+m.id+'" style="left:calc('+((m.day-a)/N*100)+'% + 3px);width:calc('+(100/N)+'% - 6px)" aria-label="Ménage du '+fDs(m.day)+', '+ST[m.status][0]+(m.agent!==null?', '+esc(T.agents[m.agent].name):'')+'">'+(m.agent===null?'?':ini(T.agents[m.agent].name))+'</button>'});
+    h+='<div class="cal-r"><div class="cal-l"><span>'+esc(p.name)+'</span><small>Ménage '+hrs(p.dur)+'</small></div><div class="cal-t">'+cells+items+'</div></div>';
+  });
+  h+='</div></div><div class="keys"><span>Ménages :</span>'+Object.keys(ST).map(function(s){return '<span><i class="s-'+s+'"></i>'+ST[s][0]+'</span>'}).join('')+'<span>Bord épais = rotation serrée (arrivée le jour même)</span></div></div>';
+  var td=T.mis.filter(function(m){return m.day===TODAY&&(ui.zone==='all'||T.props[m.prop].zone===+ui.zone)});
+  var un=T.mis.filter(function(m){return m.status==='todo'&&m.day>=TODAY&&m.day<=TODAY+7});
+  h+='<aside class="card"><div class="card-h"><h2>Ménages du jour</h2><span class="badge b-gray">'+td.length+'</span></div><div class="mlist">'+(td.length?td.map(mRow).join(''):'<p class="empty">Aucun départ aujourd\'hui.</p>')+'</div>'+
+   '<div class="card-h" style="margin-top:18px"><h2>À attribuer sous 7 jours</h2><span class="badge b-warn">'+un.length+'</span></div><div class="mlist">'+(un.length?un.slice(0,5).map(mRow).join(''):'<p class="empty">Tout est attribué.</p>')+'</div>'+
+   (un.length?'<button class="btn block" style="margin-top:10px" data-act="auto">'+ic('wand')+'Attribution automatique</button>':'')+'</aside></div>';
+  return h;
+}
+function mRow(m){var T=cur();return '<button class="mrow" data-act="mis" data-id="'+m.id+'"><span><b>'+esc(T.props[m.prop].name)+'</b><small>'+fD(m.day)+' · '+(m.agent===null?'non attribuée':esc(T.agents[m.agent].name))+'</small></span>'+badge(m.status)+'</button>'}
+function misFiltered(){
+  var T=cur(),f=ui.mf,R=mRange(0),q=f.q.trim().toLowerCase();
+  return T.mis.filter(function(m){
+    if(f.per==='today'&&m.day!==TODAY)return false;
+    if(f.per==='7'&&(m.day<TODAY||m.day>TODAY+7))return false;
+    if(f.per==='month'&&(m.day<R[0]||m.day>=R[1]))return false;
+    if(f.st!=='all'&&m.status!==f.st)return false;
+    if(f.zone!=='all'&&T.props[m.prop].zone!==+f.zone)return false;
+    if(q){var s=(T.props[m.prop].name+' '+(m.agent!==null?T.agents[m.agent].name:'')+' '+m.id).toLowerCase();if(s.indexOf(q)<0)return false}
+    return true}).sort(function(a,b){return a.day-b.day});
+}
+function sel(id,label,opts,v){return '<div class="field"><label for="'+id+'">'+label+'</label><select id="'+id+'">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(String(v)===String(o[0])?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select></div>'}
+function vMis(){
+  var T=cur(),L=misFiltered(),un=L.filter(function(m){return m.status==='todo'}).length;
+  var h='<div class="page-h"><div><h1>Missions de ménage</h1><p>Attribution aux équipes de terrain et suivi de réalisation.</p></div><div class="actions"><button class="btn primary" data-act="auto"'+(un?'':' disabled')+'>'+ic('wand')+'Attribution automatique ('+un+')</button></div></div>';
+  h+='<div class="filters">'+sel('mf-per','Période',[['today','Aujourd\'hui'],['7','7 prochains jours'],['month','Mois en cours'],['all','Tout']],ui.mf.per)+
+   sel('mf-st','Statut',[['all','Tous les statuts']].concat(Object.keys(ST).map(function(s){return [s,ST[s][0]]})),ui.mf.st)+
+   sel('mf-zone','Zone',[['all','Toutes les zones']].concat(T.zones.map(function(z){return [z.id,z.name]})),ui.mf.zone)+
+   '<div class="field grow"><label for="mf-q">Recherche</label><input type="search" id="mf-q" placeholder="Logement, intervenant, n° de mission" value="'+esc(ui.mf.q)+'"></div></div>';
+  h+='<div class="tw"><table><thead><tr><th>Date</th><th>Logement</th><th>Créneau</th><th>Intervenant</th><th>Statut</th><th><span class="sr">Action</span></th></tr></thead><tbody>';
+  if(!L.length)h+='<tr><td colspan="6" class="empty">Aucune mission ne correspond à ces filtres.</td></tr>';
+  L.forEach(function(m){var p=T.props[m.prop];
+    h+='<tr><td><b>'+fD(m.day)+'</b><br><span class="small muted">'+m.id+'</span></td><td>'+esc(p.name)+'<br><span class="small muted">'+esc(T.zones[p.zone].name)+'</span></td><td>'+slot(T,m)+'<br><span class="small muted">'+hrs(m.dur)+' prévues</span></td><td>'+agName(T,m)+'</td><td>'+badge(m.status)+'</td><td class="r"><button class="btn" data-act="mis" data-id="'+m.id+'">'+(m.status==='todo'?'Attribuer':'Ouvrir')+'</button></td></tr>'});
+  return h+'</tbody></table></div><p class="small muted" style="margin-top:8px">'+L.length+' mission(s) affichée(s).</p>';
+}
+function vZones(){
+  var T=cur(),R=mRange(0);
+  var h='<div class="page-h"><div><h1>Vue par responsable de zone</h1><p>Supervision des logements et des équipes par secteur.</p></div></div><div class="grid">';
+  T.zones.forEach(function(z){
+    var ps=T.props.filter(function(p){return p.zone===z.id}),ags=T.agents.filter(function(a){return a.zone===z.id});
+    var zm=T.mis.filter(function(m){return T.props[m.prop].zone===z.id});
+    var td=zm.filter(function(m){return m.day===TODAY}),tdd=td.filter(function(m){return m.status==='done'}).length;
+    var un=zm.filter(function(m){return m.status==='todo'&&m.day>=TODAY&&m.day<=TODAY+7}).length;
+    var inc=zm.filter(function(m){return m.status==='issue'&&m.day>=R[0]&&m.day<R[1]}).length;
+    h+='<section class="card"><div class="card-h"><div><h2>'+esc(z.name)+'</h2><span class="small muted">Responsable : '+esc(z.lead)+'</span></div><button class="btn" data-act="zonecal" data-id="'+z.id+'">'+ic('cal')+'Calendrier</button></div>'+
+     '<div class="small muted">Ménages du jour : '+tdd+' / '+td.length+' terminés</div><div class="prog"><i style="width:'+pct(tdd,td.length)+'%"></i></div>'+
+     '<div class="stat3"><div><b>'+ps.length+'</b><span>logements</span></div><div><b>'+un+'</b><span>à attribuer (7 j)</span></div><div><b>'+inc+'</b><span>incidents du mois</span></div></div>'+
+     '<h3 class="small muted" style="margin-top:6px">Équipe</h3><ul class="plist">'+ags.map(function(a){var n=load(T,a.id,TODAY),w=T.mis.filter(function(m){return m.agent===a.id&&m.day>TODAY&&m.day<=TODAY+7}).length;return '<li><span><b>'+esc(a.name)+'</b> <span class="muted">· '+a.type+'</span></span><span class="muted">'+n+' aujourd\'hui · '+w+' à venir</span></li>'}).join('')+'</ul>'+
+     '<h3 class="small muted" style="margin-top:12px">Logements</h3><ul class="plist">'+ps.map(function(p){
+        var occ=T.res.filter(function(r){return r.prop===p.id&&r.in<=TODAY&&r.out>TODAY})[0];
+        var nm=T.mis.filter(function(m){return m.prop===p.id&&m.day>=TODAY}).sort(function(a,b){return a.day-b.day})[0];
+        return '<li><span><b>'+esc(p.name)+'</b><br><span class="muted">'+(occ?'Occupé jusqu\'au '+fDs(occ.out):'Libre ce soir')+'</span></span>'+(nm?'<button class="btn" data-act="mis" data-id="'+nm.id+'">Ménage '+fDs(nm.day)+' · '+ST[nm.status][0]+'</button>':'')+'</li>'}).join('')+'</ul></section>';
+  });
+  return h+'</div>';
+}
+function vKpi(){
+  var T=cur(),R=mRange(0),a=R[0],b=R[1],N=b-a;
+  var mm=T.mis.filter(function(m){return m.day>=a&&m.day<b}),due=mm.filter(function(m){return m.day<=TODAY});
+  var ok=mm.filter(function(m){return m.status==='done'||m.status==='issue'});
+  var nights=0,byP={airbnb:0,booking:0,abritel:0,direct:0},byZ=T.zones.map(function(){return 0});
+  T.res.forEach(function(r){var n=Math.max(0,Math.min(r.out,b)-Math.max(r.in,a));nights+=n;byP[r.plat]+=n;byZ[T.props[r.prop].zone]+=n});
+  var un=T.mis.filter(function(m){return m.status==='todo'&&m.day>=TODAY&&m.day<=TODAY+7}).length;
+  var hh=0,cost=0;ok.forEach(function(m){hh+=m.hours;cost+=m.hours*T.agents[m.agent].rate});
+  var inc=mm.filter(function(m){return m.status==='issue'}).length;
+  function k(l,v,s){return '<div class="card kpi"><div class="k-l">'+l+'</div><div class="k-v num">'+v+'</div><div class="k-s">'+s+'</div></div>'}
+  var h='<div class="page-h"><div><h1>Tableau de bord</h1><p>Activité et performance — '+mLabel(0)+'. Les chiffres se mettent à jour avec vos actions.</p></div></div><div class="kpis">'+
+   k('Ménages réalisés',ok.length,'sur '+mm.length+' planifiés ce mois')+k('Taux de réalisation',pct(ok.length,due.length)+' %','des ménages échus à ce jour')+
+   k('Taux d\'occupation',pct(nights,T.props.length*N)+' %',nights+' nuits réservées')+k('À attribuer (7 j)',un,un?'action requise':'planning couvert')+
+   k('Heures terrain',hrs(hh),'coût moyen '+eur(ok.length?Math.round(cost/ok.length*100)/100:0)+' / ménage')+k('Incidents signalés',inc,pct(inc,ok.length)+' % des ménages réalisés')+'</div><div class="grid">';
+  var mx=1,days=[];for(var d=TODAY;d<TODAY+14;d++){var dm=T.mis.filter(function(m){return m.day===d}),u=dm.filter(function(m){return m.status==='todo'}).length;days.push([d,dm.length-u,u]);mx=Math.max(mx,dm.length)}
+  h+='<section class="card"><div class="card-h"><h2>Charge de ménage — 14 prochains jours</h2></div><div class="vbars" role="img" aria-label="Nombre de ménages par jour sur 14 jours">'+days.map(function(x){return '<div class="vb"><b>'+(x[1]+x[2])+'</b>'+(x[2]?'<div class="seg un" style="height:'+(x[2]/mx*70)+'%"></div>':'')+(x[1]?'<div class="seg" style="height:'+(x[1]/mx*70)+'%;'+(x[2]?'border-radius:0':'')+'"></div>':'')+'<span>'+new Date(x[0]*DAY).getUTCDate()+'</span></div>'}).join('')+'</div><div class="keys"><span><i style="background:var(--accent);border:0"></i>Attribués</span><span><i style="background:var(--warn);border:0"></i>À attribuer</span></div></section>';
+  function hb(l,v,t,cls){return '<div class="hb"><span class="wrap">'+esc(l)+'</span><div class="track"><div class="fill '+(cls||'')+'" style="width:'+pct(v,t)+'%"></div></div><b class="num">'+pct(v,t)+' %</b></div>'}
+  h+='<section class="card"><div class="card-h"><h2>Nuits réservées par plateforme</h2></div>'+Object.keys(PLAT).map(function(p){return hb(PLAT[p],byP[p],nights,'p-'+p)}).join('')+
+   '<div class="card-h" style="margin-top:18px"><h2>Occupation par zone</h2></div>'+T.zones.map(function(z){return hb(z.name,byZ[z.id],T.props.filter(function(p){return p.zone===z.id}).length*N)}).join('')+'</section>';
+  h+='<section class="card" style="grid-column:1/-1"><div class="card-h"><h2>Performance par intervenant</h2></div><div class="tw"><table><thead><tr><th>Intervenant</th><th>Zone</th><th class="r">Ménages réalisés</th><th class="r">Heures</th><th class="r">Écart / durée prévue</th><th class="r">Incidents</th></tr></thead><tbody>'+
+   T.agents.map(function(ag){var l=ok.filter(function(m){return m.agent===ag.id}),h1=0,p1=0;l.forEach(function(m){h1+=m.hours;p1+=m.dur});var e=p1?Math.round((h1-p1)/p1*100):0;
+     return '<tr><td><b>'+esc(ag.name)+'</b></td><td>'+esc(T.zones[ag.zone].name)+'</td><td class="r num">'+l.length+'</td><td class="r num">'+hrs(h1)+'</td><td class="r num">'+(e>0?'+':'')+e+' %</td><td class="r num">'+l.filter(function(m){return m.status==='issue'}).length+'</td></tr>'}).join('')+'</tbody></table></div></section>';
+  return h+'</div>';
+}
+function payRow(T,ag,o){var R=mRange(o),n=0,h=0,t=0;T.mis.forEach(function(m){if(m.agent===ag.id&&m.day>=R[0]&&m.day<R[1]&&(m.status==='done'||m.status==='issue')){n++;h+=m.hours;if(tight(T,m))t++}});return {n:n,h:h,prime:t*5,total:Math.round((h*ag.rate+t*5)*100)/100}}
+function vPay(){
+  var T=cur(),tot={n:0,h:0,p:0,t:0};
+  var h='<div class="page-h"><div><h1>RH / Paie</h1><p>Heures réalisées et rémunérations des intervenants, calculées depuis les missions terminées.</p></div><div class="actions">'+
+   '<div class="field"><label class="sr" for="pm">Mois</label><select id="pm"><option value="0"'+(ui.pm===0?' selected':'')+'>'+mLabel(0)+'</option><option value="-1"'+(ui.pm===-1?' selected':'')+'>'+mLabel(-1)+'</option></select></div><button class="btn" data-act="csv">'+ic('dl')+'Exporter en CSV</button></div></div>';
+  h+='<div class="tw"><table><thead><tr><th>Intervenant</th><th>Statut</th><th class="r">Ménages</th><th class="r">Heures</th><th>Taux horaire (€)</th><th class="r">Primes rotation serrée</th><th class="r">Total brut</th><th>Validation</th></tr></thead><tbody>';
+  T.agents.forEach(function(ag){var r=payRow(T,ag,ui.pm),ok=T.payOk[ui.pm+'_'+ag.id];tot.n+=r.n;tot.h+=r.h;tot.p+=r.prime;tot.t+=r.total;
+    h+='<tr><td><b>'+esc(ag.name)+'</b><br><span class="small muted">'+esc(T.zones[ag.zone].name)+'</span></td><td>'+ag.type+'</td><td class="r num">'+r.n+'</td><td class="r num">'+hrs(r.h)+'</td><td><label class="sr" for="rate-'+ag.id+'">Taux horaire de '+esc(ag.name)+'</label><input type="number" id="rate-'+ag.id+'" data-rate="'+ag.id+'" min="11" max="40" step="0.5" value="'+ag.rate+'" style="max-width:100px"'+(ok?' disabled':'')+'></td><td class="r num">'+eur(r.prime)+'</td><td class="r num"><b>'+eur(r.total)+'</b></td><td>'+(ok?'<span class="badge b-ok">Validée</span>':'<button class="btn" data-act="payok" data-id="'+ag.id+'">Valider</button>')+'</td></tr>'});
+  h+='</tbody><tfoot><tr><td colspan="2">Total '+mLabel(ui.pm)+'</td><td class="r num">'+tot.n+'</td><td class="r num">'+hrs(tot.h)+'</td><td></td><td class="r num">'+eur(tot.p)+'</td><td class="r num">'+eur(Math.round(tot.t*100)/100)+'</td><td></td></tr></tfoot></table></div>';
+  return h+'<p class="note" style="margin-top:12px">Règle de démonstration : heures pointées × taux horaire + 5 € par rotation serrée. En production, les règles (forfait par logement, majorations dimanche, indemnités kilométriques) sont paramétrables par espace client.</p>';
+}
+function vConn(){
+  var T=cur();
+  var h='<div class="page-h"><div><h1>Channel managers</h1><p>Chaque espace client connecte son propre compte avec ses identifiants API.</p></div><div class="actions"><button class="btn primary" data-act="sync"'+(ui.syncing?' disabled':'')+'>'+ic('sync')+(ui.syncing?'Synchronisation…':'Synchroniser maintenant')+'</button></div></div>';
+  h+='<p class="note" style="margin-bottom:16px"><b>Espace actif : '+esc(T.name)+'.</b> Architecture multi-tenant : identifiants chiffrés et données cloisonnées par espace client. Changez d\'espace en haut de page pour le constater — logements, équipes et connexions sont distincts.</p><div class="grid">';
+  CMS.forEach(function(c){var k=T.conn[c[0]];
+    h+='<section class="card cm"><div class="cm-h"><div><h2>'+c[1]+'</h2><span class="small muted">'+c[2]+'</span></div>'+(k?'<span class="badge b-ok">Connecté</span>':'<span class="badge b-gray">Non connecté</span>')+'</div>'+
+     (k?'<p class="small wrap">Compte n° '+esc(k.account)+' · '+T.props.length+' logements synchronisés · depuis le '+fDs(k.since)+'</p><div class="actions"><button class="btn danger" data-act="disconnect" data-id="'+c[0]+'">Déconnecter</button></div>':'<div class="actions"><button class="btn" data-act="connect" data-id="'+c[0]+'">'+ic('plug')+'Connecter</button></div>')+'</section>'});
+  h+='</div><section class="card" style="margin-top:16px"><div class="card-h"><h2>Journal de synchronisation</h2><span class="small muted">Toutes les 15 min + webhooks (simulation)</span></div><ul class="feed">'+T.syncs.map(function(s){return '<li style="grid-template-columns:minmax(0,150px) minmax(0,1fr)"><time>'+esc(s.t)+'</time><span>'+esc(s.text)+'</span></li>'}).join('')+'</ul></section>';
+  return h;
+}
+function invs(T){var o=[];for(var i=1;i<=3;i++){var d=new Date(Date.UTC(Y,M-i,1));o.push({no:'FA-'+d.getUTCFullYear()+('0'+(d.getUTCMonth()+1)).slice(-2)+'-0'+(T.id==='t1'?'142':'187'),month:mLabel(-i),n:T.props.length})}return o}
+function vAbo(){
+  var T=cur(),n=T.props.length,ht=PRICE.base+PRICE.unit*n,sim=ui.sim||n;
+  var others=[['Rivage Conciergerie','Nice',23,'Actif'],['Maison Clémence Ménage','Lyon',41,'Actif'],['Côte Ouest Services','La Rochelle',9,'Essai gratuit']];
+  var rows=DEFS.map(function(d){return [d.name,d.city,S[d.id].props.length,'Actif']}).concat(others),mrr=0;
+  var h='<div class="page-h"><div><h1>Abonnement</h1><p>Facturation mensuelle : forfait fixe par client + montant par logement.</p></div></div><div class="grid">';
+  h+='<section class="card"><div class="card-h"><h2>Formule de '+esc(T.name)+'</h2><span class="badge b-ok">Actif</span></div><div class="price num">'+eur(ht)+' <span class="small muted">HT / mois</span></div>'+
+   '<div class="calc"><div><span>Forfait fixe</span><b class="num">'+eur(PRICE.base)+'</b></div><div><span>'+n+' logements × '+eur(PRICE.unit)+'</span><b class="num">'+eur(PRICE.unit*n)+'</b></div><div><span>TVA 20 %</span><b class="num">'+eur(ht*.2)+'</b></div><div class="tot"><span>Total TTC</span><span class="num">'+eur(ht*1.2)+'</span></div></div>'+
+   '<p class="small muted">Prochain prélèvement le '+fDs(mRange(1)[0])+' · carte •••• '+esc(T.card.last)+' (exp. '+esc(T.card.exp)+')</p><div class="actions" style="margin-top:10px"><button class="btn" data-act="card">'+ic('card')+'Mettre à jour la carte (mode test)</button></div></section>';
+  h+='<section class="card"><div class="card-h"><h2>Simulateur de tarif</h2></div><div class="field"><label for="sim">Nombre de logements : <b id="sim-n">'+sim+'</b></label><input type="range" id="sim" min="1" max="80" value="'+sim+'"></div><div class="price num" id="sim-p">'+eur(PRICE.base+PRICE.unit*sim)+' <span class="small muted">HT / mois</span></div><p class="small muted">Le montant est recalculé à chaque logement ajouté ou retiré, au prorata du mois. Tarifs fictifs, à paramétrer.</p></section>';
+  h+='<section class="card"><div class="card-h"><h2>Factures</h2></div><ul class="plist">'+invs(T).map(function(f,i){return '<li style="align-items:center"><span><b class="wrap">'+f.no+'</b><br><span class="muted" style="text-transform:capitalize">'+f.month+' · '+eur((PRICE.base+PRICE.unit*f.n)*1.2)+' TTC</span></span><button class="btn" data-act="inv" data-id="'+i+'">Aperçu</button></li>'}).join('')+'</ul></section>';
+  h+='<section class="card" style="grid-column:1/-1"><div class="card-h"><h2>Vue éditeur — tous les espaces clients</h2><span class="badge b-acc">Réservé à l\'administrateur de la plateforme</span></div><div class="tw"><table><thead><tr><th>Espace client</th><th>Ville</th><th class="r">Logements</th><th>Statut</th><th class="r">Revenu mensuel HT</th></tr></thead><tbody>'+
+   rows.map(function(r){var v=r[3]==='Actif'?PRICE.base+PRICE.unit*r[2]:0;mrr+=v;return '<tr><td><b>'+esc(r[0])+'</b></td><td>'+r[1]+'</td><td class="r num">'+r[2]+'</td><td><span class="badge '+(v?'b-ok':'b-info')+'">'+r[3]+'</span></td><td class="r num">'+eur(v)+'</td></tr>'}).join('')+
+   '</tbody><tfoot><tr><td colspan="4">Revenu mensuel récurrent</td><td class="r num">'+eur(mrr)+'</td></tr></tfoot></table></div></section>';
+  return h+'</div>';
+}
+function vAgent(){
+  var T=cur(),ag=T.agents[ui.agent],body='';
+  var L=T.mis.filter(function(m){return m.agent===ag.id&&m.day>=TODAY&&m.day<=TODAY+7}).sort(function(a,b){return a.day-b.day});
+  var m=ui.am?getM(ui.am):null;
+  if(m&&m.agent===ag.id){
+    var p=T.props[m.prop],run=m.status==='progress',nc=m.check.filter(Boolean).length;
+    body='<button class="btn" data-act="aback">'+ic('l')+'Mes missions</button><div class="card"><div class="card-h"><h2>'+esc(p.name)+'</h2>'+badge(m.status)+'</div><dl class="info" style="margin:0"><div><dt>Adresse</dt><dd>'+esc(p.addr)+'</dd></div><div><dt>Boîte à clés</dt><dd class="num">'+p.code+'</dd></div><div><dt>Créneau</dt><dd>'+fD(m.day)+' · '+slot(T,m)+'</dd></div><div><dt>Durée prévue</dt><dd>'+hrs(m.dur)+'</dd></div></dl></div>';
+    if(m.status==='assigned')body+=(m.day===TODAY?'<button class="btn primary block" data-act="astart">Démarrer la mission</button>':'<p class="note">Cette mission pourra être démarrée le '+fD(m.day)+'.</p>');
+    if(run||m.status==='done'||m.status==='issue'){
+      body+='<h3>Checklist ('+nc+' / '+CHECK.length+')</h3>'+CHECK.map(function(c,i){return '<label class="ck"><input type="checkbox" id="chk-'+i+'" data-chk="'+i+'"'+(m.check[i]?' checked':'')+(run?'':' disabled')+'>'+c+'</label>'}).join('');
+      if(run){
+        body+='<button class="btn block" data-act="aphoto">Ajouter une photo de contrôle (simulation) · '+m.photos+'</button><p class="err" id="a-err" role="alert"></p><button class="btn primary block" data-act="afinish">Terminer la mission</button>';
+        body+=ui.issue?'<form data-form="issue" novalidate><div class="field"><label for="iss">Décrivez le problème</label><textarea id="iss" name="note" placeholder="Ex. : vaisselle cassée, tache sur le canapé…"></textarea><p class="err" role="alert"></p></div><button class="btn danger block" style="margin-top:8px">Envoyer le signalement</button></form>':'<button class="btn danger block" data-act="aissue">Signaler un problème</button>';
+      }else body+='<p class="note">'+(m.status==='issue'?'Signalement transmis : '+esc(m.note):'Mission terminée — '+hrs(m.hours)+' enregistrées pour la paie.')+'</p>';
+    }
+  }else{
+    var td=L.filter(function(x){return x.day===TODAY}),nx=L.filter(function(x){return x.day>TODAY});
+    var card=function(x){return '<button class="mrow" data-act="amis" data-id="'+x.id+'"><span><b>'+esc(T.props[x.prop].name)+'</b><small>'+fD(x.day)+' · '+slot(T,x)+'</small></span>'+badge(x.status)+'</button>'};
+    body='<h3>Aujourd\'hui</h3>'+(td.length?td.map(card).join(''):'<p class="note">Aucune mission aujourd\'hui.</p>')+'<h3>À venir</h3>'+(nx.length?nx.map(card).join(''):'<p class="note">Rien de prévu sur 7 jours.</p>');
+  }
+  var all=T.mis.filter(function(x){return x.day===TODAY});
+  var h='<div class="page-h"><div><h1>Application agent</h1><p>Ce que voit l\'intervenant sur son téléphone, et l\'effet immédiat côté back-office.</p></div><div class="field" style="min-width:min(240px,100%)"><label for="ag-sel">Connecté en tant que</label><select id="ag-sel">'+T.agents.map(function(a){return '<option value="'+a.id+'"'+(a.id===ag.id?' selected':'')+'>'+esc(a.name)+' — '+esc(T.zones[a.zone].name)+'</option>'}).join('')+'</select></div></div>';
+  h+='<div class="agent-wrap"><div class="phone"><div class="ph-top"><b>Bonjour '+esc(ag.name.split(' ')[0])+'</b><span>'+fmt(TODAY,{weekday:'long',day:'numeric',month:'long'})+' · '+L.filter(function(x){return x.day===TODAY}).length+' mission(s) aujourd\'hui</span></div><div class="ph-body">'+body+'</div></div>';
+  h+='<div class="grid" style="grid-template-columns:minmax(0,1fr)"><section class="card"><div class="card-h"><h2>Back-office en direct — ménages du jour</h2></div><div class="mlist">'+(all.length?all.map(mRow).join(''):'<p class="empty">Aucun ménage aujourd\'hui.</p>')+'</div></section>'+
+   '<section class="card"><div class="card-h"><h2>Fil d\'activité</h2></div><ul class="feed">'+T.log.slice(0,8).map(function(l){return '<li><time>'+l.t+'</time><span>'+esc(l.text)+'</span></li>'}).join('')+'</ul></section></div></div>';
+  return h;
+}
+var VIEWS={cal:vCal,mis:vMis,zones:vZones,kpi:vKpi,pay:vPay,conn:vConn,abo:vAbo,agent:vAgent};
+function render(){
+  var act=document.activeElement,id=act&&act.id,pos=id&&act.selectionStart,sc=$('.cal-scroll');
+  if(sc&&ui.view==='cal')ui.scroll=sc.scrollLeft;
+  $('#nav').innerHTML=NAV.map(function(n){return '<button class="tab" data-act="nav" data-v="'+n[0]+'"'+(ui.view===n[0]?' aria-current="page"':'')+'>'+ic(n[2])+n[1]+'</button>'}).join('');
+  $('#tenant').innerHTML=DEFS.map(function(d){return '<option value="'+d.id+'"'+(d.id===ui.tenant?' selected':'')+'>'+esc(d.name)+' ('+d.city+')</option>'}).join('');
+  $('#view').innerHTML=VIEWS[ui.view]();
+  sc=$('.cal-scroll');
+  if(sc){if(ui.scroll===null){var t=sc.querySelector('.dh.today');ui.scroll=t?Math.max(0,t.offsetLeft-60):0}sc.scrollLeft=ui.scroll}
+  if(id&&!$('#dlg').open){var el=document.getElementById(id);if(el&&el!==document.activeElement){el.focus();if(typeof pos==='number'&&el.setSelectionRange&&el.type==='search'){try{el.setSelectionRange(pos,pos)}catch(e){}}}}
+}
+
+/* ---------- Modales ---------- */
+var dlg=$('#dlg');
+function modal(title,body,foot){$('#dlg-c').innerHTML='<div class="dlg-h"><h2 id="dlg-t">'+title+'</h2><button class="icon-btn noprint" data-act="close" aria-label="Fermer">'+ic('x')+'</button></div>'+body+(foot?'<div class="dlg-f noprint">'+foot+'</div>':'');if(!dlg.open)dlg.showModal()}
+dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.close()});
+function mRes(id){var T=cur(),r=getR(id),p=T.props[r.prop],m=T.mis.filter(function(x){return x.res===r.id})[0];
+  modal('Réservation '+esc(r.guest),'<dl class="info"><div><dt>Plateforme</dt><dd>'+PLAT[r.plat]+'</dd></div><div><dt>Référence</dt><dd>'+r.ref+'</dd></div><div><dt>Logement</dt><dd>'+esc(p.name)+'</dd></div><div><dt>Séjour</dt><dd>'+fD(r.in)+' → '+fD(r.out)+' ('+(r.out-r.in)+' nuits)</dd></div><div><dt>Voyageurs</dt><dd>'+r.n+'</dd></div><div><dt>Montant</dt><dd>'+eur(r.amount)+'</dd></div></dl>'+
+   (m?'<div class="note">Ménage de sortie planifié automatiquement le <b>'+fD(m.day)+'</b> · '+slot(T,m)+' · '+badge(m.status)+'</div>':'<div class="note">Le départ est hors de la période chargée : le ménage sera planifié à la prochaine synchronisation.</div>'),
+   (m?'<button class="btn primary" data-act="mis" data-id="'+m.id+'">Ouvrir le ménage</button>':'')+'<button class="btn" data-act="close">Fermer</button>')}
+function mMis(id){var T=cur(),m=getM(id),p=T.props[m.prop],r=getR(m.res),sg=suggest(T,m),ni=nextIn(T,m);
+  var zs=T.agents.filter(function(a){return a.zone===p.zone}),os=T.agents.filter(function(a){return a.zone!==p.zone});
+  function opt(a){return '<option value="'+a.id+'"'+(m.agent===a.id?' selected':'')+'>'+esc(a.name)+' — '+load(T,a.id,m.day)+' mission(s) ce jour'+(m.agent===null&&a.id===sg.id?' · suggéré':'')+'</option>'}
+  modal('Ménage · '+esc(p.name),'<dl class="info"><div><dt>Date</dt><dd>'+fD(m.day)+'</dd></div><div><dt>Créneau</dt><dd>'+slot(T,m)+'</dd></div><div><dt>Durée prévue</dt><dd>'+hrs(m.dur)+'</dd></div><div><dt>Adresse</dt><dd>'+esc(p.addr)+'</dd></div><div><dt>Voyageur sortant</dt><dd>'+(r?esc(r.guest)+' ('+PLAT[r.plat]+')':'—')+'</dd></div><div><dt>Prochaine arrivée</dt><dd>'+(ni===null?'Aucune prévue':fD(ni))+'</dd></div><div><dt>Checklist</dt><dd>'+m.check.filter(Boolean).length+' / '+CHECK.length+' points</dd></div><div><dt>Mission</dt><dd>'+m.id+'</dd></div></dl>'+
+   '<form data-form="mis" id="f-mis" novalidate><input type="hidden" name="id" value="'+m.id+'"><div class="fgrid"><div class="field"><label for="m-ag">Intervenant</label><select id="m-ag" name="agent"><option value="">— Non attribuée —</option><optgroup label="'+esc(T.zones[p.zone].name)+'">'+zs.map(opt).join('')+'</optgroup>'+(os.length?'<optgroup label="Autres zones">'+os.map(opt).join('')+'</optgroup>':'')+'</select></div>'+
+   '<div class="field"><label for="m-st">Statut</label><select id="m-st" name="status">'+Object.keys(ST).map(function(s){return '<option value="'+s+'"'+(m.status===s?' selected':'')+'>'+ST[s][0]+'</option>'}).join('')+'</select></div>'+
+   '<div class="field full"><label for="m-note">Consigne ou remarque</label><textarea id="m-note" name="note">'+esc(m.note)+'</textarea></div></div><p class="err" role="alert"></p></form>',
+   '<button class="btn" data-act="close">Annuler</button><button class="btn primary" form="f-mis">Enregistrer</button>')}
+function mNewRes(){var T=cur();
+  modal('Nouvelle réservation','<form data-form="res" id="f-res" novalidate><div class="fgrid"><div class="field full"><label for="r-prop">Logement</label><select id="r-prop" name="prop">'+T.props.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' — '+esc(T.zones[p.zone].name)+'</option>'}).join('')+'</select></div>'+
+   '<div class="field"><label for="r-guest">Voyageur</label><input type="text" id="r-guest" name="guest" autocomplete="off"></div><div class="field"><label for="r-plat">Plateforme</label><select id="r-plat" name="plat">'+Object.keys(PLAT).map(function(p){return '<option value="'+p+'"'+(p==='direct'?' selected':'')+'>'+PLAT[p]+'</option>'}).join('')+'</select></div>'+
+   '<div class="field"><label for="r-in">Arrivée</label><input type="date" id="r-in" name="in" value="'+iso(TODAY+1)+'"></div><div class="field"><label for="r-out">Départ</label><input type="date" id="r-out" name="out" value="'+iso(TODAY+4)+'"></div></div><p class="hint" style="margin-top:8px">Le ménage de sortie est créé automatiquement le jour du départ.</p><p class="err" role="alert"></p></form>',
+   '<button class="btn" data-act="close">Annuler</button><button class="btn primary" form="f-res">Créer la réservation</button>')}
+function mConn(id){var c=CMS.filter(function(x){return x[0]===id})[0];
+  modal('Connecter '+c[1],'<form data-form="conn" id="f-conn" novalidate><input type="hidden" name="cm" value="'+id+'"><p class="test">Simulation : aucun appel réel n\'est effectué, saisissez des valeurs de test.</p><div class="fgrid"><div class="field full"><label for="c-acc">Identifiant de compte</label><input type="text" id="c-acc" name="account" autocomplete="off" inputmode="numeric"></div><div class="field full"><label for="c-key">Clé API secrète</label><input type="password" id="c-key" name="key" autocomplete="off"><span class="hint">16 caractères minimum. Stockée chiffrée, visible uniquement par '+esc(cur().name)+'.</span></div></div><p class="err" role="alert"></p></form>',
+   '<button class="btn" data-act="close">Annuler</button><button class="btn primary" form="f-conn">Tester et connecter</button>')}
+function mCard(){modal('Moyen de paiement','<form data-form="card" id="f-card" novalidate><p class="test">Mode test — aucune carte n\'est débitée. Essayez 4242 4242 4242 4242.</p><div class="fgrid"><div class="field full"><label for="k-num">Numéro de carte</label><input type="text" id="k-num" name="num" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242"></div><div class="field"><label for="k-exp">Expiration (MM/AA)</label><input type="text" id="k-exp" name="exp" placeholder="12/29" autocomplete="off"></div><div class="field"><label for="k-cvc">Cryptogramme</label><input type="text" id="k-cvc" name="cvc" inputmode="numeric" placeholder="123" autocomplete="off"></div></div><p class="err" role="alert"></p></form>','<button class="btn" data-act="close">Annuler</button><button class="btn primary" form="f-card">Enregistrer la carte</button>')}
+function mInv(i){var T=cur(),f=invs(T)[i],ht=PRICE.base+PRICE.unit*f.n;
+  modal('Facture '+f.no,'<p class="small muted">Aperçu imprimable — document fictif</p><dl class="info" style="margin-top:10px"><div><dt>Client</dt><dd>'+esc(T.name)+', '+T.city+'</dd></div><div><dt>Période</dt><dd style="text-transform:capitalize">'+f.month+'</dd></div></dl><div class="calc"><div><span>Forfait mensuel fixe</span><b class="num">'+eur(PRICE.base)+'</b></div><div><span>'+f.n+' logements × '+eur(PRICE.unit)+'</span><b class="num">'+eur(PRICE.unit*f.n)+'</b></div><div><span>Total HT</span><b class="num">'+eur(ht)+'</b></div><div><span>TVA 20 %</span><b class="num">'+eur(ht*.2)+'</b></div><div class="tot"><span>Total TTC</span><span class="num">'+eur(ht*1.2)+'</span></div></div><p class="small muted">Réglée par prélèvement sur carte •••• '+esc(T.card.last)+'.</p>',
+   '<button class="btn" data-act="close">Fermer</button><button class="btn primary" data-act="print">'+ic('print')+'Imprimer / PDF</button>')}
+
+/* ---------- Actions ---------- */
+function doSync(){var T=cur();
+  if(!Object.keys(T.conn).length){toast('Aucun channel manager connecté : connectez un compte pour synchroniser.');ui.view='conn';render();return}
+  ui.syncing=true;render();
+  setTimeout(function(){ui.syncing=false;var n=0,first=null,L=T.props.length,off=ui.syncN++*5;
+    for(var i=0;i<L&&n<2;i++){var p=T.props[(i+off)%L],g=null;
+      for(var s=TODAY+2;s<TODAY+40&&!g;s++){[3,2].forEach(function(len){if(!g&&s+len<RANGE[1]&&free(T,p.id,s,s+len))g=[s,s+len]})}
+      if(g){addRes(T,{prop:p.id,in:g[0],out:g[1],guest:GUESTS[(T.rseq*7)%GUESTS.length],plat:['airbnb','booking','abritel'][T.rseq%3],n:2});n++;if(first===null)first=g[0]}}
+    var txt=n?n+' réservation(s) importée(s), '+n+' ménage(s) planifié(s) automatiquement':'Aucune nouvelle réservation — tout est à jour';
+    T.syncs.unshift({t:'Aujourd\'hui '+hm(),text:txt});log(T,'Synchronisation : '+txt.toLowerCase());
+    if(first!==null&&ui.view==='cal'){ui.mo=first>=mRange(1)[0]?1:0;ui.scroll=null}
+    render();toast(txt+' (simulation).');
+  },900);
+}
+function autoAssign(){var T=cur(),L=(ui.view==='mis'?misFiltered():T.mis.filter(function(m){return m.day>=TODAY&&m.day<=TODAY+7})).filter(function(m){return m.status==='todo'});
+  L.forEach(function(m){m.agent=suggest(T,m).id;m.status='assigned'});
+  if(L.length)log(T,L.length+' mission(s) attribuée(s) automatiquement');
+  render();toast(L.length?L.length+' mission(s) attribuée(s) à l\'intervenant le moins chargé de la zone. Notification envoyée (simulation).':'Aucune mission à attribuer.');
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var a=b.dataset.act,id=b.dataset.id,T=cur(),m;
+  if(a==='nav'){ui.view=b.dataset.v;ui.am=null;ui.issue=false;if(ui.view==='cal')ui.scroll=null;render();window.scrollTo(0,0)}
+  else if(a==='reset'){if(dlg.open)dlg.close();init();render();toast('Démo réinitialisée.')}
+  else if(a==='close')dlg.close();
+  else if(a==='mo'){var v=+b.dataset.v;ui.mo=v===0?0:Math.max(-1,Math.min(1,ui.mo+v));ui.scroll=v===0||ui.mo===0?null:0;render()}
+  else if(a==='plat'){ui.plats[b.dataset.v]=ui.plats[b.dataset.v]?0:1;render()}
+  else if(a==='sync')doSync();
+  else if(a==='auto')autoAssign();
+  else if(a==='newres')mNewRes();
+  else if(a==='res')mRes(id);
+  else if(a==='mis')mMis(id);
+  else if(a==='zonecal'){ui.zone=id;ui.view='cal';ui.mo=0;ui.scroll=null;render();window.scrollTo(0,0)}
+  else if(a==='amis'){ui.am=id;ui.issue=false;render()}
+  else if(a==='aback'){ui.am=null;ui.issue=false;render()}
+  else if(a==='astart'){m=getM(ui.am);m.status='progress';m.start=hm();log(T,T.agents[m.agent].name+' a démarré le ménage — '+T.props[m.prop].name);render();toast('Mission démarrée : le back-office est informé en direct.')}
+  else if(a==='aphoto'){getM(ui.am).photos++;render()}
+  else if(a==='aissue'){ui.issue=true;render();var ta=$('#iss');if(ta)ta.focus()}
+  else if(a==='afinish'){m=getM(ui.am);
+    if(m.check.some(function(c){return !c})){$('#a-err').textContent='Cochez tous les points de la checklist avant de terminer.';return}
+    m.status='done';m.hours=m.dur;log(T,T.agents[m.agent].name+' a terminé le ménage — '+T.props[m.prop].name);render();toast('Mission terminée : heures transmises à la paie.')}
+  else if(a==='payok'){T.payOk[ui.pm+'_'+id]=true;render();toast('Paie validée pour '+T.agents[+id].name+'. Récapitulatif envoyé par e-mail (simulation).')}
+  else if(a==='csv'){var rows=[['Intervenant','Statut','Menages','Heures','Taux horaire','Primes','Total brut']];T.agents.forEach(function(ag){var r=payRow(T,ag,ui.pm);rows.push([ag.name,ag.type,r.n,String(r.h).replace('.',','),String(ag.rate).replace('.',','),r.prime,String(r.total).replace('.',',')])});
+    var url=URL.createObjectURL(new Blob(['﻿'+rows.map(function(r){return r.join(';')}).join('\n')],{type:'text/csv;charset=utf-8'})),l=document.createElement('a');l.href=url;l.download='paie-'+iso(mRange(ui.pm)[0]).slice(0,7)+'.csv';document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast('Export CSV téléchargé.')}
+  else if(a==='connect')mConn(id);
+  else if(a==='disconnect'){delete T.conn[id];T.syncs.unshift({t:'Aujourd\'hui '+hm(),text:'Compte déconnecté — les réservations déjà importées sont conservées'});render();toast('Compte déconnecté.')}
+  else if(a==='card')mCard();
+  else if(a==='inv')mInv(+id);
+  else if(a==='print')window.print();
+});
+document.addEventListener('change',function(e){
+  var t=e.target,T=cur();
+  if(t.id==='tenant'){ui.tenant=t.value;ui.zone='all';ui.mf.zone='all';ui.sim=null;ui.scroll=null;pickAgent();render();toast('Espace client : '+cur().name+'.')}
+  else if(t.id==='f-zone'){ui.zone=t.value;render()}
+  else if(t.id==='mf-per'){ui.mf.per=t.value;render()}
+  else if(t.id==='mf-st'){ui.mf.st=t.value;render()}
+  else if(t.id==='mf-zone'){ui.mf.zone=t.value;render()}
+  else if(t.id==='pm'){ui.pm=+t.value;render()}
+  else if(t.id==='ag-sel'){ui.agent=+t.value;ui.am=null;ui.issue=false;render()}
+  else if(t.dataset.chk!==undefined){getM(ui.am).check[+t.dataset.chk]=t.checked?1:0;render()}
+  else if(t.dataset.rate!==undefined){var v=parseFloat(t.value);if(isNaN(v)||v<11||v>40){t.setAttribute('aria-invalid','true');toast('Taux horaire attendu entre 11 et 40 €.');return}T.agents[+t.dataset.rate].rate=v;render()}
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='mf-q'){ui.mf.q=t.value;render()}
+  else if(t.id==='sim'){ui.sim=+t.value;$('#sim-n').textContent=t.value;$('#sim-p').innerHTML=eur(PRICE.base+PRICE.unit*ui.sim)+' <span class="small muted">HT / mois</span>'}
+});
+document.addEventListener('submit',function(e){
+  var f=e.target,k=f.dataset.form;if(!k)return;e.preventDefault();
+  var T=cur(),fd=new FormData(f),errEl=f.querySelector('.err');
+  Array.prototype.forEach.call(f.querySelectorAll('[aria-invalid]'),function(x){x.removeAttribute('aria-invalid')});
+  function fail(msg,name){errEl.textContent=msg;if(name){var el=f.elements[name];el.setAttribute('aria-invalid','true');el.focus()}}
+  if(k==='mis'){
+    var m=getM(fd.get('id')),ag=fd.get('agent'),st=fd.get('status');
+    if(ag===''&&st!=='todo')return fail('Choisissez un intervenant pour ce statut.','agent');
+    if(ag!==''&&st==='todo')st='assigned';
+    m.agent=ag===''?null:+ag;m.status=st;m.note=String(fd.get('note')).trim();
+    if(st==='done'||st==='issue'){m.hours=m.hours||m.dur;if(st==='done')m.check=CHECK.map(function(){return 1})}
+    log(T,'Mission '+m.id+' — '+ST[st][0].toLowerCase()+(m.agent!==null?' ('+T.agents[m.agent].name+')':''));
+    dlg.close();render();toast(st==='assigned'?'Mission attribuée à '+T.agents[m.agent].name+'. Notification envoyée (simulation).':'Mission mise à jour.');
+  }else if(k==='res'){
+    var g=String(fd.get('guest')).trim(),a=pIso(fd.get('in')),b=pIso(fd.get('out')),p=+fd.get('prop');
+    if(g.length<2)return fail('Indiquez le nom du voyageur.','guest');
+    if(isNaN(a))return fail('Date d\'arrivée invalide.','in');
+    if(isNaN(b)||b<=a)return fail('Le départ doit être postérieur à l\'arrivée.','out');
+    if(a<RANGE[0]||b>=RANGE[1])return fail('Choisissez des dates entre le '+fDs(RANGE[0])+' et le '+fDs(RANGE[1]-2)+'.','in');
+    if(!free(T,p,a,b))return fail('Ce logement est déjà réservé sur ces dates.','in');
+    var nm=addRes(T,{prop:p,in:a,out:b,guest:g,plat:fd.get('plat'),n:2});
+    log(T,'Réservation créée — '+T.props[p].name+', ménage planifié le '+fDs(nm.day));
+    ui.view='cal';ui.zone='all';ui.plats[fd.get('plat')]=1;ui.mo=a>=mRange(1)[0]?1:a<mRange(0)[0]?-1:0;ui.scroll=null;
+    dlg.close();render();toast('Réservation créée. Ménage de sortie planifié le '+fD(nm.day)+', à attribuer.');
+  }else if(k==='conn'){
+    var acc=String(fd.get('account')).trim(),key=String(fd.get('key')).trim(),cm=fd.get('cm');
+    if(acc.length<3)return fail('Indiquez l\'identifiant du compte.','account');
+    if(key.length<16)return fail('La clé API doit contenir au moins 16 caractères.','key');
+    var btn=document.querySelector('[form="f-conn"]');btn.disabled=true;btn.textContent='Test de connexion…';errEl.textContent='';
+    setTimeout(function(){T.conn[cm]={account:acc,since:TODAY};T.syncs.unshift({t:'Aujourd\'hui '+hm(),text:'Connexion vérifiée — '+T.props.length+' logements détectés'});if(dlg.open)dlg.close();render();toast('Connexion vérifiée, compte relié à '+T.name+' (simulation).')},900);
+  }else if(k==='card'){
+    var num=String(fd.get('num')).replace(/\s/g,''),exp=String(fd.get('exp')).trim(),cvc=String(fd.get('cvc')).trim();
+    if(!/^\d{16}$/.test(num))return fail('Le numéro de carte doit comporter 16 chiffres.','num');
+    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp))return fail('Expiration attendue au format MM/AA.','exp');
+    if(!/^\d{3}$/.test(cvc))return fail('Cryptogramme à 3 chiffres.','cvc');
+    T.card={last:num.slice(-4),exp:exp};dlg.close();render();toast('Carte enregistrée (mode test, aucun débit).');
+  }else if(k==='issue'){
+    var note=String(fd.get('note')).trim(),mi=getM(ui.am);
+    if(note.length<5)return fail('Décrivez le problème en quelques mots.','note');
+    mi.status='issue';mi.note=note;mi.hours=mi.dur;ui.issue=false;
+    log(T,'Problème signalé par '+T.agents[mi.agent].name+' — '+T.props[mi.prop].name);
+    render();toast('Signalement envoyé au responsable de zone (simulation).');
+  }
+});
+init();render();
+})();
+</script>
 </body>
 </html>
