@@ -2,20 +2,832 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Place de marché véhicules anciens</title>
+<meta name="description" content="Place de marché de pièces, équipements et véhicules anciens et de compétition : annonces et options payantes, messagerie, paiement conservé jusqu’à réception, expédition, litiges, modération et espace professionnel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F3F0E8;--panel:#FFFDF8;--panel-2:#ECE7DB;--ink:#1B1D1A;--muted:#575C55;--line:#DDD6C6;--line-2:#B4AC98;
+  --accent:#14523E;--accent-ink:#FFFFFF;--accent-soft:#DCEBE3;--accent-text:#114534;
+  --race:#7A4F00;--race-soft:#F6E8C6;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#854700;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4E5552;--gray-soft:#E8E4DA;
+  --t-auto:#E3EADF;--t-moto:#EFE3D6;--t-kart:#DFE6EE;--art:#3D4A43;
+  --shadow:0 1px 2px rgba(30,26,16,.05),0 3px 10px rgba(30,26,16,.05);
+  --font:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111412;--panel:#181C19;--panel-2:#20251F;--ink:#E8E9E3;--muted:#A5ABA1;--line:#2B312B;--line-2:#4A534A;
+  --accent:#7CCBA6;--accent-ink:#06241A;--accent-soft:#17332A;--accent-text:#9ADBBB;
+  --race:#E9B65C;--race-soft:#332712;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--gray:#B8BFBB;--gray-soft:#262B29;
+  --t-auto:#1F2A23;--t-moto:#2C241C;--t-kart:#1D2530;--art:#B9C4BC;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);letter-spacing:.01em}
+h1{font-size:30px}h2{font-size:22px}h3{font-size:18px}
+p{margin:0}
+.muted{color:var(--muted)}.small{font-size:14px}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--race-soft);font-size:14px;padding:0 16px;display:flex;gap:4px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--race)}
+.demo-band button{min-height:44px;border:0;background:transparent;padding:0 10px;cursor:pointer;font-weight:600;display:inline-flex;gap:6px;align-items:center;text-decoration:underline;text-underline-offset:3px}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:22px;line-height:1.1}
+.brand small{display:block;font-family:var(--font);font-weight:500;font-size:12.5px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.tab .cnt{font-size:12.5px;background:var(--race-soft);color:var(--race);border-radius:999px;padding:0 7px;font-weight:700}
+.who{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0}
+.who label{font-size:14px;color:var(--muted);white-space:nowrap}
+.who select{max-width:330px}
+main{padding:20px clamp(16px,2vw,32px) 64px;outline:0}
+@media (max-width:860px){.who{margin-left:0;width:100%}.who select{flex:1;max-width:none;width:0}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:6px 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;line-height:1.25}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:0;background:transparent;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:14.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:13.5px;color:var(--muted)}
+.err{font-size:14px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=number],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:96px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:6px;font-weight:600;font-size:14.5px}
+.fgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
+.ck{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer}
+.ck:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.ck input{width:18px;height:18px;accent-color:var(--accent);margin:0;flex:none}
+.ck .ck-t{flex:1;min-width:0}
+.ck .ck-t small{display:block;color:var(--muted);font-size:13.5px}
+.ck .ck-p{font-weight:700;white-space:nowrap}
+.stack{display:grid;gap:8px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h p{max-width:70ch}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;line-height:1.3}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}.b-race{background:var(--race-soft);color:var(--race)}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.note{background:var(--panel-2);border-radius:10px;padding:10px 12px;font-size:14.5px;display:flex;gap:10px;align-items:flex-start}
+.note svg{margin-top:2px;color:var(--accent-text)}
+.note.bad{background:var(--bad-soft);color:var(--bad)}.note.bad svg{color:var(--bad)}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));margin-bottom:16px}
+.kpi .k-l{font-size:14px;color:var(--muted);font-weight:600}
+.kpi .k-v{font-family:var(--head);font-size:30px;font-weight:700;line-height:1.1;margin-top:4px}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));align-items:start}
+.section{margin-top:26px}
+.section>h2{margin-bottom:12px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+
+/* Catalogue */
+.hero{display:grid;gap:12px;margin-bottom:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cat{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+.filters{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
+.filters .full{grid-column:1/-1}
+@media (min-width:960px){.cat{grid-template-columns:270px minmax(0,1fr)}.filters{grid-template-columns:minmax(0,1fr);position:sticky;top:12px}}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{padding-left:38px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
+.lcard{display:flex;flex-direction:column;text-align:left;padding:0;overflow:hidden;cursor:pointer;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.lcard:hover{border-color:var(--accent)}
+.art{display:grid;place-items:center;aspect-ratio:4/3;position:relative;color:var(--art);width:100%}
+.art svg{width:62%;height:auto;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.art.auto{background:var(--t-auto)}.art.moto{background:var(--t-moto)}.art.kart{background:var(--t-kart)}
+.art .badges{position:absolute;left:8px;top:8px;right:8px}
+.art.thumb{width:76px;aspect-ratio:4/3;border-radius:8px;flex:none}
+.art.big{border-radius:14px;aspect-ratio:16/9}
+.art.big svg{width:38%}
+.lbody{display:block;padding:12px 14px 14px}
+.lbody .lt{display:block;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.lbody .lp{display:block;font-family:var(--head);font-size:24px;font-weight:700;margin-top:4px}
+.lbody .lm{display:block;font-size:14px;color:var(--muted);margin-top:2px}
+.sponsor{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;border-left:4px solid var(--race);margin-bottom:14px;padding:12px 16px}
+.res-h{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+
+/* Fiche */
+.detail{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:960px){.detail{grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr)}}
+.price{font-family:var(--head);font-size:38px;font-weight:700;line-height:1}
+dl.specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:10px 16px;margin:0}
+dl.specs dt{font-size:13.5px;color:var(--muted)}dl.specs dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.serp{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--panel-2)}
+.serp .s-u{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.serp .s-t{font-size:18px;color:var(--info);font-weight:600;overflow-wrap:anywhere}
+.serp .s-d{font-size:14px}
+ul.clean{margin:8px 0 0;padding-left:18px}
+ul.clean li{margin:2px 0}
+details summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+
+/* Lignes de montant */
+dl.lines{margin:0;display:grid;gap:4px}
+dl.lines div{display:flex;justify-content:space-between;gap:12px}
+dl.lines dt{color:var(--muted);min-width:0}dl.lines dd{margin:0;font-weight:600;white-space:nowrap}
+dl.lines .tot{border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+dl.lines .tot dt{color:var(--ink);font-weight:700}dl.lines .tot dd{font-size:18px}
+
+/* Commandes */
+.ocard{display:grid;gap:14px}
+.o-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.o-h .o-t{font-weight:700;font-size:17px;overflow-wrap:anywhere}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.steps li{font-size:13px;line-height:1.25;color:var(--muted);padding-top:12px;border-top:4px solid var(--line);overflow-wrap:anywhere;hyphens:auto}
+.steps li.on{border-color:var(--accent);color:var(--ink);font-weight:600}
+.steps li.stop{border-color:var(--bad);color:var(--bad);font-weight:600}
+.log{margin:0;padding:0;list-style:none;font-size:14px;display:grid;gap:4px}
+.log li{display:flex;gap:10px;flex-wrap:wrap}
+.log time{color:var(--muted);flex:none}
+.dispute{border:1px solid var(--bad);border-radius:10px;padding:12px;display:grid;gap:10px}
+.bub{background:var(--panel-2);border-radius:10px;padding:8px 12px;font-size:15px;overflow-wrap:anywhere}
+.bub b{display:block;font-size:13.5px;color:var(--muted)}
+.inline-form{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.inline-form .field{flex:1 1 200px}
+
+/* Messagerie */
+.msgs{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:860px){.msgs{grid-template-columns:minmax(0,340px) minmax(0,1fr)}}
+.tlist{display:grid;gap:6px;padding:8px}
+.titem{display:block;text-align:left;width:100%;min-height:44px;padding:10px 12px;border-radius:10px;border:1px solid transparent;background:transparent;cursor:pointer}
+.titem:hover{background:var(--panel-2)}
+.titem[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.titem b,.titem span{display:block;overflow-wrap:anywhere}
+.titem span{font-size:14px;color:var(--muted)}
+.conv{display:grid;gap:8px;max-height:420px;overflow-y:auto;padding:4px 2px;margin:12px 0}
+.conv .bub{max-width:min(520px,88%);justify-self:start}
+.conv .bub.me{justify-self:end;background:var(--accent-soft)}
+
+/* Tableaux */
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:860px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:13.5px;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.row{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.row>.grow{flex:1;min-width:0}
+.rows{display:grid;gap:12px}
+.plans{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr))}
+.plan{border:1px solid var(--line-2);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start}
+.plan.cur{border-color:var(--accent);background:var(--accent-soft)}
+.plan .pp{font-family:var(--head);font-size:26px;font-weight:700}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs img{width:72px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+input[type=file]{min-height:44px;max-width:100%}
+
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:0;width:min(580px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgba(10,12,10,.55)}
+.m-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 10px 10px 18px;border-bottom:1px solid var(--line)}
+.m-b{padding:18px;display:grid;gap:14px}
+.testband{background:var(--race-soft);color:var(--race);border-radius:10px;padding:8px 12px;font-weight:600;font-size:14.5px;display:flex;gap:8px;align-items:center}
+#toasts{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:grid;gap:8px;z-index:99;width:min(460px,calc(100vw - 24px));pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 14px;font-weight:600;font-size:15px;box-shadow:var(--shadow)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:up .2s ease-out}@keyframes up{from{opacity:0;transform:translateY(8px)}}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4h12l-2 4 2 4H5"/></svg></span><span>RétroPaddock<small>Anciennes &amp; compétition</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="who"><label for="role">Voir en tant que</label><select id="role"></select></div>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="dlg" aria-labelledby="dlg-t"></dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY="retropaddock-demo-v1", FEE=0.06;
+var $=function(s,r){return (r||document).querySelector(s);};
+var CATS={piece:"Pièces",equip:"Équipements",vehicule:"Véhicules"};
+var CAT_SLUG={piece:"pieces",equip:"equipements",vehicule:"vehicules"};
+var UNIVS={auto:"Voiture",moto:"Moto",kart:"Kart"};
+var CONDS=["Neuf","Restauré","Très bon état","Bon état","À restaurer"];
+var USERS={
+  u1:{id:"u1",name:"Camille Renaud",type:"part",city:"Angers",since:"2024",role:"Camille Renaud — particulière"},
+  u2:{id:"u2",name:"Garage Vintage Atlantique",type:"pro",city:"La Rochelle",since:"2023",role:"Garage Vintage Atlantique — professionnel"},
+  u3:{id:"u3",name:"Julien Marchetti",type:"part",city:"Lyon",since:"2025"},
+  u4:{id:"u4",name:"Écurie Kart Ouest",type:"pro",city:"Le Mans",since:"2024"},
+  adm:{id:"adm",name:"Équipe de modération",type:"admin",role:"Équipe de modération — administration"}
+};
+var CARRIERS=[
+  {id:"relais",label:"Point relais",delay:"3 à 5 jours ouvrés",price:6.9},
+  {id:"dom",label:"Livraison à domicile",delay:"2 à 3 jours ouvrés, contre signature",price:9.9},
+  {id:"express",label:"Express assuré",delay:"24 h, assurance valeur déclarée",price:16.9}
+];
+var OPTIONS=[
+  {id:"boost",label:"À la une pendant 7 jours",desc:"En tête des résultats de sa catégorie",price:9.9},
+  {id:"urgent",label:"Badge « Urgent »",desc:"Signale une vente rapide",price:2.9},
+  {id:"photos",label:"Pack 20 photos",desc:"Au lieu de 6 photos incluses",price:3.9}
+];
+var PLANS=[
+  {id:"essentiel",label:"Essentiel",price:29,desc:"30 annonces actives, page boutique"},
+  {id:"atelier",label:"Atelier",price:79,desc:"150 annonces, import par fichier, statistiques"},
+  {id:"ecurie",label:"Écurie",price:149,desc:"Annonces illimitées, 2 mises à la une par mois"}
+];
+var SLOTS={home:{label:"Bannière en haut des annonces",day:12},cat:{label:"Tête de catégorie",day:7},search:{label:"Résultats de recherche",day:5}};
+var REPLIES=["Bonjour, oui l’article est toujours disponible.","Je peux expédier dès demain, colis soigné et assuré.","Je vous prépare des photos supplémentaires dans la soirée."];
+var ICONS={
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.500-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+  msg:'<path d="M21 12a8 8 0 0 1-12 7l-5 1 1-4a8 8 0 1 1 16-4z"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  check:'<path d="m5 12 5 5 9-10"/>',
+  truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="17.500" r="1.800"/><circle cx="17.500" cy="17.500" r="1.800"/>',
+  star:'<path d="m12 3 2.700 5.600 6.100.800-4.500 4.300 1.100 6.100L12 16.900 6.600 19.800l1.100-6.100L3.200 9.400l6.100-.800z"/>',
+  flag:'<path d="M5 21V4h12l-2 4 2 4H5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  card:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500v.500"/>'
+};
+function ic(n){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+ICONS[n]+'</svg>';}
+var ART={
+  auto:'<path d="M12 52h8a9 9 0 0 1 18 0h40a9 9 0 0 1 18 0h10c2 0 3-1 3-3v-5c0-3-2-5-5-6l-16-3-12-11c-2-2-4-3-7-3H44c-3 0-5 1-7 3L27 35l-12 3c-3 1-5 3-5 6v5c0 2 1 3 2 3z"/><circle cx="29" cy="53" r="6.500"/><circle cx="87" cy="53" r="6.500"/><path d="M38 35h42"/>',
+  moto:'<circle cx="28" cy="54" r="12"/><circle cx="92" cy="54" r="12"/><path d="M28 54l16-22h26l22 22M44 32l14 22h18M70 32l-6-8H54M70 32l10-8h8"/>',
+  kart:'<circle cx="26" cy="56" r="8"/><circle cx="94" cy="56" r="8"/><path d="M34 56h52M42 56l6-18h14l4 18M74 56l6-16M74 38h12"/>',
+  piece:'<circle cx="60" cy="40" r="22" stroke-width="8" stroke-dasharray="8.640 8.640"/><circle cx="60" cy="40" r="15"/><circle cx="60" cy="40" r="5"/>',
+  equip:'<path d="M34 54c0-19 11-31 27-31s25 11 25 26v4c0 3-2 5-5 5H56l-6-10H34z"/><path d="M58 40h28"/>'
+};
+function art(l,cls,badges){
+  var k=l.cat==="vehicule"?l.univ:l.cat;
+  return '<span class="art '+l.univ+' '+(cls||"")+'"><svg viewBox="0 0 120 80" aria-hidden="true">'+ART[k]+'</svg>'+(badges||"")+'</span>';
+}
+
+/* ---------- Données ---------- */
+function L(id,title,cat,univ,price,seller,cond,compat,desc,x){
+  var u=USERS[seller];
+  var o={id:id,ref:"A"+(1030+parseInt(id.slice(1),10)),title:title,cat:cat,univ:univ,price:price,seller:seller,city:u.city,cond:cond,compat:compat,desc:desc,photos:5,status:"online",boost:false,urgent:false,ts:100-parseInt(id.slice(1),10),date:"0"+(9-parseInt(id.slice(1),10)%7)+"/10/2026",views:40+parseInt(id.slice(1),10)*37%400,flags:[],reason:""};
+  for(var k in (x||{}))o[k]=x[k];
+  return o;
+}
+function seed(){
+  return {
+    cur:"u1",seq:150,lseq:20,
+    listings:[
+      L("l1","Carburateur Weber 40 DCOE restauré","piece","auto",420,"u2","Restauré","Alfa Romeo, Lotus, Ford Kent","Carburateur double corps entièrement démonté, nettoyé aux ultrasons et remonté avec un kit de joints neuf. Axes sans jeu, buses de 30. Prêt à monter.",{boost:true}),
+      L("l2","Jantes type Minilite 13 pouces, lot de 4","piece","auto",680,"u3","Très bon état","Entraxe 4 × 101,6","Lot de quatre jantes alliage 6 × 13, déport ET16. Aucune fissure, voile contrôlé. Vendues sans pneus."),
+      L("l3","Siège baquet homologué FIA jusqu’en 2029","equip","auto",350,"u2","Très bon état","Fixation latérale","Baquet coque fibre, housse sans accroc, étiquette d’homologation lisible. Supports latéraux fournis."),
+      L("l4","Casque jet vintage taille M avec visière","equip","moto",190,"u3","Bon état","Taille M (57-58)","Casque jet style années 70, intérieur refait, visière bulle fumée. Idéal balades et rassemblements.",{urgent:true}),
+      L("l5","Berlinette 1600 S de 1972, matching numbers","vehicule","auto",118000,"u2","Restauré","1972 — 67 400 km","Restauration complète documentée (factures, photos). Moteur et boîte d’origine, carte grise collection, contrôle technique vierge. Visible sur rendez-vous.",{boost:true}),
+      L("l6","Quatre cylindres 750 de 1972, état concours","vehicule","moto",12900,"u3","Restauré","1972 — 31 200 km","Moto restaurée dans les règles : peinture d’origine refaite, échappements 4 en 4 neufs, carburateurs synchronisés. Carte grise collection."),
+      L("l7","Kart KZ2 châssis 2023, moteur 125 à boîte","vehicule","kart",4800,"u4","Très bon état","2023 — 12 heures","Châssis droit, freins avant révisés, moteur 125 cm³ à boîte 6 rapports révisé il y a 3 heures. Vendu avec jeu de jantes pluie."),
+      L("l8","Moteur 125 Senior révisé, plombé","piece","kart",1650,"u4","Restauré","Catégorie Senior","Moteur révisé par un centre agréé, piston et roulements neufs, plombage et passeport fournis. Zéro heure depuis révision.",{boost:true}),
+      L("l9","Combinaison karting homologuée niveau 2, taille 50","equip","kart",140,"u4","Bon état","Taille 50","Combinaison portée deux saisons, aucune déchirure, homologation valide. Lavée et prête à rouler."),
+      L("l10","Ligne d’échappement inox bicylindre anglais 650","piece","moto",390,"u2","Neuf","Bicylindres 650 de 1963 à 1970","Ligne complète inox poli, silencieux type cigare, colliers fournis. Fabrication artisanale, jamais montée."),
+      L("l11","Boîte de vitesses à crabots 5 rapports","piece","auto",3200,"u2","Restauré","Groupe 2, moteur longitudinal","Boîte à crabots révisée, pignons et roulements contrôlés, étagement course. Fiche de révision jointe."),
+      L("l12","Compte-tours mécanique 8 000 tr/min","piece","auto",260,"u1","Bon état","Diamètre 100 mm","Compte-tours d’époque fonctionnel, aiguille stable, verre sans rayure. Câble non fourni."),
+      L("l13","Volant bois trois branches 14 pouces","piece","auto",230,"u3","Très bon état","Moyeu 6 trous","Volant bois riveté, branches aluminium poli. Quelques marques d’usage, vernis sain.",{status:"pending",photos:4}),
+      L("l14","Lot de pneus slicks kart, peu roulés","piece","kart",60,"u4","Bon état","Avant et arrière","Deux trains de slicks, environ 30 tours. Appelez-moi directement au 06 00 00 00 00 pour aller plus vite.",{status:"pending",photos:0,flags:["Coordonnées dans le texte","Aucune photo"]}),
+      L("l15","Harnais 6 points homologué","equip","auto",180,"u2","Très bon état","Homologation 2028","Harnais 6 points, sangles 3 pouces.",{status:"sold"}),
+      L("l16","Rétroviseur obus chromé","piece","auto",75,"u1","Bon état","Universel","Rétroviseur obus, chrome sain.",{status:"sold"}),
+      L("l17","Carter d’embrayage magnésium","piece","kart",310,"u4","Bon état","Moteurs 125 à boîte","Carter d’embrayage d’occasion.",{status:"sold"}),
+      L("l18","Lot de couronnes kart 219","piece","kart",64,"u4","Bon état","78 à 84 dents","Sept couronnes aluminium.",{status:"sold"}),
+      L("l19","Bobine d’allumage haute performance","piece","auto",95,"u2","Neuf","12 V","Bobine neuve en boîte.",{status:"sold"})
+    ],
+    orders:[
+      {id:"o147",ref:"CMD-2026-0147",lid:"l15",title:"Harnais 6 points homologué",buyer:"u1",seller:"u2",price:180,ship:6.9,carrier:"Point relais",step:1,status:"escrow",tracking:"RP 4471 2209 FR",log:[["08/10/2026 18:42","Paiement reçu, fonds conservés"],["09/10/2026 10:15","Colis remis au transporteur"]],dispute:null},
+      {id:"o148",ref:"CMD-2026-0148",lid:"l16",title:"Rétroviseur obus chromé",buyer:"u3",seller:"u1",price:75,ship:9.9,carrier:"Livraison à domicile",step:0,status:"escrow",tracking:"",log:[["11/10/2026 21:03","Paiement reçu, fonds conservés"]],dispute:null},
+      {id:"o149",ref:"CMD-2026-0149",lid:"l19",title:"Bobine d’allumage haute performance",buyer:"u3",seller:"u2",price:95,ship:6.9,carrier:"Point relais",step:0,status:"escrow",tracking:"",log:[["12/10/2026 08:20","Paiement reçu, fonds conservés"]],dispute:null},
+      {id:"o139",ref:"CMD-2026-0139",lid:"l17",title:"Carter d’embrayage magnésium",buyer:"u3",seller:"u4",price:310,ship:9.9,carrier:"Livraison à domicile",step:2,status:"dispute",tracking:"RP 4390 1187 FR",log:[["02/10/2026 12:10","Paiement reçu, fonds conservés"],["03/10/2026 09:00","Colis remis au transporteur"],["06/10/2026 11:32","Colis livré"],["06/10/2026 19:05","Litige ouvert par l’acheteur"]],
+        dispute:{reason:"Article non conforme à l’annonce",text:"Le carter présente une fissure au niveau d’une patte de fixation, non visible sur les photos de l’annonce.",msgs:[{from:"u4",text:"La pièce est partie en bon état, elle a pu être abîmée pendant le transport. Je suis prêt à trouver un arrangement."}],decision:""}},
+      {id:"o131",ref:"CMD-2026-0131",lid:"l18",title:"Lot de couronnes kart 219",buyer:"u1",seller:"u4",price:64,ship:6.9,carrier:"Point relais",step:3,status:"done",tracking:"RP 4102 7754 FR",log:[["22/09/2026 14:02","Paiement reçu, fonds conservés"],["23/09/2026 16:40","Colis remis au transporteur"],["26/09/2026 10:11","Colis livré"],["26/09/2026 18:30","Réception confirmée, fonds versés au vendeur"]],dispute:null}
+    ],
+    threads:[
+      {id:"t1",lid:"l1",buyer:"u1",seller:"u2",msgs:[{from:"u1",text:"Bonjour, les axes de papillon ont-ils été remplacés ?",at:"10/10/2026 09:12"},{from:"u2",text:"Bonjour, oui : axes et roulements neufs, je peux vous envoyer la facture des pièces.",at:"10/10/2026 09:40"}]},
+      {id:"t2",lid:"l12",buyer:"u3",seller:"u1",msgs:[{from:"u3",text:"Bonjour, le compte-tours est-il compatible avec un entraînement par câble côté distributeur ?",at:"11/10/2026 17:25"}]}
+    ],
+    campaigns:[{id:"c1",owner:"u4",name:"Révision moteurs avant la finale",slot:"home",days:14,lid:"l8",paid:168,status:"active",imp:4210,clicks:163}],
+    plan:{u2:"essentiel",u4:"atelier"},
+    extra:184.5,
+    modlog:[["11/10/2026","Ligne d’échappement inox bicylindre anglais 650","Approuvée",""],["10/10/2026","Réplique de casque sans homologation","Refusée","Équipement de sécurité non homologué"]]
+  };
+}
+var state, ui;
+function load(){
+  try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.listings&&s.orders)return s;}catch(e){}
+  return seed();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function freshUi(){return {view:"catalog",param:null,f:{q:"",univ:"",cat:"",seller:"",max:"",sort:"recent"},thread:null,photos:0};}
+
+/* ---------- Outils ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function eur(n){n=Math.round(n*100)/100;return n.toLocaleString("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2});}
+function now(){return new Date().toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).replace(",","");}
+function today(){return new Date().toLocaleDateString("fr-FR");}
+function norm(s){return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");}
+function slug(s){return norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60);}
+function U(id){return USERS[id];}
+function LS(id){return state.listings.filter(function(l){return l.id===id;})[0];}
+function OR(id){return state.orders.filter(function(o){return o.id===id;})[0];}
+function fee(o){return Math.round(o.price*FEE*100)/100;}
+function typeBadge(u){return u.type==="pro"?'<span class="badge b-info">Professionnel</span>':'<span class="badge b-gray">Particulier</span>';}
+function toast(m){var t=document.createElement("div");t.className="toast";t.textContent=m;$("#toasts").appendChild(t);setTimeout(function(){t.remove();},4200);}
+function fld(n,l,o){
+  o=o||{};var id="f-"+n,d='aria-describedby="'+id+'-e"',c;
+  if(o.opts)c='<select id="'+id+'" name="'+n+'" '+d+'>'+o.opts.map(function(p){return '<option value="'+esc(p[0])+'"'+(p[0]===o.v?" selected":"")+'>'+esc(p[1])+'</option>';}).join("")+'</select>';
+  else if(o.ta)c='<textarea id="'+id+'" name="'+n+'" rows="4" '+d+' placeholder="'+esc(o.ph||"")+'">'+esc(o.v||"")+'</textarea>';
+  else c='<input id="'+id+'" name="'+n+'" type="'+(o.type||"text")+'" value="'+esc(o.v||"")+'" placeholder="'+esc(o.ph||"")+'" '+d+' '+(o.attr||"")+'>';
+  return '<div class="field'+(o.full?" full":"")+'"><label for="'+id+'">'+l+'</label>'+c+(o.hint?'<span class="hint">'+o.hint+'</span>':"")+'<span class="err" id="'+id+'-e" data-err="'+n+'"></span></div>';
+}
+function check(form,rules){
+  var ok=true,first=null;
+  Object.keys(rules).forEach(function(n){
+    var el=form.elements[n],msg=rules[n]((el.value||"").trim()),er=form.querySelector('[data-err="'+n+'"]');
+    el.setAttribute("aria-invalid",msg?"true":"false");if(er)er.textContent=msg||"";
+    if(msg){ok=false;first=first||el;}
+  });
+  if(first)first.focus();
+  return ok;
+}
+var dlg=$("#dlg");
+function modal(title,body){
+  dlg.innerHTML='<div class="m-h"><h2 id="dlg-t">'+title+'</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">'+ic("x")+'</button></div><div class="m-b">'+body+'</div>';
+  if(!dlg.open)dlg.showModal();
+}
+function closeModal(){if(dlg.open)dlg.close();}
+dlg.addEventListener("click",function(e){if(e.target===dlg)closeModal();});
+function linesHtml(lines,totalLabel){
+  var t=lines.reduce(function(s,l){return s+l[1];},0);
+  return '<dl class="lines">'+lines.map(function(l){return '<div><dt>'+esc(l[0])+'</dt><dd>'+eur(l[1])+'</dd></div>';}).join("")+'<div class="tot"><dt>'+(totalLabel||"Total")+'</dt><dd>'+eur(t)+'</dd></div></dl>';
+}
+var payCb=null;
+function openPay(title,lines,cb){
+  var total=lines.reduce(function(s,l){return s+l[1];},0);payCb=cb;
+  modal("Paiement par carte",
+    '<p class="testband">'+ic("lock")+'Mode test — aucun débit réel, carte de test préremplie.</p>'+
+    '<h3>'+esc(title)+'</h3>'+linesHtml(lines,"À payer")+
+    '<form data-form="pay" novalidate class="stack" style="gap:14px"><div class="fgrid">'+
+    fld("holder","Titulaire de la carte",{v:U(state.cur).name,full:true})+
+    fld("card","Numéro de carte",{v:"4242 4242 4242 4242",full:true,attr:'inputmode="numeric" autocomplete="off"'})+
+    fld("exp","Expiration (MM/AA)",{v:"12/29",attr:'inputmode="numeric"'})+
+    fld("cvc","Cryptogramme",{v:"123",attr:'inputmode="numeric"'})+
+    '</div><button type="submit" class="btn primary block">'+ic("card")+'Payer '+eur(total)+'</button>'+
+    '<p class="hint">En production, ce formulaire est celui de Stripe : les données de carte ne transitent jamais par le site.</p></form>');
+}
+
+/* ---------- Navigation ---------- */
+function navFor(u){
+  if(u.type==="admin"){
+    return [["moderation","Modération",state.listings.filter(function(l){return l.status==="pending";}).length],
+      ["disputes","Litiges",state.orders.filter(function(o){return o.status==="dispute";}).length],["payments","Paiements",0],["catalog","Annonces",0]];
+  }
+  var todo=state.orders.filter(function(o){return o.status==="escrow"&&((o.seller===u.id&&o.step===0)||(o.buyer===u.id&&o.step===2));}).length;
+  var n=[["catalog","Annonces",0],["publish","Déposer une annonce",0],["mine","Mes annonces",0],["messages","Messages",0],["orders","Commandes",todo]];
+  if(u.type==="pro")n.push(["pro","Espace pro",0]);
+  return n;
+}
+function renderNav(){
+  var u=U(state.cur),cur=ui.view==="listing"?"catalog":ui.view;
+  $("#nav").innerHTML=navFor(u).map(function(n){
+    return '<button type="button" class="tab" data-act="go" data-v="'+n[0]+'"'+(cur===n[0]?' aria-current="page"':"")+'>'+n[1]+(n[2]?' <span class="cnt">'+n[2]+'<span class="sr"> à traiter</span></span>':"")+'</button>';
+  }).join("");
+  $("#role").innerHTML=["u1","u2","adm"].map(function(id){return '<option value="'+id+'"'+(id===state.cur?" selected":"")+'>'+esc(U(id).role)+'</option>';}).join("");
+}
+function render(){
+  var u=U(state.cur),allowed=navFor(u).map(function(n){return n[0];}).concat(["listing"]);
+  if(allowed.indexOf(ui.view)<0)ui.view=allowed[0];
+  renderNav();
+  $("#main").innerHTML=VIEWS[ui.view](u);
+  if(ui.view==="catalog")renderResults();
+  if(ui.view==="messages"){var c=$("#conv");if(c)c.scrollTop=c.scrollHeight;}
+  save();
+}
+function go(v,p){ui.view=v;ui.param=p||null;render();window.scrollTo(0,0);$("#main").focus({preventScroll:true});}
+
+/* ---------- Vues ---------- */
+var VIEWS={};
+function statusBadge(l){
+  var m={online:["b-ok","En ligne"],pending:["b-warn","En cours de modération"],refused:["b-bad","Refusée"],sold:["b-info","Vendue"],off:["b-gray","Retirée"]}[l.status];
+  return '<span class="badge '+m[0]+'">'+m[1]+'</span>';
+}
+function lcard(l){
+  var u=U(l.seller),b='<span class="badges">'+(l.boost?'<span class="badge b-race">À la une</span>':"")+(l.urgent?'<span class="badge b-bad">Urgent</span>':"")+(u.type==="pro"?'<span class="badge b-info">Pro</span>':"")+'</span>';
+  return '<button type="button" class="lcard" data-act="open" data-id="'+l.id+'">'+art(l,"",b)+
+    '<span class="lbody"><span class="lt">'+esc(l.title)+'</span><span class="lp">'+eur(l.price)+'</span><span class="lm">'+CATS[l.cat]+' · '+UNIVS[l.univ]+'</span><span class="lm">'+esc(l.city)+' · '+esc(l.date)+'</span></span></button>';
+}
+VIEWS.catalog=function(){
+  var f=ui.f;
+  function sel(n,label,opts){return '<div class="field"><label for="ff-'+n+'">'+label+'</label><select id="ff-'+n+'" data-f="'+n+'">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(f[n]===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select></div>';}
+  return '<div class="hero"><h1>Pièces, équipements et véhicules anciens et de compétition</h1>'+
+    '<div class="chips" role="group" aria-label="Univers">'+[["","Tout"],["auto","Voitures"],["moto","Motos"],["kart","Karts"]].map(function(c){return '<button type="button" class="chip" data-act="univ" data-v="'+c[0]+'" aria-pressed="'+(f.univ===c[0])+'">'+c[1]+'</button>';}).join("")+'</div></div>'+
+    '<div class="cat"><aside class="card filters" aria-label="Filtres">'+
+      '<div class="field full"><label for="ff-q">Recherche</label><div class="search">'+ic("search")+'<input type="search" id="ff-q" data-f="q" value="'+esc(f.q)+'" placeholder="Carburateur, baquet, 1972…"></div></div>'+
+      sel("cat","Catégorie",[["","Toutes"],["piece","Pièces"],["equip","Équipements"],["vehicule","Véhicules"]])+
+      sel("seller","Vendeur",[["","Tous"],["part","Particuliers"],["pro","Professionnels"]])+
+      '<div class="field"><label for="ff-max">Prix maximum (€)</label><input type="number" id="ff-max" data-f="max" min="0" step="10" value="'+esc(f.max)+'" placeholder="Sans limite"></div>'+
+      sel("sort","Trier par",[["recent","Plus récentes"],["asc","Prix croissant"],["desc","Prix décroissant"]])+
+      '<button type="button" class="btn full" data-act="clearf">Effacer les filtres</button>'+
+    '</aside><section aria-label="Résultats" style="min-width:0"><div id="sponsor"></div><div class="res-h"><p id="count" aria-live="polite" class="muted"></p>'+
+      '<span class="badge b-acc">'+ic("shield")+'Paiement conservé jusqu’à la réception</span></div><div id="results" class="grid"></div></section></div>';
+};
+function renderResults(){
+  var f=ui.f,q=norm(f.q.trim()),max=parseFloat(f.max);
+  var r=state.listings.filter(function(l){
+    if(l.status!=="online")return false;
+    if(f.univ&&l.univ!==f.univ)return false;
+    if(f.cat&&l.cat!==f.cat)return false;
+    if(f.seller&&U(l.seller).type!==f.seller)return false;
+    if(!isNaN(max)&&l.price>max)return false;
+    if(q&&norm(l.title+" "+l.desc+" "+l.compat+" "+l.city).indexOf(q)<0)return false;
+    return true;
+  });
+  r.sort(function(a,b){
+    if(f.sort==="asc")return a.price-b.price;
+    if(f.sort==="desc")return b.price-a.price;
+    return (b.boost-a.boost)||(b.ts-a.ts);
+  });
+  $("#count").textContent=r.length+(r.length>1?" annonces":" annonce");
+  $("#results").innerHTML=r.length?r.map(lcard).join(""):'<div class="empty" style="grid-column:1/-1">Aucune annonce ne correspond à ces critères.</div>';
+  var c=state.campaigns.filter(function(x){return x.status==="active"&&LS(x.lid)&&LS(x.lid).status==="online";}).slice(-1)[0];
+  $("#sponsor").innerHTML=c?'<div class="card sponsor"><div style="min-width:0"><span class="badge b-race">Sponsorisé</span><p class="wrap" style="font-weight:600;margin-top:4px">'+esc(c.name)+'</p><p class="small muted wrap">'+esc(U(c.owner).name)+' — '+esc(LS(c.lid).title)+'</p></div><button type="button" class="btn" data-act="open" data-id="'+c.lid+'">Voir l’annonce</button></div>':"";
+}
+VIEWS.listing=function(u){
+  var l=LS(ui.param);if(!l)return '<div class="empty">Annonce introuvable.</div>';
+  var s=U(l.seller),url="retropaddock.example/"+CAT_SLUG[l.cat]+"/"+l.univ+"/"+slug(l.title)+"-"+l.ref.toLowerCase(),act;
+  if(u.type==="admin"){
+    act=l.status==="pending"?'<button type="button" class="btn primary block" data-act="approve" data-id="'+l.id+'">'+ic("check")+'Approuver l’annonce</button><button type="button" class="btn danger block" data-act="refuse" data-id="'+l.id+'">Refuser</button>':'<p class="muted small">Vue administrateur : aucune action en attente sur cette annonce.</p>';
+  }else if(l.seller===u.id){
+    act='<p class="note">'+ic("info")+'<span>C’est votre annonce.</span></p><button type="button" class="btn block" data-act="go" data-v="mine">Gérer mes annonces</button>';
+  }else if(l.status!=="online"){
+    act='<p class="muted">Cette annonce n’est plus disponible.</p>';
+  }else if(l.cat==="vehicule"){
+    act='<button type="button" class="btn primary block" data-act="contact" data-id="'+l.id+'">'+ic("msg")+'Contacter le vendeur</button><p class="hint">Véhicule : prise de contact et visite. Le paiement en ligne avec expédition concerne les pièces et équipements (règle à valider ensemble).</p>';
+  }else{
+    act='<button type="button" class="btn primary block" data-act="buy" data-id="'+l.id+'">'+ic("lock")+'Acheter avec paiement sécurisé</button><button type="button" class="btn block" data-act="contact" data-id="'+l.id+'">'+ic("msg")+'Contacter le vendeur</button>'+
+      '<p class="note">'+ic("shield")+'<span>Votre paiement est conservé et n’est versé au vendeur qu’après confirmation de la réception du colis.</span></p>';
+  }
+  return '<p style="margin-bottom:10px"><button type="button" class="btn" data-act="go" data-v="'+(u.type==="admin"?"moderation":"catalog")+'">'+ic("back")+'Retour</button></p>'+
+  '<div class="detail"><div class="stack" style="gap:16px">'+art(l,"big")+
+    '<div class="card stack" style="gap:12px"><div class="badges">'+statusBadge(l)+(l.boost?'<span class="badge b-race">À la une</span>':"")+(l.urgent?'<span class="badge b-bad">Urgent</span>':"")+'</div>'+
+      '<h1 class="wrap">'+esc(l.title)+'</h1><p class="wrap">'+esc(l.desc)+'</p>'+
+      (l.status==="refused"?'<p class="note bad">'+ic("info")+'<span class="wrap">Refusée : '+esc(l.reason)+'</span></p>':"")+
+      '<dl class="specs"><div><dt>Catégorie</dt><dd>'+CATS[l.cat]+'</dd></div><div><dt>Univers</dt><dd>'+UNIVS[l.univ]+'</dd></div><div><dt>État</dt><dd>'+esc(l.cond)+'</dd></div><div><dt>Compatibilité / année</dt><dd>'+esc(l.compat||"—")+'</dd></div><div><dt>Référence</dt><dd>'+esc(l.ref)+'</dd></div><div><dt>Photos</dt><dd>'+l.photos+' (illustration dans cette démo)</dd></div></dl></div>'+
+    '<div class="card"><details><summary>Aperçu du référencement Google de cette annonce</summary><div class="stack" style="gap:10px">'+
+      '<div class="serp"><p class="s-u">'+esc(url)+'</p><p class="s-t">'+esc(l.title)+' — '+eur(l.price)+' | RétroPaddock</p><p class="s-d wrap">'+esc((l.cond+" · "+l.city+". "+l.desc).slice(0,150))+'…</p></div>'+
+      '<ul class="clean small"><li>Adresse lisible générée à partir du titre, de la catégorie et de l’univers.</li><li>Balises titre et description uniques, données structurées « produit » (prix, état, disponibilité).</li><li>Pages rendues côté serveur, plan de site mis à jour à chaque publication, annonces vendues redirigées vers leur catégorie.</li></ul></div></details></div>'+
+  '</div><aside class="stack" style="gap:16px"><div class="card stack" style="gap:12px"><p class="price">'+eur(l.price)+'</p>'+act+'</div>'+
+    '<div class="card stack"><h2>Vendeur</h2><p class="wrap" style="font-weight:600">'+esc(s.name)+'</p><div class="badges">'+typeBadge(s)+'<span class="badge b-ok">Identité vérifiée</span></div><p class="small muted">'+esc(s.city)+' · membre depuis '+s.since+'</p></div></aside></div>';
+};
+VIEWS.publish=function(){
+  ui.photos=0;
+  return '<div class="page-h"><div><h1>Déposer une annonce</h1><p class="muted">Dépôt gratuit. Chaque annonce est vérifiée par la modération avant sa mise en ligne.</p></div></div>'+
+  '<form data-form="publish" novalidate class="cols"><div class="card stack" style="gap:14px"><h2>Votre article</h2><div class="fgrid">'+
+    fld("title","Titre de l’annonce",{full:true,ph:"Ex. : Carburateur double corps restauré"})+
+    fld("cat","Catégorie",{opts:[["","Choisir…"],["piece","Pièces"],["equip","Équipements"],["vehicule","Véhicules"]],v:""})+
+    fld("univ","Univers",{opts:[["","Choisir…"],["auto","Voiture"],["moto","Moto"],["kart","Kart"]],v:""})+
+    fld("price","Prix (€)",{type:"number",attr:'min="1" step="1" inputmode="decimal"'})+
+    fld("cond","État",{opts:CONDS.map(function(c){return [c,c];}),v:"Bon état"})+
+    fld("compat","Compatibilité ou année",{ph:"Ex. : 1972, entraxe 4 × 100…",hint:"Facultatif"})+
+    fld("city","Ville",{v:U(state.cur).city})+
+    fld("desc","Description",{ta:true,full:true,ph:"État, historique, ce qui est fourni…",hint:"30 caractères minimum. Les coordonnées sont à échanger par la messagerie."})+
+    '<div class="field full"><label for="f-photos">Photos (6 incluses)</label><input type="file" id="f-photos" accept="image/*" multiple><div class="thumbs" id="thumbs"></div><span class="hint">Les photos restent sur votre appareil : la démo affiche ensuite une illustration.</span></div>'+
+  '</div></div><div class="card stack" style="gap:14px"><h2>Options de visibilité</h2><fieldset class="stack"><legend>Options payantes (facultatives)</legend>'+
+    OPTIONS.map(function(o){return '<label class="ck"><input type="checkbox" name="opt" value="'+o.id+'"><span class="ck-t">'+o.label+'<small>'+o.desc+'</small></span><span class="ck-p">'+eur(o.price)+'</span></label>';}).join("")+
+    '</fieldset><dl class="lines"><div class="tot"><dt>Total des options</dt><dd id="pub-total">'+eur(0)+'</dd></div></dl>'+
+    '<button type="submit" class="btn primary block" id="pub-btn">Envoyer en modération</button><p class="hint">Les options sont réglées par carte avant l’envoi (mode test).</p></div></form>';
+};
+VIEWS.mine=function(u){
+  var mine=state.listings.filter(function(l){return l.seller===u.id;}).sort(function(a,b){return b.ts-a.ts;});
+  return '<div class="page-h"><div><h1>Mes annonces</h1><p class="muted">'+mine.length+' annonce'+(mine.length>1?"s":"")+'</p></div><button type="button" class="btn primary" data-act="go" data-v="publish">'+ic("plus")+'Déposer une annonce</button></div>'+
+  '<div class="card" style="margin-bottom:16px"><div class="row">'+ic("shield")+'<div class="grow"><p style="font-weight:600">Compte de paiement vendeur : vérifié</p><p class="small muted">Identité et coordonnées bancaires contrôlées par le prestataire de paiement. Les ventes sont versées sur votre compte après confirmation de réception, commission de '+(FEE*100)+' % déduite.</p></div></div></div>'+
+  (mine.length?'<div class="cols">'+mine.map(function(l){
+    var a='<button type="button" class="btn" data-act="open" data-id="'+l.id+'">Voir</button>';
+    if(l.status==="online"&&!l.boost)a+='<button type="button" class="btn" data-act="boost" data-id="'+l.id+'">'+ic("star")+'Mettre à la une — '+eur(9.9)+'</button>';
+    if(l.status==="online"||l.status==="pending")a+='<button type="button" class="btn danger" data-act="unlist" data-id="'+l.id+'">Retirer</button>';
+    if(l.status==="refused"||l.status==="off")a+='<button type="button" class="btn" data-act="resubmit" data-id="'+l.id+'">Renvoyer en modération</button>';
+    return '<div class="card stack" style="gap:12px"><div class="row">'+art(l,"thumb")+'<div class="grow"><p class="wrap" style="font-weight:600">'+esc(l.title)+'</p><p class="small muted">'+eur(l.price)+' · '+l.views+' vues · réf. '+l.ref+'</p><div class="badges" style="margin-top:6px">'+statusBadge(l)+(l.boost?'<span class="badge b-race">À la une</span>':"")+(l.urgent?'<span class="badge b-bad">Urgent</span>':"")+'</div></div></div>'+
+      (l.status==="refused"?'<p class="note bad">'+ic("info")+'<span class="wrap">Motif du refus : '+esc(l.reason)+'</span></p>':"")+'<div class="actions">'+a+'</div></div>';
+  }).join("")+'</div>':'<div class="empty">Vous n’avez pas encore d’annonce.</div>');
+};
+function threadsOf(id){return state.threads.filter(function(t){return t.buyer===id||t.seller===id;});}
+function convHtml(t){
+  return t.msgs.map(function(m){return '<div class="bub'+(m.from===state.cur?" me":"")+'"><b>'+esc(U(m.from).name)+' · '+esc(m.at)+'</b>'+esc(m.text)+'</div>';}).join("")||'<p class="muted small">Aucun message pour l’instant : écrivez le premier.</p>';
+}
+VIEWS.messages=function(u){
+  var ts=threadsOf(u.id);
+  if(!ts.length)return '<div class="page-h"><h1>Messages</h1></div><div class="empty">Aucune conversation. Ouvrez une annonce et contactez le vendeur.</div>';
+  var t=ts.filter(function(x){return x.id===ui.thread;})[0]||ts[ts.length-1];ui.thread=t.id;
+  var l=LS(t.lid),other=U(t.buyer===u.id?t.seller:t.buyer),auto=other.id==="u3"||other.id==="u4";
+  return '<div class="page-h"><h1>Messages</h1></div><div class="msgs"><div class="card tlist" style="padding:8px">'+ts.slice().reverse().map(function(x){
+    var o=U(x.buyer===u.id?x.seller:x.buyer);
+    return '<button type="button" class="titem" data-act="thread" data-id="'+x.id+'"'+(x.id===t.id?' aria-current="true"':"")+'><b>'+esc(o.name)+'</b><span>'+esc(LS(x.lid).title)+'</span></button>';
+  }).join("")+'</div><div class="card"><div class="row">'+art(l,"thumb")+'<div class="grow"><h2 class="wrap">'+esc(other.name)+'</h2><p class="small muted wrap">'+esc(l.title)+' · '+eur(l.price)+'</p></div><button type="button" class="btn" data-act="open" data-id="'+l.id+'">Voir l’annonce</button></div>'+
+    '<div class="conv" id="conv" aria-live="polite">'+convHtml(t)+'</div>'+
+    '<form data-form="msg" novalidate class="inline-form">'+fld("text","Votre message",{ph:"Écrire un message…"})+'<button type="submit" class="btn primary" style="margin-top:27px">Envoyer</button></form>'+
+    '<p class="hint" style="margin-top:8px">'+(auto?"Ce vendeur répond automatiquement dans la démo.":"Pour répondre à sa place, changez de profil avec « Voir en tant que ».")+' Les numéros de téléphone et adresses e-mail sont masqués.</p></div></div>';
+};
+var STEPS=["Paiement reçu","Colis expédié","Colis livré","Fonds versés"];
+function fundBadge(o){
+  var m={escrow:["b-warn","Fonds conservés"],dispute:["b-bad","Fonds bloqués — litige"],done:["b-ok","Versé au vendeur"],refunded:["b-info","Remboursé à l’acheteur"],partial:["b-info","Fonds partagés"]}[o.status];
+  return '<span class="badge '+m[0]+'">'+m[1]+'</span>';
+}
+function actBtn(o,role,act,label,cls){
+  var me=state.cur===o[role];
+  return '<button type="button" class="btn '+(me?(cls||"primary"):"")+'" data-act="'+act+'" data-id="'+o.id+'">'+(me?label:"Simuler ("+(role==="seller"?"vendeur":"acheteur")+") : "+label)+'</button>';
+}
+function orderCard(o){
+  var f=fee(o),admin=state.cur==="adm",last=o.status==="refunded"?"Remboursé":o.status==="partial"?"Fonds partagés":STEPS[3];
+  var steps='<ol class="steps">'+STEPS.map(function(s,i){
+    var cls=i<=o.step?"on":"";if(o.status==="dispute"&&i===3)cls="stop";
+    return '<li class="'+cls+'">'+(i===3?(o.status==="dispute"?"Litige en cours":last):s)+'</li>';
+  }).join("")+'</ol>';
+  var a="",hint="";
+  if(o.status==="escrow"){
+    if(o.step===0){a=actBtn(o,"seller","ship","Déclarer l’expédition");hint="Le vendeur doit expédier sous 3 jours ouvrés.";}
+    else if(o.step===1){a='<button type="button" class="btn" data-act="deliver" data-id="'+o.id+'">'+ic("truck")+'Simuler la livraison par le transporteur</button>';hint="En production, le suivi du transporteur met la commande à jour automatiquement.";}
+    else if(o.step===2){a=actBtn(o,"buyer","confirm","Confirmer la réception")+actBtn(o,"buyer","dispute","Signaler un problème","danger");hint="Sans action de l’acheteur sous 48 h après la livraison, les fonds sont versés automatiquement.";}
+  }
+  var d="";
+  if(o.dispute){
+    var dd=o.dispute;
+    d='<div class="dispute"><p><b>Litige : '+esc(dd.reason)+'</b></p><div class="bub"><b>'+esc(U(o.buyer).name)+' (acheteur)</b>'+esc(dd.text)+'</div>'+
+      dd.msgs.map(function(m){return '<div class="bub"><b>'+esc(U(m.from).name)+'</b>'+esc(m.text)+'</div>';}).join("")+
+      (dd.decision?'<p class="note">'+ic("check")+'<span class="wrap"><b>Décision :</b> '+esc(dd.decision)+'</span></p>':
+        '<form data-form="dmsg" data-id="'+o.id+'" novalidate class="inline-form">'+fld("d"+o.id,"Ajouter un message au dossier",{ph:"Votre message…"})+'<button type="submit" class="btn" style="margin-top:27px">Ajouter</button></form>'+
+        (admin?'<div class="actions"><button type="button" class="btn primary" data-act="decide" data-d="refund" data-id="'+o.id+'">Rembourser l’acheteur</button><button type="button" class="btn" data-act="decide" data-d="partial" data-id="'+o.id+'">Partager 50 / 50</button><button type="button" class="btn" data-act="decide" data-d="release" data-id="'+o.id+'">Verser au vendeur</button></div>':'<p class="hint">Décision rendue par la plateforme : passez sur le profil « Équipe de modération » pour trancher.</p>'))+'</div>';
+  }
+  return '<article class="card ocard"><div class="o-h"><div style="min-width:0"><p class="o-t">'+esc(o.title)+'</p><p class="small muted wrap">'+o.ref+' · acheteur : '+esc(U(o.buyer).name)+' · vendeur : '+esc(U(o.seller).name)+'</p></div>'+fundBadge(o)+'</div>'+steps+
+    '<dl class="lines"><div><dt>Article</dt><dd>'+eur(o.price)+'</dd></div><div><dt>Livraison — '+esc(o.carrier)+'</dt><dd>'+eur(o.ship)+'</dd></div><div class="tot"><dt>Payé par l’acheteur</dt><dd>'+eur(o.price+o.ship)+'</dd></div><div><dt>Commission plateforme ('+(FEE*100)+' %)</dt><dd>− '+eur(f)+'</dd></div><div><dt>Net versé au vendeur</dt><dd>'+eur(o.price-f)+'</dd></div></dl>'+
+    (o.tracking?'<p class="small wrap">'+ic("truck")+' Suivi : <b>'+esc(o.tracking)+'</b></p>':"")+
+    (a?'<div class="actions">'+a+'</div>':"")+(hint?'<p class="hint">'+hint+'</p>':"")+d+
+    '<details><summary>Historique</summary><ul class="log">'+o.log.map(function(e){return '<li><time>'+esc(e[0])+'</time><span class="wrap">'+esc(e[1])+'</span></li>';}).join("")+'</ul></details></article>';
+}
+function orderList(list,empty){return list.length?'<div class="cols">'+list.slice().reverse().map(orderCard).join("")+'</div>':'<div class="empty">'+empty+'</div>';}
+VIEWS.orders=function(u){
+  return '<div class="page-h"><div><h1>Commandes</h1><p class="muted">Le paiement de l’acheteur est conservé par le prestataire de paiement, puis versé au vendeur une fois le colis reçu.</p></div></div>'+
+    '<section><h2 style="margin-bottom:12px">Mes achats</h2>'+orderList(state.orders.filter(function(o){return o.buyer===u.id;}),"Aucun achat pour l’instant.")+'</section>'+
+    '<section class="section"><h2>Mes ventes</h2>'+orderList(state.orders.filter(function(o){return o.seller===u.id;}),"Aucune vente pour l’instant.")+'</section>';
+};
+VIEWS.moderation=function(){
+  var p=state.listings.filter(function(l){return l.status==="pending";});
+  return '<div class="page-h"><div><h1>Modération des annonces</h1><p class="muted">'+p.length+' annonce'+(p.length>1?"s":"")+' en attente. Les points à vérifier sont détectés automatiquement.</p></div></div>'+
+  (p.length?'<div class="cols">'+p.map(function(l){var s=U(l.seller);
+    return '<div class="card stack" style="gap:12px"><div class="row">'+art(l,"thumb")+'<div class="grow"><p class="wrap" style="font-weight:600">'+esc(l.title)+'</p><p class="small muted wrap">'+eur(l.price)+' · '+CATS[l.cat]+' · '+UNIVS[l.univ]+' · '+esc(s.name)+'</p><div class="badges" style="margin-top:6px">'+typeBadge(s)+(l.flags.length?l.flags.map(function(f){return '<span class="badge b-bad">'+esc(f)+'</span>';}).join(""):'<span class="badge b-ok">Aucune alerte</span>')+'</div></div></div>'+
+      '<p class="small wrap">'+esc(l.desc)+'</p><div class="actions"><button type="button" class="btn primary" data-act="approve" data-id="'+l.id+'">'+ic("check")+'Approuver</button><button type="button" class="btn danger" data-act="refuse" data-id="'+l.id+'">Refuser</button><button type="button" class="btn" data-act="open" data-id="'+l.id+'">Voir la fiche</button></div></div>';
+  }).join("")+'</div>':'<div class="empty">File de modération vide.</div>')+
+  '<section class="section"><h2>Dernières décisions</h2><div class="tw"><table style="min-width:640px"><thead><tr><th>Date</th><th>Annonce</th><th>Décision</th><th>Motif</th></tr></thead><tbody>'+
+    state.modlog.map(function(m){return '<tr><td>'+esc(m[0])+'</td><td>'+esc(m[1])+'</td><td><span class="badge '+(m[2]==="Approuvée"?"b-ok":"b-bad")+'">'+m[2]+'</span></td><td>'+esc(m[3]||"—")+'</td></tr>';}).join("")+'</tbody></table></div></section>';
+};
+VIEWS.disputes=function(){
+  var d=state.orders.filter(function(o){return o.dispute;});
+  var open=d.filter(function(o){return o.status==="dispute";}),closed=d.filter(function(o){return o.status!=="dispute";});
+  return '<div class="page-h"><div><h1>Litiges</h1><p class="muted">Tant qu’un litige est ouvert, les fonds restent bloqués. La décision déclenche le remboursement ou le versement.</p></div></div>'+
+    orderList(open,"Aucun litige ouvert.")+(closed.length?'<section class="section"><h2>Litiges clos</h2>'+orderList(closed,"")+'</section>':"");
+};
+VIEWS.payments=function(){
+  var vol=0,held=0,com=0;
+  state.orders.forEach(function(o){vol+=o.price+o.ship;if(o.status==="escrow"||o.status==="dispute")held+=o.price+o.ship;if(o.status==="done")com+=fee(o);if(o.status==="partial")com+=fee(o)/2;});
+  return '<div class="page-h"><div><h1>Paiements</h1><p class="muted">Vue d’ensemble des flux : encaissements, fonds conservés, commissions et versements aux vendeurs.</p></div></div>'+
+  '<div class="kpis">'+[["Volume encaissé",eur(vol)],["Fonds conservés",eur(held)],["Commissions acquises",eur(com)],["Options, abonnements et publicité",eur(state.extra)]].map(function(k){return '<div class="card kpi"><p class="k-l">'+k[0]+'</p><p class="k-v">'+k[1]+'</p></div>';}).join("")+'</div>'+
+  '<div class="tw"><table><thead><tr><th>Commande</th><th>Article</th><th>Acheteur</th><th>Vendeur</th><th class="r">Payé</th><th class="r">Commission</th><th class="r">Net vendeur</th><th>Fonds</th></tr></thead><tbody>'+
+  state.orders.slice().reverse().map(function(o){return '<tr><td>'+o.ref+'</td><td>'+esc(o.title)+'</td><td>'+esc(U(o.buyer).name)+'</td><td>'+esc(U(o.seller).name)+'</td><td class="r">'+eur(o.price+o.ship)+'</td><td class="r">'+eur(fee(o))+'</td><td class="r">'+eur(o.price-fee(o))+'</td><td>'+fundBadge(o)+'</td></tr>';}).join("")+'</tbody></table></div>';
+};
+VIEWS.pro=function(u){
+  var mine=state.listings.filter(function(l){return l.seller===u.id;}),on=mine.filter(function(l){return l.status==="online";});
+  var views=mine.reduce(function(s,l){return s+l.views;},0),sales=state.orders.filter(function(o){return o.seller===u.id;}).length,contacts=state.threads.filter(function(t){return t.seller===u.id;}).length;
+  var cs=state.campaigns.filter(function(c){return c.owner===u.id;});
+  return '<div class="page-h"><div><h1>Espace professionnel</h1><p class="muted wrap">'+esc(u.name)+' — boutique, formule et publicité.</p></div></div>'+
+  '<div class="kpis">'+[["Annonces en ligne",on.length],["Vues sur 30 jours",views.toLocaleString("fr-FR")],["Contacts reçus",contacts],["Ventes",sales]].map(function(k){return '<div class="card kpi"><p class="k-l">'+k[0]+'</p><p class="k-v">'+k[1]+'</p></div>';}).join("")+'</div>'+
+  '<div class="cols"><div class="card stack" style="gap:12px"><h2>Formule mensuelle</h2><div class="plans">'+PLANS.map(function(p){var c=state.plan[u.id]===p.id;
+    return '<div class="plan'+(c?" cur":"")+'"><p style="font-weight:700">'+p.label+'</p><p class="pp">'+eur(p.price)+'<span class="small muted"> / mois</span></p><p class="small">'+p.desc+'</p>'+(c?'<span class="badge b-acc">Formule actuelle</span>':'<button type="button" class="btn" data-act="plan" data-id="'+p.id+'">Choisir</button>')+'</div>';}).join("")+'</div></div>'+
+  '<div class="card stack" style="gap:12px"><h2>Nouvelle campagne publicitaire</h2>'+(on.length?'<form data-form="camp" novalidate class="stack" style="gap:14px"><div class="fgrid">'+
+    fld("name","Titre de la campagne",{full:true,ph:"Ex. : Arrivage pièces moteur"})+
+    fld("lid","Annonce mise en avant",{opts:on.map(function(l){return [l.id,l.title];}),v:on[0].id,full:true})+
+    fld("slot","Emplacement",{opts:Object.keys(SLOTS).map(function(k){return [k,SLOTS[k].label+" — "+eur(SLOTS[k].day)+" / jour"];}),v:"home"})+
+    fld("days","Durée",{opts:[["7","7 jours"],["14","14 jours"],["30","30 jours"]],v:"7"})+
+    '</div><dl class="lines"><div class="tot"><dt>Budget</dt><dd id="camp-total">'+eur(84)+'</dd></div></dl><button type="submit" class="btn primary">Payer et lancer la campagne</button></form>':'<p class="muted">Publiez une annonce pour lancer une campagne.</p>')+'</div></div>'+
+  '<section class="section"><h2>Mes campagnes</h2>'+(cs.length?'<div class="tw"><table style="min-width:700px"><thead><tr><th>Campagne</th><th>Emplacement</th><th>Durée</th><th class="r">Budget</th><th class="r">Affichages</th><th class="r">Clics</th><th>État</th></tr></thead><tbody>'+
+    cs.slice().reverse().map(function(c){return '<tr><td>'+esc(c.name)+'</td><td>'+SLOTS[c.slot].label+'</td><td>'+c.days+' jours</td><td class="r">'+eur(c.paid)+'</td><td class="r">'+c.imp.toLocaleString("fr-FR")+'</td><td class="r">'+c.clicks+'</td><td><span class="badge b-ok">Active</span></td></tr>';}).join("")+'</tbody></table></div>':'<div class="empty">Aucune campagne. Une campagne active s’affiche en bandeau « Sponsorisé » au-dessus des annonces.</div>')+'</section>';
+};
+
+/* ---------- Actions ---------- */
+var A={};
+A.reset=function(){try{localStorage.removeItem(KEY);}catch(e){}state=seed();ui=freshUi();closeModal();render();toast("Démo réinitialisée.");};
+A.go=function(d){go(d.v);};
+A.close=function(){closeModal();};
+A.open=function(d){go("listing",d.id);};
+A.univ=function(d){ui.f.univ=d.v;document.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",String(c.dataset.v===d.v));});renderResults();};
+A.clearf=function(){ui.f=freshUi().f;render();};
+A.thread=function(d){ui.thread=d.id;render();};
+A.contact=function(d){
+  var l=LS(d.id),t=state.threads.filter(function(x){return x.lid===l.id&&x.buyer===state.cur;})[0];
+  if(!t){t={id:"t"+(++state.seq),lid:l.id,buyer:state.cur,seller:l.seller,msgs:[]};state.threads.push(t);}
+  ui.thread=t.id;go("messages");var i=$("#f-text");if(i)i.focus();
+};
+A.buy=function(d){
+  var l=LS(d.id),u=U(state.cur);
+  modal("Livraison",'<div class="row">'+art(l,"thumb")+'<div class="grow"><p class="wrap" style="font-weight:600">'+esc(l.title)+'</p><p class="muted">'+eur(l.price)+'</p></div></div>'+
+    '<form data-form="checkout" data-id="'+l.id+'" novalidate class="stack" style="gap:14px"><div class="fgrid">'+
+    fld("name","Nom du destinataire",{v:u.name,full:true})+fld("addr","Adresse",{v:"12 rue des Lices",full:true})+fld("zip","Code postal",{v:"49100",attr:'inputmode="numeric"'})+fld("city","Ville",{v:u.city})+'</div>'+
+    '<fieldset class="stack"><legend>Mode de livraison</legend>'+CARRIERS.map(function(c,i){return '<label class="ck"><input type="radio" name="carrier" value="'+c.id+'"'+(i===0?" checked":"")+'><span class="ck-t">'+c.label+'<small>'+c.delay+'</small></span><span class="ck-p">'+eur(c.price)+'</span></label>';}).join("")+'</fieldset>'+
+    '<p class="note">'+ic("shield")+'<span>Paiement conservé jusqu’à votre confirmation de réception. En cas de problème, vous pouvez ouvrir un litige.</span></p>'+
+    '<button type="submit" class="btn primary block">Continuer vers le paiement</button></form>');
+};
+A.boost=function(d){
+  var l=LS(d.id);
+  openPay("Mise à la une — "+l.title,[["À la une pendant 7 jours",9.9]],function(){l.boost=true;state.extra+=9.9;render();toast("Annonce mise à la une. Reçu envoyé par e-mail (simulation).");});
+};
+A.unlist=function(d){LS(d.id).status="off";render();toast("Annonce retirée.");};
+A.resubmit=function(d){var l=LS(d.id);l.status="pending";l.reason="";render();toast("Annonce renvoyée en modération.");};
+A.approve=function(d){
+  var l=LS(d.id);l.status="online";l.ts=Date.now();l.date=today();l.flags=[];
+  state.modlog.unshift([today(),l.title,"Approuvée",""]);
+  if(ui.view==="listing")go("moderation");else render();
+  toast("Annonce publiée. Vendeur prévenu par e-mail (simulation).");
+};
+A.refuse=function(d){
+  var l=LS(d.id);
+  modal("Refuser l’annonce",'<p class="wrap"><b>'+esc(l.title)+'</b></p><form data-form="refuse" data-id="'+l.id+'" novalidate class="stack" style="gap:14px">'+
+    fld("motif","Motif",{opts:[["Coordonnées dans le texte","Coordonnées dans le texte"],["Photos manquantes ou insuffisantes","Photos manquantes ou insuffisantes"],["Article non autorisé","Article non autorisé"],["Description trompeuse","Description trompeuse"]],v:(l.flags[0]==="Coordonnées dans le texte"?"Coordonnées dans le texte":"Photos manquantes ou insuffisantes")})+
+    fld("comment","Message au vendeur",{ta:true,ph:"Ce qu’il doit corriger pour être publié…"})+
+    '<button type="submit" class="btn danger">Confirmer le refus</button></form>');
+};
+A.ship=function(d){
+  var o=OR(d.id);
+  modal("Déclarer l’expédition",'<p class="wrap"><b>'+esc(o.title)+'</b> — '+esc(o.carrier)+'</p><form data-form="ship" data-id="'+o.id+'" novalidate class="stack" style="gap:14px">'+
+    fld("tracking","Numéro de suivi",{v:"RP "+(4500+state.seq)+" "+(1000+state.seq*7%9000)+" FR",hint:"En production, l’étiquette prépayée et le numéro sont générés automatiquement chez le transporteur."})+
+    '<button type="submit" class="btn primary">Confirmer l’expédition</button></form>');
+};
+A.deliver=function(d){var o=OR(d.id);o.step=2;o.log.push([now(),"Colis livré"]);render();toast("Colis livré. Acheteur prévenu par e-mail (simulation).");};
+A.confirm=function(d){
+  var o=OR(d.id);o.step=3;o.status="done";o.log.push([now(),"Réception confirmée, "+eur(o.price-fee(o))+" versés au vendeur"]);
+  render();toast("Réception confirmée : "+eur(o.price-fee(o))+" versés au vendeur.");
+};
+A.dispute=function(d){
+  var o=OR(d.id);
+  modal("Signaler un problème",'<p class="wrap"><b>'+esc(o.title)+'</b> — '+o.ref+'</p><form data-form="dispute" data-id="'+o.id+'" novalidate class="stack" style="gap:14px">'+
+    fld("reason","Motif",{opts:[["Article non conforme à l’annonce","Article non conforme à l’annonce"],["Article endommagé","Article endommagé"],["Colis incomplet","Colis incomplet"]],v:"Article non conforme à l’annonce"})+
+    fld("text","Décrivez le problème",{ta:true,ph:"Ce que vous avez constaté à l’ouverture du colis…",hint:"20 caractères minimum. Vous pourrez joindre des photos."})+
+    '<button type="submit" class="btn danger">Ouvrir le litige et bloquer les fonds</button></form>');
+};
+A.decide=function(d){
+  var o=OR(d.id),f=fee(o),total=o.price+o.ship,txt;
+  if(d.d==="refund"){o.status="refunded";txt="Remboursement intégral de "+eur(total)+" à l’acheteur.";}
+  else if(d.d==="partial"){o.status="partial";txt="Partage : "+eur(o.price/2)+" remboursés à l’acheteur, "+eur(o.price/2-f/2)+" versés au vendeur.";}
+  else{o.status="done";txt="Litige rejeté : "+eur(o.price-f)+" versés au vendeur.";}
+  o.step=3;o.dispute.decision=txt;o.log.push([now(),"Décision de la plateforme — "+txt]);
+  render();toast("Décision enregistrée. Les deux parties sont prévenues par e-mail (simulation).");
+};
+A.plan=function(d){
+  var p=PLANS.filter(function(x){return x.id===d.id;})[0];
+  openPay("Formule "+p.label,[["Abonnement mensuel "+p.label,p.price]],function(){state.plan[state.cur]=p.id;state.extra+=p.price;render();toast("Formule "+p.label+" activée (simulation).");});
+};
+
+/* ---------- Formulaires ---------- */
+var F={};
+F.pay=function(f){
+  var ok=check(f,{
+    holder:function(v){return v.length<3?"Indiquez le titulaire de la carte.":"";},
+    card:function(v){return /^\d{16}$/.test(v.replace(/\s/g,""))?"":"Numéro à 16 chiffres attendu.";},
+    exp:function(v){var m=v.match(/^(\d{2})\s*\/\s*(\d{2})$/);if(!m||+m[1]<1||+m[1]>12)return "Format MM/AA attendu.";return new Date(2000+ +m[2],+m[1],1)<=new Date()?"Carte expirée.":"";},
+    cvc:function(v){return /^\d{3}$/.test(v)?"":"3 chiffres attendus.";}
+  });
+  if(!ok)return;
+  var b=f.querySelector("[type=submit]");b.disabled=true;b.textContent="Traitement en cours…";
+  setTimeout(function(){var cb=payCb;payCb=null;closeModal();if(cb)cb();},900);
+};
+F.checkout=function(f){
+  if(!check(f,{name:function(v){return v.length<3?"Indiquez le destinataire.":"";},addr:function(v){return v.length<5?"Adresse incomplète.":"";},zip:function(v){return /^\d{5}$/.test(v)?"":"Code postal à 5 chiffres.";},city:function(v){return v.length<2?"Indiquez la ville.":"";}}))return;
+  var l=LS(f.dataset.id),c=CARRIERS.filter(function(x){return x.id===f.elements.carrier.value;})[0];
+  openPay(l.title,[["Article",l.price],["Livraison — "+c.label,c.price]],function(){
+    var n=++state.seq;
+    state.orders.push({id:"o"+n,ref:"CMD-2026-"+("000"+n).slice(-4),lid:l.id,title:l.title,buyer:state.cur,seller:l.seller,price:l.price,ship:c.price,carrier:c.label,step:0,status:"escrow",tracking:"",log:[[now(),"Paiement reçu, fonds conservés"]],dispute:null});
+    l.status="sold";go("orders");toast("Paiement accepté : fonds conservés jusqu’à la réception. E-mail de confirmation envoyé (simulation).");
+  });
+};
+F.publish=function(f){
+  if(!check(f,{
+    title:function(v){return v.length<10?"Titre trop court (10 caractères minimum).":"";},
+    cat:function(v){return v?"":"Choisissez une catégorie.";},
+    univ:function(v){return v?"":"Choisissez un univers.";},
+    price:function(v){return parseFloat(v)>0?"":"Indiquez un prix supérieur à 0.";},
+    city:function(v){return v.length<2?"Indiquez la ville.":"";},
+    desc:function(v){return v.length<30?"Description trop courte (30 caractères minimum).":"";}
+  }))return;
+  var e=f.elements,opts=[].slice.call(f.querySelectorAll("[name=opt]:checked")).map(function(c){return c.value;});
+  var lines=OPTIONS.filter(function(o){return opts.indexOf(o.id)>=0;}).map(function(o){return [o.label,o.price];});
+  var price=Math.round(parseFloat(e.price.value)*100)/100,text=e.title.value+" "+e.desc.value,flags=[];
+  if(/(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}|[\w.+-]+@[\w-]+\.[\w.]+/.test(text))flags.push("Coordonnées dans le texte");
+  if(!ui.photos)flags.push("Aucune photo");
+  if(price<5)flags.push("Prix anormalement bas");
+  var n=++state.lseq,photos=ui.photos;
+  var l={id:"l"+n,ref:"A"+(1030+n),title:e.title.value.trim(),cat:e.cat.value,univ:e.univ.value,price:price,seller:state.cur,city:e.city.value.trim(),cond:e.cond.value,compat:e.compat.value.trim(),desc:e.desc.value.trim(),photos:photos,status:"pending",boost:opts.indexOf("boost")>=0,urgent:opts.indexOf("urgent")>=0,ts:Date.now(),date:today(),views:0,flags:flags,reason:""};
+  function create(){state.listings.push(l);go("mine");toast("Annonce envoyée en modération. Pour la valider, passez sur le profil « Équipe de modération ».");}
+  if(lines.length)openPay("Options de visibilité",lines,function(){state.extra+=lines.reduce(function(s,x){return s+x[1];},0);create();});else create();
+};
+F.msg=function(f){
+  if(!check(f,{text:function(v){return v?"":"Écrivez un message.";}}))return;
+  var t=state.threads.filter(function(x){return x.id===ui.thread;})[0],raw=f.elements.text.value.trim();
+  var txt=raw.replace(/(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}|[\w.+-]+@[\w-]+\.[\w.]+/g,"[coordonnées masquées]");
+  if(txt!==raw)toast("Coordonnées masquées : les échanges restent sur la plateforme.");
+  t.msgs.push({from:state.cur,text:txt,at:now()});f.elements.text.value="";save();
+  var c=$("#conv");c.innerHTML=convHtml(t);c.scrollTop=c.scrollHeight;f.elements.text.focus();
+  var other=t.buyer===state.cur?t.seller:t.buyer;
+  if(other==="u3"||other==="u4")setTimeout(function(){
+    t.msgs.push({from:other,text:REPLIES[t.msgs.length%REPLIES.length],at:now()});save();
+    var c2=$("#conv");if(c2&&ui.view==="messages"&&ui.thread===t.id){c2.innerHTML=convHtml(t);c2.scrollTop=c2.scrollHeight;}
+  },1100);
+};
+F.refuse=function(f){
+  if(!check(f,{comment:function(v){return v.length<10?"Précisez la correction attendue (10 caractères minimum).":"";}}))return;
+  var l=LS(f.dataset.id);l.status="refused";l.reason=f.elements.motif.value+" — "+f.elements.comment.value.trim();
+  state.modlog.unshift([today(),l.title,"Refusée",f.elements.motif.value]);
+  closeModal();if(ui.view==="listing")go("moderation");else render();
+  toast("Annonce refusée. Motif envoyé au vendeur par e-mail (simulation).");
+};
+F.ship=function(f){
+  if(!check(f,{tracking:function(v){return v.replace(/\s/g,"").length<8?"Numéro de suivi trop court (8 caractères minimum).":"";}}))return;
+  var o=OR(f.dataset.id);o.step=1;o.tracking=f.elements.tracking.value.trim();o.log.push([now(),"Colis remis au transporteur"]);
+  closeModal();render();toast("Expédition déclarée. Suivi transmis à l’acheteur par e-mail (simulation).");
+};
+F.dispute=function(f){
+  if(!check(f,{text:function(v){return v.length<20?"Décrivez le problème (20 caractères minimum).":"";}}))return;
+  var o=OR(f.dataset.id);o.status="dispute";o.dispute={reason:f.elements.reason.value,text:f.elements.text.value.trim(),msgs:[],decision:""};
+  o.log.push([now(),"Litige ouvert par l’acheteur"]);
+  closeModal();render();toast("Litige ouvert : les fonds restent bloqués jusqu’à la décision.");
+};
+F.dmsg=function(f){
+  var n="d"+f.dataset.id,r={};r[n]=function(v){return v?"":"Écrivez un message.";};
+  if(!check(f,r))return;
+  OR(f.dataset.id).dispute.msgs.push({from:state.cur,text:f.elements[n].value.trim()});render();
+};
+F.camp=function(f){
+  if(!check(f,{name:function(v){return v.length<5?"Donnez un titre à la campagne (5 caractères minimum).":"";}}))return;
+  var e=f.elements,days=+e.days.value,slot=e.slot.value,total=SLOTS[slot].day*days,name=e.name.value.trim(),lid=e.lid.value;
+  openPay("Campagne publicitaire",[[SLOTS[slot].label+" — "+days+" jours",total]],function(){
+    state.campaigns.push({id:"c"+(++state.seq),owner:state.cur,name:name,slot:slot,days:days,lid:lid,paid:total,status:"active",imp:0,clicks:0});
+    state.extra+=total;render();toast("Campagne lancée : elle apparaît en bandeau « Sponsorisé » dans les annonces.");
+  });
+};
+
+/* ---------- Événements ---------- */
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-act]");if(!b)return;
+  var a=A[b.dataset.act];if(a)a(b.dataset,b);
+});
+document.addEventListener("submit",function(e){
+  var h=F[e.target.dataset.form];if(h){e.preventDefault();h(e.target);}
+});
+function onInput(e){
+  var t=e.target;
+  if(t.dataset&&t.dataset.f){ui.f[t.dataset.f]=t.value;renderResults();return;}
+  if(t.id==="role"){state.cur=t.value;ui.thread=null;closeModal();go(navFor(U(state.cur))[0][0]);return;}
+  var f=t.form;if(!f)return;
+  if(f.dataset.form==="publish"){
+    if(t.id==="f-photos"){
+      var files=[].slice.call(t.files||[]).slice(0,6);ui.photos=files.length;
+      $("#thumbs").innerHTML="";
+      files.forEach(function(file){try{var i=new Image();i.alt="";i.src=URL.createObjectURL(file);$("#thumbs").appendChild(i);}catch(x){}});
+    }
+    var tot=0;f.querySelectorAll("[name=opt]:checked").forEach(function(c){tot+=OPTIONS.filter(function(o){return o.id===c.value;})[0].price;});
+    $("#pub-total").textContent=eur(tot);$("#pub-btn").textContent=tot?"Payer "+eur(tot)+" et envoyer en modération":"Envoyer en modération";
+  }
+  if(f.dataset.form==="camp")$("#camp-total").textContent=eur(SLOTS[f.elements.slot.value].day*+f.elements.days.value);
+}
+document.addEventListener("input",onInput);
+document.addEventListener("change",function(e){if(e.target.tagName==="SELECT"||e.target.type==="file"||e.target.type==="checkbox")onInput(e);});
+
+state=load();ui=freshUi();
+if(!USERS[state.cur])state.cur="u1";
+render();
+})();
+</script>
 </body>
 </html>
