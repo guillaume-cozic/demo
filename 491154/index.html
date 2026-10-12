@@ -2,20 +2,830 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Cabinets kiné et rendez-vous</title>
+<meta name="description" content="Site de trois cabinets de kinésithérapie avec prise de rendez-vous en ligne par cabinet, praticien et soin, espace patient (annulation, ordonnance, questionnaire), gestion des créneaux par praticien, agenda du secrétariat et statistiques d'absence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F5F2EC;--panel:#FFFFFF;--panel-2:#FAF8F3;--ink:#16242B;--muted:#55636A;--line:#E2DDD2;--line-2:#C4BDAE;
+  --pri:#0F4C5C;--pri-ink:#FFFFFF;--pri-soft:#DCEBEE;--pri-text:#0D4250;
+  --cta:#B4472F;--cta-ink:#FFFFFF;--cta-soft:#F8E4DD;--cta-text:#8F3421;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--gray:#4E5552;--gray-soft:#ECE9E2;
+  --map-bg:#EDE8DC;--map-road:#FFFFFF;--map-water:#C9DFE6;--map-green:#D5E3CC;
+  --av-l:86%;--av-t:24%;
+  --shadow:0 1px 2px rgba(20,30,34,.05),0 4px 14px rgba(20,30,34,.06);
+  --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F1517;--panel:#161E21;--panel-2:#1B2528;--ink:#E5EBEC;--muted:#9EABB0;--line:#273337;--line-2:#3B4A4F;
+  --pri:#7CC4D4;--pri-ink:#06242B;--pri-soft:#16343B;--pri-text:#9AD5E2;
+  --cta:#F0937C;--cta-ink:#3A0F05;--cta-soft:#3A1E17;--cta-text:#F5AC9A;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--gray:#B8BFBB;--gray-soft:#242C2E;
+  --map-bg:#1C2629;--map-road:#33424A;--map-water:#1B3A45;--map-green:#1F3327;
+  --av-l:26%;--av-t:86%;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1,h2,.serif{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--pri-text)}
+ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--warn-soft);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--warn)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:14px;height:14px}
+
+.top{display:flex;align-items:center;gap:6px 20px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:19px;text-decoration:none;color:var(--ink);min-height:44px}
+.brand small{display:block;font-family:var(--font);font-weight:500;font-size:12px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:50%;background:var(--pri);color:var(--pri-ink);display:grid;place-items:center;flex:none}
+.mark svg{width:22px;height:22px}
+.navrow{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0;max-width:100%}
+.navrow::-webkit-scrollbar{display:none}
+#spaces{margin-left:auto;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:3px}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:9px;font-weight:600;font-size:15px;color:var(--muted);text-decoration:none;white-space:nowrap;flex:none}
+.tab:hover{color:var(--ink);background:var(--gray-soft)}
+.tab[aria-current="page"]{background:var(--pri-soft);color:var(--pri-text)}
+#spaces .tab[aria-current="page"]{background:var(--pri);color:var(--pri-ink)}
+.sub{padding:6px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.sub .tab.go{background:var(--cta);color:var(--cta-ink);margin-left:6px}
+@media (max-width:820px){#spaces{margin-left:0;width:100%}}
+
+main{padding:22px clamp(16px,2vw,32px) 48px;min-width:0}
+main:focus{outline:none}
+main.site{max-width:1240px;margin:0 auto}
+footer{padding:18px clamp(16px,2vw,32px) 32px;font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);display:flex;gap:8px 24px;flex-wrap:wrap}
+footer span{display:inline-flex;gap:6px;align-items:center;min-width:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
+.btn.cta{background:var(--cta);border-color:var(--cta);color:var(--cta-ink)}
+.btn.pri:hover,.btn.cta:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.lg{min-height:52px;padding:0 22px;font-size:17px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;color:var(--ink);flex:none}
+.icon-btn:hover{background:var(--panel-2)}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:14px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:13px;color:var(--muted)}
+.err{font-size:13.5px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:92px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:6px}
+.ck{display:flex;align-items:flex-start;gap:10px;min-height:44px;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer;font-size:15px;min-width:0}
+.ck input{width:20px;height:20px;accent-color:var(--pri);margin:1px 0 0;flex:none}
+.cks{display:flex;flex-wrap:wrap;gap:8px}
+.fgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr))}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:19px}
+.card h3{font-size:16px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-h h1{font-size:clamp(24px,3vw,30px)}
+.page-h>*{min-width:0}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.cols{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:1080px){.cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}.cols.even{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tiles{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(290px,100%),1fr))}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--pri-soft);color:var(--pri-text)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-cta{background:var(--cta-soft);color:var(--cta-text)}
+.badge svg{width:14px;height:14px}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--pri-soft);color:var(--pri-text);border-radius:12px;padding:12px 14px;font-size:14.5px;min-width:0}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note svg{margin-top:2px}
+.empty{text-align:center;padding:32px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px;display:grid;gap:12px;justify-items:center}
+.meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14.5px;color:var(--muted)}
+.meta span{display:inline-flex;gap:6px;align-items:center;min-width:0}
+.av{--s:56px;width:var(--s);height:var(--s);border-radius:50%;flex:none;display:inline-grid;place-items:center;font-weight:700;font-size:calc(var(--s)*.36);background:hsl(var(--h,190) 34% var(--av-l));color:hsl(var(--h,190) 45% var(--av-t));object-fit:cover}
+.who{display:flex;gap:12px;align-items:center;min-width:0}
+.who>div{min-width:0}
+.who b{display:block}
+
+/* site public */
+.hero{display:grid;gap:24px;grid-template-columns:minmax(0,1fr);align-items:center;padding:12px 0 28px}
+@media (min-width:940px){.hero{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);padding:28px 0 40px}}
+.hero h1{font-size:clamp(30px,4.6vw,50px);line-height:1.08}
+.eyebrow{font-size:13.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cta-text);margin-bottom:10px}
+.lead{font-size:18px;color:var(--muted);margin:14px 0 20px;max-width:56ch}
+.sec{margin-top:36px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sec-h h2{font-size:26px}
+.tile{display:flex;flex-direction:column;gap:10px}
+.tile h3{font-family:var(--serif);font-size:20px;font-weight:600}
+.tile .actions{margin-top:auto;padding-top:6px}
+.plan{width:100%;height:auto;border-radius:12px;display:block;border:1px solid var(--line)}
+.hours{width:100%;border-collapse:collapse;font-size:15px}
+.hours th{text-align:left;font-weight:500;color:var(--muted);padding:6px 0}
+.hours td{text-align:right;font-weight:600;padding:6px 0}
+.hours tr+tr{border-top:1px solid var(--line)}
+.portrait{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.prose p+p{margin-top:10px}
+.steps-l{counter-reset:s;display:grid;gap:10px}
+.steps-l li{counter-increment:s;display:flex;gap:12px;align-items:flex-start}
+.steps-l li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--pri-soft);color:var(--pri-text);font-weight:700;display:grid;place-items:center;flex:none;font-size:14px}
+.actu time{font-size:13.5px;color:var(--muted);font-weight:600}
+
+/* réservation */
+.stepper{display:flex;gap:6px;margin-bottom:18px}
+.stepper li{flex:1;min-width:0;font-size:13.5px;font-weight:600;color:var(--muted);border-top:4px solid var(--line);padding-top:6px;overflow-wrap:anywhere}
+.stepper li.done,.stepper li.cur{border-color:var(--pri);color:var(--ink)}
+.days{display:grid;grid-template-columns:44px repeat(7,minmax(0,1fr)) 44px;gap:6px;align-items:stretch;margin:14px 0}
+.day{min-height:64px;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:4px 2px;font-size:12.5px;color:var(--muted);min-width:0}
+.day b{font-size:17px;color:var(--ink)}
+.day .n{font-size:11.5px;font-weight:700;color:var(--ok)}
+.day.none .n{color:var(--muted);font-weight:500}
+.day[aria-pressed="true"]{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
+.day[aria-pressed="true"] b,.day[aria-pressed="true"] .n{color:var(--pri-ink)}
+.days .icon-btn{height:auto;width:44px}
+@media (max-width:520px){.days{grid-template-columns:repeat(7,minmax(0,1fr));}.days .icon-btn{grid-row:2;height:44px;width:100%}.days .icon-btn.prev{grid-column:1/4}.days .icon-btn.next{grid-column:5/8}.day{font-size:11.5px}.day .n{font-size:10.5px}}
+.pslots{border-top:1px solid var(--line);padding:14px 0;display:grid;gap:10px}
+.slots{display:flex;flex-wrap:wrap;gap:8px}
+.slot{min-height:44px;min-width:70px;padding:0 10px;border:1px solid var(--pri);color:var(--pri-text);background:var(--panel);border-radius:10px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums}
+.slot:hover{background:var(--pri-soft)}
+.recap{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:6px}
+.recap .big{font-family:var(--serif);font-size:20px;font-weight:600}
+.bubble{background:var(--gray-soft);border-radius:16px 16px 16px 4px;padding:12px 14px;font-size:14.5px;max-width:420px}
+.okmark{width:56px;height:56px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.okmark svg{width:28px;height:28px}
+
+/* app */
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .k-l{font-size:13.5px;color:var(--muted);font-weight:600}
+.kpi .k-v{font-size:28px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi.hot .k-v{color:var(--cta-text)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;margin-bottom:14px}
+.toolbar .field{flex:0 1 220px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--muted);margin-left:auto}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-1px;border:1px solid var(--line-2)}
+.ag-wrap{overflow:auto;position:relative;max-height:78vh;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+table.ag{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed}
+.ag th,.ag td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:2px}
+.ag thead th{position:sticky;top:0;background:var(--panel);z-index:3;padding:8px 6px;font-size:13.5px;text-align:left;vertical-align:bottom;overflow-wrap:anywhere}
+.ag thead th small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.ag th.h{position:sticky;left:0;background:var(--panel);z-index:2;width:58px;font-size:12.5px;font-weight:600;color:var(--muted);text-align:right;padding-right:8px;font-variant-numeric:tabular-nums}
+.ag thead th.h{z-index:4}
+.ag tr.hh th.h{color:var(--ink)}
+.ag td.off{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--gray-soft) 6px 8px)}
+.cell{display:block;width:100%;min-height:44px;text-align:left;border-radius:8px;border:1px solid transparent;font-size:12.5px;line-height:1.25;padding:4px 7px;cursor:pointer;overflow-wrap:anywhere;background:transparent}
+.cell b{display:block;font-weight:600}
+.cell.free{border:1px dashed transparent;color:var(--muted);text-align:center;font-size:18px}
+.cell.free:hover,.cell.free:focus-visible{border-color:var(--line-2);background:var(--panel-2)}
+.cell.confirme{background:var(--pri-soft);color:var(--pri-text)}
+.cell.honore{background:var(--ok-soft);color:var(--ok)}
+.cell.absent{background:var(--bad-soft);color:var(--bad)}
+.cell.blk{background:var(--gray-soft);color:var(--gray);border-color:var(--line-2)}
+.cell.mine{box-shadow:inset 3px 0 0 var(--cta)}
+.tw{overflow-x:auto;position:relative}
+table.t{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
+.t th{text-align:left;font-size:13px;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line-2)}
+.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+.t .r{text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--gray-soft);border-radius:999px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:var(--pri);border-radius:999px}
+.bar.hot i{background:var(--cta)}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:8px 0}
+.brow .bar{grid-column:1/-1}
+.brow b{font-variant-numeric:tabular-nums}
+.rows>li{display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.rows>li:first-child{border-top:0}
+.rows .tm{font-weight:700;font-variant-numeric:tabular-nums}
+.rows .bd{display:flex;gap:8px 12px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-width:0}
+.rows .bd>div{min-width:0}
+.items>li{padding:14px 0;border-top:1px solid var(--line);display:flex;gap:10px 16px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.items>li:first-child{border-top:0;padding-top:0}
+.items>li>div{min-width:0}
+.hrow{display:grid;grid-template-columns:150px repeat(2,minmax(0,1fr));gap:8px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.hrow:first-of-type{border-top:0}
+.hrow .rg{display:flex;gap:6px;align-items:center;min-width:0}
+.hrow .rg select{padding:8px 6px}
+.hrow .err{grid-column:1/-1}
+.hrow .dck{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:600;cursor:pointer}
+.hrow .dck input{width:20px;height:20px;accent-color:var(--pri)}
+@media (max-width:640px){.hrow{grid-template-columns:minmax(0,1fr)}}
+.wk{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(130px,100%),1fr));gap:8px}
+.wk button{min-height:64px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer;text-align:left;padding:8px 10px;font-size:13.5px;color:var(--muted)}
+.wk button b{display:block;color:var(--ink);font-size:15px;text-transform:capitalize}
+.wk button[aria-pressed="true"]{border-color:var(--pri);background:var(--pri-soft);color:var(--pri-text)}
+.todo{display:grid;gap:8px}
+.todo li{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 14px}
+.todo li span{display:inline-flex;gap:8px;align-items:center;min-width:0;font-weight:600}
+.todo .done{color:var(--ok)}
+.drop{border:2px dashed var(--line-2);border-radius:14px;padding:22px 16px;text-align:center;display:grid;gap:10px;justify-items:center}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop input:focus-visible+label{outline:3px solid var(--pri);outline-offset:2px}
+.scale{display:flex;gap:12px;align-items:center}
+.scale input{flex:1;min-width:0;min-height:44px;accent-color:var(--pri)}
+.scale output{font-weight:700;font-size:20px;min-width:2ch;text-align:right}
+
+dialog{border:0;padding:0;border-radius:16px;background:var(--panel);color:var(--ink);width:min(580px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,20,24,.55)}
+.m-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 14px 10px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.m-h h2{font-size:20px;min-width:0;overflow-wrap:anywhere}
+.m-b{padding:16px 20px 20px;display:grid;gap:16px}
+.m-b hr{border:0;border-top:1px solid var(--line);margin:0;width:100%}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;font-size:15px;margin:0}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+#toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;max-width:calc(100vw - 32px);opacity:0;pointer-events:none;transition:.25s;z-index:100;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <a class="brand" href="#/"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9c3-3 5-3 8 0s5 3 8 0M4 14c3-3 5-3 8 0s5 3 8 0M4 19c3-3 5-3 8 0s5 3 8 0"/></svg></span><span>Kiné des Trois Rives<small>Kinésithérapeutes — 3 cabinets</small></span></a>
+  <nav class="navrow" id="spaces" aria-label="Espaces"></nav>
+</header>
+<nav class="sub navrow" id="sub" aria-label="Navigation de l’espace"></nav>
+<main id="main" tabindex="-1"></main>
+<footer>
+  <span><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Données de santé : hébergement certifié HDS et consentement RGPD prévus en production.</span>
+  <span>Maquette interactive — e-mails, SMS et dépôts de fichiers sont simulés.</span>
+</footer>
+<dialog id="dlg" aria-labelledby="dlg-t"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- utilitaires ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const pd=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
+const dow=s=>pd(s).getDay();
+const TODAY=iso(new Date());
+const fmtD=(s,o)=>pd(s).toLocaleDateString('fr-FR',o||{weekday:'long',day:'numeric',month:'long'});
+const fmtS=s=>fmtD(s,{day:'numeric',month:'short'});
+const dt=(d,t)=>{const x=pd(d),a=t.split(':').map(Number);x.setHours(a[0],a[1],0,0);return x};
+const tmin=t=>{const a=t.split(':').map(Number);return a[0]*60+a[1]};
+const mint=m=>pad(Math.floor(m/60))+':'+pad(m%60);
+const hh=t=>t.replace(':',' h ');
+const workDay=(d,dir)=>{while(dow(d)===0)d=addD(d,dir||1);return d};
+const monday=d=>addD(d,1-(dow(d)||7));
+const pct=(a,b)=>b?(a/b*100).toFixed(1).replace('.',',')+' %':'—';
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const IC={
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-5.5 7-5.5s7 2 7 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 15c2.2.7 3.5 2.3 3.5 5"/>',
+ pin:'<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ phone:'<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 12l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 5a2 2 0 0 1 2-2z"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',plus:'<path d="M12 5v14M5 12h14"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ chart:'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+ sms:'<path d="M4 5h16v11H9l-5 4z"/>',
+ file:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+ upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+ left:'<path d="M15 6l-6 6 6 6"/>',right:'<path d="M9 6l6 6-6 6"/>',
+ pmr:'<circle cx="11" cy="4.5" r="1.5"/><path d="M11 8v6h5l2 5M8.5 11.5a5 5 0 1 0 6 7"/>',
+ list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+ pulse:'<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+ news:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.500 0 18M12 3c-3 3.5-3 14.500 0 18"/>',
+ info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.500v.01"/>'
+};
+const ic=n=>'<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>';
+const opts=(list,val,first)=>(first!=null?'<option value="">'+first+'</option>':'')+list.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>').join('');
+const TIMES=[];for(let m=420;m<=1230;m+=30)TIMES.push(mint(m));
+const ST={confirme:['Confirmé','b-info'],honore:['Honoré','b-ok'],absent:['Absent','b-bad'],annule:['Annulé','b-gray']};
+const DAYS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const ME={pn:'Camille',nm:'Roussel',n:'Camille Roussel',t:'06 39 98 41 27',e:'camille.roussel@exemple.fr'};
+
+/* ---------- données ---------- */
+let S,B,U,IDX=null;
+const CABS=[
+ {id:'c1',n:'Cabinet des Quais',k:'Quais',adr:'14 quai des Bateliers, 49100 Angers',tel:'02 61 91 24 10',rot:0,
+  hor:[['Lundi – vendredi','8 h – 19 h 30'],['Samedi','9 h – 12 h 30'],['Dimanche','Fermé']],
+  txt:'Notre cabinet historique, au bord de la Maine. Quatre kinésithérapeutes, une salle de rééducation lumineuse et deux cabines dédiées à la périnéologie.',
+  pmr:['Accès de plain-pied depuis le quai','Place de stationnement réservée devant l’entrée','Sanitaires adaptés, portes de 90 cm'],acc:'Tram A, arrêt Bateliers (3 min à pied). Parking du Port à 150 m.'},
+ {id:'c2',n:'Cabinet du Parc',k:'Parc',adr:'3 allée des Marronniers, 49000 Angers',tel:'02 61 91 24 20',rot:28,
+  hor:[['Lundi – vendredi','8 h – 19 h 30'],['Samedi','9 h – 12 h 30'],['Dimanche','Fermé']],
+  txt:'Face au parc, au 2e étage de la maison de santé. Quatre praticiens, un espace enfants et une salle dédiée aux troubles de l’équilibre.',
+  pmr:['Ascenseur aux normes (2e étage)','Rampe d’accès côté allée','Table de soins à hauteur variable dans chaque cabine'],acc:'Bus 4 et 9, arrêt Parc. Stationnement gratuit allée des Marronniers.'},
+ {id:'c3',n:'Cabinet Belle-Rive',k:'Belle-Rive',adr:'27 rue du Moulin Neuf, 49130 Les Ponts-de-Cé',tel:'02 61 91 24 30',rot:-22,
+  hor:[['Lundi – vendredi','8 h – 19 h 30'],['Samedi','9 h – 12 h 30'],['Dimanche','Fermé']],
+  txt:'Le plus récent de nos cabinets : 120 m² de plateau technique pour la rééducation du sportif et la reprise après chirurgie.',
+  pmr:['Bâtiment de plain-pied, seuils abaissés','Deux places réservées sur le parking privé','Vestiaire et douche accessibles en fauteuil'],acc:'Parking privé gratuit de 14 places. Bus 8, arrêt Moulin Neuf.'}
+];
+const SOINS=[
+ {id:'sport',n:'Rééducation du sportif',k:'Sportif',c:'Entorses, tendinopathies, reprise après blessure : retrouver le geste et la confiance.',
+  t:'Du coureur du dimanche au compétiteur, nous construisons un programme de reprise adapté à votre discipline : traitement de la douleur, renforcement ciblé, puis réathlétisation sur plateau technique.',
+  e:['Bilan initial et tests fonctionnels','Soins manuels et renforcement progressif','Réathlétisation et prévention de la récidive']},
+ {id:'perinee',n:'Rééducation périnéale',k:'Périnéale',c:'Après une grossesse ou en cas de fuites urinaires, en toute confidentialité.',
+  t:'Séances individuelles en cabine fermée, avec des praticiennes formées à la périnéologie. Prise en charge post-partum, incontinence, douleurs pelviennes, préparation à une chirurgie.',
+  e:['Entretien et bilan, à votre rythme','Exercices guidés, biofeedback si besoin','Programme d’auto-rééducation à la maison']},
+ {id:'respi',n:'Kiné respiratoire de l’enfant',k:'Respiratoire',c:'Bronchiolite, encombrement bronchique, asthme du nourrisson et de l’enfant.',
+  t:'Des techniques douces de désencombrement, expliquées aux parents. Créneaux réservés en fin de journée et permanences le week-end en période hivernale.',
+  e:['Évaluation de l’encombrement','Désencombrement par techniques douces','Conseils aux parents : lavage de nez, couchage, surveillance']},
+ {id:'dos',n:'Dos et cervicales',k:'Dos',c:'Lombalgies, sciatiques, cervicalgies, douleurs posturales liées au travail.',
+  t:'Une prise en charge active : thérapie manuelle, exercices de mobilité et de gainage, conseils d’ergonomie pour que la douleur ne revienne pas.',
+  e:['Bilan postural et recherche des facteurs aggravants','Thérapie manuelle et exercices actifs','Routine personnalisée de 10 minutes par jour']},
+ {id:'postop',n:'Rééducation post-opératoire',k:'Post-op.',c:'Prothèse de hanche ou de genou, ligaments croisés, coiffe des rotateurs.',
+  t:'Nous suivons le protocole de votre chirurgien et vous accompagnons de la sortie de clinique à la reprise complète de vos activités.',
+  e:['Lecture du compte rendu opératoire et bilan','Récupération des amplitudes et de la force','Retour à l’autonomie puis à l’activité']},
+ {id:'vestib',n:'Rééducation vestibulaire',k:'Vestibulaire',c:'Vertiges, troubles de l’équilibre, prévention des chutes.',
+  t:'Un bilan spécifique permet d’identifier l’origine du vertige. La rééducation associe manœuvres libératoires et exercices d’équilibre progressifs.',
+  e:['Bilan vestibulaire instrumenté','Manœuvres et exercices d’habituation','Travail de l’équilibre et de la marche']},
+ {id:'lymph',n:'Drainage lymphatique',k:'Drainage',c:'Lymphœdème, suites de chirurgie, jambes lourdes.',
+  t:'Drainage lymphatique manuel et bandages réducteurs, notamment après un cancer du sein, en lien avec votre équipe médicale.',
+  e:['Mesures et bilan de l’œdème','Drainage manuel et bandages','Apprentissage de l’auto-drainage']}
+];
+const PRATS=[
+ ['p1','Hélène Marchetti','c1',['dos','postop','lymph'],'Diplômée en 2006, Hélène s’est formée à la thérapie manuelle et au drainage lymphatique. Elle coordonne le Cabinet des Quais.'],
+ ['p2','Julien Castaing','c1',['sport','postop'],'Ancien handballeur, Julien accompagne les sportifs amateurs et confirmés, du premier bilan jusqu’au retour sur le terrain.'],
+ ['p3','Nadia Benali','c1',['perinee','lymph'],'Nadia consacre l’essentiel de son activité à la périnéologie et au suivi post-partum, dans un cadre calme et confidentiel.'],
+ ['p4','Thomas Leroux','c1',['respi','dos'],'Thomas reçoit les nourrissons et les enfants pour la kiné respiratoire, et les adultes pour les douleurs du dos.'],
+ ['p5','Claire Vasseur','c2',['perinee','dos'],'Claire associe rééducation périnéale et travail postural : deux approches souvent complémentaires après une grossesse.'],
+ ['p6','Mathieu Perrin','c2',['sport','dos'],'Kiné d’un club de course à pied, Mathieu est spécialisé dans les tendinopathies et les pathologies du coureur.'],
+ ['p7','Sophie Lambert','c2',['respi','vestib'],'Sophie partage son temps entre la kiné respiratoire pédiatrique et la rééducation des vertiges.'],
+ ['p8','Antoine Girard','c2',['postop','vestib','dos'],'Antoine suit de nombreux patients après une prothèse de hanche ou de genou et anime l’atelier « équilibre » des seniors.'],
+ ['p9','Élodie Fontaine','c3',['sport','postop'],'Élodie a rejoint Belle-Rive pour son plateau technique : isocinétisme, tests de saut, réathlétisation après ligamentoplastie.'],
+ ['p10','Karim Haddad','c3',['sport','dos'],'Karim travaille avec des grimpeurs et des nageurs. Il est formé au traitement des épaules douloureuses.'],
+ ['p11','Louise Meunier','c3',['respi','perinee','lymph'],'Louise assure les permanences de kiné respiratoire à Belle-Rive et le suivi en périnéologie.']
+];
+const OFF=[null,3,null,5,1,null,3,null,2,null,4],SAT=[0,5,9],ABS={c1:.05,c2:.085,c3:.04};
+function mkHours(i){const h={};const v=i%3,a=v===0?'08:00':v===1?'08:30':'09:00',d=v===0?'18:00':v===1?'18:30':'19:30';
+  for(let k=1;k<=6;k++)h[k]={on:k<=5&&OFF[i]!==k,a:a,b:'12:30',c:'14:00',d:d};
+  if(SAT.includes(i))h[6]={on:true,a:'09:00',b:'12:30',c:'',d:''};else{h[6].c='';h[6].d=''}
+  return h}
+function daySlots(p,d){const h=p.h[dow(d)];if(!h||!h.on)return[];const o=[];
+  [[h.a,h.b],[h.c,h.d]].forEach(r=>{if(!r[0]||!r[1])return;for(let m=tmin(r[0]);m+30<=tmin(r[1]);m+=30)o.push(mint(m))});return o}
+function idx(){if(!IDX){IDX=new Map();S.rdvs.forEach(r=>{if(r.st!=='annule')IDX.set(r.p+'|'+r.d+'|'+r.t,r)})}return IDX}
+const dirty=()=>{IDX=null};
+const rdvAt=(p,d,t)=>idx().get(p+'|'+d+'|'+t);
+const blockAt=(p,d,t)=>S.blocks.find(b=>b.p===p&&b.d===d&&t>=b.from&&t<b.to);
+const freeSlots=(p,d)=>{const now=new Date();return daySlots(p,d).filter(t=>!rdvAt(p.id,d,t)&&!blockAt(p.id,d,t)&&dt(d,t)>now)};
+const P=id=>S.prats.find(p=>p.id===id),C=id=>CABS.find(c=>c.id===id),SO=id=>SOINS.find(s=>s.id===id),RV=id=>S.rdvs.find(r=>r.id===+id);
+const telOf=r=>r.tel||('06 39 98 '+pad(r.id%100)+' '+pad(r.id*7%100));
+function notify(ch,to,txt){S.notifs.unshift({ts:new Date(),ch:ch,to:to,txt:txt})}
+function nextSlots(p,n){const o=[];for(let i=0;i<28&&o.length<n;i++){const d=addD(TODAY,i);freeSlots(p,d).some(t=>{o.push({d:d,t:t});return o.length>=n})}return o}
+
+function seed(){
+  const R=rng(491154);
+  const PN=['Léa','Hugo','Manon','Lucas','Chloé','Nathan','Emma','Louis','Inès','Paul','Jeanne','Arthur','Sarah','Victor','Alice','Marc','Nicole','Bernard','Yasmine','Olivier','Margaux','Rémi','Agathe','Samuel'];
+  const NN=['Martin','Besnard','Dubois','Petit','Durand','Moreau','Laurent','Simon','Michel','Lefèvre','Garcia','David','Bertrand','Roux','Vincent','Fournier','Morel','Girault','André','Mercier','Blanc','Guérin','Boyer','Garnier','Chevalier','Legrand','Gauthier','Renaud'];
+  S={seq:0,rdvs:[],blocks:[],wait:[],notifs:[],ordos:[],quest:null,
+    prats:PRATS.map((a,i)=>({id:a[0],n:a[1],c:a[2],s:a[3].slice(),bio:a[4],titre:'Masseur-kinésithérapeute D.E.',hue:(i*47+185)%360,h:mkHours(i),photo:''})),
+    actus:[
+     {id:1,d:addD(TODAY,-5),t:'Bronchiolite : permanences de kiné respiratoire le week-end',x:'De novembre à février, un praticien assure une permanence le samedi et le dimanche matin au Cabinet du Parc. Les créneaux s’ouvrent à la réservation chaque jeudi.'},
+     {id:2,d:addD(TODAY,-19),t:'Un plateau de réathlétisation à Belle-Rive',x:'Tests de saut, isocinétisme et piste de course de 15 m : le cabinet Belle-Rive s’équipe pour accompagner le retour au sport après blessure.'},
+     {id:3,d:addD(TODAY,-41),t:'Atelier équilibre pour les plus de 65 ans',x:'Chaque mardi à 11 h au Cabinet du Parc, un atelier collectif de prévention des chutes animé par Antoine Girard. Sur prescription médicale.'}]};
+  const now=new Date();
+  for(let o=-28;o<=20;o++){const d=addD(TODAY,o);if(dow(d)===0)continue;
+    S.prats.forEach(p=>{daySlots(p,d).forEach(t=>{
+      const fill=o<0?.64:o===0?.7:Math.max(.1,.58-.035*o);
+      if(R()>fill)return;
+      const so=p.s[Math.floor(R()*p.s.length)],nm=PN[Math.floor(R()*PN.length)]+' '+NN[Math.floor(R()*NN.length)];
+      let st='confirme';const x=R();
+      if(o<0)st=x<ABS[p.c]?'absent':x<ABS[p.c]+.07?'annule':'honore';
+      else if(o===0&&dt(d,t)<now&&x<.85)st='honore';
+      S.rdvs.push({id:++S.seq,p:p.id,c:p.c,s:so,d:d,t:t,n:nm,st:st,src:R()<.56?'ligne':'tel',first:R()<.12});
+    })})}
+  // patiente de démonstration
+  const put=(p,d,t,x)=>{const ex=rdvAt(p.id,d,t);if(ex)S.rdvs.splice(S.rdvs.indexOf(ex),1);
+    S.rdvs.push(Object.assign({id:++S.seq,p:p.id,c:p.c,s:p.s[0],d:d,t:t,n:ME.n,tel:ME.t,st:'confirme',src:'ligne',first:false,mine:true},x||{}));dirty()};
+  const p2=P('p2'),p1=P('p1');
+  [-21,-14,-7].forEach((o,i)=>{let d=addD(TODAY,o);while(!daySlots(p2,d).length)d=addD(d,-1);const sl=daySlots(p2,d);put(p2,d,sl[Math.min(3,sl.length-1)],{st:'honore',first:i===0})});
+  near:for(let i=0;i<2;i++){const d=addD(TODAY,i);for(const t of daySlots(p2,d)){const g=dt(d,t)-now;if(g>36e5&&g<23*36e5){put(p2,d,t);break near}}}
+  let fd=addD(TODAY,6);while(!daySlots(p1,fd).length)fd=addD(fd,1);
+  const fs=daySlots(p1,fd);put(p1,fd,fs.includes('10:00')?'10:00':fs[1],{s:'dos',first:true});
+  S.wait=[
+   {id:1,n:'Martin Delcourt',t:'06 39 98 17 52',p:'p1',c:'c1',s:'dos',since:addD(TODAY,-2),st:'attente'},
+   {id:2,n:'Océane Tessier',t:'06 39 98 60 08',p:'',c:'c2',s:'perinee',since:addD(TODAY,-1),st:'attente'},
+   {id:3,n:'Gabriel Royer',t:'06 39 98 33 71',p:'p9',c:'c3',s:'sport',since:addD(TODAY,-4),st:'attente'}];
+  S.blocks=[{id:1,p:'p6',d:workDay(addD(TODAY,1)),from:'14:00',to:'18:30',m:'Formation'},{id:2,p:'p10',d:workDay(TODAY),from:'12:00',to:'12:30',m:'Réunion d’équipe'}];
+  S.blocks.forEach(b=>{S.rdvs=S.rdvs.filter(r=>!(r.p===b.p&&r.d===b.d&&r.t>=b.from&&r.t<b.to&&!r.mine))});dirty();
+  const y=new Date(now-18*36e5);
+  S.notifs=[
+   {ts:y,ch:'SMS',to:'Léa Durand',txt:'Rappel : rendez-vous demain à 9 h 30 avec Thomas Leroux, Cabinet des Quais. Annulation possible jusqu’à 24 h avant depuis votre espace patient.'},
+   {ts:new Date(y-2*36e5),ch:'E-mail',to:'Paul Mercier',txt:'Confirmation de votre rendez-vous de rééducation post-opératoire avec Antoine Girard, Cabinet du Parc.'},
+   {ts:new Date(y-5*36e5),ch:'SMS',to:'Inès Garnier',txt:'Votre rendez-vous a bien été annulé. Reprenez rendez-vous en ligne à tout moment.'}];
+  B={c:'',p:'',s:'',start:TODAY,date:'',step:1,slot:null,done:null};
+  U={agDate:workDay(TODAY),agCab:'',proId:'p1',proDate:workDay(TODAY),statP:28,statC:''};
+}
+
+/* ---------- rendu commun ---------- */
+function av(p,sz){const st='style="--s:'+(sz||56)+'px;--h:'+p.hue+'"';
+  return p.photo?'<img class="av" '+st+' src="'+p.photo+'" alt="Photo de '+esc(p.n)+'">':'<span class="av" '+st+' aria-hidden="true">'+esc(p.n.split(' ').map(w=>w[0]).join(''))+'</span>'}
+function plan(c){return '<svg class="plan" viewBox="0 0 400 200" role="img" aria-label="Plan d’accès : '+esc(c.adr)+'"><rect width="400" height="200" fill="var(--map-bg)"/><g transform="rotate('+c.rot+' 200 100)"><rect x="-60" y="-40" width="170" height="100" fill="var(--map-green)" rx="14"/><path d="M-80 150c120-40 240 30 560-20v60H-80z" fill="var(--map-water)"/><g stroke="var(--map-road)" stroke-linecap="round" fill="none"><path d="M-80 100h560" stroke-width="12"/><path d="M200-80v360" stroke-width="10"/><path d="M-80 40h560M90-80v360M310-80v360" stroke-width="5"/></g></g><g transform="translate(200 100)"><path d="M0 0s-17-15-17-28a17 17 0 0 1 34 0C17-15 0 0 0 0z" fill="var(--cta)"/><circle cy="-28" r="6" fill="var(--panel)"/></g></svg>'}
+function fld(label,name,html,o){o=o||{};return '<div class="field'+(o.full?' full':'')+'"><label for="f-'+name+'">'+label+(o.req?' <span class="req" aria-hidden="true">*</span>':'')+'</label>'+html+(o.hint?'<span class="hint">'+o.hint+'</span>':'')+'<p class="err" data-err="'+name+'"></p></div>'}
+function setErr(f,name,msg){const el=f.elements[name],er=f.querySelector('[data-err="'+name+'"]');if(el&&el.setAttribute)el.setAttribute('aria-invalid',msg?'true':'false');if(er)er.textContent=msg||'';return !msg}
+function focusErr(f){const el=f.querySelector('[aria-invalid="true"]');if(el)el.focus()}
+function modal(title,html){const d=$('#dlg');d.innerHTML='<div class="m-h"><h2 id="dlg-t">'+title+'</h2><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">'+ic('x')+'</button></div><div class="m-b">'+html+'</div>';if(!d.open)d.showModal()}
+function closeM(){const d=$('#dlg');if(d.open)d.close()}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),4600)}
+function go(h){if(location.hash===h){render();window.scrollTo(0,0)}else location.hash=h}
+const badge=st=>'<span class="badge '+ST[st][1]+'">'+ST[st][0]+'</span>';
+
+const NAV={
+ site:[['','Accueil'],['cabinets','Cabinets'],['praticiens','Praticiens'],['soins','Soins'],['actus','Actualités'],['rdv','Prendre rendez-vous']],
+ patient:[['patient/rdv','Mes rendez-vous'],['patient/ordonnance','Ordonnance'],['patient/questionnaire','Questionnaire']],
+ pro:[['pro/jour','Ma journée'],['pro/creneaux','Mes créneaux'],['pro/fiche','Ma fiche et actualités']],
+ sec:[['secretariat/agenda','Agenda'],['secretariat/attente','Liste d’attente'],['secretariat/stats','Statistiques'],['secretariat/notifs','E-mails et SMS']]};
+const SPACES=[['site','','Site public','globe'],['patient','patient/rdv','Espace patient','user'],['pro','pro/jour','Espace praticien','pulse'],['sec','secretariat/agenda','Secrétariat','cal']];
+
+function render(){
+  const parts=location.hash.replace(/^#\/?/,'').split('/'),a=parts[0]||'',b=parts[1]||'';
+  const space=a==='patient'?'patient':a==='pro'?'pro':a==='secretariat'?'sec':'site';
+  const fid=document.activeElement&&document.activeElement.id;
+  $('#spaces').innerHTML=SPACES.map(s=>'<a class="tab" href="#/'+s[1]+'"'+(s[0]===space?' aria-current="page"':'')+'>'+ic(s[3])+s[2]+'</a>').join('');
+  const alias={cabinet:'cabinets',praticien:'praticiens',soin:'soins'};
+  const cur=space==='site'?(alias[a]||a):a+'/'+(b||NAV[space][0][0].split('/')[1]);
+  $('#sub').innerHTML=NAV[space].map(n=>'<a class="tab'+(n[0]==='rdv'?' go':'')+'" href="#/'+n[0]+'"'+(n[0]===cur?' aria-current="page"':'')+'>'+(n[0]==='rdv'?ic('cal'):'')+n[1]+'</a>').join('');
+  let h;
+  if(space==='site')h=a==='cabinets'?vCabs():a==='cabinet'&&C(b)?vCab(C(b)):a==='praticiens'?vPrats():a==='praticien'&&P(b)?vPrat(P(b)):a==='soins'?vSoins():a==='soin'&&SO(b)?vSoin(SO(b)):a==='actus'?vActus():a==='rdv'?vRdv():vHome();
+  else if(space==='patient')h=b==='ordonnance'?vOrdo():b==='questionnaire'?vQuest():vPatient();
+  else if(space==='pro')h=b==='creneaux'?vProHours():b==='fiche'?vProFiche():vProJour();
+  else h=b==='attente'?vWait():b==='stats'?vStats():b==='notifs'?vNotifs():vAgenda();
+  const m=$('#main');m.className=space==='site'?'site':'app';m.innerHTML=h;
+  if(fid){const e=document.getElementById(fid);if(e)e.focus()}
+}
+
+/* ---------- site public ---------- */
+const bookBtn=(o,label,cls)=>'<button type="button" class="btn '+(cls||'cta')+'" data-act="book" data-c="'+(o.c||'')+'" data-p="'+(o.p||'')+'" data-s="'+(o.s||'')+'">'+ic('cal')+(label||'Prendre rendez-vous')+'</button>';
+function cabTile(c){return '<article class="card tile"><h3>'+c.n+'</h3><p class="meta"><span>'+ic('pin')+'<span class="wrap">'+c.adr+'</span></span><span>'+ic('phone')+c.tel+'</span></p><p><span class="badge b-ok">'+ic('pmr')+'Accessible aux personnes à mobilité réduite</span></p><p class="muted small">'+S.prats.filter(p=>p.c===c.id).length+' praticiens · lun. – ven. 8 h – 19 h 30, sam. matin</p><div class="actions"><a class="btn" href="#/cabinet/'+c.id+'">Voir le cabinet</a>'+bookBtn({c:c.id},'Rendez-vous')+'</div></article>'}
+function pratTile(p){return '<article class="card tile"><div class="who">'+av(p,64)+'<div><h3>'+esc(p.n)+'</h3><span class="muted small">'+C(p.c).n+'</span></div></div><p class="cks">'+p.s.map(s=>'<span class="badge b-info">'+SO(s).k+'</span>').join('')+'</p><div class="actions"><a class="btn" href="#/praticien/'+p.id+'">Voir la fiche</a>'+bookBtn({p:p.id,c:p.c},'Rendez-vous')+'</div></article>'}
+function soinTile(s){return '<article class="card tile"><h3>'+s.n+'</h3><p class="muted">'+s.c+'</p><div class="actions"><a class="btn" href="#/soin/'+s.id+'">En savoir plus</a></div></article>'}
+function actuItem(a){return '<article class="card actu tile"><time datetime="'+a.d+'">'+fmtD(a.d,{day:'numeric',month:'long',year:'numeric'})+'</time><h3>'+esc(a.t)+'</h3><p class="wrap">'+esc(a.x)+'</p></article>'}
+function vHome(){
+  return '<section class="hero"><div><p class="eyebrow">3 cabinets · 11 kinésithérapeutes</p><h1>Votre kiné près de chez vous, votre rendez-vous en deux minutes.</h1><p class="lead">Choisissez un cabinet, un praticien ou un type de soin, et réservez directement le créneau qui vous convient. Confirmation et rappel par e-mail et SMS.</p><div class="actions"><a class="btn cta lg" href="#/rdv">'+ic('cal')+'Prendre rendez-vous</a><a class="btn lg" href="#/patient/rdv">Mon espace patient</a></div></div>'+
+  '<form class="card stack" data-form="quick" novalidate><h2>Trouver un créneau</h2>'+
+  '<div class="field"><label for="q-c">Cabinet</label><select id="q-c" name="c">'+opts(CABS.map(c=>[c.id,c.n]),'','Tous les cabinets')+'</select></div>'+
+  '<div class="field"><label for="q-s">Type de soin</label><select id="q-s" name="s">'+opts(SOINS.map(s=>[s.id,s.n]),'','Tous les soins')+'</select></div>'+
+  '<button class="btn pri" type="submit">Voir les disponibilités</button></form></section>'+
+  '<section class="sec"><div class="sec-h"><h2>Nos trois cabinets</h2><a href="#/cabinets">Adresses, plans et horaires</a></div><div class="tiles">'+CABS.map(cabTile).join('')+'</div></section>'+
+  '<section class="sec"><div class="sec-h"><h2>Nos soins</h2><a href="#/soins">Tous les soins</a></div><div class="tiles">'+SOINS.slice(0,6).map(soinTile).join('')+'</div></section>'+
+  '<section class="sec"><div class="sec-h"><h2>Actualités</h2><a href="#/actus">Toutes les actualités</a></div><div class="tiles">'+S.actus.slice(0,3).map(actuItem).join('')+'</div></section>';
+}
+function vCabs(){return '<div class="page-h"><div><h1>Nos cabinets</h1><p class="muted">Une page par cabinet : adresse, plan, horaires et accessibilité.</p></div></div><div class="tiles">'+CABS.map(cabTile).join('')+'</div>'}
+function vCab(c){
+  return '<div class="page-h"><div><p class="small"><a href="#/cabinets">Cabinets</a> /</p><h1>'+c.n+'</h1></div>'+bookBtn({c:c.id},'Rendez-vous dans ce cabinet')+'</div>'+
+  '<div class="cols"><div class="stack"><section class="card stack"><p class="prose">'+c.txt+'</p>'+plan(c)+'<p class="meta"><span>'+ic('pin')+'<span class="wrap">'+c.adr+'</span></span><span>'+ic('phone')+c.tel+'</span></p><p class="muted small">'+c.acc+' Plan interactif (fond de carte libre) intégré à la mise en production.</p></section>'+
+  '<section><div class="sec-h"><h2>L’équipe du cabinet</h2></div><div class="tiles">'+S.prats.filter(p=>p.c===c.id).map(pratTile).join('')+'</div></section></div>'+
+  '<div class="stack"><section class="card"><div class="card-h"><h2>Horaires</h2>'+ic('clock')+'</div><table class="hours"><tbody>'+c.hor.map(h=>'<tr><th scope="row">'+h[0]+'</th><td>'+h[1]+'</td></tr>').join('')+'</tbody></table></section>'+
+  '<section class="card"><div class="card-h"><h2>Accès handicapés</h2>'+ic('pmr')+'</div><ul class="stack">'+c.pmr.map(x=>'<li class="meta"><span style="color:var(--ink)">'+ic('check')+x+'</span></li>').join('')+'</ul></section></div></div>';
+}
+function vPrats(){return '<div class="page-h"><div><h1>Nos praticiens</h1><p class="muted">11 kinésithérapeutes, chacun avec ses spécialités.</p></div></div>'+CABS.map(c=>'<section class="sec"><div class="sec-h"><h2>'+c.n+'</h2></div><div class="tiles">'+S.prats.filter(p=>p.c===c.id).map(pratTile).join('')+'</div></section>').join('')}
+function vPrat(p){const c=C(p.c),ns=nextSlots(p,6);
+  return '<div class="page-h"><div><p class="small"><a href="#/praticiens">Praticiens</a> /</p><div class="portrait">'+av(p,104)+'<div><h1>'+esc(p.n)+'</h1><p class="muted">'+esc(p.titre)+' · <a href="#/cabinet/'+c.id+'">'+c.n+'</a></p></div></div></div></div>'+
+  '<div class="cols"><div class="stack"><section class="card stack"><h2>Présentation</h2><p class="prose wrap">'+esc(p.bio)+'</p></section>'+
+  '<section class="card stack"><h2>Spécialités</h2><ul class="stack">'+p.s.map(s=>'<li><a href="#/soin/'+s+'"><b>'+SO(s).n+'</b></a><br><span class="muted small">'+SO(s).c+'</span></li>').join('')+'</ul></section></div>'+
+  '<section class="card stack"><h2>Prochaines disponibilités</h2>'+(ns.length?'<div class="slots">'+ns.map(x=>'<button type="button" class="slot" data-act="pick" data-p="'+p.id+'" data-d="'+x.d+'" data-t="'+x.t+'">'+fmtD(x.d,{weekday:'short',day:'numeric',month:'short'})+' · '+x.t+'</button>').join('')+'</div>':'<p class="muted">Aucun créneau libre dans les 4 prochaines semaines.</p>')+bookBtn({p:p.id,c:p.c},'Voir tous ses créneaux','pri')+'</section></div>';
+}
+function vSoins(){return '<div class="page-h"><div><h1>Nos soins</h1><p class="muted">Une page par soin, avec les praticiens qui le pratiquent.</p></div></div><div class="tiles">'+SOINS.map(soinTile).join('')+'</div>'}
+function vSoin(s){const ps=S.prats.filter(p=>p.s.includes(s.id));
+  return '<div class="page-h"><div><p class="small"><a href="#/soins">Soins</a> /</p><h1>'+s.n+'</h1></div>'+bookBtn({s:s.id},'Rendez-vous pour ce soin')+'</div>'+
+  '<div class="cols"><div class="stack"><section class="card stack"><p class="lead" style="margin:0">'+s.c+'</p><p class="prose">'+s.t+'</p></section><section class="card stack"><h2>Comment se déroule la prise en charge</h2><ol class="steps-l">'+s.e.map(x=>'<li><span>'+x+'</span></li>').join('')+'</ol><p class="muted small">Séances de 30 minutes, sur prescription médicale.</p></section></div>'+
+  '<section class="card stack"><h2>Praticiens ('+ps.length+')</h2><ul class="items">'+ps.map(p=>'<li><div class="who">'+av(p,48)+'<div><b><a href="#/praticien/'+p.id+'">'+esc(p.n)+'</a></b><span class="muted small">'+C(p.c).n+'</span></div></div>'+bookBtn({p:p.id,c:p.c,s:s.id},'Rendez-vous','')+'</li>').join('')+'</ul></section></div>';
+}
+function vActus(){return '<div class="page-h"><div><h1>Actualités</h1><p class="muted">Publiées par les praticiens depuis leur espace, sans passer par un prestataire.</p></div><a class="btn" href="#/pro/fiche">'+ic('plus')+'Publier (espace praticien)</a></div><div class="tiles">'+S.actus.map(actuItem).join('')+'</div>'}
+
+/* ---------- prise de rendez-vous ---------- */
+function stepper(n){return '<ol class="stepper">'+['1. Créneau','2. Vos coordonnées','3. Confirmation'].map((l,i)=>'<li class="'+(i+1<n?'done':i+1===n?'cur':'')+'"'+(i+1===n?' aria-current="step"':'')+'>'+l+'</li>').join('')+'</ol>'}
+function cands(){return S.prats.filter(p=>(!B.c||p.c===B.c)&&(!B.p||p.id===B.p)&&(!B.s||p.s.includes(B.s)))}
+function vRdv(){
+  let h='<div class="page-h"><div><h1>Prendre rendez-vous</h1><p class="muted">Par cabinet, par praticien et par type de soin.</p></div></div>'+stepper(B.step);
+  if(B.step===3&&B.done){const r=RV(B.done),p=P(r.p),c=C(r.c);
+    return h+'<section class="card stack" style="justify-items:start"><span class="okmark">'+ic('check')+'</span><h2>Rendez-vous confirmé</h2><div class="recap" style="width:100%"><span class="big">'+fmtD(r.d)+' à '+hh(r.t)+'</span><span>'+SO(r.s).n+' avec '+esc(p.n)+'</span><span class="muted wrap">'+c.n+' — '+c.adr+'</span></div>'+
+    '<p class="muted small">SMS envoyé au '+esc(r.tel)+' (simulation) :</p><p class="bubble">Kiné des Trois Rives : RDV confirmé '+fmtD(r.d,{weekday:'short',day:'numeric',month:'short'})+' à '+hh(r.t)+' avec '+esc(p.n)+', '+c.n+'. Rappel la veille. Annulation gratuite jusqu’à 24 h avant.</p>'+
+    (r.first?'<p class="note">'+ic('info')+'<span>Première séance : pensez à déposer votre ordonnance et à remplir le questionnaire dans votre espace patient.</span></p>':'')+
+    '<div class="actions"><a class="btn pri" href="#/patient/rdv">Voir dans mon espace patient</a><a class="btn" href="#/secretariat/agenda" data-act="agGo" data-d="'+r.d+'">Voir dans l’agenda du secrétariat</a><button type="button" class="btn" data-act="bkNew">Prendre un autre rendez-vous</button></div></section>';
+  }
+  if(B.step===2&&B.slot){const p=P(B.slot.p),c=C(p.c),so=p.s.includes(B.s)?B.s:'';
+    return h+'<div class="cols"><form class="card stack" data-form="book" novalidate><h2>Vos coordonnées</h2><p class="note">'+ic('info')+'<span>Champs pré-remplis avec la patiente fictive de la démonstration — modifiables.</span></p><div class="fgrid">'+
+    fld('Type de soin','soin','<select id="f-soin" name="soin">'+opts(p.s.map(s=>[s,SO(s).n]),so,'Choisir…')+'</select>',{req:1,full:1})+
+    fld('Prénom','prenom','<input type="text" id="f-prenom" name="prenom" autocomplete="given-name" value="'+ME.pn+'">',{req:1})+
+    fld('Nom','nom','<input type="text" id="f-nom" name="nom" autocomplete="family-name" value="'+ME.nm+'">',{req:1})+
+    fld('Mobile','tel','<input type="tel" id="f-tel" name="tel" autocomplete="tel" value="'+ME.t+'">',{req:1,hint:'Pour la confirmation et le rappel par SMS.'})+
+    fld('E-mail','email','<input type="email" id="f-email" name="email" autocomplete="email" value="'+ME.e+'">',{req:1})+
+    '</div><label class="ck"><input type="checkbox" name="first"><span>C’est ma première séance pour ce motif</span></label>'+
+    '<div><label class="ck"><input type="checkbox" name="rgpd" id="f-rgpd"><span>J’accepte que mes données soient utilisées pour gérer mes rendez-vous. Elles sont hébergées chez un hébergeur certifié pour les données de santé. <span class="req" aria-hidden="true">*</span></span></label><p class="err" data-err="rgpd"></p></div>'+
+    '<div class="actions"><button type="button" class="btn" data-act="bkBack">'+ic('left')+'Changer de créneau</button><button type="submit" class="btn cta">Confirmer le rendez-vous</button></div></form>'+
+    '<aside class="card stack"><h2>Votre créneau</h2><div class="recap"><span class="big">'+fmtD(B.slot.d)+'</span><span class="big">'+hh(B.slot.t)+'</span></div><div class="who">'+av(p,48)+'<div><b>'+esc(p.n)+'</b><span class="muted small wrap">'+c.n+' — '+c.adr+'</span></div></div><p class="muted small">Annulation en ligne possible jusqu’à 24 h avant le rendez-vous.</p></aside></div>';
+  }
+  const cs=cands(),days=[];for(let i=0;i<7;i++){const d=addD(B.start,i);days.push({d:d,n:cs.reduce((a,p)=>a+freeSlots(p,d).length,0)})}
+  if(!B.date||B.date<B.start||B.date>days[6].d)B.date=(days.find(x=>x.n)||days[0]).d;
+  const pOpts=S.prats.filter(p=>(!B.c||p.c===B.c)&&(!B.s||p.s.includes(B.s))).map(p=>[p.id,p.n]);
+  const sOpts=(B.p?P(B.p).s.map(SO):SOINS).map(s=>[s.id,s.n]);
+  const list=cs.map(p=>({p:p,sl:freeSlots(p,B.date)})).filter(x=>x.sl.length);
+  h+='<section class="card"><div class="fgrid">'+
+   '<div class="field"><label for="bk-c">Cabinet</label><select id="bk-c" name="c" data-ch="bk">'+opts(CABS.map(c=>[c.id,c.n]),B.c,'Tous les cabinets')+'</select></div>'+
+   '<div class="field"><label for="bk-s">Type de soin</label><select id="bk-s" name="s" data-ch="bk">'+opts(sOpts,B.s,'Tous les soins')+'</select></div>'+
+   '<div class="field"><label for="bk-p">Praticien</label><select id="bk-p" name="p" data-ch="bk">'+opts(pOpts,B.p,'Sans préférence')+'</select></div></div>'+
+   '<div class="days"><button type="button" class="icon-btn prev" data-act="bkWeek" data-n="-7" aria-label="Semaine précédente"'+(B.start<=TODAY?' disabled':'')+'>'+ic('left')+'</button>'+
+   days.map(x=>'<button type="button" class="day'+(x.n?'':' none')+'" data-act="bkDay" data-d="'+x.d+'" aria-pressed="'+(x.d===B.date)+'" aria-label="'+fmtD(x.d)+', '+x.n+' créneaux libres"><span>'+fmtD(x.d,{weekday:'short'})+'</span><b>'+pd(x.d).getDate()+'</b><span class="n">'+(x.n||'—')+'</span></button>').join('')+
+   '<button type="button" class="icon-btn next" data-act="bkWeek" data-n="7" aria-label="Semaine suivante"'+(B.start>=addD(TODAY,49)?' disabled':'')+'>'+ic('right')+'</button></div>'+
+   '<h2 style="font-size:19px;text-transform:capitalize">'+fmtD(B.date)+'</h2>';
+  if(!list.length)h+='<div class="empty" style="margin-top:12px"><p>Aucun créneau libre ce jour-là avec ces critères.</p><button type="button" class="btn pri" data-act="waitMe">'+ic('list')+'M’inscrire sur la liste d’attente</button></div>';
+  else h+=list.map(x=>'<div class="pslots"><div class="who">'+av(x.p,44)+'<div><b>'+esc(x.p.n)+'</b><span class="muted small">'+C(x.p.c).n+' · '+x.p.s.map(s=>SO(s).k).join(', ')+'</span></div></div><div class="slots">'+x.sl.map(t=>'<button type="button" class="slot" data-act="pick" data-p="'+x.p.id+'" data-d="'+B.date+'" data-t="'+t+'" aria-label="'+hh(t)+' avec '+esc(x.p.n)+'">'+t+'</button>').join('')+'</div></div>').join('')+
+    '<div class="pslots"><p class="muted small">Aucun horaire ne vous convient ? <button type="button" class="btn" data-act="waitMe" style="margin-left:6px">'+ic('list')+'Liste d’attente</button></p></div>';
+  return h+'</section>';
+}
+
+/* ---------- espace patient ---------- */
+const mine=()=>S.rdvs.filter(r=>r.mine).sort((a,b)=>(a.d+a.t).localeCompare(b.d+b.t));
+function patHead(t,sub){return '<div class="page-h"><div><h1>'+t+'</h1><p class="muted">'+sub+'</p></div><span class="badge b-gray">'+ic('user')+ME.n+' — patiente fictive</span></div>'}
+function rdvCard(r,up){const p=P(r.p),c=C(r.c),can=dt(r.d,r.t)-Date.now()>=864e5;
+  return '<li><div class="stack" style="gap:6px"><b class="serif" style="font-size:18px;text-transform:capitalize">'+fmtD(r.d,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · '+hh(r.t)+'</b><span>'+SO(r.s).n+(r.first?' <span class="badge b-cta">Première séance</span>':'')+'</span><span class="meta"><span>'+ic('user')+esc(p.n)+'</span><span>'+ic('pin')+'<span class="wrap">'+c.n+', '+c.adr+'</span></span></span>'+
+   (up&&!can?'<span class="muted small">Annulation en ligne impossible à moins de 24 h : appelez le '+c.tel+'.</span>':'')+'</div>'+
+   '<div class="actions">'+(up?'<button type="button" class="btn" data-act="ics" data-id="'+r.id+'">'+ic('cal')+'Ajouter à mon agenda</button>'+(can?'<button type="button" class="btn danger" data-act="askCancel" data-id="'+r.id+'">Annuler</button>':''):badge(r.st))+'</div></li>'}
+function vPatient(){const now=new Date(),all=mine(),up=all.filter(r=>r.st==='confirme'&&dt(r.d,r.t)>now),past=all.filter(r=>!up.includes(r)).reverse();
+  const first=up.find(r=>r.first),ww=S.wait.filter(w=>w.mine);
+  return patHead('Bonjour Camille','Vos rendez-vous dans nos trois cabinets.')+
+  (first?'<section class="card stack" style="margin-bottom:16px"><h2>Avant votre première séance du '+fmtD(first.d,{day:'numeric',month:'long'})+'</h2><ul class="todo"><li><span class="'+(S.ordos.length?'done':'')+'">'+ic(S.ordos.length?'check':'file')+(S.ordos.length?'Ordonnance déposée':'Déposer votre ordonnance')+'</span><a class="btn" href="#/patient/ordonnance">'+(S.ordos.length?'Voir':'Déposer')+'</a></li><li><span class="'+(S.quest?'done':'')+'">'+ic(S.quest?'check':'list')+(S.quest?'Questionnaire rempli':'Remplir le questionnaire (2 min)')+'</span><a class="btn" href="#/patient/questionnaire">'+(S.quest?'Voir':'Remplir')+'</a></li></ul></section>':'')+
+  '<div class="cols even"><section class="card"><div class="card-h"><h2>À venir ('+up.length+')</h2><a class="btn cta" href="#/rdv">'+ic('plus')+'Nouveau rendez-vous</a></div>'+(up.length?'<ul class="items">'+up.map(r=>rdvCard(r,1)).join('')+'</ul>':'<div class="empty"><p>Aucun rendez-vous à venir.</p></div>')+
+  (ww.length?'<hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><h3>Liste d’attente</h3><ul class="items" style="margin-top:10px">'+ww.map(w=>'<li><div><b>'+(w.s?SO(w.s).n:'Tous soins')+'</b><br><span class="muted small">'+(w.p?esc(P(w.p).n):w.c?C(w.c).n:'Tous les cabinets')+' — vous serez prévenue par SMS dès qu’un créneau se libère.</span></div><button type="button" class="btn" data-act="waitDel" data-id="'+w.id+'">Me retirer</button></li>').join('')+'</ul>':'')+'</section>'+
+  '<section class="card"><div class="card-h"><h2>Passés et annulés ('+past.length+')</h2></div>'+(past.length?'<ul class="items">'+past.map(r=>rdvCard(r,0)).join('')+'</ul>':'<div class="empty"><p>Aucun rendez-vous passé.</p></div>')+'</section></div>';
+}
+function vOrdo(){
+  return patHead('Mon ordonnance','À déposer avant la première séance : votre praticien la consulte avant de vous recevoir.')+
+  '<div class="cols even"><section class="card stack"><h2>Déposer un document</h2><div class="drop"><span class="okmark" style="background:var(--pri-soft);color:var(--pri-text)">'+ic('upload')+'</span><p>Photo ou PDF de l’ordonnance, 10 Mo maximum.</p><input type="file" id="f-ordo" accept="image/*,application/pdf" data-ch="ordo"><label class="btn pri" for="f-ordo">Choisir un fichier</label></div><p class="note">'+ic('lock')+'<span>En production : fichier chiffré, visible uniquement par vos praticiens et le secrétariat. Ici, rien n’est envoyé : seul le nom du fichier est affiché.</span></p></section>'+
+  '<section class="card stack"><h2>Documents déposés ('+S.ordos.length+')</h2>'+(S.ordos.length?'<ul class="items">'+S.ordos.map((o,i)=>'<li><div class="who">'+ic('file')+'<div><b class="wrap">'+esc(o.n)+'</b><span class="muted small">'+o.sz+' · déposé le '+o.d.toLocaleDateString('fr-FR')+'</span></div></div><button type="button" class="btn danger" data-act="ordoDel" data-i="'+i+'">'+ic('trash')+'Supprimer</button></li>').join('')+'</ul>':'<div class="empty"><p>Aucun document pour l’instant.</p></div>')+'</section></div>';
+}
+function vQuest(){const q=S.quest;
+  if(q)return patHead('Questionnaire avant la première séance','Transmis à votre praticien.')+'<section class="card stack"><p><span class="badge b-ok">'+ic('check')+'Questionnaire transmis</span></p><dl class="dl"><dt>Motif</dt><dd>'+esc(q.motif)+'</dd><dt>Depuis</dt><dd>'+esc(q.depuis)+'</dd><dt>Douleur</dt><dd>'+q.douleur+' / 10</dd><dt>Opération récente</dt><dd>'+(q.op==='oui'?'Oui':'Non')+'</dd><dt>Traitement en cours</dt><dd>'+(esc(q.ttt)||'Aucun')+'</dd><dt>Objectif</dt><dd>'+(esc(q.obj)||'—')+'</dd></dl><div class="actions"><button type="button" class="btn" data-act="questEdit">Modifier mes réponses</button><a class="btn pri" href="#/patient/rdv">Retour à mes rendez-vous</a></div></section>';
+  const o=U.questDraft||{};
+  return patHead('Questionnaire avant la première séance','Six questions, deux minutes : votre praticien gagne du temps pour le bilan.')+
+  '<form class="card stack" data-form="quest" novalidate><div class="fgrid">'+
+  fld('Pour quel motif consultez-vous ?','motif','<textarea id="f-motif" name="motif">'+esc(o.motif||'')+'</textarea>',{req:1,full:1,hint:'Par exemple : douleur en bas du dos depuis un déménagement.'})+
+  fld('Depuis quand ?','depuis','<select id="f-depuis" name="depuis">'+opts([['Moins d’une semaine','Moins d’une semaine'],['1 à 4 semaines','1 à 4 semaines'],['1 à 3 mois','1 à 3 mois'],['Plus de 3 mois','Plus de 3 mois']],o.depuis||'','Choisir…')+'</select>',{req:1})+
+  '<div class="field"><label for="f-douleur">Douleur aujourd’hui (0 à 10)</label><div class="scale"><input type="range" id="f-douleur" name="douleur" min="0" max="10" step="1" value="'+(o.douleur||4)+'" data-out="o-douleur"><output id="o-douleur" for="f-douleur">'+(o.douleur||4)+'</output></div></div>'+
+  '<fieldset class="field full"><legend class="flabel">Avez-vous été opéré(e) pour ce motif ces 6 derniers mois ?</legend><div class="cks"><label class="ck"><input type="radio" name="op" value="non"'+(o.op!=='oui'?' checked':'')+'><span>Non</span></label><label class="ck"><input type="radio" name="op" value="oui"'+(o.op==='oui'?' checked':'')+'><span>Oui</span></label></div></fieldset>'+
+  fld('Traitement en cours','ttt','<input type="text" id="f-ttt" name="ttt" value="'+esc(o.ttt||'')+'">',{hint:'Facultatif.'})+
+  fld('Votre objectif','obj','<input type="text" id="f-obj" name="obj" value="'+esc(o.obj||'')+'">',{hint:'Facultatif. Par exemple : reprendre la course à pied.'})+
+  '</div><div class="actions"><button type="submit" class="btn pri">Envoyer à mon praticien</button></div></form>';
+}
+
+/* ---------- espace praticien ---------- */
+function proHead(t,sub){return '<div class="page-h"><div><h1>'+t+'</h1><p class="muted">'+sub+'</p></div><div class="field" style="flex:0 1 280px"><label for="proSel">Praticien connecté</label><select id="proSel" data-ch="proSel">'+opts(S.prats.map(p=>[p.id,p.n+' — '+C(p.c).k]),U.proId)+'</select></div></div>'}
+function vProJour(){const p=P(U.proId),d=U.proDate,now=new Date();
+  const set=new Set(daySlots(p,d));S.rdvs.forEach(r=>{if(r.p===p.id&&r.d===d&&r.st!=='annule')set.add(r.t)});
+  const ts=[...set].sort(),mon=monday(d);
+  const rows=ts.map(t=>{const r=rdvAt(p.id,d,t),b=!r&&blockAt(p.id,d,t);let body,act='';
+    if(r){body='<div><b>'+esc(r.n)+'</b>'+(r.first?' <span class="badge b-cta">1re séance</span>':'')+'<br><span class="muted small">'+SO(r.s).n+' · '+(r.src==='ligne'?'pris en ligne':'pris par téléphone')+'</span></div>';
+      act=dt(d,t)<=now?(r.st==='confirme'?'<button type="button" class="btn" data-act="setSt" data-id="'+r.id+'" data-st="honore">'+ic('check')+'Présent</button><button type="button" class="btn danger" data-act="setSt" data-id="'+r.id+'" data-st="absent">Absent</button>':badge(r.st)+'<button type="button" class="btn" data-act="setSt" data-id="'+r.id+'" data-st="confirme">Corriger</button>'):badge(r.st)}
+    else if(b){body='<div class="muted">'+ic('lock')+' Bloqué — '+esc(b.m)+'</div>';act='<button type="button" class="btn" data-act="unblock" data-id="'+b.id+'">Débloquer</button>'}
+    else{body='<div class="muted">Libre — ouvert à la réservation en ligne</div>';act=dt(d,t)>now?'<button type="button" class="btn" data-act="quickBlock" data-t="'+t+'">'+ic('lock')+'Bloquer</button>':''}
+    return '<li><span class="tm">'+t+'</span><div class="bd">'+body+'<div class="actions">'+act+'</div></div></li>'}).join('');
+  let wk='';for(let i=0;i<6;i++){const x=addD(mon,i),n=S.rdvs.filter(r=>r.p===p.id&&r.d===x&&r.st!=='annule').length,f=freeSlots(p,x).length;
+    wk+='<button type="button" data-act="proDay" data-d="'+x+'" aria-pressed="'+(x===d)+'"><b>'+fmtD(x,{weekday:'short',day:'numeric'})+'</b>'+(daySlots(p,x).length||n?n+' RDV · '+f+' libres':'Non travaillé')+'</button>'}
+  return proHead('Ma journée','Vos rendez-vous, le pointage des présences et le blocage rapide d’un créneau.')+
+  '<div class="cols"><section class="card"><div class="card-h"><h2 style="text-transform:capitalize">'+fmtD(d)+'</h2><div class="actions"><button type="button" class="icon-btn" data-act="proNav" data-n="-1" aria-label="Jour précédent">'+ic('left')+'</button><button type="button" class="btn" data-act="proDay" data-d="'+workDay(TODAY)+'">Aujourd’hui</button><button type="button" class="icon-btn" data-act="proNav" data-n="1" aria-label="Jour suivant">'+ic('right')+'</button></div></div>'+(rows?'<ul class="rows">'+rows+'</ul>':'<div class="empty"><p>Jour non travaillé.</p><a class="btn" href="#/pro/creneaux">Modifier mes horaires</a></div>')+'</section>'+
+  '<aside class="stack"><section class="card stack"><h2>Ma semaine</h2><div class="wk">'+wk+'</div></section><section class="card stack"><div class="who">'+av(p,56)+'<div><b>'+esc(p.n)+'</b><span class="muted small">'+C(p.c).n+'</span></div></div><div class="actions"><a class="btn" href="#/pro/creneaux">'+ic('clock')+'Gérer mes créneaux</a><a class="btn" href="#/praticien/'+p.id+'">'+ic('globe')+'Ma page publique</a></div></section></aside></div>';
+}
+function tsel(name,val,lab,blank){return '<select name="'+name+'" aria-label="'+lab+'">'+opts(TIMES.map(t=>[t,t]),val,blank?'—':null)+'</select>'}
+function vProHours(){const p=P(U.proId);let rows='';
+  for(let k=1;k<=6;k++){const h=p.h[k],D=DAYS[k];
+    rows+='<div class="hrow"><label class="dck"><input type="checkbox" name="on_'+k+'"'+(h.on?' checked':'')+'>'+D+'</label><div class="rg">'+tsel('a_'+k,h.a,D+' matin, début')+'<span aria-hidden="true">–</span>'+tsel('b_'+k,h.b,D+' matin, fin')+'</div><div class="rg">'+tsel('c_'+k,h.c,D+' après-midi, début',1)+'<span aria-hidden="true">–</span>'+tsel('d_'+k,h.d,D+' après-midi, fin',1)+'</div><p class="err" data-err="h_'+k+'"></p></div>'}
+  const bl=S.blocks.filter(b=>b.p===p.id&&b.d>=TODAY).sort((a,b)=>(a.d+a.from).localeCompare(b.d+b.from));
+  let open='';for(let i=0;i<7;i++){const x=addD(TODAY,i);if(dow(x)===0)continue;const n=freeSlots(p,x).length,tot=daySlots(p,x).length||1;
+    open+='<div class="brow"><span style="text-transform:capitalize">'+fmtD(x,{weekday:'long',day:'numeric',month:'short'})+'</span><b>'+n+' libres</b><div class="bar"><i style="width:'+Math.round(n/tot*100)+'%"></i></div></div>'}
+  return proHead('Mes créneaux','Vous gérez vous-même vos horaires : la réservation en ligne s’ajuste aussitôt.')+
+  '<div class="cols"><form class="card" data-form="hours" novalidate><div class="card-h"><h2>Horaires hebdomadaires</h2><span class="muted small">Séances de 30 min</span></div>'+rows+'<div class="actions" style="margin-top:12px"><button type="submit" class="btn pri">Enregistrer mes horaires</button></div></form>'+
+  '<aside class="stack"><form class="card stack" data-form="absence" novalidate><h2>Absence ou créneau bloqué</h2><div class="fgrid">'+
+   fld('Date','ab_d','<input type="date" id="f-ab_d" name="ab_d" min="'+TODAY+'" value="'+workDay(addD(TODAY,1))+'">',{req:1,full:1})+
+   fld('De','ab_a','<select id="f-ab_a" name="ab_a">'+opts(TIMES.map(t=>[t,t]),'08:00')+'</select>')+
+   fld('À','ab_b','<select id="f-ab_b" name="ab_b">'+opts(TIMES.map(t=>[t,t]),'12:30')+'</select>')+
+   fld('Motif','ab_m','<input type="text" id="f-ab_m" name="ab_m" value="Congé">',{full:1})+'</div><button type="submit" class="btn">'+ic('lock')+'Bloquer ces créneaux</button>'+
+   (bl.length?'<ul class="items">'+bl.map(b=>'<li><div><b style="text-transform:capitalize">'+fmtD(b.d,{weekday:'short',day:'numeric',month:'short'})+'</b> · '+b.from+' – '+b.to+'<br><span class="muted small">'+esc(b.m)+'</span></div><button type="button" class="btn" data-act="unblock" data-id="'+b.id+'">Débloquer</button></li>').join('')+'</ul>':'<p class="muted small">Aucun blocage à venir.</p>')+'</form>'+
+  '<section class="card"><div class="card-h"><h2>Ouvert à la réservation</h2></div>'+open+'</section></aside></div>';
+}
+function vProFiche(){const p=P(U.proId);
+  return proHead('Ma fiche et actualités','Textes et photo modifiables sans aide technique : la page publique est mise à jour immédiatement.')+
+  '<div class="cols"><form class="card stack" data-form="fiche" novalidate><div class="card-h"><h2>Ma page praticien</h2><a class="btn" href="#/praticien/'+p.id+'">'+ic('globe')+'Voir la page publique</a></div>'+
+  '<div class="portrait"><span id="photoPrev">'+av(p,96)+'</span><div class="stack" style="gap:8px"><div class="drop" style="border:0;padding:0;justify-items:start"><input type="file" id="f-photo" accept="image/*" data-ch="photo"><label class="btn" for="f-photo">'+ic('upload')+'Changer ma photo</label></div><span class="hint">JPG ou PNG, recadrée automatiquement.</span></div></div><div class="fgrid">'+
+  fld('Titre','titre','<input type="text" id="f-titre" name="titre" value="'+esc(p.titre)+'">',{req:1,full:1})+
+  fld('Présentation','bio','<textarea id="f-bio" name="bio" rows="5">'+esc(p.bio)+'</textarea>',{req:1,full:1,hint:'Affichée sur votre page publique.'})+
+  '<fieldset class="field full"><legend class="flabel">Spécialités proposées à la réservation <span class="req" aria-hidden="true">*</span></legend><div class="cks">'+SOINS.map(s=>'<label class="ck"><input type="checkbox" name="sp" value="'+s.id+'"'+(p.s.includes(s.id)?' checked':'')+'><span>'+s.n+'</span></label>').join('')+'</div><p class="err" data-err="sp"></p></fieldset></div>'+
+  '<div class="actions"><button type="submit" class="btn pri">Enregistrer ma fiche</button></div></form>'+
+  '<aside class="stack"><form class="card stack" data-form="actu" novalidate><h2>Publier une actualité</h2>'+
+   fld('Titre','at','<input type="text" id="f-at" name="at">',{req:1})+fld('Texte','ax','<textarea id="f-ax" name="ax"></textarea>',{req:1})+'<button type="submit" class="btn pri">'+ic('news')+'Publier sur le site</button></form>'+
+  '<section class="card stack"><h2>Actualités en ligne ('+S.actus.length+')</h2><ul class="items">'+S.actus.map(a=>'<li><div><b class="wrap">'+esc(a.t)+'</b><br><span class="muted small">'+fmtD(a.d,{day:'numeric',month:'long',year:'numeric'})+'</span></div><button type="button" class="icon-btn" data-act="actuDel" data-id="'+a.id+'" aria-label="Supprimer l’actualité « '+esc(a.t)+' »">'+ic('trash')+'</button></li>').join('')+'</ul></section></aside></div>';
+}
+
+/* ---------- secrétariat ---------- */
+function vAgenda(){const d=U.agDate,cf=U.agCab,prs=S.prats.filter(p=>!cf||p.c===cf),now=new Date();
+  let lo=1e9,hi=0;const sets={};
+  prs.forEach(p=>{const s=daySlots(p,d);sets[p.id]=new Set(s);if(s.length){lo=Math.min(lo,tmin(s[0]));hi=Math.max(hi,tmin(s[s.length-1])+30)}});
+  if(!hi){lo=480;hi=1140}lo=Math.floor(lo/60)*60;hi=Math.ceil(hi/60)*60;
+  let nR=0,nF=0,nB=0,nP=0,body='';
+  for(let m=lo;m<hi;m+=30){const t=mint(m);body+='<tr'+(m%60===0?' class="hh"':'')+'><th scope="row" class="h">'+t+'</th>';
+    prs.forEach(p=>{const r=rdvAt(p.id,d,t);
+      if(r){nR++;if(r.st==='confirme'&&dt(d,t)<=now)nP++;body+='<td><button type="button" class="cell '+r.st+(r.mine?' mine':'')+'" data-act="agRdv" data-id="'+r.id+'" aria-label="'+t+', '+esc(r.n)+', '+SO(r.s).k+', '+ST[r.st][0]+'"><b>'+esc(r.n)+'</b>'+SO(r.s).k+'</button></td>';return}
+      const b=blockAt(p.id,d,t);
+      if(b){nB++;body+='<td><button type="button" class="cell blk" data-act="agBlk" data-id="'+b.id+'" aria-label="'+t+', '+esc(p.n)+', bloqué : '+esc(b.m)+'"><b>Bloqué</b>'+esc(b.m)+'</button></td>';return}
+      if(!sets[p.id].has(t)){body+='<td class="off"></td>';return}
+      nF++;body+='<td><button type="button" class="cell free" data-act="agFree" data-p="'+p.id+'" data-t="'+t+'" aria-label="'+t+', '+esc(p.n)+', créneau libre"><span aria-hidden="true">+</span></button></td>'});
+    body+='</tr>'}
+  return '<div class="page-h"><div><h1>Agenda des 3 cabinets</h1><p class="muted" style="text-transform:capitalize">'+fmtD(d,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</p></div></div>'+
+  '<div class="kpis"><div class="card kpi"><div class="k-l">Rendez-vous</div><div class="k-v">'+nR+'</div></div><div class="card kpi"><div class="k-l">Créneaux libres</div><div class="k-v">'+nF+'</div></div><div class="card kpi"><div class="k-l">Créneaux bloqués</div><div class="k-v">'+nB+'</div></div><div class="card kpi'+(nP?' hot':'')+'"><div class="k-l">Présences à pointer</div><div class="k-v">'+nP+'</div></div></div>'+
+  '<div class="toolbar"><button type="button" class="icon-btn" data-act="agNav" data-n="-1" aria-label="Jour précédent">'+ic('left')+'</button><div class="field" style="flex:0 1 180px"><label for="agD" class="sr">Date</label><input type="date" id="agD" value="'+d+'" data-ch="agDate"></div><button type="button" class="icon-btn" data-act="agNav" data-n="1" aria-label="Jour suivant">'+ic('right')+'</button><button type="button" class="btn" data-act="agGo" data-d="'+workDay(TODAY)+'">Aujourd’hui</button>'+
+  '<div class="field"><label for="agC" class="sr">Cabinet</label><select id="agC" data-ch="agCab">'+opts(CABS.map(c=>[c.id,c.n]),cf,'Les 3 cabinets')+'</select></div>'+
+  '<div class="legend"><span><i style="background:var(--pri-soft)"></i>Confirmé</span><span><i style="background:var(--ok-soft)"></i>Honoré</span><span><i style="background:var(--bad-soft)"></i>Absent</span><span><i style="background:var(--gray-soft)"></i>Bloqué</span></div></div>'+
+  (dow(d)===0?'<div class="empty"><p>Cabinets fermés le dimanche.</p></div>':'<div class="ag-wrap"><table class="ag" style="min-width:'+(58+prs.length*128)+'px"><thead><tr><th class="h" scope="col"><span class="sr">Heure</span></th>'+prs.map(p=>'<th scope="col">'+esc(p.n)+'<small>'+C(p.c).k+'</small></th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div><p class="muted small" style="margin-top:10px">Cliquez sur un créneau libre pour le bloquer ou saisir un rendez-vous pris par téléphone ; sur un rendez-vous pour pointer la présence ou l’annuler.</p>');
+}
+function waitWho(w){return (w.s?SO(w.s).n:'Tous soins')+' · '+(w.p?esc(P(w.p).n):w.c?C(w.c).n:'Tous les cabinets')}
+function vWait(){
+  return '<div class="page-h"><div><h1>Liste d’attente</h1><p class="muted">Quand un patient annule, le créneau est proposé par SMS au premier inscrit correspondant.</p></div></div>'+
+  (S.wait.length?'<section class="card"><div class="tw"><table class="t"><thead><tr><th>Patient</th><th>Demande</th><th>Inscrit le</th><th>Statut</th><th><span class="sr">Actions</span></th></tr></thead><tbody>'+S.wait.map(w=>'<tr><td><b>'+esc(w.n)+'</b><br><span class="muted small">'+esc(w.t)+'</span></td><td>'+waitWho(w)+'</td><td>'+fmtS(w.since)+'</td><td>'+(w.st==='propose'?'<span class="badge b-warn">Créneau proposé</span><br><span class="small">'+fmtS(w.slot.d)+' à '+w.slot.t+' · '+esc(P(w.slot.p).n)+'</span>':'<span class="badge b-gray">En attente</span>')+'</td><td><div class="actions">'+(w.st==='propose'?'<button type="button" class="btn pri" data-act="waitOk" data-id="'+w.id+'">Le patient a répondu OUI</button>':'<button type="button" class="btn" data-act="waitProp" data-id="'+w.id+'">Proposer le prochain créneau</button>')+'<button type="button" class="icon-btn" data-act="waitDel" data-id="'+w.id+'" aria-label="Retirer '+esc(w.n)+' de la liste">'+ic('trash')+'</button></div></td></tr>').join('')+'</tbody></table></div></section>':'<div class="empty"><p>Personne sur liste d’attente.</p></div>');
+}
+function calc(rs,prs,P_){const c=f=>rs.filter(f).length,hon=c(r=>r.st==='honore'),abs=c(r=>r.st==='absent'),ann=c(r=>r.st==='annule'),pl=rs.length-ann;
+  let cap=0;for(let o=1;o<=P_;o++){const d=addD(TODAY,-o);prs.forEach(p=>{cap+=daySlots(p,d).length})}
+  return {hon:hon,abs:abs,ann:ann,pl:pl,all:rs.length,cap:cap,lig:c(r=>r.src==='ligne'&&r.st!=='annule')}}
+function vStats(){const N=U.statP,cf=U.statC,from=addD(TODAY,-N);
+  const prs=S.prats.filter(p=>!cf||p.c===cf),rs=S.rdvs.filter(r=>r.d>=from&&r.d<TODAY&&(!cf||r.c===cf)),k=calc(rs,prs,N);
+  const rate=x=>x.hon+x.abs?x.abs/(x.hon+x.abs):0,bw=v=>Math.min(100,Math.round(v/.15*100));
+  const cabs=CABS.map(c=>{const x=calc(S.rdvs.filter(r=>r.d>=from&&r.d<TODAY&&r.c===c.id),S.prats.filter(p=>p.c===c.id),N);return '<div class="brow"><span>'+c.n+'</span><b>'+pct(x.abs,x.hon+x.abs)+'</b><div class="bar hot"><i style="width:'+bw(rate(x))+'%"></i></div></div>'}).join('');
+  let weeks='';for(let w=N/7-1;w>=0;w--){const a=addD(TODAY,-7*(w+1)),b=addD(TODAY,-7*w),x=calc(rs.filter(r=>r.d>=a&&r.d<b),[],0);weeks+='<div class="brow"><span>Semaine du '+fmtS(a)+'</span><b>'+pct(x.abs,x.hon+x.abs)+' <span class="muted small">('+x.abs+' sur '+(x.hon+x.abs)+')</span></b><div class="bar hot"><i style="width:'+bw(rate(x))+'%"></i></div></div>'}
+  const mx=Math.max.apply(null,SOINS.map(s=>rs.filter(r=>r.s===s.id&&r.st!=='annule').length).concat(1));
+  const soins=SOINS.map(s=>{const n=rs.filter(r=>r.s===s.id&&r.st!=='annule').length;return '<div class="brow"><span>'+s.n+'</span><b>'+n+'</b><div class="bar"><i style="width:'+Math.round(n/mx*100)+'%"></i></div></div>'}).join('');
+  const rows=prs.map(p=>{const x=calc(rs.filter(r=>r.p===p.id),[p],N);return '<tr><td><b>'+esc(p.n)+'</b><br><span class="muted small">'+C(p.c).k+'</span></td><td class="r">'+x.pl+'</td><td class="r">'+x.abs+'</td><td class="r"><b>'+pct(x.abs,x.hon+x.abs)+'</b></td><td><div class="bar hot"><i style="width:'+bw(rate(x))+'%"></i></div></td><td class="r">'+pct(x.pl,x.cap)+'</td></tr>'}).join('');
+  return '<div class="page-h"><div><h1>Statistiques</h1><p class="muted">Du '+fmtS(from)+' au '+fmtS(addD(TODAY,-1))+' — calculées en direct sur l’agenda.</p></div><div class="toolbar" style="margin:0"><div class="field"><label for="stP">Période</label><select id="stP" data-ch="statP">'+opts([['7','7 derniers jours'],['28','4 dernières semaines']],String(N))+'</select></div><div class="field"><label for="stC">Cabinet</label><select id="stC" data-ch="statC">'+opts(CABS.map(c=>[c.id,c.n]),cf,'Les 3 cabinets')+'</select></div></div></div>'+
+  '<div class="kpis"><div class="card kpi"><div class="k-l">Séances planifiées</div><div class="k-v">'+k.pl+'</div></div><div class="card kpi hot"><div class="k-l">Taux d’absence</div><div class="k-v">'+pct(k.abs,k.hon+k.abs)+'</div></div><div class="card kpi"><div class="k-l">Annulations</div><div class="k-v">'+pct(k.ann,k.all)+'</div></div><div class="card kpi"><div class="k-l">Pris en ligne</div><div class="k-v">'+pct(k.lig,k.pl)+'</div></div><div class="card kpi"><div class="k-l">Taux de remplissage</div><div class="k-v">'+pct(k.pl,k.cap)+'</div></div></div>'+
+  '<div class="cols"><section class="card"><div class="card-h"><h2>Par praticien</h2></div><div class="tw"><table class="t"><thead><tr><th>Praticien</th><th class="r">Séances</th><th class="r">Absences</th><th class="r">Taux d’absence</th><th></th><th class="r">Remplissage</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>'+
+  '<aside class="stack"><section class="card"><div class="card-h"><h2>Absence par cabinet</h2></div>'+cabs+'</section><section class="card"><div class="card-h"><h2>Absence par semaine</h2></div>'+weeks+'</section><section class="card"><div class="card-h"><h2>Séances par type de soin</h2></div>'+soins+'</section></aside></div>';
+}
+function vNotifs(){const L=S.notifs,sh=L.slice(0,60);
+  return '<div class="page-h"><div><h1>E-mails et SMS</h1><p class="muted">Confirmations, rappels la veille et propositions de créneau — tous simulés dans cette démonstration.</p></div><button type="button" class="btn pri" data-act="remind">'+ic('sms')+'Simuler l’envoi des rappels de demain</button></div>'+
+  '<section class="card"><div class="tw"><table class="t"><thead><tr><th>Envoyé</th><th>Canal</th><th>Destinataire</th><th>Message</th></tr></thead><tbody>'+sh.map(n=>'<tr><td>'+n.ts.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' '+pad(n.ts.getHours())+':'+pad(n.ts.getMinutes())+'</td><td><span class="badge '+(n.ch==='SMS'?'b-info':'b-gray')+'">'+ic(n.ch==='SMS'?'sms':'mail')+n.ch+'</span></td><td><b>'+esc(n.to)+'</b></td><td>'+esc(n.txt)+'</td></tr>').join('')+'</tbody></table></div>'+(L.length>60?'<p class="muted small" style="margin-top:10px">… et '+(L.length-60)+' autres messages.</p>':'')+'</section>';
+}
+
+/* ---------- logique métier ---------- */
+function cancelRdv(r){const future=dt(r.d,r.t)>new Date();r.st='annule';dirty();
+  notify('E-mail',r.n,'Votre rendez-vous du '+fmtD(r.d)+' à '+hh(r.t)+' est annulé.');
+  if(!future)return null;
+  const w=S.wait.find(w=>w.st==='attente'&&(w.p?w.p===r.p:(!w.c||w.c===r.c)&&(!w.s||P(r.p).s.includes(w.s))));
+  if(w)propose(w,{p:r.p,d:r.d,t:r.t});return w}
+function propose(w,slot){w.st='propose';w.slot=slot;notify('SMS',w.n,'Un créneau s’est libéré le '+fmtD(slot.d)+' à '+hh(slot.t)+' avec '+P(slot.p).n+'. Répondez OUI pour le réserver.')}
+function addBlock(p,d,from,to,m){S.blocks.push({id:++S.seq,p:p,d:d,from:from,to:to,m:m||'Indisponible'});
+  return S.rdvs.filter(r=>r.p===p&&r.d===d&&r.st==='confirme'&&r.t>=from&&r.t<to).length}
+
+const A={
+ reset(){seed();dirty();closeM();go('#/');toast('Démonstration réinitialisée.')},
+ close:closeM,
+ book(el){B={c:el.dataset.c,p:el.dataset.p,s:el.dataset.s,start:TODAY,date:'',step:1,slot:null,done:null};go('#/rdv')},
+ pick(el){B.slot={p:el.dataset.p,d:el.dataset.d,t:el.dataset.t};B.step=2;B.done=null;go('#/rdv');window.scrollTo(0,0);$('#main').focus()},
+ bkBack(){B.step=1;render()},
+ bkNew(){B={c:'',p:'',s:'',start:TODAY,date:'',step:1,slot:null,done:null};render();window.scrollTo(0,0)},
+ bkWeek(el){B.start=addD(B.start,+el.dataset.n);if(B.start<TODAY)B.start=TODAY;B.date='';render()},
+ bkDay(el){B.date=el.dataset.d;render()},
+ waitMe(){S.wait.push({id:++S.seq,n:ME.n,t:ME.t,p:B.p,c:B.c||(B.p?P(B.p).c:''),s:B.s,since:TODAY,st:'attente',mine:true});
+  notify('E-mail',ME.n,'Vous êtes inscrite sur la liste d’attente. Nous vous préviendrons par SMS dès qu’un créneau se libère.');
+  toast('Inscription sur liste d’attente enregistrée — e-mail envoyé (simulation).');go('#/patient/rdv')},
+ waitDel(el){S.wait=S.wait.filter(w=>w.id!==+el.dataset.id);render();toast('Inscription retirée de la liste d’attente.')},
+ waitProp(el){const w=S.wait.find(x=>x.id===+el.dataset.id),ps=S.prats.filter(p=>w.p?p.id===w.p:(!w.c||p.c===w.c)&&(!w.s||p.s.includes(w.s)));
+  let best=null;ps.forEach(p=>{const n=nextSlots(p,1)[0];if(n&&(!best||n.d+n.t<best.d+best.t))best={p:p.id,d:n.d,t:n.t}});
+  if(!best)return toast('Aucun créneau libre à proposer pour l’instant.');
+  propose(w,best);render();toast('Créneau proposé par SMS à '+w.n+' (simulation).')},
+ waitOk(el){const w=S.wait.find(x=>x.id===+el.dataset.id),s=w.slot;
+  if(rdvAt(s.p,s.d,s.t)||blockAt(s.p,s.d,s.t)){w.st='attente';w.slot=null;render();return toast('Ce créneau n’est plus disponible : le patient reste en attente.')}
+  S.rdvs.push({id:++S.seq,p:s.p,c:P(s.p).c,s:w.s||P(s.p).s[0],d:s.d,t:s.t,n:w.n,tel:w.t,st:'confirme',src:'ligne',first:true,mine:!!w.mine});dirty();
+  S.wait=S.wait.filter(x=>x!==w);notify('SMS',w.n,'RDV confirmé le '+fmtD(s.d)+' à '+hh(s.t)+' avec '+P(s.p).n+'.');render();toast('Rendez-vous créé pour '+w.n+' — SMS de confirmation envoyé (simulation).')},
+ askCancel(el){const r=RV(el.dataset.id);modal('Annuler ce rendez-vous ?','<p>'+SO(r.s).n+' avec '+esc(P(r.p).n)+', le <b>'+fmtD(r.d)+' à '+hh(r.t)+'</b>.</p><p class="muted small">Le créneau sera aussitôt proposé à un patient sur liste d’attente.</p><div class="actions"><button type="button" class="btn danger" data-act="doCancel" data-id="'+r.id+'">Oui, annuler</button><button type="button" class="btn" data-act="close">Garder mon rendez-vous</button></div>')},
+ doCancel(el){const r=RV(el.dataset.id),w=cancelRdv(r);closeM();render();toast('Rendez-vous annulé — e-mail envoyé (simulation).'+(w?' Créneau proposé à la liste d’attente.':''))},
+ ics(el){const r=RV(el.dataset.id),s=dt(r.d,r.t),e=new Date(+s+18e5),f=x=>x.getFullYear()+pad(x.getMonth()+1)+pad(x.getDate())+'T'+pad(x.getHours())+pad(x.getMinutes())+'00';
+  const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Kine des Trois Rives//FR','BEGIN:VEVENT','UID:rdv-'+r.id+'@exemple.fr','DTSTAMP:'+f(new Date()),'DTSTART:'+f(s),'DTEND:'+f(e),'SUMMARY:Kiné — '+SO(r.s).n+' ('+P(r.p).n+')','LOCATION:'+C(r.c).adr.replace(/,/g,'\\,'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));a.download='rendez-vous-kine.ics';document.body.appendChild(a);a.click();a.remove();toast('Fichier agenda (.ics) téléchargé.')}catch(err){toast('Téléchargement impossible dans ce navigateur.')}},
+ ordoDel(el){S.ordos.splice(+el.dataset.i,1);render();toast('Document supprimé.')},
+ questEdit(){U.questDraft=S.quest;S.quest=null;render()},
+ proNav(el){let d=addD(U.proDate,+el.dataset.n);U.proDate=workDay(d,+el.dataset.n);render()},
+ proDay(el){U.proDate=el.dataset.d;render()},
+ setSt(el){const r=RV(el.dataset.id);r.st=el.dataset.st;closeM();render();toast(el.dataset.st==='absent'?'Absence enregistrée — comptée dans les statistiques.':el.dataset.st==='honore'?'Présence enregistrée.':'Statut remis à « confirmé ».')},
+ quickBlock(el){addBlock(U.proId,U.proDate,el.dataset.t,mint(tmin(el.dataset.t)+30));render();toast('Créneau bloqué : il n’est plus proposé en ligne.')},
+ unblock(el){S.blocks=S.blocks.filter(b=>b.id!==+el.dataset.id);closeM();render();toast('Créneau débloqué : à nouveau réservable en ligne.')},
+ actuDel(el){S.actus=S.actus.filter(a=>a.id!==+el.dataset.id);render();toast('Actualité retirée du site.')},
+ agNav(el){U.agDate=workDay(addD(U.agDate,+el.dataset.n),+el.dataset.n);render()},
+ agGo(el){U.agDate=el.dataset.d;if(el.tagName!=='A')render()},
+ agRdv(el){const r=RV(el.dataset.id),p=P(r.p),past=dt(r.d,r.t)<=new Date();
+  modal(esc(r.n),'<dl class="dl"><dt>Rendez-vous</dt><dd style="text-transform:capitalize">'+fmtD(r.d)+' · '+hh(r.t)+'</dd><dt>Soin</dt><dd>'+SO(r.s).n+(r.first?' — première séance':'')+'</dd><dt>Praticien</dt><dd>'+esc(p.n)+', '+C(r.c).n+'</dd><dt>Mobile</dt><dd>'+esc(telOf(r))+'</dd><dt>Origine</dt><dd>'+(r.src==='ligne'?'Pris en ligne':'Pris par téléphone')+'</dd><dt>Statut</dt><dd>'+badge(r.st)+'</dd>'+
+  (r.mine?'<dt>Ordonnance</dt><dd>'+(S.ordos.length?'Déposée ('+esc(S.ordos[0].n)+')':'Non déposée')+'</dd><dt>Questionnaire</dt><dd>'+(S.quest?'Rempli — douleur '+S.quest.douleur+' / 10':'Non rempli')+'</dd>':'')+'</dl><hr>'+
+  '<div class="actions">'+(past?'<button type="button" class="btn pri" data-act="setSt" data-id="'+r.id+'" data-st="honore">'+ic('check')+'Présent</button><button type="button" class="btn danger" data-act="setSt" data-id="'+r.id+'" data-st="absent">Absent</button>':'<span class="muted small">Le pointage présent / absent est disponible une fois l’heure passée.</span>')+
+  (r.st!=='confirme'?'<button type="button" class="btn" data-act="setSt" data-id="'+r.id+'" data-st="confirme">Remettre « confirmé »</button>':'')+'<button type="button" class="btn" data-act="doCancelS" data-id="'+r.id+'">Annuler le rendez-vous</button></div>')},
+ doCancelS(el){const r=RV(el.dataset.id),w=cancelRdv(r);closeM();render();toast('Rendez-vous annulé — patient prévenu (simulation).'+(w?' Créneau proposé à '+w.n+' (liste d’attente).':''))},
+ agBlk(el){const b=S.blocks.find(x=>x.id===+el.dataset.id);modal('Créneau bloqué','<dl class="dl"><dt>Praticien</dt><dd>'+esc(P(b.p).n)+'</dd><dt>Horaire</dt><dd>'+fmtD(b.d)+', '+b.from+' – '+b.to+'</dd><dt>Motif</dt><dd>'+esc(b.m)+'</dd></dl><div class="actions"><button type="button" class="btn pri" data-act="unblock" data-id="'+b.id+'">Débloquer</button><button type="button" class="btn" data-act="close">Fermer</button></div>')},
+ agFree(el){const p=P(el.dataset.p),t=el.dataset.t,d=U.agDate,ends=TIMES.filter(x=>x>t).concat(['21:00']);
+  modal(esc(p.n)+' — '+hh(t),'<p class="muted" style="text-transform:capitalize">'+fmtD(d)+' · '+C(p.c).n+'</p>'+
+  '<form class="stack" data-form="agAdd" data-p="'+p.id+'" data-t="'+t+'" novalidate><h3>Rendez-vous pris par téléphone</h3><div class="fgrid">'+fld('Nom du patient','m_nom','<input type="text" id="f-m_nom" name="m_nom" autocomplete="off">',{req:1})+fld('Mobile','m_tel','<input type="tel" id="f-m_tel" name="m_tel" autocomplete="off">',{hint:'Pour le rappel par SMS.'})+fld('Soin','m_soin','<select id="f-m_soin" name="m_soin">'+opts(p.s.map(s=>[s,SO(s).n]),p.s[0])+'</select>',{full:1})+'</div><button type="submit" class="btn pri">'+ic('plus')+'Ajouter le rendez-vous</button></form><hr>'+
+  '<form class="stack" data-form="agBlock" data-p="'+p.id+'" data-t="'+t+'" novalidate><h3>Bloquer le créneau</h3><div class="fgrid">'+fld('Jusqu’à','m_to','<select id="f-m_to" name="m_to">'+opts(ends.map(x=>[x,x]),ends[0])+'</select>')+fld('Motif','m_motif','<select id="f-m_motif" name="m_motif">'+opts(['Congé','Formation','Réunion d’équipe','Visite à domicile','Autre'].map(x=>[x,x]),'Congé')+'</select>')+'</div><button type="submit" class="btn">'+ic('lock')+'Bloquer</button></form>')},
+ remind(){const d=workDay(addD(TODAY,1)),rs=S.rdvs.filter(r=>r.d===d&&r.st==='confirme'&&!r.rem);
+  if(!rs.length)return toast('Les rappels de demain ont déjà été envoyés.');
+  rs.forEach(r=>{r.rem=true;notify('SMS',r.n,'Rappel : rendez-vous le '+fmtD(d)+' à '+hh(r.t)+' avec '+P(r.p).n+', '+C(r.c).n+'.')});render();toast(rs.length+' rappels SMS envoyés pour le '+fmtD(d)+' (simulation).')}
+};
+const CH={
+ bk(el){B[el.name]=el.value;
+  if(B.p){const p=P(B.p);if(B.c&&p.c!==B.c)B.p='';else if(B.s&&!p.s.includes(B.s)){if(el.name==='p')B.s='';else B.p=''}}
+  B.date='';render()},
+ proSel(el){U.proId=el.value;render()},
+ agDate(el){if(el.value){U.agDate=el.value;render()}},
+ agCab(el){U.agCab=el.value;render()},
+ statP(el){U.statP=+el.value;render()},
+ statC(el){U.statC=el.value;render()},
+ ordo(el){const f=el.files[0];if(!f)return;
+  if(!/^image\/|pdf$/.test(f.type))return toast('Format non accepté : choisissez une photo ou un PDF.');
+  if(f.size>10485760)return toast('Fichier trop volumineux (10 Mo maximum).');
+  S.ordos.unshift({n:f.name,sz:f.size>1048576?(f.size/1048576).toFixed(1).replace('.',',')+' Mo':Math.max(1,Math.round(f.size/1024))+' Ko',d:new Date()});render();toast('Ordonnance déposée (simulation) — votre praticien en est informé.')},
+ photo(el){const f=el.files[0];if(!f)return;if(!/^image\//.test(f.type))return toast('Choisissez une image (JPG ou PNG).');
+  const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(im.width,im.height),cv=document.createElement('canvas');cv.width=cv.height=320;
+    cv.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,320,320);const p=P(U.proId);p.photo=cv.toDataURL('image/jpeg',.85);
+    const pv=$('#photoPrev');if(pv)pv.innerHTML=av(p,96);toast('Photo mise à jour sur votre page publique.')};im.onerror=()=>toast('Image illisible.');im.src=rd.result};rd.readAsDataURL(f)}
+};
+const F={
+ quick(f){B={c:f.elements.c.value,p:'',s:f.elements.s.value,start:TODAY,date:'',step:1,slot:null,done:null};go('#/rdv')},
+ book(f){const v=n=>f.elements[n].value.trim();let ok=true;
+  ok=setErr(f,'soin',v('soin')?'':'Choisissez le type de soin.')&&ok;
+  ok=setErr(f,'prenom',v('prenom')?'':'Indiquez votre prénom.')&&ok;
+  ok=setErr(f,'nom',v('nom')?'':'Indiquez votre nom.')&&ok;
+  ok=setErr(f,'tel',/^(?:\+33\s?|0)[1-9](?:[\s.]?\d{2}){4}$/.test(v('tel'))?'':'Numéro attendu au format 06 12 34 56 78.')&&ok;
+  ok=setErr(f,'email',/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))?'':'Adresse e-mail invalide.')&&ok;
+  ok=setErr(f,'rgpd',f.elements.rgpd.checked?'':'Votre accord est nécessaire pour enregistrer le rendez-vous.')&&ok;
+  if(!ok)return focusErr(f);
+  const s=B.slot,p=P(s.p);
+  if(rdvAt(s.p,s.d,s.t)||blockAt(s.p,s.d,s.t)){B.step=1;render();return toast('Ce créneau vient d’être pris : choisissez-en un autre.')}
+  const r={id:++S.seq,p:s.p,c:p.c,s:v('soin'),d:s.d,t:s.t,n:v('prenom')+' '+v('nom'),tel:v('tel'),st:'confirme',src:'ligne',first:f.elements.first.checked,mine:true};
+  S.rdvs.push(r);dirty();
+  notify('E-mail',r.n,'Confirmation : '+SO(r.s).n+' le '+fmtD(r.d)+' à '+hh(r.t)+' avec '+p.n+', '+C(r.c).n+'.');
+  notify('SMS',r.n,'RDV confirmé le '+fmtD(r.d)+' à '+hh(r.t)+' avec '+p.n+'. Annulation gratuite jusqu’à 24 h avant.');
+  B.step=3;B.done=r.id;render();window.scrollTo(0,0);$('#main').focus();toast('E-mail et SMS de confirmation envoyés (simulation).')},
+ quest(f){const v=n=>f.elements[n].value.trim();let ok=true;
+  ok=setErr(f,'motif',v('motif').length>=5?'':'Décrivez votre motif en quelques mots.')&&ok;
+  ok=setErr(f,'depuis',v('depuis')?'':'Sélectionnez une durée.')&&ok;
+  if(!ok)return focusErr(f);
+  S.quest={motif:v('motif'),depuis:v('depuis'),douleur:+f.elements.douleur.value,op:f.elements.op.value,ttt:v('ttt'),obj:v('obj')};U.questDraft=null;render();window.scrollTo(0,0);toast('Questionnaire transmis à votre praticien (simulation).')},
+ hours(f){const p=P(U.proId),nh={};let ok=true;
+  for(let k=1;k<=6;k++){const g=n=>f.elements[n+'_'+k].value,h={on:f.elements['on_'+k].checked,a:g('a'),b:g('b'),c:g('c'),d:g('d')};let m='';
+    if(h.on){if(h.a>=h.b)m='La fin de matinée doit être après le début.';else if(!!h.c!==!!h.d)m='Renseignez le début et la fin de l’après-midi, ou laissez les deux vides.';else if(h.c&&h.c>=h.d)m='La fin d’après-midi doit être après le début.';else if(h.c&&h.c<h.b)m='L’après-midi doit commencer après la fin de la matinée.'}
+    ok=setErr(f,'h_'+k,m)&&ok;nh[k]=h}
+  if(!ok)return toast('Certains horaires sont incohérents : voir les messages en rouge.');
+  p.h=nh;const out=S.rdvs.filter(r=>r.p===p.id&&r.st==='confirme'&&r.d>=TODAY&&!daySlots(p,r.d).includes(r.t)).length;
+  render();toast('Horaires enregistrés : la réservation en ligne est à jour.'+(out?' '+out+' rendez-vous déjà pris sont maintenus.':''))},
+ absence(f){const d=f.elements.ab_d.value,a=f.elements.ab_a.value,b=f.elements.ab_b.value;let ok=true;
+  ok=setErr(f,'ab_d',d&&d>=TODAY?'':'Choisissez une date à venir.')&&ok;
+  ok=setErr(f,'ab_b',b>a?'':'L’heure de fin doit être après le début.')&&ok;
+  if(!ok)return focusErr(f);
+  const n=addBlock(U.proId,d,a,b,f.elements.ab_m.value.trim());render();toast('Créneaux bloqués le '+fmtD(d)+'.'+(n?' '+n+' rendez-vous déjà pris sont à déplacer.':''))},
+ fiche(f){const p=P(U.proId),sp=[...f.querySelectorAll('[name=sp]:checked')].map(x=>x.value);let ok=true;
+  ok=setErr(f,'titre',f.elements.titre.value.trim()?'':'Indiquez votre titre.')&&ok;
+  ok=setErr(f,'bio',f.elements.bio.value.trim().length>=20?'':'Rédigez une présentation d’au moins 20 caractères.')&&ok;
+  const er=f.querySelector('[data-err="sp"]');er.textContent=sp.length?'':'Sélectionnez au moins une spécialité.';ok=!!sp.length&&ok;
+  if(!ok)return focusErr(f);
+  p.titre=f.elements.titre.value.trim();p.bio=f.elements.bio.value.trim();p.s=sp;render();toast('Fiche enregistrée : votre page publique est à jour.')},
+ actu(f){let ok=true;const t=f.elements.at.value.trim(),x=f.elements.ax.value.trim();
+  ok=setErr(f,'at',t?'':'Donnez un titre à l’actualité.')&&ok;ok=setErr(f,'ax',x.length>=10?'':'Ajoutez un texte d’au moins 10 caractères.')&&ok;
+  if(!ok)return focusErr(f);
+  S.actus.unshift({id:++S.seq,d:TODAY,t:t,x:x});render();toast('Actualité publiée sur le site.')},
+ agAdd(f){const n=f.elements.m_nom.value.trim(),tel=f.elements.m_tel.value.trim();let ok=true;
+  ok=setErr(f,'m_nom',n?'':'Indiquez le nom du patient.')&&ok;
+  ok=setErr(f,'m_tel',!tel||/^(?:\+33\s?|0)[1-9](?:[\s.]?\d{2}){4}$/.test(tel)?'':'Numéro attendu au format 06 12 34 56 78.')&&ok;
+  if(!ok)return focusErr(f);
+  const p=P(f.dataset.p),r={id:++S.seq,p:p.id,c:p.c,s:f.elements.m_soin.value,d:U.agDate,t:f.dataset.t,n:n,st:'confirme',src:'tel',first:false};if(tel)r.tel=tel;
+  S.rdvs.push(r);dirty();if(tel)notify('SMS',n,'RDV confirmé le '+fmtD(r.d)+' à '+hh(r.t)+' avec '+p.n+', '+C(p.c).n+'.');
+  closeM();render();toast('Rendez-vous ajouté'+(tel?' — SMS de confirmation envoyé (simulation).':'.'))},
+ agBlock(f){const n=addBlock(f.dataset.p,U.agDate,f.dataset.t,f.elements.m_to.value,f.elements.m_motif.value);closeM();render();toast('Créneaux bloqués.'+(n?' '+n+' rendez-vous existants sont à déplacer.':''))}
+};
+
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&A[el.dataset.act])A[el.dataset.act](el,e)});
+document.addEventListener('change',e=>{const el=e.target.closest('[data-ch]');if(el&&CH[el.dataset.ch])CH[el.dataset.ch](el)});
+document.addEventListener('input',e=>{const o=e.target.dataset&&e.target.dataset.out;if(o){const x=document.getElementById(o);if(x)x.textContent=e.target.value}});
+document.addEventListener('submit',e=>{const f=e.target.closest('form[data-form]');if(f){e.preventDefault();F[f.dataset.form](f)}});
+$('#dlg').addEventListener('click',e=>{if(e.target===e.currentTarget)closeM()});
+window.addEventListener('hashchange',()=>{closeM();render();window.scrollTo(0,0)});
+seed();render();
+})();
+</script>
 </body>
 </html>
