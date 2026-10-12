@@ -2,20 +2,614 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Lavage auto à domicile</title>
+<meta name="description" content="Marketplace de lavage auto à domicile : recherche par adresse, comparaison de professionnels vérifiés, réservation avec paiement en mode test, et espace professionnel (demandes, prestations, tarifs, disponibilités, versements).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F3F7F8;--panel:#FFFFFF;--panel-2:#F0F5F7;--ink:#0F2530;--muted:#4D626C;--line:#DAE3E7;--line-2:#B9C8CF;
+  --accent:#0B6E8A;--accent-ink:#FFFFFF;--accent-soft:#DCF0F5;--accent-text:#095A72;
+  --hero:#0E3040;--hero-ink:#F2FAFC;--hero-muted:#B9D6DF;
+  --star:#B86E00;--band:#FBF1DC;--band-ink:#7A4B00;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4E5A60;--gray-soft:#E8EDEF;
+  --shadow:0 1px 2px rgba(15,37,48,.05),0 4px 14px rgba(15,37,48,.06);
+  --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Outfit","DM Sans",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B1418;--panel:#131F25;--panel-2:#19282F;--ink:#E4ECEF;--muted:#9DB0B9;--line:#24353D;--line-2:#3A525C;
+  --accent:#5CC4DF;--accent-ink:#05222B;--accent-soft:#12323D;--accent-text:#8AD8EC;
+  --hero:#102C39;--hero-ink:#EAF6F9;--hero-muted:#A9C7D1;
+  --star:#F0B24D;--band:#2E2512;--band-ink:#EFC57A;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--gray:#B5C1C6;--gray-soft:#222F35;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);letter-spacing:-.01em}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13.5px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.star{width:16px;height:16px;flex:none;fill:var(--star);stroke:none}
+
+.demo-band{background:var(--band);color:var(--ink);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:19px}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--ink)}
+.seg{margin-left:auto;display:flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);min-width:0}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+main{padding:20px clamp(16px,2vw,32px) 110px}
+@media (max-width:820px){.seg{margin-left:0;width:100%}.seg button{flex:1;justify-content:center;min-height:44px;padding:0 8px}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.block{width:100%}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font:inherit;color:inherit;text-align:left;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px;overflow-wrap:anywhere}
+.lnk:hover{color:var(--accent-text)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=number],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:8px;font-weight:600;font-size:13.5px}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
+.ck{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer;font-size:14px;font-weight:500}
+.ck:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text);font-weight:600}
+.ck input{width:18px;height:18px;accent-color:var(--accent);margin:0;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:18px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:26px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.badge svg{width:13px;height:13px}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500}
+.note.test{background:var(--warn-soft);color:var(--warn)}
+.empty{text-align:center;padding:36px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted);align-items:center}
+.meta span{display:inline-flex;gap:5px;align-items:center;min-width:0}
+.meta b{color:var(--ink)}
+
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:20px;padding:clamp(18px,3vw,36px);display:grid;gap:22px;grid-template-columns:minmax(0,1fr);margin-bottom:22px}
+@media (min-width:1000px){.hero{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:center}}
+.hero h1{font-size:clamp(26px,3.4vw,42px);margin-bottom:10px}
+.hero p{color:var(--hero-muted);font-size:16.5px;max-width:56ch}
+.trust{display:grid;gap:8px;margin-top:16px;font-weight:500}
+.trust li{display:flex;gap:9px;align-items:center}
+.sbox{background:var(--panel);color:var(--ink);border-radius:16px;padding:16px;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr));align-items:end;min-width:0}
+.rhead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.rhead h2{font-size:21px}
+.rhead .field{flex:0 1 220px}
+.pgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr))}
+.pcard{display:flex;flex-direction:column;gap:12px}
+.p-top{display:flex;gap:12px;align-items:flex-start;min-width:0}
+.p-top>div{min-width:0;flex:1}
+.p-top h3{font-size:18px}
+.ava{width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-family:var(--head);font-weight:700;flex:none}
+.ava.lg{width:64px;height:64px;font-size:22px;border-radius:18px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags li{font-size:12.5px;font-weight:600;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.p-next{display:flex;gap:8px;align-items:center;font-size:14px;background:var(--panel-2);border-radius:10px;padding:8px 12px}
+.p-foot{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+.price{font-family:var(--head);font-weight:700;font-size:24px;line-height:1.1}
+.cmpbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--panel);border-top:1px solid var(--line-2);box-shadow:0 -6px 20px rgba(0,0,0,.12);padding:10px clamp(16px,2vw,32px) calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+.tblw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+thead th{background:var(--panel-2);font-size:13px;color:var(--muted)}
+tbody tr:last-child>*{border-bottom:0}
+tbody th{font-weight:600;color:var(--muted);font-size:13.5px}
+.num{font-variant-numeric:tabular-nums}
+
+.two{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.two{grid-template-columns:minmax(0,1fr) minmax(300px,400px);align-items:start}.two>aside{position:sticky;top:80px}}
+.stack{display:grid;gap:16px;min-width:0}
+.svc{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}
+.svc:last-child{border-bottom:0;padding-bottom:0}
+.svc>div:first-child{flex:1 1 220px;min-width:0}
+.svc h3{font-size:16px;font-family:var(--font);font-weight:700}
+.svc .right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.dayrow{display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr);gap:8px 12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.dayrow:last-child{border-bottom:0}
+@media (max-width:520px){.dayrow{grid-template-columns:minmax(0,1fr)}}
+.review{padding:12px 0;border-bottom:1px solid var(--line)}
+.review:last-child{border-bottom:0}
+.stars{display:inline-flex;gap:1px;vertical-align:middle}
+.stars svg.off{fill:var(--line-2)}
+.checks li{display:flex;gap:9px;align-items:center;padding:6px 0;color:var(--ok);font-weight:600;font-size:14.5px}
+.checks li span{color:var(--ink);font-weight:500}
+
+.steps{display:flex;gap:6px;margin-bottom:16px}
+.steps li{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--muted);border-top:4px solid var(--line);padding-top:6px;overflow-wrap:anywhere}
+.steps li.done{border-color:var(--accent);color:var(--accent-text)}
+.steps li.cur{border-color:var(--accent);color:var(--ink)}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer;min-height:44px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt input{width:20px;height:20px;accent-color:var(--accent);margin:2px 0 0;flex:none}
+.opt>span{flex:1;min-width:0}
+.opt b{display:block}
+.sum dl{margin:0;display:grid;gap:8px}
+.sum dl>div{display:flex;justify-content:space-between;gap:12px}
+.sum dt{color:var(--muted)}
+.sum dd{margin:0;text-align:right;font-weight:600;overflow-wrap:anywhere;min-width:0}
+.sum .tot{border-top:1px solid var(--line);padding-top:10px;font-size:18px}
+.sum .tot dt{color:var(--ink);font-weight:700}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .k-l{font-size:13.5px;color:var(--muted);font-weight:600}
+.kpi .k-v{font-family:var(--head);font-size:27px;font-weight:700;margin-top:2px}
+.cols{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.cols{grid-template-columns:repeat(2,minmax(0,1fr))}.cols .span2{grid-column:1/-1}}
+@media (min-width:1700px){.cols{grid-template-columns:repeat(3,minmax(0,1fr))}.cols .span2{grid-column:auto}}
+.rq{padding:12px 0;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.rq:last-child{border-bottom:0;padding-bottom:0}
+.rq-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.bkgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr))}
+.cal-w{overflow-x:auto;position:relative}
+.cal{display:grid;grid-template-columns:56px repeat(7,minmax(44px,1fr));gap:6px;min-width:400px}
+.cal .hd{font-weight:700;font-size:13.5px;text-align:center;align-self:center}
+.cal .hr{font-size:13.5px;color:var(--muted);align-self:center;font-variant-numeric:tabular-nums}
+.cal button{min-height:44px;border-radius:10px;border:1px dashed var(--line-2);background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--muted)}
+.cal button[aria-pressed="true"]{background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink)}
+.bar{height:8px;background:var(--gray-soft);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+
+dialog{border:0;border-radius:18px;padding:0;width:min(540px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(6,18,24,.6)}
+.dlg{padding:20px;display:grid;gap:14px}
+.dlg-h{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.dlg-h h2{font-size:20px}
+.xbtn{width:44px;height:44px;border:0;background:transparent;border-radius:10px;cursor:pointer;display:grid;place-items:center;color:var(--muted);flex:none}
+.xbtn:hover{background:var(--panel-2)}
+.rate{display:flex;gap:4px}
+.rate button{width:44px;height:44px;border:0;background:transparent;border-radius:10px;cursor:pointer;display:grid;place-items:center}
+.rate svg{width:30px;height:30px;fill:var(--line-2)}
+.rate button[aria-pressed="true"] svg{fill:var(--star)}
+#toasts{position:fixed;right:16px;left:16px;bottom:84px;z-index:100;display:grid;gap:8px;justify-items:center;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;font-size:14.5px;box-shadow:var(--shadow);max-width:520px}
+@media print{.demo-band,.top,.cmpbar,#toasts,.noprint{display:none!important}body{background:#fff}main{padding:0}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-a="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Réinitialiser la démo</button></div>
+<div id="app"></div>
+<dialog id="dlg" aria-labelledby="dlg-t"></dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var KEY='demo-472335-v1',COM=0.12;
+var SLOTS=['08:00','10:00','12:00','14:00','16:00','18:00'];
+var VEH=[{id:'citadine',l:'Citadine',s:0},{id:'berline',l:'Berline / break',s:5},{id:'suv',l:'SUV / monospace',s:10},{id:'utilitaire',l:'Utilitaire',s:20}];
+var VILLES={'Nantes':[0,0],'Rezé':[1,-4],'Saint-Herblain':[-6,1],'Orvault':[-3,6],'Vertou':[6,-6],'Carquefou':[8,8],'Saint-Sébastien-sur-Loire':[4,-3]};
+var CATS={ext:'Extérieur',int:'Intérieur',complet:'Intérieur + extérieur',premium:'Rénovation'};
+var TAGS=['Autonome en eau','Autonome en électricité','Produits biodégradables','Lavage sans eau','Nettoyage vapeur','Traitement cuir'];
+var STAT={attente:['En attente de confirmation','b-warn'],confirmee:['Confirmée','b-info'],terminee:['Terminée','b-ok'],refusee:['Refusée · remboursée','b-bad'],annulee:['Annulée · remboursée','b-gray']};
+var DAYS=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+var ME='Camille Renard';
+var S,card={num:'',exp:'',cvc:''},rv=null,paying=false,lastView='';
+
+var $=function(s,r){return (r||document).querySelector(s)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function iso(off){var d=new Date();d.setDate(d.getDate()+off);return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function dt(i){return new Date(i+'T12:00:00')}
+function fd(i,long){return dt(i).toLocaleDateString('fr-FR',long?{weekday:'long',day:'numeric',month:'long'}:{weekday:'short',day:'numeric',month:'short'})}
+function eur(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})+' €'}
+function dur(m){var h=Math.floor(m/60),r=m%60;return h?(h+' h'+(r?' '+('0'+r).slice(-2):'')):(m+' min')}
+function r2(n){return Math.round(n*100)/100}
+var IC={
+ drop:'<path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3z"/>',
+ check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ shield:'<path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z"/><path d="M9 12l2.2 2.2L15 10.5"/>',
+ pin:'<path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ cal:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+ clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+ search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/>',
+ brief:'<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/>',
+ lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ info:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
+ print:'<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6"/>',
+ eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>'
+};
+function ic(n){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'}
+var STAR='<path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.5l-5.9 3.2 1.2-6.6L2.5 9.5l6.6-.9z"/>';
+function star(off){return '<svg class="star'+(off?' off':'')+'" viewBox="0 0 24 24" aria-hidden="true">'+STAR+'</svg>'}
+function stars(n){var h='';for(var i=1;i<=5;i++)h+=star(i>n);return '<span class="stars" role="img" aria-label="'+n+' sur 5">'+h+'</span>'}
+
+/* ---------- données ---------- */
+function dispo(wk,sat,sun){var o={};for(var i=1;i<=5;i++)o[i]=wk.slice();o[6]=(sat||[]).slice();o[0]=(sun||[]).slice();return o}
+function seed(){
+ function P(id,nom,gerant,ville,rayon,annee,done,vues,desc,tags,svcs,dsp,revs){
+  return{id:id,nom:nom,gerant:gerant,ville:ville,rayon:rayon,annee:annee,done:done,vues:vues,desc:desc,tags:tags,dispo:dsp,
+   services:svcs.map(function(s,i){return{id:id+'s'+(i+1),nom:s[0],cat:s[1],duree:s[2],prix:s[3],desc:s[4]}}),
+   reviews:revs.map(function(r){return{a:r[0],n:r[1],d:iso(r[2]),t:r[3],p:r[4]}})}
+ }
+ var pros=[
+  P('p1','Atelier Brillance Mobile','Yanis Morel','Nantes',12,2019,412,286,'Lavage à la main et soin intérieur, à domicile ou sur votre parking d’entreprise. Matériel autonome, aucune arrivée d’eau nécessaire.',['Autonome en eau','Autonome en électricité','Produits biodégradables'],
+   [['Lavage extérieur à la main','ext',45,35,'Carrosserie, jantes, vitres et séchage microfibre.'],['Nettoyage intérieur complet','int',60,45,'Aspiration, plastiques, vitres intérieures, seuils de portes.'],['Formule intérieur + extérieur','complet',105,72,'Les deux prestations en un seul passage.'],['Rénovation sièges et moquettes','premium',150,119,'Shampoing injection-extraction, désodorisation.']],
+   dispo(['08:00','10:00','14:00','16:00','18:00'],['08:00','10:00','12:00']),
+   [['Lucie P.',5,-9,'Ponctuel, soigneux, la voiture est ressortie comme neuve. Je n’ai rien eu à préparer.','Lavage extérieur à la main'],['Marc D.',5,-12,'Intervention sur le parking du bureau pendant mes réunions. Très pratique.','Formule intérieur + extérieur'],['Hélène V.',4,-31,'Très bon résultat, un quart d’heure de retard mais j’ai été prévenue.','Nettoyage intérieur complet']]),
+  P('p2','Nacre Auto Soin','Clara Besson','Rezé',10,2021,187,143,'Spécialiste du nettoyage vapeur : idéal pour les intérieurs très sollicités, sièges enfants et poils d’animaux.',['Nettoyage vapeur','Produits biodégradables'],
+   [['Lavage extérieur vapeur','ext',50,32,'Carrosserie et jantes à la vapeur sèche, sans ruissellement.'],['Intérieur vapeur','int',75,49,'Tissus, plastiques et aérations désinfectés.'],['Formule complète vapeur','complet',120,75,'Extérieur et intérieur.']],
+   dispo(['10:00','12:00','14:00','16:00'],['10:00','14:00']),
+   [['Antoine G.',5,-6,'Les sièges arrière ont retrouvé leur couleur. Bluffant.','Intérieur vapeur'],['Maëlle T.',4,-20,'Travail propre et explications claires.','Formule complète vapeur'],['Rachid O.',5,-44,'Rapide à confirmer, à l’heure, prix annoncé respecté.','Lavage extérieur vapeur']]),
+  P('p3','H2O Détail','Bastien Leroy','Saint-Herblain',15,2017,968,402,'Detailing et entretien régulier pour particuliers et flottes. Finition soignée, cire de protection incluse sur les formules extérieures.',['Autonome en eau','Autonome en électricité'],
+   [['Lavage extérieur premium','ext',60,42,'Prélavage mousse, lavage main, cire de protection.'],['Intérieur soigné','int',60,48,'Aspiration, plastiques satinés, vitres.'],['Formule complète','complet',120,82,'Extérieur premium + intérieur soigné.'],['Polissage carrosserie','premium',240,220,'Correction des micro-rayures, lustrage machine.']],
+   dispo(['08:00','10:00','12:00','14:00','16:00','18:00'],['08:00','10:00','12:00','14:00'],['10:00']),
+   [['Julie M.',5,-3,'Un vrai travail de pro, la cire fait toute la différence.','Lavage extérieur premium'],['Paul R.',5,-15,'Polissage impeccable sur une voiture de dix ans.','Polissage carrosserie'],['Nadia K.',5,-28,'Réservation en deux minutes, intervention le lendemain.','Formule complète'],['Simon B.',4,-52,'Très bien, légèrement plus cher que la moyenne mais justifié.','Intérieur soigné']]),
+  P('p4','Lustre & Cuir','Élodie Fournier','Orvault',8,2020,254,97,'Soin des intérieurs cuir et véhicules haut de gamme. Produits au pH neutre, protection hydratante en finition.',['Traitement cuir','Produits biodégradables','Autonome en eau'],
+   [['Intérieur cuir','int',90,69,'Nettoyage doux et hydratation des cuirs.'],['Formule prestige','complet',150,115,'Extérieur main + intérieur cuir.'],['Rénovation cuir','premium',180,165,'Recoloration légère, réparation des craquelures.']],
+   dispo(['10:00','14:00','16:00'],[]),
+   [['Olivier C.',5,-11,'Cuir beige redevenu clair, aucune trace. Merci.','Intérieur cuir'],['Sandrine L.',5,-37,'Minutieuse et de bon conseil.','Formule prestige']]),
+  P('p5','Vapeur Verte','Hugo Marais','Vertou',12,2022,96,118,'Lavage écologique sans eau, moins de deux litres par véhicule. Tarifs doux pour un entretien régulier.',['Lavage sans eau','Produits biodégradables'],
+   [['Lavage extérieur sans eau','ext',40,29,'Nettoyant végétal et microfibres.'],['Intérieur express','int',40,35,'Aspiration et dépoussiérage.'],['Duo express','complet',80,58,'Extérieur sans eau + intérieur express.']],
+   dispo(['08:00','12:00','16:00','18:00'],['08:00','10:00','12:00','14:00','16:00'],['10:00','12:00']),
+   [['Chloé N.',4,-8,'Bon rapport qualité-prix, parfait pour un entretien mensuel.','Duo express'],['Farid A.',5,-19,'Rapide et efficace, même en appartement sans point d’eau.','Lavage extérieur sans eau'],['Estelle J.',4,-40,'Correct, quelques traces sur les vitres vite rattrapées.','Intérieur express']]),
+  P('p6','Clean Express 44','Mehdi Collin','Carquefou',14,2018,631,174,'Équipe de deux laveurs pour des interventions rapides, y compris sur utilitaires et véhicules de société.',['Autonome en eau','Autonome en électricité','Nettoyage vapeur'],
+   [['Lavage extérieur','ext',35,34,'Lavage haute pression basse consommation, séchage.'],['Intérieur complet','int',50,44,'Aspiration, plastiques, vitres.'],['Formule intégrale','complet',80,70,'À deux laveurs : durée réduite.'],['Désinfection et désodorisation','premium',60,89,'Traitement vapeur et ozone.']],
+   dispo(['08:00','10:00','12:00','14:00','16:00'],['08:00','10:00']),
+   [['Thierry H.',5,-5,'Deux personnes, 1 h 20 pour un utilitaire très sale. Top.','Formule intégrale'],['Amandine S.',4,-23,'Efficace, je recommande.','Lavage extérieur'],['Loïc F.',5,-33,'Odeur de tabac disparue.','Désinfection et désodorisation']])
+ ];
+ pros.forEach(function(p){var c=VILLES[p.ville];p.x=c[0];p.y=c[1]+(p.id==='p1'?1:0)});
+ var seq=1040,bookings=[];
+ function B(pid,si,veh,off,slot,statut,client,adresse,lieu,mine,avis){
+  var p=pros.filter(function(x){return x.id===pid})[0],s=p.services[si],v=VEH.filter(function(x){return x.id===veh})[0];
+  bookings.push({id:'b'+(++seq),ref:'LV-'+seq,proId:pid,svc:s.nom,duree:s.duree,prix:s.prix,veh:veh,supp:v.s,total:s.prix+v.s,date:iso(off),slot:slot,statut:statut,client:client,adresse:adresse,lieu:lieu,mine:!!mine,avis:!!avis,notes:''});
+ }
+ B('p1',2,'suv',-12,'10:00','terminee','Marc Delaunay','8 allée des Tanneurs, Nantes','domicile',0,1);
+ B('p1',0,'berline',-9,'14:00','terminee','Lucie Perrin','27 rue de la Bastille, Nantes','domicile',0,1);
+ B('p1',2,'citadine',-5,'16:00','terminee',ME,'12 rue des Olivettes, Nantes','domicile',1,0);
+ B('p1',1,'berline',1,'08:00','confirmee','Sophie Marchand','3 impasse du Clos Toreau, Nantes','domicile');
+ B('p1',2,'suv',2,'10:00','attente','Inès Lambert','14 rue des Hauts-Pavés, Nantes','domicile');
+ B('p1',0,'citadine',3,'14:00','attente','Thomas Girard','Parc de la Chantrerie, bâtiment C, Nantes','travail');
+ B('p1',3,'berline',4,'16:00','confirmee','Karim Benali','41 boulevard des Poilus, Nantes','domicile');
+ B('p3',0,'citadine',2,'14:00','confirmee',ME,'Technoparc de l’Aubinière, 5 rue Vega, Nantes','travail',1);
+ B('p3',2,'suv',-7,'10:00','terminee','Nadia Kaci','19 rue de la Syonnière, Saint-Herblain','domicile',0,1);
+ return{day:iso(0),role:'client',view:'search',proId:'p1',proTab:'dash',cur:'p1',mineF:'all',
+  q:{adresse:'',ville:'Nantes',veh:'citadine',cat:'',date:'',tri:'note'},compare:[],pros:pros,bookings:bookings,seq:seq,draft:null,last:null,
+  contact:{nom:ME,email:'',tel:''}};
+}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.day===iso(0)&&s.pros)return s}catch(e){}return seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- métier ---------- */
+function pro(id){return S.pros.filter(function(p){return p.id===id})[0]}
+function veh(id){return VEH.filter(function(v){return v.id===id})[0]||VEH[0]}
+function bk(id){return S.bookings.filter(function(b){return b.id===id})[0]}
+function rating(p){if(!p.reviews.length)return 0;return p.reviews.reduce(function(a,r){return a+r.n},0)/p.reviews.length}
+function rtxt(p){return p.reviews.length?rating(p).toFixed(1).replace('.',','):'–'}
+function dist(p,ville){var c=VILLES[ville]||[0,0];return Math.max(.8,Math.hypot(c[0]-p.x,c[1]-p.y))}
+function km(d){return d.toFixed(1).replace('.',',')+' km'}
+function taken(pid,i,slot){return S.bookings.some(function(b){return b.proId===pid&&b.date===i&&b.slot===slot&&(b.statut==='attente'||b.statut==='confirmee')})}
+function free(p,i){return (p.dispo[dt(i).getDay()]||[]).filter(function(s){return !taken(p.id,i,s)}).sort()}
+function nextSlot(p){for(var o=1;o<=14;o++){var f=free(p,iso(o));if(f.length)return{d:iso(o),t:f[0]}}return null}
+function fromPrice(p,cat){var l=p.services.filter(function(s){return !cat||s.cat===cat});if(!l.length)return null;return Math.min.apply(null,l.map(function(s){return s.prix}))+veh(S.q.veh).s}
+function doneCount(p){return p.done+S.bookings.filter(function(b){return b.proId===p.id&&b.statut==='terminee'}).length}
+function results(){
+ var q=S.q;
+ var l=S.pros.filter(function(p){return dist(p,q.ville)<=p.rayon&&p.services.length&&(!q.cat||p.services.some(function(s){return s.cat===q.cat}))&&(!q.date||free(p,q.date).length)});
+ l.sort(function(a,b){
+  if(q.tri==='prix')return fromPrice(a,q.cat)-fromPrice(b,q.cat);
+  if(q.tri==='dist')return dist(a,q.ville)-dist(b,q.ville);
+  if(q.tri==='dispo'){var x=nextSlot(a),y=nextSlot(b);return ((x?x.d+x.t:'z')<(y?y.d+y.t:'z'))?-1:1}
+  return rating(b)-rating(a)||b.reviews.length-a.reviews.length});
+ return l;
+}
+function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;$('#toasts').appendChild(t);setTimeout(function(){t.remove()},4200)}
+function initials(n){return n.split(/\s+/).filter(function(w){return /^[A-Za-zÀ-ÿ0-9]/.test(w)&&w!=='&'}).slice(0,2).map(function(w){return w[0].toUpperCase()}).join('')}
+function badgeV(){return '<span class="badge b-ok">'+ic('shield')+'Vérifié</span>'}
+function sel(id,path,opts,val,rer,label){return '<select id="'+id+'" data-m="'+path+'"'+(rer?' data-r':'')+(label?' aria-label="'+label+'"':'')+'>'+opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select>'}
+function fld(id,label,html,hint,cls){return '<div class="field'+(cls?' '+cls:'')+'"><label for="'+id+'">'+label+'</label>'+html+(hint?'<span class="hint">'+hint+'</span>':'')+'<span class="err" id="'+id+'-e"></span></div>'}
+function inp(id,path,val,attrs){return '<input id="'+id+'" '+(path?'data-m="'+path+'" ':'')+'value="'+esc(val)+'" '+(attrs||'type="text"')+'>'}
+function validate(rules){var first=null;rules.forEach(function(r){var el=$('#'+r[0]),e=$('#'+r[0]+'-e'),bad=!r[1](el.value.trim());el.setAttribute('aria-invalid',bad?'true':'false');if(bad)el.setAttribute('aria-describedby',r[0]+'-e');e.textContent=bad?r[2]:'';if(bad&&!first)first=el});if(first)first.focus();return !first}
+var req=function(v){return v.length>1};
+
+/* ---------- vues particulier ---------- */
+function vSearch(){
+ var q=S.q,res=results(),dates=[['','Toutes les dates']];
+ for(var o=1;o<=7;o++)dates.push([iso(o),fd(iso(o))]);
+ var h='<section class="hero"><div><h1>Votre voiture lavée chez vous, par un professionnel vérifié</h1><p>Indiquez votre adresse, comparez les tarifs et les avis, réservez un créneau en quelques clics.</p>'+
+  '<ul class="trust"><li>'+ic('shield')+'Identité, SIRET et assurance contrôlés</li><li>'+ic('check')+'Prix affichés, déplacement inclus</li><li>'+ic('lock')+'Paiement débloqué après la prestation</li></ul></div>'+
+  '<form class="sbox" data-form="search" novalidate>'+
+  fld('q-adr','Adresse d’intervention',inp('q-adr','q.adresse',q.adresse,'type="text" autocomplete="street-address" placeholder="12 rue des Olivettes"'),'Domicile ou lieu de travail','full')+
+  fld('q-ville','Commune',sel('q-ville','q.ville',Object.keys(VILLES).map(function(v){return[v,v]}),q.ville,1))+
+  fld('q-veh','Véhicule',sel('q-veh','q.veh',VEH.map(function(v){return[v.id,v.l]}),q.veh,1))+
+  fld('q-date','Date souhaitée',sel('q-date','q.date',dates,q.date,1))+
+  '<button class="btn primary" type="submit">'+ic('search')+'Rechercher</button></form></section>';
+ h+='<div class="rhead" id="res"><div><h2>'+res.length+' professionnel'+(res.length>1?'s':'')+' autour de '+esc(q.ville)+'</h2><p class="muted small">Tarifs calculés pour : '+esc(veh(q.veh).l.toLowerCase())+(q.date?' · disponibles '+fd(q.date,1):'')+'</p></div>'+
+  fld('q-tri','Trier par',sel('q-tri','q.tri',[['note','Meilleure note'],['prix','Prix croissant'],['dist','Distance'],['dispo','Disponibilité la plus proche']],q.tri,1))+'</div>';
+ h+='<div class="chips" role="group" aria-label="Type de prestation" style="margin-bottom:16px">'+[['','Toutes les prestations']].concat(Object.keys(CATS).map(function(k){return[k,CATS[k]]})).map(function(c){return '<button type="button" class="chip" data-a="cat" data-v="'+c[0]+'" aria-pressed="'+(q.cat===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
+ if(!res.length)h+='<div class="empty"><p><b>Aucun professionnel ne correspond.</b></p><p>Essayez une autre date ou un autre type de prestation.</p><p style="margin-top:12px"><button class="btn" type="button" data-a="clearq">Effacer les filtres</button></p></div>';
+ else h+='<div class="pgrid">'+res.map(function(p){
+  var n=nextSlot(p),pr=fromPrice(p,q.cat),on=S.compare.indexOf(p.id)>-1;
+  return '<article class="card pcard"><div class="p-top"><div class="ava" aria-hidden="true">'+initials(p.nom)+'</div><div><h3><button type="button" class="lnk" data-a="pro" data-id="'+p.id+'">'+esc(p.nom)+'</button></h3>'+
+   '<div class="meta"><span>'+star()+'<b>'+rtxt(p)+'</b> ('+p.reviews.length+' avis)</span><span>'+ic('pin')+km(dist(p,q.ville))+'</span></div></div>'+badgeV()+'</div>'+
+   '<p class="small muted">'+esc(p.desc)+'</p><ul class="tags">'+p.tags.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>'+
+   '<div class="p-next">'+ic('cal')+(n?'<span>Prochain créneau : <b>'+fd(n.d)+' à '+n.t+'</b></span>':'<span>Complet sur 14 jours</span>')+'</div>'+
+   '<div class="p-foot"><div><span class="muted small">à partir de</span><div class="price">'+eur(pr)+'</div></div><label class="ck"><input type="checkbox" data-cmp="'+p.id+'"'+(on?' checked':'')+'>Comparer</label><button type="button" class="btn primary" data-a="pro" data-id="'+p.id+'">Voir le profil</button></div></article>'}).join('')+'</div>';
+ if(S.compare.length)h+='<div class="cmpbar"><span><b>'+S.compare.length+'</b> profil'+(S.compare.length>1?'s':'')+' sélectionné'+(S.compare.length>1?'s':'')+' <span class="muted small">(3 maximum)</span></span><span class="actions"><button type="button" class="btn" data-a="cmpclear">Vider</button><button type="button" class="btn primary" data-a="go" data-v="compare"'+(S.compare.length<2?' disabled':'')+'>Comparer</button></span></div>';
+ return h;
+}
+function vCompare(){
+ var l=S.compare.map(pro).filter(Boolean),q=S.q;
+ function row(t,f){return '<tr><th scope="row">'+t+'</th>'+l.map(function(p){return '<td>'+f(p)+'</td>'}).join('')+'</tr>'}
+ function pc(cat){return function(p){var v=fromPrice(p,cat);return v==null?'<span class="muted">Non proposé</span>':'<b class="num">'+eur(v)+'</b>'}}
+ var h='<div class="page-h"><div><button type="button" class="btn ghost" data-a="go" data-v="search">'+ic('back')+'Retour aux résultats</button><h1>Comparer les profils</h1><p class="muted">Tarifs pour : '+esc(veh(q.veh).l.toLowerCase())+', déplacement inclus.</p></div></div>';
+ if(l.length<2)return h+'<div class="empty">Sélectionnez au moins deux profils dans les résultats.</div>';
+ h+='<div class="tblw"><table style="min-width:'+(160+l.length*190)+'px"><thead><tr><th scope="col">Critère</th>'+l.map(function(p){return '<th scope="col"><span style="font-size:15px;color:var(--ink)">'+esc(p.nom)+'</span></th>'}).join('')+'</tr></thead><tbody>'+
+  row('Note moyenne',function(p){return '<span class="meta"><span>'+star()+'<b>'+rtxt(p)+'</b> ('+p.reviews.length+' avis)</span></span>'})+
+  row('Distance',function(p){return km(dist(p,q.ville))})+
+  row('Prochain créneau',function(p){var n=nextSlot(p);return n?fd(n.d)+' à '+n.t:'Complet'})+
+  Object.keys(CATS).map(function(k){return row(CATS[k],pc(k))}).join('')+
+  row('Interventions réalisées',function(p){return doneCount(p)})+
+  row('En activité depuis',function(p){return p.annee})+
+  row('Équipement',function(p){return '<ul class="tags">'+p.tags.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul>'})+
+  row('',function(p){return '<button type="button" class="btn primary" data-a="pro" data-id="'+p.id+'">Voir et réserver</button>'})+
+  '</tbody></table></div>';
+ return h;
+}
+function vProfile(){
+ var p=pro(S.cur),q=S.q,v=veh(q.veh);
+ var h='<div class="page-h"><button type="button" class="btn ghost" data-a="go" data-v="search">'+ic('back')+'Retour aux résultats</button></div><div class="two"><div class="stack">';
+ h+='<section class="card"><div class="p-top"><div class="ava lg" aria-hidden="true">'+initials(p.nom)+'</div><div><h1 style="font-size:25px" class="wrap">'+esc(p.nom)+'</h1><div class="meta" style="margin-top:4px"><span>'+star()+'<b>'+rtxt(p)+'</b> ('+p.reviews.length+' avis)</span><span>'+ic('pin')+esc(p.ville)+' · rayon '+p.rayon+' km</span><span>'+ic('check')+doneCount(p)+' interventions</span></div></div>'+badgeV()+'</div>'+
+  '<p style="margin:14px 0 10px">'+esc(p.desc)+'</p><ul class="tags">'+p.tags.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul></section>';
+ h+='<section class="card"><div class="card-h"><h2>Prestations et tarifs</h2><div class="field" style="flex:0 1 220px">'+sel('pf-veh','q.veh',VEH.map(function(x){return[x.id,x.l]}),q.veh,1,'Type de véhicule')+'</div></div>'+
+  (p.services.length?p.services.map(function(s){return '<div class="svc"><div><h3>'+esc(s.nom)+'</h3><p class="small muted">'+esc(s.desc)+'</p><div class="meta small" style="margin-top:4px"><span>'+ic('clock')+dur(s.duree)+'</span><span class="badge b-acc">'+CATS[s.cat]+'</span></div></div><div class="right"><div style="text-align:right"><div class="price">'+eur(s.prix+v.s)+'</div>'+(v.s?'<span class="small muted">dont '+eur(v.s)+' '+esc(v.l.toLowerCase())+'</span>':'<span class="small muted">déplacement inclus</span>')+'</div><button type="button" class="btn primary" data-a="book" data-id="'+p.id+'" data-s="'+s.id+'">Réserver</button></div></div>'}).join(''):'<p class="muted">Aucune prestation publiée pour le moment.</p>')+'</section>';
+ h+='<section class="card"><div class="card-h"><h2>Avis clients</h2><span class="small muted">Publiés uniquement après une prestation payée</span></div>'+(p.reviews.length?p.reviews.map(function(r){return '<div class="review"><div class="meta">'+stars(r.n)+'<b>'+esc(r.a)+'</b><span>'+fd(r.d)+'</span><span class="badge b-ok">'+ic('check')+'Avis vérifié</span></div><p style="margin-top:6px">'+esc(r.t)+'</p><p class="small muted">Prestation : '+esc(r.p)+'</p></div>'}).join(''):'<p class="muted">Pas encore d’avis.</p>')+'</section></div>';
+ h+='<aside class="stack"><section class="card"><div class="card-h"><h2>Disponibilités</h2><span class="small muted">7 prochains jours</span></div>';
+ for(var o=1;o<=7;o++){var d=iso(o),f=free(p,d);h+='<div class="dayrow"><b style="text-transform:capitalize">'+fd(d)+'</b><div class="chips">'+(f.length?f.map(function(t){return '<button type="button" class="chip" data-a="book" data-id="'+p.id+'" data-d="'+d+'" data-t="'+t+'" aria-label="Réserver '+fd(d,1)+' à '+t+'">'+t+'</button>'}).join(''):'<span class="muted small">Indisponible</span>')+'</div></div>'}
+ h+='</section><section class="card"><h2 style="margin-bottom:8px">Vérifications</h2><ul class="checks"><li>'+ic('check')+'<span>Pièce d’identité contrôlée</span></li><li>'+ic('check')+'<span>SIRET actif vérifié</span></li><li>'+ic('check')+'<span>Assurance RC professionnelle valide</span></li></ul></section></aside></div>';
+ return h;
+}
+function vBook(){
+ var d=S.draft,p=pro(d.proId),s=p.services.filter(function(x){return x.id===d.serviceId})[0]||p.services[0],v=veh(d.veh),tot=s.prix+v.s,st=d.step;
+ var names=['Prestation','Créneau et lieu','Paiement'];
+ var h='<div class="page-h"><div><button type="button" class="btn ghost" data-a="pro" data-id="'+p.id+'">'+ic('back')+'Retour au profil</button><h1>Réserver chez '+esc(p.nom)+'</h1></div></div>'+
+  '<ol class="steps" aria-label="Étapes">'+names.map(function(n,i){return '<li class="'+(i+1<st?'done':i+1===st?'cur':'')+'"'+(i+1===st?' aria-current="step"':'')+'>'+(i+1)+'. '+n+'</li>'}).join('')+'</ol><div class="two"><form class="card stack" data-form="step" novalidate>';
+ if(st===1){
+  h+='<fieldset><legend>Choisissez une prestation</legend><div class="stack" style="gap:8px">'+p.services.map(function(x){return '<label class="opt"><input type="radio" name="svc" value="'+x.id+'"'+(x.id===s.id?' checked':'')+'><span><b>'+esc(x.nom)+' — '+eur(x.prix+v.s)+'</b><span class="small muted">'+dur(x.duree)+' · '+esc(x.desc)+'</span></span></label>'}).join('')+'</div></fieldset>'+
+   fld('d-veh','Type de véhicule',sel('d-veh','draft.veh',VEH.map(function(x){return[x.id,x.l+(x.s?' (+'+eur(x.s)+')':'')]}),d.veh,1),'Le supplément dépend du gabarit, il est affiché avant paiement.');
+ }else if(st===2){
+  h+='<fieldset><legend>Jour</legend><div class="chips">';
+  for(var o=1;o<=10;o++){var di=iso(o),n=free(p,di).length;h+='<button type="button" class="chip" data-a="day" data-d="'+di+'" aria-pressed="'+(d.date===di)+'"'+(n?'':' disabled')+'>'+fd(di)+'</button>'}
+  h+='</div></fieldset><fieldset><legend>Heure d’arrivée</legend><div class="chips">'+(d.date?free(p,d.date).map(function(t){return '<button type="button" class="chip" data-a="slot" data-t="'+t+'" aria-pressed="'+(d.slot===t)+'">'+t+'</button>'}).join(''):'<span class="muted small">Choisissez d’abord un jour.</span>')+'</div><span class="err" id="slot-e" role="alert"></span></fieldset>'+
+   '<fieldset><legend>Lieu d’intervention</legend><div class="chips"><label class="ck"><input type="radio" name="lieu" value="domicile" data-m="draft.lieu" data-r'+(d.lieu==='domicile'?' checked':'')+'>À domicile</label><label class="ck"><input type="radio" name="lieu" value="travail" data-m="draft.lieu" data-r'+(d.lieu==='travail'?' checked':'')+'>Sur mon lieu de travail</label></div></fieldset>'+
+   '<div class="fgrid">'+fld('d-adr',d.lieu==='travail'?'Adresse du lieu de travail':'Adresse du domicile',inp('d-adr','draft.adresse',d.adresse,'type="text" autocomplete="street-address"'),'','full')+
+   fld('d-ville','Commune',sel('d-ville','draft.ville',Object.keys(VILLES).map(function(x){return[x,x]}),d.ville))+
+   fld('d-notes','Précisions d’accès (facultatif)','<textarea id="d-notes" data-m="draft.notes" placeholder="Code portail, place de parking, étage…">'+esc(d.notes)+'</textarea>','','full')+'</div>';
+ }else{
+  h+='<div class="fgrid">'+fld('c-nom','Nom et prénom',inp('c-nom','contact.nom',S.contact.nom,'type="text" autocomplete="name"'))+
+   fld('c-mail','E-mail',inp('c-mail','contact.email',S.contact.email,'type="email" autocomplete="email" placeholder="vous@exemple.fr"'))+
+   fld('c-tel','Téléphone',inp('c-tel','contact.tel',S.contact.tel,'type="tel" autocomplete="tel" placeholder="06 12 34 56 78"'),'Transmis au professionnel pour le jour J')+'</div>'+
+   '<div class="note test">'+ic('info')+'<span><b>Mode test</b> — aucun paiement réel. En production, le paiement passe par un prestataire certifié (carte, 3-D Secure).</span></div>'+
+   '<div class="fgrid">'+fld('k-num','Numéro de carte',inp('k-num','card.num',card.num,'type="text" inputmode="numeric" autocomplete="off" placeholder="4242 4242 4242 4242"'),'','full')+
+   fld('k-exp','Expiration (MM/AA)',inp('k-exp','card.exp',card.exp,'type="text" inputmode="numeric" autocomplete="off" placeholder="12/29"'))+
+   fld('k-cvc','Cryptogramme',inp('k-cvc','card.cvc',card.cvc,'type="text" inputmode="numeric" autocomplete="off" placeholder="123"'))+'</div>'+
+   '<div><button type="button" class="btn" data-a="testcard">Remplir avec la carte de test</button></div>';
+ }
+ h+='<div class="actions" style="justify-content:space-between">'+(st>1?'<button type="button" class="btn" data-a="prev">'+ic('back')+'Retour</button>':'<span></span>')+
+  '<button type="submit" class="btn primary" id="next"'+(paying?' disabled':'')+'>'+(st<3?'Continuer':paying?'Paiement en cours…':ic('lock')+'Payer '+eur(tot)+' (mode test)')+'</button></div></form>';
+ h+='<aside class="card sum"><h2 style="margin-bottom:12px">Récapitulatif</h2><dl><div><dt>Professionnel</dt><dd>'+esc(p.nom)+'</dd></div><div><dt>Prestation</dt><dd>'+esc(s.nom)+'</dd></div><div><dt>Durée estimée</dt><dd>'+dur(s.duree)+'</dd></div>'+
+  (d.date&&d.slot?'<div><dt>Créneau</dt><dd>'+fd(d.date)+' à '+d.slot+'</dd></div>':'')+
+  '<div><dt>Tarif de base</dt><dd class="num">'+eur(s.prix)+'</dd></div><div><dt>Supplément '+esc(v.l.toLowerCase())+'</dt><dd class="num">'+eur(v.s)+'</dd></div><div><dt>Déplacement</dt><dd>Inclus</dd></div><div><dt>Frais de service</dt><dd class="num">0 €</dd></div>'+
+  '<div class="tot"><dt>Total à payer</dt><dd class="num">'+eur(tot)+'</dd></div></dl><p class="small muted" style="margin-top:12px">'+ic('lock')+' Le montant est bloqué à la réservation et versé au professionnel seulement une fois la prestation réalisée. Annulation gratuite avant l’intervention.</p></aside></div>';
+ return h;
+}
+function payLine(b){
+ var a=b.statut;if(a==='refusee'||a==='annulee')return '<p class="small muted">'+ic('lock')+' Paiement de '+eur(b.total)+' remboursé intégralement (simulation).</p>';
+ var i=a==='attente'?1:a==='confirmee'?2:3,n=['Paiement bloqué','Confirmée par le pro','Réalisée · pro payé'];
+ return '<ol class="steps" style="margin:0">'+n.map(function(t,k){return '<li class="'+(k<i?'done':'')+'">'+t+'</li>'}).join('')+'</ol>';
+}
+function vConfirm(){
+ var b=bk(S.last);if(!b)return vMine();var p=pro(b.proId);
+ return '<div class="two"><section class="card stack"><div><span class="badge b-ok">'+ic('check')+'Paiement accepté (mode test)</span><h1 style="font-size:26px;margin-top:10px">Réservation enregistrée</h1><p class="muted">Référence <b class="wrap" style="color:var(--ink)">'+b.ref+'</b> — '+esc(p.nom)+' a été prévenu et doit confirmer le créneau.</p></div>'+
+  '<div class="sum"><dl><div><dt>Prestation</dt><dd>'+esc(b.svc)+' · '+esc(veh(b.veh).l)+'</dd></div><div><dt>Date</dt><dd>'+fd(b.date,1)+' à '+b.slot+'</dd></div><div><dt>Lieu</dt><dd>'+(b.lieu==='travail'?'Lieu de travail':'Domicile')+' — '+esc(b.adresse)+'</dd></div><div class="tot"><dt>Montant bloqué</dt><dd class="num">'+eur(b.total)+'</dd></div></dl></div>'+payLine(b)+
+  '<div class="actions noprint"><button type="button" class="btn primary" data-a="go" data-v="mine">Mes réservations</button><button type="button" class="btn" data-a="print">'+ic('print')+'Imprimer le récapitulatif</button></div></section>'+
+  '<aside class="card stack noprint"><h2>Et côté professionnel ?</h2><p class="muted">La demande vient d’arriver dans son espace. Passez de l’autre côté pour la confirmer, puis clôturer la prestation et déclencher le versement.</p><button type="button" class="btn" data-a="seepro" data-id="'+b.proId+'">'+ic('brief')+'Ouvrir l’espace de '+esc(p.nom)+'</button></aside></div>';
+}
+function vMine(){
+ var f=S.mineF,l=S.bookings.filter(function(b){return b.mine}).filter(function(b){return f==='all'||(f==='next'?(b.statut==='attente'||b.statut==='confirmee'):b.statut==='terminee')}).sort(function(a,b){return a.date<b.date?1:-1});
+ var h='<div class="page-h"><div><h1>Mes réservations</h1><p class="muted">Compte de '+esc(ME)+'</p></div><button type="button" class="btn primary" data-a="go" data-v="search">'+ic('plus')+'Nouvelle réservation</button></div>'+
+  '<div class="chips" role="group" aria-label="Filtrer" style="margin-bottom:16px">'+[['all','Toutes'],['next','À venir'],['done','Terminées']].map(function(c){return '<button type="button" class="chip" data-a="minef" data-v="'+c[0]+'" aria-pressed="'+(f===c[0])+'">'+c[1]+'</button>'}).join('')+'</div>';
+ if(!l.length)return h+'<div class="empty">Aucune réservation dans cette catégorie.</div>';
+ return h+'<div class="bkgrid">'+l.map(function(b){var p=pro(b.proId),s=STAT[b.statut];
+  return '<article class="card stack" style="gap:12px"><div class="rq-h"><span class="badge '+s[1]+'">'+s[0]+'</span><span class="small muted wrap">'+b.ref+'</span></div><div><h2 class="wrap">'+esc(b.svc)+'</h2><p class="muted"><button type="button" class="lnk" data-a="pro" data-id="'+p.id+'">'+esc(p.nom)+'</button></p></div>'+
+   '<div class="meta"><span>'+ic('cal')+fd(b.date,1)+' à '+b.slot+'</span><span>'+ic('pin')+esc(b.adresse)+'</span></div>'+payLine(b)+
+   '<div class="p-foot"><div class="price">'+eur(b.total)+'</div><div class="actions">'+
+   ((b.statut==='attente'||b.statut==='confirmee')?'<button type="button" class="btn danger" data-a="cancel" data-id="'+b.id+'">Annuler</button>':'')+
+   (b.statut==='terminee'?(b.avis?'<span class="badge b-ok">'+ic('check')+'Avis publié</span>':'<button type="button" class="btn primary" data-a="review" data-id="'+b.id+'">Laisser un avis</button>'):'')+
+   '</div></div></article>'}).join('')+'</div>';
+}
+
+/* ---------- espace professionnel ---------- */
+function rqItem(b,btns){return '<div class="rq"><div class="rq-h"><b>'+fd(b.date)+' · '+b.slot+'</b><span class="num"><b>'+eur(b.total)+'</b></span></div><div>'+esc(b.svc)+' <span class="muted">· '+esc(veh(b.veh).l)+' · '+dur(b.duree)+'</span></div><div class="meta small"><span>'+ic('user')+esc(b.client)+'</span><span>'+ic('pin')+(b.lieu==='travail'?'Lieu de travail — ':'Domicile — ')+esc(b.adresse)+'</span></div>'+(b.notes?'<p class="small muted">« '+esc(b.notes)+' »</p>':'')+'<div class="actions">'+btns+'</div></div>'}
+function vPro(){
+ var p=pro(S.proId),t=S.proTab,mine=S.bookings.filter(function(b){return b.proId===p.id});
+ var h='<div class="page-h"><div><h1 class="wrap">'+esc(p.nom)+'</h1><p class="muted">Espace professionnel · '+esc(p.gerant)+' '+badgeV()+'</p></div><button type="button" class="btn" data-a="seepublic">'+ic('eye')+'Voir ma fiche publique</button></div>';
+ if(t==='dash'){
+  var att=mine.filter(function(b){return b.statut==='attente'}).sort(function(a,b){return (a.date+a.slot)<(b.date+b.slot)?-1:1}),
+      conf=mine.filter(function(b){return b.statut==='confirmee'}).sort(function(a,b){return (a.date+a.slot)<(b.date+b.slot)?-1:1}),
+      done=mine.filter(function(b){return b.statut==='terminee'}).sort(function(a,b){return a.date<b.date?1:-1}),
+      net=done.reduce(function(a,b){return a+r2(b.total*(1-COM))},0),hold=att.concat(conf).reduce(function(a,b){return a+b.total},0);
+  h+='<div class="kpis">'+[['Demandes à confirmer',att.length],['Interventions à venir',conf.length],['Versé sur 30 jours',eur(r2(net))],['En attente de prestation',eur(hold)],['Note moyenne',rtxt(p)+' / 5'],['Vues de la fiche (30 j)',p.vues]].map(function(k){return '<div class="card kpi"><div class="k-l">'+k[0]+'</div><div class="k-v num">'+k[1]+'</div></div>'}).join('')+'</div><div class="cols">';
+  h+='<section class="card"><div class="card-h"><h2>Demandes à confirmer</h2><span class="badge b-warn">'+att.length+'</span></div>'+(att.length?att.map(function(b){return rqItem(b,'<button type="button" class="btn primary" data-a="accept" data-id="'+b.id+'">'+ic('check')+'Confirmer</button><button type="button" class="btn danger" data-a="refuse" data-id="'+b.id+'">Refuser</button>')}).join(''):'<div class="empty">Aucune demande en attente.</div>')+'</section>';
+  h+='<section class="card"><div class="card-h"><h2>Planning à venir</h2><span class="badge b-info">'+conf.length+'</span></div>'+(conf.length?conf.map(function(b){return rqItem(b,'<button type="button" class="btn" data-a="done" data-id="'+b.id+'">'+ic('check')+'Prestation terminée</button>')}).join('')+'<p class="small muted" style="margin-top:10px">Dans cette démonstration, vous pouvez clôturer une prestation sans attendre sa date.</p>':'<div class="empty">Aucune intervention confirmée.</div>')+'</section>';
+  h+='<section class="card span2"><div class="card-h"><h2>Versements</h2><span class="small muted">Automatiques après chaque prestation · commission '+Math.round(COM*100)+' %</span></div>'+(done.length?'<div class="tblw"><table style="min-width:560px"><thead><tr><th>Réf.</th><th>Date</th><th>Client</th><th>Payé</th><th>Commission</th><th>Net versé</th><th>Statut</th></tr></thead><tbody>'+done.map(function(b){var n=r2(b.total*(1-COM));return '<tr><td>'+b.ref+'</td><td>'+fd(b.date)+'</td><td>'+esc(b.client)+'</td><td class="num">'+eur(b.total)+'</td><td class="num">'+eur(r2(b.total-n))+'</td><td class="num"><b>'+eur(n)+'</b></td><td><span class="badge b-ok">Versé</span></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Aucun versement pour le moment.</div>')+'</section></div>';
+ }else if(t==='svc'){
+  h+='<section class="card"><div class="card-h"><h2>Prestations et tarifs</h2><button type="button" class="btn primary" data-a="svcnew">'+ic('plus')+'Ajouter une prestation</button></div>'+
+   (p.services.length?'<div class="tblw"><table style="min-width:640px"><thead><tr><th>Prestation</th><th>Type</th><th>Durée</th>'+VEH.map(function(v){return '<th>'+esc(v.l)+'</th>'}).join('')+'<th><span class="sr">Actions</span></th></tr></thead><tbody>'+p.services.map(function(s){return '<tr><td><b>'+esc(s.nom)+'</b><div class="small muted">'+esc(s.desc)+'</div></td><td>'+CATS[s.cat]+'</td><td>'+dur(s.duree)+'</td>'+VEH.map(function(v){return '<td class="num">'+eur(s.prix+v.s)+'</td>'}).join('')+'<td><div class="actions"><button type="button" class="xbtn" data-a="svcedit" data-id="'+s.id+'" aria-label="Modifier '+esc(s.nom)+'">'+ic('edit')+'</button><button type="button" class="xbtn" data-a="svcdel" data-id="'+s.id+'" aria-label="Supprimer '+esc(s.nom)+'">'+ic('trash')+'</button></div></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Ajoutez votre première prestation pour apparaître dans les recherches.</div>')+
+   '<p class="small muted" style="margin-top:12px">Vous fixez le tarif de base (citadine). Les suppléments par gabarit sont appliqués et affichés au client avant paiement.</p></section>';
+ }else if(t==='cal'){
+  var ord=[1,2,3,4,5,6,0],n=ord.reduce(function(a,d){return a+(p.dispo[d]||[]).length},0);
+  h+='<div class="two"><section class="card"><div class="card-h"><h2>Semaine type</h2><span class="badge b-acc">'+n+' créneaux ouverts</span></div><p class="muted small" style="margin-bottom:12px">Touchez une case pour ouvrir ou fermer un créneau. La modification est immédiatement visible par les clients.</p><div class="cal-w"><div class="cal"><span></span>'+ord.map(function(d){return '<span class="hd">'+DAYS[d]+'</span>'}).join('')+
+   SLOTS.map(function(s){return '<span class="hr">'+s+'</span>'+ord.map(function(d){var on=(p.dispo[d]||[]).indexOf(s)>-1;return '<button type="button" id="c'+d+s.slice(0,2)+'" data-a="tog" data-d="'+d+'" data-t="'+s+'" aria-pressed="'+on+'" aria-label="'+DAYS[d]+' '+s+'">'+(on?ic('check'):'')+'</button>'}).join('')}).join('')+'</div></div></section>'+
+   '<aside class="card"><h2 style="margin-bottom:8px">Créneaux déjà réservés</h2>'+(function(){var l=mine.filter(function(b){return b.statut==='attente'||b.statut==='confirmee'}).sort(function(a,b){return (a.date+a.slot)<(b.date+b.slot)?-1:1});return l.length?l.map(function(b){return '<div class="rq"><div class="rq-h"><b>'+fd(b.date)+' · '+b.slot+'</b><span class="badge '+STAT[b.statut][1]+'">'+STAT[b.statut][0]+'</span></div><span class="small muted">'+esc(b.svc)+' — '+esc(b.client)+'</span></div>'}).join(''):'<p class="muted">Aucun.</p>'})()+'<p class="small muted" style="margin-top:10px">Un créneau réservé est automatiquement retiré de votre fiche.</p></aside></div>';
+ }else{
+  var filled=[p.nom,p.gerant,p.desc.length>40,p.services.length,p.tags.length,Object.keys(p.dispo).some(function(k){return p.dispo[k].length})].filter(Boolean).length,pct=Math.round(filled/6*100);
+  h+='<div class="two"><form class="card stack" data-form="profil" novalidate><h2>Profil professionnel</h2><div class="fgrid">'+
+   fld('pf-nom','Nom commercial',inp('pf-nom','',p.nom))+fld('pf-ger','Responsable',inp('pf-ger','',p.gerant))+
+   fld('pf-ville','Commune de départ','<select id="pf-ville">'+Object.keys(VILLES).map(function(v){return '<option'+(v===p.ville?' selected':'')+'>'+v+'</option>'}).join('')+'</select>')+
+   fld('pf-ray','Rayon d’intervention (km)',inp('pf-ray','',p.rayon,'type="number" min="1" max="40" inputmode="numeric"'))+
+   fld('pf-desc','Présentation','<textarea id="pf-desc" rows="4">'+esc(p.desc)+'</textarea>','Affichée dans les résultats de recherche.','full')+'</div>'+
+   '<fieldset><legend>Équipement et méthodes</legend><div class="chips">'+TAGS.map(function(t){return '<label class="ck"><input type="checkbox" name="tag" value="'+esc(t)+'"'+(p.tags.indexOf(t)>-1?' checked':'')+'>'+t+'</label>'}).join('')+'</div></fieldset>'+
+   '<div><button type="submit" class="btn primary">Enregistrer le profil</button></div></form>'+
+   '<aside class="stack"><section class="card"><h2 style="margin-bottom:8px">Profil complété à '+pct+' %</h2><div class="bar" role="img" aria-label="'+pct+' %"><i style="width:'+pct+'%"></i></div><p class="small muted" style="margin-top:8px">Un profil complet remonte mieux dans les résultats.</p></section>'+
+   '<section class="card"><h2 style="margin-bottom:8px">Vérifications</h2><ul class="checks"><li>'+ic('check')+'<span>Pièce d’identité contrôlée</span></li><li>'+ic('check')+'<span>SIRET actif vérifié</span></li><li>'+ic('check')+'<span>Assurance RC professionnelle valide</span></li></ul><p class="small muted">Le badge « Vérifié » est attribué après contrôle des justificatifs par l’équipe de la plateforme.</p></section></aside></div>';
+ }
+ return h;
+}
+
+/* ---------- rendu ---------- */
+function render(){
+ var act=document.activeElement&&document.activeElement.id,c=S.role==='client',nav;
+ if(c){var up=S.bookings.filter(function(b){return b.mine&&(b.statut==='attente'||b.statut==='confirmee')}).length,sv=S.view==='mine'||S.view==='confirm'?'mine':'search';
+  nav='<button type="button" class="tab" data-a="go" data-v="search"'+(sv==='search'?' aria-current="page"':'')+'>'+ic('search')+'Trouver un pro</button><button type="button" class="tab" data-a="go" data-v="mine"'+(sv==='mine'?' aria-current="page"':'')+'>'+ic('cal')+'Mes réservations<span class="cnt">'+up+'</span></button>';
+ }else{var pa=S.bookings.filter(function(b){return b.proId===S.proId&&b.statut==='attente'}).length;
+  nav=[['dash','Tableau de bord',pa],['svc','Prestations et tarifs'],['cal','Disponibilités'],['prof','Profil']].map(function(t){return '<button type="button" class="tab" data-a="ptab" data-v="'+t[0]+'"'+(S.proTab===t[0]?' aria-current="page"':'')+'>'+t[1]+(t[2]!=null?'<span class="cnt">'+t[2]+'</span>':'')+'</button>'}).join('')}
+ var v=S.view,body=v==='pro'?vPro():v==='profile'?vProfile():v==='compare'?vCompare():v==='book'?vBook():v==='confirm'?vConfirm():v==='mine'?vMine():vSearch();
+ $('#app').innerHTML='<header class="top"><div class="brand"><span class="mark">'+ic('drop')+'</span>Lustréo</div><nav id="nav" aria-label="Navigation principale">'+nav+'</nav><div class="seg" role="group" aria-label="Espace"><button type="button" data-a="role" data-v="client" aria-pressed="'+c+'">'+ic('user')+'Particulier</button><button type="button" data-a="role" data-v="pro" aria-pressed="'+!c+'">'+ic('brief')+'Professionnel</button></div></header><main id="main">'+body+'</main>';
+ var key=v+(v==='pro'?S.proTab:'')+(v==='book'?S.draft.step:'')+(v==='profile'?S.cur:'');
+ if(key!==lastView){window.scrollTo(0,0);lastView=key}
+ else if(act){var el=document.getElementById(act);if(el)el.focus({preventScroll:true})}
+ save();
+}
+function go(v){S.view=v;render()}
+
+/* ---------- modales ---------- */
+var dlg=$('#dlg');
+function openDlg(html){dlg.innerHTML='<div class="dlg">'+html+'</div>';if(!dlg.open)dlg.showModal()}
+function dlgHead(t){return '<div class="dlg-h"><h2 id="dlg-t">'+t+'</h2><button type="button" class="xbtn" data-a="close" aria-label="Fermer">'+ic('x')+'</button></div>'}
+function reviewDlg(){var b=bk(rv.id);
+ openDlg(dlgHead('Votre avis')+'<p class="muted">'+esc(b.svc)+' — '+esc(pro(b.proId).nom)+', '+fd(b.date,1)+'</p><form data-form="review" class="stack" novalidate><fieldset><legend>Note</legend><div class="rate">'+[1,2,3,4,5].map(function(n){return '<button type="button" data-a="rate" data-n="'+n+'" id="rt'+n+'" aria-pressed="'+(n<=rv.n)+'" aria-label="'+n+' étoile'+(n>1?'s':'')+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+STAR+'</svg></button>'}).join('')+'</div><span class="err" id="rate-e" role="alert"></span></fieldset>'+
+  fld('rv-t','Commentaire','<textarea id="rv-t" rows="4" placeholder="Ponctualité, résultat, contact…">'+esc(rv.t)+'</textarea>')+'<div class="actions" style="justify-content:flex-end"><button type="button" class="btn" data-a="close">Annuler</button><button type="submit" class="btn primary">Publier l’avis</button></div></form>');
+}
+function svcDlg(s){
+ openDlg(dlgHead(s?'Modifier la prestation':'Nouvelle prestation')+'<form data-form="svc" data-id="'+(s?s.id:'')+'" class="stack" novalidate><div class="fgrid">'+
+  fld('sv-nom','Intitulé',inp('sv-nom','',s?s.nom:''),'','full')+
+  fld('sv-cat','Type','<select id="sv-cat">'+Object.keys(CATS).map(function(k){return '<option value="'+k+'"'+(s&&s.cat===k?' selected':'')+'>'+CATS[k]+'</option>'}).join('')+'</select>')+
+  fld('sv-dur','Durée (minutes)',inp('sv-dur','',s?s.duree:60,'type="number" min="15" step="5" inputmode="numeric"'))+
+  fld('sv-prix','Tarif de base (€)',inp('sv-prix','',s?s.prix:'','type="number" min="1" step="1" inputmode="decimal"'),'Tarif citadine, déplacement inclus')+
+  fld('sv-desc','Description','<textarea id="sv-desc" rows="3">'+esc(s?s.desc:'')+'</textarea>','','full')+'</div><div class="actions" style="justify-content:flex-end"><button type="button" class="btn" data-a="close">Annuler</button><button type="submit" class="btn primary">Enregistrer</button></div></form>');
+}
+
+/* ---------- événements ---------- */
+function startBook(id,sid,d,t){var p=pro(id);if(!p.services.length){toast('Ce professionnel n’a pas encore publié de prestation.');return}
+ S.draft={proId:id,serviceId:sid||p.services[0].id,veh:S.q.veh,date:d||(S.q.date&&free(p,S.q.date).length?S.q.date:''),slot:t||'',lieu:'domicile',adresse:S.q.adresse,ville:S.q.ville,notes:'',step:1};go('book')}
+document.addEventListener('click',function(e){
+ var el=e.target.closest('[data-a]');if(!el)return;var a=el.dataset.a,id=el.dataset.id,b,p;
+ if(a==='reset'){try{localStorage.removeItem(KEY)}catch(x){}S=seed();card={num:'',exp:'',cvc:''};paying=false;lastView='';if(dlg.open)dlg.close();render();toast('Démo réinitialisée.')}
+ else if(a==='role'){S.role=el.dataset.v;S.view=S.role==='pro'?'pro':'search';render()}
+ else if(a==='go')go(el.dataset.v)
+ else if(a==='ptab'){S.proTab=el.dataset.v;render()}
+ else if(a==='cat'){S.q.cat=el.dataset.v;render()}
+ else if(a==='clearq'){S.q.cat='';S.q.date='';render()}
+ else if(a==='cmpclear'){S.compare=[];render()}
+ else if(a==='pro'){S.cur=id;S.role='client';go('profile')}
+ else if(a==='book')startBook(id,el.dataset.s,el.dataset.d,el.dataset.t)
+ else if(a==='day'){S.draft.date=el.dataset.d;S.draft.slot='';render()}
+ else if(a==='slot'){S.draft.slot=el.dataset.t;render()}
+ else if(a==='prev'){S.draft.step--;render()}
+ else if(a==='testcard'){card={num:'4242 4242 4242 4242',exp:'12/29',cvc:'123'};render()}
+ else if(a==='print')window.print()
+ else if(a==='minef'){S.mineF=el.dataset.v;render()}
+ else if(a==='cancel'){b=bk(id);if(window.confirm('Annuler la réservation '+b.ref+' ? Vous serez remboursé intégralement.')){b.statut='annulee';render();toast('Réservation annulée — remboursement de '+eur(b.total)+' (simulation).')}}
+ else if(a==='review'){rv={id:id,n:0,t:''};reviewDlg()}
+ else if(a==='rate'){rv.t=$('#rv-t').value;rv.n=+el.dataset.n;reviewDlg();$('#rt'+rv.n).focus()}
+ else if(a==='close')dlg.close()
+ else if(a==='seepro'){S.proId=id;S.role='pro';S.proTab='dash';go('pro')}
+ else if(a==='seepublic'){S.cur=S.proId;S.role='client';go('profile')}
+ else if(a==='accept'){b=bk(id);b.statut='confirmee';render();toast('Réservation confirmée — e-mail envoyé à '+b.client+' (simulation).')}
+ else if(a==='refuse'){b=bk(id);if(window.confirm('Refuser la demande de '+b.client+' ? Le client sera remboursé.')){b.statut='refusee';render();toast('Demande refusée — client remboursé (simulation).')}}
+ else if(a==='done'){b=bk(id);b.statut='terminee';render();toast('Prestation clôturée — versement de '+eur(r2(b.total*(1-COM)))+' déclenché (simulation).')}
+ else if(a==='svcnew')svcDlg(null)
+ else if(a==='svcedit')svcDlg(pro(S.proId).services.filter(function(s){return s.id===id})[0])
+ else if(a==='svcdel'){p=pro(S.proId);if(window.confirm('Supprimer cette prestation ?')){p.services=p.services.filter(function(s){return s.id!==id});render();toast('Prestation supprimée.')}}
+ else if(a==='tog'){p=pro(S.proId);var d=el.dataset.d,t=el.dataset.t,l=p.dispo[d]||(p.dispo[d]=[]),i=l.indexOf(t);if(i>-1)l.splice(i,1);else{l.push(t);l.sort()}render()}
+});
+function setPath(path,val){var k=path.split('.');if(k[0]==='card')card[k[1]]=val;else S[k[0]][k[1]]=val}
+document.addEventListener('input',function(e){var el=e.target;if(el.dataset&&el.dataset.m&&el.type!=='radio')setPath(el.dataset.m,el.value)});
+document.addEventListener('change',function(e){
+ var el=e.target;
+ if(el.dataset.cmp){var id=el.dataset.cmp,i=S.compare.indexOf(id);if(i>-1)S.compare.splice(i,1);else if(S.compare.length>=3)toast('Vous pouvez comparer 3 profils au maximum.');else S.compare.push(id);render();var n=$('[data-cmp="'+id+'"]');if(n)n.focus({preventScroll:true});return}
+ if(el.name==='svc'){S.draft.serviceId=el.value;render();var r=$('input[name=svc]:checked');if(r)r.focus({preventScroll:true});return}
+ if(el.dataset.m){if(el.type==='radio'){if(el.checked)setPath(el.dataset.m,el.value)}else setPath(el.dataset.m,el.value);
+  if(el.hasAttribute('data-r')){render();if(el.type==='radio'){var x=$('input[name="'+el.name+'"]:checked');if(x)x.focus({preventScroll:true})}}else save()}
+});
+document.addEventListener('submit',function(e){
+ e.preventDefault();var f=e.target.dataset.form,p,b;
+ if(f==='search'){render();var r=$('#res');if(r)r.scrollIntoView({behavior:'smooth',block:'start'})}
+ else if(f==='step'){var d=S.draft;
+  if(d.step===1){d.step=2;render()}
+  else if(d.step===2){var ok=!!(d.date&&d.slot);$('#slot-e').textContent=ok?'':'Choisissez un jour et une heure d’arrivée.';
+   var ok2=validate([['d-adr',function(v){return v.length>5},'Indiquez l’adresse complète d’intervention.']]);if(ok&&ok2){d.step=3;render()}else if(!ok)$('.chip[data-a=day]:not(:disabled)').focus()}
+  else{if(paying)return;
+   if(!validate([['c-nom',req,'Indiquez votre nom.'],['c-mail',function(v){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)},'Adresse e-mail invalide.'],['c-tel',function(v){return /^0\d{9}$/.test(v.replace(/[\s.]/g,''))},'Numéro à 10 chiffres attendu.'],
+    ['k-num',function(v){return /^\d{16}$/.test(v.replace(/\s/g,''))},'16 chiffres attendus (utilisez la carte de test).'],['k-exp',function(v){return /^(0[1-9]|1[0-2])\/\d{2}$/.test(v)},'Format MM/AA.'],['k-cvc',function(v){return /^\d{3}$/.test(v)},'3 chiffres.']]))return;
+   paying=true;render();
+   setTimeout(function(){paying=false;if(!S.draft)return;var pr=pro(d.proId),s=pr.services.filter(function(x){return x.id===d.serviceId})[0]||pr.services[0],v=veh(d.veh);S.seq++;
+    b={id:'b'+S.seq,ref:'LV-'+S.seq,proId:pr.id,svc:s.nom,duree:s.duree,prix:s.prix,veh:d.veh,supp:v.s,total:s.prix+v.s,date:d.date,slot:d.slot,statut:'attente',client:S.contact.nom.trim()||ME,adresse:d.adresse.trim()+', '+d.ville,lieu:d.lieu,mine:true,avis:false,notes:d.notes.trim()};
+    S.bookings.push(b);S.last=b.id;S.draft=null;card={num:'',exp:'',cvc:''};S.view='confirm';render();toast('Paiement test accepté — e-mail de confirmation envoyé (simulation).')},900)}
+ }
+ else if(f==='review'){if(!rv.n){$('#rate-e').textContent='Choisissez une note de 1 à 5.';$('#rt1').focus();return}
+  if(!validate([['rv-t',function(v){return v.length>=10},'Quelques mots de plus (10 caractères minimum).']]))return;
+  b=bk(rv.id);p=pro(b.proId);var n=b.client.split(' ');p.reviews.unshift({a:n[0]+(n[1]?' '+n[1][0]+'.':''),n:rv.n,d:iso(0),t:$('#rv-t').value.trim(),p:b.svc});b.avis=true;dlg.close();render();toast('Merci ! Votre avis vérifié est publié sur la fiche.')}
+ else if(f==='svc'){if(!validate([['sv-nom',function(v){return v.length>=4},'Intitulé trop court.'],['sv-dur',function(v){return +v>=15&&+v<=600},'Entre 15 et 600 minutes.'],['sv-prix',function(v){return +v>=1&&+v<=2000},'Indiquez un tarif en euros.']]))return;
+  p=pro(S.proId);var id=e.target.dataset.id,o={nom:$('#sv-nom').value.trim(),cat:$('#sv-cat').value,duree:Math.round(+$('#sv-dur').value),prix:r2(+$('#sv-prix').value),desc:$('#sv-desc').value.trim()};
+  if(id){var s0=p.services.filter(function(x){return x.id===id})[0];for(var k in o)s0[k]=o[k]}else{S.seq++;o.id=p.id+'n'+S.seq;p.services.push(o)}
+  dlg.close();render();toast(id?'Prestation mise à jour.':'Prestation ajoutée — visible dans les recherches.')}
+ else if(f==='profil'){if(!validate([['pf-nom',function(v){return v.length>=3},'Nom commercial requis.'],['pf-ger',req,'Nom du responsable requis.'],['pf-ray',function(v){return +v>=1&&+v<=40},'Entre 1 et 40 km.'],['pf-desc',function(v){return v.length>=30},'Présentez votre activité en 30 caractères minimum.']]))return;
+  p=pro(S.proId);p.nom=$('#pf-nom').value.trim();p.gerant=$('#pf-ger').value.trim();p.ville=$('#pf-ville').value;p.rayon=Math.round(+$('#pf-ray').value);p.desc=$('#pf-desc').value.trim();
+  var c=VILLES[p.ville];p.x=c[0];p.y=c[1];p.tags=[].map.call(document.querySelectorAll('input[name=tag]:checked'),function(i){return i.value});render();toast('Profil enregistré.')}
+});
+dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.close()});
+
+S=load();if(S.view==='book'&&!S.draft)S.view='search';
+render();
+})();
+</script>
 </body>
 </html>
