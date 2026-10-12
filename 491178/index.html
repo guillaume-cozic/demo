@@ -2,20 +2,868 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Carte collaborative des flans</title>
+<meta name="description" content="Carte gourmande et collaborative des flans pâtissiers : repères regroupés, filtres, fiches avec avis sur quatre dimensions, contribution en trois étapes sans compte, classements lisibles, carnet « À goûter » et points de contributeur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#FAF5EA;--panel:#FFFFFF;--panel-2:#F4ECDC;--ink:#2A1D10;--muted:#6B5A47;--line:#E6DAC4;--line-2:#CDBB9D;
+  --accent:#8A4A12;--accent-ink:#FFFFFF;--accent-soft:#F6E3C2;--accent-text:#7A3F0C;--star:#B36B00;--band:#FBEFD0;
+  --ok:#1F6B43;--ok-soft:#DDF0E3;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#2B5480;--info-soft:#E2EBF5;--warn:#8A4B00;--warn-soft:#FBEBD2;
+  --sea:#CFE2E8;--land:#F7F0DF;--urban:#EBDDC0;--street:#FFFFFF;--river:#A5CCDA;--coast:#C9B994;--mlabel:#5B4A36;--halo:#F7F0DF;
+  --shadow:0 1px 2px rgba(42,29,16,.06),0 6px 18px rgba(42,29,16,.08);
+  --font:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#15110C;--panel:#1F1911;--panel-2:#2A2218;--ink:#F3EADB;--muted:#B9A98F;--line:#352B1E;--line-2:#56472F;
+  --accent:#F0B95A;--accent-ink:#2A1A05;--accent-soft:#3A2C14;--accent-text:#F5CB80;--star:#F0B24D;--band:#2E2512;
+  --ok:#73D39C;--ok-soft:#15301F;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--warn:#F0B661;--warn-soft:#352613;
+  --sea:#0E1C22;--land:#241D14;--urban:#33291B;--street:#43361F;--river:#1C3A45;--coast:#4A3D28;--mlabel:#C9B899;--halo:#241D14;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);letter-spacing:-.01em}
+p{margin:0}ul,ol{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13.5px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:-1px}
+svg.i{width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.star{width:16px;height:16px;flex:none;fill:var(--star)}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:4px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:9px;padding:0 12px;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.top{display:flex;align-items:center;gap:8px 16px;padding:6px clamp(12px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;min-height:44px;font-family:var(--head);font-weight:700;font-size:21px;min-width:0}
+.brand small{font:500 13px var(--font);color:var(--muted)}
+.mark{width:36px;height:36px;border-radius:11px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.mark svg{width:22px;height:22px}
+#nav{display:none;gap:4px;margin-left:8px;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:11px;border:0;background:transparent;font-weight:600;color:var(--muted)}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:999px;padding:0 7px;color:var(--ink);font-weight:700}
+.cnt:empty{display:none}
+.sp{margin-left:auto}
+.cta{display:none!important}
+.pts{min-height:44px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--panel-2);border-radius:999px;padding:0 14px;font-weight:700}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.bnav button{border:0;background:none;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:600;color:var(--muted);position:relative;min-width:0}
+.bnav button[aria-current="page"]{color:var(--accent-text)}
+.bnav button.plus svg{background:var(--accent);color:var(--accent-ink);border-radius:50%;width:30px;height:30px;padding:5px}
+.bnav .cnt{position:absolute;top:5px;left:calc(50% + 6px)}
+@media (min-width:900px){#nav{display:flex}.cta{display:inline-flex!important}.bnav{display:none}}
+@media (max-width:420px){.brand small{display:none}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:11px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink)}
+.icon-btn:hover{background:var(--panel-2)}
+.savebtn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.savebtn[aria-pressed="true"] svg{fill:currentColor}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:14px}
+.hint{font-size:13px;color:var(--muted);font-weight:400}
+.err{font-size:13.5px;color:var(--bad);font-weight:600}.err:empty{display:none}
+input[type=text],input[type=email],input[type=date],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:11px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:96px}
+input:disabled{opacity:.5}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;font-weight:600;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 15px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:19px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--panel-2);color:var(--ink)}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-info{background:var(--info-soft);color:var(--info)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500}
+.note.w{background:var(--warn-soft);color:var(--warn)}
+.empty{text-align:center;padding:30px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px;display:grid;gap:12px;justify-items:center}
+.thumb{width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none;display:block;background:var(--panel-2)}
+.thumb svg,.thumb img,.gmain svg,.gmain img{width:100%;height:100%;display:block;object-fit:cover}
+
+/* pages */
+.page{padding:20px clamp(16px,2vw,32px) 100px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:clamp(24px,3vw,32px)}
+.page-h h1:focus{outline:none}
+
+/* carte */
+.mapview{height:calc(100vh - var(--chrome,160px));height:calc(100dvh - var(--chrome,160px));min-height:380px;display:flex;flex-direction:column}
+.mtools{display:flex;gap:8px 12px;flex-wrap:wrap;align-items:flex-start;padding:8px clamp(12px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line)}
+.msearch{display:flex;gap:8px;flex:1 1 320px;min-width:0;flex-wrap:wrap}
+.msearch .inp{position:relative;flex:1;min-width:0}
+.msearch .inp svg{position:absolute;left:12px;top:12px;color:var(--muted)}
+.msearch input{padding-left:40px}
+.msearch .err{flex-basis:100%}
+.mfilters{display:flex;gap:8px;overflow-x:auto;min-width:0;flex:2 1 320px;scrollbar-width:thin}
+.mfilters select{width:auto;flex:none;max-width:200px}
+.mfilters .chip{flex:none;display:inline-flex;align-items:center;gap:6px;border-radius:11px}
+.mbody{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);position:relative}
+.lpanel{position:absolute;inset:0;z-index:5;background:var(--bg);display:none;flex-direction:column;min-width:0;min-height:0}
+.is-list .lpanel{display:flex}
+.lhead{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 14px;padding-right:120px;border-bottom:1px solid var(--line)}
+.lhead select{width:auto}
+.lscroll{overflow-y:auto;flex:1;min-height:0;padding:10px 12px 16px}
+.flist{display:grid;gap:8px}
+.frow{display:flex;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;min-width:0}
+.fmain{display:flex;gap:12px;align-items:center;flex:1;min-width:0;border:0;background:none;padding:0;text-align:left;min-height:64px;border-radius:10px}
+.finfo{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.fmeta{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:center;font-size:14px}
+.fmeta .star{margin-right:-6px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.rk{font-family:var(--head);font-weight:700;font-size:19px;width:30px;text-align:center;flex:none;color:var(--accent-text)}
+.mapbox{position:relative;min-width:0;min-height:0;overflow:hidden}
+.map{position:absolute;inset:0;touch-action:none;cursor:grab;background:var(--sea);overflow:hidden;user-select:none;-webkit-user-select:none}
+.map.drag{cursor:grabbing}
+.msvg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.m-land{fill:var(--land)}.m-urban{fill:var(--urban)}
+.m-coast{fill:none;stroke:var(--coast);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.m-river{fill:none;stroke:var(--river);stroke-width:3;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.m-st,.m-av{fill:none;stroke:var(--street);vector-effect:non-scaling-stroke}
+.m-st{stroke-width:1.5}.m-av{stroke-width:3.5}
+.m-labels,.m-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.m-labels span{position:absolute;left:0;top:0;font-size:12.5px;font-weight:600;color:var(--mlabel);white-space:nowrap;text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 3px var(--halo)}
+.m-layer>*{position:absolute;left:0;top:0;pointer-events:auto}
+.pin{min-width:46px;height:32px;margin:-42px 0 0 -23px;border-radius:16px;border:2px solid var(--panel);background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;padding:0 8px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.pin::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-6px;border:6px solid transparent;border-top:8px solid var(--accent);border-bottom:0}
+.pin::before{content:"";position:absolute;inset:-8px -2px -14px}
+.pin.sv{box-shadow:0 0 0 3px var(--star),0 2px 6px rgba(0,0,0,.3)}
+.pin.sel{background:var(--ink);color:var(--bg);z-index:3;transform-origin:50% 130%}
+.pin.sel::after{border-top-color:var(--ink)}
+.clu{width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid var(--panel);background:var(--ink);color:var(--bg);font-weight:700;font-size:16px;box-shadow:0 0 0 5px color-mix(in srgb,var(--ink) 22%,transparent),0 2px 6px rgba(0,0,0,.3)}
+.me{width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#2F7BEA;border:3px solid #fff;box-shadow:0 0 0 8px rgba(47,123,234,.25);pointer-events:none!important}
+.mpin{width:36px;height:44px;margin:-42px 0 0 -18px;color:var(--accent);pointer-events:none!important}
+.mpin svg{width:36px;height:44px;fill:var(--accent);stroke:var(--panel);stroke-width:1.2}
+.zc{position:absolute;right:10px;top:64px;display:grid;gap:6px;z-index:4}
+.zc button{box-shadow:var(--shadow)}
+.modebtn{position:absolute;right:10px;top:10px;z-index:6;box-shadow:var(--shadow)}
+.preview{position:absolute;left:10px;right:10px;bottom:10px;z-index:4;padding:12px;display:grid;gap:10px;max-height:70%;overflow-y:auto}
+.pv{display:flex;gap:12px;min-width:0}
+.pv .thumb{width:92px;height:92px}
+.pv h3{font-size:18px}
+.pv-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media (min-width:900px){
+  .mbody{grid-template-columns:clamp(340px,28vw,470px) minmax(0,1fr)}
+  .lpanel{position:static;display:flex;border-right:1px solid var(--line)}
+  .lhead{padding-right:14px}
+  .modebtn{display:none}.zc{top:10px}
+  .preview{right:auto;width:420px;left:14px;bottom:14px}
+}
+@media (max-width:520px){.locbtn span{display:none}.locbtn{padding:0;width:44px}}
+
+/* classement / carnet / profil */
+.rfilters{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr));margin-bottom:14px}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));align-items:start}
+.cols .card{display:grid;gap:12px}
+.cols .frow{border-radius:12px;background:var(--panel-2);border-color:transparent}
+details.method{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 16px;margin-bottom:16px}
+details.method summary{min-height:48px;display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
+details.method p{padding-bottom:14px;max-width:90ch}
+.sc{flex:none;text-align:right;font-size:12.5px;color:var(--muted);line-height:1.2}
+.sc b{display:block;font-size:17px;color:var(--ink)}
+.crow{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--panel-2);min-width:0}
+.crow.me-row{outline:2px solid var(--accent)}
+.av{width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700;flex:none}
+.bgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr))}
+.bcard{display:grid;gap:10px;padding:12px}
+.bcard .frow{border:0;padding:0;background:none}
+.prog{height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.big{font-family:var(--head);font-weight:700;font-size:40px;line-height:1}
+.rules li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.rules li:last-child{border:0}
+.ladder li{display:flex;gap:10px;align-items:center;padding:6px 0}
+.ladder .on{font-weight:700;color:var(--accent-text)}
+
+/* contribution */
+.steps{display:flex;gap:8px;margin-bottom:16px}
+.steps li{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:600;color:var(--muted)}
+.steps li b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--panel-2);font-size:13px;flex:none}
+.steps li[aria-current]{border-color:var(--accent);color:var(--ink)}
+.steps li[aria-current] b,.steps li.done b{background:var(--accent);color:var(--accent-ink)}
+.addgrid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:1000px){.addgrid{grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr)}}
+.aform{display:grid;gap:16px}
+.aform h2{font-size:22px}.aform h2:focus{outline:none}
+.two{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))}
+.presults{display:grid;gap:8px}
+.pres{width:100%;display:flex;gap:12px;align-items:center;text-align:left;min-height:56px;padding:8px 12px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel)}
+.pres:hover{background:var(--panel-2)}
+.pres span{display:flex;flex-direction:column;min-width:0;flex:1}
+.pres.man{border-style:dashed;color:var(--accent-text);font-weight:600}
+.miniwrap{position:relative;height:280px;border-radius:14px;overflow:hidden;border:1px solid var(--line-2)}
+.miniwrap .zc{top:10px}
+.choices{display:grid;gap:8px}
+.choice{display:flex;gap:12px;align-items:center;min-height:60px;padding:8px 12px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer;min-width:0}
+.choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.choice input{width:20px;height:20px;accent-color:var(--accent);flex:none;margin:0}
+.choice>span:last-child{display:flex;flex-direction:column;min-width:0}
+.choice .thumb{width:48px;height:48px}
+.ck{display:inline-flex;align-items:center;gap:9px;min-height:44px;cursor:pointer}
+.ck input{width:20px;height:20px;accent-color:var(--accent);margin:0;flex:none}
+.photo{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.photo .thumb{width:84px;height:84px}
+.filebtn{position:relative;overflow:hidden}
+.filebtn:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.rate{display:grid;gap:4px}
+.rate legend{display:flex;flex-direction:column;margin-bottom:2px}
+.rate.sep{border-top:1px dashed var(--line-2);padding-top:14px}
+.stars{display:flex}
+.stars label{position:relative;width:44px;height:44px;display:grid;place-items:center;cursor:pointer;border-radius:10px}
+.stars label svg{width:32px;height:32px;fill:var(--line-2)}
+.stars label.on svg{fill:var(--star)}
+.stars label:has(input:focus-visible){outline:3px solid var(--accent)}
+.recap{display:grid;gap:12px;position:sticky;top:12px}
+.recap dl{margin:0;display:grid;gap:6px}
+.recap dl div{display:flex;justify-content:space-between;gap:12px}
+.recap dt{color:var(--muted)}.recap dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere;min-width:0}
+.ptsbox{background:var(--accent-soft);color:var(--accent-text);border-radius:12px;padding:12px}
+.ptsbox li{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.ptsbox .tot{font-weight:700;font-size:17px;border-top:1px solid color-mix(in srgb,var(--accent) 35%,transparent);margin-top:6px;padding-top:6px}
+.donebox{display:grid;gap:14px;justify-items:center;text-align:center;padding:34px 18px}
+.donebox .okc{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.donebox .okc svg{width:32px;height:32px}
+
+/* fiche */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(20,12,4,.55);display:flex;justify-content:center;align-items:stretch}
+.mdl{background:var(--bg);width:100%;overflow-y:auto;display:flex;flex-direction:column;min-width:0}
+.mh{position:sticky;top:0;z-index:2;background:var(--panel);border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;padding:8px 14px}
+.mh h2{font-size:19px;flex:1;min-width:0;overflow-wrap:anywhere}
+.fbody{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);padding:16px}
+.fleft,.fright{display:grid;gap:14px;align-content:start;min-width:0}
+.gmain{aspect-ratio:16/10;border-radius:16px;overflow:hidden;background:var(--panel-2)}
+.gthumbs{display:flex;gap:8px;overflow-x:auto;padding:3px}
+.gthumbs button{border:2px solid transparent;padding:0;border-radius:12px;background:none;flex:none;width:60px;height:60px;overflow:hidden}
+.gthumbs button[aria-pressed="true"]{border-color:var(--accent)}
+.gthumbs .thumb{width:100%;height:100%;border-radius:0}
+.scores{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:2px 10px;align-items:center}
+.bar .bt{grid-column:1;height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden}
+.bar .bt i{display:block;height:100%;background:var(--star);border-radius:99px}
+.bar .bv{grid-column:2;grid-row:1/3;text-align:right}
+.rev{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;min-width:0}
+.rh{display:flex;gap:10px;align-items:center;min-width:0}
+.rn{display:flex;flex-direction:column;min-width:0;flex:1}
+.rnote{display:inline-flex;gap:4px;align-items:center;font-size:17px}
+.dims{display:flex;flex-wrap:wrap;gap:6px}
+.dims span{font-size:13px;background:var(--panel-2);border-radius:8px;padding:2px 8px}
+.dims .qp{background:var(--info-soft);color:var(--info)}
+.rev .thumb{width:96px;height:72px}
+@media (min-width:900px){
+  .modal{padding:28px;align-items:center}
+  .mdl{width:min(1180px,100%);max-height:100%;border-radius:18px}
+  .fbody{grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:20px}
+}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;z-index:90;display:grid;gap:8px;width:min(92vw,460px);pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:11px 16px;font-weight:600;font-size:14.5px;box-shadow:var(--shadow);text-align:center}
+@media (prefers-reduced-motion:no-preference){.toast{animation:tin .25s ease}}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media print{.demo-band,.top,.bnav,#toasts{display:none}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
+<div class="demo-band" id="band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4.5v4.6h4.6"/></svg>Réinitialiser</button></div>
+<header class="top" id="top">
+  <button type="button" class="brand" data-act="go" data-v="map" aria-label="Flânerie, retour à la carte"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14 20 6.5V14z" fill="currentColor"/><path d="M3 15.5h17v3H3z" fill="currentColor" opacity=".65"/></svg></span><span>Flânerie</span><small>la carte des flans</small></button>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <span class="sp"></span>
+  <button type="button" class="btn primary cta" data-act="add"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter une dégustation</button>
+  <button type="button" class="pts" data-act="go" data-v="me" aria-label="Mes points, ouvrir le profil"><svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg><span id="ptsTop">0</span> pts</button>
+</header>
+<main id="main">
+  <section id="v-map" class="mapview" aria-label="Carte des flans">
+    <div class="mtools">
+      <form class="msearch" id="citySearch" novalidate>
+        <div class="inp"><label class="sr" for="cityq">Rechercher une ville</label><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="cityq" type="search" list="cityList" placeholder="Rechercher une ville…" autocomplete="off" aria-describedby="cityErr"><datalist id="cityList"></datalist></div>
+        <button type="button" class="btn locbtn" data-act="locate" aria-label="Autour de moi (localisation simulée)"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2"/></svg><span>Autour de moi</span></button>
+        <span class="err" id="cityErr" role="alert"></span>
+      </form>
+      <div class="mfilters" id="mfilters"></div>
+    </div>
+    <div class="mbody" id="mbody">
+      <aside class="lpanel" aria-label="Liste des flans">
+        <div class="lhead"><b id="lcount" aria-live="polite"></b>
+          <span><label class="sr" for="lsort">Trier la liste</label><select id="lsort" data-sort><option value="note">Mieux notés</option><option value="n">Plus d’avis</option><option value="price">Moins chers</option><option value="dist">Plus proches</option></select></span>
+        </div>
+        <div class="lscroll"><ul class="flist" id="llist"></ul></div>
+      </aside>
+      <div class="mapbox">
+        <div class="map" id="map"></div>
+        <div class="zc"><button type="button" class="icon-btn" data-act="zoom" data-f="2" aria-label="Zoomer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="icon-btn" data-act="zoom" data-f="0.5" aria-label="Dézoomer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button><button type="button" class="icon-btn" data-act="france" aria-label="Voir toute la France"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
+        <div class="card preview" id="preview" hidden></div>
+      </div>
+      <button type="button" class="btn modebtn" data-act="mode" id="modebtn"></button>
+    </div>
+  </section>
+  <section id="v-rank" class="page" hidden></section>
+  <section id="v-add" class="page" hidden></section>
+  <section id="v-book" class="page" hidden></section>
+  <section id="v-me" class="page" hidden></section>
 </main>
+<nav class="bnav" id="bnav" aria-label="Navigation mobile"></nav>
+<div id="modal" class="modal" hidden><div class="mdl" id="mdl" role="dialog" aria-modal="true" aria-labelledby="fTitle"></div></div>
+<div id="toasts" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='demo-491178';
+var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var f1=function(n){return n.toFixed(1).replace('.',',')};
+var eur=function(n){return n.toFixed(2).replace('.',',')+' €'};
+var clamp=function(v,a,b){return Math.max(a,Math.min(b,v))};
+var norm=function(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim()};
+var cap=function(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s};
+var pad=function(n){return (n<10?'0':'')+n};
+var iso=function(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+var daysAgo=function(n){var d=new Date();d.setDate(d.getDate()-n);return d};
+var toDate=function(s){return new Date(s+'T12:00:00')};
+var fmtDate=function(s){return toDate(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})};
+function ago(s){var n=Math.round((Date.now()-toDate(s).getTime())/864e5);if(n<=0)return 'aujourd’hui';if(n===1)return 'hier';if(n<31)return 'il y a '+n+' jours';if(n<365)return 'il y a '+Math.round(n/30.4)+' mois';return 'il y a plus d’un an'}
+function ageDays(s){return Math.round((Date.now()-toDate(s).getTime())/864e5)}
+
+var IC={map:'<path d="M9 4 3 6.5V20l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4.5a3.5 3.5 0 0 0 3.6 4M16 6h3.5a3.5 3.5 0 0 1-3.6 4M12 13v4M8.5 20h7"/>',plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',book:'<path d="M6 3.5h12v17l-6-4.2-6 4.2z"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.2-4 4.2-5.5 8-5.5s6.8 1.5 8 5.5"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',check:'<path d="m4.5 12.5 5 5 10-11"/>',cam:'<path d="M4 8h3.2l1.6-2.5h6.4L16.8 8H20v11H4z"/><circle cx="12" cy="13.2" r="3.4"/>',share:'<path d="M12 15V3.5M7.5 8 12 3.5 16.5 8M5 12.5V20h14v-7.5"/>',back:'<path d="M14.5 5.5 8 12l6.5 6.5"/>',next:'<path d="M9.5 5.5 16 12l-6.5 6.5"/>',pin:'<path d="M12 21.5s7-6.3 7-11.6a7 7 0 0 0-14 0c0 5.3 7 11.6 7 11.6z"/><circle cx="12" cy="9.8" r="2.4"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6h.01"/>'};
+var ic=function(n){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'};
+var STAR='<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
+
+/* ---------- géographie stylisée ---------- */
+var K=100,KY=146,LON0=-5.6,LAT0=51.4,WW=1420,WH=1372,MAXS=90;
+var wx=function(lon){return (lon-LON0)*K}, wy=function(lat){return (LAT0-lat)*KY};
+var ilon=function(x){return x/K+LON0}, ilat=function(y){return LAT0-y/KY};
+var FR=[[2.4,51.05],[1.85,50.95],[1.4,50.05],[0.1,49.5],[-1.2,49.35],[-1.3,49.68],[-1.9,49.7],[-1.6,48.8],[-1.5,48.6],[-2.0,48.65],[-3.0,48.85],[-4.0,48.7],[-4.75,48.4],[-4.7,48.0],[-4.3,47.8],[-3.4,47.7],[-2.7,47.5],[-2.2,47.25],[-2.1,46.9],[-1.8,46.5],[-1.2,46.15],[-1.05,45.6],[-1.2,44.65],[-1.55,43.5],[-1.8,43.35],[-0.7,42.9],[0.7,42.7],[1.7,42.5],[3.15,42.45],[3.05,42.9],[3.1,43.2],[3.7,43.4],[4.2,43.45],[4.8,43.35],[5.35,43.25],[5.95,43.05],[6.7,43.2],[7.3,43.68],[7.5,43.8],[7.7,44.15],[6.9,44.4],[7.0,45.1],[6.8,45.8],[7.0,45.9],[6.8,46.4],[6.15,46.2],[6.1,46.6],[7.0,47.5],[7.55,47.6],[7.6,48.1],[8.2,48.97],[6.9,49.2],[6.35,49.47],[5.8,49.55],[4.85,49.8],[4.8,50.15],[4.15,49.98],[4.2,50.3],[3.2,50.75],[2.6,50.85]];
+var RIVERS=[[[4.0,45.0],[3.6,46.2],[3.1,47.0],[2.6,47.6],[1.9,47.9],[1.3,47.6],[0.7,47.4],[-0.2,47.38],[-0.55,47.42],[-1.2,47.3],[-1.55,47.2],[-2.2,47.28]],[[4.6,47.7],[3.9,48.3],[3.0,48.4],[2.5,48.8],[2.35,48.855],[2.2,48.9],[1.6,49.1],[1.1,49.44],[0.5,49.45],[0.1,49.45]],[[6.15,46.2],[5.8,45.9],[5.2,45.8],[4.84,45.75],[4.8,45.0],[4.75,44.2],[4.7,43.8],[4.75,43.35]],[[0.7,42.8],[1.0,43.2],[1.44,43.6],[1.0,44.0],[0.3,44.4],[-0.56,44.84],[-0.8,45.2],[-1.05,45.55]]];
+var CITIES=[['Paris',2.35,48.86,1],['Lyon',4.83,45.76,1],['Marseille',5.376,43.302,1],['Bordeaux',-0.58,44.84,1],['Lille',3.06,50.63,1],['Strasbourg',7.75,48.58,1],['Toulouse',1.44,43.6,1],['Nantes',-1.55,47.22,1],['Rennes',-1.68,48.11,1],['Angers',-0.55,47.47,1],['Nice',7.25,43.72,0],['Brest',-4.45,48.4,0],['Tours',0.69,47.39,0],['Dijon',5.04,47.32,0],['Clermont-Ferrand',3.08,45.78,0],['Montpellier',3.88,43.61,0],['Reims',4.03,49.26,0],['Limoges',1.26,45.83,0],['Rouen',1.1,49.44,0],['Orléans',1.9,47.9,0]].map(function(c){return {n:c[0],lon:c[1],lat:c[2],p:c[3]}});
+var CITY={};CITIES.forEach(function(c){CITY[norm(c.n)]=c});
+var mapSeq=0;
+function jit(i){var x=Math.sin(i*12.9898)*43758.5453;return x-Math.floor(x)}
+
+function createMap(el,opt){
+  opt=opt||{};
+  var id='mp'+(++mapSeq);
+  var poly=FR.map(function(p){return wx(p[0]).toFixed(1)+','+wy(p[1]).toFixed(1)}).join(' ');
+  el.innerHTML='<svg class="msvg" preserveAspectRatio="none" aria-hidden="true" focusable="false"><defs><clipPath id="'+id+'"><polygon points="'+poly+'"/></clipPath></defs><polygon class="m-land" points="'+poly+'"/><g clip-path="url(#'+id+')">'+
+    CITIES.map(function(c){return '<circle class="m-urban" cx="'+wx(c.lon).toFixed(1)+'" cy="'+wy(c.lat).toFixed(1)+'" r="'+(c.p?9:5)+'"/>'}).join('')+
+    '<g transform="rotate(14)"><path class="m-st" d=""/><path class="m-av" d=""/></g>'+
+    RIVERS.map(function(r){return '<polyline class="m-river" points="'+r.map(function(p){return wx(p[0]).toFixed(1)+','+wy(p[1]).toFixed(1)}).join(' ')+'"/>'}).join('')+
+    '</g><polygon class="m-coast" points="'+poly+'"/></svg><div class="m-labels" aria-hidden="true"></div><div class="m-layer"></div>';
+  var svg=el.firstElementChild,st=$('.m-st',el),av=$('.m-av',el),labels=$('.m-labels',el);
+  var v={cx:WW/2,cy:WH/2,s:.3},w=0,h=0,lastS=0,anim=0,wheelT=0;
+  var A=14*Math.PI/180,ca=Math.cos(A),sa=Math.sin(A);
+  var m={el:el,layer:$('.m-layer',el),v:v,
+    size:function(){w=el.clientWidth;h=el.clientHeight;return [w,h]},
+    minS:function(){return (Math.min(w/WW,h/WH)*.8)||.2},
+    fitS:function(){return Math.min(w/WW,h/WH)*.96},
+    toScreen:function(x,y){return [(x-v.cx)*v.s+w/2,(y-v.cy)*v.s+h/2]},
+    toWorld:function(sx,sy){return [(sx-w/2)/v.s+v.cx,(sy-h/2)/v.s+v.cy]},
+    set:function(cx,cy,s){v.s=clamp(s,m.minS(),MAXS);v.cx=clamp(cx,0,WW);v.cy=clamp(cy,0,WH);draw()},
+    zoomAt:function(f,sx,sy){var p=m.toWorld(sx,sy),s=clamp(v.s*f,m.minS(),MAXS);m.set(p[0]-(sx-w/2)/s,p[1]-(sy-h/2)/s,s)},
+    fly:function(cx,cy,s,done){
+      cancelAnimationFrame(anim);s=clamp(s,m.minS(),MAXS);
+      var a={cx:v.cx,cy:v.cy,ls:Math.log(v.s)},ls=Math.log(s),t0=performance.now();
+      var D=(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)?0:520;
+      var step=function(t){var k=D?clamp((t-t0)/D,0,1):1,e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+        m.set(a.cx+(cx-a.cx)*e,a.cy+(cy-a.cy)*e,Math.exp(a.ls+(ls-a.ls)*e));
+        if(k<1)anim=requestAnimationFrame(step);else{opt.onEnd&&opt.onEnd(m);done&&done()}};
+      anim=requestAnimationFrame(step)},
+    fit:function(pts,padPx,maxS){
+      var x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(function(p){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
+      padPx=padPx||80;var s=Math.min(maxS||45,Math.max(60,w-2*padPx)/Math.max(x1-x0,.01),Math.max(60,h-2*padPx)/Math.max(y1-y0,.01));
+      m.fly((x0+x1)/2,(y0+y1)/2,s)},
+    bounds:function(){var a=m.toWorld(0,0),b=m.toWorld(w,h);return [a[0],a[1],b[0],b[1]]},
+    resize:function(){m.size();if(w&&h)draw()}
+  };
+  function draw(){
+    if(!w||!h)return;
+    var vw=w/v.s,vh=h/v.s,x0=v.cx-vw/2,y0=v.cy-vh/2;
+    svg.setAttribute('viewBox',x0+' '+y0+' '+vw+' '+vh);
+    streets(x0,y0,vw,vh);
+    var placed=[],html='';
+    CITIES.forEach(function(c){var p=m.toScreen(wx(c.lon),wy(c.lat)),sx=p[0],sy=p[1];if(sx<-50||sy<-20||sx>w+50||sy>h+20)return;
+      var bw=c.n.length*7.4+10,b=[sx-bw/2,sy+6,sx+bw/2,sy+26];
+      if(placed.some(function(q){return b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]}))return;placed.push(b);
+      html+='<span style="transform:translate('+sx.toFixed(1)+'px,'+sy.toFixed(1)+'px) translate(-50%,7px)">'+c.n+'</span>'});
+    labels.innerHTML=html;
+    var z=v.s!==lastS;lastS=v.s;opt.onMove&&opt.onMove(m,z);
+  }
+  function streets(x0,y0,vw,vh){
+    if(v.s<9){if(av.getAttribute('d')){av.setAttribute('d','');st.setAttribute('d','')}return}
+    var u0=1e9,u1=-1e9,q0=1e9,q1=-1e9;
+    [[x0,y0],[x0+vw,y0],[x0,y0+vh],[x0+vw,y0+vh]].forEach(function(p){var u=p[0]*ca+p[1]*sa,q=-p[0]*sa+p[1]*ca;u0=Math.min(u0,u);u1=Math.max(u1,u);q0=Math.min(q0,q);q1=Math.max(q1,q)});
+    var G=.6,ds='',da='',i,c,fine=v.s>=26;
+    for(i=Math.floor(u0/G);i<=Math.ceil(u1/G);i++){c=((i+jit(i)*.35)*G).toFixed(2);var sg='M'+c+' '+q0.toFixed(2)+'V'+q1.toFixed(2);if(((i%4)+4)%4===0)da+=sg;else if(fine)ds+=sg}
+    for(i=Math.floor(q0/G);i<=Math.ceil(q1/G);i++){c=((i+jit(i+977)*.35)*G).toFixed(2);var sh='M'+u0.toFixed(2)+' '+c+'H'+u1.toFixed(2);if(((i%4)+4)%4===0)da+=sh;else if(fine)ds+=sh}
+    av.setAttribute('d',da);st.setAttribute('d',ds);
+  }
+  var pts={},drag=null,moved=false,pinch=0;
+  var count=function(){return Object.keys(pts).length};
+  var pdist=function(){var k=Object.keys(pts),a=pts[k[0]],b=pts[k[1]];return Math.hypot(a[0]-b[0],a[1]-b[1])};
+  el.addEventListener('pointerdown',function(e){if(e.button)return;cancelAnimationFrame(anim);pts[e.pointerId]=[e.clientX,e.clientY];
+    if(count()===1){moved=false;drag={x:e.clientX,y:e.clientY,cx:v.cx,cy:v.cy}}else if(count()===2){pinch=pdist();drag=null;moved=true}});
+  el.addEventListener('pointermove',function(e){if(!pts[e.pointerId])return;pts[e.pointerId]=[e.clientX,e.clientY];
+    if(count()>=2){var d=pdist(),k=Object.keys(pts),a=pts[k[0]],b=pts[k[1]],r=el.getBoundingClientRect();if(pinch>0&&d>0)m.zoomAt(d/pinch,(a[0]+b[0])/2-r.left,(a[1]+b[1])/2-r.top);pinch=d;return}
+    if(!drag)return;var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+    if(!moved){if(Math.hypot(dx,dy)<6)return;moved=true;try{el.setPointerCapture(e.pointerId)}catch(_){}el.classList.add('drag')}
+    m.set(drag.cx-dx/v.s,drag.cy-dy/v.s,v.s)});
+  var up=function(e){if(!pts[e.pointerId])return;delete pts[e.pointerId];pinch=0;
+    if(count()===1){var p=pts[Object.keys(pts)[0]];drag={x:p[0],y:p[1],cx:v.cx,cy:v.cy}}else drag=null;
+    el.classList.remove('drag');if(moved&&!count()){opt.onEnd&&opt.onEnd(m);setTimeout(function(){moved=false},0)}};
+  el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  el.addEventListener('click',function(e){
+    if(moved){e.stopPropagation();e.preventDefault();moved=false;return}
+    if(opt.onClick&&!e.target.closest('button')){var r=el.getBoundingClientRect();opt.onClick(m.toWorld(e.clientX-r.left,e.clientY-r.top))}},true);
+  if(opt.wheel!==false)el.addEventListener('wheel',function(e){e.preventDefault();var r=el.getBoundingClientRect();m.zoomAt(Math.exp(-e.deltaY*.0018),e.clientX-r.left,e.clientY-r.top);clearTimeout(wheelT);wheelT=setTimeout(function(){opt.onEnd&&opt.onEnd(m)},160)},{passive:false});
+  return m;
+}
+
+/* ---------- données fictives ---------- */
+var SEED=[
+['Flan vanille de Madagascar','Vanille','Maison Authier','12 rue des Tilleuls, Paris 9e','Paris',-8,14,4.7,14,4.2,420],
+['Flan pâtissier nature','Nature','Boulangerie du Canal','48 quai des Écluses, Paris 10e','Paris',16,12,4.3,9,3.2,380],
+['Flan pistache','Pistache','Atelier Sucré Lemaire','7 rue de la Butte, Paris 18e','Paris',-4,28,4.5,6,5.5,300],
+['Flan chocolat grand cru','Chocolat','Pâtisserie Vauquelin','31 rue du Marché, Paris 11e','Paris',30,-2,4.1,7,4.9,350],
+['Flan sésame noir','Sésame noir','Kuro & Blé','5 passage des Artisans, Paris 3e','Paris',12,2,4.8,2,6,18],
+['Flan vanille à l’ancienne','Vanille','Au Pétrin de Louise','102 avenue des Acacias, Paris 15e','Paris',-42,-18,3.6,5,2.8,400],
+['Flan praliné rose','Praliné','Maison Bressand','9 rue de la Soierie, Lyon 2e','Lyon',2,-4,4.6,8,4.5,360],
+['Flan vanille','Vanille','Boulangerie des Pentes','22 montée des Canuts, Lyon 1er','Lyon',-6,14,4.2,5,3.4,300],
+['Flan café','Café','Le Fournil Perrachon','3 place des Tisserands, Lyon 7e','Lyon',14,-16,4.4,1,null,9],
+['Flan vanille bourbon','Vanille','Pâtisserie Ardoisière','18 rue du Tuffeau, Angers','Angers',4,2,4.8,11,3.9,400],
+['Flan caramel beurre salé','Caramel','Les Délices de la Maine','6 quai des Bateliers, Angers','Angers',-14,8,4.4,6,4,280],
+['Flan nature','Nature','Boulangerie Doutre & Fils','41 rue des Lavandières, Angers','Angers',-22,-6,3.9,4,2.6,330],
+['Flan pistache de Sicile','Pistache','Atelier Coquelin','2 place des Halles, Angers','Angers',18,-10,4.7,2,5.2,14],
+['Flan vanille','Vanille','Maison Kervadec','15 rue des Chantiers, Nantes','Nantes',-6,-8,4.5,7,3.8,340],
+['Flan coco','Coco','L’Île Sucrée','8 allée des Tanneurs, Nantes','Nantes',10,6,4.0,3,4.2,150],
+['Flan vanille & rhum','Vanille','Maison Lartigue','27 cours du Négoce, Bordeaux','Bordeaux',4,12,4.6,9,4.3,390],
+['Flan chocolat','Chocolat','Le Pain des Quais','4 rue des Gabarres, Bordeaux','Bordeaux',-10,-6,3.8,4,3.5,260],
+['Flan à la vergeoise','Caramel','Boulangerie Vandecasteele','11 rue des Brasseurs, Lille','Lille',2,4,4.5,6,3,310],
+['Flan vanille','Vanille','Pâtisserie Delobel','56 rue de la Halle, Lille','Lille',-14,-10,4.1,5,3.3,290],
+['Flan fleur d’oranger','Fleur d’oranger','Maison Roubaud','19 rue des Navettes, Marseille','Marseille',6,4,4.6,3,3.7,60],
+['Flan à la violette','Violette','Pâtisserie Castanet','8 rue des Pasteliers, Toulouse','Toulouse',2,4,4.2,2,4,25],
+['Flan vanille','Vanille','Boulangerie Hirtzmann','3 quai des Tonneliers, Strasbourg','Strasbourg',-4,2,4.4,8,3.1,370],
+['Flan caramel au sarrasin','Caramel','Maison Guillerm','25 rue des Halliers, Rennes','Rennes',2,-2,4.7,1,3.9,6]];
+var EXTRA=[['Boulangerie Martineau','9 rue des Ardoisiers, Angers','Angers',8,14],['Maison Faugère','63 rue des Vignerons, Paris 12e','Paris',38,-20],['Le Fournil des Carmélites','14 rue des Teinturiers, Toulouse','Toulouse',-8,-6],['Pâtisserie Oberlin','21 rue des Dentelles, Strasbourg','Strasbourg',6,-8],['Au Blé Nantais','30 rue des Salorges, Nantes','Nantes',-16,4],['Boulangerie Thibaudeau','5 place du Grand Marché, Tours','Tours',2,2]];
+var PSEUDOS=['VanilleBourbon','Margaux_T','LeFlâneur','Clafoutine','Hugo.B','Tatin49','CrèmeDeLaCrème','Jeanne_L','PâteSablée','Biscotte','Sésame_Noir','Oeuf.Lait.Sucre','Théo_Gourmand','Lison'];
+var HI=['Une vanille très présente, des grains partout et une texture crémeuse sans être lourde. Pâte bien cuite, croustillante jusqu’au bout.','Tremblotant comme il faut, peu sucré, dessus bien caramélisé. J’y suis retourné le lendemain.','La pâte reste croustillante même en fin de journée. Appareil très onctueux, vrai goût d’œuf et de lait entier.','Part généreuse, parfum franc, fondant en bouche. Une référence dans le quartier.','Équilibre parfait entre la garniture et la pâte. Le parfum est net sans être écœurant.','Texture entre crème et flan, exactement ce que je cherche. La pâte a ce petit goût de beurre noisette.'];
+var MID=['Bon flan, texture un peu ferme à mon goût mais le parfum est bien là. Pâte correcte.','Agréable, assez sucré selon mes préférences. La part est généreuse pour le prix.','Crémeux, mais la pâte manquait un peu de cuisson le jour de mon passage.','Classique et bien fait, sans surprise. Parfait pour un goûter.'];
+var LO=['Trop sucré pour moi et une texture un peu gélifiée. La pâte était molle.','Déçu : peu de parfum et une pâte détrempée. Peut-être un mauvais jour.'];
+var FLAVORS=['Vanille','Nature','Chocolat','Pistache','Caramel','Café','Praliné','Coco','Autre'];
+var FL={'vanille':['#F2D886','#C7882A'],'nature':['#F4E2A6','#B9782A'],'chocolat':['#6E4429','#3F2515'],'pistache':['#B7C678','#8A9844'],'café':['#C7A078','#7A5130'],'caramel':['#E0B062','#A5601A'],'praliné':['#DDA08E','#B0604F'],'coco':['#F5EDD6','#D7B06A'],'sésame noir':['#8E8B86','#4B4845'],'fleur d’oranger':['#F6DE9C','#D8993A'],'violette':['#CDB6DD','#9273AE']};
+var BGS=['#F3E6D0','#DDE8DF','#F0DDD8','#DCE3EF'];
+function flanArt(flavor,vn){
+  var c=FL[String(flavor||'').toLowerCase()]||FL.vanille;vn=vn||0;
+  return '<svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="120" height="90" fill="'+BGS[vn%4]+'"/><g'+(vn%2?' transform="translate(120,0) scale(-1,1)"':'')+'><ellipse cx="60" cy="68" rx="54" ry="13" fill="#fff" opacity=".92"/><ellipse cx="60" cy="68" rx="42" ry="8" fill="#000" opacity=".07"/><polygon points="98,40 84,24 89,24 104,41 104,62 98,62" fill="#B98347"/><polygon points="18,42 84,24 98,40" fill="'+c[1]+'"/><ellipse cx="72" cy="34" rx="8" ry="2.2" fill="#000" opacity=".22" transform="rotate(-10 72 34)"/><ellipse cx="88" cy="35" rx="3.5" ry="1.4" fill="#000" opacity=".2"/><ellipse cx="50" cy="38.5" rx="5" ry="1.3" fill="#000" opacity=".16" transform="rotate(-8 50 38.5)"/><polygon points="18,42 98,40 98,62 18,64" fill="'+c[0]+'"/><polygon points="18,43.5 98,41.5 98,44 18,46" fill="#fff" opacity=".28"/><polygon points="18,59.5 98,57.5 98,62 18,64" fill="#C99A5B"/></g></svg>';
+}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
+function seed(){
+  var rnd=mulberry(491178),flans=[],reviews=[],rid=1000;
+  SEED.forEach(function(a,i){
+    var c=CITY[norm(a[4])];
+    flans.push({id:i+1,name:a[0],flavor:a[1],shop:a[2],addr:a[3],city:a[4],lon:c.lon+a[5]/1000,lat:c.lat+a[6]/1000,art:i%4});
+    var base=a[7],n=a[8],price=a[9],ages=[],k;
+    for(k=0;k<n;k++)ages.push(Math.floor(2+rnd()*a[10]));
+    ages.sort(function(x,y){return y-x});
+    ages.forEach(function(age,k){
+      var d=function(){return clamp(Math.round(base+(rnd()-.5)*1.5),1,5)},g=d(),t=d(),p=d();
+      var hasP=price!=null&&(k===n-1||rnd()<.6),pv=hasP?Math.round((price-(age>240?.3:age>120?.1:0))*20)/20:null;
+      var qp=clamp(Math.round(base-(price==null?0:(price-3.8)*.5)+(rnd()-.5)*1.4),1,5),mm=(g+t+p)/3,pool=mm>=4.2?HI:mm>=3.2?MID:LO;
+      reviews.push({id:rid++,flan:i+1,author:PSEUDOS[Math.floor(Math.pow(rnd(),1.7)*PSEUDOS.length)],date:iso(daysAgo(age)),gout:g,texture:t,pate:p,qp:qp,price:pv,comment:pool[Math.floor(rnd()*pool.length)],photo:(k===0||rnd()<.3)?'art:'+((i+k)%4):null,first:k===0});
+    });
+  });
+  return {v:1,flans:flans,reviews:reviews,saved:[13,5],user:null,nid:5000,loc:null};
+}
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.v===1&&Array.isArray(d.flans)&&Array.isArray(d.reviews))return d}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+
+var D=load()||seed();
+var S={view:'map',mode:'map',sel:null,multi:null,filt:{flavor:'',minNote:0,maxPrice:0,saved:false},sort:'note',rk:{city:'',flavor:'',maxPrice:0,minNote:0},draft:null,fiche:null,gal:[],lastFocus:null};
+var cache={},boardCache=null;
+function touch(){cache={};boardCache=null}
+var flan=function(id){return D.flans.filter(function(f){return f.id===+id})[0]};
+function stats(f){
+  var c=cache[f.id];if(c)return c;
+  var rs=D.reviews.filter(function(r){return r.flan===f.id}).sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id});
+  var avg=function(k){var a=rs.map(function(r){return r[k]}).filter(function(x){return x>0});return a.length?a.reduce(function(p,q){return p+q},0)/a.length:null};
+  var g=avg('gout')||0,t=avg('texture')||0,p=avg('pate')||0,pr=rs.filter(function(r){return r.price!=null})[0];
+  c=cache[f.id]={rs:rs,n:rs.length,gout:g,texture:t,pate:p,note:(g+t+p)/3,qp:avg('qp'),price:pr?pr.price:null,priceDate:pr?pr.date:null};
+  return c;
+}
+var MB=4;
+function globalMean(){var a=D.flans.map(function(f){return stats(f).note});return a.reduce(function(p,q){return p+q},0)/Math.max(1,a.length)}
+function score(f){var s=stats(f);return (s.n*s.note+MB*globalMean())/(s.n+MB)}
+function pointsOf(r){return 20+(r.first?50:0)+(r.photo?10:0)+(r.price!=null?5:0)+((r.comment||'').length>=40?10:0)}
+var TITLES=[[0,'Curieux du flan'],[100,'Gourmand'],[250,'Fin palais'],[500,'Expert flan'],[900,'Grand maître flan']];
+function titleOf(p){var t=TITLES[0][1];TITLES.forEach(function(x){if(p>=x[0])t=x[1]});return t}
+function myStats(){var l=D.reviews.filter(function(r){return r.mine}),p=0;l.forEach(function(r){p+=pointsOf(r)});return {list:l,n:l.length,pts:p}}
+var myName=function(){return D.user?D.user.pseudo:'Vous (invité)'};
+function board(){
+  if(boardCache)return boardCache;
+  var m={},arr=[];
+  D.reviews.forEach(function(r){if(r.mine)return;var a=m[r.author]||(m[r.author]={name:r.author,pts:0,n:0});a.pts+=pointsOf(r);a.n++});
+  Object.keys(m).forEach(function(k){arr.push(m[k])});
+  var me=myStats();if(me.n)arr.push({name:myName(),pts:me.pts,n:me.n,me:true});
+  arr.sort(function(a,b){return b.pts-a.pts});
+  return boardCache={map:m,arr:arr};
+}
+function dist(f){if(!D.loc)return null;var R=6371,r=Math.PI/180,a=Math.sin((f.lat-D.loc.lat)*r/2),b=Math.sin((f.lon-D.loc.lon)*r/2),h=a*a+Math.cos(f.lat*r)*Math.cos(D.loc.lat*r)*b*b;return 2*R*Math.asin(Math.sqrt(h))}
+var fmtDist=function(d){return d<1?'à '+Math.round(d*100)*10+' m':d<50?'à '+f1(d)+' km':'à '+Math.round(d)+' km'};
+function mainPhoto(f){var r=stats(f).rs.filter(function(x){return x.photo})[0];return r?r.photo:'art:'+f.art}
+function pic(src,f){return String(src).indexOf('data:')===0?'<img src="'+src+'" alt="">':flanArt(f.flavor,+String(src).slice(4)||0)}
+function conf(n){return n>=10?'<span class="badge b-ok">Référence confirmée</span>':n>=5?'<span class="badge b-acc">Valeur sûre</span>':n>=3?'<span class="badge b-info">'+n+' avis · en cours</span>':'<span class="badge b-warn">'+n+' avis · à confirmer</span>'}
+function saveBtn(f,icon){var sv=D.saved.indexOf(f.id)>=0;return '<button type="button" class="'+(icon?'icon-btn':'btn')+' savebtn" data-act="save" data-id="'+f.id+'" aria-pressed="'+sv+'" aria-label="'+(sv?'Retirer de':'Ajouter à')+' ma liste À goûter">'+ic('book')+(icon?'':'<span class="st">'+(sv?'Dans ma liste':'À goûter')+'</span>')+'</button>'}
+function flanRow(f,lead,tail){
+  var s=stats(f),d=dist(f);
+  return '<li class="frow">'+(lead||'')+'<button type="button" class="fmain" data-act="open" data-id="'+f.id+'"><span class="thumb">'+pic(mainPhoto(f),f)+'</span><span class="finfo"><b class="wrap">'+esc(f.name)+'</b><span class="muted small wrap">'+esc(f.shop)+' · '+esc(f.city)+'</span><span class="fmeta">'+STAR+'<b>'+f1(s.note)+'</b><span class="muted">'+s.n+' avis</span><span>'+(s.price!=null?eur(s.price):'Prix inconnu')+'</span>'+(d!=null?'<span class="muted">'+fmtDist(d)+'</span>':'')+'</span><span class="tags"><span class="badge">'+esc(f.flavor)+'</span>'+conf(s.n)+'</span></span></button>'+(tail!=null?tail:saveBtn(f,true))+'</li>';
+}
+function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;$('#toasts').appendChild(t);setTimeout(function(){t.remove()},3800)}
+
+/* ---------- navigation ---------- */
+var NAV=[['map','Carte','map'],['rank','Classement','trophy'],['add','Contribuer','plus'],['book','À goûter','book'],['me','Profil','user']];
+$('#nav').innerHTML=NAV.filter(function(n){return n[0]!=='add'}).map(function(n){return '<button type="button" class="tab" data-act="go" data-v="'+n[0]+'">'+ic(n[2])+n[1]+(n[0]==='book'?'<span class="cnt" data-cnt></span>':'')+'</button>'}).join('');
+$('#bnav').innerHTML=NAV.map(function(n){return '<button type="button" class="'+(n[0]==='add'?'plus':'')+'" data-act="'+(n[0]==='add'?'add':'go')+'" data-v="'+n[0]+'">'+ic(n[2])+'<span>'+n[1]+'</span>'+(n[0]==='book'?'<span class="cnt" data-cnt></span>':'')+'</button>'}).join('');
+$('#cityList').innerHTML=CITIES.map(function(c){return '<option value="'+c.n+'">'}).join('');
+function updCounts(){$$('[data-cnt]').forEach(function(e){e.textContent=D.saved.length||''});$('#ptsTop').textContent=myStats().pts}
+function layout(){var b=$('#band').offsetHeight+$('#top').offsetHeight,n=$('#bnav');if(n.offsetParent!==null||getComputedStyle(n).display!=='none')b+=n.offsetHeight;document.documentElement.style.setProperty('--chrome',b+'px');if(S.view==='map'){map.resize();renderList()}}
+function go(v,keep){S.view=v;render();if(!keep){window.scrollTo(0,0);var h=$('#v-'+v+' h1');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}}
+var VIEWS={};
+function render(){
+  $$('[data-v]').forEach(function(b){if(b.classList.contains('brand'))return;if(b.dataset.v===S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  NAV.forEach(function(n){$('#v-'+n[0]).hidden=n[0]!==S.view});
+  updCounts();
+  if(S.view==='map'){renderFilters();applyMode();map.resize();if(!mapInit&&map.size()[0]){mapInit=true;map.set(WW/2,WH/2,map.fitS())}renderMarkers();renderList();renderPreview()}
+  else if(S.view==='add')renderAdd();
+  else $('#v-'+S.view).innerHTML=VIEWS[S.view]();
+}
+
+/* ---------- carte principale ---------- */
+var mapInit=false,listT=0;
+var map=createMap($('#map'),{onMove:function(m,z){if(z)renderMarkers();else positionMarkers()},onEnd:function(){clearTimeout(listT);listT=setTimeout(renderList,120)}});
+function filtered(){var F=S.filt;return D.flans.filter(function(f){var s=stats(f);if(!s.n)return false;if(F.flavor&&f.flavor!==F.flavor)return false;if(F.minNote&&s.note<F.minNote)return false;if(F.maxPrice&&(s.price==null||s.price>F.maxPrice))return false;if(F.saved&&D.saved.indexOf(f.id)<0)return false;return true})}
+function flavorsList(){var o={};D.flans.forEach(function(f){o[f.flavor]=1});return Object.keys(o).sort(function(a,b){return a.localeCompare(b,'fr')})}
+function opts(list,cur){return list.map(function(o){return '<option value="'+esc(o[0])+'"'+(String(o[0])===String(cur)?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')}
+var NOTES=[[0,'Toutes les notes'],[4.5,'4,5 et plus'],[4,'4 et plus'],[3.5,'3,5 et plus']],PRICES=[[0,'Tous les budgets'],[3,'3 € max la part'],[4,'4 € max la part'],[5,'5 € max la part']];
+function renderFilters(){
+  var F=S.filt,any=F.flavor||F.minNote||F.maxPrice||F.saved;
+  $('#mfilters').innerHTML='<label class="sr" for="ff">Parfum</label><select id="ff" data-flt="flavor">'+opts([['','Tous les parfums']].concat(flavorsList().map(function(x){return [x,x]})),F.flavor)+'</select><label class="sr" for="fn">Note minimale</label><select id="fn" data-flt="minNote">'+opts(NOTES,F.minNote)+'</select><label class="sr" for="fp">Budget maximal</label><select id="fp" data-flt="maxPrice">'+opts(PRICES,F.maxPrice)+'</select><button type="button" class="chip" data-act="fsaved" aria-pressed="'+F.saved+'">'+ic('book')+'À goûter</button>'+(any?'<button type="button" class="btn ghost" data-act="clearf" style="flex:none">Effacer</button>':'');
+}
+function applyMode(){$('#v-map').classList.toggle('is-list',S.mode==='list');$('#modebtn').innerHTML=S.mode==='list'?ic('map')+'Carte':ic('list')+'Liste'}
+function renderMarkers(){
+  if(S.view!=='map')return;
+  var s=map.v.s,cl=[];
+  filtered().forEach(function(f){var x=wx(f.lon),y=wy(f.lat),c=null,i;
+    for(i=0;i<cl.length;i++)if(Math.hypot((cl[i].x-x)*s,(cl[i].y-y)*s)<50){c=cl[i];break}
+    if(c){c.items.push(f);var n=c.items.length;c.x=(c.x*(n-1)+x)/n;c.y=(c.y*(n-1)+y)/n}else cl.push({x:x,y:y,items:[f]})});
+  var h=cl.map(function(c){
+    if(c.items.length>1)return '<button type="button" class="clu" data-act="clu" data-ids="'+c.items.map(function(f){return f.id}).join(',')+'" data-x="'+c.x+'" data-y="'+c.y+'" aria-label="'+c.items.length+' flans dans cette zone, zoomer">'+c.items.length+'</button>';
+    var f=c.items[0],st=stats(f);
+    return '<button type="button" class="pin'+(S.sel===f.id?' sel':'')+(D.saved.indexOf(f.id)>=0?' sv':'')+'" data-act="pin" data-id="'+f.id+'" data-x="'+c.x+'" data-y="'+c.y+'" aria-label="'+esc(f.name)+', '+esc(f.shop)+', note '+f1(st.note)+' sur 5">'+f1(st.note)+'</button>'}).join('');
+  if(D.loc)h+='<span class="me" data-x="'+wx(D.loc.lon)+'" data-y="'+wy(D.loc.lat)+'" title="Votre position (simulée)"></span>';
+  map.layer.innerHTML=h;positionMarkers();
+}
+function positionMarkers(){var c=map.layer.children,i,p;for(i=0;i<c.length;i++){p=map.toScreen(+c[i].dataset.x,+c[i].dataset.y);c[i].style.transform='translate('+p[0].toFixed(1)+'px,'+p[1].toFixed(1)+'px)'}}
+function renderList(){
+  if(S.view!=='map'||!map.size()[0])return;
+  var b=map.bounds(),all=filtered(),items=all.filter(function(f){var x=wx(f.lon),y=wy(f.lat);return x>=b[0]&&x<=b[2]&&y>=b[1]&&y<=b[3]});
+  var cmp={note:function(a,c){return stats(c).note-stats(a).note},n:function(a,c){return stats(c).n-stats(a).n},price:function(a,c){var x=stats(a).price,y=stats(c).price;return (x==null?99:x)-(y==null?99:y)},dist:function(a,c){return (dist(a)||0)-(dist(c)||0)}};
+  items.sort(cmp[S.sort]||cmp.note);
+  $('#lsort').value=S.sort;
+  $('#lcount').textContent=items.length+(items.length>1?' flans':' flan')+' dans cette zone';
+  $('#llist').innerHTML=items.length?items.map(function(f){return flanRow(f)}).join(''):'<li class="empty"><span>Aucun flan ne correspond dans cette zone'+(all.length?'':' avec ces filtres')+'.</span><span class="actions"><button type="button" class="btn" data-act="france">Voir toute la France</button><button type="button" class="btn primary" data-act="add">'+ic('plus')+'Ajouter une dégustation</button></span></li>';
+}
+function priceLine(s){return s.price!=null?'<b>'+eur(s.price)+'</b> la part · relevé le '+fmtDate(s.priceDate)+(ageDays(s.priceDate)>180?' <span class="badge b-warn">à vérifier</span>':''):'Prix inconnu pour le moment'}
+function renderPreview(){
+  var el=$('#preview');
+  if(S.multi){el.hidden=false;el.innerHTML='<div class="pv-h"><b>'+S.multi.length+' flans à cette adresse</b><button type="button" class="icon-btn" data-act="closePrev" aria-label="Fermer">'+ic('x')+'</button></div><ul class="flist">'+S.multi.map(function(id){return flanRow(flan(id))}).join('')+'</ul>';return}
+  var f=S.sel&&flan(S.sel);if(!f){el.hidden=true;el.innerHTML='';return}
+  var s=stats(f),d=dist(f);el.hidden=false;
+  el.innerHTML='<div class="pv"><span class="thumb">'+pic(mainPhoto(f),f)+'</span><div class="finfo"><h3 class="wrap">'+esc(f.name)+'</h3><span class="muted small wrap">'+esc(f.shop)+' · '+esc(f.city)+(d!=null?' · '+fmtDist(d):'')+'</span><span class="fmeta">'+STAR+'<b>'+f1(s.note)+'</b><span class="muted">'+s.n+' avis</span>'+(s.qp?'<span class="muted">Qualité-prix '+f1(s.qp)+'</span>':'')+'</span><span class="small">'+priceLine(s)+'</span></div><button type="button" class="icon-btn" data-act="closePrev" aria-label="Fermer l’aperçu">'+ic('x')+'</button></div><div class="tags"><span class="badge">'+esc(f.flavor)+'</span>'+conf(s.n)+'</div><div class="actions"><button type="button" class="btn primary" data-act="open" data-id="'+f.id+'" style="flex:1">Voir la fiche</button>'+saveBtn(f)+'</div>';
+}
+function refreshMap(){renderFilters();renderMarkers();renderList();if(S.sel&&filtered().every(function(f){return f.id!==S.sel}))S.sel=null;renderPreview()}
+function showOnMap(f){
+  closeModal();S.filt={flavor:'',minNote:0,maxPrice:0,saved:false};S.mode='map';S.multi=null;S.sel=f.id;
+  if(S.view!=='map')go('map',true);else render();
+  window.scrollTo(0,0);map.fly(wx(f.lon),wy(f.lat),48);
+}
+
+/* ---------- fiche ---------- */
+function reviewHTML(r,f){
+  var m=(r.gout+r.texture+r.pate)/3,name=r.mine?myName():r.author,b=board(),pts=r.mine?myStats().pts:(b.map[r.author]?b.map[r.author].pts:0);
+  return '<li class="rev"><div class="rh"><span class="av" aria-hidden="true">'+esc(name.charAt(0).toUpperCase())+'</span><div class="rn"><b class="wrap">'+esc(name)+'</b><span class="muted small">'+titleOf(pts)+' · dégusté le '+fmtDate(r.date)+'</span></div><span class="rnote" aria-label="Note de dégustation '+f1(m)+' sur 5">'+STAR+'<b>'+f1(m)+'</b></span></div><div class="dims"><span>Goût <b>'+r.gout+'</b></span><span>Texture <b>'+r.texture+'</b></span><span>Pâte <b>'+r.pate+'</b></span>'+(r.qp?'<span class="qp">Qualité-prix <b>'+r.qp+'</b></span>':'')+'</div>'+(r.comment?'<p class="wrap">'+esc(r.comment)+'</p>':'')+'<div class="small muted">'+(r.price!=null?'Part payée '+eur(r.price):'Prix non renseigné')+'</div>'+(r.photo?'<span class="thumb">'+pic(r.photo,f)+'</span>':'')+'</li>';
+}
+function ficheHTML(f){
+  var s=stats(f),photos=s.rs.filter(function(r){return r.photo}).map(function(r){return r.photo});if(!photos.length)photos=['art:'+f.art];S.gal=photos;
+  var bar=function(l,d,v){return '<div class="bar"><span><b>'+l+'</b> <span class="muted small">'+d+'</span></span><b class="bv">'+f1(v)+'</b><span class="bt" aria-hidden="true"><i style="width:'+(v/5*100).toFixed(0)+'%"></i></span></div>'};
+  return '<div class="mh"><button type="button" class="icon-btn" data-act="closeModal" aria-label="Fermer la fiche">'+ic('back')+'</button><h2 id="fTitle">'+esc(f.name)+'</h2>'+saveBtn(f,true)+'</div><div class="fbody"><div class="fleft"><div class="gmain" id="gMain">'+pic(photos[0],f)+'</div>'+(photos.length>1?'<div class="gthumbs">'+photos.map(function(p,i){return '<button type="button" data-act="photo" data-i="'+i+'" aria-pressed="'+(i===0)+'" aria-label="Photo '+(i+1)+' sur '+photos.length+'"><span class="thumb">'+pic(p,f)+'</span></button>'}).join('')+'</div>':'')+
+  '<div><b class="wrap" style="font-size:17px">'+esc(f.shop)+'</b><div class="muted wrap">'+esc(f.addr||f.city)+'</div><div class="tags" style="margin-top:6px"><span class="badge">'+esc(f.flavor)+'</span>'+conf(s.n)+'</div></div>'+
+  '<div class="scores"><div class="card" style="display:grid;gap:10px"><div><span class="muted small">Note de dégustation</span><div style="display:flex;align-items:baseline;gap:8px"><span class="big">'+f1(s.note)+'</span><span class="muted">/ 5 · '+s.n+' avis</span></div><span class="hint">Moyenne du goût, de la texture et de la pâte</span></div>'+bar('Goût','saveurs, sucre',s.gout)+bar('Texture','fondant, tenue',s.texture)+bar('Pâte','cuisson, équilibre',s.pate)+'</div>'+
+  '<div class="card" style="display:grid;gap:8px;align-content:start"><span class="muted small">Rapport qualité-prix — appréciation distincte</span><div style="display:flex;align-items:baseline;gap:8px"><span class="big">'+(s.qp?f1(s.qp):'—')+'</span><span class="muted">/ 5</span></div><div class="wrap">'+priceLine(s)+'</div>'+(s.price!=null?'<span class="hint">Dernier prix constaté '+ago(s.priceDate)+' par un contributeur.</span>':'<span class="hint">Aucun contributeur n’a encore indiqué le prix.</span>')+'</div></div>'+
+  '<div class="actions"><button type="button" class="btn primary" data-act="taste" data-id="'+f.id+'">'+ic('plus')+'Ajouter ma dégustation</button><button type="button" class="btn" data-act="onmap" data-id="'+f.id+'">'+ic('pin')+'Voir sur la carte</button><button type="button" class="btn" data-act="share" data-id="'+f.id+'">'+ic('share')+'Partager</button></div></div>'+
+  '<div class="fright"><h3 style="font-size:19px">'+s.n+' dégustation'+(s.n>1?'s':'')+' de la communauté</h3><ul style="display:grid;gap:10px">'+s.rs.map(function(r){return reviewHTML(r,f)}).join('')+'</ul></div></div>';
+}
+function openFiche(id){var f=flan(id);if(!f)return;if($('#modal').hidden)S.lastFocus=document.activeElement;S.fiche=f.id;$('#mdl').innerHTML=ficheHTML(f);$('#modal').hidden=false;document.body.style.overflow='hidden';$('#mdl').scrollTop=0;var b=$('#mdl [data-act=closeModal]');b&&b.focus()}
+function closeModal(){if($('#modal').hidden)return;$('#modal').hidden=true;S.fiche=null;document.body.style.overflow='';if(S.lastFocus&&document.contains(S.lastFocus))S.lastFocus.focus()}
+
+/* ---------- classement ---------- */
+function rankBody(){
+  var R=S.rk,all=D.flans.filter(function(f){var s=stats(f);return s.n&&(!R.city||f.city===R.city)&&(!R.flavor||f.flavor===R.flavor)&&(!R.maxPrice||(s.price!=null&&s.price<=R.maxPrice))&&(!R.minNote||s.note>=R.minNote)});
+  var sure=all.filter(function(f){return stats(f).n>=5}).sort(function(a,b){return score(b)-score(a)});
+  var pep=all.filter(function(f){var s=stats(f);return s.n<5&&s.note>=4}).sort(function(a,b){return stats(b).rs[0].date.localeCompare(stats(a).rs[0].date)});
+  var none='<li class="empty">Aucun flan pour ces critères.</li>';
+  var b=board().arr;
+  return '<div class="card"><div><h2>Valeurs sûres</h2><p class="muted small">Au moins 5 avis · classées par score pondéré</p></div><ol class="flist">'+(sure.length?sure.slice(0,12).map(function(f,i){return flanRow(f,'<span class="rk" aria-label="Rang '+(i+1)+'">'+(i+1)+'</span>','<span class="sc"><b>'+score(f).toFixed(2).replace('.',',')+'</b>score</span>')}).join(''):none)+'</ol></div>'+
+  '<div class="card"><div><h2>Nouvelles pépites</h2><p class="muted small">Moins de 5 avis, note de 4 ou plus · les plus récentes d’abord</p></div><ol class="flist">'+(pep.length?pep.map(function(f){return flanRow(f,'','<span class="sc"><b>'+ago(stats(f).rs[0].date).replace('il y a ','')+'</b>dernier avis</span>')}).join(''):none)+'</ol><p class="note">'+ic('info')+'<span>Prometteuses, mais encore peu notées : votre dégustation aide à les confirmer.</span></p></div>'+
+  '<div class="card"><div><h2>Meilleurs contributeurs</h2><p class="muted small">Points gagnés grâce aux contributions utiles</p></div><ol style="display:grid;gap:6px">'+b.slice(0,10).map(function(c,i){return '<li class="crow'+(c.me?' me-row':'')+'"><span class="rk">'+(i+1)+'</span><span class="av" aria-hidden="true">'+esc(c.name.charAt(0).toUpperCase())+'</span><span class="finfo"><b class="wrap">'+esc(c.name)+'</b><span class="muted small">'+titleOf(c.pts)+' · '+c.n+' dégustation'+(c.n>1?'s':'')+'</span></span><span class="sc"><b>'+c.pts+'</b>points</span></li>'}).join('')+'</ol></div>';
+}
+VIEWS.rank=function(){
+  var R=S.rk,cs={};D.flans.forEach(function(f){cs[f.city]=1});var cities=Object.keys(cs).sort(function(a,b){return a.localeCompare(b,'fr')}),C=globalMean();
+  var ex=function(n,v){return ((n*v+MB*C)/(n+MB)).toFixed(2).replace('.',',')};
+  return '<div class="page-h"><div><h1>Classement des flans</h1><p class="muted">Les références de la communauté d’un côté, les découvertes récentes de l’autre.</p></div></div>'+
+  '<div class="rfilters"><div class="field"><label for="rc">Ville</label><select id="rc" data-rk="city">'+opts([['','Toutes les villes']].concat(cities.map(function(x){return [x,x]})),R.city)+'</select></div><div class="field"><label for="rf">Parfum</label><select id="rf" data-rk="flavor">'+opts([['','Tous les parfums']].concat(flavorsList().map(function(x){return [x,x]})),R.flavor)+'</select></div><div class="field"><label for="rn">Note minimale</label><select id="rn" data-rk="minNote">'+opts(NOTES,R.minNote)+'</select></div><div class="field"><label for="rp">Budget</label><select id="rp" data-rk="maxPrice">'+opts(PRICES,R.maxPrice)+'</select></div></div>'+
+  '<details class="method"><summary>'+ic('info')+'Comment est calculé le classement ?</summary><p>Score = (nombre d’avis × note de dégustation + '+MB+' × moyenne générale) ÷ (nombre d’avis + '+MB+'). La moyenne générale est actuellement de <b>'+f1(C)+'</b>. Un flan noté 5,0 avec un seul avis obtient donc un score de <b>'+ex(1,5)+'</b>, alors qu’un 4,7 soutenu par 14 avis atteint <b>'+ex(14,4.7)+'</b>. Le rapport qualité-prix n’entre pas dans ce score : il reste affiché à part sur chaque fiche.</p></details>'+
+  '<div class="cols" id="rkBody">'+rankBody()+'</div>';
+};
+
+/* ---------- carnet ---------- */
+VIEWS.book=function(){
+  var items=D.saved.map(flan).filter(Boolean),g={};
+  items.forEach(function(f){(g[f.city]=g[f.city]||[]).push(f)});
+  var h='<div class="page-h"><div><h1>Mon carnet « À goûter »</h1><p class="muted">'+(D.user?'Synchronisé avec le compte '+esc(D.user.pseudo)+' (simulation).':'Enregistré sur cet appareil — un compte permet de le retrouver partout.')+'</p></div><button type="button" class="btn" data-act="go" data-v="map">'+ic('map')+'Explorer la carte</button></div>';
+  if(!items.length)return h+'<div class="empty"><span>Votre carnet est vide. Touchez le marque-page d’un flan pour le garder ici.</span><button type="button" class="btn primary" data-act="go" data-v="map">Découvrir des flans</button></div>';
+  Object.keys(g).sort(function(a,b){return a.localeCompare(b,'fr')}).forEach(function(c){
+    h+='<h2 style="font-size:19px;margin:18px 0 10px">'+esc(c)+' <span class="muted" style="font:500 14px var(--font)">· '+g[c].length+' adresse'+(g[c].length>1?'s':'')+'</span></h2><ul class="bgrid">'+g[c].map(function(f){return '<li class="card bcard"><ul>'+flanRow(f,'','')+'</ul><div class="small wrap">'+priceLine(stats(f))+'</div><div class="actions"><button type="button" class="btn primary" data-act="taste" data-id="'+f.id+'" style="flex:1">'+ic('check')+'Je l’ai goûté</button><button type="button" class="btn" data-act="onmap" data-id="'+f.id+'" aria-label="Voir '+esc(f.name)+' sur la carte">'+ic('pin')+'</button><button type="button" class="btn" data-act="save" data-id="'+f.id+'" aria-label="Retirer '+esc(f.name)+' du carnet">'+ic('x')+'</button></div></li>'}).join('')+'</ul>'});
+  return h;
+};
+
+/* ---------- profil ---------- */
+VIEWS.me=function(){
+  var me=myStats(),t=titleOf(me.pts),nx=TITLES.filter(function(x){return x[0]>me.pts})[0],pv=0;TITLES.forEach(function(x){if(x[0]<=me.pts)pv=x[0]});
+  var b=board().arr,rank=0;b.forEach(function(c,i){if(c.me)rank=i+1});
+  var acc=D.user?'<div><h2 class="wrap">'+esc(D.user.pseudo)+'</h2><p class="muted small wrap">'+esc(D.user.email)+'</p></div>':'<div><h2>Invité</h2><p class="muted small">Vous pouvez explorer et contribuer sans compte.</p></div>';
+  var form=D.user?'<button type="button" class="btn" data-act="logout">Se déconnecter</button>':'<form id="accForm" novalidate style="display:grid;gap:12px;border-top:1px solid var(--line);padding-top:14px"><b>Créer un compte pour garder points et carnet</b><div class="field"><label for="ap">Pseudo</label><input id="ap" type="text" maxlength="20" autocomplete="nickname"><span class="err" id="apE"></span></div><div class="field"><label for="ae">Adresse e-mail</label><input id="ae" type="email" autocomplete="email"><span class="err" id="aeE"></span></div><button class="btn primary">Créer mon compte</button><span class="hint">Simulation : aucun e-mail n’est envoyé, rien ne quitte votre navigateur.</span></form>';
+  return '<div class="page-h"><div><h1>Mon profil</h1><p class="muted">Identité, progression et historique de vos contributions.</p></div></div><div class="cols">'+
+  '<div class="card"><div style="display:flex;gap:12px;align-items:center"><span class="av" style="width:52px;height:52px;font-size:20px" aria-hidden="true">'+esc((D.user?D.user.pseudo:'I').charAt(0).toUpperCase())+'</span>'+acc+'</div><div><span class="big">'+me.pts+'</span> <span class="muted">points'+(rank?' · '+rank+(rank===1?'er':'e')+' du classement':'')+'</span></div><div><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b>'+t+'</b><span class="muted small">'+(nx?'encore '+(nx[0]-me.pts)+' pts avant « '+nx[1]+' »':'Titre le plus élevé atteint')+'</span></div><div class="prog" role="progressbar" aria-label="Progression vers le prochain titre" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+(nx?Math.round((me.pts-pv)/(nx[0]-pv)*100):100)+'" style="margin-top:6px"><i style="width:'+(nx?Math.round((me.pts-pv)/(nx[0]-pv)*100):100)+'%"></i></div></div>'+form+'</div>'+
+  '<div class="card"><h2>Mes dégustations</h2>'+(me.n?'<ul class="flist">'+me.list.slice().reverse().map(function(r){var f=flan(r.flan);return f?flanRow(f,'','<span class="sc"><b>+'+pointsOf(r)+'</b>points</span>'):''}).join('')+'</ul>':'<div class="empty"><span>Aucune contribution pour l’instant. Votre première dégustation rapporte jusqu’à 95 points.</span><button type="button" class="btn primary" data-act="add">'+ic('plus')+'Partager une dégustation</button></div>')+'</div>'+
+  '<div class="card"><h2>Gagner des points</h2><ul class="rules"><li><span>Partager une dégustation notée</span><b>+20</b></li><li><span>Référencer un nouveau flan</span><b>+50</b></li><li><span>Ajouter une photo</span><b>+10</b></li><li><span>Indiquer le prix constaté</span><b>+5</b></li><li><span>Commentaire détaillé (40 caractères et plus)</span><b>+10</b></li></ul><h2 style="margin-top:6px">Titres</h2><ul class="ladder">'+TITLES.map(function(x){return '<li class="'+(x[1]===t?'on':'')+'"><span class="badge '+(me.pts>=x[0]?'b-acc':'')+'">'+x[0]+' pts</span>'+x[1]+(x[1]===t?' · votre titre':'')+'</li>'}).join('')+'</ul></div></div>';
+};
+
+/* ---------- contribution ---------- */
+var mini=null,PL=[];
+function newDraft(f){var d={step:1,q:'',place:null,flanId:null,other:false,name:'',flavor:'',custom:'',photo:null,date:iso(new Date()),price:'',noPrice:false,gout:0,texture:0,pate:0,qp:0,comment:'',dupOk:false,dup:null,err:{}};if(f){d.place={name:f.shop,addr:f.addr,city:f.city,lon:f.lon,lat:f.lat};d.flanId=f.id;d.step=2}return d}
+function places(){var o={},l=[];D.flans.forEach(function(f){var k=norm(f.shop)+'|'+norm(f.city);if(!o[k]){o[k]=1;l.push({name:f.shop,addr:f.addr,city:f.city,lon:f.lon,lat:f.lat})}});
+  EXTRA.forEach(function(e){var c=CITY[norm(e[2])],k=norm(e[0])+'|'+norm(e[2]);if(!o[k])l.push({name:e[0],addr:e[1],city:e[2],lon:c.lon+e[3]/1000,lat:c.lat+e[4]/1000})});return l}
+function placeFlans(p){return p?D.flans.filter(function(f){return norm(f.shop)===norm(p.name)&&norm(f.city)===norm(p.city)}):[]}
+function placeResults(q){
+  var n=norm(q),h='';PL=[];
+  if(n.length>=2){PL=places().filter(function(p){return norm(p.name+' '+p.addr+' '+p.city).indexOf(n)>=0}).slice(0,6);
+    h=PL.map(function(p,i){var k=placeFlans(p).length;return '<li><button type="button" class="pres" data-act="place" data-i="'+i+'">'+ic('pin')+'<span><b class="wrap">'+esc(p.name)+'</b><span class="muted small wrap">'+esc(p.addr)+'</span></span>'+(k?'<span class="badge b-acc" style="flex:none">'+k+' flan'+(k>1?'s':'')+'</span>':'')+'</button></li>'}).join('');
+    if(!PL.length)h='<li class="muted small">Aucun établissement trouvé pour « '+esc(q)+' ».</li>'}
+  else h='<li class="muted small">Saisissez au moins 2 caractères — essayez « Angers », « Maison » ou « Tours ».</li>';
+  return h+'<li><button type="button" class="pres man" data-act="manual">'+ic('plus')+'<span>Mon commerce n’apparaît pas — l’ajouter moi-même</span></button></li>';
+}
+var flavorOf=function(d){return d.flavor==='Autre'?cap(d.custom.trim()):d.flavor};
+function estPts(d){var a=[['Dégustation partagée',20]];if(d.place&&!d.flanId)a.push(['Nouveau flan référencé',50]);if(d.photo)a.push(['Photo',10]);if(!d.noPrice&&String(d.price).trim())a.push(['Prix constaté',5]);if(d.comment.trim().length>=40)a.push(['Commentaire détaillé',10]);return a}
+function recapHTML(){
+  var d=S.draft,f=d.flanId?flan(d.flanId):null,n=(d.gout&&d.texture&&d.pate)?f1((+d.gout+ +d.texture+ +d.pate)/3):'—',pts=estPts(d),tot=0;pts.forEach(function(p){tot+=p[1]});
+  var row=function(a,b){return '<div><dt>'+a+'</dt><dd>'+b+'</dd></div>'};
+  return '<h2>Votre contribution</h2><dl>'+row('Commerce',d.place&&d.place.name?esc(d.place.name)+(d.place.city?' · '+esc(d.place.city):''):'—')+row('Flan',f?esc(f.name):(d.name.trim()?esc(d.name):'—'))+row('Parfum',f?esc(f.flavor):(esc(flavorOf(d))||'—'))+row('Prix de la part',d.noPrice?'Inconnu':(String(d.price).trim()?esc(d.price)+' €':'—'))+row('Note de dégustation',n)+row('Qualité-prix',d.qp?d.qp+' / 5':'—')+'</dl><div class="ptsbox"><ul>'+pts.map(function(p){return '<li><span>'+p[0]+'</span><b>+'+p[1]+'</b></li>'}).join('')+'<li class="tot"><span>Points à gagner</span><span>+'+tot+'</span></li></ul></div><p class="hint">'+(D.user?'Publié sous le pseudo '+esc(D.user.pseudo)+'.':'Publié en tant qu’invité : aucun compte n’est nécessaire.')+'</p>';
+}
+function updRecap(){var r=$('#recap');if(r)r.innerHTML=recapHTML()}
+function miniHTML(hint){return '<div class="miniwrap"><div class="map" id="mini" aria-label="Carte de vérification de l’emplacement"></div><div class="zc"><button type="button" class="icon-btn" data-act="mzoom" data-f="2" aria-label="Zoomer">'+ic('plus')+'</button><button type="button" class="icon-btn" data-act="mzoom" data-f="0.5" aria-label="Dézoomer">'+ic('minus')+'</button></div></div><p class="hint" id="pinHint">'+hint+'</p>'}
+function step1(d){
+  var p=d.place,E=d.err,inv=function(k){return E[k]?' aria-invalid="true"':''};
+  if(!p)return '<h2 tabindex="-1">Où avez-vous acheté votre part ?</h2><div class="field"><label for="pq">Commerce ou adresse</label><input id="pq" type="text" data-d="q" value="'+esc(d.q)+'" placeholder="Ex. Maison Bressand, Angers…" autocomplete="off"'+inv('place')+'><span class="err">'+(E.place||'')+'</span><span class="hint">Recherche d’établissements simulée pour la démonstration.</span></div><ul class="presults" id="pres">'+placeResults(d.q)+'</ul>';
+  if(p.manual)return '<h2 tabindex="-1">Ajouter un commerce</h2><p class="muted">Deux informations et un repère suffisent.</p><div class="two"><div class="field"><label for="pn">Nom du commerce</label><input id="pn" type="text" data-p="name" value="'+esc(p.name)+'" maxlength="60"'+inv('name')+'><span class="err">'+(E.name||'')+'</span></div><div class="field"><label for="pc">Ville</label><input id="pc" type="text" data-p="city" list="cityList" value="'+esc(p.city)+'" maxlength="40"'+inv('city')+'><span class="err">'+(E.city||'')+'</span></div></div><div><span class="flabel">Emplacement</span>'+miniHTML('Touchez la carte pour placer le repère — zoomez pour être précis.')+'<span class="err">'+(E.pin||'')+'</span></div><div><button type="button" class="btn ghost" data-act="unplace">'+ic('back')+'Revenir à la recherche</button></div>';
+  var ex=placeFlans(p);
+  return '<h2 tabindex="-1">Est-ce bien ici ?</h2><div class="pres" style="cursor:default">'+ic('pin')+'<span><b class="wrap">'+esc(p.name)+'</b><span class="muted small wrap">'+esc(p.addr||p.city)+'</span></span><button type="button" class="btn" data-act="unplace">Changer</button></div>'+miniHTML('Le repère est prérempli. Touchez la carte pour l’ajuster si besoin.')+(ex.length?'<p class="note">'+ic('info')+'<span>'+ex.length+' flan'+(ex.length>1?'s sont déjà référencés':' est déjà référencé')+' dans ce commerce : vous pourrez ajouter votre dégustation à sa fiche.</span></p>':'');
+}
+function step2(d){
+  var ex=placeFlans(d.place),E=d.err,inv=function(k){return E[k]?' aria-invalid="true"':''},showNew=!ex.length||d.other,du=d.dup&&flan(d.dup);
+  var h='<h2 tabindex="-1">Quel flan avez-vous goûté ?</h2>';
+  if(ex.length)h+='<fieldset class="choices"><legend>Chez '+esc(d.place.name)+'</legend>'+ex.map(function(f){return '<label class="choice"><input type="radio" name="choix" value="'+f.id+'"'+(d.flanId===f.id?' checked':'')+'><span class="thumb">'+pic(mainPhoto(f),f)+'</span><span><b class="wrap">'+esc(f.name)+'</b><span class="muted small">'+esc(f.flavor)+' · '+stats(f).n+' avis — votre dégustation rejoint cette fiche</span></span></label>'}).join('')+'<label class="choice"><input type="radio" name="choix" value="new"'+(d.other?' checked':'')+'><span><b>Un autre flan de ce commerce</b><span class="muted small">Créer une nouvelle fiche</span></span></label><span class="err">'+(E.choix||'')+'</span></fieldset>';
+  h+='<div id="newFlan" style="display:grid;gap:16px"'+(showNew?'':' hidden')+'><div class="field"><label for="fnm">Nom du flan</label><input id="fnm" type="text" data-d="name" value="'+esc(d.name)+'" maxlength="60" placeholder="Ex. Flan vanille"'+inv('name')+'><span class="err">'+(E.name||'')+'</span></div><fieldset><legend style="margin-bottom:8px">Parfum</legend><div class="chips">'+FLAVORS.map(function(v){return '<button type="button" class="chip" data-act="flavor" data-v="'+v+'" aria-pressed="'+(d.flavor===v)+'">'+(v==='Autre'?'Autre parfum…':v)+'</button>'}).join('')+'</div><span class="err">'+(E.flavor||'')+'</span></fieldset><div class="field" id="customWrap"'+(d.flavor==='Autre'?'':' hidden')+'><label for="fcu">Précisez le parfum</label><input id="fcu" type="text" data-d="custom" value="'+esc(d.custom)+'" maxlength="30" placeholder="Sésame noir, café, fleur d’oranger…"'+inv('custom')+'><span class="err">'+(E.custom||'')+'</span></div>'+
+    (E.dup&&du?'<div class="note w" role="alert" style="flex-direction:column"><span>Ce flan semble déjà référencé ici : <b>'+esc(du.name)+'</b> ('+stats(du).n+' avis). Réunir les dégustations sur une même fiche évite les doublons.</span><span class="actions"><button type="button" class="btn primary" data-act="dupUse">Ajouter à cette fiche</button><button type="button" class="btn" data-act="dupNo">Non, c’est un flan différent</button></span></div>':'')+'</div>';
+  h+='<div><span class="flabel">Photo de votre part <span class="hint">· facultatif</span></span><div class="photo" id="photoBox" style="margin-top:6px">'+photoBox(d)+'</div></div>'+
+  '<div class="two"><div class="field"><label for="fdt">Date de dégustation</label><input id="fdt" type="date" data-d="date" value="'+esc(d.date)+'" max="'+iso(new Date())+'"'+inv('date')+'><span class="err">'+(E.date||'')+'</span></div><div class="field"><label for="fpr">Prix payé pour une part (€)</label><input id="fpr" type="text" inputmode="decimal" data-d="price" value="'+esc(d.price)+'" placeholder="Ex. 3,90"'+(d.noPrice?' disabled':'')+inv('price')+'><span class="err">'+(E.price||'')+'</span><label class="ck"><input type="checkbox" id="noPrice"'+(d.noPrice?' checked':'')+'>Je ne connais pas le prix</label></div></div>';
+  return h;
+}
+function photoBox(d){return (d.photo?'<span class="thumb"><img src="'+d.photo+'" alt="Aperçu de votre photo"></span>':'')+'<label class="btn filebtn">'+ic('cam')+(d.photo?'Changer la photo':'Ajouter une photo')+'<input class="sr" type="file" accept="image/*" id="photoIn"></label>'+(d.photo?'<button type="button" class="btn ghost" data-act="rmPhoto">Retirer</button>':'')}
+var DIMS=[['gout','Le goût','Saveurs, parfum, équilibre du sucre'],['texture','La texture','Fondant, onctuosité ou fermeté'],['pate','La pâte','Cuisson, qualité, équilibre avec la garniture'],['qp','Le rapport qualité-prix','Au regard du prix et de la taille de la part · facultatif, noté à part']];
+function step3(d){
+  var E=d.err;
+  return '<h2 tabindex="-1">Votre avis</h2><p class="muted">Goût, texture et pâte forment la note de dégustation. Le rapport qualité-prix reste une appréciation séparée.</p>'+DIMS.map(function(x){var k=x[0],v=+d[k];return '<fieldset class="rate'+(k==='qp'?' sep':'')+'" data-rate="'+k+'"><legend>'+x[1]+'<span class="hint">'+x[2]+'</span></legend><div class="stars">'+[1,2,3,4,5].map(function(i){return '<label class="'+(i<=v?'on':'')+'"><input class="sr" type="radio" name="r_'+k+'" value="'+i+'"'+(v===i?' checked':'')+'><span class="sr">'+i+' sur 5</span>'+STAR+'</label>'}).join('')+'</div><span class="err">'+(E[k]||'')+'</span></fieldset>'}).join('')+
+  '<div class="field"><label for="fcm">Commentaire <span class="hint">· facultatif</span></label><textarea id="fcm" data-d="comment" maxlength="600" placeholder="Ce qui vous a plu ou moins plu : une vanille présente, une pâte croustillante, trop sucré à votre goût…">'+esc(d.comment)+'</textarea><span class="hint" id="cmHint"></span></div>';
+}
+function vAdd(){
+  var d=S.draft;
+  if(d.step===4){var f=flan(d.result.flan);return '<div class="card donebox"><span class="okc">'+ic('check')+'</span><h1>Merci pour cette dégustation !</h1><p>'+(d.result.created?'« '+esc(f.name)+' » est maintenant sur la carte.':'Votre avis a rejoint la fiche « '+esc(f.name)+' ».')+' Vous gagnez <b>+'+d.result.pts+' points</b>.</p><div class="actions" style="justify-content:center"><button type="button" class="btn primary" data-act="open" data-id="'+f.id+'">Voir la fiche</button><button type="button" class="btn" data-act="onmap" data-id="'+f.id+'">'+ic('pin')+'Voir sur la carte</button><button type="button" class="btn" data-act="add">Ajouter une autre dégustation</button></div>'+(D.user?'':'<p class="muted small">Publié en invité. <button type="button" class="btn ghost" data-act="go" data-v="me">Créer un compte pour garder mes points</button></p>')+'</div>'}
+  var L=['Lieu','Flan','Avis'];
+  return '<div class="page-h"><div><h1>Partager une dégustation</h1><p class="muted">Trois étapes, environ une minute. Aucun compte requis.</p></div></div><ol class="steps" aria-label="Étapes">'+L.map(function(l,i){return '<li'+(d.step===i+1?' aria-current="step"':'')+' class="'+(d.step>i+1?'done':'')+'"><b>'+(d.step>i+1?'✓':i+1)+'</b><span>'+l+'</span></li>'}).join('')+'</ol>'+
+  '<div class="addgrid"><form class="card aform" id="addForm" novalidate>'+(d.step===1?step1(d):d.step===2?step2(d):step3(d))+'<div class="actions" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:14px"><button type="button" class="btn" data-act="back">'+ic('back')+(d.step===1?'Annuler':'Retour')+'</button><button class="btn primary">'+(d.step===3?ic('check')+'Publier ma dégustation':'Continuer'+ic('next'))+'</button></div></form><aside class="card recap" id="recap" aria-live="polite">'+recapHTML()+'</aside></div>';
+}
+function setupMini(){
+  var el=$('#mini');mini=null;if(!el)return;var p=S.draft.place;
+  mini=createMap(el,{wheel:false,onMove:function(m){var pin=m.layer.firstElementChild;if(!pin)return;if(p.lon==null){pin.hidden=true;return}pin.hidden=false;var q=m.toScreen(wx(p.lon),wy(p.lat));pin.style.transform='translate('+q[0].toFixed(1)+'px,'+q[1].toFixed(1)+'px)'},
+    onClick:function(w){p.lon=ilon(w[0]);p.lat=ilat(w[1]);mini.resize();var h=$('#pinHint');if(h)h.textContent='Repère placé. Touchez à nouveau la carte pour le déplacer.'}});
+  mini.layer.innerHTML='<span class="mpin"><svg viewBox="0 0 24 29" aria-hidden="true"><path d="M12 28s9-8.6 9-16a9 9 0 0 0-18 0c0 7.4 9 16 9 16z"/><circle cx="12" cy="12" r="3.4" fill="#fff" stroke="none"/></svg></span>';
+  mini.size();
+  if(p.lon!=null)mini.set(wx(p.lon),wy(p.lat),46);else{var c=CITY[norm(p.city)];if(c)mini.set(wx(c.lon),wy(c.lat),16);else mini.set(WW/2,WH/2,mini.fitS())}
+}
+function renderAdd(focus){
+  if(!S.draft)S.draft=newDraft();
+  $('#v-add').innerHTML=vAdd();setupMini();
+  if(focus){window.scrollTo(0,0);var h=$('#v-add h2[tabindex]')||$('#v-add h1');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}
+}
+function next(){
+  var d=S.draft,E=d.err={},p=d.place;d.dup=null;
+  if(d.step===1){
+    if(!p)E.place='Choisissez un commerce dans les résultats ou ajoutez-le vous-même.';
+    else if(p.manual){if(p.name.trim().length<2)E.name='Indiquez le nom du commerce.';if(p.city.trim().length<2)E.city='Indiquez la ville.';if(p.lon==null)E.pin='Touchez la carte pour placer le repère du commerce.'}
+  }else if(d.step===2){
+    var ex=placeFlans(p);
+    if(ex.length&&!d.flanId&&!d.other)E.choix='Choisissez le flan dégusté ou indiquez qu’il s’agit d’un autre flan.';
+    if(!d.flanId&&(d.other||!ex.length)){
+      if(d.name.trim().length<3)E.name='Donnez un nom au flan (3 caractères minimum).';
+      if(!d.flavor)E.flavor='Choisissez un parfum.';else if(d.flavor==='Autre'&&d.custom.trim().length<2)E.custom='Précisez le parfum.';
+      if(!E.name&&!E.flavor&&!E.custom&&!d.dupOk){var fl=norm(flavorOf(d)),du=ex.filter(function(f){return norm(f.name)===norm(d.name)||norm(f.flavor)===fl})[0];if(du){d.dup=du.id;E.dup=1}}
+    }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d.date))E.date='Indiquez la date de dégustation.';else if(d.date>iso(new Date()))E.date='La date ne peut pas être dans le futur.';
+    if(!d.noPrice&&String(d.price).trim()){var v=parseFloat(String(d.price).replace(',','.'));if(!/^\d+([.,]\d{1,2})?$/.test(String(d.price).trim())||!(v>=.5&&v<=30))E.price='Prix invalide : entre 0,50 € et 30 € (ex. 3,90).'}
+  }else if(d.step===3){
+    ['gout','texture','pate'].forEach(function(k){if(!d[k])E[k]='Donnez une note de 1 à 5.'});
+    if(!Object.keys(E).length)return submit();
+  }
+  if(Object.keys(E).length){renderAdd();var t=$('#v-add [aria-invalid="true"]')||$('#v-add [role=alert] button')||$('#v-add .err:not(:empty)');if(t){if(t.focus&&t.tagName!=='SPAN')t.focus();t.scrollIntoView({block:'center'})}return}
+  d.step++;renderAdd(true);
+}
+function submit(){
+  var d=S.draft,p=d.place,f,created=false;
+  if(d.flanId)f=flan(d.flanId);
+  else{f={id:D.nid++,name:d.name.trim(),flavor:flavorOf(d),shop:p.name.trim(),addr:p.addr||'',city:cap(p.city.trim()),lon:p.lon,lat:p.lat,art:D.nid%4,mine:true};
+    var n=placeFlans(p).length;if(n){f.lon+=.0012*n;f.lat+=.0006*n}
+    D.flans.push(f);created=true}
+  var pr=(!d.noPrice&&String(d.price).trim())?parseFloat(String(d.price).replace(',','.')):null;
+  var r={id:D.nid++,flan:f.id,mine:true,author:'',date:d.date,gout:+d.gout,texture:+d.texture,pate:+d.pate,qp:+d.qp||null,price:pr,comment:d.comment.trim(),photo:d.photo,first:created};
+  D.reviews.push(r);
+  var i=D.saved.indexOf(f.id);if(i>=0)D.saved.splice(i,1);
+  touch();save();d.step=4;d.result={flan:f.id,pts:pointsOf(r),created:created};
+  renderAdd(true);updCounts();toast('Dégustation publiée · +'+d.result.pts+' points');
+}
+function readPhoto(file,cb){
+  if(!file)return;if(!/^image\//.test(file.type)){toast('Format non pris en charge : choisissez une image.');return}
+  var fr=new FileReader();fr.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,560/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));var u;try{c.getContext('2d').drawImage(im,0,0,c.width,c.height);u=c.toDataURL('image/jpeg',.72)}catch(e){u=fr.result}cb(u)};im.onerror=function(){toast('Image illisible, essayez un autre fichier.')};im.src=fr.result};fr.readAsDataURL(file);
+}
+
+/* ---------- actions ---------- */
+var A={
+  go:function(b){go(b.dataset.v)},
+  add:function(){closeModal();S.draft=newDraft();S.view='add';render();window.scrollTo(0,0);var i=$('#pq');i&&i.focus()},
+  reset:function(){try{localStorage.removeItem(KEY)}catch(e){}D=seed();touch();closeModal();S.sel=null;S.multi=null;S.mode='map';S.sort='note';S.filt={flavor:'',minNote:0,maxPrice:0,saved:false};S.rk={city:'',flavor:'',maxPrice:0,minNote:0};S.draft=null;$('#cityq').value='';$('#cityErr').textContent='';mapInit=false;go('map');toast('Démonstration réinitialisée')},
+  zoom:function(b){var s=map.size();map.fly(map.v.cx,map.v.cy,map.v.s*+b.dataset.f)},
+  mzoom:function(b){if(mini)mini.fly(mini.v.cx,mini.v.cy,mini.v.s*+b.dataset.f)},
+  france:function(){S.sel=null;S.multi=null;renderPreview();map.fly(WW/2,WH/2,map.fitS())},
+  locate:function(){D.loc={lon:-0.5515,lat:47.4712};S.sort='dist';save();S.mode='map';applyMode();renderMarkers();
+    var pts=D.flans.filter(function(f){return f.city==='Angers'}).map(function(f){return [wx(f.lon),wy(f.lat)]});pts.push([wx(D.loc.lon),wy(D.loc.lat)]);map.fit(pts,70,48);toast('Localisation simulée : centre d’Angers')},
+  mode:function(){S.mode=S.mode==='list'?'map':'list';applyMode();renderList()},
+  fsaved:function(){S.filt.saved=!S.filt.saved;refreshMap();var b=$('[data-act=fsaved]');b&&b.focus()},
+  clearf:function(){S.filt={flavor:'',minNote:0,maxPrice:0,saved:false};refreshMap();var b=$('#ff');b&&b.focus()},
+  pin:function(b){S.multi=null;S.sel=+b.dataset.id;renderMarkers();renderPreview();var n=$('.pin.sel',map.layer);n&&n.focus()},
+  clu:function(b){var fs=b.dataset.ids.split(',').map(flan),pts=fs.map(function(f){return [wx(f.lon),wy(f.lat)]}),x=pts.map(function(p){return p[0]}),y=pts.map(function(p){return p[1]});
+    var span=Math.max(Math.max.apply(0,x)-Math.min.apply(0,x),Math.max.apply(0,y)-Math.min.apply(0,y));
+    if(span*MAXS<56||map.v.s>=MAXS*.98){S.sel=null;S.multi=fs.map(function(f){return f.id});renderPreview();return}
+    S.sel=null;S.multi=null;renderPreview();map.fit(pts,90,MAXS)},
+  closePrev:function(){S.sel=null;S.multi=null;renderPreview();renderMarkers()},
+  open:function(b){openFiche(b.dataset.id)},
+  closeModal:closeModal,
+  save:function(b){var id=+b.dataset.id,i=D.saved.indexOf(id),on=i<0;if(on)D.saved.push(id);else D.saved.splice(i,1);save();updCounts();
+    $$('.savebtn[data-id="'+id+'"]').forEach(function(x){x.setAttribute('aria-pressed',on);x.setAttribute('aria-label',(on?'Retirer de':'Ajouter à')+' ma liste À goûter');var t=$('.st',x);if(t)t.textContent=on?'Dans ma liste':'À goûter'});
+    toast(on?'Ajouté à votre carnet « À goûter »':'Retiré de votre carnet');
+    if(S.view==='map'){renderMarkers();if(S.filt.saved){renderList();if(S.sel===id&&!on)S.sel=null;renderPreview()}}else if(S.view==='book')$('#v-book').innerHTML=VIEWS.book()},
+  photo:function(b){var f=flan(S.fiche);if(!f)return;$('#gMain').innerHTML=pic(S.gal[+b.dataset.i],f);$$('.gthumbs button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})},
+  share:function(b){var f=flan(b.dataset.id);try{navigator.clipboard&&navigator.clipboard.writeText(f.name+' — '+f.shop+', '+f.city).catch(function(){})}catch(e){}toast('Lien de partage copié (simulation)')},
+  onmap:function(b){var f=flan(b.dataset.id);f&&showOnMap(f)},
+  taste:function(b){var f=flan(b.dataset.id);closeModal();S.draft=newDraft(f);S.view='add';render();renderAdd(true)},
+  place:function(b){var p=PL[+b.dataset.i];if(!p)return;var d=S.draft;d.place={name:p.name,addr:p.addr,city:p.city,lon:p.lon,lat:p.lat};d.flanId=null;d.other=false;d.err={};renderAdd(true)},
+  manual:function(){var d=S.draft,q=d.q.trim(),c=CITY[norm(q)];d.place={manual:true,name:c?'':q,addr:'',city:c?c.n:'',lon:null,lat:null};d.flanId=null;d.other=false;d.err={};renderAdd(true);var i=$('#pn');i&&i.focus()},
+  unplace:function(){var d=S.draft;d.place=null;d.flanId=null;d.other=false;d.err={};renderAdd();var i=$('#pq');i&&i.focus()},
+  back:function(){var d=S.draft;d.err={};if(d.step===1){S.draft=null;go('map')}else{d.step--;renderAdd(true)}},
+  flavor:function(b){var d=S.draft;d.flavor=b.dataset.v;d.dupOk=false;$$('[data-act=flavor]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});var w=$('#customWrap');w.hidden=d.flavor!=='Autre';if(d.flavor==='Autre')$('#fcu').focus();updRecap()},
+  dupUse:function(){var d=S.draft;d.flanId=d.dup;d.other=false;d.err={};d.step=3;renderAdd(true)},
+  dupNo:function(){var d=S.draft;d.dupOk=true;d.err={};next()},
+  rmPhoto:function(){S.draft.photo=null;$('#photoBox').innerHTML=photoBox(S.draft);updRecap()},
+  logout:function(){D.user=null;touch();save();render();toast('Déconnecté — vos contributions restent sur cet appareil')}
+};
+document.addEventListener('click',function(e){
+  if(e.target.id==='modal'){closeModal();return}
+  var b=e.target.closest('[data-act]');if(!b)return;var fn=A[b.dataset.act];if(fn)fn(b,e);
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();
+  if(e.target.id==='addForm')next();
+  else if(e.target.id==='citySearch')searchCity();
+  else if(e.target.id==='accForm'){
+    var p=$('#ap'),m=$('#ae'),ok=true,pv=p.value.trim(),mv=m.value.trim();
+    var set=function(i,el,msg){i.setAttribute('aria-invalid',!!msg);$(el).textContent=msg;if(msg&&ok){ok=false;i.focus()}};
+    set(p,'#apE',pv.length<3?'Choisissez un pseudo de 3 à 20 caractères.':'');
+    set(m,'#aeE',/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mv)?'':'Saisissez une adresse e-mail valide.');
+    if(!ok)return;D.user={pseudo:pv,email:mv};touch();save();render();toast('Compte créé (simulation) — aucun e-mail envoyé');
+  }
+});
+function searchCity(){
+  var i=$('#cityq'),q=norm(i.value),E=$('#cityErr');E.textContent='';i.removeAttribute('aria-invalid');if(!q)return;
+  var c=CITIES.filter(function(x){return norm(x.n)===q})[0]||CITIES.filter(function(x){return norm(x.n).indexOf(q)===0})[0];
+  if(!c){E.textContent='Ville introuvable dans cette démonstration — essayez Angers, Paris ou Lyon.';i.setAttribute('aria-invalid','true');return}
+  i.value=c.n;S.sel=null;S.multi=null;renderPreview();
+  var fs=filtered().filter(function(f){return norm(f.city)===norm(c.n)});
+  if(fs.length>1)map.fit(fs.map(function(f){return [wx(f.lon),wy(f.lat)]}),80,48);else map.fly(wx(c.lon),wy(c.lat),fs.length?40:16);
+  if(!fs.length)toast('Aucun flan référencé à '+c.n+' pour l’instant — soyez le premier !');
+}
+document.addEventListener('input',function(e){
+  var t=e.target,d=S.draft;
+  if(t.id==='cityq'){if(CITY[norm(t.value)]&&e.inputType!=='insertText'&&e.inputType!=='deleteContentBackward')searchCity();return}
+  if(!d)return;
+  if(t.dataset.d&&t.type!=='checkbox'&&t.type!=='radio'&&t.type!=='file'){d[t.dataset.d]=t.value;if(t.dataset.d==='name'||t.dataset.d==='custom')d.dupOk=false;
+    if(t.dataset.d==='q')$('#pres').innerHTML=placeResults(t.value);
+    if(t.dataset.d==='comment'){var n=t.value.trim().length,h=$('#cmHint');if(h)h.textContent=n>=40?'Commentaire détaillé : +10 points':n?'Encore '+(40-n)+' caractères pour le bonus de 10 points':''}
+    updRecap()}
+  else if(t.dataset.p&&d.place){d.place[t.dataset.p]=t.value;if(t.dataset.p==='city'){var c=CITY[norm(t.value)];if(c&&mini&&d.place.lon==null)mini.fly(wx(c.lon),wy(c.lat),16)}updRecap()}
+});
+document.addEventListener('change',function(e){
+  var t=e.target,d=S.draft;
+  if(t.dataset.flt){S.filt[t.dataset.flt]=t.dataset.flt==='flavor'?t.value:+t.value;refreshMap();var s=$('#'+t.id);s&&s.focus();return}
+  if(t.hasAttribute('data-sort')){S.sort=t.value;if(t.value==='dist'&&!D.loc)A.locate();else renderList();return}
+  if(t.dataset.rk){S.rk[t.dataset.rk]=(t.dataset.rk==='city'||t.dataset.rk==='flavor')?t.value:+t.value;$('#rkBody').innerHTML=rankBody();return}
+  if(!d)return;
+  if(t.name==='choix'){if(t.value==='new'){d.flanId=null;d.other=true}else{d.flanId=+t.value;d.other=false}$('#newFlan').hidden=!d.other;updRecap()}
+  else if(t.name&&t.name.indexOf('r_')===0){var k=t.name.slice(2),v=+t.value;d[k]=v;$$('[data-rate="'+k+'"] .stars label').forEach(function(l,i){l.classList.toggle('on',i<v)});var er=$('[data-rate="'+k+'"] .err');if(er)er.textContent='';updRecap()}
+  else if(t.id==='noPrice'){d.noPrice=t.checked;var p=$('#fpr');p.disabled=t.checked;if(t.checked){p.removeAttribute('aria-invalid')}updRecap()}
+  else if(t.id==='photoIn'){readPhoto(t.files&&t.files[0],function(u){d.photo=u;$('#photoBox').innerHTML=photoBox(d);updRecap()})}
+});
+document.addEventListener('keydown',function(e){
+  var mo=$('#modal');
+  if(e.key==='Escape'){if(!mo.hidden)closeModal();else if(S.view==='map'&&(S.sel||S.multi))A.closePrev()}
+  if(e.key==='Tab'&&!mo.hidden){var fs=$$('button,input,select,textarea,[href]',mo).filter(function(x){return !x.disabled&&x.offsetParent!==null});if(!fs.length)return;var a=fs[0],z=fs[fs.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
+});
+var rsT=0;window.addEventListener('resize',function(){clearTimeout(rsT);rsT=setTimeout(function(){layout();if(mini)mini.resize()},80)});
+layout();render();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(layout);
+})();
+</script>
 </body>
 </html>
