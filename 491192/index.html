@@ -2,20 +2,548 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Catalogue fluides et espace client</title>
+<meta name="description" content="Catalogue de fluides frigorigènes filtrable, panier de demande de devis, espace client avec droits et documents par entreprise, et back-office marketing (produits, éditeur de blocs, documents, 230 redirections).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F2F5F7;--panel:#FFFFFF;--panel-2:#EDF2F5;--ink:#10222D;--muted:#4A5F6B;--line:#D7E0E6;--line-2:#B4C3CC;
+  --accent:#0A5F7A;--accent-ink:#FFFFFF;--accent-soft:#DDEEF4;--accent-text:#084E65;
+  --deep:#0C2A38;--deep-ink:#EEF7FA;--deep-muted:#B4D0DB;
+  --band:#FBF2DE;--band-ink:#734700;
+  --ok:#1B6A3D;--ok-soft:#DDF0E3;--warn:#854800;--warn-soft:#FBEBD2;--bad:#A5252E;--bad-soft:#FAE1E2;--info:#24518A;--info-soft:#E1EAF6;--gray:#4C585F;--gray-soft:#E6ECEF;
+  --shadow:0 1px 2px rgba(16,34,45,.05),0 4px 14px rgba(16,34,45,.06);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0A1317;--panel:#121D23;--panel-2:#18262D;--ink:#E3EBEF;--muted:#9BAEB8;--line:#23343C;--line-2:#3A515B;
+  --accent:#5BC0DC;--accent-ink:#04212A;--accent-soft:#11313C;--accent-text:#8AD6EA;
+  --deep:#0F2A36;--deep-ink:#EAF6F9;--deep-muted:#A8C6D0;
+  --band:#2C2411;--band-ink:#EEC478;
+  --ok:#72D29B;--ok-soft:#142F1E;--warn:#F0B55F;--warn-soft:#342512;--bad:#FF9299;--bad-soft:#3A1A1D;--info:#96BEF0;--info-soft:#16293F;--gray:#B4C0C6;--gray-soft:#212E34;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em}
+p{margin:0}ul{margin:0;padding:0;list-style:none}dl,dd{margin:0}
+.muted{color:var(--muted)}.small{font-size:13.5px}.mono{font-family:var(--mono);font-size:.93em;overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:6px 20px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;min-width:0}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--deep);color:#7FD6EC;display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0;margin-left:auto}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"],.tab[aria-current="true"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 7px;font-weight:700}
+main{padding:20px clamp(16px,2vw,32px) 90px}
+@media (max-width:860px){#nav{margin-left:0;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:0 11px;font-size:14px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.ic{width:44px;padding:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font:inherit;font-weight:inherit;color:inherit;text-align:left;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px;overflow-wrap:anywhere}
+.lnk:hover{color:var(--accent-text)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.err{font-size:13px;color:var(--bad);font-weight:600}.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:84px}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--accent);margin:0}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin:0;flex:none}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
+.ck{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-size:14.5px}
+.ckc{display:inline-grid;place-items:center;min-width:44px;min-height:44px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:18px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:26px}
+.page-h>div{min-width:0}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500;min-width:0}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note>span{min-width:0;overflow-wrap:anywhere}
+.empty{text-align:center;padding:36px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+
+.cat{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:960px){.cat{grid-template-columns:290px minmax(0,1fr)}.filters{position:sticky;top:78px}}
+.filters summary{font-weight:700;font-size:16px;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px}
+.filters .fl{display:grid;gap:12px;margin-top:8px}
+.pgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr))}
+.pc{display:flex;flex-direction:column;gap:10px}
+.pc-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.pc h3{font-family:var(--mono);font-size:20px;min-width:0}
+.pc .actions{margin-top:auto}
+.pc .actions .btn{flex:1}
+.prg-l{display:flex;justify-content:space-between;font-size:13.5px;gap:8px}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.bar i.ok{background:var(--ok)}.bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));gap:10px}
+.specs div{background:var(--panel-2);border-radius:10px;padding:8px 12px;min-width:0}
+.specs dt{font-size:12.5px;color:var(--muted)}.specs dd{font-weight:600;overflow-wrap:anywhere}
+
+.two{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:1000px){.two{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+.line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.line:first-child{border-top:0}
+.line .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;grid-column:1/-1}
+.line .ctl select{flex:1 1 170px}.line .ctl input{flex:0 0 84px;width:84px}
+.tot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:2px solid var(--line);padding-top:12px;margin-top:4px;font-weight:600}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:660px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td select{min-width:140px}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}.kpi b{display:block;font-size:26px;font-family:var(--mono)}.kpi span{font-size:13.5px;color:var(--muted)}
+.sub{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.tools .field{flex:1 1 200px}
+.users{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr))}
+.ucard{display:flex;gap:12px;align-items:center;text-align:left;width:100%;min-height:72px;padding:12px 14px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);cursor:pointer}
+.ucard:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ucard>span:last-child{min-width:0}
+.av{width:42px;height:42px;border-radius:50%;background:var(--deep);color:var(--deep-ink);display:grid;place-items:center;font-weight:700;flex:none}
+.doc{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.doc:first-child{border-top:0}
+.doc>div{flex:1 1 220px;min-width:0}
+.doc b{overflow-wrap:anywhere}
+
+.blk{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px;background:var(--panel-2)}
+.blk-h{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.pv{border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:var(--bg)}
+.pv-bar{background:var(--panel-2);padding:8px 12px;font-size:12.5px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.pv section{padding:22px clamp(14px,3vw,30px);border-bottom:1px solid var(--line)}
+.pv section:last-child{border-bottom:0}
+.pv .hero{background:var(--deep);color:var(--deep-ink)}
+.pv .hero p{color:var(--deep-muted);margin-top:8px}
+.pv h2{font-size:22px}.pv h3{font-size:18px;margin-bottom:8px}
+.pv .fake{display:inline-block;margin-top:14px;padding:9px 16px;border-radius:10px;background:#7FD6EC;color:#04212A;font-weight:700}
+.pv .cta{text-align:center}.pv .cta .fake{background:var(--accent);color:var(--accent-ink)}
+.pv li{display:flex;gap:8px;align-items:flex-start;padding:3px 0}.pv li svg{color:var(--ok);margin-top:3px}
+.pv .mini{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr))}
+.pv .mini div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0}
+
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);padding:0;width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgba(5,15,20,.6)}
+.dlg-h{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dlg-h h2{font-size:19px;min-width:0;overflow-wrap:anywhere}
+.dlg-b{padding:18px 20px 20px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+pre{margin:0;background:var(--deep);color:var(--deep-ink);border-radius:12px;padding:14px;font:500 12.5px/1.55 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--deep);color:var(--deep-ink);padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);font-weight:600;font-size:14.5px;max-width:calc(100vw - 32px);z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{.demo-band,.top,#toast{display:none}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M20.7 7 3.3 17M9 4l3 3 3-3M9 20l3-3 3 3"/></svg></span><span>Altéfrio<small>Fluides frigorigènes &amp; rétrofit</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+</header>
+<main id="main"></main>
+<dialog id="dlg" aria-labelledby="dlg-t"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf=n=>Number(n).toLocaleString('fr-FR');
+const norm=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+const slug=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const IC={
+  grid:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/>',
+  cart:'<path d="M3 4h2l2.5 11h10L20 7H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  cog:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  up:'<path d="M12 19V5M6 11l6-6 6 6"/>',down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  doc:'<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v4h4M9 13h6M9 17h6"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  dl:'<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>',
+  check:'<path d="M5 12l5 5 9-10"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/>',out:'<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'
+};
+const ic=n=>'<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>';
+
+const FAMS=['HFO','Mélange HFO/HFC','HFC','Fluide naturel'];
+const APPS=['Froid commercial','Froid industriel','Climatisation','Pompes à chaleur','Transport frigorifique'];
+const CLS=['A1','A2L','A3'];
+const REPL=['R-404A','R-507A','R-134a','R-410A','R-22'];
+const PK=['Bouteille 12 kg','Bouteille 27 kg','Bouteille 61 kg','Conteneur 900 kg'];
+const PKN=['Bouteille 5 kg','Bouteille 12 kg','Bouteille 33 kg'];
+const P0=[
+ ['R-449A',1,1397,'A1',[0,1],['R-404A','R-507A'],-46,'Solution de rétrofit de référence pour les installations R-404A en froid positif et négatif, sans changement de compresseur.'],
+ ['R-448A',1,1387,'A1',[0,1],['R-404A','R-507A'],-45.9,'Alternative non inflammable pour la conversion des centrales frigorifiques de la grande distribution.'],
+ ['R-452A',1,2140,'A1',[4],['R-404A'],-47,'Conçu pour le transport frigorifique : températures de refoulement proches du R-404A.'],
+ ['R-513A',1,631,'A1',[0,2],['R-134a'],-29.2,'Remplaçant azéotropique du R-134a, sans glissement, pour groupes d\'eau glacée et froid positif.'],
+ ['R-450A',1,605,'A1',[0,2],['R-134a'],-23.4,'Mélange à faible PRG pour le rétrofit des installations R-134a en moyenne température.'],
+ ['R-407F',2,1825,'A1',[0],['R-404A','R-22'],-46.1,'HFC de transition pour la conversion rapide des installations commerciales existantes.'],
+ ['R-422D',2,2729,'A1',[0,2],['R-22'],-43.2,'Remplaçant direct du R-22 compatible avec les huiles minérales, pour prolonger les équipements anciens.'],
+ ['R-1234ze(E)',0,7,'A2L',[1,2,3],['R-134a'],-19,'HFO pur à très faible PRG pour refroidisseurs de liquide et pompes à chaleur de forte puissance.'],
+ ['R-1234yf',0,4,'A2L',[2],['R-134a'],-29.5,'HFO pur pour climatisation embarquée et petites unités de conditionnement d\'air.'],
+ ['R-454C',1,148,'A2L',[0],['R-404A'],-45.6,'PRG inférieur à 150 pour les nouveaux meubles et groupes de condensation.'],
+ ['R-455A',1,148,'A2L',[0],['R-404A'],-52,'Mélange faiblement inflammable pour équipements hermétiques neufs en froid commercial.'],
+ ['R-454B',1,466,'A2L',[2,3],['R-410A'],-50.9,'Successeur du R-410A pour les pompes à chaleur et la climatisation de nouvelle génération.'],
+ ['R-32',2,675,'A2L',[2,3],['R-410A'],-51.7,'Fluide pur à haut rendement pour les climatiseurs split et les pompes à chaleur résidentielles.'],
+ ['R-290 (propane)',3,3,'A3',[0,3],[],-42.1,'Hydrocarbure de haute pureté pour équipements à charge réduite et pompes à chaleur monoblocs.'],
+ ['R-744 (CO₂)',3,1,'A1',[0,1],[],-78.5,'Dioxyde de carbone de qualité frigorifique pour installations transcritiques et cascades.'],
+ ['R-600a (isobutane)',3,3,'A3',[0],[],-11.7,'Isobutane pour la réfrigération domestique et les petits meubles autonomes.']
+];
+const COS={tfa:{name:'Thermofroid Atlantique',siret:'812 345 678 00021',cp:'44800'},gnm:{name:'Givrenord Maintenance',siret:'790 112 233 00014',cp:'59160'}};
+const PERMS=[['tarifs','Tarifs & contrats'],['fds','Fiches de sécurité & guides'],['certifs','Certificats & traçabilité'],['factures','Factures'],['devis','Demander un devis']];
+const CATS=PERMS.slice(0,4);
+const catL=k=>(PERMS.find(p=>p[0]===k)||[,k])[1];
+const STAT=[['Nouvelle','b-info'],['En cours','b-warn'],['Devis envoyé','b-acc'],['Clôturée','b-gray']];
+const BLK={
+ hero:{l:'Bandeau d\'accroche',f:[['title','Titre'],['text','Texte','ta'],['btn','Libellé du bouton']],d:{title:'Votre titre d\'accroche',text:'Une phrase qui précise la promesse.',btn:'En savoir plus'}},
+ texte:{l:'Texte',f:[['title','Titre'],['text','Paragraphe','ta']],d:{title:'Nouveau paragraphe',text:'Rédigez ici votre contenu.'}},
+ args:{l:'Liste d\'arguments',f:[['title','Titre'],['items','Arguments (un par ligne)','ta']],d:{title:'Nos engagements',items:'Premier argument\nDeuxième argument'}},
+ produits:{l:'Sélection de fluides',f:[['title','Titre']],d:{title:'Fluides de rétrofit les plus demandés'}},
+ cta:{l:'Appel à l\'action',f:[['title','Phrase d\'appel'],['btn','Libellé du bouton']],d:{title:'Un projet de conversion ?',btn:'Demander un devis'}}
+};
+let S,toastT;
+
+function genRedirs(){
+  const r=[];
+  P0.forEach((p,i)=>{const s=slug(p[0]);r.push(['/produits/fiche.php?id='+(101+i),'/fluides/'+s],['/fr/gaz-refrigerant-'+s+'.html','/fluides/'+s],['/pdf/fds-'+s+'.pdf','/documents/fds/'+s]);});
+  APPS.forEach(a=>{const s=slug(a);r.push(['/applications/'+s+'.html','/fluides?application='+s],['/index.php?rub='+s,'/fluides?application='+s]);});
+  [['/index.php','/'],['/societe.html','/entreprise'],['/contact.php','/contact'],['/retrofit.html','/retrofit'],['/retrofit/r404a.html','/retrofit/r-404a'],['/retrofit/r22.html','/retrofit/r-22'],['/reglementation.html','/reglementation-f-gas'],['/recuperation.html','/services/recuperation-fluides'],['/analyse-fluides.html','/services/analyses'],['/mentions.html','/mentions-legales'],['/espace-pro/login.php','/espace-client'],['/devis.php','/demande-de-devis']].forEach(x=>r.push(x));
+  const T=['reglementation-f-gas','retrofit-r404a','quotas-hfc','recuperation-fluides','detection-fuites','conversion-r22','fluides-a2l','bilan-carbone-froid'];
+  let n=1;while(r.length<230){const t=T[n%T.length];r.push(['/actualites/'+(2016+n%9)+'/'+n+'-'+t+'.html','/actualites/'+t+'-'+n]);n++;}
+  return r.map((x,i)=>({id:i,from:x[0],to:x[1],st:i%33===7?'ko':i%11===3?'todo':'ok'}));
+}
+function seed(){
+  S={view:'cat',f:{q:'',fam:'',app:'',cls:'',repl:'',use:'',prg:3000,sort:'prg'},cart:[],sent:null,user:null,cTab:'docs',docCat:'',boTab:'quotes',seq:143,
+   products:P0.map((p,i)=>({id:i+1,name:p[0],fam:FAMS[p[1]],prg:p[2],cls:p[3],apps:p[4].map(a=>APPS[a]),repl:p[5],eb:p[6],desc:p[7],packs:p[1]===3?PKN:PK,pub:true})),
+   users:[
+    {id:1,name:'Claire Bonnet',co:'tfa',role:'Administratrice',email:'c.bonnet@thermofroid-atlantique.example',p:{tarifs:1,fds:1,certifs:1,factures:1,devis:1}},
+    {id:2,name:'Yanis Morel',co:'tfa',role:'Acheteur',email:'y.morel@thermofroid-atlantique.example',p:{tarifs:1,fds:1,certifs:0,factures:1,devis:1}},
+    {id:3,name:'Léo Garnier',co:'tfa',role:'Technicien',email:'l.garnier@thermofroid-atlantique.example',p:{tarifs:0,fds:1,certifs:1,factures:0,devis:0}},
+    {id:4,name:'Sophie Lambert',co:'gnm',role:'Administratrice',email:'s.lambert@givrenord.example',p:{tarifs:1,fds:1,certifs:1,factures:1,devis:1}},
+    {id:5,name:'Hugo Perrin',co:'gnm',role:'Technicien',email:'h.perrin@givrenord.example',p:{tarifs:0,fds:1,certifs:1,factures:0,devis:0}}],
+   docs:[
+    {id:1,t:'Grille tarifaire 2026 — Thermofroid Atlantique',cat:'tarifs',co:'tfa',d:'02/09/2026',s:'184 Ko'},
+    {id:2,t:'Contrat-cadre d\'approvisionnement 2026',cat:'tarifs',co:'tfa',d:'15/01/2026',s:'412 Ko'},
+    {id:3,t:'Certificat d\'analyse — lot 26-0418 (R-449A)',cat:'certifs',co:'tfa',d:'21/09/2026',s:'96 Ko'},
+    {id:4,t:'Bordereau de reprise des fluides usagés — T3 2026',cat:'certifs',co:'tfa',d:'01/10/2026',s:'73 Ko'},
+    {id:5,t:'Facture FA-2026-0912',cat:'factures',co:'tfa',d:'30/09/2026',s:'58 Ko'},
+    {id:6,t:'Facture FA-2026-0877',cat:'factures',co:'tfa',d:'31/08/2026',s:'61 Ko'},
+    {id:7,t:'Grille tarifaire 2026 — Givrenord Maintenance',cat:'tarifs',co:'gnm',d:'04/09/2026',s:'179 Ko'},
+    {id:8,t:'Certificat d\'analyse — lot 26-0502 (R-513A)',cat:'certifs',co:'gnm',d:'28/09/2026',s:'94 Ko'},
+    {id:9,t:'Facture FA-2026-0931',cat:'factures',co:'gnm',d:'06/10/2026',s:'57 Ko'},
+    {id:10,t:'Fiche de données de sécurité — R-449A',cat:'fds',co:null,d:'12/03/2026',s:'310 Ko'},
+    {id:11,t:'Fiche de données de sécurité — R-513A',cat:'fds',co:null,d:'12/03/2026',s:'298 Ko'},
+    {id:12,t:'Guide de rétrofit R-404A vers R-449A',cat:'fds',co:null,d:'20/05/2026',s:'1,2 Mo'}],
+   quotes:[
+    {ref:'DV-2026-0142',date:'09/10/2026',co:'tfa',company:'Thermofroid Atlantique',contact:'Yanis Morel',email:'y.morel@thermofroid-atlantique.example',lines:[{n:'R-449A',pack:'Bouteille 61 kg',qty:6},{n:'R-513A',pack:'Bouteille 12 kg',qty:4}],msg:'Conversion de deux centrales négatives en novembre.',st:'Nouvelle'},
+    {ref:'DV-2026-0141',date:'07/10/2026',co:null,company:'Clim\'Ouest Services',contact:'Nadia Ferrand',email:'n.ferrand@climouest.example',lines:[{n:'R-32',pack:'Bouteille 12 kg',qty:10}],msg:'',st:'En cours'},
+    {ref:'DV-2026-0139',date:'02/10/2026',co:'gnm',company:'Givrenord Maintenance',contact:'Sophie Lambert',email:'s.lambert@givrenord.example',lines:[{n:'R-448A',pack:'Conteneur 900 kg',qty:1}],msg:'Livraison sur site de Lomme.',st:'Devis envoyé'},
+    {ref:'DV-2026-0133',date:'18/09/2026',co:'tfa',company:'Thermofroid Atlantique',contact:'Claire Bonnet',email:'c.bonnet@thermofroid-atlantique.example',lines:[{n:'R-452A',pack:'Bouteille 27 kg',qty:3}],msg:'',st:'Clôturée'}],
+   blocks:[
+    {type:'hero',title:'Convertissez vos installations R-404A sans les remplacer',text:'Des fluides de rétrofit à PRG réduit, livrés partout en France sous 48 h, avec reprise de vos fluides usagés.',btn:'Voir les fluides de rétrofit'},
+    {type:'args',title:'Pourquoi passer au rétrofit',items:'Jusqu\'à 65 % de PRG en moins par rapport au R-404A\nConversion sans changement de compresseur\nAccompagnement technique et analyses de fluide'},
+    {type:'produits',title:'Fluides de rétrofit les plus demandés'},
+    {type:'cta',title:'Un projet de conversion ? Recevez un devis sous 24 h ouvrées.',btn:'Demander un devis'}],
+   redirs:genRedirs(),rf:{q:'',st:'',page:0}};
+}
+
+const use=p=>p.repl.length&&p.cls==='A1'?'Rétrofit':'Installation neuve';
+const kg=l=>((String(l.pack).match(/(\d+) kg/)||[0,0])[1]*l.qty);
+const prgCls=v=>v<150?'ok':v<750?'':v<2000?'warn':'bad';
+const clsB=c=>c==='A1'?'b-ok':c==='A2L'?'b-warn':'b-bad';
+const stB=s=>(STAT.find(x=>x[0]===s)||STAT[0])[1];
+const opts=(l,cur,all)=>(all?'<option value="">'+all+'</option>':'')+l.map(o=>{const v=Array.isArray(o)?o[0]:o,t=Array.isArray(o)?o[1]:o;return '<option value="'+esc(v)+'"'+(String(v)===String(cur)?' selected':'')+'>'+esc(t)+'</option>';}).join('');
+const fld=(n,l,v,o)=>{o=o||{};return '<div class="field'+(o.full?' full':'')+'"><label for="f-'+n+'">'+l+(o.opt?' <span class="muted">(facultatif)</span>':'')+'</label>'+(o.html||'<input id="f-'+n+'" name="'+n+'" type="'+(o.type||'text')+'" value="'+esc(v||'')+'" '+(o.at||'')+' aria-describedby="e-'+n+'">')+'<span class="err" id="e-'+n+'"></span></div>';};
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3400);}
+function openDlg(title,body){const d=$('#dlg');d.innerHTML='<div class="dlg-h"><h2 id="dlg-t">'+title+'</h2><button class="btn ic" type="button" data-act="close" aria-label="Fermer">'+ic('x')+'</button></div><div class="dlg-b">'+body+'</div>';if(!d.open)d.showModal();}
+function closeDlg(){const d=$('#dlg');if(d.open)d.close();}
+
+/* ---------- Rendu ---------- */
+function render(){
+  const fo=$('details.filters');if(fo)S.fo=fo.open;
+  const cartN=S.cart.reduce((a,l)=>a+l.qty,0);
+  $('#nav').innerHTML=[['cat','grid','Catalogue'],['devis','cart','Demande de devis'],['client','user','Espace client'],['bo','cog','Back-office']].map(t=>'<button type="button" class="tab" data-act="go" data-v="'+t[0]+'"'+(S.view===t[0]?' aria-current="page"':'')+'>'+ic(t[1])+t[2]+(t[0]==='devis'&&cartN?' <span class="cnt">'+cartN+'<span class="sr"> articles</span></span>':'')+'</button>').join('');
+  $('#main').innerHTML=({cat:vCat,devis:vDevis,client:vClient,bo:vBo})[S.view]();
+  if(S.view==='cat')renderGrid();
+  if(S.view==='bo'&&S.boTab==='redirs')renderRedirs();
+  if(S.view==='bo'&&S.boTab==='pages')renderPreview();
+}
+
+/* Catalogue */
+function vCat(){
+  const f=S.f,wide=S.fo===undefined?window.innerWidth>=960:S.fo;
+  return '<div class="page-h"><div><h1>Catalogue des fluides</h1><p class="muted">Filtrez par fluide à remplacer, application, classe de sécurité ou PRG, puis ajoutez à votre demande de devis.</p></div></div>'+
+  '<div class="cat"><details class="card filters"'+(wide?' open':'')+'><summary>'+ic('grid')+'Filtres</summary><div class="fl">'+
+   '<div class="field"><label for="q">Recherche</label><input id="q" type="search" data-f="q" value="'+esc(f.q)+'" placeholder="R-449A, propane, R404…" autocomplete="off"></div>'+
+   '<div class="field"><label for="frepl">Je remplace…</label><select id="frepl" data-f="repl">'+opts(REPL,f.repl,'Tous les fluides')+'</select></div>'+
+   '<div class="field"><label for="fuse">Usage</label><select id="fuse" data-f="use">'+opts(['Rétrofit','Installation neuve'],f.use,'Rétrofit et neuf')+'</select></div>'+
+   '<div class="field"><label for="fapp">Application</label><select id="fapp" data-f="app">'+opts(APPS,f.app,'Toutes les applications')+'</select></div>'+
+   '<div class="field"><label for="ffam">Famille</label><select id="ffam" data-f="fam">'+opts(FAMS,f.fam,'Toutes les familles')+'</select></div>'+
+   '<div class="field"><label for="fcls">Classe de sécurité</label><select id="fcls" data-f="cls">'+opts([['A1','A1 — non inflammable'],['A2L','A2L — légèrement inflammable'],['A3','A3 — inflammable']],f.cls,'Toutes les classes')+'</select></div>'+
+   '<div class="field"><label for="fprg">PRG maximal : <span id="prg-o">'+(f.prg>=3000?'sans limite':nf(f.prg))+'</span></label><input id="fprg" type="range" min="0" max="3000" step="50" value="'+f.prg+'" data-f="prg"><div class="chips">'+[150,750,2500].map(v=>'<button type="button" class="chip" data-act="prg" data-v="'+v+'" aria-pressed="'+(f.prg===v)+'">≤ '+nf(v)+'</button>').join('')+'</div></div>'+
+   '<div class="field"><label for="fsort">Trier par</label><select id="fsort" data-f="sort">'+opts([['prg','PRG croissant'],['prgd','PRG décroissant'],['name','Désignation']],f.sort)+'</select></div>'+
+   '<button type="button" class="btn" data-act="clearf">Effacer les filtres</button>'+
+  '</div></details><div class="stack"><p id="rcount" class="muted" role="status" aria-live="polite"></p><div id="grid" class="pgrid"></div><p class="small muted">PRG : potentiel de réchauffement global sur 100 ans. Valeurs indicatives de démonstration.</p></div></div>';
+}
+function filtered(){
+  const f=S.f,q=norm(f.q);
+  const l=S.products.filter(p=>p.pub&&(!q||norm(p.name+p.fam+p.apps.join('')+p.repl.join('')).includes(q))&&(!f.fam||p.fam===f.fam)&&(!f.app||p.apps.includes(f.app))&&(!f.cls||p.cls===f.cls)&&(!f.repl||p.repl.includes(f.repl))&&(!f.use||use(p)===f.use)&&(f.prg>=3000||p.prg<=f.prg));
+  return l.sort((a,b)=>f.sort==='name'?a.name.localeCompare(b.name,'fr',{numeric:true}):f.sort==='prgd'?b.prg-a.prg:a.prg-b.prg);
+}
+function renderGrid(){
+  const l=filtered(),g=$('#grid');if(!g)return;
+  $('#rcount').textContent=l.length+(l.length>1?' fluides correspondent':' fluide correspond')+' à votre recherche';
+  const o=$('#prg-o');if(o)o.textContent=S.f.prg>=3000?'sans limite':nf(S.f.prg);
+  g.innerHTML=l.length?l.map(p=>'<article class="card pc"><div class="pc-h"><h3><button type="button" class="lnk" data-act="prod" data-id="'+p.id+'">'+esc(p.name)+'</button></h3><span class="badge '+clsB(p.cls)+'">Classe '+p.cls+'</span></div>'+
+    '<div class="tags"><span class="badge b-gray">'+esc(p.fam)+'</span><span class="badge '+(use(p)==='Rétrofit'?'b-acc':'b-info')+'">'+use(p)+'</span></div>'+
+    '<div><div class="prg-l"><span class="muted">PRG</span><b>'+nf(p.prg)+'</b></div><div class="bar"><i class="'+prgCls(p.prg)+'" style="width:'+Math.max(2,Math.min(100,p.prg/30))+'%"></i></div></div>'+
+    '<p class="small">'+(p.repl.length?'<span class="muted">Remplace :</span> <b>'+esc(p.repl.join(', '))+'</b>':'<span class="muted">Fluide naturel, sans équivalent HFC direct</span>')+'</p>'+
+    '<p class="small muted">'+esc(p.apps.join(' · '))+'</p>'+
+    '<div class="actions"><button type="button" class="btn sm" data-act="prod" data-id="'+p.id+'">Fiche</button><button type="button" class="btn sm primary" data-act="add" data-id="'+p.id+'">'+ic('plus')+'Devis<span class="sr"> : ajouter '+esc(p.name)+'</span></button></div></article>').join('')
+   :'<div class="empty" style="grid-column:1/-1"><p>Aucun fluide ne correspond à ces critères.</p><p style="margin-top:10px"><button type="button" class="btn" data-act="clearf">Effacer les filtres</button></p></div>';
+}
+function prodDlg(id){
+  const p=S.products.find(x=>x.id===id);if(!p)return;
+  openDlg(esc(p.name),'<p class="mono muted">altefrio.example/fluides/'+slug(p.name)+'</p><p>'+esc(p.desc)+'</p>'+
+   '<dl class="specs"><div><dt>Famille</dt><dd>'+esc(p.fam)+'</dd></div><div><dt>PRG (100 ans)</dt><dd>'+nf(p.prg)+'</dd></div><div><dt>Classe de sécurité</dt><dd>'+p.cls+'</dd></div><div><dt>Point d\'ébullition</dt><dd>'+String(p.eb).replace('.',',').replace('-','−')+' °C</dd></div><div><dt>Remplace</dt><dd>'+(p.repl.length?esc(p.repl.join(', ')):'—')+'</dd></div><div><dt>Usage</dt><dd>'+use(p)+'</dd></div><div><dt>Applications</dt><dd>'+esc(p.apps.join(', '))+'</dd></div></dl>'+
+   '<form data-form="addp" data-id="'+p.id+'" class="fgrid" novalidate><div class="field"><label for="ap-pack">Conditionnement</label><select id="ap-pack" name="pack">'+opts(p.packs,p.packs[0])+'</select></div><div class="field"><label for="ap-qty">Quantité</label><input id="ap-qty" name="qty" type="number" min="1" max="99" value="1" inputmode="numeric"></div><div class="field" style="justify-content:flex-end"><button class="btn primary" type="submit">'+ic('plus')+'Ajouter au devis</button></div></form>'+
+   '<div class="note"><span>'+ic('info')+'</span><span>Cette fiche est rendue côté serveur : le contenu est présent dans le HTML avant tout JavaScript. <button type="button" class="lnk" data-act="ssr" data-id="'+p.id+'">Voir le HTML reçu par un robot</button></span></div>');
+}
+function ssrDlg(id){
+  const p=S.products.find(x=>x.id===id),s=slug(p.name),t=p.name+(p.repl.length?' — remplaçant du '+p.repl[0]:' — fluide frigorigène')+' | Altéfrio';
+  const h='HTTP/1.1 200 OK\ncontent-type: text/html; charset=utf-8\n\n<title>'+t+'</title>\n<meta name="description" content="'+p.desc+'">\n<link rel="canonical" href="https://www.altefrio.example/fluides/'+s+'">\n<script type="application/ld+json">\n{"@context":"https://schema.org","@type":"Product",\n "name":"'+p.name+'","category":"'+p.fam+'"}\n<\/script>\n…\n<h1>'+p.name+'</h1>\n<p>'+p.desc+'</p>\n<dl><dt>PRG</dt><dd>'+p.prg+'</dd><dt>Classe</dt><dd>'+p.cls+'</dd></dl>';
+  openDlg('Rendu serveur — '+esc(p.name),'<p class="muted">Aperçu simulé de la réponse du serveur, telle qu\'un moteur de recherche la reçoit sans exécuter de JavaScript. C\'est ce point qui est contrôlé en recette.</p><pre>'+esc(h)+'</pre><div class="actions"><button type="button" class="btn" data-act="prod" data-id="'+p.id+'">Retour à la fiche</button></div>');
+}
+
+/* Demande de devis */
+function vDevis(){
+  if(S.sent)return '<div class="card" style="text-align:center;padding:36px 18px"><p><span class="badge b-ok">'+ic('check')+'Demande enregistrée</span></p><h1 style="margin:14px 0 8px;font-size:24px">Votre demande <span class="mono">'+S.sent+'</span> a bien été transmise</h1><p class="muted">Un email de confirmation vous est envoyé (simulation). Notre équipe revient vers vous sous 24 h ouvrées.</p><div class="actions" style="justify-content:center;margin-top:18px"><button type="button" class="btn primary" data-act="go" data-v="bo">Voir la demande dans le back-office</button><button type="button" class="btn" data-act="go" data-v="client">Suivre dans l\'espace client</button><button type="button" class="btn" data-act="go" data-v="cat">Retour au catalogue</button></div></div>';
+  if(!S.cart.length)return '<div class="page-h"><div><h1>Demande de devis</h1></div></div><div class="empty"><p>Votre demande est vide pour l\'instant.</p><p style="margin-top:10px"><button type="button" class="btn primary" data-act="go" data-v="cat">Parcourir le catalogue</button></p></div>';
+  const u=S.user,c=u?COS[u.co]:null,blocked=u&&!u.p.devis;
+  const tot=S.cart.reduce((a,l)=>a+kg(l),0);
+  return '<div class="page-h"><div><h1>Demande de devis</h1><p class="muted">Ajustez les quantités, puis envoyez votre demande : aucun paiement en ligne.</p></div></div><div class="two">'+
+  '<section class="card"><div class="card-h"><h2>Fluides sélectionnés</h2><button type="button" class="btn sm" data-act="go" data-v="cat">'+ic('plus')+'Ajouter un fluide</button></div><div>'+
+   S.cart.map((l,i)=>{const p=S.products.find(x=>x.id===l.pid);return '<div class="line"><div><b class="mono">'+esc(p.name)+'</b><div class="small muted">'+esc(p.fam)+' · PRG '+nf(p.prg)+' · '+nf(kg(l))+' kg</div></div><button type="button" class="btn ic" data-act="rm" data-i="'+i+'" aria-label="Retirer '+esc(p.name)+'">'+ic('trash')+'</button><div class="ctl"><label class="sr" for="cp'+i+'">Conditionnement de '+esc(p.name)+'</label><select id="cp'+i+'" data-cp="'+i+'">'+opts(p.packs,l.pack)+'</select><label class="sr" for="cq'+i+'">Quantité de '+esc(p.name)+'</label><input id="cq'+i+'" type="number" min="1" max="99" value="'+l.qty+'" data-cq="'+i+'" inputmode="numeric"></div></div>';}).join('')+
+   '</div><div class="tot"><span>'+S.cart.length+' ligne'+(S.cart.length>1?'s':'')+'</span><span>Masse totale : '+nf(tot)+' kg</span></div></section>'+
+  '<section class="card"><div class="card-h"><h2>Vos coordonnées</h2>'+(u?'<span class="badge b-acc">Prérempli : '+esc(u.name)+'</span>':'')+'</div>'+
+   (blocked?'<div class="note warn" style="margin-bottom:12px"><span>'+ic('lock')+'</span><span>Votre compte n\'a pas le droit « Demander un devis ». Contactez l\'administrateur de votre entreprise.</span></div>':'')+
+   '<form data-form="quote" class="fgrid" novalidate>'+fld('company','Raison sociale',c&&c.name,{at:'autocomplete="organization"'})+fld('siret','SIRET',c&&c.siret,{at:'inputmode="numeric" placeholder="14 chiffres"'})+fld('contact','Nom et prénom',u&&u.name,{at:'autocomplete="name"'})+fld('email','Email professionnel',u&&u.email,{type:'email',at:'autocomplete="email"'})+fld('cp','Code postal de livraison',c&&c.cp,{at:'inputmode="numeric" maxlength="5"'})+
+   fld('msg','Précisions',null,{full:1,opt:1,html:'<textarea id="f-msg" name="msg" placeholder="Installation concernée, date souhaitée, reprise de fluides usagés…"></textarea>'})+
+   '<div class="field full"><label class="ck"><input type="checkbox" name="cap" id="f-cap" aria-describedby="e-cap"><span>Mon entreprise détient une attestation de capacité en cours de validité.</span></label><span class="err" id="e-cap"></span></div>'+
+   '<div class="field full"><button type="submit" class="btn primary"'+(blocked?' disabled':'')+'>Envoyer la demande de devis</button></div></form></section></div>';
+}
+
+/* Espace client */
+function vClient(){
+  const u=S.user;
+  if(!u)return '<div class="page-h"><div><h1>Espace client</h1><p class="muted">Choisissez un compte de test : chaque utilisateur ne voit que les documents de son entreprise, selon ses droits.</p></div></div>'+
+   Object.keys(COS).map(k=>'<section class="card" style="margin-bottom:16px"><div class="card-h"><h2>'+esc(COS[k].name)+'</h2><span class="badge b-gray">SIRET '+COS[k].siret+'</span></div><div class="users">'+S.users.filter(x=>x.co===k).map(x=>'<button type="button" class="ucard" data-act="login" data-id="'+x.id+'"><span class="av" aria-hidden="true">'+x.name.split(' ').map(w=>w[0]).join('')+'</span><span><b>'+esc(x.name)+'</b><br><span class="small muted">'+x.role+' · '+PERMS.filter(p=>x.p[p[0]]).length+' droits sur '+PERMS.length+'</span></span></button>').join('')+'</div></section>').join('')+
+   '<div class="note"><span>'+ic('lock')+'</span><span>Connexion simulée. En production : authentification Supabase et règles de sécurité au niveau des lignes (RLS) — le cloisonnement par entreprise est appliqué par la base, pas seulement par l\'interface.</span></div>';
+  const admin=u.role==='Administratrice',co=COS[u.co];
+  const tabs=[['docs','Documents'],['quotes','Demandes de devis']].concat(admin?[['team','Équipe & droits']]:[]);
+  let b='';
+  if(S.cTab==='docs'){
+    const mine=S.docs.filter(d=>d.co===u.co||d.co===null),vis=mine.filter(d=>u.p[d.cat]&&(!S.docCat||d.cat===S.docCat));
+    const locked=CATS.filter(c=>!u.p[c[0]]&&mine.some(d=>d.cat===c[0]));
+    b='<section class="card"><div class="chips" style="margin-bottom:10px"><button type="button" class="chip" data-act="dcat" data-v="" aria-pressed="'+(!S.docCat)+'">Tous</button>'+CATS.filter(c=>u.p[c[0]]).map(c=>'<button type="button" class="chip" data-act="dcat" data-v="'+c[0]+'" aria-pressed="'+(S.docCat===c[0])+'">'+c[1]+'</button>').join('')+'</div>'+
+     (vis.length?vis.map(d=>'<div class="doc"><span class="av" aria-hidden="true" style="border-radius:10px">'+ic('doc')+'</span><div><b>'+esc(d.t)+'</b><div class="small muted">'+catL(d.cat)+' · '+d.d+' · PDF '+d.s+'</div></div><span class="badge '+(d.co?'b-warn':'b-gray')+'">'+(d.co?ic('lock')+'Confidentiel':'Tous clients')+'</span><button type="button" class="btn sm" data-act="dl" data-id="'+d.id+'">'+ic('dl')+'Télécharger</button></div>').join(''):'<div class="empty">Aucun document dans cette catégorie.</div>')+
+     locked.map(c=>'<div class="note warn" style="margin-top:10px"><span>'+ic('lock')+'</span><span>'+mine.filter(d=>d.cat===c[0]).length+' document(s) « '+c[1]+' » : accès non accordé par l\'administrateur de votre entreprise.</span></div>').join('')+'</section>';
+  }else if(S.cTab==='quotes'){
+    const q=S.quotes.filter(x=>x.co===u.co);
+    b='<section class="card"><div class="card-h"><h2>Demandes de '+esc(co.name)+'</h2>'+(u.p.devis?'<button type="button" class="btn sm primary" data-act="go" data-v="cat">'+ic('plus')+'Nouvelle demande</button>':'<span class="badge b-warn">'+ic('lock')+'Droit « Demander un devis » non accordé</span>')+'</div>'+
+     (q.length?'<div class="tw"><table><thead><tr><th>Référence</th><th>Date</th><th>Demandeur</th><th>Fluides</th><th>Statut</th></tr></thead><tbody>'+q.map(x=>'<tr><td><button type="button" class="lnk mono" data-act="qd" data-ref="'+x.ref+'">'+x.ref+'</button></td><td>'+x.date+'</td><td>'+esc(x.contact)+'</td><td>'+esc(x.lines.map(l=>l.qty+' × '+l.n).join(', '))+'</td><td><span class="badge '+stB(x.st)+'">'+x.st+'</span></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Aucune demande pour le moment.</div>')+'</section>';
+  }else{
+    b='<section class="card"><div class="card-h"><h2>Droits des membres</h2></div><p class="muted" style="margin-bottom:12px">Cochez ce que chaque collaborateur peut consulter. Le changement est immédiat : reconnectez-vous avec son compte pour le vérifier.</p><div class="tw"><table><thead><tr><th>Membre</th>'+PERMS.map(p=>'<th>'+p[1]+'</th>').join('')+'</tr></thead><tbody>'+
+     S.users.filter(x=>x.co===u.co).map(x=>'<tr><td><b>'+esc(x.name)+'</b><div class="small muted">'+x.role+'</div></td>'+PERMS.map(p=>'<td><label class="ckc"><input type="checkbox" data-perm="'+x.id+':'+p[0]+'"'+(x.p[p[0]]?' checked':'')+(x.id===u.id?' disabled':'')+'><span class="sr">'+p[1]+' pour '+esc(x.name)+'</span></label></td>').join('')+'</tr>').join('')+'</tbody></table></div></section>';
+  }
+  return '<div class="page-h"><div><h1>'+esc(co.name)+'</h1><p class="muted">Connecté : <b>'+esc(u.name)+'</b> · '+u.role+'</p></div><button type="button" class="btn" data-act="logout">'+ic('out')+'Changer de compte</button></div>'+
+   '<div class="sub">'+tabs.map(t=>'<button type="button" class="tab" data-act="ctab" data-v="'+t[0]+'"'+(S.cTab===t[0]?' aria-current="true"':'')+'>'+t[1]+'</button>').join('')+'</div>'+b;
+}
+
+/* Back-office */
+function vBo(){
+  const R=S.redirs,ok=R.filter(r=>r.st==='ok').length;
+  const tabs=[['quotes','Demandes de devis'],['products','Produits'],['pages','Pages (blocs)'],['docs','Documents'],['redirs','Redirections']];
+  let b='';
+  if(S.boTab==='quotes'){
+    b='<div class="tw"><table><thead><tr><th>Référence</th><th>Date</th><th>Entreprise</th><th>Contact</th><th>Contenu</th><th>Statut</th></tr></thead><tbody>'+S.quotes.map(q=>'<tr><td><button type="button" class="lnk mono" data-act="qd" data-ref="'+q.ref+'">'+q.ref+'</button></td><td>'+q.date+'</td><td><b>'+esc(q.company)+'</b>'+(q.co?'':'<div class="small muted">Sans compte client</div>')+'</td><td>'+esc(q.contact)+'<div class="small muted">'+esc(q.email)+'</div></td><td>'+q.lines.length+' ligne'+(q.lines.length>1?'s':'')+' · '+nf(q.lines.reduce((a,l)=>a+kg(l),0))+' kg</td><td><label class="sr" for="qs'+q.ref+'">Statut de '+q.ref+'</label><select id="qs'+q.ref+'" data-qs="'+q.ref+'">'+opts(STAT.map(s=>s[0]),q.st)+'</select></td></tr>').join('')+'</tbody></table></div>';
+  }else if(S.boTab==='products'){
+    b='<div class="tools"><p class="muted" style="flex:1 1 240px;min-width:0">Un fluide dépublié disparaît immédiatement du catalogue.</p><button type="button" class="btn primary" data-act="pedit" data-id="0">'+ic('plus')+'Nouveau fluide</button></div><div class="tw"><table><thead><tr><th>Désignation</th><th>Famille</th><th>PRG</th><th>Classe</th><th>Remplace</th><th>Publié</th><th><span class="sr">Actions</span></th></tr></thead><tbody>'+S.products.map(p=>'<tr><td><b class="mono">'+esc(p.name)+'</b></td><td>'+esc(p.fam)+'</td><td>'+nf(p.prg)+'</td><td><span class="badge '+clsB(p.cls)+'">'+p.cls+'</span></td><td>'+(esc(p.repl.join(', '))||'—')+'</td><td><label class="ckc"><input type="checkbox" data-pub="'+p.id+'"'+(p.pub?' checked':'')+'><span class="sr">Publier '+esc(p.name)+'</span></label></td><td><button type="button" class="btn sm" data-act="pedit" data-id="'+p.id+'">Modifier</button></td></tr>').join('')+'</tbody></table></div>';
+  }else if(S.boTab==='pages'){
+    b='<div class="two"><section class="card stack"><div class="card-h" style="margin:0"><h2>Page « Rétrofit »</h2><button type="button" class="btn sm primary" data-act="publish">Publier</button></div>'+
+     S.blocks.map((k,i)=>'<div class="blk"><div class="blk-h"><b>'+(i+1)+'. '+BLK[k.type].l+'</b><span class="actions"><button type="button" class="btn ic" data-act="bup" data-i="'+i+'" aria-label="Monter le bloc '+(i+1)+'"'+(i?'':' disabled')+'>'+ic('up')+'</button><button type="button" class="btn ic" data-act="bdown" data-i="'+i+'" aria-label="Descendre le bloc '+(i+1)+'"'+(i<S.blocks.length-1?'':' disabled')+'>'+ic('down')+'</button><button type="button" class="btn ic danger" data-act="bdel" data-i="'+i+'" aria-label="Supprimer le bloc '+(i+1)+'">'+ic('trash')+'</button></span></div>'+
+      BLK[k.type].f.map(f=>'<div class="field"><label for="b'+i+f[0]+'">'+f[1]+'</label>'+(f[2]?'<textarea id="b'+i+f[0]+'" data-bk="'+i+':'+f[0]+'">'+esc(k[f[0]])+'</textarea>':'<input type="text" id="b'+i+f[0]+'" data-bk="'+i+':'+f[0]+'" value="'+esc(k[f[0]])+'">')+'</div>').join('')+'</div>').join('')+
+     '<div class="tools" style="margin:0"><div class="field"><label for="nb">Ajouter un bloc</label><select id="nb">'+opts(Object.keys(BLK).map(k=>[k,BLK[k].l]))+'</select></div><button type="button" class="btn" data-act="badd">'+ic('plus')+'Ajouter</button></div></section>'+
+     '<section class="stack"><div class="pv"><div class="pv-bar mono">Aperçu en direct — altefrio.example/retrofit</div><div id="pv"></div></div><div class="note"><span>'+ic('info')+'</span><span>Maquette du principe de l\'éditeur de blocs Puck : l\'équipe marketing compose ses pages à partir de blocs développés aux couleurs de votre charte, sans toucher au code.</span></div></section></div>';
+  }else if(S.boTab==='docs'){
+    b='<div class="two"><div class="tw"><table><thead><tr><th>Document</th><th>Catégorie</th><th>Visible par</th><th>Date</th><th><span class="sr">Actions</span></th></tr></thead><tbody>'+S.docs.map(d=>'<tr><td><b>'+esc(d.t)+'</b></td><td>'+catL(d.cat)+'</td><td><span class="badge '+(d.co?'b-warn':'b-gray')+'">'+(d.co?esc(COS[d.co].name):'Tous les clients')+'</span></td><td>'+d.d+'</td><td><button type="button" class="btn ic danger" data-act="ddel" data-id="'+d.id+'" aria-label="Supprimer '+esc(d.t)+'">'+ic('trash')+'</button></td></tr>').join('')+'</tbody></table></div>'+
+     '<section class="card"><div class="card-h"><h2>Déposer un document</h2></div><form data-form="doc" class="fgrid" novalidate>'+fld('t','Intitulé',null,{full:1})+fld('cat','Catégorie',null,{html:'<select id="f-cat" name="cat">'+opts(CATS)+'</select>'})+fld('co','Entreprise destinataire',null,{html:'<select id="f-co" name="co">'+opts(Object.keys(COS).map(k=>[k,COS[k].name]),'','Tous les clients')+'</select>'})+'<div class="field full"><button type="submit" class="btn primary">Déposer (téléversement simulé)</button></div></form><p class="small muted" style="margin-top:10px">Le document n\'apparaît que pour les membres de l\'entreprise choisie disposant du droit sur la catégorie.</p></section></div>';
+  }else{
+    b='<div class="tools"><div class="field"><label for="rq">Rechercher une adresse</label><input id="rq" type="search" data-rf="q" value="'+esc(S.rf.q)+'" placeholder="/produits/fiche.php, actualites…" autocomplete="off"></div><div class="field" style="flex:0 1 200px"><label for="rs">État</label><select id="rs" data-rf="st">'+opts([['ok','Vérifiées'],['todo','À tester'],['ko','À corriger']],S.rf.st,'Tous les états')+'</select></div><button type="button" class="btn primary" data-act="rtest">Tester les redirections en attente</button></div><div id="rtable"></div>';
+  }
+  return '<div class="page-h"><div><h1>Back-office</h1><p class="muted">Connecté : Équipe marketing (accès simulé)</p></div></div>'+
+   '<div class="kpis"><div class="card kpi"><b>'+S.quotes.filter(q=>q.st==='Nouvelle').length+'</b><span>Nouvelles demandes de devis</span></div><div class="card kpi"><b>'+S.products.filter(p=>p.pub).length+'/'+S.products.length+'</b><span>Fluides publiés</span></div><div class="card kpi"><b>'+S.docs.length+'</b><span>Documents clients</span></div><div class="card kpi"><b>'+ok+'/'+R.length+'</b><span>Redirections 301 vérifiées</span></div></div>'+
+   '<div class="sub">'+tabs.map(t=>'<button type="button" class="tab" data-act="btab" data-v="'+t[0]+'"'+(S.boTab===t[0]?' aria-current="true"':'')+'>'+t[1]+'</button>').join('')+'</div>'+b;
+}
+function renderPreview(){
+  const el=$('#pv');if(!el)return;
+  el.innerHTML=S.blocks.map(k=>{
+    if(k.type==='hero')return '<section class="hero"><h2>'+esc(k.title)+'</h2><p>'+esc(k.text)+'</p><span class="fake">'+esc(k.btn)+'</span></section>';
+    if(k.type==='texte')return '<section><h3>'+esc(k.title)+'</h3><p>'+esc(k.text)+'</p></section>';
+    if(k.type==='args')return '<section><h3>'+esc(k.title)+'</h3><ul>'+String(k.items).split('\n').filter(x=>x.trim()).map(x=>'<li>'+ic('check')+'<span>'+esc(x)+'</span></li>').join('')+'</ul></section>';
+    if(k.type==='produits')return '<section><h3>'+esc(k.title)+'</h3><div class="mini">'+S.products.filter(p=>p.pub&&use(p)==='Rétrofit').slice(0,4).map(p=>'<div><b class="mono">'+esc(p.name)+'</b><div class="small muted">PRG '+nf(p.prg)+'</div></div>').join('')+'</div></section>';
+    return '<section class="cta"><h3>'+esc(k.title)+'</h3><span class="fake">'+esc(k.btn)+'</span></section>';
+  }).join('')||'<section class="muted">Page vide : ajoutez un premier bloc.</section>';
+}
+function renderRedirs(){
+  const el=$('#rtable');if(!el)return;
+  const f=S.rf,q=f.q.trim().toLowerCase(),l=S.redirs.filter(r=>(!f.st||r.st===f.st)&&(!q||(r.from+' '+r.to).toLowerCase().includes(q)));
+  const per=25,pages=Math.max(1,Math.ceil(l.length/per));if(f.page>=pages)f.page=pages-1;
+  const L={ok:['b-ok','301 → 200 vérifiée'],todo:['b-gray','À tester'],ko:['b-bad','Cible introuvable (404)']};
+  el.innerHTML='<p class="muted" role="status" style="margin-bottom:8px">'+l.length+' adresse'+(l.length>1?'s':'')+' sur '+S.redirs.length+' · '+S.redirs.filter(r=>r.st==='todo').length+' à tester · '+S.redirs.filter(r=>r.st==='ko').length+' à corriger</p>'+
+   (l.length?'<div class="tw"><table><thead><tr><th>Ancienne adresse</th><th>Nouvelle adresse</th><th>État</th><th><span class="sr">Actions</span></th></tr></thead><tbody>'+l.slice(f.page*per,f.page*per+per).map(r=>'<tr><td class="mono">'+esc(r.from)+'</td><td class="mono">'+esc(r.to)+'</td><td><span class="badge '+L[r.st][0]+'">'+L[r.st][1]+'</span></td><td><button type="button" class="btn sm" data-act="redit" data-id="'+r.id+'">'+(r.st==='ko'?'Corriger':'Modifier')+'</button></td></tr>').join('')+'</tbody></table></div><div class="actions" style="justify-content:space-between;margin-top:12px"><button type="button" class="btn" data-act="rpage" data-v="-1"'+(f.page?'':' disabled')+'>Précédent</button><span class="muted">Page '+(f.page+1)+' / '+pages+'</span><button type="button" class="btn" data-act="rpage" data-v="1"'+(f.page<pages-1?'':' disabled')+'>Suivant</button></div>':'<div class="empty">Aucune redirection ne correspond.</div>');
+}
+function quoteDlg(ref){
+  const q=S.quotes.find(x=>x.ref===ref);if(!q)return;
+  openDlg('Demande '+q.ref,'<dl class="specs"><div><dt>Entreprise</dt><dd>'+esc(q.company)+'</dd></div><div><dt>Contact</dt><dd>'+esc(q.contact)+'</dd></div><div><dt>Email</dt><dd>'+esc(q.email)+'</dd></div><div><dt>Date</dt><dd>'+q.date+'</dd></div><div><dt>Statut</dt><dd><span class="badge '+stB(q.st)+'">'+q.st+'</span></dd></div></dl><div class="tw"><table style="min-width:420px"><thead><tr><th>Fluide</th><th>Conditionnement</th><th>Quantité</th><th>Masse</th></tr></thead><tbody>'+q.lines.map(l=>'<tr><td class="mono">'+esc(l.n)+'</td><td>'+esc(l.pack)+'</td><td>'+l.qty+'</td><td>'+nf(kg(l))+' kg</td></tr>').join('')+'</tbody></table></div>'+(q.msg?'<p><span class="muted">Précisions :</span> '+esc(q.msg)+'</p>':''));
+}
+function prodEditDlg(id){
+  const p=S.products.find(x=>x.id===id)||{name:'',fam:FAMS[1],prg:'',cls:'A1',desc:'',repl:[]};
+  openDlg(id?'Modifier '+esc(p.name):'Nouveau fluide','<form data-form="product" data-id="'+id+'" class="fgrid" novalidate>'+fld('name','Désignation',p.name,{at:'placeholder="R-000A"'})+fld('fam','Famille',null,{html:'<select id="f-fam" name="fam">'+opts(FAMS,p.fam)+'</select>'})+fld('prg','PRG (100 ans)',p.prg,{type:'number',at:'min="0" inputmode="numeric"'})+fld('cls','Classe de sécurité',null,{html:'<select id="f-cls" name="cls">'+opts(CLS,p.cls)+'</select>'})+fld('repl','Remplace',null,{html:'<select id="f-repl" name="repl">'+opts(REPL,p.repl[0]||'','Aucun fluide')+'</select>'})+fld('desc','Description',null,{full:1,html:'<textarea id="f-desc" name="desc" aria-describedby="e-desc">'+esc(p.desc)+'</textarea>'})+'<div class="field full actions" style="flex-direction:row"><button type="submit" class="btn primary">Enregistrer</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>');
+}
+function redirDlg(id){
+  const r=S.redirs.find(x=>x.id===id);
+  openDlg('Redirection 301','<p><span class="muted">Ancienne adresse :</span> <span class="mono">'+esc(r.from)+'</span></p>'+(r.st==='ko'?'<div class="note warn"><span>'+ic('info')+'</span><span>La cible actuelle renvoie une erreur 404 : indiquez une page existante du nouveau site.</span></div>':'')+'<form data-form="redir" data-id="'+id+'" class="stack" novalidate>'+fld('to','Nouvelle adresse',r.st==='ko'?'/fluides':r.to,{at:'placeholder="/fluides/r-449a"'})+'<div class="actions"><button type="submit" class="btn primary">Enregistrer et tester</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>');
+}
+
+/* ---------- Actions ---------- */
+function addCart(pid,pack,qty){
+  const p=S.products.find(x=>x.id===pid);pack=pack||p.packs[0];qty=Math.max(1,Math.min(99,qty||1));
+  const l=S.cart.find(x=>x.pid===pid&&x.pack===pack);if(l)l.qty=Math.min(99,l.qty+qty);else S.cart.push({pid:pid,pack:pack,qty:qty});
+  S.sent=null;toast(p.name+' ajouté à la demande de devis');
+}
+function go(v){S.view=v;if(v!=='devis'&&S.sent)S.sent=null;closeDlg();render();window.scrollTo(0,0);}
+const ACT={
+  reset(){seed();closeDlg();render();window.scrollTo(0,0);toast('Démo réinitialisée');},
+  go(e){go(e.dataset.v);},close(){closeDlg();},
+  prg(e){const v=+e.dataset.v;S.f.prg=S.f.prg===v?3000:v;render();},
+  clearf(){S.f={q:'',fam:'',app:'',cls:'',repl:'',use:'',prg:3000,sort:S.f.sort};render();},
+  prod(e){prodDlg(+e.dataset.id);},ssr(e){ssrDlg(+e.dataset.id);},
+  add(e){addCart(+e.dataset.id);render();},
+  rm(e){S.cart.splice(+e.dataset.i,1);render();},
+  login(e){S.user=S.users.find(u=>u.id===+e.dataset.id);S.cTab='docs';S.docCat='';render();toast('Connecté en tant que '+S.user.name+' (simulation)');},
+  logout(){S.user=null;render();},
+  ctab(e){S.cTab=e.dataset.v;render();},dcat(e){S.docCat=e.dataset.v;render();},
+  dl(e){const d=S.docs.find(x=>x.id===+e.dataset.id);toast('Téléchargement simulé : '+d.t+' (lien signé, valable 5 min)');},
+  qd(e){quoteDlg(e.dataset.ref);},
+  btab(e){S.boTab=e.dataset.v;render();},
+  pedit(e){prodEditDlg(+e.dataset.id);},
+  bup(e){const i=+e.dataset.i,b=S.blocks;b.splice(i-1,0,b.splice(i,1)[0]);render();},
+  bdown(e){const i=+e.dataset.i,b=S.blocks;b.splice(i+1,0,b.splice(i,1)[0]);render();},
+  bdel(e){S.blocks.splice(+e.dataset.i,1);render();},
+  badd(){const t=$('#nb').value;S.blocks.push(Object.assign({type:t},BLK[t].d));render();toast('Bloc « '+BLK[t].l+' » ajouté');},
+  publish(){toast('Page publiée (simulation) — rendue côté serveur à la prochaine requête');},
+  ddel(e){S.docs=S.docs.filter(d=>d.id!==+e.dataset.id);render();toast('Document supprimé');},
+  rpage(e){S.rf.page+=+e.dataset.v;renderRedirs();},
+  redit(e){redirDlg(+e.dataset.id);},
+  rtest(e){const n=S.redirs.filter(r=>r.st==='todo').length;if(!n){toast('Aucune redirection en attente de test');return;}e.disabled=true;e.textContent='Test en cours…';setTimeout(()=>{S.redirs.forEach(r=>{if(r.st==='todo')r.st='ok';});render();toast(n+' redirections testées : 301 → 200 (simulation)');},800);}
+};
+document.addEventListener('click',ev=>{
+  if(ev.target.id==='dlg'){closeDlg();return;}
+  const e=ev.target.closest('[data-act]');if(e&&!e.disabled&&ACT[e.dataset.act])ACT[e.dataset.act](e);
+});
+document.addEventListener('input',ev=>{
+  const t=ev.target,d=t.dataset;
+  if(d.f){S.f[d.f]=d.f==='prg'?+t.value:t.value;renderGrid();if(d.f==='prg')document.querySelectorAll('[data-act="prg"]').forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.v===S.f.prg)));}
+  else if(d.rf){S.rf[d.rf]=t.value;S.rf.page=0;renderRedirs();}
+  else if(d.bk){const x=d.bk.split(':');S.blocks[+x[0]][x[1]]=t.value;renderPreview();}
+});
+document.addEventListener('change',ev=>{
+  const t=ev.target,d=t.dataset;
+  if(d.cq){S.cart[+d.cq].qty=Math.max(1,Math.min(99,parseInt(t.value,10)||1));render();}
+  else if(d.cp){S.cart[+d.cp].pack=t.value;render();}
+  else if(d.qs){const q=S.quotes.find(x=>x.ref===d.qs);q.st=t.value;render();toast(q.ref+' : « '+q.st+' » — email envoyé au client (simulation)');}
+  else if(d.perm){const x=d.perm.split(':'),u=S.users.find(m=>m.id===+x[0]);u.p[x[1]]=t.checked?1:0;toast(catL(x[1])+(t.checked?' : accès accordé à ':' : accès retiré à ')+u.name);}
+  else if(d.pub){const p=S.products.find(x=>x.id===+d.pub);p.pub=t.checked;render();toast(p.name+(p.pub?' publié dans le catalogue':' retiré du catalogue'));}
+});
+function check(form,rules){
+  let first=null;
+  rules.forEach(r=>{const el=form.elements[r[0]],m=r[2]?'':r[1];el.setAttribute('aria-invalid',m?'true':'false');const e=form.querySelector('#e-'+r[0]);if(e)e.textContent=m;if(m&&!first)first=el;});
+  if(first)first.focus();return !first;
+}
+document.addEventListener('submit',ev=>{
+  const form=ev.target,k=form.dataset.form;if(!k)return;ev.preventDefault();
+  const v=n=>String(form.elements[n].value).trim();
+  if(k==='addp'){addCart(+form.dataset.id,v('pack'),parseInt(v('qty'),10)||1);closeDlg();render();}
+  else if(k==='quote'){
+    if(S.user&&!S.user.p.devis)return;
+    if(!check(form,[['company','Indiquez la raison sociale.',v('company').length>1],['siret','Le SIRET comporte 14 chiffres.',/^\d{14}$/.test(v('siret').replace(/\s/g,''))],['contact','Indiquez votre nom.',v('contact').length>1],['email','Saisissez une adresse email valide.',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))],['cp','Code postal à 5 chiffres.',/^\d{5}$/.test(v('cp'))],['cap','Cette attestation est obligatoire pour l\'achat de fluides.',form.elements.cap.checked]]))return;
+    const ref='DV-2026-0'+(S.seq++);
+    S.quotes.unshift({ref:ref,date:new Date().toLocaleDateString('fr-FR'),co:S.user?S.user.co:null,company:v('company'),contact:v('contact'),email:v('email'),msg:v('msg'),st:'Nouvelle',lines:S.cart.map(l=>({n:S.products.find(p=>p.id===l.pid).name,pack:l.pack,qty:l.qty}))});
+    S.cart=[];S.sent=ref;S.boTab='quotes';S.cTab='quotes';render();window.scrollTo(0,0);toast('Demande '+ref+' envoyée — email de confirmation (simulation)');
+  }
+  else if(k==='product'){
+    const id=+form.dataset.id,prg=v('prg');
+    if(!check(form,[['name','La désignation est obligatoire.',v('name').length>1],['prg','Indiquez un PRG positif ou nul.',prg!==''&&+prg>=0],['desc','Ajoutez une courte description.',v('desc').length>9]]))return;
+    let p=S.products.find(x=>x.id===id);
+    if(!p){p={id:Math.max.apply(null,S.products.map(x=>x.id))+1,apps:['Froid commercial'],eb:-40,packs:PK,pub:true};S.products.unshift(p);}
+    Object.assign(p,{name:v('name'),fam:v('fam'),prg:Math.round(+prg),cls:v('cls'),repl:v('repl')?[v('repl')]:[],desc:v('desc')});
+    closeDlg();render();toast(p.name+' enregistré — visible dans le catalogue');
+  }
+  else if(k==='doc'){
+    if(!check(form,[['t','Donnez un intitulé au document.',v('t').length>2]]))return;
+    S.docs.unshift({id:Date.now(),t:v('t'),cat:v('cat'),co:v('co')||null,d:new Date().toLocaleDateString('fr-FR'),s:'120 Ko'});
+    render();toast('Document déposé pour '+(v('co')?COS[v('co')].name:'tous les clients')+' (simulation)');
+  }
+  else if(k==='redir'){
+    if(!check(form,[['to','L\'adresse doit commencer par « / » et ne contenir aucun espace.',/^\/\S*$/.test(v('to'))]]))return;
+    const r=S.redirs.find(x=>x.id===+form.dataset.id);r.to=v('to');r.st='ok';closeDlg();render();toast('Redirection enregistrée et testée : 301 → 200 (simulation)');
+  }
+});
+seed();render();
+})();
+</script>
 </body>
 </html>
