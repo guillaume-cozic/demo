@@ -2,20 +2,768 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Gestion de cours particuliers</title>
+<meta name="description" content="Application de soutien scolaire à trois espaces : planning professeur avec contrôle des chevauchements, déclaration et validation des cours, solde d'heures en coupons avec expiration, et back-office administrateur (comptes, achats d'heures, alertes, vue « comme », code PIN).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F5F4EF;--panel:#FFFFFF;--panel-2:#F0EEE7;--ink:#1B2233;--muted:#545C70;--line:#E0DDD3;--line-2:#BEBAAD;
+  --accent:#2C4A9A;--accent-ink:#FFFFFF;--accent-soft:#E3E9F8;--accent-text:#264189;
+  --band:#FBF1DC;--band-ink:#7A4B00;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4E5560;--gray-soft:#E9E8E3;
+  --shadow:0 1px 2px rgba(27,34,51,.05),0 4px 14px rgba(27,34,51,.06);
+  --font:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F131B;--panel:#171C27;--panel-2:#1E2532;--ink:#E7EAF2;--muted:#A3ACBF;--line:#283142;--line-2:#3F4B62;
+  --accent:#9DB6FF;--accent-ink:#0C1836;--accent-soft:#1D2A4D;--accent-text:#B5C7FF;
+  --band:#2E2512;--band-ink:#EFC57A;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--gray:#B8BFCB;--gray-soft:#232A37;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-family:var(--head);font-size:26px;font-weight:600;letter-spacing:-.01em}
+h2{font-size:17px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13.5px}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:5px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-family:var(--head);font-weight:600;font-size:20px;line-height:1.1;display:block}
+.brand span span{font-size:12px;color:var(--muted);display:block}
+.mark{width:38px;height:38px;border-radius:11px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--bad-soft);color:var(--bad);border-radius:999px;padding:0 7px;font-weight:700}
+.right{margin-left:auto;display:flex;gap:10px;align-items:center;min-width:0;flex-wrap:wrap}
+.live{display:inline-flex;gap:7px;align-items:center;font-size:12.5px;font-weight:600;color:var(--ok)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.live i{animation:none}}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);min-width:0}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.asbar{background:var(--accent);color:var(--accent-ink);padding:6px clamp(16px,2vw,32px);display:flex;gap:8px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-weight:500}
+.asbar span{display:inline-flex;gap:8px;align-items:center;min-width:0}
+.asbar button{min-height:44px;border:1px solid currentColor;background:transparent;color:inherit;border-radius:10px;padding:0 14px;font-weight:700;cursor:pointer}
+main{padding:20px clamp(16px,2vw,32px) 80px}
+@media (max-width:900px){.top{position:static}.right{margin-left:0;width:100%}.live{display:none}.seg{width:100%}.seg button{flex:1;min-height:44px;padding:0 4px;font-size:13.5px}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:0 12px;font-size:14px}
+.ic{width:44px;height:44px;display:inline-grid;place-items:center;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;cursor:pointer;flex:none}
+.ic:hover{background:var(--panel-2)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font-weight:600;text-align:left;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px;overflow-wrap:anywhere}
+.lnk:hover{color:var(--accent-text)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input,select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:76px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr))}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h>div{min-width:0}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500;margin-bottom:14px}
+.note.warn{background:var(--warn-soft);color:var(--warn)}.note.bad{background:var(--bad-soft);color:var(--bad)}.note.ok{background:var(--ok-soft);color:var(--ok)}
+.note:empty{display:none}
+.note>div{min-width:0;flex:1}
+.empty{text-align:center;padding:26px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+.meta{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:14px;color:var(--muted)}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));align-items:start}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi b{display:block;font-size:26px;line-height:1.15;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13.5px;color:var(--muted)}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.toolbar .field{flex:1 1 180px;max-width:320px}
+.tblw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:780px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+thead th{background:var(--panel-2);font-size:13px;color:var(--muted)}
+tbody tr:last-child>*{border-bottom:0}
+tfoot td{font-weight:700;background:var(--panel-2);border-bottom:0}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+
+.week{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr))}
+@media (min-width:1200px){.week{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.day{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0;display:flex;flex-direction:column;gap:8px}
+@media (min-width:1200px){.day{min-height:300px}}
+.day h3{display:flex;justify-content:space-between;gap:6px;align-items:baseline;text-transform:capitalize;padding:2px 4px}
+.day h3 span{font-weight:500;color:var(--muted);font-size:13.5px}
+.day.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.day.today h3{color:var(--accent-text)}
+.ev{width:100%;text-align:left;border:1px solid var(--line);border-left:4px solid var(--info);background:var(--panel-2);border-radius:10px;padding:8px 10px;cursor:pointer;display:grid;gap:3px;min-height:44px;min-width:0;overflow-wrap:anywhere}
+.ev:hover{border-color:var(--line-2)}
+.ev b{font-variant-numeric:tabular-nums}
+.ev small{color:var(--muted);font-size:13px}
+.ev.s-declare{border-left-color:var(--accent)}.ev.s-valide{border-left-color:var(--ok)}.ev.s-annule{border-left-color:var(--bad)}.ev.s-annule b,.ev.s-annule>span{text-decoration:line-through;color:var(--muted)}.ev.late{border-left-color:var(--warn)}
+.ev .badge{justify-self:start}
+.none{font-size:13.5px;color:var(--muted);padding:4px}
+
+.crow{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0;padding-bottom:0}
+.cdate{width:64px;flex:none;text-align:center;background:var(--panel-2);border-radius:10px;padding:6px 4px;line-height:1.2}
+.cdate b{display:block}.cdate span{font-size:12px;color:var(--muted);text-transform:capitalize}
+.cmain{flex:1 1 170px;min-width:0}
+.big{font-family:var(--head);font-size:44px;line-height:1.05;font-weight:600}
+.lots{display:grid;gap:12px;margin-top:14px}
+.lots li{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.lot-h{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin:8px 0 6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.pgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+.who{display:flex;gap:12px;align-items:center;min-width:0}
+.who>div{min-width:0}
+.ava{width:44px;height:44px;border-radius:13px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700;flex:none}
+.jr{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.jr:last-child{border-bottom:0}
+.jr>div{flex:1;min-width:0;overflow-wrap:anywhere}
+.jr time{display:block;font-size:12.5px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:7px;flex:none;background:var(--gray)}
+.dot.annulation{background:var(--bad)}.dot.modification,.dot.solde{background:var(--warn)}.dot.validation{background:var(--ok)}.dot.declaration{background:var(--info)}.dot.achat{background:var(--accent)}
+.scroll{max-height:440px;overflow-y:auto}
+
+dialog{border:0;border-radius:16px;padding:0;width:min(580px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,14,24,.55)}
+dialog form{padding:20px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.dh{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.dh h2{font-family:var(--head);font-size:21px;font-weight:600;padding-top:8px}
+.dfoot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+dl{margin:0;display:grid;grid-template-columns:minmax(0,120px) minmax(0,1fr);gap:6px 12px}
+dt{color:var(--muted);font-size:14px}dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:6px}
+#toasts{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;justify-items:center;z-index:99;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14.5px;max-width:520px;box-shadow:var(--shadow)}
+#print{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  body>*:not(#print){display:none!important}
+  #print{display:block;font:12pt/1.4 Georgia,serif;color:#000}
+  #print h1{font-size:20pt;color:#000}#print table{min-width:0;margin-top:14pt;font-size:10.5pt}
+  #print th,#print td{border:1px solid #999;padding:5pt 7pt;background:#fff;color:#000}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c1.6 1.6 3.6 2.4 6 2.4s4.4-.8 6-2.4v-4.5M22 9v6"/></svg></span><span><b>Passerelle</b><span>Soutien scolaire</span></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="right">
+    <span class="live" title="Dans l’application livrée, chaque écran se met à jour en temps réel"><i></i>Mises à jour en direct</span>
+    <button type="button" class="btn sm" data-act="install"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Installer</button>
+    <div class="seg" id="seg" role="group" aria-label="Espace affiché">
+      <button type="button" data-act="role" data-v="admin">Administrateur</button>
+      <button type="button" data-act="role" data-v="prof">Professeur</button>
+      <button type="button" data-act="role" data-v="famille">Parent / élève</button>
+    </div>
+  </div>
+</header>
+<div id="asbar" class="asbar" hidden></div>
+<main id="main"></main>
+<dialog id="dlg" aria-label="Fenêtre"></dialog>
+<div id="toasts" role="status" aria-live="polite"></div>
+<section id="print"></section>
+
+<script>
+(function(){
+'use strict';
+var KEY='demo491194',PIN='2580',SEUIL=4;
+var $=function(s){return document.querySelector(s)};
+var pad=function(n){return String(n).padStart(2,'0')};
+var iso=function(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+var pd=function(s){var a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+var addD=function(s,n){var d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
+var TODAY=iso(new Date());
+var nowStr=function(){var d=new Date();return iso(d)+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+var toMin=function(h){var a=h.split(':').map(Number);return a[0]*60+a[1]};
+var fromMin=function(m){return pad(Math.floor(m/60))+':'+pad(m%60)};
+var fin=function(c){return fromMin(toMin(c.debut)+c.duree)};
+var fmtH=function(m){var h=Math.floor(m/60),r=m%60;return h+' h'+(r?' '+pad(r):'')};
+var fmtD=function(s,o){return pd(s).toLocaleDateString('fr-FR',o||{weekday:'short',day:'numeric',month:'short'})};
+var fmtDL=function(s){return fmtD(s,{day:'numeric',month:'long',year:'numeric'})};
+var eur=function(n){return n.toLocaleString('fr-FR',{style:'currency',currency:'EUR'})};
+var diffJ=function(a,b){return Math.round((pd(a)-pd(b))/864e5)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var fmtC=function(n){return n+' coupon'+(n>1?'s':'')+' ('+fmtH(n*30)+')'};
+var moisLabel=function(m){return pd(m+'-01').toLocaleDateString('fr-FR',{month:'long',year:'numeric'})};
+var moisList=function(){var d=pd(TODAY),o=[];for(var i=0;i<4;i++){o.push(iso(new Date(d.getFullYear(),d.getMonth()-i,1)).slice(0,7))}return o};
+var ref=function(c){return 'C-'+String(c.id).padStart(4,'0')};
+
+var P={cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
+cap:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c1.6 1.6 3.6 2.4 6 2.4s4.4-.8 6-2.4v-4.5M22 9v6"/>',
+grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+check:'<path d="M4 12.5l5 5L20 6.5"/>',
+doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+ticket:'<path d="M3 9V6h18v3a3 3 0 0 0 0 6v3H3v-3a3 3 0 0 0 0-6z"/><path d="M14 7v10"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',
+eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+left:'<path d="M15 5l-7 7 7 7"/>',right:'<path d="M9 5l7 7-7 7"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+down:'<path d="M12 4v12M6 11l6 6 6-6M5 21h14"/>',edit:'<path d="M4 20h4L20 8l-4-4L4 16z"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>'};
+var I=function(n){return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+P[n]+'</svg>'};
+
+/* ---------- Données ---------- */
+function seed(){
+  var profs=[
+    {id:'p1',nom:'Camille Renaud',email:'c.renaud@passerelle-cours.example',mat:['Mathématiques','Physique-chimie'],taux:24},
+    {id:'p2',nom:'Thomas Lefèvre',email:'t.lefevre@passerelle-cours.example',mat:['Français','Philosophie'],taux:22},
+    {id:'p3',nom:'Inès Benali',email:'i.benali@passerelle-cours.example',mat:['Anglais','Espagnol'],taux:21},
+    {id:'p4',nom:'Julien Marchand',email:'j.marchand@passerelle-cours.example',mat:['Mathématiques','SVT'],taux:23},
+    {id:'p5',nom:'Sophie Garnier',email:'s.garnier@passerelle-cours.example',mat:['Français','Histoire-géographie'],taux:20},
+    {id:'p6',nom:'Nicolas Perrin',email:'n.perrin@passerelle-cours.example',mat:['Physique-chimie','NSI'],taux:25}];
+  var pn=['Claire Morel','Karim Haddad','Élodie Roux','David Nguyen','Sandrine Petit','Olivier Blanc','Nadia Fontaine','Marc Dubois','Hélène Caron','Fatima Diallo'];
+  var parents=pn.map(function(n,i){return{id:'par'+(i+1),nom:n,email:n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(' ','.')+'@courriel.example'}});
+  var raw=[
+    ['Lina','Morel','3e','par1',210,[[20,3,-170,9],[40,40,-20,160]],[['p1','Mathématiques',3,'14:00',90],['p3','Anglais',5,'17:00',60]]],
+    ['Hugo','Morel','CM2','par1',210,[[20,12,-60,120]],[['p5','Français',3,'10:00',60]]],
+    ['Yanis','Haddad','1re','par2',150,[[40,3,-150,30]],[['p1','Physique-chimie',2,'18:00',90]]],
+    ['Chloé','Roux','Terminale','par3',240,[[60,26,-90,90]],[['p2','Philosophie',4,'17:30',120]]],
+    ['Emma','Nguyen','4e','par4',180,[[20,14,-45,135]],[['p3','Anglais',1,'17:00',60]]],
+    ['Léo','Nguyen','6e','par4',180,[[20,8,-70,110]],[['p4','Mathématiques',6,'10:00',60]]],
+    ['Mathis','Petit','2de','par5',120,[[40,22,-80,100]],[['p1','Mathématiques',6,'09:30',90]]],
+    ['Jade','Blanc','5e','par6',95,[[20,2,-120,60]],[['p3','Anglais',3,'15:00',60]]],
+    ['Noah','Fontaine','Terminale','par7',260,[[20,6,-200,-5],[40,18,-30,150]],[['p6','Physique-chimie',5,'18:00',120]]],
+    ['Zoé','Dubois','CE2','par8',-3,[[20,10,-100,80]],[['p5','Français',6,'11:00',60]]],
+    ['Tom','Caron','3e','par9',-12,[[20,0,-190,-10]],[['p4','Mathématiques',2,'17:30',90]]],
+    ['Aya','Diallo','1re','par10',300,[[40,30,-25,155]],[['p2','Français',1,'18:00',90]]]];
+  var mon=addD(TODAY,-((pd(TODAY).getDay()+6)%7)),eleves=[],lots=[],cours=[],n=0;
+  raw.forEach(function(r,i){
+    var id='e'+(i+1),ps=[];
+    r[6].forEach(function(s){if(ps.indexOf(s[0])<0)ps.push(s[0])});
+    eleves.push({id:id,prenom:r[0],nom:r[1],classe:r[2],parentId:r[3],contrat:addD(TODAY,r[4]),profs:ps});
+    r[5].forEach(function(l){lots.push({id:'L'+(lots.length+1),eleveId:id,n:l[0],r:l[1],achat:addD(TODAY,l[2]),exp:addD(TODAY,l[3])})});
+    r[6].forEach(function(s){for(var w=-8;w<=3;w++){
+      var date=addD(mon,w*7+s[2]-1),st='planifie';
+      if(date<addD(TODAY,-6))st='valide';else if(date<TODAY)st=i%2?'planifie':'declare';
+      cours.push({id:++n,profId:s[0],eleveId:id,matiere:s[1],date:date,debut:s[3],duree:s[4],statut:st});
+    }});
+  });
+  var y=cours.filter(function(c){return c.eleveId==='e3'&&c.date>TODAY})[0];
+  if(y){y.statut='annule';y.raison='Élève malade, cours à reporter la semaine suivante';y.par='Camille Renaud'}
+  var z=cours.filter(function(c){return c.eleveId==='e4'&&c.statut==='valide'}).pop();
+  if(z){z.statut='annule';z.raison='Professeur indisponible (formation)';z.par='Thomas Lefèvre'}
+  cours.push({id:++n,profId:'p1',eleveId:'e1',matiere:'Mathématiques',date:addD(TODAY,-1),debut:'16:00',duree:60,statut:'declare'});
+  cours.push({id:++n,profId:'p1',eleveId:'e7',matiere:'Mathématiques',date:addD(TODAY,-2),debut:'16:00',duree:60,statut:'planifie'});
+  var t=Date.now(),H=36e5;
+  var journal=[
+    {id:5,t:t-2*H,type:'annulation',txt:'Camille Renaud a annulé le cours de Physique-chimie de Yanis Haddad ('+(y?fmtD(y.date)+' à '+y.debut:'')+'). Motif : élève malade, cours à reporter la semaine suivante.',lu:false},
+    {id:4,t:t-5*H,type:'declaration',txt:'Camille Renaud a déclaré 1 h de Mathématiques avec Lina Morel.',lu:true},
+    {id:3,t:t-26*H,type:'solde',txt:'Solde bas pour Jade Blanc : 2 coupons (1 h).',lu:false},
+    {id:2,t:t-30*H,type:'validation',txt:'Élodie Roux a validé 2 h de Philosophie pour Chloé Roux : 4 coupons déduits.',lu:true},
+    {id:1,t:t-480*H,type:'achat',txt:'Achat de 20 h pour Lina Morel : 40 coupons générés.',lu:true}];
+  return{day:TODAY,profs:profs,parents:parents,eleves:eleves,lots:lots,cours:cours,journal:journal,seq:n,jseq:5,
+    ui:{role:'admin',as:null,tab:{admin:'dash',prof:'planning',famille:'accueil'},week:0,mois:TODAY.slice(0,7),enfant:null,fe:{q:'',f:'tous'},fh:{mois:'',statut:'',prof:'',q:''}}};
+}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));return s&&s.day===TODAY&&s.ui?s:null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var S=load()||seed();
+
+var prof=function(id){return S.profs.filter(function(p){return p.id===id})[0]};
+var eleve=function(id){return S.eleves.filter(function(p){return p.id===id})[0]};
+var parent=function(id){return S.parents.filter(function(p){return p.id===id})[0]};
+var cours=function(id){return S.cours.filter(function(c){return c.id===+id})[0]};
+var nomE=function(e){return e.prenom+' '+e.nom};
+var lotsDe=function(e){return S.lots.filter(function(l){return l.eleveId===e.id}).sort(function(a,b){return a.exp<b.exp?-1:1})};
+var lotsActifs=function(e){return lotsDe(e).filter(function(l){return l.exp>=TODAY&&l.r>0})};
+var solde=function(e){return lotsActifs(e).reduce(function(s,l){return s+l.r},0)};
+var coupons=function(c){return c.duree/30};
+var passe=function(c){return c.date+' '+c.debut<=nowStr()};
+var fait=function(c){return c.statut==='declare'||c.statut==='valide'};
+var byDate=function(a,b){return (a.date+a.debut)<(b.date+b.debut)?-1:1};
+var byDateD=function(a,b){return -byDate(a,b)};
+function log(type,txt){S.journal.unshift({id:++S.jseq,t:Date.now(),type:type,txt:txt,lu:false})}
+function ctx(){var u=S.ui;if(u.as)return u.as;if(u.role==='prof')return{role:'prof',id:'p1'};if(u.role==='famille')return{role:'famille',parentId:'par1'};return{role:'admin'}}
+function qui(){var x=ctx();return x.role==='prof'?prof(x.id).nom:x.role==='famille'?parent(x.parentId).nom:'L’administrateur'}
+function conflits(x,ignore){var a=toMin(x.debut),b=a+x.duree;
+  return S.cours.filter(function(c){return c.id!==ignore&&c.statut!=='annule'&&c.date===x.date&&(c.profId===x.profId||c.eleveId===x.eleveId)&&toMin(c.debut)<b&&a<toMin(c.debut)+c.duree})}
+function st(c){
+  if(c.statut==='annule')return '<span class="badge b-bad">Annulé</span>';
+  if(c.statut==='valide')return '<span class="badge b-ok">Validé</span>';
+  if(c.statut==='declare')return '<span class="badge b-acc">À valider</span>';
+  return passe(c)?'<span class="badge b-warn">À déclarer</span>':'<span class="badge b-info">Planifié</span>';
+}
+function toast(m){var d=document.createElement('div');d.className='toast';d.textContent=m;$('#toasts').appendChild(d);setTimeout(function(){d.remove()},4500)}
+
+/* ---------- Fenêtres ---------- */
+var dlg=$('#dlg'),onSub=null;
+function openDlg(html,sub,inp){
+  if(dlg.open)dlg.close();
+  dlg.innerHTML='<form novalidate>'+html+'</form>';onSub=sub||null;
+  var f=dlg.firstChild;
+  if(inp)f.addEventListener('input',function(){inp(f)});
+  dlg.showModal();
+  var el=f.querySelector('input,select,textarea');if(el)el.focus();
+  if(inp)inp(f);
+}
+dlg.addEventListener('submit',function(e){
+  e.preventDefault();var f=e.target;
+  f.querySelectorAll('[aria-invalid]').forEach(function(x){x.removeAttribute('aria-invalid')});
+  f.querySelectorAll('.err').forEach(function(x){x.textContent=''});
+  if(onSub)onSub(Object.fromEntries(new FormData(f)),f);
+});
+function bad(f,name,msg){var el=f.elements[name];if(el&&el.setAttribute)el.setAttribute('aria-invalid','true');var e=f.querySelector('[data-err="'+name+'"]');if(e)e.textContent=msg;return true}
+function fail(f){var el=f.querySelector('[aria-invalid]');if(el)el.focus()}
+var dh=function(t){return '<div class="dh"><h2>'+t+'</h2><button type="button" class="ic" data-act="close" aria-label="Fermer">'+I('x')+'</button></div>'};
+var df=function(l,cls){return '<div class="dfoot"><button type="button" class="btn" data-act="close">Retour</button><button class="btn '+(cls||'primary')+'">'+l+'</button></div>'};
+var F=function(l,n,h,hint,full){return '<div class="field'+(full?' full':'')+'"><label for="f-'+n+'">'+l+'</label>'+h+(hint?'<p class="hint">'+hint+'</p>':'')+'<p class="err" data-err="'+n+'"></p></div>'};
+var sel=function(a,b){return a===b?' selected':''};
+function askPin(label,cb){
+  openDlg(dh('Code PIN requis')+'<p class="note">'+I('lock')+'<span><b>Action sensible :</b> '+label+'</span></p>'+
+    F('Code PIN administrateur','pin','<input id="f-pin" name="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off">','PIN de démonstration : '+PIN)+df('Confirmer'),
+    function(v,f){if(v.pin!==PIN){bad(f,'pin','Code PIN incorrect.');return fail(f)}dlg.close();cb()});
+}
+
+/* ---------- Agenda (.ics réel) ---------- */
+function ics(list,name){
+  var z=function(s){return s.replace(/[-:]/g,'')},L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Passerelle//Cours//FR','CALSCALE:GREGORIAN'];
+  list.forEach(function(c){L.push('BEGIN:VEVENT','UID:cours-'+c.id+'@passerelle-cours.example','DTSTAMP:'+z(TODAY)+'T000000','DTSTART:'+z(c.date)+'T'+z(c.debut)+'00','DTEND:'+z(c.date)+'T'+z(fin(c))+'00','SUMMARY:'+c.matiere+' - '+nomE(eleve(c.eleveId))+' / '+prof(c.profId).nom,'END:VEVENT')});
+  L.push('END:VCALENDAR');
+  var u=URL.createObjectURL(new Blob([L.join('\r\n')],{type:'text/calendar'})),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},1500);
+}
+function aVenir(){var x=ctx();
+  return S.cours.filter(function(c){if(c.statut!=='planifie'||c.date<TODAY)return false;
+    return x.role==='prof'?c.profId===x.id:x.role==='famille'?eleve(c.eleveId).parentId===x.parentId:true}).sort(byDate)}
+
+/* ---------- Lignes communes ---------- */
+function rowC(c,who,btns){
+  var nom=who==='prof'?prof(c.profId).nom:nomE(eleve(c.eleveId));
+  return '<li class="crow"><div class="cdate"><b>'+fmtD(c.date,{day:'numeric',month:'short'})+'</b><span>'+fmtD(c.date,{weekday:'long'})+'</span></div>'+
+    '<div class="cmain"><button type="button" class="lnk" data-act="cours" data-id="'+c.id+'">'+esc(c.matiere)+' · '+c.debut+'–'+fin(c)+'</button>'+
+    '<div class="meta"><span>'+esc(nom)+'</span><span>'+fmtH(c.duree)+' · '+coupons(c)+' coupons</span></div></div>'+
+    '<div class="actions">'+st(c)+(btns||'')+'</div></li>';
+}
+var listOr=function(a,msg){return a.length?'<ul>'+a.join('')+'</ul>':'<p class="empty">'+msg+'</p>'};
+function moisSel(id,path,val,all){return '<select id="'+id+'" data-f="'+path+'">'+(all?'<option value="">Tous les mois</option>':'')+moisList().map(function(m){return '<option value="'+m+'"'+sel(m,val)+'>'+moisLabel(m)+'</option>'}).join('')+'</select>'}
+
+/* ---------- Espace professeur ---------- */
+function vPlanning(x){
+  var p=prof(x.id),mon=addD(TODAY,-((pd(TODAY).getDay()+6)%7)+S.ui.week*7),days='';
+  var late=S.cours.filter(function(c){return c.profId===p.id&&c.statut==='planifie'&&passe(c)}).length;
+  for(var i=0;i<7;i++){
+    var d=addD(mon,i),cs=S.cours.filter(function(c){return c.profId===p.id&&c.date===d}).sort(byDate);
+    days+='<section class="day'+(d===TODAY?' today':'')+'"><h3>'+fmtD(d,{weekday:'long'})+'<span>'+fmtD(d,{day:'numeric',month:'short'})+'</span></h3>'+
+      (cs.length?cs.map(function(c){return '<button type="button" class="ev s-'+c.statut+(c.statut==='planifie'&&passe(c)?' late':'')+'" data-act="cours" data-id="'+c.id+'"><b>'+c.debut+'–'+fin(c)+'</b><span>'+esc(nomE(eleve(c.eleveId)))+'</span><small>'+esc(c.matiere)+'</small>'+st(c)+'</button>'}).join(''):'<p class="none">Aucun cours</p>')+'</section>';
+  }
+  return '<div class="page-h"><div><h1>Planning de '+esc(p.nom)+'</h1><p class="muted">Semaine du '+fmtD(mon,{day:'numeric',month:'long'})+' au '+fmtD(addD(mon,6),{day:'numeric',month:'long'})+'</p></div>'+
+    '<div class="actions"><button type="button" class="ic" data-act="week" data-v="-1" aria-label="Semaine précédente">'+I('left')+'</button><button type="button" class="btn" data-act="week" data-v="0">Aujourd’hui</button><button type="button" class="ic" data-act="week" data-v="1" aria-label="Semaine suivante">'+I('right')+'</button>'+
+    '<button type="button" class="btn" data-act="sync">'+I('cal')+'Synchroniser l’agenda</button><button type="button" class="btn primary" data-act="new-cours">'+I('plus')+'Planifier un cours</button></div></div>'+
+    (late?'<p class="note warn">'+I('alert')+'<span>'+late+' cours passé'+(late>1?'s':'')+' à déclarer. <button type="button" class="lnk" data-act="tab" data-v="declarer">Voir la liste</button></span></p>':'')+
+    '<div class="week">'+days+'</div>';
+}
+function vDeclarer(x){
+  var mine=S.cours.filter(function(c){return c.profId===x.id});
+  var a=mine.filter(function(c){return c.statut==='planifie'&&passe(c)}).sort(byDateD).map(function(c){return rowC(c,'eleve','<button type="button" class="btn primary sm" data-act="declare" data-id="'+c.id+'">'+I('check')+'Déclarer effectué</button>')});
+  var b=mine.filter(function(c){return c.statut==='declare'}).sort(byDateD).map(function(c){return rowC(c,'eleve')});
+  return '<div class="page-h"><div><h1>Cours à déclarer</h1><p class="muted">Un cours déclaré est envoyé à la famille, qui le valide : les heures et coupons sont alors déduits.</p></div></div>'+
+    '<div class="cols"><section class="card"><div class="card-h"><h2>Cours passés à déclarer</h2><span class="badge b-warn">'+a.length+'</span></div>'+listOr(a,'Tout est déclaré.')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>En attente de validation par la famille</h2><span class="badge b-acc">'+b.length+'</span></div>'+listOr(b,'Aucun cours en attente.')+'</section></div>';
+}
+function vMesEleves(x){
+  var m=TODAY.slice(0,7),els=S.eleves.filter(function(e){return e.profs.indexOf(x.id)>=0});
+  var h=els.map(function(e){
+    var cs=S.cours.filter(function(c){return c.profId===x.id&&c.eleveId===e.id}),s=solde(e);
+    var next=cs.filter(function(c){return c.statut==='planifie'&&!passe(c)}).sort(byDate)[0];
+    var hm=cs.filter(function(c){return fait(c)&&c.date.slice(0,7)===m}).reduce(function(t,c){return t+c.duree},0);
+    return '<article class="card"><div class="who"><span class="ava">'+esc(e.prenom[0]+e.nom[0])+'</span><div><h2>'+esc(nomE(e))+'</h2><p class="muted small">'+esc(e.classe)+' · parent : '+esc(parent(e.parentId).nom)+'</p></div></div>'+
+      '<dl style="margin:14px 0"><dt>Solde</dt><dd>'+fmtH(s*30)+' <span class="badge '+(s<=SEUIL?'b-warn':'b-ok')+'">'+s+' coupons</span></dd><dt>Prochain cours</dt><dd>'+(next?fmtD(next.date)+' à '+next.debut:'Aucun')+'</dd><dt>Ce mois-ci</dt><dd>'+fmtH(hm)+' effectuées</dd></dl>'+
+      '<button type="button" class="btn sm" data-act="new-cours" data-e="'+e.id+'">'+I('plus')+'Planifier un cours</button></article>';
+  });
+  return '<div class="page-h"><div><h1>Mes élèves</h1><p class="muted">'+els.length+' élève'+(els.length>1?'s':'')+' suivi'+(els.length>1?'s':'')+'</p></div></div>'+
+    (h.length?'<div class="pgrid">'+h.join('')+'</div>':'<p class="empty">Aucun élève attribué pour le moment : l’administrateur les rattache depuis la fiche élève.</p>');
+}
+function releve(x){
+  var p=prof(x.id),cs=S.cours.filter(function(c){return c.profId===p.id&&c.date.slice(0,7)===S.ui.mois&&c.statut!=='annule'&&(fait(c)||passe(c))}).sort(byDate);
+  var min=cs.filter(fait).reduce(function(t,c){return t+c.duree},0);
+  var rows=cs.map(function(c){return '<tr><td>'+fmtD(c.date)+'</td><td>'+c.debut+'–'+fin(c)+'</td><td>'+esc(nomE(eleve(c.eleveId)))+'</td><td>'+esc(c.matiere)+'</td><td class="num">'+fmtH(c.duree)+'</td><td>'+st(c)+'</td><td class="num">'+(fait(c)?eur(c.duree/60*p.taux):'—')+'</td></tr>'}).join('');
+  var table='<table><thead><tr><th>Date</th><th>Horaire</th><th>Élève</th><th>Matière</th><th class="num">Durée</th><th>Statut</th><th class="num">Montant</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Aucun cours sur cette période.</td></tr>')+'</tbody><tfoot><tr><td colspan="4">Total des cours effectués</td><td class="num">'+fmtH(min)+'</td><td></td><td class="num">'+eur(min/60*p.taux)+'</td></tr></tfoot></table>';
+  return{p:p,cs:cs,min:min,table:table};
+}
+function vReleve(x){
+  var r=releve(x);
+  return '<div class="page-h"><div><h1>Relevé mensuel</h1><p class="muted">'+esc(r.p.nom)+' · taux horaire '+eur(r.p.taux)+'</p></div>'+
+    '<div class="actions"><div class="field"><label for="rm">Mois</label>'+moisSel('rm','mois',S.ui.mois)+'</div><button type="button" class="btn primary" data-act="pdf">'+I('down')+'Exporter en PDF</button></div></div>'+
+    '<div class="kpis"><div class="kpi"><b>'+fmtH(r.min)+'</b><span>Heures effectuées</span></div><div class="kpi"><b>'+eur(r.min/60*r.p.taux)+'</b><span>Total à percevoir</span></div><div class="kpi"><b>'+r.cs.filter(fait).length+'</b><span>Cours déclarés ou validés</span></div><div class="kpi"><b>'+r.cs.filter(function(c){return c.statut==='valide'}).length+'</b><span>Dont validés par les familles</span></div></div>'+
+    '<div class="tblw">'+r.table+'</div>';
+}
+
+/* ---------- Espace parent / élève ---------- */
+function enfants(x){return S.eleves.filter(function(e){return e.parentId===x.parentId})}
+function enfant(x){var k=enfants(x);return k.filter(function(e){return e.id===S.ui.enfant})[0]||k[0]}
+function famHead(x,titre){
+  var k=enfants(x),e=enfant(x);
+  return '<div class="page-h"><div><h1>'+titre+'</h1><p class="muted">Espace de '+esc(parent(x.parentId).nom)+' · '+k.length+' enfant'+(k.length>1?'s':'')+' suivi'+(k.length>1?'s':'')+'</p></div>'+
+    '<div class="actions"><button type="button" class="btn" data-act="sync">'+I('cal')+'Synchroniser l’agenda</button></div></div>'+
+    (k.length>1?'<div class="chips" role="group" aria-label="Enfant affiché" style="margin-bottom:16px">'+k.map(function(c){return '<button type="button" class="chip" data-act="enfant" data-id="'+c.id+'" aria-pressed="'+(c.id===e.id)+'">'+esc(c.prenom)+' · '+fmtH(solde(c)*30)+'</button>'}).join('')+'</div>':'');
+}
+function vAccueil(x){
+  var e=enfant(x),s=solde(e),cs=S.cours.filter(function(c){return c.eleveId===e.id});
+  var lots=lotsDe(e).map(function(l){
+    var j=diffJ(l.exp,TODAY),b=j<0?'<span class="badge b-bad">Expiré'+(l.r?' · '+l.r+' perdus':'')+'</span>':!l.r?'<span class="badge b-gray">Épuisé</span>':j<=14?'<span class="badge b-warn">Expire dans '+j+' j</span>':'<span class="badge b-ok">Valide</span>';
+    return '<li><div class="lot-h"><b>'+l.r+' / '+l.n+' coupons</b>'+b+'</div><div class="bar"><i style="width:'+Math.round(l.r/l.n*100)+'%"></i></div><p class="small muted">Acheté le '+fmtDL(l.achat)+' · expire le '+fmtDL(l.exp)+'</p></li>';
+  }).join('');
+  var av=cs.filter(function(c){return c.statut==='declare'}).sort(byDateD).map(function(c){return rowC(c,'prof','<button type="button" class="btn primary sm" data-act="valider" data-id="'+c.id+'">'+I('check')+'Valider</button>')});
+  var nx=cs.filter(function(c){return c.statut==='planifie'&&!passe(c)}).sort(byDate).slice(0,6).map(function(c){return rowC(c,'prof')});
+  return famHead(x,'Solde et cours de '+esc(e.prenom))+
+    (e.contrat<TODAY?'<p class="note bad">'+I('alert')+'<span>Le contrat de '+esc(e.prenom)+' a expiré le '+fmtDL(e.contrat)+'. Contactez l’administration pour le renouveler.</span></p>':'')+
+    (s<=SEUIL?'<p class="note warn">'+I('alert')+'<span>Solde bas : pensez à recharger des heures auprès de l’administration.</span></p>':'')+
+    '<div class="cols"><section class="card"><div class="card-h"><h2>Solde d’heures</h2><span class="badge b-acc">1 heure = 2 coupons</span></div><p class="big">'+fmtH(s*30)+'</p><p class="muted">'+s+' coupon'+(s>1?'s':'')+' disponible'+(s>1?'s':'')+' · les coupons qui expirent en premier sont utilisés en premier</p><ul class="lots">'+(lots||'<li class="muted">Aucune heure achetée pour le moment.</li>')+'</ul></section>'+
+    '<section class="card"><div class="card-h"><h2>Cours à valider</h2><span class="badge b-acc">'+av.length+'</span></div>'+listOr(av,'Aucun cours en attente de validation.')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>Cours à venir</h2></div>'+listOr(nx,'Aucun cours planifié.')+'</section></div>';
+}
+function vHistoFam(x){
+  var e=enfant(x),cs=S.cours.filter(function(c){return c.eleveId===e.id&&c.date.slice(0,7)===S.ui.mois&&(passe(c)||c.statut==='annule')}).sort(byDateD);
+  var v=cs.filter(function(c){return c.statut==='valide'}),min=v.reduce(function(t,c){return t+c.duree},0);
+  var rows=cs.map(function(c){return '<tr><td>'+fmtD(c.date)+'</td><td>'+c.debut+'–'+fin(c)+'</td><td><button type="button" class="lnk" data-act="cours" data-id="'+c.id+'">'+esc(c.matiere)+'</button></td><td>'+esc(prof(c.profId).nom)+'</td><td class="num">'+fmtH(c.duree)+'</td><td class="num">'+(c.statut==='valide'?'−'+coupons(c):'—')+'</td><td>'+st(c)+'</td></tr>'}).join('');
+  return famHead(x,'Historique de '+esc(e.prenom))+
+    '<div class="toolbar"><div class="field"><label for="hm">Mois</label>'+moisSel('hm','mois',S.ui.mois)+'</div></div>'+
+    '<div class="kpis"><div class="kpi"><b>'+fmtH(min)+'</b><span>Heures validées</span></div><div class="kpi"><b>'+min/30+'</b><span>Coupons déduits</span></div><div class="kpi"><b>'+cs.filter(function(c){return c.statut==='annule'}).length+'</b><span>Cours annulés</span></div></div>'+
+    '<div class="tblw"><table><thead><tr><th>Date</th><th>Horaire</th><th>Matière</th><th>Professeur</th><th class="num">Durée</th><th class="num">Coupons</th><th>Statut</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Aucun cours sur cette période.</td></tr>')+'</tbody></table></div>';
+}
+
+/* ---------- Espace administrateur ---------- */
+function vDash(){
+  var m=TODAY.slice(0,7),mc=S.cours.filter(function(c){return fait(c)&&c.date.slice(0,7)===m});
+  var min=mc.reduce(function(t,c){return t+c.duree},0),du=mc.reduce(function(t,c){return t+c.duree/60*prof(c.profId).taux},0);
+  var bas=S.eleves.filter(function(e){return solde(e)<=SEUIL}),exp=S.eleves.filter(function(e){return e.contrat<TODAY});
+  var al=S.journal.filter(function(j){return !j.lu&&(j.type==='annulation'||j.type==='modification')});
+  return '<div class="page-h"><div><h1>Tableau de bord</h1><p class="muted">Échantillon de démonstration : '+S.eleves.length+' élèves et '+S.profs.length+' professeurs</p></div><div class="actions"><button type="button" class="btn" data-act="new-eleve">'+I('plus')+'Nouvel élève</button><button type="button" class="btn primary" data-act="add-heures">'+I('ticket')+'Ajouter des heures</button></div></div>'+
+    '<div class="kpis"><div class="kpi"><b>'+S.eleves.length+'</b><span>Élèves</span></div><div class="kpi"><b>'+S.profs.length+'</b><span>Professeurs</span></div><div class="kpi"><b>'+fmtH(min)+'</b><span>Heures effectuées ce mois</span></div><div class="kpi"><b>'+S.cours.filter(function(c){return c.statut==='declare'}).length+'</b><span>Cours en attente de validation</span></div><div class="kpi"><b>'+eur(du)+'</b><span>À reverser aux professeurs ce mois</span></div></div>'+
+    '<div class="cols">'+
+    '<section class="card"><div class="card-h"><h2>Annulations et modifications</h2><span class="badge '+(al.length?'b-bad':'b-gray')+'">'+al.length+'</span></div>'+listOr(al.map(function(j){return '<li class="jr"><i class="dot '+j.type+'"></i><div>'+esc(j.txt)+'<time>'+fmtT(j.t)+'</time></div><button type="button" class="btn sm" data-act="lu" data-id="'+j.id+'">Traité</button></li>'}),'Aucune alerte à traiter.')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>Soldes bas</h2><span class="badge '+(bas.length?'b-warn':'b-gray')+'">'+bas.length+'</span></div><p class="small muted">Seuil : '+fmtC(SEUIL)+' ou moins</p>'+listOr(bas.map(function(e){var s=solde(e);return '<li class="crow"><div class="cmain"><b>'+esc(nomE(e))+'</b><div class="meta"><span>'+esc(e.classe)+'</span><span>'+fmtC(s)+'</span></div></div><button type="button" class="btn sm" data-act="add-heures" data-id="'+e.id+'">'+I('plus')+'Ajouter des heures</button></li>'}),'Tous les soldes sont suffisants.')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>Contrats expirés</h2><span class="badge '+(exp.length?'b-bad':'b-gray')+'">'+exp.length+'</span></div>'+listOr(exp.map(function(e){return '<li class="crow"><div class="cmain"><b>'+esc(nomE(e))+'</b><div class="meta"><span>Expiré le '+fmtDL(e.contrat)+'</span><span>'+esc(parent(e.parentId).nom)+'</span></div></div><button type="button" class="btn sm" data-act="renouv" data-id="'+e.id+'">'+I('lock')+'Renouveler 12 mois</button></li>'}),'Aucun contrat expiré.')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>Activité en direct</h2></div><ul class="scroll">'+S.journal.slice(0,30).map(function(j){return '<li class="jr"><i class="dot '+j.type+'"></i><div>'+esc(j.txt)+'<time>'+fmtT(j.t)+'</time></div></li>'}).join('')+'</ul></section></div>';
+}
+var fmtT=function(t){return new Date(t).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+function vEleves(){
+  var f=S.ui.fe,q=f.q.trim().toLowerCase();
+  var els=S.eleves.filter(function(e){
+    if(f.f==='bas'&&solde(e)>SEUIL)return false;if(f.f==='exp'&&e.contrat>=TODAY)return false;
+    return !q||(nomE(e)+' '+parent(e.parentId).nom+' '+e.classe).toLowerCase().indexOf(q)>=0});
+  var rows=els.map(function(e){
+    var s=solde(e),l=lotsActifs(e)[0],ex=e.contrat<TODAY;
+    return '<tr><td><b>'+esc(nomE(e))+'</b><br><span class="muted small">'+esc(e.classe)+'</span></td><td>'+esc(parent(e.parentId).nom)+'<br><span class="muted small">'+esc(parent(e.parentId).email)+'</span></td><td>'+(e.profs.map(function(p){return esc(prof(p).nom)}).join(', ')||'—')+'</td>'+
+      '<td><b>'+fmtH(s*30)+'</b> <span class="badge '+(s<=SEUIL?'b-warn':'b-ok')+'">'+s+' coupons</span></td><td>'+(l?fmtDL(l.exp):'—')+'</td><td>'+fmtDL(e.contrat)+(ex?' <span class="badge b-bad">Expiré</span>':'')+'</td>'+
+      '<td><div class="actions"><button type="button" class="btn sm" data-act="add-heures" data-id="'+e.id+'">'+I('plus')+'Heures</button><button type="button" class="btn sm" data-act="as-eleve" data-id="'+e.id+'">'+I('eye')+'Voir comme</button></div></td></tr>';
+  }).join('');
+  var chip=function(v,l){return '<button type="button" class="chip" data-act="fe" data-v="'+v+'" aria-pressed="'+(f.f===v)+'">'+l+'</button>'};
+  return '<div class="page-h"><div><h1>Élèves</h1><p class="muted">'+els.length+' sur '+S.eleves.length+' affichés</p></div><div class="actions"><button type="button" class="btn" data-act="add-heures">'+I('ticket')+'Ajouter des heures</button><button type="button" class="btn primary" data-act="new-eleve">'+I('plus')+'Nouvel élève</button></div></div>'+
+    '<div class="toolbar"><div class="field"><label for="qe">Rechercher</label><input id="qe" type="search" data-f="fe.q" value="'+esc(f.q)+'" placeholder="Élève, parent, classe"></div><div class="chips" role="group" aria-label="Filtre">'+chip('tous','Tous')+chip('bas','Solde bas')+chip('exp','Contrat expiré')+'</div></div>'+
+    '<div class="tblw"><table><thead><tr><th>Élève</th><th>Parent</th><th>Professeurs</th><th>Solde</th><th>Prochaine expiration</th><th>Fin de contrat</th><th>Actions</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Aucun élève ne correspond.</td></tr>')+'</tbody></table></div>';
+}
+function vProfs(){
+  var m=TODAY.slice(0,7);
+  var rows=S.profs.map(function(p){
+    var min=S.cours.filter(function(c){return c.profId===p.id&&fait(c)&&c.date.slice(0,7)===m}).reduce(function(t,c){return t+c.duree},0);
+    return '<tr><td><b>'+esc(p.nom)+'</b><br><span class="muted small">'+esc(p.email)+'</span></td><td>'+esc(p.mat.join(', '))+'</td><td class="num">'+S.eleves.filter(function(e){return e.profs.indexOf(p.id)>=0}).length+'</td><td class="num"><b>'+eur(p.taux)+'</b> / h</td><td class="num">'+fmtH(min)+'</td><td class="num">'+eur(min/60*p.taux)+'</td>'+
+      '<td><div class="actions"><button type="button" class="btn sm" data-act="taux" data-id="'+p.id+'">'+I('edit')+'Taux</button><button type="button" class="btn sm" data-act="as-prof" data-id="'+p.id+'">'+I('eye')+'Voir comme</button></div></td></tr>';
+  }).join('');
+  return '<div class="page-h"><div><h1>Professeurs</h1><p class="muted">Taux horaire propre à chaque professeur, rémunération calculée sur les cours effectués</p></div><div class="actions"><button type="button" class="btn primary" data-act="new-prof">'+I('plus')+'Nouveau professeur</button></div></div>'+
+    '<div class="tblw"><table><thead><tr><th>Professeur</th><th>Matières</th><th class="num">Élèves</th><th class="num">Taux horaire</th><th class="num">Heures ce mois</th><th class="num">À reverser</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+function vHisto(){
+  var f=S.ui.fh,q=f.q.trim().toLowerCase();
+  var cs=S.cours.filter(function(c){
+    if(f.mois&&c.date.slice(0,7)!==f.mois)return false;if(f.prof&&c.profId!==f.prof)return false;
+    if(f.statut&&c.statut!==f.statut)return false;
+    return !q||(nomE(eleve(c.eleveId))+' '+prof(c.profId).nom+' '+c.matiere+' '+ref(c)).toLowerCase().indexOf(q)>=0}).sort(byDateD);
+  var done=cs.filter(fait),min=done.reduce(function(t,c){return t+c.duree},0),du=done.reduce(function(t,c){return t+c.duree/60*prof(c.profId).taux},0);
+  var rows=cs.slice(0,120).map(function(c){return '<tr><td><button type="button" class="lnk" data-act="cours" data-id="'+c.id+'">'+ref(c)+'</button></td><td>'+fmtD(c.date,{day:'numeric',month:'short',year:'numeric'})+'</td><td>'+c.debut+'–'+fin(c)+'</td><td>'+esc(nomE(eleve(c.eleveId)))+'</td><td>'+esc(prof(c.profId).nom)+'</td><td>'+esc(c.matiere)+'</td><td class="num">'+fmtH(c.duree)+'</td><td>'+st(c)+'</td><td class="num">'+(fait(c)?eur(c.duree/60*prof(c.profId).taux):'—')+'</td></tr>'}).join('');
+  var so=[['','Tous les statuts'],['planifie','Planifié / à déclarer'],['declare','À valider'],['valide','Validé'],['annule','Annulé']];
+  return '<div class="page-h"><div><h1>Historique global</h1><p class="muted">'+cs.length+' cours · '+fmtH(min)+' effectuées · '+eur(du)+' de rémunération</p></div></div>'+
+    '<div class="toolbar"><div class="field"><label for="qh">Rechercher</label><input id="qh" type="search" data-f="fh.q" value="'+esc(f.q)+'" placeholder="Élève, professeur, référence"></div>'+
+    '<div class="field"><label for="hmo">Mois</label>'+moisSel('hmo','fh.mois',f.mois,true)+'</div>'+
+    '<div class="field"><label for="hst">Statut</label><select id="hst" data-f="fh.statut">'+so.map(function(o){return '<option value="'+o[0]+'"'+sel(o[0],f.statut)+'>'+o[1]+'</option>'}).join('')+'</select></div>'+
+    '<div class="field"><label for="hpr">Professeur</label><select id="hpr" data-f="fh.prof"><option value="">Tous les professeurs</option>'+S.profs.map(function(p){return '<option value="'+p.id+'"'+sel(p.id,f.prof)+'>'+esc(p.nom)+'</option>'}).join('')+'</select></div></div>'+
+    '<div class="tblw"><table><thead><tr><th>Réf.</th><th>Date</th><th>Horaire</th><th>Élève</th><th>Professeur</th><th>Matière</th><th class="num">Durée</th><th>Statut</th><th class="num">Rémunération</th></tr></thead><tbody>'+(rows||'<tr><td colspan="9">Aucun cours ne correspond.</td></tr>')+'</tbody></table></div>'+
+    (cs.length>120?'<p class="small muted" style="margin-top:8px">120 premiers résultats affichés : affinez les filtres.</p>':'');
+}
+
+/* ---------- Rendu ---------- */
+var NAV={admin:[['dash','Tableau de bord','grid'],['eleves','Élèves','users'],['profs','Professeurs','cap'],['histo','Historique','list']],
+  prof:[['planning','Planning','cal'],['declarer','À déclarer','check'],['eleves','Mes élèves','users'],['releve','Relevé mensuel','doc']],
+  famille:[['accueil','Solde et cours','ticket'],['histo','Historique','list']]};
+var VIEWS={admin:{dash:vDash,eleves:vEleves,profs:vProfs,histo:vHisto},prof:{planning:vPlanning,declarer:vDeclarer,eleves:vMesEleves,releve:vReleve},famille:{accueil:vAccueil,histo:vHistoFam}};
+function render(){
+  var a=document.activeElement,fid=a&&a.id,ss=null;try{ss=a.selectionStart}catch(e){}
+  var x=ctx(),tab=S.ui.tab[x.role],main=$('#main');
+  document.querySelectorAll('#seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.v===S.ui.role))});
+  var ab=$('#asbar');ab.hidden=!S.ui.as;
+  if(S.ui.as)ab.innerHTML='<span>'+I('eye')+'<span>Vue administrateur : vous voyez l’application comme <b>'+esc(x.role==='prof'?prof(x.id).nom+' (professeur)':parent(x.parentId).nom+' (parent)')+'</b></span></span><button type="button" data-act="quit-as">Revenir à l’administration</button>';
+  var cnt={};
+  if(x.role==='prof')cnt.declarer=S.cours.filter(function(c){return c.profId===x.id&&c.statut==='planifie'&&passe(c)}).length;
+  if(x.role==='famille')cnt.accueil=S.cours.filter(function(c){return c.statut==='declare'&&eleve(c.eleveId).parentId===x.parentId}).length;
+  if(x.role==='admin')cnt.dash=S.journal.filter(function(j){return !j.lu&&(j.type==='annulation'||j.type==='modification')}).length;
+  $('#nav').innerHTML=NAV[x.role].map(function(t){return '<button type="button" class="tab" data-act="tab" data-v="'+t[0]+'"'+(t[0]===tab?' aria-current="page"':'')+'>'+I(t[2])+t[1]+(cnt[t[0]]?'<span class="cnt">'+cnt[t[0]]+'</span>':'')+'</button>'}).join('');
+  main.innerHTML=VIEWS[x.role][tab](x);
+  save();
+  if(fid){var el=document.getElementById(fid);if(el&&main.contains(el)&&el!==document.activeElement){el.focus();if(ss!=null)try{el.setSelectionRange(ss,ss)}catch(e){}}}
+}
+
+/* ---------- Formulaires ---------- */
+function coursForm(id,pre){
+  var c=id?cours(id):null,x=ctx(),pid=c?c.profId:x.id,p=prof(pid);
+  var els=S.eleves.filter(function(e){return e.profs.indexOf(pid)>=0});
+  if(!els.length)return toast('Aucun élève attribué à ce professeur pour le moment.');
+  var v=c||{eleveId:pre||els[0].id,matiere:p.mat[0],date:addD(TODAY,1),debut:'17:00',duree:60};
+  var val=function(d){return{id:c?c.id:0,profId:pid,eleveId:d.eleve,matiere:d.matiere,date:d.date,debut:d.debut,duree:+d.duree}};
+  var txt=function(k){return fmtD(k.date)+', '+k.debut+'–'+fin(k)+' : '+esc(k.matiere)+', '+esc(prof(k.profId).nom)+' avec '+esc(nomE(eleve(k.eleveId)))+(k.profId===pid?' (professeur déjà occupé)':' (élève déjà en cours)')};
+  openDlg(dh(c?'Modifier le cours':'Planifier un cours')+'<div class="fgrid">'+
+    F('Élève','eleve','<select id="f-eleve" name="eleve">'+els.map(function(e){return '<option value="'+e.id+'"'+sel(e.id,v.eleveId)+'>'+esc(nomE(e))+' ('+esc(e.classe)+')</option>'}).join('')+'</select>')+
+    F('Matière','matiere','<select id="f-matiere" name="matiere">'+p.mat.concat(c&&p.mat.indexOf(c.matiere)<0?[c.matiere]:[]).map(function(m){return '<option'+sel(m,v.matiere)+'>'+esc(m)+'</option>'}).join('')+'</select>')+
+    F('Date','date','<input id="f-date" name="date" type="date" value="'+v.date+'">')+
+    F('Heure de début','debut','<input id="f-debut" name="debut" type="time" step="900" value="'+v.debut+'">')+
+    F('Durée','duree','<select id="f-duree" name="duree">'+[60,90,120].map(function(d){return '<option value="'+d+'"'+sel(d,v.duree)+'>'+fmtH(d)+' ('+d/30+' coupons)</option>'}).join('')+'</select>')+
+    (c?F('Raison de la modification (obligatoire)','raison','<textarea id="f-raison" name="raison"></textarea>','L’administrateur est prévenu de la modification.',true):'')+
+    '</div><div id="conf" role="status"></div>'+(c?'':'<p class="hint">Pour tester le contrôle : choisissez un créneau déjà occupé dans le planning.</p>')+df(c?'Enregistrer la modification':'Planifier le cours'),
+  function(d,f){
+    var ko=false,n=val(d);
+    if(!d.date)ko=bad(f,'date','Indiquez une date.');
+    if(!d.debut)ko=bad(f,'debut','Indiquez une heure de début.');
+    else if(toMin(d.debut)<7*60||toMin(d.debut)+n.duree>22*60)ko=bad(f,'debut','Les cours ont lieu entre 7 h et 22 h.');
+    if(c&&(d.raison||'').trim().length<5)ko=bad(f,'raison','La raison est obligatoire (5 caractères minimum).');
+    if(ko)return fail(f);
+    if(conflits(n,n.id).length){f.elements.debut.setAttribute('aria-invalid','true');return f.elements.debut.focus()}
+    var e=eleve(n.eleveId);
+    if(c){
+      var avant=fmtD(c.date)+' '+c.debut;
+      c.eleveId=n.eleveId;c.matiere=n.matiere;c.date=n.date;c.debut=n.debut;c.duree=n.duree;
+      log('modification',qui()+' a modifié le cours de '+c.matiere+' de '+nomE(e)+' ('+avant+' → '+fmtD(c.date)+' '+c.debut+', '+fmtH(c.duree)+'). Motif : '+d.raison.trim());
+      toast('Cours modifié : l’administrateur est prévenu (notification simulée).');
+    }else{
+      n.id=++S.seq;n.statut='planifie';S.cours.push(n);
+      toast('Cours planifié le '+fmtD(n.date)+' à '+n.debut+'.');
+    }
+    var mon=addD(TODAY,-((pd(TODAY).getDay()+6)%7));
+    if(ctx().role==='prof')S.ui.week=Math.floor(diffJ(n.date,mon)/7);
+    dlg.close();render();
+  },function(f){
+    var d=Object.fromEntries(new FormData(f)),box=f.querySelector('#conf');
+    if(!d.date||!d.debut){box.className='';box.innerHTML='';return}
+    var k=conflits(val(d),c?c.id:0);
+    box.className='note '+(k.length?'bad':'ok');box.style.marginBottom='0';
+    box.innerHTML=k.length?I('alert')+'<div><b>Chevauchement détecté : enregistrement impossible.</b><br>'+k.map(txt).join('<br>')+'</div>':I('check')+'<div>Créneau libre pour le professeur et pour l’élève.</div>';
+  });
+}
+function coursDetail(id){
+  var c=cours(id),x=ctx(),e=eleve(c.eleveId),b='';
+  if(c.statut==='planifie'&&x.role!=='famille'){
+    if(passe(c)&&x.role==='prof')b+='<button type="button" class="btn primary" data-act="declare" data-id="'+c.id+'">'+I('check')+'Déclarer effectué</button>';
+    b+='<button type="button" class="btn" data-act="edit-cours" data-id="'+c.id+'">'+I('edit')+'Modifier</button><button type="button" class="btn danger" data-act="cancel-cours" data-id="'+c.id+'">'+I('x')+'Annuler le cours</button>';
+  }
+  if(c.statut==='declare'&&x.role==='famille')b+='<button type="button" class="btn primary" data-act="valider" data-id="'+c.id+'">'+I('check')+'Valider le cours</button>';
+  if(c.statut==='planifie'&&!passe(c))b+='<button type="button" class="btn" data-act="ics-one" data-id="'+c.id+'">'+I('cal')+'Ajouter à l’agenda</button>';
+  openDlg(dh(esc(c.matiere)+' · '+ref(c))+'<dl><dt>Statut</dt><dd>'+st(c)+'</dd><dt>Date</dt><dd>'+fmtD(c.date,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</dd><dt>Horaire</dt><dd>'+c.debut+'–'+fin(c)+' ('+fmtH(c.duree)+')</dd><dt>Élève</dt><dd>'+esc(nomE(e))+' · '+esc(e.classe)+'</dd><dt>Professeur</dt><dd>'+esc(prof(c.profId).nom)+'</dd><dt>Coupons</dt><dd>'+coupons(c)+(c.statut==='valide'?' déduits':' à déduire à la validation')+'</dd>'+
+    (c.raison?'<dt>Motif</dt><dd>'+esc(c.raison)+(c.par?' (par '+esc(c.par)+')':'')+'</dd>':'')+(c.note?'<dt>Commentaire</dt><dd>'+esc(c.note)+'</dd>':'')+'</dl>'+
+    '<div class="dfoot">'+b+'<button type="button" class="btn" data-act="close">Fermer</button></div>');
+}
+function cancelForm(id){
+  var c=cours(id),e=eleve(c.eleveId);
+  openDlg(dh('Annuler le cours')+'<p>'+esc(c.matiere)+' avec '+esc(nomE(e))+', '+fmtD(c.date)+' à '+c.debut+'.</p>'+
+    F('Raison de l’annulation (obligatoire)','raison','<textarea id="f-raison" name="raison"></textarea>','L’administrateur reçoit une alerte. Aucun coupon n’est déduit.')+df('Confirmer l’annulation','danger'),
+  function(d,f){
+    var r=(d.raison||'').trim();if(r.length<5){bad(f,'raison','La raison est obligatoire (5 caractères minimum).');return fail(f)}
+    c.statut='annule';c.raison=r;c.par=qui();
+    log('annulation',qui()+' a annulé le cours de '+c.matiere+' de '+nomE(e)+' ('+fmtD(c.date)+' à '+c.debut+'). Motif : '+r);
+    dlg.close();toast('Cours annulé : l’administrateur est prévenu (notification simulée).');render();
+  });
+}
+function declareForm(id){
+  var c=cours(id),e=eleve(c.eleveId);
+  openDlg(dh('Déclarer le cours effectué')+'<p>'+esc(c.matiere)+' avec '+esc(nomE(e))+', '+fmtD(c.date)+' à '+c.debut+'.</p><div class="fgrid">'+
+    F('Durée réelle','duree','<select id="f-duree" name="duree">'+[30,60,90,120,150,180].map(function(d){return '<option value="'+d+'"'+sel(d,c.duree)+'>'+fmtH(d)+' ('+d/30+' coupons)</option>'}).join('')+'</select>')+
+    F('Commentaire pour la famille (facultatif)','note','<textarea id="f-note" name="note"></textarea>','',true)+'</div>'+df('Déclarer le cours'),
+  function(d){
+    c.duree=+d.duree;c.statut='declare';if(d.note.trim())c.note=d.note.trim();
+    log('declaration',prof(c.profId).nom+' a déclaré '+fmtH(c.duree)+' de '+c.matiere+' avec '+nomE(e)+'.');
+    dlg.close();toast('Cours déclaré : en attente de validation par la famille.');render();
+  });
+}
+function validerForm(id){
+  var c=cours(id),e=eleve(c.eleveId),need=coupons(c),s=solde(e);
+  openDlg(dh('Valider le cours')+'<p>'+esc(c.matiere)+' avec '+esc(prof(c.profId).nom)+', '+fmtD(c.date)+' de '+c.debut+' à '+fin(c)+'.</p>'+(c.note?'<p class="muted">Commentaire du professeur : '+esc(c.note)+'</p>':'')+
+    '<dl><dt>À déduire</dt><dd>'+fmtC(need)+'</dd><dt>Solde actuel</dt><dd>'+fmtC(s)+'</dd><dt>Solde après</dt><dd>'+(s>=need?fmtC(s-need):'Insuffisant')+'</dd></dl>'+
+    (s<need?'<p class="note bad" style="margin:0">'+I('alert')+'<span>Solde insuffisant : la validation sera bloquée et l’administration prévenue.</span></p>':'')+df('Confirmer la validation'),
+  function(){
+    dlg.close();
+    if(s<need){log('solde','Validation impossible pour '+nomE(e)+' : solde insuffisant ('+s+' coupon(s) pour '+need+' requis).');toast('Solde insuffisant : l’administration est prévenue.');return render()}
+    var k=need;lotsActifs(e).forEach(function(l){var t=Math.min(l.r,k);l.r-=t;k-=t});
+    c.statut='valide';
+    log('validation',qui()+' a validé '+fmtH(c.duree)+' de '+c.matiere+' pour '+nomE(e)+' : '+need+' coupons déduits.');
+    if(solde(e)<=SEUIL)log('solde','Solde bas pour '+nomE(e)+' : '+fmtC(solde(e))+'.');
+    toast('Cours validé : '+fmtC(need)+' déduits.');render();
+  });
+}
+function heuresForm(id){
+  openDlg(dh('Ajouter des heures achetées')+'<div class="fgrid">'+
+    F('Élève','eleve','<select id="f-eleve" name="eleve">'+S.eleves.map(function(e){return '<option value="'+e.id+'"'+sel(e.id,id)+'>'+esc(nomE(e))+' · solde '+fmtH(solde(e)*30)+'</option>'}).join('')+'</select>','',true)+
+    F('Nombre d’heures achetées','heures','<input id="f-heures" name="heures" type="number" min="0.5" step="0.5" value="10" inputmode="decimal">')+
+    F('Date d’expiration des coupons','exp','<input id="f-exp" name="exp" type="date" value="'+addD(TODAY,180)+'">')+'</div>'+
+    '<p class="note ok" id="cpn" style="margin:0"></p>'+df(I('lock')+'Générer les coupons'),
+  function(d,f){
+    var h=parseFloat(String(d.heures).replace(',','.')),ko=false;
+    if(!(h>0)||h>200||(h*2)%1)ko=bad(f,'heures','Saisissez un nombre d’heures par demi-heure, entre 0,5 et 200.');
+    if(!d.exp||d.exp<=TODAY)ko=bad(f,'exp','La date d’expiration doit être dans le futur.');
+    if(ko)return fail(f);
+    var e=eleve(d.eleve);
+    askPin('ajout de '+fmtH(h*60)+' à '+esc(nomE(e))+'.',function(){
+      S.lots.push({id:'L'+(S.lots.length+1),eleveId:e.id,n:h*2,r:h*2,achat:TODAY,exp:d.exp});
+      log('achat','Achat de '+fmtH(h*60)+' pour '+nomE(e)+' : '+h*2+' coupons générés, valables jusqu’au '+fmtDL(d.exp)+'.');
+      toast(h*2+' coupons générés pour '+nomE(e)+'.');render();
+    });
+  },function(f){var h=parseFloat(String(f.elements.heures.value).replace(',','.'));f.querySelector('#cpn').innerHTML=h>0?I('ticket')+'<span><b>'+fmtH(h*60)+' = '+Math.round(h*2)+' coupons</b> générés automatiquement (1 heure = 2 coupons).</span>':''});
+}
+var mailOk=function(s){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)};
+function eleveForm(){
+  openDlg(dh('Nouvel élève')+'<div class="fgrid">'+
+    F('Prénom','prenom','<input id="f-prenom" name="prenom" type="text" autocomplete="off">')+F('Nom','nom','<input id="f-nom" name="nom" type="text" autocomplete="off">')+
+    F('Classe','classe','<select id="f-classe" name="classe">'+['CP','CE1','CE2','CM1','CM2','6e','5e','4e','3e','2de','1re','Terminale'].map(function(c){return '<option'+sel(c,'6e')+'>'+c+'</option>'}).join('')+'</select>')+
+    F('Professeur référent','prof','<select id="f-prof" name="prof">'+S.profs.map(function(p){return '<option value="'+p.id+'">'+esc(p.nom)+'</option>'}).join('')+'</select>')+
+    F('Compte parent','parent','<select id="f-parent" name="parent"><option value="new">Nouveau parent…</option>'+S.parents.map(function(p){return '<option value="'+p.id+'">'+esc(p.nom)+' (déjà inscrit)</option>'}).join('')+'</select>','Un parent peut suivre plusieurs enfants.')+
+    F('Fin de contrat','contrat','<input id="f-contrat" name="contrat" type="date" value="'+addD(TODAY,365)+'">')+
+    '<div class="field full" id="np"><div class="fgrid">'+F('Nom du parent','pnom','<input id="f-pnom" name="pnom" type="text" autocomplete="off">')+F('E-mail du parent','pmail','<input id="f-pmail" name="pmail" type="email" autocomplete="off">')+'</div></div></div>'+df('Créer le compte'),
+  function(d,f){
+    var ko=false;
+    if(!d.prenom.trim())ko=bad(f,'prenom','Prénom obligatoire.');
+    if(!d.nom.trim())ko=bad(f,'nom','Nom obligatoire.');
+    if(!d.contrat||d.contrat<=TODAY)ko=bad(f,'contrat','Choisissez une date future.');
+    if(d.parent==='new'){if(!d.pnom.trim())ko=bad(f,'pnom','Nom du parent obligatoire.');if(!mailOk(d.pmail.trim()))ko=bad(f,'pmail','Adresse e-mail invalide.')}
+    if(ko)return fail(f);
+    var pid=d.parent;
+    if(pid==='new'){pid='par'+(S.parents.length+1);S.parents.push({id:pid,nom:d.pnom.trim(),email:d.pmail.trim()})}
+    var e={id:'e'+(S.eleves.length+1),prenom:d.prenom.trim(),nom:d.nom.trim(),classe:d.classe,parentId:pid,contrat:d.contrat,profs:[d.prof]};
+    S.eleves.push(e);log('compte','Compte créé pour '+nomE(e)+' ('+e.classe+'), rattaché à '+parent(pid).nom+'.');
+    S.ui.tab.admin='eleves';S.ui.fe={q:'',f:'tous'};dlg.close();
+    toast('Compte créé : identifiants envoyés par e-mail (simulation).');render();
+  },function(f){f.querySelector('#np').hidden=f.elements.parent.value!=='new'});
+}
+function profForm(){
+  openDlg(dh('Nouveau professeur')+'<div class="fgrid">'+
+    F('Prénom et nom','nom','<input id="f-nom" name="nom" type="text" autocomplete="off">')+F('E-mail','mail','<input id="f-mail" name="mail" type="email" autocomplete="off">')+
+    F('Matières','mat','<input id="f-mat" name="mat" type="text" placeholder="Mathématiques, SVT">','Séparées par des virgules.')+
+    F('Taux horaire (€)','taux','<input id="f-taux" name="taux" type="number" min="10" max="100" step="0.5" value="22" inputmode="decimal">')+'</div>'+df('Créer le compte'),
+  function(d,f){
+    var ko=false,t=parseFloat(d.taux),m=d.mat.split(',').map(function(s){return s.trim()}).filter(Boolean);
+    if(!d.nom.trim())ko=bad(f,'nom','Nom obligatoire.');
+    if(!mailOk(d.mail.trim()))ko=bad(f,'mail','Adresse e-mail invalide.');
+    if(!m.length)ko=bad(f,'mat','Indiquez au moins une matière.');
+    if(!(t>=10&&t<=100))ko=bad(f,'taux','Taux entre 10 € et 100 €.');
+    if(ko)return fail(f);
+    S.profs.push({id:'p'+(S.profs.length+1),nom:d.nom.trim(),email:d.mail.trim(),mat:m,taux:t});
+    log('compte','Compte professeur créé pour '+d.nom.trim()+' ('+eur(t)+' / h).');
+    dlg.close();toast('Compte créé : identifiants envoyés par e-mail (simulation).');render();
+  });
+}
+function tauxForm(id){
+  var p=prof(id);
+  openDlg(dh('Taux horaire de '+esc(p.nom))+F('Nouveau taux horaire (€)','taux','<input id="f-taux" name="taux" type="number" min="10" max="100" step="0.5" value="'+p.taux+'" inputmode="decimal">','Appliqué au calcul de la rémunération. Taux actuel : '+eur(p.taux)+'.')+df(I('lock')+'Modifier le taux'),
+  function(d,f){
+    var t=parseFloat(d.taux);if(!(t>=10&&t<=100)){bad(f,'taux','Taux entre 10 € et 100 €.');return fail(f)}
+    askPin('modification du taux horaire de '+esc(p.nom)+' ('+eur(p.taux)+' → '+eur(t)+').',function(){
+      log('compte','Taux horaire de '+p.nom+' modifié : '+eur(p.taux)+' → '+eur(t)+'.');p.taux=t;toast('Taux horaire mis à jour.');render()});
+  });
+}
+function syncDlg(){
+  var l=aVenir(),x=ctx();
+  openDlg(dh('Synchroniser avec l’agenda du téléphone')+'<p>'+l.length+' cours à venir'+(x.role==='famille'?' pour vos enfants':'')+'.</p>'+
+    '<section><h3>Fichier agenda (.ics)</h3><p class="muted small" style="margin:4px 0 8px">Fonctionne réellement dans cette démo : le fichier s’ouvre dans Google Agenda, l’agenda iPhone ou Outlook.</p><button type="button" class="btn primary" data-act="ics-all">'+I('down')+'Télécharger mes cours à venir</button></section>'+
+    '<section>'+F('Abonnement automatique (simulation)','lien','<input id="f-lien" name="lien" type="text" readonly value="webcal://agenda.passerelle-cours.example/'+(x.role==='prof'?x.id:x.role==='famille'?x.parentId:'admin')+'/k7f2q9.ics">','Dans l’application livrée, ce lien personnel met l’agenda du téléphone à jour à chaque planification, modification ou annulation.')+'</section>'+
+    '<div class="dfoot"><button type="button" class="btn" data-act="close">Fermer</button></div>');
+}
+function installDlg(){
+  openDlg(dh('Installer l’application sur Android')+'<p>L’application livrée s’installe depuis le navigateur, sans passer par un store, et s’ouvre en plein écran comme une application classique.</p>'+
+    '<ol class="steps"><li>Ouvrir l’adresse de l’application dans Chrome sur le téléphone.</li><li>Appuyer sur « Installer l’application » (ou menu ⋮ puis « Ajouter à l’écran d’accueil »).</li><li>L’icône apparaît sur l’écran d’accueil : la connexion reste mémorisée.</li></ol>'+
+    '<p class="note" style="margin:0">'+I('info')+'<span>Dans cette démonstration, l’installation est seulement décrite. Le même site fonctionne aussi sur ordinateur et sur iPhone.</span></p>'+
+    '<div class="dfoot"><button type="button" class="btn primary" data-act="close">Compris</button></div>');
+}
+
+/* ---------- Actions ---------- */
+var A={
+  reset:function(){try{localStorage.removeItem(KEY)}catch(e){}S=seed();if(dlg.open)dlg.close();render();window.scrollTo(0,0);toast('Démo réinitialisée.')},
+  close:function(){dlg.close()},
+  role:function(el){S.ui.role=el.dataset.v;S.ui.as=null;S.ui.enfant=null;S.ui.week=0;render();window.scrollTo(0,0)},
+  tab:function(el){S.ui.tab[ctx().role]=el.dataset.v;render();window.scrollTo(0,0)},
+  week:function(el){var v=+el.dataset.v;S.ui.week=v?S.ui.week+v:0;render()},
+  enfant:function(el){S.ui.enfant=el.dataset.id;render()},
+  fe:function(el){S.ui.fe.f=el.dataset.v;render()},
+  'new-cours':function(el){coursForm(null,el.dataset.e)},
+  cours:function(el){coursDetail(el.dataset.id)},
+  'edit-cours':function(el){coursForm(el.dataset.id)},
+  'cancel-cours':function(el){cancelForm(el.dataset.id)},
+  declare:function(el){declareForm(el.dataset.id)},
+  valider:function(el){validerForm(el.dataset.id)},
+  sync:syncDlg,install:installDlg,
+  'ics-all':function(){var l=aVenir();if(!l.length)return toast('Aucun cours à venir à exporter.');ics(l,'cours-a-venir.ics');toast('Fichier agenda téléchargé ('+l.length+' cours).')},
+  'ics-one':function(el){var c=cours(el.dataset.id);ics([c],'cours-'+c.date+'.ics');toast('Fichier agenda téléchargé.')},
+  pdf:function(){
+    var x=ctx(),r=releve(x);
+    $('#print').innerHTML='<h1>Relevé mensuel : '+moisLabel(S.ui.mois)+'</h1><p>Passerelle, soutien scolaire (document de démonstration, données fictives)</p><p><b>'+esc(r.p.nom)+'</b> · taux horaire '+eur(r.p.taux)+' · édité le '+fmtDL(TODAY)+'</p>'+r.table;
+    toast('Aperçu avant impression : choisissez « Enregistrer au format PDF ».');setTimeout(function(){window.print()},150);
+  },
+  'add-heures':function(el){heuresForm(el.dataset.id||S.eleves[0].id)},
+  'new-eleve':eleveForm,'new-prof':profForm,
+  taux:function(el){tauxForm(el.dataset.id)},
+  renouv:function(el){var e=eleve(el.dataset.id);askPin('renouvellement du contrat de '+esc(nomE(e))+' pour 12 mois.',function(){e.contrat=addD(TODAY,365);log('compte','Contrat de '+nomE(e)+' renouvelé jusqu’au '+fmtDL(e.contrat)+'.');toast('Contrat renouvelé.');render()})},
+  lu:function(el){var j=S.journal.filter(function(j){return j.id===+el.dataset.id})[0];if(j)j.lu=true;render()},
+  'as-prof':function(el){S.ui.as={role:'prof',id:el.dataset.id};S.ui.tab.prof='planning';S.ui.week=0;render();window.scrollTo(0,0)},
+  'as-eleve':function(el){var e=eleve(el.dataset.id);S.ui.as={role:'famille',parentId:e.parentId};S.ui.enfant=e.id;S.ui.tab.famille='accueil';render();window.scrollTo(0,0)},
+  'quit-as':function(){S.ui.as=null;S.ui.enfant=null;render();window.scrollTo(0,0)}
+};
+document.addEventListener('click',function(e){var el=e.target.closest('[data-act]');if(el&&A[el.dataset.act])A[el.dataset.act](el)});
+$('#main').addEventListener('input',function(e){
+  var p=e.target.dataset.f;if(!p)return;
+  var k=p.split('.');if(k.length===2)S.ui[k[0]][k[1]]=e.target.value;else S.ui[p]=e.target.value;
+  render();
+});
+if(moisList().indexOf(S.ui.mois)<0)S.ui.mois=TODAY.slice(0,7);
+render();
+})();
+</script>
 </body>
 </html>
