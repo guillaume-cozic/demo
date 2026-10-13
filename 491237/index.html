@@ -2,20 +2,765 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Gestion de stock multicanal</title>
+<meta name="description" content="WMS pour distributeur B2B de cosmétiques : import de factures fournisseurs avec OCR, réception par scan, commandes multicanal avec réservation et reliquats, cartographie d'entrepôt, terminal de préparation guidée, bons de livraison et droits d'accès.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F4F1;--panel:#FFFFFF;--panel-2:#F1EEEA;--ink:#1F1A1C;--muted:#5E5458;--line:#E2DCD7;--line-2:#C4BAB4;
+  --accent:#9A3557;--accent-ink:#FFFFFF;--accent-soft:#F7E3EA;--accent-text:#862B4A;
+  --band:#FBF1DC;--band-ink:#7A4B00;--dev:#2A2427;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4E5257;--gray-soft:#EAE7E4;
+  --shadow:0 1px 2px rgba(31,26,28,.05),0 4px 14px rgba(31,26,28,.06);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141012;--panel:#1D181A;--panel-2:#262022;--ink:#EFE8EA;--muted:#B3A6AB;--line:#332B2E;--line-2:#54474C;
+  --accent:#F29AB4;--accent-ink:#33101D;--accent-soft:#3A1E28;--accent-text:#F7B3C7;
+  --band:#2E2512;--band-ink:#EFC57A;--dev:#000;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--gray:#BDB5B8;--gray-soft:#2A2426;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em}
+p{margin:0}ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13px}
+.mono{font-family:var(--mono);font-size:.92em;overflow-wrap:anywhere}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:6px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+.mark{width:36px;height:36px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.role{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0}
+.role label{font-size:13px;font-weight:600;color:var(--muted)}
+.role select{width:auto;max-width:100%}
+#nav{display:flex;gap:4px;overflow-x:auto;min-width:0;width:100%;order:3;padding-bottom:2px}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 13px;border-radius:9px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;flex:none}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--panel);border:1px solid var(--line-2);border-radius:999px;padding:0 7px;color:var(--ink)}
+main{padding:20px clamp(16px,2vw,32px) 90px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 15px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.block{width:100%}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.err{font-size:13.5px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=search],input[type=number],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:9px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:96px;font-family:var(--mono);font-size:13.5px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(210px,100%),1fr));align-items:end}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;min-width:0}
+.card h2{font-size:17px}
+.card h3{font-size:15px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:24px}
+.page-h>div{min-width:0}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:10px;padding:10px 14px;font-size:14px;font-weight:500}
+.note.warn{background:var(--warn-soft);color:var(--warn)}.note.ok{background:var(--ok-soft);color:var(--ok)}.note.bad{background:var(--bad-soft);color:var(--bad)}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px}
+.stack{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr))}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr))}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0;border-top:3px solid var(--line-2)}
+.kpi.a{border-top-color:var(--ok)}.kpi.b{border-top-color:var(--warn)}.kpi.c{border-top-color:var(--info)}.kpi.d{border-top-color:var(--accent)}
+.kpi b{display:block;font-size:27px;line-height:1.15;font-weight:700}
+.kpi span{font-size:13px;color:var(--muted);font-weight:500}
+.rows li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.rows li:first-child{border-top:0}
+.rows li>div{min-width:0;flex:1 1 180px}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.steps{display:flex;gap:4px;margin:8px 0 4px}
+.steps i{flex:1;height:6px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line)}
+.steps i.on{background:var(--accent);border-color:var(--accent)}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td input[type=number]{width:92px}
+
+.maplay{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.maplay{grid-template-columns:minmax(0,1fr) minmax(0,380px);align-items:start}.maplay aside{position:sticky;top:130px}}
+.aisles{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+.slots{display:grid;gap:6px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.slot{min-height:54px;border:1px solid var(--line-2);border-radius:8px;background:var(--panel-2);cursor:pointer;padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+.slot small{font-size:11.5px;font-weight:500}
+.slot.occ{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.slot.low{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.slot.out{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+.slot[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:14px;height:14px;border-radius:4px;border:1px solid}
+
+.preplay{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:920px){.preplay{grid-template-columns:minmax(0,400px) minmax(0,1fr);align-items:start}}
+.device{border:9px solid var(--dev);border-radius:28px;background:var(--panel);overflow:hidden;box-shadow:var(--shadow);min-width:0;max-width:420px;width:100%;justify-self:center}
+.dev-h{background:var(--dev);color:#fff;padding:6px 14px 10px;font-size:13px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.dev-b{padding:14px;display:grid;gap:12px;min-height:420px;align-content:start}
+.bigloc{font-family:var(--mono);font-size:40px;font-weight:600;text-align:center;background:var(--accent-soft);color:var(--accent-text);border-radius:12px;padding:10px;line-height:1.1}
+.bigq{font-size:30px;font-weight:700;line-height:1}
+.pickrow{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.pickrow>div{min-width:0}
+.phase{display:flex;gap:6px}
+.phase span{flex:1;text-align:center;font-size:12px;font-weight:700;padding:5px 2px;border-radius:7px;background:var(--panel-2);color:var(--muted)}
+.phase span.on{background:var(--accent);color:var(--accent-ink)}
+.phase span.done{background:var(--ok-soft);color:var(--ok)}
+.jobbtn{width:100%;text-align:left;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);padding:12px;cursor:pointer;min-height:44px;display:grid;gap:3px}
+.jobbtn:hover{background:var(--panel-2)}
+
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);padding:0;width:min(820px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(20,14,16,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 10px 10px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:18px;min-width:0;overflow-wrap:anywhere}
+.dlg-b{padding:18px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.xbtn{width:44px;height:44px;border:0;background:transparent;border-radius:9px;cursor:pointer;display:grid;place-items:center;flex:none}
+.xbtn:hover{background:var(--panel-2)}
+.drop{border:2px dashed var(--line-2);border-radius:14px;padding:22px 16px;text-align:center;display:grid;gap:10px;justify-items:center}
+.prog{height:10px;border-radius:99px;background:var(--panel-2);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--accent);animation:prog 1.5s ease-out forwards}
+@keyframes prog{to{width:100%}}
+@media (prefers-reduced-motion:reduce){.prog i{animation-duration:.01s}}
+.doc{background:#fff;color:#111;border:1px solid #ccc;border-radius:8px;padding:20px;font-size:13.5px;min-width:0}
+.doc h3{font-size:20px;margin-bottom:4px}
+.doc .two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));margin:14px 0}
+.doc table{min-width:520px}
+.doc th{background:#eee;color:#333}.doc th,.doc td{border-color:#ccc}
+.doc .tw{border-color:#ccc;background:#fff;border-radius:4px}
+.doc .sig{margin-top:22px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))}
+.doc .sig div{border:1px solid #999;height:70px;padding:6px;font-size:12px;color:#444}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:10px;font-weight:600;font-size:14px;max-width:calc(100vw - 24px);width:max-content;z-index:99;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+.permck{display:grid;place-items:center;min-width:44px;min-height:44px;cursor:pointer}
+.permck input{width:20px;height:20px;accent-color:var(--accent)}
+@media print{
+  body>*:not(dialog){display:none!important}
+  body{background:#fff}
+  dialog{position:static;border:0;box-shadow:none;width:auto;max-width:none;max-height:none;overflow:visible;background:#fff}
+  .noprint,.dlg-h{display:none!important}
+  .doc{border:0;padding:0}.dlg-b{padding:0}
+  .doc table{min-width:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0">
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+<symbol id="i-truck" viewBox="0 0 24 24"><path d="M1 6h13v10H1zM14 10h4l4 3v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+<symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.5 11h10L20 7H7"/><circle cx="9" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M8 9v6M12 9v6M16 9v6"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M22 20v-2a4 4 0 00-3-3.9M16 2.1a4 4 0 010 7.8"/><circle cx="9" cy="6" r="4"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-3-6.7M21 3v6h-6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2zM12 10v5M12 18h.01"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2M6 14h12v7H6z"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</svg>
+
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i"><use href="#i-refresh"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i"><use href="#i-box"/></svg></span>Mirae Stock</div>
+  <div class="role"><label for="roleSel">Profil</label><select id="roleSel" data-ch="role"></select></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+</header>
+<main id="main"></main>
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='wms491237';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic=n=>`<svg class="i" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const nf=n=>Number(n).toLocaleString('fr-FR');
+const fd=t=>new Date(t).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+const fdt=t=>new Date(t).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const sum=(a,f)=>a.reduce((n,x)=>n+f(x),0);
+
+const VIEWS=[['dash','Tableau de bord','chart'],['achats','Achats & arrivages','truck'],['cmd','Commandes','cart'],['stock','Stock','box'],['map','Entrepôt','map'],['prep','Terminal préparateur','scan'],['mov','Mouvements','list'],['users','Utilisateurs & droits','users']];
+const ROLES={admin:'Administrateur',gest:'Gestionnaire logistique',prep:'Préparateur',agent:'Agent commercial'};
+const TS=['Étiquette créée','Pris en charge','En transit','Dédouanement','En livraison','Livré'];
+const CARRIERS=['DHL Express','FedEx International','Chronopost','Fret maritime groupé'];
+const AISLES=['A','B','C','D'];
+const SLOTS=[];AISLES.forEach(a=>{for(let n=3;n>=1;n--)for(let t=1;t<=4;t++)SLOTS.push(`${a}-0${t}-${n}`)});
+const STL={prep:['À préparer','b-info'],cours:['En préparation','b-warn'],exp:['Expédiée','b-ok'],reliq:['Reliquat en attente','b-bad'],attente:['En attente de stock','b-bad']};
+const OCR=[
+ {supplier:'Dalbit Cosmetics Co., Ltd — Séoul',invoice:'DB-INV-26-1187',lines:[
+  {ref:'DB-CER-CRM50',label:'Ceramide Barrier Cream 50ml',qty:144,conf:98},
+  {ref:'DB-RICE-SRM30',label:'Fermented Rice Glow Serum 30ml',qty:120,conf:97},
+  {ref:'DB-BRCH-TNR150',label:'Birch Hydra Toner 150ml',qty:96,conf:71},
+  {ref:'DB-CER-CRM50-N',label:'Ceramide Barrier Cream 50ml (new pkg)',qty:48,conf:88,sug:3}]},
+ {supplier:'Sonyeo Beauty Corp. — Busan',invoice:'SY-2026-0412',lines:[
+  {ref:'SY-CSH-21N',label:'Glow Cushion 15g #21N',qty:60,conf:99},
+  {ref:'SY-VLT-RW',label:'Velvet Lip Ink 4g Rosewood',qty:240,conf:96},
+  {ref:'SY-CLO-200',label:'Deep Cleansing Oil 200ml',qty:72,conf:83,sug:12}]}
+];
+const SYNC=[
+ {ch:'Shopify B2B',client:'Concept store Hanji — Tours',lines:[[14,24],[8,12]]},
+ {ch:'Qogita',client:'Beauty Wholesale Benelux — Anvers',lines:[[4,96],[3,48]]},
+ {ch:'TikTok Shop',client:'Client TikTok #90377',lines:[[11,1],[7,1]]}
+];
+
+let S, ui, draft={lines:[]}, ocr=null;
+
+function seed(){
+  const now=Date.now(),H=36e5,D=24*H;
+  const products=[
+   ['DAL-SER-030','8809000010017','Sérum éclat riz fermenté 30 ml','Dalbit','A-01-1',240,60,12],
+   ['DAL-TON-150','8809000010024','Tonique hydratant bouleau 150 ml','Dalbit','A-01-2',132,48,12],
+   ['DAL-CRM-050','8809000010031','Crème barrière céramides 50 ml','Dalbit','A-02-1',36,48,12],
+   ['HAN-SPF-050','8809000020016','Crème solaire SPF50+ 50 ml','Haneul Lab','A-03-1',310,80,24],
+   ['HAN-CLE-120','8809000020023','Mousse nettoyante pH 5.5 120 ml','Haneul Lab','A-03-2',96,40,12],
+   ['HAN-ESS-100','8809000020030','Essence centella 100 ml','Haneul Lab','B-01-1',18,36,12],
+   ['MOK-MSK-010','8809000030015','Masque tissu camélia (boîte de 10)','Mokryeon','B-02-1',420,100,20],
+   ['MOK-NUI-080','8809000030022','Masque de nuit miel 80 ml','Mokryeon','B-02-2',64,30,12],
+   ['MOK-PAT-060','8809000030039','Patchs yeux collagène (60 pcs)','Mokryeon','B-03-1',0,40,12],
+   ['SON-CUS-21N','8809000040014','Cushion teint lumineux 15 g — 21N','Sonyeo','C-01-1',150,40,12],
+   ['SON-TIN-RW4','8809000040021','Encre à lèvres velours 4 g — Rosewood','Sonyeo','C-01-2',208,60,24],
+   ['SON-HUI-200','8809000040038','Huile démaquillante 200 ml','Sonyeo','C-02-1',75,36,12],
+   ['BOR-AMP-030','8809000050013','Ampoule vitamine C 30 ml','Boram','C-03-1',54,36,12],
+   ['BOR-GEL-300','8809000050020','Gel aloe apaisant 300 ml','Boram','D-01-1',188,50,12]
+  ].map((a,i)=>({id:i+1,sku:a[0],ean:a[1],name:a[2],brand:a[3],loc:a[4],stock:a[5],min:a[6],pack:a[7]}));
+  const L=(pid,qty,shipped=0)=>({pid,qty,shipped,alloc:0});
+  const orders=[
+   {id:'CMD-1039',ch:'Shopify B2B',client:'Maison Séréna — Bordeaux',t:now-4*D,lines:[L(5,12,12),L(14,24,24)]},
+   {id:'CMD-1040',ch:'Agent commercial',agent:'Claire Aubert',client:'Institut Fleur de Thé — Rennes',t:now-3*D,lines:[L(12,12,12),L(13,12,12)]},
+   {id:'CMD-1041',ch:'Qogita',client:'Nordic Beauty Trade — Lille',t:now-2*D,lines:[L(9,24)]},
+   {id:'CMD-1042',ch:'Shopify B2B',client:'Institut Belle Peau — Lyon',t:now-26*H,lines:[L(1,24),L(4,48),L(7,40)]},
+   {id:'CMD-1043',ch:'TikTok Shop',client:'Client TikTok #88214',t:now-20*H,lines:[L(11,2),L(10,1)]},
+   {id:'CMD-1044',ch:'Qogita',client:'Parfumerie du Marché — Nantes',t:now-9*H,lines:[L(9,36),L(2,24)]},
+   {id:'CMD-1045',ch:'Agent commercial',agent:'Thomas Girard',client:'Pharmacie des Tilleuls — Orléans',t:now-3*H,lines:[L(6,30),L(3,12)]}
+  ];
+  const arrivals=[
+   {id:'ARR-0017',supplier:'Dalbit Cosmetics Co., Ltd — Séoul',invoice:'DB-INV-26-1102',t:now-12*D,tracking:'JD014600098213445',carrier:CARRIERS[0],track:5,status:'recu',lines:[{ref:'DB-RICE-SRM30',pid:1,qty:240,recv:240},{ref:'DB-BRCH-TNR150',pid:2,qty:144,recv:132}]},
+   {id:'ARR-0018',supplier:'Mokryeon Co., Ltd — Séoul',invoice:'MK-2026-0914',t:now-6*D,tracking:'7740 1182 9035',carrier:CARRIERS[1],track:4,status:'prevu',lines:[{ref:'MK-EYE-60',pid:9,qty:120,recv:0},{ref:'MK-CAM-10',pid:7,qty:200,recv:0}]},
+   {id:'ARR-0019',supplier:'Haneul Lab Inc. — Incheon',invoice:'HL-INV-3308',t:now-2*D,tracking:'JD014600098877120',carrier:CARRIERS[0],track:2,status:'prevu',lines:[{ref:'HL-CICA-ESS100',pid:6,qty:144,recv:0},{ref:'HL-SUN-50',pid:4,qty:240,recv:0}]}
+  ];
+  const M=(d,type,pid,qty,ref,user)=>({t:now-d*H,type,pid,qty,ref,user});
+  const moves=[
+   M(3,'Inventaire',8,-2,'Comptage B-02-2','Karim Benali'),
+   M(28,'Déplacement',14,0,'C-04-2 → D-01-1','Lucie Fontaine'),
+   M(70,'Expédition',13,-12,'CMD-1040 · BL-0032','Karim Benali'),
+   M(70,'Expédition',12,-12,'CMD-1040 · BL-0032','Karim Benali'),
+   M(94,'Expédition',14,-24,'CMD-1039 · BL-0031','Lucie Fontaine'),
+   M(94,'Expédition',5,-12,'CMD-1039 · BL-0031','Lucie Fontaine'),
+   M(280,'Réception',2,132,'ARR-0017','Karim Benali'),
+   M(280,'Réception',1,240,'ARR-0017','Karim Benali')
+  ];
+  const ships=[
+   {id:'BL-0031',oid:'CMD-1039',t:now-94*H,colis:2,carrier:CARRIERS[2],lines:[{pid:5,qty:12,ordered:12,rest:0},{pid:14,qty:24,ordered:24,rest:0}]},
+   {id:'BL-0032',oid:'CMD-1040',t:now-70*H,colis:1,carrier:CARRIERS[2],lines:[{pid:12,qty:12,ordered:12,rest:0},{pid:13,qty:12,ordered:12,rest:0}]}
+  ];
+  S={products,orders,arrivals,moves,ships,role:'admin',syncN:0,ocrN:0,seq:{o:1046,a:20,b:33},
+   refMap:{'DB-CER-CRM50':3,'DB-RICE-SRM30':1,'DB-BRCH-TNR150':2,'SY-CSH-21N':10,'SY-VLT-RW':11},
+   channels:[{name:'Shopify B2B',on:true,last:now-25*6e4},{name:'TikTok Shop',on:true,last:now-25*6e4},{name:'Qogita',on:true,last:now-40*6e4},{name:'Autre marketplace (API)',on:false,last:0}],
+   users:[{name:'Inès Marchand',email:'ines.marchand@mirae-stock.example',role:'admin'},{name:'Julien Perrot',email:'julien.perrot@mirae-stock.example',role:'gest'},{name:'Karim Benali',email:'karim.benali@mirae-stock.example',role:'prep'},{name:'Lucie Fontaine',email:'lucie.fontaine@mirae-stock.example',role:'prep'},{name:'Claire Aubert',email:'claire.aubert@mirae-stock.example',role:'agent'},{name:'Thomas Girard',email:'thomas.girard@mirae-stock.example',role:'agent'}],
+   perms:{admin:VIEWS.map(v=>v[0]),gest:['dash','achats','cmd','stock','map','prep','mov'],prep:['stock','map','prep'],agent:['dash','cmd','stock']}};
+  allocate();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.products&&o.perms){S=o;return}}}catch(e){}seed()}
+
+/* ---------- domaine ---------- */
+const prod=id=>S.products.find(p=>p.id===+id);
+const reserved=id=>sum(S.orders,o=>sum(o.lines,l=>l.pid===id?l.alloc:0));
+const expected=id=>sum(S.arrivals.filter(a=>a.status!=='recu'),a=>sum(a.lines,l=>l.pid===id?l.qty:0));
+const dispo=id=>prod(id).stock-reserved(id);
+const me=()=>(S.users.find(u=>u.role===S.role)||{name:ROLES[S.role]}).name;
+function mov(type,pid,qty,ref){S.moves.unshift({t:Date.now(),type,pid,qty,ref,user:me()})}
+function allocate(){
+  let n=0;
+  [...S.orders].sort((a,b)=>a.t-b.t).forEach(o=>{if(o.picking)return;o.lines.forEach(l=>{
+    const need=l.qty-l.shipped-l.alloc;if(need<=0)return;
+    const a=Math.min(need,dispo(l.pid));if(a>0){l.alloc+=a;n++}})});
+  return n;
+}
+function trim(pid){
+  let over=reserved(pid)-prod(pid).stock;
+  for(const o of [...S.orders].sort((a,b)=>b.t-a.t)){if(over<=0)break;if(o.picking)continue;
+    for(const l of o.lines)if(l.pid===pid&&l.alloc){const d=Math.min(l.alloc,over);l.alloc-=d;over-=d}}
+}
+function st(o){
+  if(o.picking)return 'cours';
+  if(!sum(o.lines,l=>l.qty-l.shipped))return 'exp';
+  if(sum(o.lines,l=>l.alloc))return 'prep';
+  return o.lines.some(l=>l.shipped)?'reliq':'attente';
+}
+const partial=o=>o.lines.some(l=>l.qty-l.shipped-l.alloc>0);
+const stBadge=o=>{const k=st(o),x=STL[k];return `<span class="badge ${x[1]}">${x[0]}</span>`+((k==='prep'||k==='cours')&&partial(o)?' <span class="badge b-warn">Partielle</span>':'')};
+const pickLines=o=>o.lines.map((l,idx)=>({l,idx,p:prod(l.pid)})).filter(x=>x.l.alloc>0).sort((a,b)=>a.p.loc.localeCompare(b.p.loc));
+function pState(p){const d=dispo(p.id);return d<=0?['Rupture','b-bad','out']:d<p.min?['Stock faible','b-warn','low']:['OK','b-ok','occ']}
+function aState(a){return a.status==='recu'?['Réceptionné','b-ok']:a.track>=5?['Livré — à contrôler','b-warn']:[TS[a.track],'b-info']}
+
+/* ---------- UI de base ---------- */
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),4200)}
+function openDlg(title,body){const d=$('#dlg');d.innerHTML=`<div class="dlg-h"><h2 id="dlgT">${title}</h2><button type="button" class="xbtn" data-act="close" aria-label="Fermer">${ic('x')}</button></div><div class="dlg-b">${body}</div>`;if(!d.open)d.showModal()}
+function closeDlg(){const d=$('#dlg');if(d.open)d.close()}
+function setErr(form,msg,field){const e=$('.err',form);if(e)e.textContent=msg;form.querySelectorAll('[aria-invalid]').forEach(x=>x.removeAttribute('aria-invalid'));if(field){field.setAttribute('aria-invalid','true');field.focus()}}
+function render(focus){
+  const al=S.perms[S.role];if(!al.includes(ui.view))ui.view=al.includes('prep')&&S.role==='prep'?'prep':(VIEWS.find(v=>al.includes(v[0]))||['dash'])[0];
+  const cnt={cmd:S.orders.filter(o=>st(o)==='prep').length,achats:S.arrivals.filter(a=>a.status!=='recu').length};
+  $('#nav').innerHTML=VIEWS.filter(v=>al.includes(v[0])).map(v=>`<button type="button" class="tab" data-act="go" data-v="${v[0]}"${ui.view===v[0]?' aria-current="page"':''}>${ic(v[2])}${v[1]}${cnt[v[0]]?`<span class="cnt">${cnt[v[0]]}</span>`:''}</button>`).join('');
+  $('#roleSel').innerHTML=Object.keys(ROLES).map(r=>`<option value="${r}"${r===S.role?' selected':''}>${ROLES[r]}</option>`).join('');
+  $('#main').innerHTML=V[ui.view]();
+  if(focus){const el=$(focus);if(el){el.focus();if(el.type==='text'||el.type==='search'){const n=el.value.length;try{el.setSelectionRange(n,n)}catch(e){}}}}
+}
+const pcell=p=>`<b>${esc(p.name)}</b><br><span class="mono muted">${p.sku}</span>`;
+const table=(head,rows,empty)=>rows.length?`<div class="tw"><table><thead><tr>${head.map(h=>`<th scope="col"${h[1]?' class="n"':''}>${h[0]}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`:`<div class="empty">${empty||'Aucun résultat.'}</div>`;
+
+/* ---------- vues ---------- */
+const V={};
+V.dash=()=>{
+  const P=S.products,d=sum(P,p=>Math.max(0,dispo(p.id))),r=sum(P,p=>reserved(p.id)),e=sum(P,p=>expected(p.id));
+  const c=k=>S.orders.filter(o=>st(o)===k).length,tot=S.orders.length||1;
+  const low=P.filter(p=>dispo(p.id)<p.min).sort((a,b)=>dispo(a.id)/a.min-dispo(b.id)/b.min);
+  const can=ui.can=S.perms[S.role];
+  return `<div class="page-h"><div><h1>Tableau de bord</h1><p class="muted">Stocks, commandes et arrivages en temps réel — ${fdt(Date.now())}</p></div>
+  <div class="actions"><button class="btn primary" type="button" data-act="sync">${ic('refresh')}Synchroniser les canaux</button></div></div>
+  <div class="stack">
+  <div class="kpis">
+   <div class="kpi a"><b>${nf(d)}</b><span>Unités disponibles</span></div>
+   <div class="kpi b"><b>${nf(r)}</b><span>Unités réservées</span></div>
+   <div class="kpi c"><b>${nf(e)}</b><span>Unités attendues</span></div>
+   <div class="kpi d"><b>${c('prep')}</b><span>Commandes à préparer</span></div>
+   <div class="kpi d"><b>${c('cours')}</b><span>En préparation</span></div>
+   <div class="kpi d"><b>${c('exp')}</b><span>Expédiées</span></div>
+   <div class="kpi"><b>${c('reliq')+c('attente')}</b><span>En attente de stock / reliquat</span></div>
+  </div>
+  <div class="grid">
+   <section class="card"><div class="card-h"><h2>Alertes de stock</h2><span class="badge ${low.length?'b-warn':'b-ok'}">${low.length} référence(s)</span></div>
+    ${low.length?`<ul class="rows">${low.map(p=>{const s=pState(p),ex=expected(p.id);return `<li><div><b>${esc(p.name)}</b><div class="small muted">Disponible ${nf(dispo(p.id))} / seuil ${p.min}${ex?` · <b>${nf(ex)} attendues</b>`:' · aucun arrivage prévu'}</div></div><span class="badge ${s[1]}">${s[0]}</span></li>`}).join('')}</ul>`:'<div class="empty">Aucune alerte.</div>'}
+   </section>
+   <section class="card"><div class="card-h"><h2>Canaux de vente</h2><span class="small muted">Connexions simulées</span></div>
+    <ul class="rows">${S.channels.map((ch,i)=>`<li><div><b>${esc(ch.name)}</b><div class="small muted">${ch.on?`Dernière synchro ${fdt(ch.last)} · ${S.orders.filter(o=>o.ch===ch.name).length} commande(s)`:'Non connecté'}</div></div><span class="badge ${ch.on?'b-ok':'b-gray'}">${ch.on?'Connecté':'Inactif'}</span><button class="btn" type="button" data-act="chan" data-i="${i}">${ch.on?'Déconnecter':'Connecter'}</button></li>`).join('')}</ul>
+   </section>
+   <section class="card"><div class="card-h"><h2>Commandes par statut</h2></div>
+    <ul class="rows">${Object.keys(STL).map(k=>`<li><div><div style="display:flex;justify-content:space-between;gap:8px"><span>${STL[k][0]}</span><b>${c(k)}</b></div><div class="bar"><i style="width:${Math.round(c(k)/tot*100)}%"></i></div></div></li>`).join('')}</ul>
+   </section>
+   <section class="card"><div class="card-h"><h2>Arrivages attendus</h2>${can.includes('achats')?`<button class="btn" type="button" data-act="go" data-v="achats">Voir${ic('arrow')}</button>`:''}</div>
+    ${(a=>a.length?`<ul class="rows">${a.map(x=>`<li><div><b class="mono">${x.id}</b> · ${esc(x.supplier)}<div class="small muted">${nf(sum(x.lines,l=>l.qty))} unités · ${esc(x.carrier)}</div></div><span class="badge ${aState(x)[1]}">${aState(x)[0]}</span></li>`).join('')}</ul>`:'<div class="empty">Aucun arrivage en cours.</div>')(S.arrivals.filter(a=>a.status!=='recu'))}
+   </section>
+   <section class="card" style="grid-column:1/-1"><div class="card-h"><h2>Derniers mouvements</h2>${can.includes('mov')?`<button class="btn" type="button" data-act="go" data-v="mov">Historique complet${ic('arrow')}</button>`:''}</div>
+    ${movTable(S.moves.slice(0,6))}
+   </section>
+  </div></div>`;
+};
+function movTable(list){
+  return table([['Date'],['Type'],['Produit'],['Quantité',1],['Référence'],['Utilisateur']],list.map(m=>{const p=prod(m.pid);return `<tr><td>${fdt(m.t)}</td><td><span class="badge ${m.type==='Réception'?'b-ok':m.type==='Expédition'?'b-info':m.type==='Déplacement'?'b-gray':'b-warn'}">${m.type}</span></td><td>${p?pcell(p):'—'}</td><td class="n"><b>${m.qty>0?'+':''}${m.qty===0?'—':nf(m.qty)}</b></td><td class="mono">${esc(m.ref)}</td><td>${esc(m.user)}</td></tr>`}),'Aucun mouvement.');
+}
+V.achats=()=>{
+  if(ui.recv){const a=S.arrivals.find(x=>x.id===ui.recv);if(a&&a.status!=='recu')return recvView(a);ui.recv=null}
+  return `<div class="page-h"><div><h1>Achats & arrivages</h1><p class="muted">Importez une facture fournisseur : les lignes sont extraites par OCR, rapprochées du catalogue et créées en arrivage prévu.</p></div>
+  <button class="btn primary" type="button" data-act="ocrOpen">${ic('upload')}Importer une facture</button></div>
+  <div class="grid">${S.arrivals.slice().reverse().map(a=>{const s=aState(a),ec=a.status==='recu'?a.lines.filter(l=>l.recv!==l.qty):[];return `<section class="card">
+   <div class="card-h"><h2 class="mono">${a.id}</h2><span class="badge ${s[1]}">${s[0]}</span></div>
+   <p><b>${esc(a.supplier)}</b></p><p class="small muted">Facture <span class="mono">${esc(a.invoice)}</span> · importée le ${fd(a.t)}</p>
+   <div class="steps" aria-hidden="true">${TS.map((_,i)=>`<i class="${i<=a.track?'on':''}"></i>`).join('')}</div>
+   <p class="small">${esc(a.carrier)} · suivi <span class="mono">${esc(a.tracking)}</span> · <b>${TS[a.track]}</b></p>
+   <ul class="rows" style="margin:10px 0">${a.lines.map(l=>{const p=prod(l.pid);return `<li><div>${esc(p.name)}<div class="small muted mono">${esc(l.ref)} → ${p.sku}</div></div><b>${a.status==='recu'?`${nf(l.recv)} / ${nf(l.qty)}`:nf(l.qty)}</b></li>`}).join('')}</ul>
+   ${ec.length?`<p class="note warn">${ic('alert')}<span>Écart à la réception sur ${ec.length} ligne(s) : ${ec.map(l=>`${prod(l.pid).sku} ${l.recv-l.qty>0?'+':''}${l.recv-l.qty}`).join(', ')}.</span></p>`:''}
+   ${a.status!=='recu'?`<div class="actions" style="margin-top:10px"><button class="btn" type="button" data-act="track" data-id="${a.id}"${a.track>=5?' disabled':''}>${ic('refresh')}Actualiser le suivi</button><button class="btn primary" type="button" data-act="recvOpen" data-id="${a.id}">${ic('scan')}Réceptionner</button></div>`:''}
+  </section>`}).join('')}</div>`;
+};
+function recvView(a){
+  const m=ui.recvMsg;
+  return `<div class="page-h"><div><h1>Réception <span class="mono">${a.id}</span></h1><p class="muted">${esc(a.supplier)} — contrôlez les quantités réellement reçues avant l'ajout au stock disponible.</p></div>
+  <button class="btn" type="button" data-act="recvBack">Retour aux arrivages</button></div>
+  <div class="stack">
+  <section class="card"><form data-form="recvScan" class="fgrid" novalidate>
+    <div class="field"><label for="recvCode">Scanner un code-barres EAN (1 scan = 1 carton)</label><input type="text" id="recvCode" name="code" inputmode="numeric" autocomplete="off" placeholder="Scannez ou saisissez l'EAN"></div>
+    <div class="actions"><button class="btn primary" type="submit">${ic('scan')}Valider le scan</button><button class="btn" type="button" data-act="recvSim">Simuler un scan</button><button class="btn" type="button" data-act="recvAll">Tout conforme</button></div>
+   </form>
+   ${m?`<p class="note ${m.ok?'ok':'bad'}" role="alert" style="margin-top:12px">${ic(m.ok?'check':'alert')}<span>${esc(m.text)}</span></p>`:''}
+  </section>
+  ${table([['Produit'],['EAN'],['Emplacement'],['Attendu',1],['Reçu',1],['Écart',1]],a.lines.map((l,i)=>{const p=prod(l.pid),d=l.recv-l.qty;return `<tr><td>${pcell(p)}</td><td class="mono">${p.ean}</td><td class="mono">${p.loc}</td><td class="n">${nf(l.qty)}</td><td class="n"><label class="sr" for="rq${i}" style="position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden">Quantité reçue ${esc(p.name)}</label><input type="number" id="rq${i}" min="0" value="${l.recv}" data-ch="recvQty" data-i="${i}"></td><td class="n"><span class="badge ${d===0?'b-ok':l.recv===0?'b-gray':'b-warn'}">${d===0?'Conforme':(d>0?'+':'')+d}</span></td></tr>`}))}
+  <div class="actions"><button class="btn primary" type="button" data-act="recvValid">${ic('check')}Valider la réception et mettre en stock</button><span class="muted small">${nf(sum(a.lines,l=>l.recv))} / ${nf(sum(a.lines,l=>l.qty))} unités contrôlées</span></div>
+  </div>`;
+}
+V.cmd=()=>{
+  const f=ui.f,chs=[...new Set(S.orders.map(o=>o.ch))];
+  const list=S.orders.filter(o=>{const k=st(o);return (f.cs==='all'||(f.cs==='wait'?(k==='reliq'||k==='attente'):k===f.cs))&&(!f.cc||o.ch===f.cc)}).sort((a,b)=>b.t-a.t);
+  const chip=(v,l)=>`<button type="button" class="chip" data-act="setf" data-k="cs" data-v="${v}" aria-pressed="${f.cs===v}">${l}</button>`;
+  return `<div class="page-h"><div><h1>Commandes</h1><p class="muted">Toutes les commandes des canaux de vente et des agents, avec réservation automatique du stock.</p></div>
+  <div class="actions"><button class="btn" type="button" data-act="sync">${ic('refresh')}Synchroniser</button><button class="btn primary" type="button" data-act="newOrder">${ic('plus')}Bon de commande agent</button></div></div>
+  <div class="stack">
+  <div class="actions"><div class="chips" role="group" aria-label="Filtrer par statut">${chip('all','Toutes')}${chip('prep','À préparer')}${chip('cours','En préparation')}${chip('exp','Expédiées')}${chip('wait','En attente / reliquat')}</div>
+   <div class="field" style="flex:0 1 230px"><label for="fcc">Canal</label><select id="fcc" data-ch="filt" data-k="cc"><option value="">Tous les canaux</option>${chs.map(c=>`<option${f.cc===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div></div>
+  ${table([['N°'],['Canal'],['Client'],['Date'],['Unités',1],['Réservé',1],['Statut'],['']],list.map(o=>`<tr><td class="mono"><b>${o.id}</b></td><td>${esc(o.ch)}${o.agent?`<br><span class="small muted">${esc(o.agent)}</span>`:''}</td><td>${esc(o.client)}</td><td>${fdt(o.t)}</td><td class="n">${nf(sum(o.lines,l=>l.qty))}</td><td class="n">${nf(sum(o.lines,l=>l.alloc))}</td><td>${stBadge(o)}</td><td><button class="btn" type="button" data-act="ord" data-id="${o.id}">Détail</button></td></tr>`),'Aucune commande pour ce filtre.')}
+  </div>`;
+};
+V.stock=()=>{
+  const f=ui.f,q=f.sq.trim().toLowerCase(),brands=[...new Set(S.products.map(p=>p.brand))];
+  const list=S.products.filter(p=>{const s=pState(p)[2];return (!q||(p.name+p.sku+p.ean+p.loc).toLowerCase().includes(q))&&(!f.sb||p.brand===f.sb)&&(f.ss==='all'||(f.ss==='low'?s!=='occ':s==='out'))});
+  const chip=(v,l)=>`<button type="button" class="chip" data-act="setf" data-k="ss" data-v="${v}" aria-pressed="${f.ss===v}">${l}</button>`;
+  return `<div class="page-h"><div><h1>Stock</h1><p class="muted">Disponible = physique − réservé. Les quantités attendues proviennent des arrivages non réceptionnés.</p></div></div>
+  <div class="stack"><div class="fgrid">
+   <div class="field"><label for="fsq">Rechercher (nom, SKU, EAN, emplacement)</label><input type="search" id="fsq" data-f="sq" value="${esc(f.sq)}" placeholder="ex. sérum, 880900…, B-02"></div>
+   <div class="field"><label for="fsb">Marque</label><select id="fsb" data-ch="filt" data-k="sb"><option value="">Toutes</option>${brands.map(b=>`<option${f.sb===b?' selected':''}>${esc(b)}</option>`).join('')}</select></div>
+   <div class="chips" role="group" aria-label="Filtrer par état">${chip('all','Tout')}${chip('low','Alertes')}${chip('out','Ruptures')}</div></div>
+  ${table([['Produit'],['EAN'],['Emplacement'],['Physique',1],['Réservé',1],['Disponible',1],['Attendu',1],['Seuil',1],['État']],list.map(p=>{const s=pState(p);return `<tr><td>${pcell(p)}<br><span class="small muted">${esc(p.brand)}</span></td><td class="mono">${p.ean}</td><td class="mono">${p.loc}</td><td class="n">${nf(p.stock)}</td><td class="n">${nf(reserved(p.id))}</td><td class="n"><b>${nf(dispo(p.id))}</b></td><td class="n">${nf(expected(p.id))}</td><td class="n">${p.min}</td><td><span class="badge ${s[1]}">${s[0]}</span></td></tr>`}),'Aucun produit ne correspond.')}
+  </div>`;
+};
+V.map=()=>{
+  const by={};S.products.forEach(p=>by[p.loc]=p);
+  const sel=ui.slot,p=sel&&by[sel],free=SLOTS.filter(s=>!by[s]).sort();
+  let side;
+  if(!sel)side=`<div class="empty">Sélectionnez un emplacement sur le plan, ou localisez un produit par scan.</div>`;
+  else if(p)side=`<div class="card-h"><h2 class="mono">${sel}</h2><span class="badge ${pState(p)[1]}">${pState(p)[0]}</span></div>
+    <p>${pcell(p)}</p><p class="small muted">EAN <span class="mono">${p.ean}</span></p>
+    <ul class="rows" style="margin:8px 0"><li><span>Physique</span><b>${nf(p.stock)}</b></li><li><span>Réservé</span><b>${nf(reserved(p.id))}</b></li><li><span>Disponible</span><b>${nf(dispo(p.id))}</b></li></ul>
+    <form data-form="move" novalidate style="display:grid;gap:8px;margin-top:6px"><h3>Déplacer le produit</h3>
+     <div class="field"><label for="mvDest">Scanner l'emplacement de destination</label><input type="text" id="mvDest" name="dest" list="freeSlots" autocomplete="off" placeholder="ex. ${free[0]||'D-04-1'}"><datalist id="freeSlots">${free.map(s=>`<option value="${s}">`).join('')}</datalist></div>
+     <p class="err" role="alert"></p><button class="btn" type="submit">${ic('arrow')}Valider le déplacement</button></form>
+    <form data-form="inv" novalidate style="display:grid;gap:8px;margin-top:16px"><h3>Inventaire de l'emplacement</h3>
+     <div class="field"><label for="invQ">Quantité comptée</label><input type="number" id="invQ" name="q" min="0" value="${p.stock}"></div>
+     <p class="err" role="alert"></p><button class="btn" type="submit">${ic('check')}Enregistrer le comptage</button></form>`;
+  else side=`<div class="card-h"><h2 class="mono">${sel}</h2><span class="badge b-gray">Libre</span></div>
+    <form data-form="assign" novalidate style="display:grid;gap:8px"><div class="field"><label for="asP">Attribuer cet emplacement à un produit</label><select id="asP" name="pid">${S.products.map(x=>`<option value="${x.id}">${esc(x.name)} (${x.loc})</option>`).join('')}</select></div><button class="btn primary" type="submit">Attribuer l'emplacement</button></form>`;
+  return `<div class="page-h"><div><h1>Cartographie de l'entrepôt</h1><p class="muted">4 allées · 48 emplacements (allée – travée – niveau). Chaque emplacement porte une étiquette scannable.</p></div></div>
+  <div class="maplay"><div class="stack">
+   <section class="card"><form data-form="locate" class="fgrid" novalidate><div class="field"><label for="locQ">Localiser un produit (scan EAN, SKU ou nom)</label><input type="text" id="locQ" name="q" autocomplete="off" placeholder="ex. 8809000030015"></div><button class="btn" type="submit">${ic('scan')}Localiser</button><p class="err field full" role="alert"></p></form>
+    <div class="legend" style="margin-top:10px"><span><i style="background:var(--ok-soft);border-color:var(--ok)"></i>En stock</span><span><i style="background:var(--warn-soft);border-color:var(--warn)"></i>Stock faible</span><span><i style="background:var(--bad-soft);border-color:var(--bad)"></i>Rupture</span><span><i style="background:var(--panel-2);border-color:var(--line-2)"></i>Libre</span></div></section>
+   <div class="aisles">${AISLES.map(a=>`<section class="card"><div class="card-h"><h2>Allée ${a}</h2><span class="small muted">${SLOTS.filter(s=>s[0]===a&&by[s]).length} / 12 occupés</span></div><div class="slots">${SLOTS.filter(s=>s[0]===a).map(s=>{const x=by[s];return `<button type="button" class="slot ${x?pState(x)[2]:''}" data-act="slot" data-s="${s}" aria-pressed="${sel===s}" aria-label="Emplacement ${s}${x?' : '+esc(x.name)+', '+x.stock+' unités':' libre'}">${s}<small>${x?nf(x.stock):'—'}</small></button>`}).join('')}</div></section>`).join('')}</div>
+  </div><aside class="card" id="slotPanel">${side}</aside></div>`;
+};
+V.prep=()=>{
+  const queue=S.orders.filter(o=>['prep','cours'].includes(st(o))).sort((a,b)=>a.t-b.t);
+  const o=ui.pick&&S.orders.find(x=>x.id===ui.pick&&x.picking);
+  let body;
+  if(!o){
+    body=`<h2>Commandes à préparer</h2>${queue.length?queue.map(q=>`<button type="button" class="jobbtn" data-act="pickStart" data-id="${q.id}"><span style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b class="mono">${q.id}</b><span>${stBadge(q)}</span></span><span>${esc(q.client)}</span><span class="small muted">${q.lines.filter(l=>l.alloc).length} ligne(s) · ${nf(sum(q.lines,l=>l.alloc))} unités à prélever · ${esc(q.ch)}</span><b style="color:var(--accent-text)">${q.picking?'Reprendre la préparation':'Démarrer la préparation'}</b></button>`).join(''):'<div class="empty">Aucune commande à préparer. Synchronisez les canaux ou réceptionnez un arrivage.</div>'}`;
+  }else{
+    const PL=pickLines(o),k=o.picking,m=ui.prepMsg;
+    const msg=m?`<p class="note ${m.ok?'ok':'bad'}" role="alert">${ic(m.ok?'check':'alert')}<span>${esc(m.text)}</span></p>`:'';
+    if(k.phase==='done'){
+      body=`<h2>Contrôle final <span class="mono">${o.id}</span></h2><p class="small muted">${esc(o.client)}</p>
+      <ul class="rows">${PL.map(x=>{const q=k.picked[x.idx]||0;return `<li><div>${esc(x.p.name)}<div class="small muted mono">${x.p.loc}</div></div><span class="badge ${q===x.l.alloc?'b-ok':'b-warn'}">${q} / ${x.l.alloc}</span></li>`}).join('')}</ul>
+      <form data-form="ship" novalidate style="display:grid;gap:10px"><div class="field"><label for="shC">Nombre de colis</label><input type="number" id="shC" name="colis" min="1" max="20" value="${Math.max(1,Math.ceil(sum(PL,x=>k.picked[x.idx]||0)/60))}"></div>
+      <div class="field"><label for="shT">Transporteur</label><select id="shT" name="carrier">${CARRIERS.slice(0,3).reverse().map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <p class="err" role="alert"></p><button class="btn primary block" type="submit">${ic('check')}Valider et expédier</button><button class="btn block" type="button" data-act="pickCancel">Abandonner la préparation</button></form>`;
+    }else{
+      const x=PL[k.i],ph=k.phase,cls=p=>p===ph?'on':(['loc','prod','qty'].indexOf(p)<['loc','prod','qty'].indexOf(ph)?'done':'');
+      body=`<div class="pickrow"><div><b class="mono">${o.id}</b><div class="small muted">${esc(o.client)}</div></div><span class="badge b-acc">Ligne ${k.i+1} / ${PL.length}</span></div>
+      <div class="bigloc" aria-label="Emplacement ${x.p.loc}">${x.p.loc}</div>
+      <div class="pickrow"><div><b>${esc(x.p.name)}</b><div class="small muted mono">${x.p.sku} · EAN ${x.p.ean}</div></div><div style="text-align:right"><div class="bigq">× ${x.l.alloc}</div><span class="small muted">à prélever</span></div></div>
+      <div class="phase" aria-hidden="true"><span class="${cls('loc')}">1 · Emplacement</span><span class="${cls('prod')}">2 · Produit</span><span class="${cls('qty')}">3 · Quantité</span></div>
+      ${msg}
+      ${ph==='qty'?`<form data-form="pickQty" novalidate style="display:grid;gap:8px"><div class="field"><label for="pkQ">Quantité réellement prélevée</label><input type="number" id="pkQ" name="q" min="0" max="${x.l.alloc}" value="${x.l.alloc}"></div><p class="err" role="alert"></p><button class="btn primary block" type="submit">${ic('check')}Confirmer la quantité</button></form>`
+      :`<form data-form="pickScan" novalidate style="display:grid;gap:8px"><div class="field"><label for="pkCode">${ph==='loc'?"Scannez l'étiquette de l'emplacement":'Scannez le code-barres EAN du produit'}</label><input type="text" id="pkCode" name="code" autocomplete="off" autocapitalize="characters" placeholder="${ph==='loc'?'ex. '+x.p.loc:'EAN 13 chiffres'}"></div><button class="btn primary block" type="submit">${ic('scan')}Valider le scan</button>
+       <div class="actions"><button class="btn" type="button" data-act="simOk" style="flex:1">Simuler le bon scan</button><button class="btn" type="button" data-act="simBad" style="flex:1">Simuler une erreur</button></div></form>`}
+      <button class="btn block" type="button" data-act="pickPause">Retour à la liste</button>`;
+    }
+  }
+  return `<div class="page-h"><div><h1>Terminal préparateur</h1><p class="muted">Interface pensée pour un terminal mobile avec scannette : gros caractères, une action par écran, contrôle par scan.</p></div></div>
+  <div class="preplay">
+   <div class="device"><div class="dev-h"><span>Terminal 02 · ${esc(me())}</span><span>Scannette connectée</span></div><div class="dev-b">${body}</div></div>
+   <div class="stack">
+    <p class="note">${ic('scan')}<span>Une scannette se comporte comme un clavier : elle saisit le code puis « Entrée ». Dans cette démo, tapez le code affiché ou utilisez « Simuler le bon scan ». Un mauvais code bloque l'étape.</span></p>
+    <section class="card"><div class="card-h"><h2>Dernières expéditions</h2></div>
+     ${S.ships.length?`<ul class="rows">${S.ships.slice().reverse().slice(0,6).map(s=>{const od=S.orders.find(x=>x.id===s.oid);return `<li><div><b class="mono">${s.id}</b> · <span class="mono">${s.oid}</span><div class="small muted">${esc(od?od.client:'')} · ${fdt(s.t)} · ${s.colis} colis · ${esc(s.carrier)}</div></div><button class="btn" type="button" data-act="docs" data-id="${s.id}">${ic('file')}BL & packing list</button></li>`}).join('')}</ul>`:'<div class="empty">Aucune expédition.</div>'}
+    </section>
+   </div>
+  </div>`;
+};
+V.mov=()=>{
+  const f=ui.f,types=['Réception','Expédition','Déplacement','Inventaire','Écart préparation'];
+  const list=S.moves.filter(m=>!f.mt||m.type===f.mt);
+  return `<div class="page-h"><div><h1>Historique des mouvements</h1><p class="muted">Chaque entrée, sortie, déplacement ou correction est tracé avec son auteur.</p></div>
+  <div class="field" style="flex:0 1 240px"><label for="fmt">Type de mouvement</label><select id="fmt" data-ch="filt" data-k="mt"><option value="">Tous</option>${types.map(t=>`<option${f.mt===t?' selected':''}>${t}</option>`).join('')}</select></div></div>
+  ${movTable(list)}`;
+};
+V.users=()=>`<div class="page-h"><div><h1>Utilisateurs & droits d'accès</h1><p class="muted">Cochez les modules accessibles à chaque rôle, puis changez de « Profil » en haut de page pour voir le résultat.</p></div></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr))">
+  <section class="card"><div class="card-h"><h2>Droits par rôle</h2></div>
+   <div class="tw"><table style="min-width:520px"><thead><tr><th scope="col">Module</th>${Object.values(ROLES).map(r=>`<th scope="col" style="text-align:center">${r}</th>`).join('')}</tr></thead><tbody>
+   ${VIEWS.map(v=>`<tr><th scope="row" style="background:none;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)">${v[1]}</th>${Object.keys(ROLES).map(r=>`<td style="padding:0"><label class="permck"><input type="checkbox" data-ch="perm" data-r="${r}" data-v="${v[0]}"${S.perms[r].includes(v[0])?' checked':''}${r==='admin'?' disabled':''} aria-label="${v[1]} — ${ROLES[r]}"></label></td>`).join('')}</tr>`).join('')}
+   </tbody></table></div></section>
+  <section class="card"><div class="card-h"><h2>Utilisateurs</h2><span class="badge b-gray">${S.users.length} comptes</span></div>
+   <ul class="rows">${S.users.map((u,i)=>`<li><div><b>${esc(u.name)}</b><div class="small muted mono">${esc(u.email)}</div></div><div class="field" style="flex:0 1 210px"><label for="ur${i}" style="position:absolute;clip:rect(0 0 0 0);width:1px;height:1px;overflow:hidden">Rôle de ${esc(u.name)}</label><select id="ur${i}" data-ch="urole" data-i="${i}">${Object.keys(ROLES).map(r=>`<option value="${r}"${u.role===r?' selected':''}>${ROLES[r]}</option>`).join('')}</select></div></li>`).join('')}</ul>
+   <form data-form="user" novalidate class="fgrid" style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px">
+    <div class="field"><label for="unm">Nom</label><input type="text" id="unm" name="name" autocomplete="off"></div>
+    <div class="field"><label for="uem">E-mail</label><input type="email" id="uem" name="email" autocomplete="off"></div>
+    <div class="field"><label for="uro">Rôle</label><select id="uro" name="role">${Object.keys(ROLES).map(r=>`<option value="${r}"${r==='prep'?' selected':''}>${ROLES[r]}</option>`).join('')}</select></div>
+    <button class="btn primary" type="submit">${ic('plus')}Inviter</button><p class="err field full" role="alert"></p></form>
+  </section></div>`;
+
+/* ---------- modales ---------- */
+function orderDlg(id){
+  const o=S.orders.find(x=>x.id===id),k=st(o),sh=S.ships.filter(s=>s.oid===id),canPrep=S.perms[S.role].includes('prep');
+  const rel=sum(o.lines,l=>l.qty-l.shipped-l.alloc);
+  openDlg(`Commande <span class="mono">${o.id}</span>`,`
+   <div class="actions">${stBadge(o)}<span class="badge b-gray">${esc(o.ch)}</span></div>
+   <p><b>${esc(o.client)}</b>${o.agent?` — saisi par ${esc(o.agent)}`:''}<br><span class="small muted">Reçue le ${fdt(o.t)}</span></p>
+   ${table([['Produit'],['Emplacement'],['Commandé',1],['Réservé',1],['Expédié',1],['Reliquat',1]],o.lines.map(l=>{const p=prod(l.pid),r=l.qty-l.shipped-l.alloc;return `<tr><td>${pcell(p)}</td><td class="mono">${p.loc}</td><td class="n">${l.qty}</td><td class="n">${l.alloc}</td><td class="n">${l.shipped}</td><td class="n">${r?`<span class="badge b-bad">${r}</span>`:'0'}</td></tr>`}))}
+   ${rel?`<p class="note warn">${ic('alert')}<span>${rel} unité(s) en reliquat : elles seront réservées automatiquement dès la réception du prochain arrivage${(e=>e?` (${nf(e)} unités attendues)`:'')(sum(o.lines,l=>l.qty-l.shipped-l.alloc>0?expected(l.pid):0))}. Le reste peut partir en expédition partielle.</span></p>`:''}
+   <div class="actions">${(k==='prep'||k==='cours')&&canPrep?`<button class="btn primary" type="button" data-act="pickStart" data-id="${o.id}">${ic('scan')}${k==='cours'?'Reprendre':'Préparer'} sur le terminal</button>`:''}${sh.map(s=>`<button class="btn" type="button" data-act="docs" data-id="${s.id}">${ic('file')}${s.id} — documents</button>`).join('')}</div>`);
+}
+function docsDlg(id,tab){
+  const s=S.ships.find(x=>x.id===id),o=S.orders.find(x=>x.id===s.oid),pk=tab==='pack';
+  const head=`<div class="two"><div><b>Expéditeur</b><br>Mirae Distribution SAS<br>Zone logistique des Érables, quai 4<br>45000 Orléans</div><div><b>Destinataire</b><br>${esc(o.client)}<br>Commande ${o.id} · ${esc(o.ch)}</div><div><b>Expédition</b><br>${fdt(s.t)}<br>${esc(s.carrier)} · ${s.colis} colis</div></div>`;
+  const body=pk
+   ?`<h3>Packing list ${s.id}</h3>${head}<div class="tw"><table><thead><tr><th>Colis</th><th>SKU</th><th>Désignation</th><th>EAN</th><th class="n">Quantité</th></tr></thead><tbody>${s.lines.map((l,i)=>{const p=prod(l.pid);return `<tr><td>${(i%s.colis)+1} / ${s.colis}</td><td class="mono">${p.sku}</td><td>${esc(p.name)}</td><td class="mono">${p.ean}</td><td class="n">${l.qty}</td></tr>`}).join('')}</tbody></table></div><p style="margin-top:10px"><b>Total : ${sum(s.lines,l=>l.qty)} unités · ${s.colis} colis</b></p>`
+   :`<h3>Bon de livraison ${s.id}</h3>${head}<div class="tw"><table><thead><tr><th>SKU</th><th>Désignation</th><th class="n">Commandé</th><th class="n">Livré</th><th class="n">Reste à livrer</th></tr></thead><tbody>${s.lines.map(l=>{const p=prod(l.pid);return `<tr><td class="mono">${p.sku}</td><td>${esc(p.name)}</td><td class="n">${l.ordered}</td><td class="n">${l.qty}</td><td class="n">${l.rest}</td></tr>`}).join('')}</tbody></table></div>${s.lines.some(l=>l.rest)?'<p style="margin-top:10px">Expédition partielle : le reliquat sera livré dès disponibilité.</p>':''}<div class="sig"><div>Préparé et contrôlé par scan</div><div>Reçu le — signature et cachet</div></div>`;
+  openDlg(`Documents <span class="mono">${s.id}</span>`,`<div class="actions noprint"><div class="chips" role="group" aria-label="Type de document"><button type="button" class="chip" data-act="docs" data-id="${id}" data-tab="bl" aria-pressed="${!pk}">Bon de livraison</button><button type="button" class="chip" data-act="docs" data-id="${id}" data-tab="pack" aria-pressed="${pk}">Packing list</button></div><button class="btn primary" type="button" data-act="print">${ic('print')}Imprimer / PDF</button></div><div class="doc">${body}</div><p class="small muted noprint">Aperçu imprimable : dans la version livrée, le PDF est généré côté serveur et joint à l'expédition.</p>`);
+}
+function draftList(){
+  const el=$('#draftLines');if(!el)return;
+  el.innerHTML=draft.lines.length?`<ul class="rows">${draft.lines.map((l,i)=>{const p=prod(l.pid),d=Math.max(0,dispo(p.id));return `<li><div><b>${esc(p.name)}</b><div class="small muted"><span class="mono">${p.sku}</span> · disponible ${nf(d)}</div></div><b>× ${l.qty}</b>${l.qty>d?`<span class="badge b-warn">${l.qty-d} en reliquat</span>`:'<span class="badge b-ok">Réservable</span>'}<button type="button" class="xbtn" data-act="draftDel" data-i="${i}" aria-label="Retirer ${esc(p.name)}">${ic('x')}</button></li>`}).join('')}</ul>`:'<div class="empty">Aucune ligne pour l\'instant.</div>';
+}
+function addDraft(pid,qty){const l=draft.lines.find(x=>x.pid===pid);if(l)l.qty+=qty;else draft.lines.push({pid,qty})}
+function newOrderDlg(){
+  draft={lines:[]};
+  const agents=S.users.filter(u=>u.role==='agent');
+  openDlg('Nouveau bon de commande agent',`
+   <form data-form="order" novalidate style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr)">
+    <div class="fgrid"><div class="field"><label for="noA">Agent commercial</label><select id="noA" name="agent">${(agents.length?agents:S.users).map(u=>`<option>${esc(u.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="noC">Client</label><input type="text" id="noC" name="client" autocomplete="off" placeholder="ex. Parfumerie Lumière — Dijon"></div></div>
+    <div class="fgrid"><div class="field" style="grid-column:span 2"><label for="noP">Produit</label><select id="noP">${S.products.map(p=>`<option value="${p.id}">${esc(p.name)} — dispo ${nf(Math.max(0,dispo(p.id)))}</option>`).join('')}</select></div>
+    <div class="field"><label for="noQ">Quantité</label><input type="number" id="noQ" min="1" value="12"></div>
+    <button class="btn" type="button" data-act="draftAdd">${ic('plus')}Ajouter la ligne</button></div>
+    <details><summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center">Ou importer des lignes (SKU;quantité)</summary>
+     <div style="display:grid;gap:8px"><div class="field"><label for="noI">Collez une ligne par produit</label><textarea id="noI" placeholder="DAL-SER-030;24"></textarea></div>
+     <div class="actions"><button class="btn" type="button" data-act="draftImport">Analyser l'import</button><button class="btn" type="button" data-act="draftEx">Insérer un exemple</button></div></div></details>
+    <div id="draftLines"></div>
+    <p class="err" role="alert"></p>
+    <div class="actions"><button class="btn primary" type="submit">${ic('check')}Créer et réserver le stock</button><button class="btn" type="button" data-act="close">Annuler</button></div>
+   </form>`);
+  draftList();
+}
+function ocrStep3(){
+  const t=ocr;
+  openDlg('Facture analysée — vérification',`
+   <form data-form="ocr" novalidate style="display:grid;gap:14px;grid-template-columns:minmax(0,1fr)">
+    <p class="note warn">${ic('alert')}<span>OCR simulé : dans la version livrée, le document est lu par un moteur OCR puis contrôlé ici avant création de l'arrivage.</span></p>
+    <p><b>${esc(t.supplier)}</b><br><span class="small muted">Facture <span class="mono">${t.invoice}</span> · ${t.lines.length} lignes détectées</span></p>
+    <div class="tw"><table><thead><tr><th>Réf. fournisseur</th><th>Libellé facture</th><th class="n">Quantité</th><th>Confiance</th><th>Produit du catalogue</th></tr></thead><tbody>
+    ${t.lines.map((l,i)=>`<tr><td class="mono">${l.ref}</td><td>${esc(l.label)}</td><td class="n"><input type="number" min="1" value="${l.qty}" data-ch="ocrQty" data-i="${i}" aria-label="Quantité ${l.ref}"></td><td><span class="badge ${l.conf<80?'b-warn':'b-ok'}">${l.conf} %${l.conf<80?' — à vérifier':''}</span></td><td style="min-width:230px"><select data-ch="ocrPid" data-i="${i}" id="ocrP${i}" aria-label="Produit du catalogue pour ${l.ref}"><option value="">— À rapprocher —</option>${S.products.map(p=>`<option value="${p.id}"${l.pid===p.id?' selected':''}>${p.sku} · ${esc(p.name)}</option>`).join('')}</select>${l.pid?(l.known?'<span class="small muted">Correspondance mémorisée</span>':''):(l.sug?`<button type="button" class="btn" style="margin-top:6px" data-act="ocrSug" data-i="${i}">Suggestion : ${prod(l.sug).sku}</button>`:'')}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="fgrid"><div class="field"><label for="ocT">N° de suivi transporteur</label><input type="text" id="ocT" name="tracking" autocomplete="off" value="JD0146000${Math.floor(1e7+Math.random()*9e7)}"></div>
+    <div class="field"><label for="ocC">Transporteur</label><select id="ocC" name="carrier">${CARRIERS.map(c=>`<option>${c}</option>`).join('')}</select></div></div>
+    <p class="err" role="alert"></p>
+    <div class="actions"><button class="btn primary" type="submit">${ic('check')}Créer l'arrivage prévu</button><button class="btn" type="button" data-act="close">Annuler</button></div>
+   </form>`);
+}
+
+/* ---------- actions ---------- */
+function scanPick(code){
+  const o=S.orders.find(x=>x.id===ui.pick),k=o.picking,x=pickLines(o)[k.i];code=String(code).trim().toUpperCase().replace(/\s/g,'');
+  if(!code){ui.prepMsg={ok:false,text:'Aucun code lu : scannez à nouveau.'}}
+  else if(k.phase==='loc'){
+    if(code===x.p.loc){k.phase='prod';ui.prepMsg={ok:true,text:`Emplacement ${x.p.loc} confirmé. Scannez maintenant le produit.`}}
+    else ui.prepMsg={ok:false,text:`Mauvais emplacement (${code}). Rendez-vous en ${x.p.loc}.`};
+  }else{
+    if(code===x.p.ean){k.phase='qty';ui.prepMsg={ok:true,text:'Produit conforme. Confirmez la quantité prélevée.'}}
+    else{const w=S.products.find(p=>p.ean===code);ui.prepMsg={ok:false,text:w?`Mauvais produit : « ${w.name} ». Attendu : ${x.p.name}.`:`Code ${code} inconnu. Attendu : EAN ${x.p.ean}.`}}
+  }
+  render(k.phase==='qty'?'#pkQ':'#pkCode');
+}
+function scanRecv(code){
+  const a=S.arrivals.find(x=>x.id===ui.recv);code=String(code).trim().replace(/\s/g,'');
+  const l=a.lines.find(x=>prod(x.pid).ean===code);
+  if(!l)ui.recvMsg={ok:false,text:code?`EAN ${code} absent de cet arrivage : mettez le colis de côté.`:'Aucun code lu.'};
+  else{const p=prod(l.pid);l.recv+=p.pack;ui.recvMsg={ok:true,text:`${p.name} : +${p.pack} (1 carton) → ${l.recv} / ${l.qty}.`}}
+  render('#recvCode');
+}
+const A={
+  go(b){ui.view=b.dataset.v;ui.recv=null;render();window.scrollTo(0,0)},
+  reset(){try{localStorage.removeItem(KEY)}catch(e){}seed();initUi();closeDlg();render();toast('Démo réinitialisée.')},
+  close(){closeDlg()},
+  print(){window.print()},
+  setf(b){ui.f[b.dataset.k]=b.dataset.v;render()},
+  sync(){
+    const on=S.channels.filter(c=>c.on).map(c=>c.name);let t=null;
+    for(let i=0;i<SYNC.length&&!t;i++){const c=SYNC[(S.syncN+i)%SYNC.length];if(on.includes(c.ch)){t=c;S.syncN+=i+1}}
+    if(!on.length)return toast('Aucun canal connecté : activez un canal depuis le tableau de bord.');
+    S.channels.forEach(c=>{if(c.on)c.last=Date.now()});
+    if(t){const o={id:'CMD-'+S.seq.o++,ch:t.ch,client:t.client,t:Date.now(),lines:t.lines.map(l=>({pid:l[0],qty:l[1],shipped:0,alloc:0}))};S.orders.push(o);allocate();
+      const al=sum(o.lines,l=>l.alloc),rq=sum(o.lines,l=>l.qty)-al;
+      toast(`Synchro simulée : ${o.id} importée depuis ${t.ch} — ${al} unités réservées${rq?`, ${rq} en reliquat`:''}. Stocks poussés vers ${on.length} canal(aux).`)}
+    else toast(`Synchro simulée : stocks poussés vers ${on.length} canal(aux), aucune nouvelle commande.`);
+    render();
+  },
+  chan(b){const c=S.channels[+b.dataset.i];c.on=!c.on;if(c.on)c.last=Date.now();render();toast(`${c.name} : ${c.on?'connecté':'déconnecté'} (simulation).`)},
+  track(b){const a=S.arrivals.find(x=>x.id===b.dataset.id);if(a.track<5)a.track++;render();toast(`Suivi ${a.carrier} actualisé (simulation) : ${TS[a.track]}.`)},
+  recvOpen(b){ui.recv=b.dataset.id;ui.recvMsg=null;render('#recvCode');window.scrollTo(0,0)},
+  recvBack(){ui.recv=null;render()},
+  recvSim(){const a=S.arrivals.find(x=>x.id===ui.recv),l=a.lines.find(x=>x.recv<x.qty)||a.lines[0];scanRecv(prod(l.pid).ean)},
+  recvAll(){const a=S.arrivals.find(x=>x.id===ui.recv);a.lines.forEach(l=>l.recv=l.qty);ui.recvMsg={ok:true,text:'Toutes les lignes sont marquées conformes.'};render()},
+  recvValid(){
+    const a=S.arrivals.find(x=>x.id===ui.recv),tot=sum(a.lines,l=>l.recv);
+    if(!tot){ui.recvMsg={ok:false,text:'Scannez au moins un carton avant de valider la réception.'};return render('#recvCode')}
+    a.lines.forEach(l=>{if(l.recv){prod(l.pid).stock+=l.recv;mov('Réception',l.pid,l.recv,a.id)}});
+    a.status='recu';a.track=5;ui.recv=null;const n=allocate();render();
+    toast(`Réception validée : +${nf(tot)} unités en stock${n?` · ${n} ligne(s) de commande en attente réservée(s) automatiquement`:''}.`);
+  },
+  ocrOpen(){
+    openDlg('Importer une facture fournisseur',`<div class="drop">${ic('upload')}<label for="ocrFile" class="flabel">Déposez un PDF ou une photo de facture</label><input type="file" id="ocrFile" accept=".pdf,image/*" data-ch="ocrFile" style="max-width:100%;min-height:44px"><span class="muted small">ou</span><button class="btn primary" type="button" data-act="ocrRun">${ic('file')}Utiliser une facture d'exemple</button></div><p class="small muted">Démonstration : aucun fichier n'est envoyé ; l'analyse affiche une facture d'exemple.</p>`);
+  },
+  ocrRun(){
+    openDlg('Analyse OCR en cours…',`<p>Lecture du document, extraction des lignes et rapprochement avec le catalogue…</p><div class="prog"><i></i></div><p class="small muted">Simulation</p>`);
+    const t=OCR[S.ocrN%OCR.length];
+    ocr={supplier:t.supplier,invoice:t.invoice,lines:t.lines.map(l=>({...l,pid:S.refMap[l.ref]||0,known:!!S.refMap[l.ref]}))};
+    setTimeout(()=>{if($('#dlg').open)ocrStep3()},1500);
+  },
+  ocrSug(b){const i=+b.dataset.i;ocr.lines[i].pid=ocr.lines[i].sug;$('#ocrP'+i).value=ocr.lines[i].sug;b.remove()},
+  ord(b){orderDlg(b.dataset.id)},
+  newOrder(){newOrderDlg()},
+  draftAdd(){const q=parseInt($('#noQ').value,10),f=$('#dlg form');if(!(q>0))return setErr(f,'Indiquez une quantité supérieure à 0.',$('#noQ'));addDraft(+$('#noP').value,q);setErr(f,'');draftList()},
+  draftDel(b){draft.lines.splice(+b.dataset.i,1);draftList()},
+  draftEx(){$('#noI').value='DAL-SER-030;24\nSON-TIN-RW4;48\nHAN-ESS-100;36\nXXX-000;5'},
+  draftImport(){
+    const f=$('#dlg form'),bad=[];let n=0;
+    $('#noI').value.split('\n').map(x=>x.trim()).filter(Boolean).forEach(r=>{const c=r.split(/[;,\t]/),p=S.products.find(x=>x.sku===(c[0]||'').trim().toUpperCase()),q=parseInt(c[1],10);if(p&&q>0){addDraft(p.id,q);n++}else bad.push(c[0])});
+    draftList();setErr(f,bad.length?`${n} ligne(s) importée(s). Ignorée(s) (SKU inconnu ou quantité invalide) : ${bad.join(', ')}.`:(n?'':'Aucune ligne à importer.'));
+    if(n&&!bad.length)toast(`${n} ligne(s) importée(s).`);
+  },
+  docs(b){docsDlg(b.dataset.id,b.dataset.tab||'bl')},
+  slot(b){ui.slot=b.dataset.s;render(`.slot[data-s="${ui.slot}"]`);if(window.innerWidth<1100)$('#slotPanel').scrollIntoView({block:'nearest'})},
+  pickStart(b){const o=S.orders.find(x=>x.id===b.dataset.id);if(!o.picking)o.picking={i:0,phase:'loc',picked:{}};ui.pick=o.id;ui.prepMsg=null;ui.view='prep';closeDlg();render(o.picking.phase==='qty'?'#pkQ':'#pkCode')},
+  pickPause(){ui.pick=null;render()},
+  pickCancel(){const o=S.orders.find(x=>x.id===ui.pick);delete o.picking;ui.pick=null;render();toast('Préparation abandonnée : la commande repasse « à préparer ».')},
+  simOk(){const o=S.orders.find(x=>x.id===ui.pick),x=pickLines(o)[o.picking.i];scanPick(o.picking.phase==='loc'?x.p.loc:x.p.ean)},
+  simBad(){const o=S.orders.find(x=>x.id===ui.pick),x=pickLines(o)[o.picking.i];scanPick(o.picking.phase==='loc'?(x.p.loc==='D-04-3'?'D-04-2':'D-04-3'):(S.products.find(p=>p.id!==x.p.id).ean))}
+};
+const F={
+  recvScan(f,d){scanRecv(d.get('code'))},
+  pickScan(f,d){scanPick(d.get('code'))},
+  pickQty(f,d){
+    const o=S.orders.find(x=>x.id===ui.pick),k=o.picking,PL=pickLines(o),x=PL[k.i],q=parseInt(d.get('q'),10);
+    if(isNaN(q)||q<0||q>x.l.alloc)return setErr(f,`Saisissez une quantité entre 0 et ${x.l.alloc}.`,f.q);
+    k.picked[x.idx]=q;k.i++;k.phase=k.i>=PL.length?'done':'loc';
+    ui.prepMsg=q<x.l.alloc?{ok:false,text:`${x.l.alloc-q} unité(s) manquante(s) signalée(s) en ${x.p.loc} : elles passeront en reliquat.`}:{ok:true,text:'Ligne validée.'};
+    render(k.phase==='done'?'#shC':'#pkCode');
+  },
+  ship(f,d){
+    const o=S.orders.find(x=>x.id===ui.pick),k=o.picking,PL=pickLines(o),colis=parseInt(d.get('colis'),10);
+    if(!(colis>=1&&colis<=20))return setErr(f,'Indiquez un nombre de colis entre 1 et 20.',f.colis);
+    if(!sum(PL,x=>k.picked[x.idx]||0))return setErr(f,'Aucune unité prélevée : abandonnez la préparation ou reprenez-la.');
+    const id='BL-00'+S.seq.b++,lines=[],touched=[];
+    PL.forEach(x=>{const q=k.picked[x.idx]||0,miss=x.l.alloc-q;
+      x.p.stock-=q;x.l.shipped+=q;x.l.alloc=0;
+      if(q){mov('Expédition',x.p.id,-q,`${o.id} · ${id}`);lines.push({pid:x.p.id,qty:q,ordered:x.l.qty,rest:x.l.qty-x.l.shipped})}
+      if(miss>0){const m=Math.min(miss,x.p.stock);x.p.stock-=m;if(m)mov('Écart préparation',x.p.id,-m,`${o.id} · ${x.p.loc}`);touched.push(x.p.id)}});
+    delete o.picking;touched.forEach(trim);allocate();
+    S.ships.push({id,oid:o.id,t:Date.now(),colis,carrier:d.get('carrier'),lines});
+    ui.pick=null;ui.prepMsg=null;render();
+    toast(`${o.id} expédiée (${id})${st(o)!=='exp'?' — expédition partielle, reliquat conservé':''}. E-mail d'expédition envoyé (simulation).`);
+    docsDlg(id,'bl');
+  },
+  order(f,d){
+    const client=String(d.get('client')).trim();
+    if(client.length<3)return setErr(f,'Indiquez le nom du client.',f.client);
+    if(!draft.lines.length)return setErr(f,'Ajoutez au moins une ligne de produit.',$('#noP'));
+    const o={id:'CMD-'+S.seq.o++,ch:'Agent commercial',agent:d.get('agent'),client,t:Date.now(),lines:draft.lines.map(l=>({pid:l.pid,qty:l.qty,shipped:0,alloc:0}))};
+    S.orders.push(o);allocate();const al=sum(o.lines,l=>l.alloc),rq=sum(o.lines,l=>l.qty)-al;
+    closeDlg();ui.view='cmd';ui.f.cs='all';ui.f.cc='';render();
+    toast(`${o.id} créée : ${al} unités réservées${rq?`, ${rq} en reliquat`:''}.`);
+  },
+  ocr(f,d){
+    const i=ocr.lines.findIndex(l=>!l.pid);
+    if(i>=0)return setErr(f,`La référence ${ocr.lines[i].ref} n'est pas rapprochée d'un produit du catalogue.`,$('#ocrP'+i));
+    if(ocr.lines.some(l=>!(l.qty>0)))return setErr(f,'Chaque ligne doit avoir une quantité supérieure à 0.');
+    const tr=String(d.get('tracking')).trim();
+    if(tr.length<6)return setErr(f,'Indiquez le numéro de suivi transporteur (6 caractères minimum).',f.tracking);
+    const a={id:'ARR-00'+S.seq.a++,supplier:ocr.supplier,invoice:ocr.invoice,t:Date.now(),tracking:tr,carrier:d.get('carrier'),track:0,status:'prevu',lines:ocr.lines.map(l=>({ref:l.ref,pid:l.pid,qty:l.qty,recv:0}))};
+    ocr.lines.forEach(l=>S.refMap[l.ref]=l.pid);S.arrivals.push(a);S.ocrN++;
+    closeDlg();ui.view='achats';ui.recv=null;render();
+    toast(`Arrivage ${a.id} créé : ${nf(sum(a.lines,l=>l.qty))} unités attendues. Correspondances fournisseur mémorisées.`);
+  },
+  move(f,d){
+    const p=S.products.find(x=>x.loc===ui.slot),dest=String(d.get('dest')).trim().toUpperCase();
+    if(!SLOTS.includes(dest))return setErr(f,'Emplacement inconnu. Format attendu : A-01-1.',f.dest);
+    if(S.products.some(x=>x.loc===dest))return setErr(f,`L'emplacement ${dest} est déjà occupé.`,f.dest);
+    mov('Déplacement',p.id,0,`${p.loc} → ${dest}`);p.loc=dest;ui.slot=dest;render();toast(`${p.sku} déplacé en ${dest}.`);
+  },
+  assign(f,d){const p=prod(d.get('pid')),old=p.loc;mov('Déplacement',p.id,0,`${old} → ${ui.slot}`);p.loc=ui.slot;render();toast(`${p.sku} : emplacement ${old} → ${ui.slot}.`)},
+  inv(f,d){
+    const p=S.products.find(x=>x.loc===ui.slot),q=parseInt(d.get('q'),10);
+    if(isNaN(q)||q<0)return setErr(f,'Saisissez une quantité comptée valide.',f.q);
+    const diff=q-p.stock;if(!diff){setErr(f,'');return toast('Comptage conforme : aucun écart.')}
+    p.stock=q;mov('Inventaire',p.id,diff,'Comptage '+p.loc);trim(p.id);allocate();render();toast(`Inventaire enregistré : écart de ${diff>0?'+':''}${diff} sur ${p.sku}.`);
+  },
+  locate(f,d){
+    const q=String(d.get('q')).trim().toLowerCase();if(!q)return setErr(f,'Scannez ou saisissez un produit.',f.q);
+    const p=S.products.find(x=>x.ean===q||x.sku.toLowerCase()===q)||S.products.find(x=>(x.name+' '+x.sku).toLowerCase().includes(q));
+    if(!p)return setErr(f,'Produit introuvable dans le catalogue.',f.q);
+    ui.slot=p.loc;render(`.slot[data-s="${p.loc}"]`);toast(`${p.name} : emplacement ${p.loc}.`);
+  },
+  user(f,d){
+    const name=String(d.get('name')).trim(),email=String(d.get('email')).trim();
+    if(name.length<3)return setErr(f,'Indiquez le nom de l\'utilisateur.',f.name);
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))return setErr(f,'Adresse e-mail invalide.',f.email);
+    S.users.push({name,email,role:d.get('role')});render();toast(`Invitation envoyée à ${email} (simulation).`);
+  }
+};
+const C={
+  role(el){S.role=el.value;ui.pick=null;if(S.role==='prep')ui.view='prep';render();toast(`Vue en tant que ${ROLES[S.role]} — ${me()}.`)},
+  filt(el){ui.f[el.dataset.k]=el.value;render('#'+el.id)},
+  recvQty(el){const a=S.arrivals.find(x=>x.id===ui.recv);a.lines[+el.dataset.i].recv=Math.max(0,parseInt(el.value,10)||0);ui.recvMsg=null;render('#'+el.id)},
+  ocrQty(el){ocr.lines[+el.dataset.i].qty=parseInt(el.value,10)||0},
+  ocrPid(el){ocr.lines[+el.dataset.i].pid=+el.value||0},
+  ocrFile(){A.ocrRun()},
+  perm(el){
+    const p=S.perms[el.dataset.r],v=el.dataset.v;
+    if(el.checked){if(!p.includes(v))p.push(v)}
+    else{if(p.length<=1){el.checked=true;return toast('Un rôle doit conserver au moins un module.')}p.splice(p.indexOf(v),1)}
+    toast(`Droits mis à jour pour le rôle ${ROLES[el.dataset.r]}.`);
+  },
+  urole(el){const u=S.users[+el.dataset.i];u.role=el.value;toast(`${u.name} : rôle ${ROLES[u.role]}.`)}
+};
+
+/* ---------- événements ---------- */
+function initUi(){ui={view:'dash',recv:null,slot:null,pick:null,prepMsg:null,recvMsg:null,f:{cs:'all',cc:'',sq:'',sb:'',ss:'all',mt:''}}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const fn=A[b.dataset.act];if(fn){fn(b);save()}});
+document.addEventListener('submit',e=>{const f=e.target;if(!f.dataset||!f.dataset.form)return;e.preventDefault();const fn=F[f.dataset.form];if(fn){fn(f,new FormData(f));save()}});
+document.addEventListener('change',e=>{const el=e.target,fn=el.dataset&&C[el.dataset.ch];if(fn){fn(el);save()}});
+document.addEventListener('input',e=>{const el=e.target;if(el.dataset&&el.dataset.f){ui.f[el.dataset.f]=el.value;render('#'+el.id)}});
+load();initUi();render();
+})();
+</script>
 </body>
 </html>
