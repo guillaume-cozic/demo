@@ -4,18 +4,742 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Assistant financements européens collectivités</title>
+<meta name="description" content="Assistant IA pour collectivités : un élu décrit son projet en langage naturel et obtient une analyse structurée des financements européens mobilisables (éligibilité, taux, plan de financement, échéances, pièces), puis suit ses dossiers et la veille des appels à projets.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F3F5F9;--panel:#FFFFFF;--panel-2:#EDF1F7;--ink:#14213D;--muted:#4A5672;--line:#DBE1EB;--line-2:#B5C0D3;
+  --accent:#1E4FA0;--accent-ink:#FFFFFF;--accent-soft:#E2EBF9;--accent-text:#1A458F;
+  --gold:#8A6100;--gold-bg:#C99A2E;--gold-soft:#FBF1D6;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--gray:#4E5A66;--gray-soft:#E7ECF2;
+  --shadow:0 1px 2px rgba(20,33,61,.05),0 4px 14px rgba(20,33,61,.06);
+  --font:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0C1322;--panel:#141D30;--panel-2:#1B2640;--ink:#E6EBF5;--muted:#A3AEC6;--line:#26314A;--line-2:#3A4766;
+  --accent:#8DB4F5;--accent-ink:#0A1834;--accent-soft:#1B2C4E;--accent-text:#AECBFA;
+  --gold:#E9C36A;--gold-bg:#C99A2E;--gold-soft:#2E2614;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--gray:#B5C1CE;--gray-soft:#222C3F;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3,h4{margin:0;line-height:1.25;letter-spacing:-.01em}
+h2{font-size:21px}h3{font-size:16.5px}h4{font-size:15.5px}
+p{margin:0}ul,ol{margin:0;padding:0}
+.muted{color:var(--muted)}.small{font-size:13.5px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--gold-soft);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--gold)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 20px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-size:18px;display:block;line-height:1.1}
+.brand small{color:var(--muted);font-size:12.5px}
+.mark{width:40px;height:40px;border-radius:11px;background:var(--accent);color:var(--gold-bg);display:grid;place-items:center;flex:none}
+@media (prefers-color-scheme:dark){.mark{background:#1E4FA0}}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--ink)}
+.who{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);min-width:0}
+.who .av{width:36px;height:36px;border-radius:50%;background:var(--panel-2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;color:var(--ink);flex:none}
+main{padding:20px clamp(16px,2vw,32px) 40px}
+@media (max-width:900px){#nav{order:3;width:100%}.who{display:none}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.sm{min-height:44px;padding:0 12px;font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}.err:empty{display:none}
+input[type=text],input[type=email],input[type=number],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex:none;margin:0}
+.chk{display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.card-b{padding:16px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--gray-soft);color:var(--gray);line-height:1.6}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}.badge.warn{background:var(--warn-soft);color:var(--warn)}.badge.bad{background:var(--bad-soft);color:var(--bad)}.badge.info{background:var(--accent-soft);color:var(--accent-text)}.badge.gold{background:var(--gold-soft);color:var(--gold)}
+
+/* Assistant */
+.asst{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,390px);gap:20px;align-items:start}
+@media (min-width:1600px){.asst{grid-template-columns:minmax(0,1fr) 430px}}
+@media (max-width:1060px){.asst{grid-template-columns:minmax(0,1fr)}}
+.chat{display:flex;flex-direction:column;min-width:0;min-height:calc(100vh - 170px)}
+.chat-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.msgs{flex:1;display:flex;flex-direction:column;gap:18px;padding-bottom:12px;min-width:0}
+.msg{min-width:0}
+.msg.user{align-self:flex-end;max-width:min(760px,92%);background:var(--accent);color:var(--accent-ink);border-radius:16px 16px 4px 16px;padding:12px 16px;overflow-wrap:anywhere;white-space:pre-wrap}
+.msg.bot{display:flex;gap:12px;align-items:flex-start}
+.bav{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.bubble{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:16px;box-shadow:var(--shadow)}
+.bubble>*+*{margin-top:12px}
+@media (max-width:600px){.msg.bot .bav{display:none}.bubble{padding:14px 12px}.ex .chip{flex-basis:100%}}
+.bubble ul.dots{padding-left:20px;list-style:disc}.bubble ol{padding-left:22px}
+.bubble li+li{margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:12px;padding:8px 12px;cursor:pointer;font-size:14px;text-align:left;color:var(--ink);line-height:1.35}
+.chip:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ex .chip{flex:1 1 280px}
+.composer{position:sticky;bottom:0;background:var(--bg);padding:10px 0 14px;z-index:5}
+.composer form{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--line-2);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
+.composer form:focus-within{outline:3px solid var(--accent);outline-offset:1px}
+.composer textarea{border:0;resize:none;min-height:44px;max-height:180px;background:transparent;padding:10px 8px;outline:none}
+.composer .btn{flex:none;width:48px;padding:0}
+.composer .hint{margin-top:6px;padding-left:4px}
+.steps{list-style:none;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:14.5px}
+.steps li.done{color:var(--ink)}
+.steps li .st{width:22px;height:22px;display:grid;place-items:center;flex:none}
+.steps li.done .st{color:var(--ok)}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+
+.understood{display:flex;flex-wrap:wrap;gap:6px}
+.understood span{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:13.5px}
+.understood span.miss{border-style:dashed;color:var(--warn)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--panel-2);border-radius:12px;padding:10px 12px;min-width:0}
+.kpi .v{font-size:19px;font-weight:700;overflow-wrap:anywhere}
+.kpi .l{font-size:12.5px;color:var(--muted)}
+.sec-t{display:flex;align-items:center;gap:8px;margin-top:18px!important}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:12px}
+.fcard{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--panel)}
+.fcard.top{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.fc-top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.meter{height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden}
+.meter span{display:block;height:100%;background:var(--accent);border-radius:4px}
+.meter.mid span{background:var(--gold-bg)}
+.dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 12px;margin:0}
+.dl div{min-width:0}.dl dt{font-size:12px;color:var(--muted)}.dl dd{margin:0;font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.checks{list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.checks li{display:flex;gap:7px;align-items:flex-start}
+.checks svg{width:16px;height:16px;margin-top:2px}
+.checks .ok svg{color:var(--ok)}.checks .warn svg{color:var(--warn)}.checks .ko svg{color:var(--bad)}
+.note{background:var(--accent-soft);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:13.5px;display:flex;gap:8px}
+.note svg{color:var(--accent-text);margin-top:2px}
+.note.warn{background:var(--warn-soft)}.note.warn svg{color:var(--warn)}
+.stack{display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--panel-2)}
+.stack span{display:block;height:100%}
+.s-eu{background:var(--accent)}.s-nat{background:var(--gold-bg)}.s-auto{background:var(--line-2)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:12.5px;color:var(--muted);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+details.disc{border:1px solid var(--line);border-radius:12px}
+details.disc summary{min-height:44px;display:flex;align-items:center;gap:8px;padding:0 14px;cursor:pointer;font-weight:600}
+details.disc>div{padding:0 14px 14px}
+.src{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:78px;min-width:0}
+@media (max-width:1060px){.side{position:static}}
+.fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.fgrid .full{grid-column:1/-1}
+.tchips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;padding:4px 10px;font-size:13px;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;gap:5px}
+.tchip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text);font-weight:600}
+.how{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13.5px}
+.how li{display:flex;gap:10px}
+.how .n{width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);font-weight:700;font-size:12.5px;display:grid;place-items:center;flex:none}
+
+/* Pages */
+.ph{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.ph p{color:var(--muted)}
+.kgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+@media (max-width:800px){.kgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kgrid .card{padding:14px 16px}
+.kgrid .v{font-size:23px;font-weight:700;overflow-wrap:anywhere}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.filters .field{flex:1 1 180px}
+.filters .field.grow{flex:2 1 260px}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;padding:0 12px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
+.pcard{padding:16px;display:flex;flex-direction:column;gap:10px}
+.pcard p{font-size:14px;color:var(--muted)}
+.pcard .actions{margin-top:auto}
+.prog{height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden;min-width:70px}
+.prog span{display:block;height:100%;background:var(--ok)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1000px){.two{grid-template-columns:minmax(0,1fr)}}
+.tl{list-style:none}
+.tl li{display:flex;gap:14px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center}
+.tl li:last-child{border-bottom:0}
+.tl .date{width:58px;flex:none;text-align:center;border:1px solid var(--line);border-radius:10px;padding:4px 0;background:var(--panel-2)}
+.tl .date b{display:block;font-size:19px;line-height:1.1}
+.tl .date span{font-size:11.5px;text-transform:uppercase;color:var(--muted)}
+.tl .body{flex:1;min-width:0}
+.mon{padding:10px 16px;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2);border-bottom:1px solid var(--line)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+
+dialog{border:0;border-radius:16px;padding:0;width:min(760px,calc(100vw - 24px));max-width:none;background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(8,14,30,.55)}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.mb{padding:18px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 160px);overflow:auto}
+.mf{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.xbtn{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;display:grid;place-items:center;flex:none}
+.mb h4{margin-bottom:4px}
+.mb ul.dots{padding-left:20px;list-style:disc}
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;width:min(440px,calc(100vw - 32px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-size:14.5px;display:flex;gap:8px;align-items:center}
+#printArea{display:none}
+@media print{
+  body.printing>*:not(#printArea){display:none!important}
+  body.printing #printArea{display:block!important;color:#000;font:12pt/1.45 var(--font)}
+  #printArea h1{font-size:18pt;margin-bottom:6pt}#printArea h2{font-size:13pt;margin:14pt 0 6pt}
+  #printArea table{border:1px solid #999}#printArea th,#printArea td{border-bottom:1px solid #bbb;color:#000;background:#fff}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="region" aria-label="Information démonstration">
+  <span><b>Démonstration</b> — données fictives (programmes, taux et échéances illustratifs)</span>
+  <button type="button" id="resetBtn"><svg class="i" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg>Réinitialiser la démo</button>
+</div>
+<header class="top">
+  <div class="brand">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><circle cx="12" cy="4" r="1.4"/><circle cx="16" cy="5.07" r="1.4"/><circle cx="18.93" cy="8" r="1.4"/><circle cx="20" cy="12" r="1.4"/><circle cx="18.93" cy="16" r="1.4"/><circle cx="16" cy="18.93" r="1.4"/><circle cx="12" cy="20" r="1.4"/><circle cx="8" cy="18.93" r="1.4"/><circle cx="5.07" cy="16" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="5.07" cy="8" r="1.4"/><circle cx="8" cy="5.07" r="1.4"/></svg></div>
+    <div><b>Cap Fonds UE</b><small>Assistant financements européens des collectivités</small></div>
+  </div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="who"><span>Commune de Roquebelle (fictive)<br><span class="small">C. Marchetti, chargée de mission</span></span><span class="av" aria-hidden="true">CM</span></div>
+</header>
+<main id="main"></main>
+<div id="toasts" aria-live="polite"></div>
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+<div id="printArea"></div>
+
+<script>
+"use strict";
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur=n=>Math.round(n).toLocaleString("fr-FR")+" €";
+const eurK=n=>n>=1e6?(n/1e6).toLocaleString("fr-FR",{maximumFractionDigits:2})+" M€":Math.round(n/1000).toLocaleString("fr-FR")+" k€";
+const pct=n=>Math.round(n*100)+" %";
+const DAY=864e5,T0=new Date();T0.setHours(0,0,0,0);
+const dIn=o=>new Date(T0.getTime()+o*DAY);
+const fd=d=>d.toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
+const norm=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/œ/g,"oe").replace(/[-'’]/g," ").replace(/\s+/g," ");
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const ICO={
+chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+send:'<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>',
+check:'<path d="M20 6 9 17l-5-5"/>',
+warn:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+x:'<path d="M18 6 6 18M6 6l12 12"/>',
+info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+dl:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
+mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+spark:'<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/>',
+doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+loader:'<path d="M21 12a9 9 0 1 1-6.2-8.6"/>',
+euro:'<path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/>',
+edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+refresh:'<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>'
+};
+const ic=(n,c="i")=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${ICO[n]}</svg>`;
+
+/* ---------- Référentiels ---------- */
+const REG={ARA:"Auvergne-Rhône-Alpes",BFC:"Bourgogne-Franche-Comté",BRE:"Bretagne",CVL:"Centre-Val de Loire",COR:"Corse",GES:"Grand Est",HDF:"Hauts-de-France",IDF:"Île-de-France",NOR:"Normandie",NAQ:"Nouvelle-Aquitaine",OCC:"Occitanie",PDL:"Pays de la Loire",PAC:"Provence-Alpes-Côte d’Azur",GUA:"Guadeloupe",MAR:"Martinique",GUY:"Guyane",REU:"La Réunion",MAY:"Mayotte"};
+const RUP=["GUA","MAR","GUY","REU","MAY"];
+const INTERREG={PAC:"France-Italie (ALCOTRA) et Euro-MED",ARA:"France-Italie (ALCOTRA) et France-Suisse",OCC:"España-France-Andorra (POCTEFA) et Euro-MED",NAQ:"POCTEFA et Espace Atlantique",HDF:"France-Wallonie-Vlaanderen et Europe du Nord-Ouest",GES:"Grande Région et Rhin supérieur",BFC:"France-Suisse",BRE:"Espace Atlantique et France (Manche) Angleterre",NOR:"France (Manche) Angleterre et Europe du Nord-Ouest",PDL:"Espace Atlantique",COR:"Italie-France Maritime et Euro-MED",IDF:"Europe du Nord-Ouest",CVL:"Interreg Europe",GUA:"Caraïbes",MAR:"Caraïbes",GUY:"Amazonie",REU:"Océan Indien",MAY:"Océan Indien"};
+const DEPS="01|Ain|ARA;02|Aisne|HDF;03|Allier|ARA;04|Alpes-de-Haute-Provence|PAC;05|Hautes-Alpes|PAC;06|Alpes-Maritimes|PAC;07|Ardèche|ARA;08|Ardennes|GES;09|Ariège|OCC;10|Aube|GES;11|Aude|OCC;12|Aveyron|OCC;13|Bouches-du-Rhône|PAC;14|Calvados|NOR;15|Cantal|ARA;16|Charente|NAQ;17|Charente-Maritime|NAQ;18|Cher|CVL;19|Corrèze|NAQ;2A|Corse-du-Sud|COR;2B|Haute-Corse|COR;21|Côte-d’Or|BFC;22|Côtes-d’Armor|BRE;23|Creuse|NAQ;24|Dordogne|NAQ;25|Doubs|BFC;26|Drôme|ARA;27|Eure|NOR;28|Eure-et-Loir|CVL;29|Finistère|BRE;30|Gard|OCC;31|Haute-Garonne|OCC;32|Gers|OCC;33|Gironde|NAQ;34|Hérault|OCC;35|Ille-et-Vilaine|BRE;36|Indre|CVL;37|Indre-et-Loire|CVL;38|Isère|ARA;39|Jura|BFC;40|Landes|NAQ;41|Loir-et-Cher|CVL;42|Loire|ARA;43|Haute-Loire|ARA;44|Loire-Atlantique|PDL;45|Loiret|CVL;46|Lot|OCC;47|Lot-et-Garonne|NAQ;48|Lozère|OCC;49|Maine-et-Loire|PDL;50|Manche|NOR;51|Marne|GES;52|Haute-Marne|GES;53|Mayenne|PDL;54|Meurthe-et-Moselle|GES;55|Meuse|GES;56|Morbihan|BRE;57|Moselle|GES;58|Nièvre|BFC;59|Nord|HDF;60|Oise|HDF;61|Orne|NOR;62|Pas-de-Calais|HDF;63|Puy-de-Dôme|ARA;64|Pyrénées-Atlantiques|NAQ;65|Hautes-Pyrénées|OCC;66|Pyrénées-Orientales|OCC;67|Bas-Rhin|GES;68|Haut-Rhin|GES;69|Rhône|ARA;70|Haute-Saône|BFC;71|Saône-et-Loire|BFC;72|Sarthe|PDL;73|Savoie|ARA;74|Haute-Savoie|ARA;75|Paris|IDF;76|Seine-Maritime|NOR;77|Seine-et-Marne|IDF;78|Yvelines|IDF;79|Deux-Sèvres|NAQ;80|Somme|HDF;81|Tarn|OCC;82|Tarn-et-Garonne|OCC;83|Var|PAC;84|Vaucluse|PAC;85|Vendée|PDL;86|Vienne|NAQ;87|Haute-Vienne|NAQ;88|Vosges|GES;89|Yonne|BFC;90|Territoire de Belfort|BFC;91|Essonne|IDF;92|Hauts-de-Seine|IDF;93|Seine-Saint-Denis|IDF;94|Val-de-Marne|IDF;95|Val-d’Oise|IDF;971|Guadeloupe|GUA;972|Martinique|MAR;973|Guyane|GUY;974|La Réunion|REU;976|Mayotte|MAY".split(";").map(s=>{const[c,n,r]=s.split("|");return{c,n,r,k:norm(n)}});
+const DEPS_SORTED=[...DEPS].sort((a,b)=>b.k.length-a.k.length);
+const depBy=c=>DEPS.find(d=>d.c===c);
+const AMBIG=new Set("lot cher ain nord orne eure aude gard var tarn gers oise marne loire paris vienne somme manche meuse jura indre rhone creuse vendee doubs savoie allier sarthe yonne drome landes vosges mayenne charente".split(" "));
+const REGN=[["provence alpes cote d azur","PAC"],["paca","PAC"],["region sud","PAC"],["auvergne rhone alpes","ARA"],["bourgogne franche comte","BFC"],["centre val de loire","CVL"],["pays de la loire","PDL"],["nouvelle aquitaine","NAQ"],["hauts de france","HDF"],["ile de france","IDF"],["grand est","GES"],["bretagne","BRE"],["normandie","NOR"],["occitanie","OCC"],["corse","COR"]];
+const TYPES=["Commune","Communauté de communes","Communauté d’agglomération","Métropole","Intercommunalité","Syndicat intercommunal","Département"];
+
+const TH={
+energie:{l:"Transition énergétique",k:["renovation energetique","energ","isolation","chauffage","photovolta","solaire","chaufferie","reseau de chaleur","eclairage public","sobriete","geotherm","biomasse","bas carbone","thermique"]},
+batiment:{l:"Bâtiments publics",k:["ecole","groupe scolaire","college","gymnase","mairie","mediatheque","bibliotheque","salle des fetes","salle polyvalente","creche","piscine","batiment","equipement public","cantine","tiers lieu","halle$"]},
+mobilite:{l:"Mobilité durable",k:["mobilite","velo","cyclable","voie verte","transport","bus$","covoiturage","pole d echange","gare$","navette","pieton"]},
+eau:{l:"Eau et assainissement",k:["eau potable","assainissement","station d epuration","reseau d eau","pluvial","eaux usees"]},
+biodiv:{l:"Biodiversité",k:["biodiversite","renaturation","nature$","espace vert","zone humide","desimpermeabil","cour oasis","arbre","vegetalis","trame verte"]},
+risques:{l:"Adaptation et risques",k:["inondation","risque","submersion","incendie","adaptation","canicule","secheresse","erosion","ilot de chaleur"]},
+numerique:{l:"Numérique",k:["numerique","fibre","wifi","tiers lieu","e administration","digital","site internet","dematerialis"]},
+social:{l:"Inclusion et emploi",k:["insertion","emploi","inclusion","solidarite","pauvrete","handicap","senior","sans abri","quartier prioritaire","precarite"]},
+jeunesse:{l:"Jeunesse",k:["jeune","jeunesse"]},
+education:{l:"Éducation et formation",k:["formation","educati","apprentissage","eleves","enseignant"]},
+citoyennete:{l:"Citoyenneté européenne",k:["jumelage","citoyen","democratie","memoire","commemoration"]},
+cooperation:{l:"Coopération européenne",k:["transfrontali","cooperation","jumelage","ville italienne","ville allemande","ville espagnole","partenaires europeens","echanges"]},
+culture:{l:"Culture et patrimoine",k:["patrimoine","culture","culturel","musee","theatre","eglise","chateau","monument"]},
+tourisme:{l:"Tourisme",k:["tourisme","touristique","randonnee","office de tourisme","itinerance"]},
+rural:{l:"Développement rural",k:["rural","village","agricole","circuit court","ferme$","commerce de proximite","multiple rural"]},
+urbain:{l:"Revitalisation urbaine",k:["friche","centre ville","centre bourg","revitalisation","quartier","requalification","amenagement urbain","logement","coeur de ville"]},
+innovation:{l:"Innovation",k:["innovant","innovation","experimentation","pilote","intelligence artificielle","smart"]},
+littoral:{l:"Littoral et économie bleue",k:["port$","littoral","plage","peche$","maritime","aquaculture"]}
+};
+const TH_ORDER=["energie","mobilite","eau","biodiv","risques","urbain","numerique","social","citoyennete","jeunesse","culture","tourisme","littoral","batiment","rural","innovation","education","cooperation"];
+const OBJ=[["ecole primaire","école primaire"],["ecole maternelle","école maternelle"],["groupe scolaire","groupe scolaire"],["cour d ecole","cour d’école"],["ecole","école"],["college","collège"],["gymnase","gymnase"],["mairie","mairie"],["mediatheque","médiathèque"],["bibliotheque","bibliothèque"],["salle des fetes","salle des fêtes"],["salle polyvalente","salle polyvalente"],["creche","crèche"],["piscine","piscine"],["voie verte","voie verte"],["piste cyclable","piste cyclable"],["pole d echange","pôle d’échanges"],["station d epuration","station d’épuration"],["reseau de chaleur","réseau de chaleur"],["eclairage public","éclairage public"],["friche","friche"],["centre bourg","centre-bourg"],["centre ville","centre-ville"],["tiers lieu","tiers-lieu"],["jumelage","jumelage"],["eglise","église"],["musee","musée"],["port","port"]];
+const ACT=[["renov","Rénovation"],["rehabilit","Réhabilitation"],["constru","Construction"],["creat","Création"],["amenag","Aménagement"],["extension","Extension"],["desimpermeabil","Désimperméabilisation"],["renatur","Renaturation"],["jumelage","Jumelage"],["moderni","Modernisation"]];
+
+const PT=["Délibération approuvant le projet et le plan de financement","Plan de financement prévisionnel signé","Avant-projet (APS/APD) et estimation détaillée","Calendrier prévisionnel de réalisation","Attestation de non-commencement des travaux","RIB, SIRET et attestation de régularité"];
+const PD=["Enregistrement sur le portail Financements et appels d’offres (code PIC)","Formulaire de candidature (parties A et B)","Budget détaillé par lot de travail","Lettres d’engagement des partenaires","Déclaration sur l’honneur du représentant légal"];
+
+const P=[
+{id:"feder-energie",sig:"FEDER",nom:"FEDER — Transition énergétique des bâtiments publics",type:"partage",th:["energie","batiment"],taux:.5,plafond:1500000,minM:100000,ech:57,fil:true,desc:"Volet « Europe plus verte » du programme régional FEDER-FSE+ 2021-2027 : rénovation énergétique des bâtiments publics, chaufferies biomasse, réseaux de chaleur et énergies renouvelables.",crit:["Gain énergétique d’au moins 30 % justifié par un audit","Travaux non engagés avant le dépôt","Maître d’ouvrage public","Contrepartie publique nationale identifiée"],pieces:["Audit énergétique avant travaux"].concat(PT)},
+{id:"feder-mobilite",sig:"FEDER",nom:"FEDER — Mobilité urbaine et rurale durable",type:"partage",th:["mobilite"],taux:.5,plafond:2000000,minM:150000,ech:107,desc:"Infrastructures cyclables, pôles d’échanges multimodaux, voies vertes du quotidien et solutions de mobilité partagée.",crit:["Usage quotidien (domicile-travail, scolaire) démontré","Cohérence avec le plan de mobilité du territoire","Continuité d’itinéraire et intermodalité"],pieces:["Étude de fréquentation ou d’usage"].concat(PT)},
+{id:"feder-biodiv",sig:"FEDER",nom:"FEDER — Biodiversité, eau et prévention des risques",type:"partage",th:["biodiv","eau","risques"],taux:.6,plafond:1000000,minM:50000,ech:135,desc:"Renaturation, désimperméabilisation, gestion intégrée des eaux pluviales, restauration de zones humides et prévention des inondations.",crit:["Gain écologique mesurable (surface renaturée, perméabilité)","Approche fondée sur la nature privilégiée","Plan de gestion sur 5 ans"],pieces:["Diagnostic écologique ou hydraulique"].concat(PT)},
+{id:"feder-numerique",sig:"FEDER",nom:"FEDER — Services numériques et inclusion numérique",type:"partage",th:["numerique"],taux:.5,plafond:500000,minM:30000,ech:44,desc:"Tiers-lieux numériques, services publics en ligne, médiation numérique et mutualisation de données territoriales.",crit:["Service ouvert au public","Accompagnement des publics éloignés du numérique","Interopérabilité et sécurité des données"],pieces:["Note d’opportunité et public cible"].concat(PT)},
+{id:"feder-iti",sig:"FEDER",nom:"FEDER — Développement urbain intégré (ITI)",type:"partage",th:["urbain","culture","tourisme","social"],taux:.6,plafond:3000000,minPop:10000,popTxt:"Réservé aux territoires dotés d’une stratégie urbaine intégrée (en pratique ≥ 10 000 hab. ou EPCI)",ech:152,desc:"Revitalisation de centres-villes et centres-bourgs, reconversion de friches et requalification de quartiers, dans le cadre d’une stratégie territoriale portée par l’EPCI.",crit:["Projet inscrit dans la stratégie urbaine intégrée","Sélection par le comité territorial de l’ITI","Mixité des usages"],pieces:["Extrait de la stratégie urbaine intégrée"].concat(PT)},
+{id:"leader",sig:"FEADER",nom:"FEADER — LEADER (groupe d’action locale)",type:"partage",th:["rural","tourisme","culture","numerique","social","mobilite","batiment"],taux:.8,plafond:100000,maxPop:20000,popTxt:"LEADER cible les territoires ruraux (communes de moins de 20 000 hab.)",ech:35,fil:true,desc:"Développement local mené par les acteurs du territoire : services de proximité, tiers-lieux, tourisme, circuits courts, patrimoine rural. Instruction par le GAL.",crit:["Projet conforme à la stratégie locale du GAL","Territoire couvert par un GAL","Aide plafonnée, souvent combinée à d’autres financements"],pieces:["Fiche projet LEADER"].concat(PT)},
+{id:"fse",sig:"FSE+",nom:"FSE+ — Inclusion sociale et emploi",type:"partage",th:["social","education","jeunesse"],taux:.6,plafond:400000,ech:93,noWorks:"Le FSE+ finance des actions (accompagnement, formation), pas des travaux",desc:"Accompagnement vers l’emploi, insertion des jeunes, lutte contre la pauvreté et inclusion des publics fragiles.",crit:["Public cible identifié et suivi d’indicateurs","Dépenses de fonctionnement (pas d’investissement)","Suivi des participants (données individuelles)"],pieces:["Description de l’action et des publics","Budget de fonctionnement","Indicateurs de réalisation"]},
+{id:"ftj",sig:"FTJ",nom:"Fonds pour une transition juste",type:"partage",th:["energie","social","urbain","innovation"],taux:.6,plafond:2500000,depts:["13","59","62","76","44","57","54"],ech:119,desc:"Accompagne les territoires les plus touchés par la décarbonation de l’industrie : reconversion de sites, compétences, énergies renouvelables.",crit:["Commune située dans le périmètre du plan territorial de transition juste","Lien avec la transition industrielle du territoire","Non cumulable avec le FEDER sur la même dépense"],pieces:["Note de lien avec le plan territorial de transition juste"].concat(PT)},
+{id:"life",sig:"LIFE",nom:"LIFE — Énergie propre / Nature et biodiversité",type:"direct",th:["energie","biodiv","eau","risques"],taux:.6,plafond:1500000,minM:500000,cons:"Consortium recommandé (souvent 3 à 6 partenaires)",noWorks:"LIFE finance des projets démonstrateurs et de l’ingénierie, rarement des travaux classiques",ech:191,desc:"Programme de la Commission européenne pour l’environnement et le climat : projets démonstrateurs, renforcement des capacités, solutions reproductibles.",crit:["Caractère démonstrateur ou innovant","Réplicabilité à l’échelle européenne","Impact environnemental chiffré"],pieces:PD},
+{id:"elena",sig:"BEI",nom:"BEI — ELENA (assistance technique)",type:"bei",th:["energie","batiment","mobilite"],taux:.9,share:.04,plafond:2000000,minM:30000000,ech:null,desc:"Finance jusqu’à 90 % de l’ingénierie (audits, AMO, montage) nécessaire à un programme d’investissement énergétique d’au moins 30 M€.",crit:["Programme d’investissement ≥ 30 M€","Effet levier de l’assistance technique","Dépôt en continu auprès de la BEI"],pieces:["Note de présentation du programme d’investissement","Budget d’assistance technique","Calendrier de mise en œuvre"],note:"Piste : mutualiser la rénovation de plusieurs bâtiments à l’échelle intercommunale pour atteindre le seuil."},
+{id:"interreg",sig:"Interreg",nom:"Interreg VI — coopération territoriale",type:"coop",th:["cooperation","tourisme","culture","biodiv","risques","mobilite","jeunesse","innovation"],taux:.8,plafond:1000000,cons:"Consortium obligatoire : au moins 2 partenaires de 2 pays",ech:168,desc:"Projets de coopération transfrontalière, transnationale ou interrégionale : gestion commune des risques, tourisme durable, mobilités transfrontalières, échanges d’expériences.",crit:["Partenariat d’au moins deux pays","Valeur ajoutée de la coopération","Résultats partagés et pérennes"],pieces:["Accord de partenariat"].concat(PD.slice(1))},
+{id:"horizon",sig:"Horizon",nom:"Horizon Europe — Missions Villes neutres et Adaptation",type:"direct",th:["energie","innovation","risques","mobilite","urbain"],taux:1,plafond:800000,cons:"Consortium obligatoire : au moins 3 entités de 3 pays",noWorks:"Finance la recherche et l’expérimentation, pas les travaux",ech:183,desc:"Missions européennes pour des villes climatiquement neutres et l’adaptation au changement climatique : expérimentations, démonstrateurs, accompagnement.",crit:["Excellence et caractère innovant","Impact et diffusion des résultats","Qualité du consortium"],pieces:PD},
+{id:"eui",sig:"EUI",nom:"Initiative urbaine européenne — Actions innovatrices",type:"direct",th:["urbain","innovation","energie","mobilite","social"],taux:.8,plafond:5000000,minPop:50000,popTxt:"Réservé aux autorités urbaines de 50 000 habitants et plus",ech:99,desc:"Expérimentation de solutions urbaines innovantes et transférables à grande échelle.",crit:["Caractère réellement innovant","Partenaires de mise en œuvre locaux","Transférabilité"],pieces:["Formulaire EUI"].concat(PD.slice(2))},
+{id:"urbact",sig:"URBACT",nom:"URBACT IV — Réseaux d’action",type:"coop",th:["urbain","cooperation","social","culture","tourisme"],taux:.8,plafond:80000,lump:true,cons:"Réseau de 6 à 10 villes européennes",noWorks:"Finance l’échange d’expériences et le plan d’action, pas les travaux",ech:210,desc:"Réseaux de villes européennes pour co-construire des plans d’action intégrés sur un enjeu urbain commun.",crit:["Engagement politique de la ville","Groupe local URBACT","Production d’un plan d’action intégré"],pieces:["Lettre d’engagement du maire","Fiche ville partenaire"]},
+{id:"cerv",sig:"CERV",nom:"CERV — Jumelage de villes",type:"direct",th:["citoyennete","jeunesse","cooperation","culture"],taux:1,plafond:30000,lump:true,cons:"Partenariat avec au moins une ville d’un autre pays",ech:128,desc:"Montant forfaitaire pour des rencontres citoyennes entre villes jumelées, autour des valeurs et de l’avenir de l’Union.",crit:["Participation d’au moins 50 citoyens","Lien avec les priorités annuelles de l’appel","Diversité des publics"],pieces:["Programme de la rencontre","Lettre d’engagement de la ville partenaire","Formulaire de candidature"]},
+{id:"erasmus",sig:"Erasmus+",nom:"Erasmus+ — Jeunesse et éducation",type:"direct",th:["jeunesse","education"],taux:1,plafond:60000,lump:true,ech:120,desc:"Échanges de jeunes, mobilités éducatives et projets de participation citoyenne des jeunes, gérés par l’agence nationale.",crit:["Jeunes de 13 à 30 ans","Activités d’apprentissage non formel","Partenaire(s) d’autres pays du programme"],pieces:["Formulaire agence nationale","Programme d’activités","Mandats des partenaires"]},
+{id:"feampa",sig:"FEAMPA",nom:"FEAMPA — Économie bleue et littoral",type:"partage",th:["littoral","tourisme","eau"],taux:.5,plafond:600000,ech:86,desc:"Ports de pêche, valorisation des produits de la mer, protection des milieux marins et économie bleue des territoires littoraux.",crit:["Territoire littoral ou lien avec la filière pêche","Impact sur la filière ou le milieu marin"],pieces:PT},
+{id:"cef",sig:"MIE",nom:"MIE Transport — Nœuds urbains",type:"direct",th:["mobilite"],taux:.5,plafond:20000000,minM:5000000,minPop:100000,popTxt:"Concerne les nœuds urbains du réseau transeuropéen (agglomérations ≥ 100 000 hab.)",ech:108,desc:"Mécanisme pour l’interconnexion en Europe : pôles multimodaux et mobilité des nœuds urbains du réseau transeuropéen de transport.",crit:["Nœud urbain du RTE-T","Valeur ajoutée européenne","Maturité du projet"],pieces:PD}
+];
+const TYPE_L={partage:"Gestion partagée",direct:"Gestion directe (Commission)",coop:"Coopération territoriale",bei:"Banque européenne d’investissement"};
+const progBy=id=>P.find(p=>p.id===id);
+function progName(p,pr){return p.id==="interreg"&&pr&&pr.region?"Interreg VI — "+INTERREG[pr.region]:p.nom}
+function progAut(p,pr){const r=pr&&pr.region?REG[pr.region]:"votre région";
+  return {partage:p.id==="leader"?"Groupe d’action locale (GAL) et Région "+r:"Région "+r+" (autorité de gestion)",direct:p.id==="erasmus"?"Agence nationale Erasmus+":"Commission européenne / agence exécutive",coop:"Secrétariat conjoint du programme",bei:"Banque européenne d’investissement"}[p.type]}
+function progDate(p){return p.ech==null?null:dIn(p.ech)}
+function echTxt(p){if(p.ech==null)return"Dépôt en continu";return(p.fil?"Fil de l’eau · comité du ":"")+fd(dIn(p.ech))}
+
+/* ---------- État ---------- */
+const KEY="capfondsue-v1";
+const SEED_D=()=>[
+{ref:"DOS-2026-0118",titre:"Voie verte des Écoles (3,2 km)",prog:"feder-mobilite",montant:1450000,aide:580000,statut:"montage",ech:107,pieces:PT.concat(["Étude de fréquentation ou d’usage"]).map((t,i)=>({t,ok:i<4})),notes:"Pré-instruction favorable du service Europe de la Région."},
+{ref:"DOS-2026-0124",titre:"Jumelage Roquebelle – Valdimonte (IT)",prog:"cerv",montant:38000,aide:30000,statut:"depose",ech:-12,pieces:["Programme de la rencontre","Lettre d’engagement de la ville partenaire","Formulaire de candidature"].map(t=>({t,ok:true})),notes:"Dossier déposé, réponse attendue sous 4 mois."},
+{ref:"DOS-2026-0131",titre:"Désimperméabilisation de la cour de l’école des Tilleuls",prog:"feder-biodiv",montant:420000,aide:252000,statut:"etude",ech:135,pieces:["Diagnostic écologique ou hydraulique"].concat(PT).map((t,i)=>({t,ok:i<1})),notes:""},
+{ref:"DOS-2025-0097",titre:"Tiers-lieu numérique de la Halle",prog:"feder-numerique",montant:310000,aide:155000,statut:"accorde",ech:-160,pieces:["Note d’opportunité et public cible"].concat(PT).map(t=>({t,ok:true})),notes:"Convention signée. Premier acompte versé (simulation)."}
+];
+const ST={etude:["À étudier",""],montage:["En montage","info"],depose:["Déposé","gold"],accorde:["Accordé","ok"],refuse:["Refusé","bad"]};
+let S;
+function fresh(){return{view:"assistant",msgs:[],profile:null,analyses:{},dossiers:SEED_D(),seq:132}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);return}}catch(e){}S=fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+/* ---------- Analyse du langage ---------- */
+function kwRe(k){return new RegExp("(?:^|[^a-z])"+k.replace("$","(?![a-z])"))}
+function parse(text){
+  const t=" "+norm(text)+" ",f={themes:[]};
+  let m=text.match(/(\d{1,3}(?:[\s  .]\d{3})+|\d+)\s*(?:habitants|hab\b)/i);
+  if(m)f.pop=parseInt(m[1].replace(/[^\d]/g,""),10);
+  m=text.match(/(\d+(?:[.,]\d+)?)\s*(millions?|M\s?€|MEUR)(?!\s*d?['’]?\s*habitants)/i);
+  if(m)f.montant=parseFloat(m[1].replace(",","."))*1e6;
+  else{m=text.match(/(\d{1,3}(?:[\s  .]\d{3})+|\d+)(?:,\d+)?\s*(k\s?€|keur|€|euros?)/i);
+    if(m){f.montant=parseInt(m[1].replace(/[^\d]/g,""),10)*(/^k/i.test(m[2])?1000:1)}}
+  if(f.montant!=null&&!(f.montant>0))delete f.montant;
+  m=t.match(/\((\d{2}|2a|2b|97[1-6])\)/)||t.match(/departement (?:n )?(\d{2}|97[1-6])(?!\d)/)||t.match(/dans le (\d{2})(?![\d ]*(?:\d|hab|%|km|m |eur|k))/);
+  let d=m&&DEPS.find(x=>x.c.toLowerCase()===m[1]);
+  if(!d)for(const x of DEPS_SORTED){const re=AMBIG.has(x.k)?new RegExp("(?:dans (?:le|la|l|les)|en|du|de la|de l|des) "+x.k+"(?![a-z])"):new RegExp("(?:^|[^a-z])"+x.k+"(?![a-z])");if(re.test(t)){d=x;break}}
+  if(d){f.dep=d.c;f.region=d.r}else{for(const[k,c]of REGN)if(kwRe(k+"$").test(t)){f.region=c;break}}
+  if(/communaute de communes/.test(t))f.type="Communauté de communes";
+  else if(/agglomeration|[^a-z]agglo[^a-z]/.test(t))f.type="Communauté d’agglomération";
+  else if(/metropole/.test(t))f.type="Métropole";
+  else if(/intercommunalite|[^a-z]epci[^a-z]|[^a-z]interco/.test(t))f.type="Intercommunalité";
+  else if(/conseil departemental|president du departement/.test(t))f.type="Département";
+  else if(/syndicat/.test(t))f.type="Syndicat intercommunal";
+  else if(/maire[^a-z]|commune|ville[^a-z]|mairie|village|municipal/.test(t))f.type="Commune";
+  for(const k of TH_ORDER)if(TH[k].k.some(w=>kwRe(w).test(t)))f.themes.push(k);
+  for(const[k,l]of OBJ)if(kwRe(k).test(t)){f.objet=l;break}
+  for(const[k,l]of ACT)if(kwRe(k).test(t)){f.action=l;break}
+  return f}
+function addRural(pr){if(pr.pop&&!pr.themes.includes("rural")){const inter=pr.type&&pr.type!=="Commune";if((!inter&&pr.pop<3500)||(inter&&pr.pop<40000&&pr.type==="Communauté de communes"))pr.themes.push("rural")}}
+function titre(pr){const prim=pr.themes[0];let a=pr.action||(prim?TH[prim].l:"Projet");
+  if(pr.action&&pr.themes.includes("energie")&&/Rénovation|Réhabilitation/.test(a))a+=" énergétique";
+  return a+(pr.objet&&pr.objet!=="jumelage"?" — "+pr.objet:"")}
+function profTxt(pr){const d=pr.dep&&depBy(pr.dep);return[(pr.type||"Collectivité")+(pr.pop?" de "+pr.pop.toLocaleString("fr-FR")+" hab.":""),d?d.n+" ("+d.c+")":pr.region?REG[pr.region]:null].filter(Boolean).join(", ")}
+
+/* ---------- Moteur d'éligibilité ---------- */
+function evalProg(p,pr){
+  const hits=p.th.filter(x=>pr.themes.includes(x));if(!hits.length)return null;
+  let s=45+12*Math.min(hits.length,2);const ck=[{k:"ok",t:"Thématique couverte : "+hits.map(h=>TH[h].l.toLowerCase()).join(", ")}];
+  const reg=pr.region;
+  if(p.depts){if(pr.dep&&!p.depts.includes(pr.dep)){s-=60;ck.push({k:"ko",t:"Votre département n’est pas dans le périmètre du fonds en France"})}
+    else if(pr.dep){s+=4;ck.push({k:"warn",t:"Département éligible : vérifier le zonage communal du plan territorial"})}
+    else ck.push({k:"warn",t:"Fonds réservé à quelques territoires industriels"})}
+  else if(reg){s+=8;ck.push({k:"ok",t:p.type==="partage"?"Programme ouvert en "+REG[reg]:"Ouvert aux collectivités de tous les États membres"})}
+  if(p.minPop){if(pr.pop&&pr.pop<p.minPop&&!(p.id==="feder-iti"&&pr.type&&pr.type!=="Commune")){s-=40;ck.push({k:"ko",t:p.popTxt})}else if(!pr.pop)ck.push({k:"warn",t:p.popTxt});else ck.push({k:"ok",t:"Seuil démographique respecté"})}
+  if(p.maxPop){if(pr.pop&&pr.type==="Commune"&&pr.pop>p.maxPop){s-=35;ck.push({k:"ko",t:p.popTxt})}else{s-=4;ck.push({k:"warn",t:"Vérifier que le territoire est couvert par un groupe d’action locale (GAL)"})}}
+  if(p.minM&&pr.montant){if(pr.montant<p.minM){s-=30;ck.push({k:"ko",t:"Montant inférieur au seuil du dispositif ("+eurK(p.minM)+")"})}else ck.push({k:"ok",t:"Montant compatible avec le dispositif"})}
+  if(p.lump&&pr.montant>p.plafond*2)ck.push({k:"warn",t:"Montant forfaitaire ("+eurK(p.plafond)+") : ne couvre qu’une partie du projet"});
+  else if(!p.lump&&pr.montant&&pr.montant*(p.share||1)*p.taux>p.plafond*1.05)ck.push({k:"warn",t:"Aide plafonnée à "+eurK(p.plafond)+" par opération"});
+  if(p.cons){s-=(pr.pop&&pr.pop<10000)?15:8;ck.push({k:"warn",t:p.cons})}
+  if(p.noWorks&&pr.themes.some(x=>["batiment","eau","mobilite","urbain"].includes(x))){s-=22;ck.push({k:"warn",t:p.noWorks})}
+  if(p.type==="partage"&&!p.cons)s+=5;
+  s=Math.max(5,Math.min(96,Math.round(s)));
+  let taux=p.taux;if(RUP.includes(reg)&&p.id.startsWith("feder")){taux=.85;ck.push({k:"ok",t:"Région ultrapériphérique : taux majoré jusqu’à 85 %"})}
+  let aide=0;if(pr.montant)aide=p.lump?Math.min(p.plafond,pr.montant):Math.min(pr.montant*(p.share||1)*taux,p.plafond);
+  return{p,s,ck,taux,aide,cat:s>=70?"top":s>=45?"mid":"low"}}
+function analyse(pr){return P.map(p=>evalProg(p,pr)).filter(Boolean).sort((a,b)=>b.s-a.s||b.aide-a.aide)}
+function plan(pr,res){const M=pr.montant||0;const el=res.filter(r=>r.cat!=="low"&&r.aide>0);
+  const main=el.filter(r=>!r.p.cons).sort((a,b)=>b.aide-a.aide)[0]||el.sort((a,b)=>b.aide-a.aide)[0]||null;
+  const eu=main?Math.min(main.aide,M*.8):0;const nat=Math.max(0,Math.min(M*.25,M*.8-eu));return{main,eu,nat,auto:M-eu-nat,M}}
+
+/* ---------- Rendu de l'analyse ---------- */
+const CK_I={ok:"check",warn:"warn",ko:"x"};
+function fcard(r,pr){const p=r.p;const d=progDate(p);
+  return `<article class="fcard ${r.cat==="top"?"top":""}">
+  <div class="fc-top"><span class="badge ${p.type==="partage"?"info":p.type==="coop"?"gold":""}">${TYPE_L[p.type]}</span><span class="badge ${r.cat==="top"?"ok":r.cat==="mid"?"warn":"bad"}">${r.cat==="top"?"Très pertinent":r.cat==="mid"?"À étudier":"Peu adapté"}</span></div>
+  <h4 class="wrap">${esc(progName(p,pr))}</h4>
+  <div><div class="small muted">Adéquation estimée : ${r.s} %</div><div class="meter ${r.cat}" role="img" aria-label="Adéquation ${r.s} %"><span style="width:${r.s}%"></span></div></div>
+  <dl class="dl"><div><dt>Taux maximal</dt><dd>${p.lump?"Forfait":"jusqu’à "+pct(r.taux)}</dd></div><div><dt>Aide estimée</dt><dd>${r.aide?"≈ "+eur(r.aide):"—"}</dd></div>
+  <div><dt>Échéance</dt><dd>${d?fd(d):"En continu"}</dd></div><div><dt>Consortium</dt><dd>${p.cons?"Oui":"Non"}</dd></div></dl>
+  <ul class="checks">${r.ck.map(c=>`<li class="${c.k}">${ic(CK_I[c.k])}<span>${esc(c.t)}</span></li>`).join("")}</ul>
+  ${p.note&&r.cat==="low"?`<div class="note">${ic("info")}<span>${esc(p.note)}</span></div>`:""}
+  <div class="actions"><button type="button" class="btn sm" data-act="prog" data-id="${p.id}">${ic("book")}Voir la fiche</button></div></article>`}
+function planHtml(pl){if(!pl.M)return"";const w=v=>(v/pl.M*100).toFixed(1);
+  return `<div class="stack" aria-hidden="true"><span class="s-eu" style="width:${w(pl.eu)}%"></span><span class="s-nat" style="width:${w(pl.nat)}%"></span><span class="s-auto" style="width:${w(pl.auto)}%"></span></div>
+  <div class="legend"><span><i class="s-eu"></i>Fonds européen</span><span><i class="s-nat"></i>Aides nationales</span><span><i class="s-auto"></i>Autofinancement</span></div>
+  <div class="tw"><table><thead><tr><th scope="col">Source</th><th scope="col" class="num">Montant</th><th scope="col" class="num">Part</th></tr></thead><tbody>
+  <tr><td>${pl.main?esc(pl.main.p.sig)+" — "+esc(pl.main.p.nom.split("— ")[1]||pl.main.p.nom):"Aucun fonds européen retenu"}</td><td class="num">${eur(pl.eu)}</td><td class="num">${pct(pl.eu/pl.M)}</td></tr>
+  <tr><td>Contrepartie nationale (DSIL, DETR, Fonds vert, Région) — à solliciter en parallèle</td><td class="num">${eur(pl.nat)}</td><td class="num">${pct(pl.nat/pl.M)}</td></tr>
+  <tr><td>Autofinancement (minimum légal 20 %)</td><td class="num">${eur(pl.auto)}</td><td class="num">${pct(pl.auto/pl.M)}</td></tr>
+  <tr><th scope="row">Total HT</th><th class="num">${eur(pl.M)}</th><th class="num">100 %</th></tr></tbody></table></div>
+  <div class="note">${ic("info")}<span>Une même dépense ne peut pas être financée par deux fonds européens. Le cumul des aides publiques est limité à 80 % du coût du projet (participation minimale du maître d’ouvrage de 20 %).</span></div>`}
+function renderAnalysis(pr,intro,aid){
+  const res=analyse(pr),keep=res.filter(r=>r.cat!=="low"),low=res.filter(r=>r.cat==="low"),pl=plan(pr,res);
+  const d=pr.dep&&depBy(pr.dep);
+  const nextD=keep.map(r=>progDate(r.p)).filter(Boolean).sort((a,b)=>a-b)[0];
+  const und=[pr.type||"Collectivité",pr.pop?pr.pop.toLocaleString("fr-FR")+" hab.":null,d?d.n+" ("+d.c+")":null,pr.region?REG[pr.region]:null].filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join("")+pr.themes.map(t=>`<span>${esc(TH[t].l)}</span>`).join("")+(pr.montant?`<span>${eur(pr.montant)} HT</span>`:"")+(pr.pop?"":`<span class="miss">Population non précisée</span>`);
+  const steps=[];
+  if(pl.main&&pl.main.p.type==="partage")steps.push("Prendre contact avec le service Europe de la Région "+REG[pr.region]+" pour une pré-instruction du projet ("+pl.main.p.sig+").");
+  if(pr.themes.includes("energie"))steps.push("Faire réaliser (ou actualiser) l’audit énergétique : le gain de 30 % est le critère d’entrée.");
+  steps.push("Faire délibérer l’assemblée sur le projet et le plan de financement prévisionnel.");
+  steps.push("Ne signer aucun marché de travaux avant l’accusé de réception du dossier : la dépense deviendrait inéligible.");
+  steps.push("Déposer en parallèle les demandes d’aides nationales (DSIL, DETR, Fonds vert) pour la contrepartie.");
+  if(keep.some(r=>r.p.cons))steps.push("Pour les programmes à consortium, identifier des partenaires européens : je peux vous en suggérer.");
+  const alt=pr.montant?Math.round(pr.montant*.7/10000)*10000:0;
+  return `<p>${esc(intro||"Voici mon analyse.")} <strong>${esc(titre(pr))}</strong>.</p>
+  <div class="understood" aria-label="Ce que j’ai compris">${und}</div>
+  <div class="kpis"><div class="kpi"><div class="v">${keep.length}</div><div class="l">dispositifs mobilisables</div></div>
+  <div class="kpi"><div class="v">${pl.eu?eurK(pl.eu):"—"}</div><div class="l">aide européenne estimée</div></div>
+  <div class="kpi"><div class="v">${pl.M?pct((pl.eu+pl.nat)/pl.M):"—"}</div><div class="l">taux d’aide publique visé</div></div>
+  <div class="kpi"><div class="v">${nextD?nextD.toLocaleDateString("fr-FR",{day:"numeric",month:"short"}):"—"}</div><div class="l">prochaine échéance</div></div></div>
+  <h3 class="sec-t">${ic("euro")}Financements mobilisables</h3>
+  ${keep.length?`<div class="cards">${keep.map(r=>fcard(r,pr)).join("")}</div>`:`<div class="note warn">${ic("warn")}<span>Aucun dispositif européen ne correspond clairement à ce projet en l’état. Les aides nationales (DSIL, DETR, Fonds vert) sont probablement plus adaptées.</span></div>`}
+  ${pl.M&&keep.length?`<h3 class="sec-t">${ic("doc")}Plan de financement indicatif</h3>${planHtml(pl)}`:""}
+  ${low.length?`<details class="disc"><summary>Dispositifs étudiés mais écartés (${low.length})</summary><div class="cards">${low.map(r=>fcard(r,pr)).join("")}</div></details>`:""}
+  <h3 class="sec-t">${ic("check")}Prochaines étapes recommandées</h3>
+  <ol>${steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
+  <div class="actions"><button type="button" class="btn primary" data-act="mkdos" data-aid="${aid}">${ic("plus")}Créer un dossier</button>
+  <button type="button" class="btn" data-act="draft" data-aid="${aid}">${ic("edit")}Rédiger la note de présentation</button>
+  <button type="button" class="btn" data-act="print" data-aid="${aid}">${ic("dl")}Exporter en PDF</button>
+  <button type="button" class="btn" data-act="mail" data-aid="${aid}">${ic("mail")}Envoyer au DGS</button></div>
+  <p class="src">Sources consultées (fictives) : programme régional FEDER-FSE+ ${esc(pr.region?REG[pr.region]:"")} 2021-2027 v4, programmes de travail LIFE, Horizon Europe et CERV, base des appels mise à jour le ${fd(dIn(-3))}. Analyse indicative, à confirmer avec l’autorité de gestion.</p>
+  <div class="chips" aria-label="Questions suggérées"><button type="button" class="chip" data-say="Faut-il un consortium ?">Faut-il un consortium ?</button><button type="button" class="chip" data-say="Quel calendrier viser ?">Quel calendrier viser ?</button><button type="button" class="chip" data-say="Quelles pièces dois-je préparer ?">Quelles pièces préparer ?</button>${alt?`<button type="button" class="chip" data-say="Et si le montant passe à ${alt.toLocaleString("fr-FR")} € ?">Et si le montant passe à ${eurK(alt)} ?</button>`:""}<button type="button" class="chip" data-say="Quelle différence entre fonds directs et gestion partagée ?">Fonds directs ou gestion partagée ?</button></div>`}
+
+/* ---------- Chat ---------- */
+const WELCOME=`<p><strong>Bonjour, je suis l’assistant financements européens.</strong> Décrivez votre projet avec vos mots : qui vous êtes, où, quoi, pour combien. Je l’analyse et vous indique les aides européennes mobilisables, avec leur éligibilité, les taux, un plan de financement et les échéances.</p>
+<p class="muted small">Pas besoin de connaître les programmes : je traduis votre demande en critères (FEDER, LEADER, LIFE, Interreg…). Essayez un exemple :</p>
+<div class="chips ex">
+<button type="button" class="chip" data-say="Je suis maire d’une commune de 8 000 habitants dans les Bouches-du-Rhône et je souhaite rénover énergétiquement mon école primaire pour environ 1,2 million d’euros. Quelles aides européennes puis-je obtenir ?">Maire, 8 000 hab., Bouches-du-Rhône : rénovation énergétique de l’école primaire, 1,2 M€</button>
+<button type="button" class="chip" data-say="Nous sommes une communauté de communes de 22 000 habitants en Dordogne et voulons créer une voie verte de 14 km, budget 2,5 M€.">Communauté de communes, Dordogne : voie verte de 14 km, 2,5 M€</button>
+<button type="button" class="chip" data-say="Village de 900 habitants dans le Cantal : réhabilitation de la salle des fêtes en tiers-lieu numérique, 350 000 €.">Village de 900 hab., Cantal : tiers-lieu numérique, 350 k€</button>
+<button type="button" class="chip" data-say="Ville de 60 000 habitants dans le Nord, reconversion d’une friche industrielle en quartier mixte, 9 millions d’euros.">Ville de 60 000 hab., Nord : reconversion d’une friche, 9 M€</button>
+<button type="button" class="chip" data-say="Commune de 4 500 habitants en Haute-Savoie : jumelage et échanges de jeunes avec une ville italienne, 40 000 €.">Commune, Haute-Savoie : jumelage et échanges de jeunes, 40 k€</button>
+</div>`;
+let busy=false;
+function msgHtml(m){return m.r==="u"?`<div class="msg user">${esc(m.h)}</div>`:`<div class="msg bot"><div class="bav" aria-hidden="true">${ic("spark")}</div><div class="bubble">${m.h}</div></div>`}
+function addMsg(r,h){const m={r,h};S.msgs.push(m);save();const box=$("#msgs");if(box){box.insertAdjacentHTML("beforeend",msgHtml(m));const el=box.lastElementChild;
+  if(r==="b")el.scrollIntoView({behavior:RM?"auto":"smooth",block:"start"})}}
+function setBusy(b){busy=b;const btn=$("#sendBtn");if(btn)btn.disabled=b}
+async function runAnalysis(pr,intro){
+  setBusy(true);
+  const box=$("#msgs");const labels=["Compréhension de la demande — extraction du profil <span class=\"code\">extraire_profil()</span>","Recherche dans la base : "+P.length+" programmes et appels ouverts <span class=\"code\">rechercher_programmes()</span>","Contrôle des critères d’éligibilité <span class=\"code\">verifier_eligibilite()</span>","Calcul du plan de financement indicatif <span class=\"code\">plan_financement()</span>","Rédaction de la synthèse sourcée"];
+  box.insertAdjacentHTML("beforeend",`<div class="msg bot" id="pending"><div class="bav" aria-hidden="true">${ic("spark")}</div><div class="bubble"><ul class="steps" aria-live="polite">${labels.map(l=>`<li><span class="st">${ic("loader","i spin")}</span><span>${l}</span></li>`).join("")}</ul></div></div>`);
+  const pend=$("#pending");pend.scrollIntoView({behavior:RM?"auto":"smooth",block:"nearest"});
+  const lis=$$("li",pend);for(const li of lis){await wait(RM?60:380);li.classList.add("done");$(".st",li).innerHTML=ic("check")}
+  await wait(RM?30:200);pend.remove();
+  const aid="A"+Date.now();S.analyses[aid]=JSON.parse(JSON.stringify(pr));S.profile=pr;
+  addMsg("b",renderAnalysis(pr,intro,aid));S.lastAid=aid;save();renderFiche();setBusy(false)}
+function missing(pr){const m=[];if(!pr.themes||!pr.themes.length)m.push("project");if(!pr.dep&&!pr.region)m.push("where");if(!pr.montant)m.push("amount");return m}
+function ask(pr,miss){
+  const it={project:"la nature du projet (ex. rénovation d’un bâtiment, piste cyclable, renaturation, jumelage…)",where:"le département de la collectivité",amount:"le montant estimé du projet (HT)"};
+  let h=`<p>Merci, j’ai bien noté : ${esc(profTxt(pr))}${pr.themes&&pr.themes.length?" — "+esc(titre(pr)):""}.</p><p>Pour vous donner une analyse fiable, il me manque :</p><ul class="dots">${miss.map(k=>`<li>${it[k]}</li>`).join("")}</ul>`;
+  if(miss.includes("amount")&&miss.length===1)h+=`<div class="chips"><button type="button" class="chip" data-say="Environ 150 000 €">Environ 150 000 €</button><button type="button" class="chip" data-say="Environ 500 000 €">Environ 500 000 €</button><button type="button" class="chip" data-say="Environ 1,5 million d’euros">Environ 1,5 M€</button><button type="button" class="chip" data-say="Plus de 5 millions d’euros">Plus de 5 M€</button></div>`;
+  else h+=`<p class="muted small">Répondez simplement dans le champ ci-dessous, par exemple « dans le Var, environ 600 000 € ».</p>`;
+  addMsg("b",h)}
+function intent(t){const n=norm(t);
+  if(/consortium|partenaire/.test(n))return"cons";if(/calendrier|echeance|date|quand|delai|planning/.test(n))return"cal";
+  if(/piece|document|justificatif|constituer|preparer|monter le dossier/.test(n))return"pieces";
+  if(/direct|gestion partagee|difference|indirect/.test(n))return"direct";if(/cumul/.test(n))return"cumul";
+  if(/note|rediger|redaction|brouillon/.test(n))return"draft";return null}
+function respond(text){
+  const f=parse(text),it=intent(text),pr0=S.profile;
+  const hasNum=f.montant||f.pop||f.dep||f.region;
+  if(it&&pr0&&!missing(pr0).length&&!hasNum&&(!f.themes.length||["cons","cal","pieces","draft"].includes(it)))return answerIntent(it,pr0);
+  if(f.themes.length||hasNum||f.type){
+    let pr;
+    if(f.themes.length||!pr0)pr={type:f.type||pr0?.type||null,pop:f.pop||pr0?.pop||null,dep:f.dep||(f.region?null:pr0?.dep)||null,region:f.region||pr0?.region||null,montant:f.montant||null,themes:f.themes.length?f.themes:(pr0?.themes||[]),objet:f.objet||(f.themes.length?null:pr0?.objet),action:f.action||(f.themes.length?null:pr0?.action),texte:text};
+    else{pr={...pr0,themes:[...pr0.themes]};if(f.type)pr.type=f.type;if(f.pop)pr.pop=f.pop;if(f.dep){pr.dep=f.dep;pr.region=f.region}else if(f.region){pr.region=f.region;pr.dep=null}if(f.montant)pr.montant=f.montant}
+    addRural(pr);
+    const miss=missing(pr);S.profile=pr;save();renderFiche();
+    if(miss.length)return ask(pr,miss);
+    const upd=pr0&&!f.themes.length&&pr0.themes.length;
+    return runAnalysis(pr,upd?"J’ai mis à jour la fiche ("+[f.montant?"montant : "+eur(f.montant):null,f.pop?"population : "+f.pop.toLocaleString("fr-FR")+" hab.":null,f.dep?"département : "+depBy(f.dep).n:null].filter(Boolean).join(", ")+"). Analyse actualisée pour :":"J’ai compris votre demande. Voici l’analyse des financements européens pour :")}
+  if(it&&pr0&&!missing(pr0).length)return answerIntent(it,pr0);
+  if(it==="direct"||it==="cumul")return answerIntent(it,null);
+  addMsg("b",`<p>Je n’ai pas identifié de projet dans votre message. Décrivez-le en une phrase : <em>qui</em> (commune, intercommunalité, population), <em>où</em> (département), <em>quoi</em> (nature des travaux ou de l’action) et <em>combien</em> (montant estimé).</p><div class="chips"><button type="button" class="chip" data-say="Je suis maire d’une commune de 8 000 habitants dans les Bouches-du-Rhône et je souhaite rénover énergétiquement mon école primaire pour environ 1,2 million d’euros.">Voir un exemple complet</button></div>`)}
+function answerIntent(it,pr){
+  const res=pr?analyse(pr):[],keep=res.filter(r=>r.cat!=="low"),pl=pr?plan(pr,res):null;
+  if(it==="cons"){const c=res.filter(r=>r.p.cons);const kc=keep.filter(r=>r.p.cons);
+    let h=kc.length?`<p>Oui pour certains dispositifs retenus : ${kc.map(r=>`<strong>${esc(progName(r.p,pr))}</strong> (${esc(r.p.cons.toLowerCase())})`).join(", ")}.</p>`:`<p><strong>Non</strong> : les dispositifs les plus adaptés à votre projet${pl&&pl.main?" (dont "+esc(pl.main.p.sig)+")":""} se déposent seul, sans partenaire étranger.</p>`;
+    if(c.length){h+=`<p>Si vous souhaitez aussi viser ${esc(c.map(r=>r.p.sig).join(", "))}, voici des collectivités européennes ayant publié une recherche de partenaires sur un sujet proche (fictives) :</p>
+    <div class="tw"><table><thead><tr><th scope="col">Collectivité</th><th scope="col">Pays</th><th scope="col">Sujet</th><th scope="col"><span class="sr">Action</span></th></tr></thead><tbody>
+    ${[["Comune di Valdimonte","Italie","9 400 hab. — "+TH[pr.themes[0]].l.toLowerCase()+", cherche partenaires FR/ES"],["Ayuntamiento de Villaluz","Espagne","12 100 hab. — bâtiments publics sobres, chef de file potentiel"],["Gemeinde Ostental","Allemagne","7 800 hab. — expérience LIFE, recherche 2 partenaires"]].map(p=>`<tr><td>${p[0]}</td><td>${p[1]}</td><td>${esc(p[2])}</td><td><button type="button" class="btn sm" data-act="contact" data-n="${esc(p[0])}">Mettre en relation</button></td></tr>`).join("")}</tbody></table></div>`}
+    return addMsg("b",h)}
+  if(it==="cal"){const rows=keep.filter(r=>r.p.ech!=null).sort((a,b)=>a.p.ech-b.p.ech);
+    let h=`<p>Voici les échéances des dispositifs retenus pour <strong>${esc(titre(pr))}</strong> :</p><div class="tw"><table><thead><tr><th scope="col">Dispositif</th><th scope="col">Échéance</th><th scope="col" class="num">Jours restants</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(progName(r.p,pr))}</td><td>${esc(echTxt(r.p))}</td><td class="num">${r.p.ech}</td></tr>`).join("")}</tbody></table></div>`;
+    if(pl.main&&pl.main.p.ech!=null){const D=pl.main.p.ech;const st=[[75,"Délibération de principe et lancement de l’audit / des études"],[45,"Avant-projet et estimation détaillée validés"],[21,"Plan de financement signé, demandes nationales déposées"],[7,"Saisie du dossier sur la plateforme régionale"],[0,"Date limite / comité de programmation"]];
+      h+=`<p><strong>Rétroplanning conseillé</strong> pour ${esc(pl.main.p.sig)} :</p><ul class="dots">${st.map(([o,l])=>`<li><strong>${fd(dIn(D-o))}</strong> — ${l}${D-o<0?' <span class="badge bad">déjà passé</span>':""}</li>`).join("")}</ul>`;
+      if(D<75)h+=`<div class="note warn">${ic("warn")}<span>Délai serré : si l’avant-projet n’est pas prêt, visez le comité suivant plutôt qu’un dossier incomplet.</span></div>`}
+    return addMsg("b",h)}
+  if(it==="pieces"){const m=pl&&pl.main?pl.main.p:keep[0]?.p;if(!m)return addMsg("b","<p>Aucun dispositif retenu : je ne peux pas encore lister les pièces.</p>");
+    return addMsg("b",`<p>Pour <strong>${esc(progName(m,pr))}</strong>, préparez :</p><ul class="dots">${m.pieces.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p>Je peux rédiger un premier jet de la note de présentation à partir de votre demande.</p><div class="actions"><button type="button" class="btn primary" data-act="draft" data-aid="${S.lastAid||""}">${ic("edit")}Rédiger la note de présentation</button><button type="button" class="btn" data-act="mkdos" data-aid="${S.lastAid||""}">${ic("plus")}Créer le dossier avec cette liste</button></div>`)}
+  if(it==="draft")return openDraft(S.lastAid);
+  if(it==="direct")return addMsg("b",`<p>Deux familles coexistent :</p><ul class="dots"><li><strong>Gestion partagée</strong> (FEDER, FSE+, FEADER-LEADER, FTJ, FEAMPA) : l’enveloppe est confiée à la France, gérée le plus souvent par la <strong>Région</strong>. On dépose seul, auprès d’un interlocuteur proche ; c’est la voie la plus accessible pour une commune.</li><li><strong>Gestion directe</strong> (LIFE, Horizon Europe, CERV, Erasmus+, MIE) : appels lancés par la Commission européenne, concurrence européenne, souvent en <strong>consortium</strong>, dossier en anglais.</li><li><strong>Coopération territoriale</strong> (Interreg, URBACT) : toujours avec des partenaires d’autres pays.</li></ul>`);
+  if(it==="cumul")return addMsg("b",`<p>Les règles principales :</p><ul class="dots"><li>Une même dépense ne peut pas être financée par deux fonds européens (interdiction du double financement).</li><li>Les fonds européens se cumulent avec les aides de l’État et de la Région, dans la limite de 80 % d’aides publiques.</li><li>Le maître d’ouvrage conserve au moins 20 % du coût à sa charge.</li><li>Deux fonds européens peuvent financer deux volets distincts d’un même projet (ex. travaux FEDER, ingénierie LIFE).</li></ul>`)}
+
+/* ---------- Vues ---------- */
+const TABS=[["assistant","Assistant","chat"],["dossiers","Mes dossiers","folder"],["programmes","Programmes et appels","book"],["echeances","Échéances","cal"]];
+function renderNav(){$("#nav").innerHTML=TABS.map(([k,l,i])=>`<button type="button" class="tab" data-view="${k}" ${S.view===k?'aria-current="page"':""}>${ic(i)}${l}${k==="dossiers"?` <span class="cnt">${S.dossiers.length}</span>`:""}</button>`).join("")}
+function go(v){S.view=v;save();renderNav();render();window.scrollTo(0,0)}
+function render(){const m=$("#main");({assistant:vAssistant,dossiers:vDossiers,programmes:vProgrammes,echeances:vEcheances})[S.view](m)}
+
+function vAssistant(m){
+  if(!S.msgs.length)S.msgs.push({r:"b",h:WELCOME});
+  m.innerHTML=`<div class="asst"><section class="chat" aria-labelledby="chatT">
+  <div class="chat-h"><div><h2 id="chatT">Analyser un projet</h2><p class="muted small">Décrivez votre projet en langage courant, l’assistant fait le reste.</p></div>
+  <button type="button" class="btn" id="newConv">${ic("refresh")}Nouvelle conversation</button></div>
+  <div class="msgs" id="msgs" aria-live="polite">${S.msgs.map(msgHtml).join("")}</div>
+  <div class="composer"><form id="chatForm"><label for="chatIn" class="sr">Décrivez votre projet</label>
+  <textarea id="chatIn" rows="1" placeholder="Ex. : commune de 3 000 habitants dans le Gers, création d’une chaufferie bois pour 600 000 €"></textarea>
+  <button class="btn primary" id="sendBtn" aria-label="Envoyer">${ic("send")}</button></form>
+  <p class="hint">Entrée pour envoyer, Maj + Entrée pour aller à la ligne. Réponses générées à partir d’une base de programmes fictive.</p></div></section>
+  <aside class="side" aria-label="Fiche projet">
+  <div class="card"><div class="card-h"><h3>Fiche projet extraite</h3><span class="badge info">${ic("spark")}Remplie par l’IA</span></div>
+  <form class="card-b" id="ficheForm" novalidate><p class="hint" style="margin-bottom:12px">Corrigez un élément mal compris puis relancez l’analyse.</p>
+  <div class="fgrid"><div class="field full"><label for="fType">Type de collectivité</label><select id="fType"><option value="">— Non précisé —</option>${TYPES.map(t=>`<option>${t}</option>`).join("")}</select></div>
+  <div class="field"><label for="fPop">Population</label><input type="number" id="fPop" min="1" inputmode="numeric"></div>
+  <div class="field"><label for="fMont">Montant HT (€)</label><input type="number" id="fMont" min="1" step="1000" inputmode="numeric"><span class="err" id="eMont"></span></div>
+  <div class="field full"><label for="fDep">Département</label><select id="fDep"><option value="">— Choisir —</option>${DEPS.map(d=>`<option value="${d.c}">${d.c} — ${esc(d.n)}</option>`).join("")}</select><span class="err" id="eDep"></span></div>
+  <div class="field full"><span class="flabel" id="thL">Thématiques</span><div class="tchips" role="group" aria-labelledby="thL" id="fThemes">${TH_ORDER.map(k=>`<button type="button" class="tchip" data-th="${k}" aria-pressed="false">${TH[k].l}</button>`).join("")}</div><span class="err" id="eTh"></span></div></div>
+  <div class="actions" style="margin-top:14px"><button class="btn primary" type="submit">${ic("refresh")}Relancer l’analyse</button></div></form></div>
+  <div class="card"><div class="card-h"><h3>Comment l’assistant raisonne</h3></div><div class="card-b"><ol class="how">
+  <li><span class="n">1</span><span><strong>Comprendre</strong> : le modèle de langage extrait un profil structuré (collectivité, territoire, thématique, montant) et pose une question s’il manque une information.</span></li>
+  <li><span class="n">2</span><span><strong>Chercher</strong> : recherche dans une base des programmes et appels, alimentée par les textes officiels et mise à jour automatiquement.</span></li>
+  <li><span class="n">3</span><span><strong>Vérifier</strong> : les critères d’éligibilité (seuils, zonages, consortium) sont contrôlés par des règles explicites, pas « devinés » par l’IA.</span></li>
+  <li><span class="n">4</span><span><strong>Restituer</strong> : synthèse sourcée, plan de financement, échéances et pièces, exportables et transformables en dossier.</span></li></ol></div></div></aside></div>`;
+  renderFiche();
+  const box=$("#msgs");if(S.msgs.length>1)requestAnimationFrame(()=>box.lastElementChild.scrollIntoView({block:"start"}));
+  const ta=$("#chatIn");
+  ta.addEventListener("input",()=>{ta.style.height="auto";ta.style.height=Math.min(ta.scrollHeight,180)+"px"});
+  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#chatForm").requestSubmit()}});
+  $("#chatForm").addEventListener("submit",e=>{e.preventDefault();const v=ta.value.trim();if(!v||busy)return;ta.value="";ta.style.height="auto";say(v)});
+  $("#newConv").addEventListener("click",()=>{S.msgs=[];S.profile=null;S.lastAid=null;save();vAssistant(m);toast("Nouvelle conversation démarrée")});
+  $("#ficheForm").addEventListener("submit",e=>{e.preventDefault();submitFiche()});
+  $("#fThemes").addEventListener("click",e=>{const b=e.target.closest(".tchip");if(b)b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true")})}
+function say(v){if(busy)return;if(S.view!=="assistant")go("assistant");addMsg("u",v);setBusy(true);setTimeout(()=>{setBusy(false);respond(v)},RM?50:350)}
+function renderFiche(){const f=$("#ficheForm");if(!f)return;const pr=S.profile||{themes:[]};
+  $("#fType").value=pr.type||"";$("#fPop").value=pr.pop||"";$("#fMont").value=pr.montant?Math.round(pr.montant):"";$("#fDep").value=pr.dep||"";
+  $$(".tchip",f).forEach(b=>b.setAttribute("aria-pressed",(pr.themes||[]).includes(b.dataset.th)?"true":"false"))}
+function submitFiche(){if(busy)return;const th=$$(".tchip[aria-pressed=true]").map(b=>b.dataset.th),mont=+$("#fMont").value,dep=$("#fDep").value;
+  $("#eMont").textContent=mont>0?"":"Indiquez un montant.";$("#eDep").textContent=dep?"":"Choisissez un département.";$("#eTh").textContent=th.length?"":"Sélectionnez au moins une thématique.";
+  if(!(mont>0)||!dep||!th.length){(!(mont>0)?$("#fMont"):!dep?$("#fDep"):$(".tchip")).focus();return}
+  const pr={...(S.profile||{}),type:$("#fType").value||null,pop:+$("#fPop").value||null,montant:mont,dep,region:depBy(dep).r,themes:TH_ORDER.filter(k=>th.includes(k))};
+  runAnalysis(pr,"Fiche corrigée manuellement. Analyse actualisée pour :")}
+
+function vDossiers(m){
+  const ds=S.dossiers,sum=k=>ds.filter(d=>k(d)).reduce((a,d)=>a+d.aide,0);
+  const f=S.dosFilter||"all",q=norm(S.dosQ||"");
+  const list=ds.filter(d=>(f==="all"||d.statut===f)&&(!q||norm(d.titre+" "+d.ref+" "+progBy(d.prog).nom).includes(q)));
+  m.innerHTML=`<div class="ph"><div><h2>Mes dossiers de financement</h2><p>Suivi des demandes créées depuis l’assistant, de l’étude à l’accord.</p></div><button type="button" class="btn primary" data-view="assistant">${ic("spark")}Analyser un nouveau projet</button></div>
+  <div class="kgrid"><div class="card"><div class="small muted">Dossiers actifs</div><div class="v">${ds.filter(d=>["etude","montage","depose"].includes(d.statut)).length}</div></div>
+  <div class="card"><div class="small muted">Aides en cours de montage</div><div class="v">${eurK(sum(d=>["etude","montage"].includes(d.statut)))}</div></div>
+  <div class="card"><div class="small muted">Aides sollicitées (déposées)</div><div class="v">${eurK(sum(d=>d.statut==="depose"))}</div></div>
+  <div class="card"><div class="small muted">Aides obtenues</div><div class="v">${eurK(sum(d=>d.statut==="accorde"))}</div></div></div>
+  <div class="filters"><div class="field grow"><label for="dq">Rechercher</label><input type="search" id="dq" value="${esc(S.dosQ||"")}" placeholder="Titre, référence, programme…"></div>
+  <div class="field" style="flex:3 1 400px"><span class="flabel" id="dsl">Statut</span><div class="seg" role="group" aria-labelledby="dsl">${[["all","Tous"]].concat(Object.entries(ST).map(([k,v])=>[k,v[0]])).map(([k,l])=>`<button type="button" data-df="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div></div></div>
+  <div class="card"><div class="tw" style="border:0">${list.length?`<table style="min-width:820px"><thead><tr><th scope="col">Référence</th><th scope="col">Projet</th><th scope="col">Programme</th><th scope="col" class="num">Montant HT</th><th scope="col" class="num">Aide visée</th><th scope="col">Échéance</th><th scope="col">Pièces</th><th scope="col">Statut</th><th scope="col"><span class="sr">Action</span></th></tr></thead><tbody>
+  ${list.map(d=>{const ok=d.pieces.filter(x=>x.ok).length,n=d.pieces.length;return`<tr><td class="small">${d.ref}</td><td><strong>${esc(d.titre)}</strong></td><td>${esc(progBy(d.prog).sig)}<div class="small muted">${esc(TYPE_L[progBy(d.prog).type])}</div></td><td class="num">${eur(d.montant)}</td><td class="num">${eur(d.aide)}</td><td>${fd(dIn(d.ech))}${d.ech>=0&&d.ech<=45&&["etude","montage"].includes(d.statut)?' <span class="badge warn">J-'+d.ech+"</span>":""}</td>
+  <td><div class="small">${ok}/${n}</div><div class="prog" role="img" aria-label="${ok} pièces sur ${n}"><span style="width:${ok/n*100}%"></span></div></td><td><span class="badge ${ST[d.statut][1]}">${ST[d.statut][0]}</span></td><td><button type="button" class="btn sm" data-act="dos" data-ref="${d.ref}">Ouvrir</button></td></tr>`}).join("")}</tbody></table>`:`<div class="empty">Aucun dossier ne correspond.</div>`}</div></div>`;
+  $("#dq").addEventListener("input",e=>{S.dosQ=e.target.value;const pos=e.target.selectionStart;vDossiers(m);const i=$("#dq");i.focus();i.setSelectionRange(pos,pos)});
+  $$("[data-df]",m).forEach(b=>b.addEventListener("click",()=>{S.dosFilter=b.dataset.df;vDossiers(m);$(`[data-df="${b.dataset.df}"]`).focus()}))}
+
+function vProgrammes(m){
+  const F=S.pf||(S.pf={q:"",th:"",ty:"",nc:false});
+  const q=norm(F.q);const list=P.filter(p=>(!q||norm(p.nom+" "+p.desc+" "+p.sig).includes(q))&&(!F.th||p.th.includes(F.th))&&(!F.ty||p.type===F.ty)&&(!F.nc||!p.cons)).sort((a,b)=>(a.ech??9999)-(b.ech??9999));
+  m.innerHTML=`<div class="ph"><div><h2>Programmes et appels à projets</h2><p>Base de veille consolidée : fonds régionaux, programmes de la Commission et coopération territoriale.</p></div><span class="badge info">${ic("refresh")}Mise à jour le ${fd(dIn(-3))}</span></div>
+  <div class="filters"><div class="field grow"><label for="pq">Rechercher</label><input type="search" id="pq" value="${esc(F.q)}" placeholder="Ex. : énergie, friche, jumelage…"></div>
+  <div class="field"><label for="pth">Thématique</label><select id="pth"><option value="">Toutes</option>${TH_ORDER.map(k=>`<option value="${k}" ${F.th===k?"selected":""}>${TH[k].l}</option>`).join("")}</select></div>
+  <div class="field"><label for="pty">Mode de gestion</label><select id="pty"><option value="">Tous</option>${Object.entries(TYPE_L).map(([k,l])=>`<option value="${k}" ${F.ty===k?"selected":""}>${l}</option>`).join("")}</select></div>
+  <label class="chk"><input type="checkbox" id="pnc" ${F.nc?"checked":""}>Sans consortium</label></div>
+  <p class="small muted" style="margin-bottom:10px" aria-live="polite">${list.length} programme${list.length>1?"s":""}</p>
+  <div class="prog-grid">${list.map(p=>`<article class="card pcard"><div class="fc-top"><span class="badge ${p.type==="partage"?"info":p.type==="coop"?"gold":""}">${TYPE_L[p.type]}</span>${p.cons?`<span class="badge">${ic("users")}Consortium</span>`:""}</div>
+  <h3 class="wrap">${esc(p.nom)}</h3><p>${esc(p.desc)}</p>
+  <dl class="dl"><div><dt>Taux maximal</dt><dd>${p.lump?"Forfait "+eurK(p.plafond):"jusqu’à "+pct(p.taux)}</dd></div><div><dt>Échéance</dt><dd>${esc(echTxt(p))}</dd></div></dl>
+  <div class="actions"><button type="button" class="btn sm" data-act="prog" data-id="${p.id}">Voir la fiche</button><button type="button" class="btn sm ghost" data-act="tryprog" data-id="${p.id}">${ic("spark")}Tester un projet</button></div></article>`).join("")||`<div class="empty">Aucun programme ne correspond à ces filtres.</div>`}</div>`;
+  const upd=(k,v,id)=>{F[k]=v;save();vProgrammes(m);const el=$("#"+id);el.focus();if(id==="pq")el.setSelectionRange(el.value.length,el.value.length)};
+  $("#pq").addEventListener("input",e=>upd("q",e.target.value,"pq"));$("#pth").addEventListener("change",e=>upd("th",e.target.value,"pth"));
+  $("#pty").addEventListener("change",e=>upd("ty",e.target.value,"pty"));$("#pnc").addEventListener("change",e=>upd("nc",e.target.checked,"pnc"))}
+
+function vEcheances(m){
+  const ps=P.filter(p=>p.ech!=null).sort((a,b)=>a.ech-b.ech);
+  const ds=S.dossiers.filter(d=>["etude","montage"].includes(d.statut)).sort((a,b)=>a.ech-b.ech);
+  const grp=(items,fn)=>{let cur="",h="";for(const it of items){const d=dIn(it.ech),k=d.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});if(k!==cur){cur=k;h+=`<li class="mon">${k}</li>`}h+=fn(it,d)}return h};
+  const dateB=d=>`<div class="date" aria-hidden="true"><b>${d.getDate()}</b><span>${d.toLocaleDateString("fr-FR",{month:"short"})}</span></div>`;
+  const left=n=>`<span class="badge ${n<=30?"warn":""}">${ic("clock")}${n} j</span>`;
+  m.innerHTML=`<div class="ph"><div><h2>Échéances</h2><p>Dates limites des appels et comités de programmation, et échéances de vos dossiers en préparation.</p></div></div>
+  <div class="two"><section class="card" aria-labelledby="e1"><div class="card-h"><h3 id="e1">Appels à projets et comités</h3><span class="badge">${ps.length}</span></div>
+  <ul class="tl">${grp(ps,(p,d)=>`<li>${dateB(d)}<div class="body"><strong class="wrap">${esc(p.nom)}</strong><div class="small muted">${esc(TYPE_L[p.type])}${p.fil?" · fil de l’eau":""}</div></div>${left(p.ech)}<button type="button" class="btn sm" data-act="prog" data-id="${p.id}" aria-label="Fiche ${esc(p.nom)}">Fiche</button></li>`)}</ul></section>
+  <section class="card" aria-labelledby="e2"><div class="card-h"><h3 id="e2">Mes dossiers à déposer</h3><span class="badge">${ds.length}</span></div>
+  ${ds.length?`<ul class="tl">${grp(ds,(x,d)=>{const ok=x.pieces.filter(p=>p.ok).length;return`<li>${dateB(d)}<div class="body"><strong class="wrap">${esc(x.titre)}</strong><div class="small muted">${esc(progBy(x.prog).sig)} · ${ok}/${x.pieces.length} pièces prêtes</div></div>${left(x.ech)}<button type="button" class="btn sm" data-act="dos" data-ref="${x.ref}" aria-label="Ouvrir ${esc(x.titre)}">Ouvrir</button></li>`})}</ul>`:`<div class="empty">Aucun dossier en préparation.</div>`}</section></div>`}
+
+/* ---------- Modales ---------- */
+const dlg=$("#dlg");
+function modal(title,body,foot){dlg.innerHTML=`<div class="mh"><h2 id="dlgTitle" class="wrap" style="font-size:19px">${title}</h2><button type="button" class="xbtn" data-close aria-label="Fermer">${ic("x")}</button></div><div class="mb">${body}</div>${foot?`<div class="mf">${foot}</div>`:""}`;if(!dlg.open)dlg.showModal()}
+dlg.addEventListener("click",e=>{if(e.target===dlg||e.target.closest("[data-close]"))dlg.close()});
+function openProg(id){const p=progBy(id),pr=S.profile;
+  modal(esc(progName(p,pr)),`<div class="actions"><span class="badge ${p.type==="partage"?"info":"gold"}">${TYPE_L[p.type]}</span>${p.cons?`<span class="badge">${ic("users")}${esc(p.cons)}</span>`:`<span class="badge ok">Dépôt sans partenaire</span>`}</div>
+  <p>${esc(p.desc)}</p>
+  <dl class="dl"><div><dt>Interlocuteur</dt><dd>${esc(progAut(p,pr))}</dd></div><div><dt>Échéance</dt><dd>${esc(echTxt(p))}</dd></div><div><dt>Taux maximal</dt><dd>${p.lump?"Montant forfaitaire":"jusqu’à "+pct(p.taux)}</dd></div><div><dt>Plafond indicatif</dt><dd>${eur(p.plafond)}</dd></div></dl>
+  <div><h4>Critères clés</h4><ul class="dots">${p.crit.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>
+  <div><h4>Pièces habituellement demandées</h4><ul class="dots">${p.pieces.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>
+  ${p.note?`<div class="note">${ic("info")}<span>${esc(p.note)}</span></div>`:""}
+  <p class="src">Données illustratives à vérifier sur le site de l’autorité de gestion.</p>`,
+  `<button type="button" class="btn" data-close>Fermer</button><button type="button" class="btn primary" data-act="tryprog" data-id="${p.id}">${ic("spark")}Tester un projet avec ce programme</button>`)}
+function openMkDos(aid){const pr=S.analyses[aid]||S.profile;if(!pr)return toast("Analysez d’abord un projet.");
+  const keep=analyse(pr).filter(r=>r.cat!=="low"&&r.aide>0);if(!keep.length)return toast("Aucun dispositif retenu pour ce projet.");
+  modal("Créer un dossier de financement",`<form id="mkForm" class="fgrid" novalidate><div class="field full"><label for="mkT">Intitulé du projet</label><input type="text" id="mkT" value="${esc(titre(pr))}"><span class="err" id="eT"></span></div>
+  <fieldset class="full" style="border:0;padding:0;margin:0"><legend class="flabel" style="margin-bottom:6px">Dispositif visé</legend>${keep.map((r,i)=>`<label class="chk" style="border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin-bottom:6px"><input type="radio" name="mkP" value="${r.p.id}" ${i===0?"checked":""} style="width:20px;height:20px;accent-color:var(--accent)"><span><strong>${esc(progName(r.p,pr))}</strong><br><span class="small muted">Aide estimée ≈ ${eur(r.aide)} · ${esc(echTxt(r.p))}</span></span></label>`).join("")}</fieldset>
+  <div class="field full"><label for="mkN">Note interne (facultatif)</label><textarea id="mkN" rows="2"></textarea></div></form>`,
+  `<button type="button" class="btn" data-close>Annuler</button><button type="submit" form="mkForm" class="btn primary">${ic("plus")}Créer le dossier</button>`);
+  $("#mkForm").addEventListener("submit",e=>{e.preventDefault();const t=$("#mkT").value.trim();if(t.length<4){$("#eT").textContent="Indiquez un intitulé (4 caractères minimum).";$("#mkT").focus();return}
+    const pid=$("input[name=mkP]:checked").value,r=keep.find(x=>x.p.id===pid);S.seq++;
+    const d={ref:"DOS-"+T0.getFullYear()+"-"+String(S.seq).padStart(4,"0"),titre:t,prog:pid,montant:pr.montant,aide:Math.round(r.aide),statut:"etude",ech:r.p.ech??60,pieces:r.p.pieces.map(x=>({t:x,ok:false})),notes:$("#mkN").value.trim()};
+    S.dossiers.unshift(d);save();renderNav();dlg.close();toast("Dossier "+d.ref+" créé",{l:"Voir",f:()=>{go("dossiers");openDos(d.ref)}})})}
+function openDos(ref){const d=S.dossiers.find(x=>x.ref===ref);if(!d)return;const p=progBy(d.prog);
+  const draw=()=>{const ok=d.pieces.filter(x=>x.ok).length;
+  modal(esc(d.titre),`<div class="actions"><span class="badge">${d.ref}</span><span class="badge ${ST[d.statut][1]}">${ST[d.statut][0]}</span></div>
+  <dl class="dl"><div><dt>Programme</dt><dd>${esc(p.nom)}</dd></div><div><dt>Échéance</dt><dd>${fd(dIn(d.ech))}</dd></div><div><dt>Montant HT</dt><dd>${eur(d.montant)}</dd></div><div><dt>Aide visée</dt><dd>${eur(d.aide)} (${pct(d.aide/d.montant)})</dd></div></dl>
+  <div class="field"><label for="dSt">Statut du dossier</label><select id="dSt">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${d.statut===k?"selected":""}>${v[0]}</option>`).join("")}</select></div>
+  <fieldset style="border:0;padding:0;margin:0"><legend class="flabel">Pièces du dossier (${ok}/${d.pieces.length})</legend><div class="prog" style="margin:6px 0 4px"><span style="width:${ok/d.pieces.length*100}%"></span></div>
+  ${d.pieces.map((x,i)=>`<label class="chk"><input type="checkbox" data-pc="${i}" ${x.ok?"checked":""}><span>${esc(x.t)}</span></label>`).join("")}</fieldset>
+  <div class="field"><label for="dNo">Notes</label><textarea id="dNo" rows="3">${esc(d.notes)}</textarea></div>`,
+  `<button type="button" class="btn danger" id="dDel">Supprimer</button><button type="button" class="btn" id="dPr">${ic("dl")}Fiche PDF</button><button type="button" class="btn primary" data-close>Fermer</button>`);
+  $("#dSt").addEventListener("change",e=>{d.statut=e.target.value;save();refresh();draw();$("#dSt").focus();toast("Statut : "+ST[d.statut][0])});
+  $$("[data-pc]",dlg).forEach(c=>c.addEventListener("change",()=>{d.pieces[+c.dataset.pc].ok=c.checked;save();refresh();const i=c.dataset.pc;draw();$(`[data-pc="${i}"]`).focus()}));
+  $("#dNo").addEventListener("change",e=>{d.notes=e.target.value;save();toast("Notes enregistrées")});
+  $("#dPr").addEventListener("click",()=>{dlg.close();printDos(d)});
+  $("#dDel").addEventListener("click",()=>{if(confirm("Supprimer le dossier "+d.ref+" ?")){S.dossiers=S.dossiers.filter(x=>x!==d);save();dlg.close();renderNav();refresh();toast("Dossier supprimé")}})};
+  draw()}
+function refresh(){if(S.view!=="assistant")render()}
+function draftText(pr){const pl=plan(pr,analyse(pr)),m=pl.main,d=pr.dep&&depBy(pr.dep);
+  return `Objet : demande de subvention ${m?m.p.sig+" — "+m.p.nom.split("— ")[1]:""}
+Projet : ${titre(pr)}
+
+1. Présentation du porteur
+${pr.type||"La collectivité"}${pr.pop?" de "+pr.pop.toLocaleString("fr-FR")+" habitants":""}${d?", située dans le département "+d.n+" ("+REG[d.r]+")":""}.
+
+2. Contexte et besoin
+${pr.themes.includes("energie")?"Le bâtiment présente aujourd’hui des consommations énergétiques élevées et un confort d’usage dégradé (été comme hiver). L’audit énergétique réalisé identifie un potentiel de réduction des consommations supérieur à 30 %.":"Le projet répond à un besoin identifié par la collectivité et ses habitants, formalisé dans le projet de territoire."}
+
+3. Description de l’opération
+${titre(pr)} : programme de ${pr.themes.map(t=>TH[t].l.toLowerCase()).join(", ")}. Le coût prévisionnel est estimé à ${eur(pr.montant)} HT. Les travaux ne sont pas engagés à la date du dépôt.
+
+4. Contribution aux objectifs européens
+Le projet s’inscrit dans l’objectif « ${m&&m.p.th.includes("energie")?"Une Europe plus verte — efficacité énergétique":"Une Europe plus proche des citoyens"} » du programme ${m?m.p.sig:""} et contribue aux indicateurs de réalisation du programme.
+
+5. Plan de financement prévisionnel
+- Fonds européen (${m?m.p.sig:"—"}) : ${eur(pl.eu)} (${pct(pl.eu/pl.M)})
+- Aides nationales (DSIL / DETR / Fonds vert) : ${eur(pl.nat)} (${pct(pl.nat/pl.M)})
+- Autofinancement : ${eur(pl.auto)} (${pct(pl.auto/pl.M)})
+Total : ${eur(pl.M)} HT
+
+6. Calendrier prévisionnel
+Dépôt : ${m&&m.p.ech!=null?fd(dIn(m.p.ech)):"à définir"} — Consultation des entreprises : T+3 mois — Travaux : T+6 à T+14 mois.`}
+function openDraft(aid){const pr=S.analyses[aid]||S.profile;if(!pr||!pr.montant)return toast("Analysez d’abord un projet complet.");
+  modal("Note de présentation — premier jet",`<div class="note">${ic("spark")}<span>Brouillon généré à partir de votre demande et de l’analyse. Relisez et complétez les éléments techniques avant dépôt.</span></div>
+  <div class="field"><label for="drT">Texte de la note</label><textarea id="drT" rows="16" style="font-size:14px">${esc(draftText(pr))}</textarea></div>`,
+  `<button type="button" class="btn" id="drC">Copier</button><button type="button" class="btn" id="drP">${ic("dl")}Imprimer</button><button type="button" class="btn primary" data-close>Fermer</button>`);
+  $("#drC").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#drT").value);toast("Note copiée dans le presse-papiers")}catch(e){$("#drT").select();toast("Sélectionnez le texte puis copiez-le")}});
+  $("#drP").addEventListener("click",()=>{const t=$("#drT").value;dlg.close();doPrint(`<h1>Note de présentation</h1><pre style="white-space:pre-wrap;font:inherit">${esc(t)}</pre>`)})}
+function openMail(aid){const pr=S.analyses[aid]||S.profile;if(!pr)return;
+  modal("Envoyer la synthèse",`<form id="mailForm" class="fgrid" novalidate><div class="field full"><label for="mTo">Destinataire</label><input type="email" id="mTo" placeholder="dgs@commune-exemple.fr" autocomplete="email"><span class="err" id="eTo"></span></div>
+  <div class="field full"><label for="mMsg">Message</label><textarea id="mMsg" rows="4">Bonjour,\n\nVous trouverez ci-joint la synthèse des financements européens mobilisables pour le projet « ${esc(titre(pr))} ».\n\nBien cordialement</textarea></div>
+  <p class="hint full">La synthèse PDF sera jointe automatiquement (simulation).</p></form>`,
+  `<button type="button" class="btn" data-close>Annuler</button><button type="submit" form="mailForm" class="btn primary">${ic("send")}Envoyer</button>`);
+  $("#mailForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#mTo").value.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){$("#eTo").textContent="Adresse e-mail invalide.";$("#mTo").focus();return}dlg.close();toast("Synthèse envoyée à "+v+" (simulation)")})}
+
+/* ---------- Impression ---------- */
+function doPrint(html){$("#printArea").innerHTML=html;document.body.classList.add("printing");setTimeout(()=>window.print(),50)}
+addEventListener("afterprint",()=>document.body.classList.remove("printing"));
+function printAnalysis(aid){const pr=S.analyses[aid]||S.profile;if(!pr)return;const res=analyse(pr),keep=res.filter(r=>r.cat!=="low"),pl=plan(pr,res);
+  doPrint(`<h1>Financements européens — ${esc(titre(pr))}</h1><p>${esc(profTxt(pr))} · Montant : ${eur(pr.montant)} HT · Édité le ${fd(T0)}</p>
+  <h2>Dispositifs mobilisables</h2><table><thead><tr><th>Dispositif</th><th>Adéquation</th><th>Taux</th><th>Aide estimée</th><th>Échéance</th></tr></thead><tbody>${keep.map(r=>`<tr><td>${esc(progName(r.p,pr))}</td><td>${r.s} %</td><td>${r.p.lump?"Forfait":pct(r.taux)}</td><td>${eur(r.aide)}</td><td>${esc(echTxt(r.p))}</td></tr>`).join("")}</tbody></table>
+  <h2>Plan de financement indicatif</h2><table><tbody><tr><td>Fonds européen${pl.main?" ("+esc(pl.main.p.sig)+")":""}</td><td>${eur(pl.eu)}</td></tr><tr><td>Aides nationales</td><td>${eur(pl.nat)}</td></tr><tr><td>Autofinancement</td><td>${eur(pl.auto)}</td></tr><tr><th>Total HT</th><th>${eur(pl.M)}</th></tr></tbody></table>
+  <p style="margin-top:14pt;font-size:10pt">Document généré par l’assistant — données fictives de démonstration, analyse indicative.</p>`)}
+function printDos(d){const p=progBy(d.prog);doPrint(`<h1>${esc(d.titre)}</h1><p>${d.ref} · ${esc(p.nom)} · Statut : ${ST[d.statut][0]}</p><table><tbody><tr><td>Montant HT</td><td>${eur(d.montant)}</td></tr><tr><td>Aide visée</td><td>${eur(d.aide)}</td></tr><tr><td>Échéance</td><td>${fd(dIn(d.ech))}</td></tr></tbody></table><h2>Pièces</h2><ul>${d.pieces.map(x=>`<li>${x.ok?"[x]":"[ ]"} ${esc(x.t)}</li>`).join("")}</ul>${d.notes?`<h2>Notes</h2><p>${esc(d.notes)}</p>`:""}`)}
+
+/* ---------- Divers ---------- */
+function toast(t,a){const el=document.createElement("div");el.className="toast";el.innerHTML=`${ic("check")}<span style="flex:1">${esc(t)}</span>`;
+  if(a){const b=document.createElement("button");b.type="button";b.className="btn sm";b.textContent=a.l;b.onclick=()=>{el.remove();a.f()};el.appendChild(b)}
+  $("#toasts").appendChild(el);setTimeout(()=>el.remove(),a?6000:3500)}
+document.addEventListener("click",e=>{
+  const v=e.target.closest("[data-view]");if(v){go(v.dataset.view);return}
+  const s=e.target.closest("[data-say]");if(s){if(dlg.open)dlg.close();say(s.dataset.say);return}
+  const a=e.target.closest("[data-act]");if(!a)return;const k=a.dataset.act;
+  if(k==="prog")openProg(a.dataset.id);
+  else if(k==="tryprog"){dlg.open&&dlg.close();go("assistant");const p=progBy(a.dataset.id),ta=$("#chatIn");ta.value="Je suis maire d’une commune de … habitants dans le département … et je souhaite "+({energie:"rénover énergétiquement un bâtiment communal",mobilite:"créer une piste cyclable",biodiv:"renaturer un espace public",numerique:"ouvrir un tiers-lieu numérique",urbain:"revitaliser le centre-bourg",rural:"créer un commerce multiservice",citoyennete:"organiser une rencontre de jumelage",jeunesse:"organiser un échange de jeunes",littoral:"moderniser le port",social:"lancer un chantier d’insertion",cooperation:"monter un projet avec une commune voisine étrangère"}[p.th[0]]||"mener un projet")+" pour environ … €.";ta.focus();ta.dispatchEvent(new Event("input"));toast("Complétez les … puis envoyez")}
+  else if(k==="mkdos")openMkDos(a.dataset.aid);
+  else if(k==="draft")openDraft(a.dataset.aid);
+  else if(k==="print")printAnalysis(a.dataset.aid);
+  else if(k==="mail")openMail(a.dataset.aid);
+  else if(k==="dos")openDos(a.dataset.ref);
+  else if(k==="contact")toast("Demande de mise en relation envoyée à "+a.dataset.n+" (simulation)")});
+$("#resetBtn").addEventListener("click",()=>{try{localStorage.removeItem(KEY)}catch(e){}S=fresh();if(dlg.open)dlg.close();renderNav();render();toast("Démo réinitialisée")});
+renderNav();render();
+</script>
 </body>
 </html>
