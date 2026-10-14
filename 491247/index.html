@@ -2,20 +2,713 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Site de gîte provençal</title>
+<meta name="description" content="Site vitrine mobile-first d’un gîte avec bandeau meilleur prix, avis Google synchronisés, réservation en direct (calendrier Open Pro et paiement One Shot Pay simulés), administration headless des textes, tarifs et photos avec publication, et rapport PageSpeed/SEO.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F7F4EE;--panel:#FFFFFF;--panel-2:#F1ECE3;--ink:#2A2620;--muted:#5D564B;--line:#E4DDD0;--line-2:#C4B9A6;
+  --accent:#4B5B2C;--accent-ink:#FFFFFF;--accent-soft:#E7EBDA;--accent-text:#3E4C22;
+  --cta:#A3441E;--cta-ink:#FFFFFF;--band:#F3E7CF;--band-ink:#6B4710;--star:#A86F00;
+  --ok:#2D6B33;--ok-soft:#E0EFDD;--bad:#A8262F;--bad-soft:#FAE1E2;--warn:#8A4B00;--warn-soft:#FBEBD2;
+  --focus:#1F5FA8;--link:#1A0DAB;--code-bg:#2A2620;--code-ink:#F1ECE3;--frame:#2A2620;
+  --shadow:0 1px 2px rgba(42,38,32,.05),0 6px 18px rgba(42,38,32,.07);
+  --font:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#16140F;--panel:#1F1C16;--panel-2:#29251D;--ink:#EEE8DC;--muted:#B5AC9B;--line:#363127;--line-2:#544C3B;
+  --accent:#B5C77F;--accent-ink:#1B210C;--accent-soft:#2C3320;--accent-text:#C8D899;
+  --cta:#E8946B;--cta-ink:#2A1006;--band:#2E2614;--band-ink:#EBC680;--star:#F2B84B;
+  --ok:#8FD49A;--ok-soft:#1B2E1D;--bad:#FF9198;--bad-soft:#3B1B1E;--warn:#F0B661;--warn-soft:#352613;
+  --focus:#8DB8F0;--link:#8AB4F8;--code-bg:#0F0D0A;--code-ink:#E6DFD1;--frame:#3E382D;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3,h4{margin:0;line-height:1.2}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit}
+.muted{color:var(--muted)}.small{font-size:13.5px}.min0{min-width:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stars{display:inline-flex;gap:1px;vertical-align:middle}
+.stars svg{width:16px;height:16px;fill:var(--star)}
+.stars svg.off{fill:var(--line-2)}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:4px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band svg.i{width:16px;height:16px}
+.appbar{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line)}
+.appbar-t{font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+.seg{display:flex;margin-left:auto;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;min-width:0;max-width:100%}
+.seg button{min-height:44px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-current=page],.seg button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--cta);display:inline-block}
+@media (max-width:700px){.seg{margin-left:0;width:100%}.seg button{flex:1;padding:0 6px;font-size:13.5px;white-space:normal;line-height:1.15;text-align:center}.seg button svg.i{display:none}.appbar-t{display:none}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;text-decoration:none;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.cta{background:var(--cta);border-color:var(--cta);color:var(--cta-ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.cta:hover,.btn.pri:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.btn.block{width:100%}
+.icon-btn{width:44px;height:44px;flex:none;display:inline-grid;place-items:center;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;cursor:pointer;color:var(--ink)}
+.icon-btn:hover{background:var(--panel-2)}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.flabel{font-weight:600;font-size:14px}
+.field.full{grid-column:1/-1}
+.req{color:var(--bad)}
+.hint{font-size:13px;color:var(--muted)}
+.fmeta{display:flex;justify-content:space-between;gap:8px}
+.count{font-size:12.5px;color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.count.over{color:var(--bad);font-weight:700}
+.err{font-size:13.5px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;line-height:1.5}
+[aria-invalid=true]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.check{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:10px 0;cursor:pointer}
+.check input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--panel-2);color:var(--muted);line-height:1.3}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.test{background:var(--warn-soft);color:var(--warn);letter-spacing:.04em}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.h2s{font-size:18px;font-weight:700;margin-bottom:12px;display:flex;gap:8px;align-items:center}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:600px){.form-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- Site public (container queries : même rendu en aperçu) ---------- */
+.site{container:site/inline-size;background:var(--bg);color:var(--ink)}
+.s-wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+@container site (min-width:760px){.s-wrap{padding:0 32px}}
+.site section{scroll-margin-top:70px}
+.s-head{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+.s-headin{display:flex;align-items:center;gap:16px;min-height:64px}
+.s-logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-size:20px;font-weight:600;min-width:0;margin-right:auto;min-height:44px}
+.s-logo span{overflow-wrap:anywhere;line-height:1.15}
+.s-logo svg{width:34px;height:34px;flex:none}
+.s-nav{display:none;gap:4px}
+.s-nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 12px;border-radius:8px;text-decoration:none;font-weight:600;color:var(--muted)}
+.s-nav a:hover{color:var(--ink);background:var(--panel-2)}
+@container site (min-width:900px){.s-nav{display:flex}}
+@container site (max-width:420px){.s-head .btn.cta{padding:0 12px}.s-head .btn.cta svg{display:none}.s-logo{font-size:17px}}
+.s-band{background:var(--band);color:var(--band-ink);font-weight:600;font-size:14.5px}
+.s-band .s-wrap{display:flex;gap:10px;align-items:center;justify-content:center;padding-top:9px;padding-bottom:9px;text-align:center}
+.s-hero{position:relative;color:#FFFFFF;background:#2B241B;overflow:hidden}
+.s-hero-img{position:absolute;inset:0}
+.s-hero-img svg,.s-hero-img img{width:100%;height:100%;object-fit:cover;display:block}
+.s-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,17,10,.42) 0%,rgba(22,17,10,.78) 100%)}
+.s-hero-in{position:relative;z-index:1;padding-top:44px;padding-bottom:28px}
+@container site (min-width:760px){.s-hero-in{padding-top:110px;padding-bottom:48px}}
+.s-hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(29px,5.4cqw,54px);max-width:17ch;letter-spacing:-.01em;margin:10px 0 12px;overflow-wrap:anywhere}
+.s-lead{font-size:clamp(16px,2.1cqw,19px);max-width:56ch;color:#F4EFE6}
+.s-cap{margin-top:10px;font-weight:600;color:#F4EFE6;font-size:14.5px}
+.s-rate{display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.42);border-radius:999px;padding:5px 12px;font-size:14px;flex-wrap:wrap}
+.s-rate .stars svg{fill:#F5C455}
+.s-search{background:var(--panel);color:var(--ink);border-radius:16px;padding:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:880px;align-items:end}
+.s-search .btn{grid-column:1/-1}
+.s-search .field:nth-child(3){grid-column:1/-1}
+@container site (min-width:760px){.s-search{grid-template-columns:repeat(3,minmax(0,1fr)) auto}.s-search .btn{grid-column:auto}.s-search .field:nth-child(3){grid-column:auto}}
+.s-direct{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:14px;color:#F4EFE6;flex-wrap:wrap}
+.s-direct svg.i{width:17px;height:17px}
+.s-sec{padding:48px 0}
+@container site (min-width:760px){.s-sec{padding:72px 0}}
+.s-alt{background:var(--panel)}
+.s-kick{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text);margin-bottom:6px}
+.s-sec h2{font-family:var(--serif);font-weight:600;font-size:clamp(25px,3.6cqw,36px);margin-bottom:14px;overflow-wrap:anywhere}
+.s-sh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 20px;flex-wrap:wrap;margin-bottom:20px}
+.s-sh h2{margin-bottom:0}
+.s-about{display:grid;gap:28px}
+.s-about p+p{margin-top:12px}
+.s-about p{max-width:62ch;overflow-wrap:anywhere}
+@container site (min-width:900px){.s-about{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:48px;align-items:center}}
+.s-feat{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.s-feat li{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.s-feat svg.i{color:var(--accent-text);margin-top:2px}
+.s-feat b{display:block;font-size:14.5px}
+.s-feat span{font-size:13.5px;color:var(--muted)}
+.s-gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.s-ph{border:0;padding:0;border-radius:12px;overflow:hidden;cursor:zoom-in;aspect-ratio:4/3;background:var(--panel-2);display:block;min-width:0}
+.s-ph:first-child{grid-column:span 2}
+.s-ph svg,.s-ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.s-ph:hover svg,.s-ph:hover img{transform:scale(1.03)}
+@container site (min-width:760px){.s-gal{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.s-ph:first-child{grid-row:span 2;aspect-ratio:auto}}
+.s-rates{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.s-rate-c{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.s-rate-c.hl{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.s-rate-c h3{font-size:18px;overflow-wrap:anywhere}
+.s-price{margin:14px 0 10px;font-size:15px;color:var(--muted)}
+.s-price b{font-family:var(--serif);font-size:32px;color:var(--ink);font-weight:600}
+.s-rate-c li{display:flex;gap:8px;align-items:center;font-size:14.5px;padding:3px 0}
+.s-rate-c li svg.i{width:17px;height:17px;color:var(--ok)}
+.s-note{margin-top:14px;color:var(--muted);font-size:14.5px;overflow-wrap:anywhere}
+.s-compare{margin-top:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border-radius:14px;padding:16px 18px}
+.s-compare>svg.i{width:28px;height:28px;color:var(--accent-text)}
+.s-compare>div{flex:1 1 260px;min-width:0}
+.s-score{display:flex;gap:12px;align-items:center}
+.s-score>b{font-family:var(--serif);font-size:44px;font-weight:600;line-height:1}
+.s-revs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px}
+.s-rev{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.s-rev p{overflow-wrap:anywhere}
+.s-rev-h{display:flex;gap:10px;align-items:center}
+.av{width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700;flex:none}
+.s-acc{display:grid;gap:24px}
+@container site (min-width:900px){.s-acc{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center}}
+.s-map{border-radius:14px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/10;background:#E9E2D2}
+.s-map svg{width:100%;height:100%;display:block}
+.s-dist li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.s-dist b{white-space:nowrap}
+.s-faq details{border-bottom:1px solid var(--line)}
+.s-faq summary{min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-weight:600;list-style:none;padding:8px 0}
+.s-faq summary::-webkit-details-marker{display:none}
+.s-faq summary svg.i{transition:transform .2s}
+.s-faq details[open] summary svg.i{transform:rotate(90deg)}
+.s-faq details p{padding:0 0 14px;color:var(--muted);max-width:70ch}
+.s-foot{background:#2A2620;color:#E9E3D7;padding:36px 0 28px;font-size:14.5px}
+.s-foot .s-wrap{display:grid;gap:16px}
+@container site (min-width:760px){.s-foot .s-wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)}}
+.s-foot b{color:#FFFFFF;font-family:var(--serif);font-size:18px;font-weight:600}
+.s-foot p{color:#D2CABC}
+.s-mbar{position:sticky;bottom:0;z-index:15;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.08)}
+.s-mbar p{font-size:14px;line-height:1.25;min-width:0}
+.s-mbar b{font-size:18px}
+@container site (min-width:760px){.s-mbar{display:none}}
+
+/* ---------- Dialogues ---------- */
+dialog{border:0;padding:0;border-radius:18px;background:var(--panel);color:var(--ink);width:min(980px,calc(100vw - 20px));max-height:calc(100dvh - 20px);box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:auto}
+dialog::backdrop{background:rgba(22,17,10,.6)}
+.dlg-h{position:sticky;top:0;z-index:2;background:var(--panel);display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-family:var(--serif);font-weight:600;font-size:22px}
+.dlg-b{padding:18px}
+@media (max-width:480px){.dlg-b{padding:14px 10px}.dlg-h{padding:12px 12px 10px}}
+.steps{display:flex;gap:6px;padding:12px 18px 0;flex-wrap:wrap}
+.steps li{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.steps li span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2);font-size:12px}
+.steps li[aria-current=step]{color:var(--ink)}
+.steps li[aria-current=step] span,.steps li.done span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.steps li+li::before{content:"";width:14px;height:1px;background:var(--line-2)}
+@media (max-width:560px){.steps li:not([aria-current=step]) b{display:none}}
+.bk-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:780px){.bk-grid{grid-template-columns:minmax(0,1fr)}}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.cal-nav p{text-align:center}
+.cal-ms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media (max-width:780px){.cal-ms{grid-template-columns:minmax(0,1fr)}.cal-m.second{display:none}}
+.cal-t{font-size:15px;font-weight:700;text-align:center;margin-bottom:6px;text-transform:capitalize}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.cal-g .wd{font-size:12px;text-align:center;color:var(--muted);font-weight:600;padding:2px 0}
+.day{min-height:44px;border:0;border-radius:8px;background:var(--panel-2);cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums;padding:0;min-width:0}
+.day:hover:not(:disabled){outline:2px solid var(--accent);outline-offset:-2px}
+.day:disabled{cursor:not-allowed;background:transparent;color:var(--muted);opacity:.6}
+.day.bk{background:repeating-linear-gradient(135deg,var(--panel-2) 0 4px,transparent 4px 8px);text-decoration:line-through;opacity:.8}
+.day.in{background:var(--accent-soft);color:var(--accent-text);opacity:1}
+.day.sel{background:var(--accent);color:var(--accent-ink);opacity:1;text-decoration:none}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block;background:var(--panel-2)}
+.legend i.b{background:repeating-linear-gradient(135deg,var(--line-2) 0 3px,transparent 3px 6px)}
+.legend i.s{background:var(--accent)}
+.recap{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.recap h3{font-size:16px}
+.rl{display:flex;justify-content:space-between;gap:10px;font-size:14.5px}
+.rl.tot{font-weight:700;font-size:17px;border-top:1px solid var(--line);padding-top:10px}
+.save{background:var(--accent-soft);color:var(--accent-text);border-radius:10px;padding:10px 12px;font-size:14px;display:flex;gap:8px;align-items:flex-start}
+.badge-src{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:2px}
+.badge-src svg.i{width:15px;height:15px}
+.osp{border:1px solid var(--line-2);border-radius:14px;overflow:hidden}
+.osp-h{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;background:var(--panel-2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.osp-h b{display:flex;gap:8px;align-items:center}
+.osp-b{padding:14px;display:grid;gap:12px}
+.radio{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line-2);border-radius:10px;padding:12px;cursor:pointer;min-height:44px}
+.radio input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex:none}
+.radio:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.cc-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.testbox{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.testbox .btn{min-height:44px;font-size:13.5px}
+.conf{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0}
+.conf .big{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.conf .big svg.i{width:32px;height:32px}
+.conf-box{width:100%;max-width:520px;text-align:left;margin-top:8px}
+.ref{font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+#dlgPhoto{width:min(1100px,calc(100vw - 20px));background:#16130E;color:#F1ECE3}
+#dlgPhoto .ph-wrap{aspect-ratio:4/3;max-height:72vh;width:100%;background:#000}
+#dlgPhoto .ph-wrap svg,#dlgPhoto .ph-wrap img{width:100%;height:100%;object-fit:contain;display:block}
+#dlgPhoto .ph-bar{display:flex;align-items:center;gap:10px;padding:10px 12px}
+#dlgPhoto .ph-bar p{flex:1;min-width:0;overflow-wrap:anywhere}
+#dlgPhoto .icon-btn{background:#2A251D;border-color:#4A4235;color:#F1ECE3}
+#dlgDeploy{width:min(620px,calc(100vw - 20px))}
+.log{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font:13px/1.7 ui-monospace,Menlo,monospace;min-height:210px;overflow-wrap:anywhere}
+.log li{display:flex;gap:8px;align-items:flex-start}
+.log svg.i{width:15px;height:15px;color:#8FD49A;margin-top:4px}
+
+/* ---------- Administration ---------- */
+.page{padding:20px clamp(16px,2vw,32px) 60px}
+.pg-head{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.pg-head h1{font-family:var(--serif);font-weight:600;font-size:clamp(22px,2.4vw,28px)}
+.adm{display:grid;grid-template-columns:230px minmax(0,1fr) minmax(0,440px);gap:20px;align-items:start}
+.adm-nav{position:sticky;top:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.adm-nav button{min-height:46px;display:flex;gap:10px;align-items:center;text-align:left;border:0;border-radius:10px;padding:0 12px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer;width:100%}
+.adm-nav button:hover{background:var(--panel-2);color:var(--ink)}
+.adm-nav button[aria-current=page]{background:var(--accent-soft);color:var(--accent-text)}
+.adm-nav .dot{margin-left:auto}
+.adm-nav hr{border:0;border-top:1px solid var(--line);margin:6px 0;width:100%}
+.adm-body{display:flex;flex-direction:column;gap:16px;min-width:0}
+.adm-pv{position:sticky;top:12px;min-width:0}
+.pv-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.pv-frame{width:390px;max-width:100%;height:min(760px,78vh);overflow:auto;border:10px solid var(--frame);border-radius:30px;margin:0 auto;background:var(--bg);position:relative}
+.pv-frame.wide{width:100%;border-width:6px;border-radius:12px}
+@media (max-width:1320px){.adm{grid-template-columns:210px minmax(0,1fr)}.adm-pv{grid-column:1/-1;position:static}}
+@media (max-width:860px){.adm{grid-template-columns:minmax(0,1fr)}.adm-nav{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}.adm-nav button{width:auto;flex:none;white-space:nowrap}.adm-nav hr{display:none}}
+.status{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.errsum{border:1px solid var(--bad);background:var(--bad-soft);color:var(--bad);border-radius:12px;padding:12px 14px}
+.errsum ul{list-style:disc;padding-left:20px;margin-top:4px}
+.info{display:flex;gap:10px;align-items:flex-start;background:var(--panel-2);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--muted)}
+.info svg.i{color:var(--accent-text);margin-top:1px}
+.rate-f{border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:12px;min-width:0}
+.rate-f legend{font-weight:700;padding:0 6px}
+.ph-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px}
+.ph-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;min-width:0}
+.ph-card .th{aspect-ratio:16/10;position:relative;background:var(--panel-2)}
+.ph-card .th svg,.ph-card .th img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-card .th .pill{position:absolute;left:8px;top:8px;background:var(--panel);color:var(--ink)}
+.ph-card .bd{padding:10px;display:flex;flex-direction:column;gap:8px}
+.ph-card .actions{justify-content:space-between}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:18px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.snip{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel)}
+.snip-url{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.snip-t{color:var(--link);font-size:19px;line-height:1.3;margin:2px 0;overflow-wrap:anywhere}
+.snip-d{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:680px;font-size:14.5px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+.hist li{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.hist li:last-child{border-bottom:0}
+.hist .ic{width:36px;height:36px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;flex:none}
+.hist .ic svg.i{width:17px;height:17px}
+.sync{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.empty{text-align:center;padding:26px 12px;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+
+/* ---------- Performance ---------- */
+.gauges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.gauges{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gauge{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-weight:600;font-size:14px}
+.gauge svg{width:96px;height:96px;transform:rotate(-90deg)}
+.gauge circle{fill:none;stroke-width:8}
+.gauge .bgc{stroke:var(--ok-soft)}
+.gauge .fgc{stroke:var(--ok);stroke-linecap:round;transition:stroke-dasharray .9s ease}
+.gauge .gv{position:relative}
+.gauge .gv b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;color:var(--ok);font-variant-numeric:tabular-nums}
+.cwv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:10px;margin-top:18px}
+.cwv div{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.cwv b{display:block;font-size:22px;color:var(--ok);font-variant-numeric:tabular-nums}
+.cwv span{font-size:13px;color:var(--muted)}
+.pf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;margin-top:16px}
+.code{background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:12px 14px;font:12.5px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow:auto;margin:0}
+.arch{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.arch .nd{flex:1 1 120px;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg);min-width:0}
+.arch .nd b{display:flex;gap:6px;align-items:center;font-size:14px}
+.arch .nd span{font-size:12.5px;color:var(--muted)}
+.arch .ar{display:grid;place-items:center;color:var(--muted)}
+@media (max-width:640px){.arch{flex-direction:column}.arch .ar{transform:rotate(90deg)}}
+.ckl li{display:flex;gap:10px;padding:7px 0;font-size:14.5px}
+.ckl svg.i{color:var(--ok);margin-top:2px}
+
+.toasts{position:fixed;right:16px;bottom:16px;left:auto;z-index:1000;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 32px));pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;font-weight:600;font-size:14.5px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:flex-start;animation:tin .25s ease}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (max-width:560px){.toasts{left:16px;bottom:84px}}
+#printArea{display:none}
+@media print{body>*{display:none!important}#printArea{display:block!important;color:#000;font:14px/1.5 Georgia,serif;padding:20px}#printArea h1{font-size:22px;margin-bottom:8px}#printArea table{min-width:0;margin-top:12px}#printArea td,#printArea th{border:1px solid #999;background:none;color:#000}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="reset"><svg class="i" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>Réinitialiser la démo</button></div>
+<div class="appbar">
+  <span class="appbar-t">Proposition : Next.js (export statique) · Decap CMS · Open Pro · One Shot Pay</span>
+  <nav class="seg" aria-label="Écrans de la démo">
+    <button type="button" data-view="site" aria-current="page"><svg class="i" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>Site public</button>
+    <button type="button" data-view="admin"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Administration <span class="dot" id="dirtyDot" hidden></span></button>
+    <button type="button" data-view="perf"><svg class="i" viewBox="0 0 24 24"><path d="M12 14l4-4M3.3 17a10 10 0 1 1 17.4 0"/></svg>Performance &amp; SEO</button>
+  </nav>
+</div>
+<main id="main">
+  <div id="view-site"><div class="site" id="site"></div></div>
+  <div id="view-admin" class="page" hidden></div>
+  <div id="view-perf" class="page" hidden></div>
 </main>
+<dialog id="dlgBook" aria-labelledby="bkT"></dialog>
+<dialog id="dlgPhoto" aria-label="Photo en grand"></dialog>
+<dialog id="dlgDeploy" aria-labelledby="dpT"></dialog>
+<div id="printArea"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const eur=n=>{n=Math.round((+n||0)*100)/100;return n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})};
+const fmt1=n=>n.toFixed(1).replace('.',',');
+const KEY='demo-491247-v1';
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const pd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const TOM=iso(addD(TODAY,1));
+const nb=(a,b)=>Math.round((pd(b)-pd(a))/864e5);
+const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const dLong=s=>pd(s).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const dShort=s=>pd(s).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const ago=t=>{const m=Math.round((Date.now()-t)/6e4);if(m<1)return'à l’instant';if(m<60)return`il y a ${m} min`;const h=Math.round(m/60);if(h<24)return`il y a ${h} h`;return`il y a ${Math.round(h/24)} j`};
+const dt=t=>new Date(t).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+
+const P={refresh:'M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5',home:'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',tag:'M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01',image:'M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6M15.5 9.5h.01',shield:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4',search:'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5',cal:'M4 5h16v16H4zM4 10h16M9 3v4M15 3v4',users:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',check:'M20 6L9 17l-5-5',x:'M18 6L6 18M6 6l12 12',cl:'M15 18l-6-6 6-6',cr:'M9 18l6-6-6-6',up:'M12 19V5M5 12l7-7 7 7',down:'M12 5v14M19 12l-7 7-7-7',trash:'M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15',upload:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12',globe:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20',lock:'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',card:'M2 5h20v14H2zM2 10h20M6 15h4',print:'M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z',mail:'M4 4h16v16H4zM4 6l8 7 8-7',pin:'M12 22s7-7 7-12a7 7 0 0 0-14 0c0 5 7 12 7 12zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',wifi:'M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0M12 20h.01',waves:'M2 8c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2M2 14c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2M2 20c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2',snow:'M12 2v20M4.9 4.9l14.2 14.2M2 12h20M4.9 19.1L19.1 4.9',car:'M5 17h14v-5l-2-5H7l-2 5zM5 17v2M19 17v2M8 13.5h.01M16 13.5h.01',leaf:'M11 20A7 7 0 0 1 4 13c0-6 6-10 16-10 0 10-4 17-9 17zM4 21c4-5 7-8 11-11',bed:'M2 18V6M2 13h20v5M22 18v-3a3 3 0 0 0-3-3h-9v1M6 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',eye:'M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',send:'M22 2L11 13M22 2l-7 20-4-9-9-4z',clock:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2',code:'M16 18l6-6-6-6M8 6l-6 6 6 6',text:'M4 6h16M4 12h16M4 18h10',star:'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z',cloud:'M18 10h-1.3A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z',git:'M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9',mobile:'M7 2h10v20H7zM11 18h2',monitor:'M2 4h20v12H2zM8 20h8M12 16v4',plus:'M12 5v14M5 12h14',fire:'M12 22c4 0 7-3 7-7 0-5-5-7-5-12-3 2-5 5-5 8-1-1-2-2-2-4-1 2-2 4-2 8 0 4 3 7 7 7z',arrow:'M5 12h14M13 6l6 6-6 6'};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true"><path d="${P[n]}"/></svg>`;
+const stars=(n,lbl=true)=>`<span class="stars" ${lbl?`role="img" aria-label="Note : ${n} sur 5"`:'aria-hidden="true"'}>${[1,2,3,4,5].map(i=>`<svg viewBox="0 0 24 24" class="${i<=n?'':'off'}"><path d="${P.star}"/></svg>`).join('')}</span>`;
+const LOGO=`<svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"/><path d="M17 27V11M17 15c-3-1-5-3-5-6 3 0 5 2 5 6zM17 19c3-1 5-3 5-6-3 0-5 2-5 6zM17 23c-3-1-5-3-5-6 3 0 5 2 5 6z" fill="none" stroke="var(--accent-ink)" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+
+/* Illustrations « photos » (SVG) */
+const SC={
+facade:`<rect width="400" height="260" fill="#CFE2EA"/><circle cx="330" cy="50" r="22" fill="#F6E7B8"/><path d="M0 165Q100 125 200 150T400 135V260H0Z" fill="#A9B47A"/><rect x="110" y="110" width="190" height="100" fill="#E2CFAE"/><path d="M110 150h190M110 180h190" stroke="#D3BD97" stroke-width="2"/><polygon points="98,113 205,68 312,113" fill="#B4603C"/><rect x="135" y="128" width="26" height="32" fill="#6E8FA1"/><rect x="250" y="128" width="26" height="32" fill="#6E8FA1"/><rect x="192" y="150" width="28" height="60" fill="#7A5A3C"/><ellipse cx="70" cy="150" rx="13" ry="58" fill="#3F5131"/><ellipse cx="342" cy="160" rx="11" ry="46" fill="#46593A"/><rect y="208" width="400" height="52" fill="#8C7DB0"/><path d="M0 222h400M0 237h400M0 252h400" stroke="#6F6194" stroke-width="6"/>`,
+piscine:`<rect width="400" height="260" fill="#D6E7EE"/><path d="M0 120Q120 85 240 110T400 100V170H0Z" fill="#9FAE74"/><rect x="0" y="95" width="130" height="75" fill="#DCC8A6"/><polygon points="-5,98 60,70 135,98" fill="#B4603C"/><rect x="30" y="118" width="20" height="26" fill="#6E8FA1"/><rect y="165" width="400" height="95" fill="#E9DEC8"/><polygon points="70,182 350,182 375,245 45,245" fill="#4E9DBB"/><path d="M95 200h230M85 220h250" stroke="#9ED1E2" stroke-width="3"/><path d="M330 110v75" stroke="#7A5A3C" stroke-width="4"/><polygon points="290,118 330,96 370,118" fill="#F2EEE4"/><rect x="20" y="200" width="44" height="10" fill="#FFFFFF" transform="rotate(-12 42 205)"/>`,
+chambre:`<rect width="400" height="260" fill="#EEE5D6"/><rect x="262" y="38" width="100" height="92" fill="#BFD9E4" stroke="#FFFFFF" stroke-width="6"/><path d="M265 105q40-22 94-6v28h-94z" fill="#9FAE74"/><path d="M312 38v92" stroke="#FFFFFF" stroke-width="4"/><rect y="205" width="400" height="55" fill="#C69B6D"/><rect x="50" y="110" width="180" height="62" rx="6" fill="#8C6A48"/><rect x="40" y="152" width="200" height="62" rx="6" fill="#F7F4EE"/><rect x="40" y="176" width="200" height="38" fill="#9DAE7E"/><rect x="60" y="140" width="62" height="24" rx="8" fill="#FFFFFF"/><rect x="132" y="140" width="62" height="24" rx="8" fill="#FFFFFF"/><rect x="250" y="168" width="40" height="40" fill="#A47E58"/><path d="M270 168v-26" stroke="#5B4632" stroke-width="3"/><polygon points="256,142 284,142 278,124 262,124" fill="#F3E3C0"/>`,
+salon:`<rect width="400" height="260" fill="#E9DFCF"/><path d="M0 18h400M0 46h400" stroke="#7A5A3C" stroke-width="10"/><rect x="38" y="78" width="124" height="134" fill="#CDBB9C"/><rect x="30" y="72" width="140" height="14" fill="#B9A582"/><rect x="66" y="132" width="68" height="80" rx="4" fill="#3A2E24"/><path d="M84 210q16-40 30 0" fill="#E0883A"/><path d="M92 210q8-22 16 0" fill="#F2C063"/><rect y="210" width="400" height="50" fill="#B98A5E"/><ellipse cx="290" cy="232" rx="110" ry="18" fill="#D6C4A1"/><rect x="205" y="122" width="170" height="36" rx="8" fill="#7E8C57"/><rect x="200" y="152" width="180" height="46" rx="8" fill="#6F7D4B"/><rect x="236" y="208" width="104" height="10" fill="#7A5A3C"/>`,
+jardin:`<rect width="400" height="260" fill="#D8E6EC"/><path d="M0 120Q140 92 260 112T400 104V150H0Z" fill="#A7B38A"/><rect y="140" width="400" height="120" fill="#9A8BBE"/><path d="M200 140L-40 260M200 140L40 260M200 140L120 260M200 140L200 260M200 140L280 260M200 140L360 260M200 140L440 260" stroke="#B6D18F" stroke-width="9"/><path d="M318 205q4-40-10-70" stroke="#6B5440" stroke-width="9" fill="none"/><ellipse cx="300" cy="118" rx="52" ry="30" fill="#7D8F5C"/><ellipse cx="335" cy="138" rx="34" ry="20" fill="#8C9D69"/><ellipse cx="270" cy="140" rx="28" ry="16" fill="#71834F"/>`,
+cuisine:`<rect width="400" height="260" fill="#EFE7DA"/><rect y="104" width="400" height="44" fill="#D4E0E2"/><path d="M0 126h400M50 104v44M100 104v44M150 104v44M200 104v44M250 104v44M300 104v44M350 104v44" stroke="#C1D0D3" stroke-width="2"/><rect x="0" y="148" width="250" height="60" fill="#F7F3EA"/><rect x="0" y="144" width="250" height="8" fill="#8C6A48"/><path d="M60 152v56M125 152v56M190 152v56" stroke="#E2D8C6" stroke-width="2"/><rect x="0" y="30" width="200" height="50" fill="#F7F3EA"/><rect y="208" width="400" height="52" fill="#C4956A"/><rect x="270" y="170" width="120" height="8" fill="#7A5A3C"/><path d="M282 178v50M378 178v50" stroke="#7A5A3C" stroke-width="5"/><path d="M330 0v120" stroke="#5B4632" stroke-width="2"/><path d="M314 136q16-24 32 0z" fill="#4B5B2C"/>`,
+terrasse:`<rect width="400" height="260" fill="#D9E8EE"/><path d="M0 150Q120 115 230 140T400 128V200H0Z" fill="#A3AF78"/><path d="M0 165Q140 140 260 160T400 155V200H0Z" fill="#8E9C63"/><rect y="195" width="400" height="65" fill="#D9C7A6"/><path d="M40 40v170M360 40v170" stroke="#7A5A3C" stroke-width="8"/><path d="M20 44h360M60 30v20M120 30v20M180 30v20M240 30v20M300 30v20" stroke="#7A5A3C" stroke-width="7"/><g fill="#7E9455"><ellipse cx="80" cy="50" rx="30" ry="14"/><ellipse cx="160" cy="46" rx="34" ry="13"/><ellipse cx="250" cy="52" rx="30" ry="14"/><ellipse cx="330" cy="46" rx="28" ry="12"/><ellipse cx="45" cy="80" rx="10" ry="22"/></g><rect x="130" y="186" width="150" height="10" fill="#F2EEE4"/><path d="M145 196v40M265 196v40" stroke="#7A5A3C" stroke-width="5"/>`,
+vue:`<rect width="400" height="260" fill="#F0D6B3"/><circle cx="280" cy="118" r="30" fill="#F7E3A8"/><path d="M0 140Q90 100 180 130T400 115V260H0Z" fill="#B49A8C"/><path d="M0 170Q120 135 240 160T400 150V260H0Z" fill="#8C8F6A"/><path d="M0 200Q140 175 280 195T400 190V260H0Z" fill="#6C7A4A"/><path d="M0 222q200-22 400 0M0 240q200-22 400 0M0 258q200-22 400 0" stroke="#556338" stroke-width="5" fill="none"/>`
+};
+const KINDS=Object.keys(SC);
+const photo=(p,eager)=>!p?'':p.src?`<img src="${p.src}" alt="${esc(p.alt)}" ${eager?'':'loading="lazy"'} decoding="async">`:`<svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(p.alt||'Photo du gîte')}">${SC[p.kind]||SC.vue}</svg>`;
+
+/* Données fictives */
+const DEF={
+ name:'Le Mas des Genêts',
+ heroTitle:'Votre parenthèse provençale, entre vignes et lavandes',
+ heroText:'Mas en pierre rénové pour 6 voyageurs, piscine chauffée et vue sur les Baronnies. Réservez en direct, au meilleur prix.',
+ capacity:'6 voyageurs · 3 chambres · 2 salles d’eau · 140 m²',
+ about:'Au cœur de la Drôme provençale, notre mas du XIXᵉ siècle a été restauré avec des matériaux locaux : pierre sèche, tomettes anciennes et poutres en chêne. Les trois chambres ouvrent sur un jardin de 4 000 m² planté d’oliviers, avec une piscine chauffée de mai à octobre.\nLe marché provençal est à 10 minutes, Vaison-la-Romaine à 15 minutes, et les premiers sentiers de randonnée partent du portail.',
+ rates:[{key:'basse',label:'Basse saison',period:'Novembre à mars',night:115,week:690,min:2},{key:'moyenne',label:'Moyenne saison',period:'Avril à juin, septembre et octobre',night:145,week:890,min:3},{key:'haute',label:'Haute saison',period:'Juillet et août',night:210,week:1350,min:7}],
+ rateNote:'Linge de lit et de toilette fournis. Ménage de fin de séjour : 70 €. Taxe de séjour : 1,10 € par adulte et par nuit. Arrivée à partir de 16 h, départ avant 10 h.',
+ photos:[{id:'p1',kind:'facade',alt:'Façade en pierre du mas et ses volets bleus'},{id:'p2',kind:'piscine',alt:'Piscine chauffée de 10 × 4 m face aux collines'},{id:'p3',kind:'salon',alt:'Salon avec cheminée en pierre et poutres apparentes'},{id:'p4',kind:'chambre',alt:'Chambre principale avec lit de 160 et vue sur le jardin'},{id:'p5',kind:'jardin',alt:'Rangs de lavande et olivier centenaire'},{id:'p6',kind:'terrasse',alt:'Terrasse ombragée sous la treille'},{id:'p7',kind:'cuisine',alt:'Cuisine équipée ouverte sur la salle à manger'},{id:'p8',kind:'vue',alt:'Coucher de soleil sur les vignes des Baronnies'}],
+ bandeau:{on:true,text:'Garantie du meilleur prix en direct : jusqu’à 15 % moins cher que sur les plateformes de réservation'},
+ reviewsShown:6,
+ seo:{title:'Le Mas des Genêts — Gîte 6 personnes avec piscine en Drôme provençale',desc:'Mas en pierre rénové pour 6 personnes, piscine chauffée, jardin de 4 000 m² et vue sur les Baronnies. Réservation en direct au meilleur prix, paiement sécurisé.'}
+};
+const REVIEWS=[
+ {name:'Claire D.',date:'septembre 2026',rating:5,trip:'En famille',text:'Un mas magnifique, encore plus beau qu’en photo. Piscine impeccable, literie excellente et un accueil aux petits soins. Nous reviendrons pour la floraison des lavandes !'},
+ {name:'Thomas et Léa',date:'août 2026',rating:5,trip:'En couple',text:'Le calme absolu à 10 minutes du marché. La terrasse sous la treille restera notre meilleur souvenir de l’été.'},
+ {name:'Marc V.',date:'août 2026',rating:5,trip:'Entre amis',text:'Réservation en direct très simple et moins chère que sur les plateformes. Maison parfaitement équipée, cuisine complète.'},
+ {name:'Sophie B.',date:'juillet 2026',rating:4,trip:'En famille',text:'Très beau séjour. Le chemin d’accès est étroit sur les derniers mètres, mais tout était parfait une fois sur place.'},
+ {name:'Julien R.',date:'juin 2026',rating:5,trip:'En couple',text:'Idéal pour randonner dans les Baronnies : les sentiers partent du portail. Propriétaires très réactifs.'},
+ {name:'Anne-Laure P.',date:'juin 2026',rating:5,trip:'En famille',text:'Décoration soignée, linge de qualité, piscine chauffée très appréciée début juin. Rien à redire.'},
+ {name:'Pierre M.',date:'mai 2026',rating:5,trip:'Entre amis',text:'Accueil chaleureux avec un panier de produits locaux. Le marché du jeudi matin est un incontournable.'},
+ {name:'Nadia K.',date:'avril 2026',rating:5,trip:'En couple',text:'Séjour de printemps parfait : maison lumineuse, bien chauffée, et la cheminée est très agréable le soir.'},
+ {name:'Bruno L.',date:'mars 2026',rating:4,trip:'En famille',text:'Grande maison confortable, enfants ravis du jardin. Un barbecue supplémentaire serait un plus.'}
+];
+const NEWREV=[
+ {name:'Émilie T.',date:'octobre 2026',rating:5,trip:'En couple',text:'Arrière-saison idéale : piscine encore chauffée, vendanges dans les vignes voisines et un silence incroyable.'},
+ {name:'Karim S.',date:'octobre 2026',rating:5,trip:'En famille',text:'Tout était prêt à notre arrivée, maison impeccable. La réservation en direct avec paiement en ligne est très rassurante.'},
+ {name:'Isabelle F.',date:'octobre 2026',rating:4,trip:'Entre amis',text:'Très belle adresse, calme et bien située. Wi-Fi rapide, pratique pour télétravailler une journée.'}
+];
+const FEATS=[['waves','Piscine chauffée','10 × 4 m, mai à octobre'],['leaf','Jardin de 4 000 m²','Oliviers et lavandes'],['bed','3 chambres','Lits 160 et 2 × 90'],['wifi','Wi-Fi fibre','Idéal télétravail'],['snow','Climatisation','Dans chaque chambre'],['car','Parking privé','2 véhicules, borne de recharge']];
+const SECTIONS=[{id:'accueil',label:'Accueil & présentation',icon:'home',keys:['name','heroTitle','heroText','capacity','about'],anchor:'top'},{id:'tarifs',label:'Tarifs',icon:'tag',keys:['rates','rateNote'],anchor:'tarifs'},{id:'galerie',label:'Galerie photos',icon:'image',keys:['photos'],anchor:'galerie'},{id:'reassurance',label:'Réassurance & avis',icon:'shield',keys:['bandeau','reviewsShown'],anchor:'avis'},{id:'seo',label:'Référencement (SEO)',icon:'search',keys:['seo'],anchor:'top'}];
+
+function defaults(){
+ const b=[[2,5],[9,13],[17,24],[31,34],[44,51],[58,61],[72,79],[95,102]].map(([a,z])=>({from:iso(addD(TODAY,a)),to:iso(addD(TODAY,z))}));
+ const d0=Date.now();
+ return{pub:clone(DEF),draft:clone(DEF),blocked:b,reviews:clone(REVIEWS),google:{n:87,avg:4.9},lastSync:d0-(3*60+12)*6e4,queue:0,
+  bookings:[{ref:`MG-${TODAY.getFullYear()}-1039`,name:'Hélène Marchetti',email:'h.marchetti@exemple.fr',arr:b[1].from,dep:b[1].to,ad:2,ch:1,total:668.6,paid:200.58,mode:'Acompte 30 %',date:d0-6*864e5},{ref:`MG-${TODAY.getFullYear()}-1040`,name:'Olivier Fabre',email:'o.fabre@exemple.fr',arr:b[4].from,dep:b[4].to,ad:4,ch:0,total:794.8,paid:794.8,mode:'Totalité',date:d0-2*864e5}],
+  deploys:[{date:d0-2*864e5,msg:'Tarifs : mise à jour de la haute saison',secs:36},{date:d0-9*864e5,msg:'Mise en ligne initiale du site',secs:41}]};
+}
+let S;
+function load(){try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.pub&&r.draft){S=r;return}}catch(e){}S=defaults()}
+let warnedQuota=false;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!warnedQuota){warnedQuota=true;toast('Stockage du navigateur plein : les changements restent visibles jusqu’au rechargement.')}}}
+load();
+
+function toast(msg,icon='check'){const host=$('dialog[open]')||document.body;let c=host===document.body?$('#toasts'):$('.toasts',host);if(!c){c=document.createElement('div');c.className='toasts';c.setAttribute('aria-live','polite');host.appendChild(c)}const t=document.createElement('div');t.className='toast';t.innerHTML=ic(icon)+`<span>${esc(msg)}</span>`;c.appendChild(t);setTimeout(()=>t.remove(),4200)}
+
+/* Tarification */
+const seasonKey=d=>{const m=d.getMonth()+1;return m===7||m===8?'haute':(m>=4&&m<=6)||m===9||m===10?'moyenne':'basse'};
+const rateFor=(d,c=S.pub)=>c.rates.find(r=>r.key===seasonKey(d))||c.rates[0];
+const isBooked=s=>S.blocked.some(r=>r.from<=s&&s<r.to);
+function rangeFree(a,b){for(let d=pd(a);iso(d)<b;d=addD(d,1))if(isBooked(iso(d)))return false;return true}
+function quote(a,b,ad){const n=nb(a,b);let l=0;for(let i=0;i<n;i++){const r=rateFor(addD(pd(a),i));l+=n>=7?(+r.week||0)/7:(+r.night||0)}l=Math.round(l);const men=70,tax=Math.round(1.1*ad*n*100)/100,total=Math.round((l+men+tax)*100)/100,plat=Math.round((l+men)*1.15+tax);return{n,l,men,tax,total,plat,save:Math.round(plat-total)}}
+
+/* ---------- Rendu du site ---------- */
+function siteHTML(c,px){
+ const g=S.google,nights=c.rates.map(r=>+r.night||0),minN=Math.min(...nights);
+ const mid=c.rates.find(r=>r.key==='moyenne')||c.rates[0];const exL=+mid.week||0,exT=Math.round((exL+70+30.8)*100)/100,exP=Math.round((exL+70)*1.15+30.8);
+ const nav=[['legite','Le gîte'],['galerie','Galerie'],['tarifs','Tarifs'],['avis','Avis'],['acces','Accès']];
+ return `<header class="s-head"><div class="s-wrap s-headin"><a class="s-logo" href="#${px}top">${LOGO}<span>${esc(c.name)}</span></a><nav class="s-nav" aria-label="Navigation du site">${nav.map(([i,l])=>`<a href="#${px}${i}">${l}</a>`).join('')}</nav><button type="button" class="btn cta" data-act="book">${ic('cal')}Réserver</button></div></header>
+${c.bandeau.on&&c.bandeau.text.trim()?`<div class="s-band"><div class="s-wrap">${ic('shield')}<span>${esc(c.bandeau.text)}</span></div></div>`:''}
+<section class="s-hero" id="${px}top" aria-labelledby="${px}h1"><div class="s-hero-img">${photo(c.photos[0],true)}</div>
+<div class="s-wrap s-hero-in"><p class="s-rate">${stars(5,false)}<b>${fmt1(g.avg)}/5</b><span>· ${g.n} avis Google</span></p>
+<h1 id="${px}h1">${esc(c.heroTitle)}</h1><p class="s-lead">${esc(c.heroText)}</p><p class="s-cap">${esc(c.capacity)}</p>
+<form class="s-search" data-search novalidate aria-label="Rechercher des disponibilités">
+<div class="field"><label for="${px}arr">Arrivée</label><input type="date" id="${px}arr" name="arr" min="${TOM}"></div>
+<div class="field"><label for="${px}dep">Départ</label><input type="date" id="${px}dep" name="dep" min="${TOM}"></div>
+<div class="field"><label for="${px}gst">Voyageurs</label><select id="${px}gst" name="gst">${[1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===4?'selected':''}>${n} voyageur${n>1?'s':''}</option>`).join('')}</select></div>
+<button class="btn cta" type="submit">${ic('search')}Voir les disponibilités</button></form>
+<p class="s-direct">${ic('lock')}Paiement sécurisé · Confirmation immédiate · Sans frais de service</p></div></section>
+<section class="s-sec" id="${px}legite" aria-labelledby="${px}h-g"><div class="s-wrap s-about"><div><p class="s-kick">Le gîte</p><h2 id="${px}h-g">Un mas en pierre, rien que pour vous</h2>${String(c.about).split(/\n+/).filter(t=>t.trim()).map(t=>`<p>${esc(t)}</p>`).join('')}</div>
+<ul class="s-feat">${FEATS.map(([i,t,s])=>`<li>${ic(i)}<div><b>${t}</b><span>${s}</span></div></li>`).join('')}</ul></div></section>
+<section class="s-sec s-alt" id="${px}galerie" aria-labelledby="${px}h-ga"><div class="s-wrap"><div class="s-sh"><div><p class="s-kick">Galerie</p><h2 id="${px}h-ga">Le mas en images</h2></div><p class="muted">${c.photos.length} photos</p></div>
+<div class="s-gal">${c.photos.map((p,i)=>`<button type="button" class="s-ph" data-ph="${i}" aria-label="Agrandir : ${esc(p.alt||'photo '+(i+1))}">${photo(p)}</button>`).join('')}</div></div></section>
+<section class="s-sec" id="${px}tarifs" aria-labelledby="${px}h-t"><div class="s-wrap"><div class="s-sh"><div><p class="s-kick">Tarifs</p><h2 id="${px}h-t">Des prix clairs, sans frais de service</h2></div><button type="button" class="btn" data-act="book">${ic('cal')}Voir le calendrier</button></div>
+<div class="s-rates">${c.rates.map(r=>`<article class="s-rate-c ${r.key==='haute'?'hl':''}"><h3>${esc(r.label)}</h3><p class="muted small">${esc(r.period)}</p><p class="s-price"><b>${eur(r.night)}</b> / nuit</p><ul><li>${ic('check')}${eur(r.week)} la semaine</li><li>${ic('check')}Séjour minimum : ${+r.min||1} nuit${(+r.min||1)>1?'s':''}</li></ul></article>`).join('')}</div>
+<p class="s-note">${esc(c.rateNote)}</p>
+<div class="s-compare">${ic('shield')}<div><b>Exemple : 7 nuits en moyenne saison, 4 adultes</b><p>En direct : <b>${eur(exT)}</b> tout compris · Sur une plateforme : environ ${eur(exP)} · <b>${eur(exP-exT)} d’économie</b></p></div><button type="button" class="btn cta" data-act="book">Réserver en direct</button></div></div></section>
+<section class="s-sec s-alt" id="${px}avis" aria-labelledby="${px}h-a"><div class="s-wrap"><div class="s-sh"><div><p class="s-kick">Avis clients</p><h2 id="${px}h-a">Ils ont séjourné au mas</h2></div>
+<div class="s-score"><b>${fmt1(g.avg)}</b><div>${stars(Math.round(g.avg))}<p class="small muted">${g.n} avis Google · synchronisés ${ago(S.lastSync)}</p></div></div></div>
+<div class="s-revs">${S.reviews.slice(0,+c.reviewsShown||6).map(r=>`<article class="s-rev"><div class="s-rev-h"><span class="av" aria-hidden="true">${esc(r.name[0])}</span><div><b>${esc(r.name)}</b><p class="small muted">${r.date} · ${r.trip}</p></div></div>${stars(r.rating)}<p>${esc(r.text)}</p></article>`).join('')}</div></div></section>
+<section class="s-sec" id="${px}acces" aria-labelledby="${px}h-ac"><div class="s-wrap s-acc"><div class="s-map"><svg viewBox="0 0 480 300" role="img" aria-label="Plan d’accès stylisé"><rect width="480" height="300" fill="#E9E2D2"/><path d="M0 220Q120 170 240 200T480 170" stroke="#9FC3D2" stroke-width="14" fill="none"/><path d="M40 0L180 300M0 90Q200 120 480 60M300 0L380 300" stroke="#FFFFFF" stroke-width="8" fill="none"/><path d="M0 90Q200 120 480 60" stroke="#E8C77A" stroke-width="4" fill="none"/><g fill="#B6C48E"><circle cx="90" cy="250" r="26"/><circle cx="410" cy="230" r="34"/><circle cx="420" cy="40" r="22"/></g><circle cx="260" cy="135" r="16" fill="#A3441E"/><circle cx="260" cy="135" r="6" fill="#FFFFFF"/><text x="282" y="128" font-family="sans-serif" font-size="15" font-weight="700" fill="#2A2620">${esc(c.name)}</text><text x="70" y="70" font-family="sans-serif" font-size="13" fill="#5D564B">Marché · 10 min</text><text x="320" y="285" font-family="sans-serif" font-size="13" fill="#5D564B">Vaison · 15 min</text></svg></div>
+<div><p class="s-kick">Accès</p><h2 id="${px}h-ac">Au calme, sans être isolé</h2><p class="muted" style="margin-bottom:10px">Quartier des Genêts, Drôme provençale (adresse fictive)</p><ul class="s-dist"><li><span>Marché provençal et commerces</span><b>10 min</b></li><li><span>Vaison-la-Romaine</span><b>15 min</b></li><li><span>Gare TGV la plus proche</span><b>55 min</b></li><li><span>Aéroport</span><b>1 h 20</b></li></ul></div></div></section>
+<section class="s-sec s-alt" aria-labelledby="${px}h-f"><div class="s-wrap"><p class="s-kick">Questions fréquentes</p><h2 id="${px}h-f">Avant de réserver</h2><div class="s-faq">
+${[['Pourquoi réserver en direct ?','Vous payez le prix affiché, sans frais de service des plateformes, et vous échangez directement avec nous. Si vous trouvez moins cher ailleurs, nous alignons le tarif.'],['Le paiement est-il sécurisé ?','Oui : le paiement est traité par une passerelle bancaire certifiée, avec authentification 3-D Secure. Aucune donnée bancaire ne transite par notre site.'],['Puis-je payer un acompte ?','Vous pouvez régler 30 % à la réservation et le solde 30 jours avant votre arrivée, ou la totalité en une fois.'],['Les animaux sont-ils acceptés ?','Un chien de petite taille est accepté sur demande, avec un supplément de 30 € par séjour.']].map(([q,a])=>`<details><summary>${q}${ic('cr')}</summary><p>${a}</p></details>`).join('')}</div></div></section>
+<footer class="s-foot"><div class="s-wrap"><div><b>${esc(c.name)}</b><p>Gîte classé 4 étoiles · Drôme provençale</p></div><div><p>contact@mas-des-genets.fr</p><p>+33 4 75 00 00 00 (fictif)</p></div><div><p>Site statique hébergé sur Netlify</p><p>Mentions légales · Confidentialité</p></div></div></footer>
+<div class="s-mbar"><p>À partir de<br><b>${eur(minN)}</b> / nuit</p><button type="button" class="btn cta" data-act="book">${ic('cal')}Réserver en direct</button></div>`;
+}
+function renderSite(){$('#site').innerHTML=siteHTML(S.pub,'s-')}
+
+/* ---------- Navigation ---------- */
+let view='site';
+function setView(v){view=v;$$('.seg [data-view]').forEach(b=>{if(b.dataset.view===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+ $('#view-site').hidden=v!=='site';$('#view-admin').hidden=v!=='admin';$('#view-perf').hidden=v!=='perf';
+ if(v==='admin')renderAdmin();if(v==='perf')renderPerf();if(v==='site')renderSite();window.scrollTo(0,0)}
+$$('.seg [data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+
+/* Site : événements */
+$('#site').addEventListener('click',e=>{const b=e.target.closest('[data-act="book"]');if(b){openBook({},b);return}const ph=e.target.closest('[data-ph]');if(ph)openPhoto(+ph.dataset.ph,ph)});
+$('#site').addEventListener('submit',e=>{const f=e.target.closest('[data-search]');if(!f)return;e.preventDefault();const a=f.arr.value,d=f.dep.value,pre={g:+f.gst.value};let msg='';
+ if(a){if(a>=TOM&&!isBooked(a)){pre.arr=a;if(d){if(d>a&&rangeFree(a,d))pre.dep=d;else msg='Ces dates chevauchent une réservation : choisissez une autre date de départ.'}}else msg='Cette date d’arrivée n’est pas disponible : choisissez-en une autre.'}
+ openBook(pre,f.querySelector('button'));if(msg)setTimeout(()=>toast(msg,'cal'),150)});
+
+/* ---------- Galerie plein écran ---------- */
+let phI=0;
+function openPhoto(i,from){phI=i;drawPhoto();const d=$('#dlgPhoto');d._from=from;d.showModal();$('[data-pc]',d).focus()}
+function drawPhoto(){const ps=S.pub.photos,p=ps[phI];$('#dlgPhoto').innerHTML=`<div class="ph-wrap">${photo(p,true)}</div><div class="ph-bar"><button type="button" class="icon-btn" data-pp="-1" aria-label="Photo précédente">${ic('cl')}</button><p><b>${phI+1} / ${ps.length}</b> · ${esc(p.alt)}</p><button type="button" class="icon-btn" data-pp="1" aria-label="Photo suivante">${ic('cr')}</button><button type="button" class="icon-btn" data-pc aria-label="Fermer">${ic('x')}</button></div>`}
+$('#dlgPhoto').addEventListener('click',e=>{const d=$('#dlgPhoto');if(e.target===d){d.close();return}const n=e.target.closest('[data-pp]');if(n){phI=(phI+ +n.dataset.pp+S.pub.photos.length)%S.pub.photos.length;drawPhoto();$(`[data-pp="${n.dataset.pp}"]`,d).focus()}if(e.target.closest('[data-pc]'))d.close()});
+$('#dlgPhoto').addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const dir=e.key==='ArrowRight'?1:-1;phI=(phI+dir+S.pub.photos.length)%S.pub.photos.length;drawPhoto();$(`[data-pp="${dir}"]`,$('#dlgPhoto')).focus()}});
+$$('dialog').forEach(d=>d.addEventListener('close',()=>{if(d._from&&document.contains(d._from))d._from.focus()}));
+
+/* ---------- Réservation : Open Pro + One Shot Pay (simulés) ---------- */
+let B={};
+const monthStart=d=>new Date(d.getFullYear(),d.getMonth(),1);
+function openBook(pre,from){B={step:1,arr:pre.arr||null,dep:pre.dep||null,ad:Math.min(pre.g||2,6),ch:0,view:monthStart(pre.arr?pd(pre.arr):addD(TODAY,1)),f:{},pay:'acompte'};const d=$('#dlgBook');d._from=from;renderBook();d.showModal()}
+function bookState(){const q=B.arr&&B.dep?quote(B.arr,B.dep,B.ad):null;const minN=B.arr?(+rateFor(pd(B.arr)).min||1):0;const errs=[];if(q&&q.n<minN)errs.push(`Séjour minimum de ${minN} nuits pour cette période.`);if(B.ad+B.ch>6)errs.push('Capacité maximale : 6 voyageurs.');return{q,minN,errs,ok:!!q&&!errs.length}}
+function monthHTML(m0,second){const y=m0.getFullYear(),m=m0.getMonth(),days=new Date(y,m+1,0).getDate(),off=(m0.getDay()+6)%7;let h=`<div class="cal-m ${second?'second':''}"><h3 class="cal-t">${MONTHS[m]} ${y}</h3><div class="cal-g">${['L','M','M','J','V','S','D'].map(w=>`<span class="wd" aria-hidden="true">${w}</span>`).join('')}`;
+ for(let i=0;i<off;i++)h+='<span></span>';
+ for(let d=1;d<=days;d++){const s=iso(new Date(y,m,d)),past=s<TOM,bk=isBooked(s);let en=!past&&!bk;const depOk=B.arr&&!B.dep&&s>B.arr&&rangeFree(B.arr,s);if(depOk)en=true;
+  const sel=s===B.arr||s===B.dep,inr=B.arr&&B.dep&&s>B.arr&&s<B.dep;
+  const st=past?'passé':bk&&!depOk?'déjà réservé':depOk?'départ possible':'disponible';
+  h+=`<button type="button" class="day ${bk&&!sel?'bk':''} ${sel?'sel':''} ${inr?'in':''}" data-day="${s}" ${en?'':'disabled'} aria-pressed="${sel}" aria-label="${dLong(s)}, ${st}">${d}</button>`}
+ return h+'</div></div>'}
+function recapHTML(st,withGuests){const q=st.q;return `<aside class="recap" aria-live="polite"><h3>Votre séjour</h3>
+ <div class="rl"><span>Arrivée</span><b>${B.arr?dShort(B.arr):'—'}</b></div><div class="rl"><span>Départ</span><b>${B.dep?dShort(B.dep):'—'}</b></div>
+ ${withGuests?`<div class="form-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="field"><label for="bkAd">Adultes</label><select id="bkAd">${[1,2,3,4,5,6].map(n=>`<option ${n===B.ad?'selected':''}>${n}</option>`).join('')}</select></div><div class="field"><label for="bkCh">Enfants</label><select id="bkCh">${[0,1,2,3,4,5].map(n=>`<option ${n===B.ch?'selected':''}>${n}</option>`).join('')}</select></div></div>`:`<div class="rl"><span>Voyageurs</span><b>${B.ad} adulte${B.ad>1?'s':''}${B.ch?`, ${B.ch} enfant${B.ch>1?'s':''}`:''}</b></div>`}
+ ${q?`<div class="rl"><span>Hébergement · ${q.n} nuit${q.n>1?'s':''}${q.n>=7?' (tarif semaine)':''}</span><span>${eur(q.l)}</span></div><div class="rl"><span>Ménage de fin de séjour</span><span>${eur(q.men)}</span></div><div class="rl"><span>Taxe de séjour</span><span>${eur(q.tax)}</span></div><div class="rl tot"><span>Total</span><span>${eur(q.total)}</span></div>
+ <p class="save">${ic('shield')}<span>Sur une plateforme : environ ${eur(q.plat)}. <b>Vous économisez ${eur(q.save)}</b> en réservant ici.</span></p>`:`<p class="small muted">${B.arr?'Sélectionnez la date de départ.':'Sélectionnez vos dates dans le calendrier.'}${B.arr?` Séjour minimum : ${st.minN} nuit${st.minN>1?'s':''}.`:''}</p>`}
+ ${st.errs.map(e=>`<p class="err" role="alert">${e}</p>`).join('')}
+ ${withGuests?`<button type="button" class="btn cta block" data-next ${st.ok?'':'disabled'}>Continuer</button>`:''}</aside>`}
+function renderBook(){const d=$('#dlgBook'),a=document.activeElement,key=a&&d.contains(a)?(a.dataset.day?`[data-day="${a.dataset.day}"]`:a.id?'#'+a.id:a.dataset.mv?`[data-mv="${a.dataset.mv}"]`:null):null;
+ const st=bookState(),labels=['Dates','Coordonnées','Paiement','Confirmation'];
+ const src=B.step===3?`${ic('lock')}Paiement One Shot Pay · mode test`:B.step===4?`${ic('check')}Réservation enregistrée dans le planning`:`${ic('cal')}Disponibilités en temps réel · moteur Open Pro (intégration simulée)`;
+ let body='';
+ if(B.step===1){const m1=new Date(B.view.getFullYear(),B.view.getMonth()+1,1),canPrev=B.view>monthStart(TODAY);
+  body=`<div class="bk-grid"><div class="min0"><div class="cal-nav"><button type="button" class="icon-btn" data-mv="-1" ${canPrev?'':'disabled'} aria-label="Mois précédent">${ic('cl')}</button><p class="small muted" id="calHelp">${B.arr&&!B.dep?'Choisissez maintenant la date de départ':'Choisissez votre date d’arrivée'}</p><button type="button" class="icon-btn" data-mv="1" aria-label="Mois suivant">${ic('cr')}</button></div>
+  <div class="cal-ms">${monthHTML(B.view)}${monthHTML(m1,true)}</div><div class="legend"><span><i></i>Disponible</span><span><i class="b"></i>Réservé</span><span><i class="s"></i>Votre sélection</span></div></div>${recapHTML(st,true)}</div>`}
+ else if(B.step===2){const f=B.f,fl=(id,l,t,ac,full)=>`<div class="field ${full?'full':''}"><label for="${id}">${l} <span class="req" aria-hidden="true">*</span></label><input type="${t}" id="${id}" name="${id}" autocomplete="${ac}" value="${esc(f[id]||'')}" required aria-describedby="${id}-e"><p class="err" id="${id}-e"></p></div>`;
+  body=`<div class="bk-grid"><form id="bkF" class="form-grid" novalidate>${fl('prenom','Prénom','text','given-name')}${fl('nom','Nom','text','family-name')}${fl('email','E-mail','email','email')}${fl('tel','Téléphone','tel','tel')}
+  <div class="field full"><label for="msg">Message pour les propriétaires (facultatif)</label><textarea id="msg" rows="3">${esc(f.msg||'')}</textarea></div>
+  <div class="field full"><label class="check"><input type="checkbox" id="cgv" ${f.cgv?'checked':''} aria-describedby="cgv-e"><span>J’accepte les conditions générales de location et la politique d’annulation (remboursement intégral jusqu’à 30 jours avant l’arrivée).</span></label><p class="err" id="cgv-e"></p></div>
+  <div class="full actions"><button type="button" class="btn" data-back>${ic('cl')}Retour</button><button type="submit" class="btn cta">Continuer vers le paiement</button></div></form>${recapHTML(st,false)}</div>`}
+ else if(B.step===3){const q=st.q,dep=Math.round(q.total*30)/100;
+  body=`<div class="bk-grid"><form id="payF" novalidate><div class="osp"><div class="osp-h"><b>${ic('lock')}One Shot Pay — paiement sécurisé</b><span class="pill test">MODE TEST</span></div><div class="osp-b">
+  <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px"><legend class="flabel" style="margin-bottom:6px">Montant à régler</legend>
+  <label class="radio"><input type="radio" name="pay" value="acompte" ${B.pay==='acompte'?'checked':''}><span><b>Acompte de 30 % : ${eur(dep)}</b><br><span class="small muted">Solde de ${eur(q.total-dep)} prélevé 30 jours avant l’arrivée</span></span></label>
+  <label class="radio"><input type="radio" name="pay" value="total" ${B.pay==='total'?'checked':''}><span><b>Totalité : ${eur(q.total)}</b><br><span class="small muted">Aucun autre paiement à prévoir</span></span></label></fieldset>
+  <div class="testbox"><span>Carte de test : 4242 4242 4242 4242 · refus : 4000 0000 0000 0002</span><button type="button" class="btn" data-fill>Remplir la carte de test</button></div>
+  <div class="field"><label for="ccName">Titulaire de la carte</label><input type="text" id="ccName" autocomplete="cc-name" aria-describedby="ccName-e"><p class="err" id="ccName-e"></p></div>
+  <div class="field"><label for="ccNum">Numéro de carte</label><input type="text" id="ccNum" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="23" aria-describedby="ccNum-e"><p class="err" id="ccNum-e"></p></div>
+  <div class="cc-row"><div class="field"><label for="ccExp">Expiration (MM/AA)</label><input type="text" id="ccExp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" aria-describedby="ccExp-e"><p class="err" id="ccExp-e"></p></div><div class="field"><label for="ccCvc">Cryptogramme</label><input type="text" id="ccCvc" inputmode="numeric" autocomplete="cc-csc" maxlength="4" aria-describedby="ccCvc-e"><p class="err" id="ccCvc-e"></p></div></div>
+  <p class="err" id="payErr" role="alert"></p>
+  <div class="actions"><button type="button" class="btn" data-back>${ic('cl')}Retour</button><button type="submit" class="btn cta" id="payBtn" style="flex:1">${ic('lock')}Payer ${eur(B.pay==='acompte'?dep:q.total)}</button></div>
+  </div></div></form>${recapHTML(st,false)}</div>`}
+ else{const k=B.done;body=`<div class="conf"><div class="big">${ic('check')}</div><h3 style="font-family:var(--serif);font-size:24px;font-weight:600">Réservation confirmée</h3><p class="muted">Merci ${esc(B.f.prenom)} ! Un e-mail de confirmation a été envoyé à <b>${esc(B.f.email)}</b> (simulation).</p>
+  <div class="recap conf-box"><div class="rl"><span>Référence</span><b class="ref">${k.ref}</b></div><div class="rl"><span>Séjour</span><b>${dShort(k.arr)} → ${dShort(k.dep)}</b></div><div class="rl"><span>Voyageurs</span><b>${k.ad+k.ch}</b></div><div class="rl"><span>Total du séjour</span><b>${eur(k.total)}</b></div><div class="rl"><span>Réglé (${k.mode})</span><b>${eur(k.paid)}</b></div></div>
+  <div class="actions" style="justify-content:center;margin-top:8px"><button type="button" class="btn" data-print>${ic('print')}Imprimer / PDF</button><button type="button" class="btn pri" data-close>Terminer</button></div></div>`}
+ d.innerHTML=`<div class="dlg-h"><div><h2 id="bkT">Réserver votre séjour</h2><p class="badge-src">${src}</p></div><button type="button" class="icon-btn" data-close aria-label="Fermer">${ic('x')}</button></div>
+ <ol class="steps" aria-label="Étapes">${labels.map((l,i)=>`<li ${i+1===B.step?'aria-current="step"':''} class="${i+1<B.step?'done':''}"><span>${i+1<B.step?'✓':i+1}</span><b>${l}</b></li>`).join('')}</ol><div class="dlg-b">${body}</div>`;
+ if(key){const el=$(key,d);if(el&&!el.disabled)el.focus()}
+}
+const setErr=(id,m)=>{const e=$('#'+id+'-e'),i=$('#'+id);if(e)e.textContent=m;if(i)i.setAttribute('aria-invalid',m?'true':'false');return!m};
+const luhn=n=>{let s=0;for(let i=0;i<n.length;i++){let d=+n[n.length-1-i];if(i%2){d*=2;if(d>9)d-=9}s+=d}return s%10===0};
+$('#dlgBook').addEventListener('click',e=>{const d=$('#dlgBook'),t=e.target;
+ if(t===d||t.closest('[data-close]')){d.close();return}
+ const day=t.closest('[data-day]');if(day){const s=day.dataset.day;if(B.arr&&!B.dep&&s>B.arr&&rangeFree(B.arr,s))B.dep=s;else if(!isBooked(s)){B.arr=s;B.dep=null}renderBook();return}
+ const mv=t.closest('[data-mv]');if(mv){B.view=new Date(B.view.getFullYear(),B.view.getMonth()+ +mv.dataset.mv,1);renderBook();return}
+ if(t.closest('[data-next]')){B.step=2;renderBook();$('#prenom').focus();return}
+ if(t.closest('[data-back]')){if(B.step===2)collectF();B.step--;renderBook();return}
+ if(t.closest('[data-fill]')){$('#ccName').value=`${B.f.prenom} ${B.f.nom}`;$('#ccNum').value='4242 4242 4242 4242';const y=(TODAY.getFullYear()+2)%100;$('#ccExp').value='12/'+String(y).padStart(2,'0');$('#ccCvc').value='123';$('#payBtn').focus();return}
+ if(t.closest('[data-print]')){printConf();return}
+});
+$('#dlgBook').addEventListener('change',e=>{const t=e.target;if(t.id==='bkAd'){B.ad=+t.value;renderBook()}if(t.id==='bkCh'){B.ch=+t.value;renderBook()}if(t.name==='pay'){B.pay=t.value;const q=bookState().q;$('#payBtn').innerHTML=`${ic('lock')}Payer ${eur(B.pay==='acompte'?Math.round(q.total*30)/100:q.total)}`}});
+$('#dlgBook').addEventListener('input',e=>{const t=e.target;if(t.id==='ccNum'){t.value=t.value.replace(/\D/g,'').slice(0,19).replace(/(\d{4})(?=\d)/g,'$1 ')}if(t.id==='ccExp'){let v=t.value.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);t.value=v}if(t.id==='ccCvc')t.value=t.value.replace(/\D/g,'')});
+function collectF(){['prenom','nom','email','tel','msg'].forEach(k=>{const i=$('#'+k);if(i)B.f[k]=i.value.trim()});const c=$('#cgv');if(c)B.f.cgv=c.checked}
+$('#dlgBook').addEventListener('submit',e=>{e.preventDefault();
+ if(e.target.id==='bkF'){collectF();const f=B.f;const ok=[setErr('prenom',f.prenom?'':'Indiquez votre prénom.'),setErr('nom',f.nom?'':'Indiquez votre nom.'),setErr('email',/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email)?'':'Adresse e-mail invalide (ex. : prenom@exemple.fr).'),setErr('tel',f.tel.replace(/\D/g,'').length>=9?'':'Numéro de téléphone invalide.'),setErr('cgv',f.cgv?'':'Vous devez accepter les conditions de location.')];
+  if(ok.every(Boolean)){B.step=3;renderBook();$('#ccName').focus()}else $('[aria-invalid=true]',e.target).focus();return}
+ if(e.target.id==='payF'){const n=$('#ccNum').value.replace(/\D/g,''),ex=$('#ccExp').value.match(/^(\d{2})\/(\d{2})$/),cvc=$('#ccCvc').value;let expMsg='';
+  if(!ex)expMsg='Format attendu : MM/AA.';else{const m=+ex[1],y=2000+ +ex[2];if(m<1||m>12)expMsg='Mois invalide.';else if(new Date(y,m,0)<TODAY)expMsg='Cette carte est expirée.'}
+  const ok=[setErr('ccName',$('#ccName').value.trim()?'':'Indiquez le nom du titulaire.'),setErr('ccNum',n.length>=13&&luhn(n)?'':'Numéro de carte invalide.'),setErr('ccExp',expMsg),setErr('ccCvc',/^\d{3,4}$/.test(cvc)?'':'Cryptogramme invalide (3 chiffres).')];
+  $('#payErr').textContent='';
+  if(!ok.every(Boolean)){$('[aria-invalid=true]',e.target).focus();return}
+  const btn=$('#payBtn');btn.disabled=true;btn.textContent='Authentification 3-D Secure (simulée)…';
+  setTimeout(()=>{if(n==='4000000000000002'){btn.disabled=false;btn.innerHTML=`${ic('lock')}Réessayer le paiement`;$('#payErr').textContent='Paiement refusé par la banque (carte de test de refus). Aucun montant n’a été débité.';return}finishBooking()},1300)}
+});
+function finishBooking(){const st=bookState(),q=st.q,paid=B.pay==='acompte'?Math.round(q.total*30)/100:q.total;
+ const k={ref:`MG-${TODAY.getFullYear()}-${1041+S.bookings.length}`,name:`${B.f.prenom} ${B.f.nom}`,email:B.f.email,arr:B.arr,dep:B.dep,ad:B.ad,ch:B.ch,total:q.total,paid,mode:B.pay==='acompte'?'Acompte 30 %':'Totalité',date:Date.now()};
+ S.bookings.unshift(k);S.blocked.push({from:B.arr,to:B.dep});save();B.done=k;B.step=4;renderBook();$('#dlgBook [data-print]').focus();
+ setTimeout(()=>toast(`E-mail de confirmation envoyé à ${k.email} (simulation)`,'mail'),400);setTimeout(()=>toast('Propriétaires notifiés par e-mail (simulation)','mail'),1400)}
+function printConf(){const k=B.done;$('#printArea').innerHTML=`<h1>${esc(S.pub.name)} — confirmation de réservation</h1><p>Référence : <b>${k.ref}</b> · émise le ${new Date().toLocaleDateString('fr-FR')}</p><table><tr><th>Voyageur</th><td>${esc(k.name)} (${esc(k.email)})</td></tr><tr><th>Arrivée</th><td>${dLong(k.arr)} à partir de 16 h</td></tr><tr><th>Départ</th><td>${dLong(k.dep)} avant 10 h</td></tr><tr><th>Voyageurs</th><td>${k.ad} adulte(s), ${k.ch} enfant(s)</td></tr><tr><th>Total du séjour</th><td>${eur(k.total)}</td></tr><tr><th>Réglé par carte</th><td>${eur(k.paid)} — ${k.mode}</td></tr></table><p style="margin-top:14px">Document de démonstration — données fictives.</p>`;window.print()}
+
+/* ---------- Administration (CMS headless simulé) ---------- */
+let aS='accueil',pvWide=false,lastErrs=[];
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
+const setP=(o,p,v)=>{const k=p.split('.'),l=k.pop();k.reduce((a,x)=>a[x],o)[l]=v};
+const changed=s=>s.keys.some(k=>JSON.stringify(S.draft[k])!==JSON.stringify(S.pub[k]));
+function validate(c){const E=[],req=(p,sec,l)=>{if(!String(getP(c,p)??'').trim())E.push({sec,path:p,msg:`${l} : champ obligatoire.`})};
+ req('name','accueil','Nom du gîte');req('heroTitle','accueil','Titre principal');req('heroText','accueil','Accroche');req('about','accueil','Présentation');
+ c.rates.forEach((r,i)=>{['night','week','min'].forEach(k=>{if(!(+r[k]>0))E.push({sec:'tarifs',path:`rates.${i}.${k}`,msg:`${r.label} : ${k==='min'?'durée minimale':'prix'} invalide.`})});req(`rates.${i}.label`,'tarifs','Nom de la saison')});
+ if(c.photos.length<3)E.push({sec:'galerie',msg:'La galerie doit contenir au moins 3 photos.'});
+ c.photos.forEach((p,i)=>{if(!String(p.alt).trim())E.push({sec:'galerie',path:`photos.${i}.alt`,msg:`Photo ${i+1} : texte alternatif manquant (accessibilité et SEO).`})});
+ if(c.bandeau.on)req('bandeau.text','reassurance','Texte du bandeau');
+ req('seo.title','seo','Titre SEO');req('seo.desc','seo','Meta description');
+ if(c.seo.title.length>70)E.push({sec:'seo',path:'seo.title',msg:'Titre SEO trop long (70 caractères max.).'});
+ if(c.seo.desc.length>170)E.push({sec:'seo',path:'seo.desc',msg:'Meta description trop longue (170 caractères max.).'});
+ return E}
+function fld(path,label,o={}){const v=getP(S.draft,path)??'',id='f-'+path.replace(/\./g,'-'),attrs=`id="${id}" data-path="${path}" aria-describedby="${id}-e" ${o.req?'data-req':''} ${o.max?`data-max="${o.max}"`:''}`;
+ const ctl=o.rows?`<textarea ${attrs} rows="${o.rows}">${esc(v)}</textarea>`:`<input type="${o.num?'number':'text'}" ${attrs} value="${esc(v)}" ${o.num?`data-num inputmode="numeric" min="${o.minv||0}" step="1"`:''}>`;
+ return `<div class="field ${o.full?'full':''}"><label for="${id}">${label}${o.req?' <span class="req" aria-hidden="true">*</span>':''}</label>${ctl}<div class="fmeta">${o.hint?`<span class="hint">${o.hint}</span>`:''}${o.max?`<span class="count" data-count="${path}">${String(v).length}/${o.max}</span>`:''}</div><p class="err" id="${id}-e"></p></div>`}
+function checkField(t){const v=t.dataset.num!==undefined?t.value:t.value.trim();let m='';
+ if(t.dataset.req!==undefined&&v==='')m='Ce champ est obligatoire.';else if(t.dataset.num!==undefined&&!(+v>0))m='Indiquez une valeur supérieure à 0.';else if(t.dataset.max&&t.value.length>+t.dataset.max)m=`Maximum ${t.dataset.max} caractères.`;
+ const e=$('#'+t.id+'-e');if(e)e.textContent=m;t.setAttribute('aria-invalid',m?'true':'false');const c=$(`[data-count="${t.dataset.path}"]`);if(c){c.textContent=`${t.value.length}/${t.dataset.max}`;c.classList.toggle('over',t.value.length>+t.dataset.max)}}
+function renderAdmin(){
+ $('#view-admin').innerHTML=`<div class="pg-head"><div><h1>Contenu du site</h1><p class="muted small">Interface d’administration headless (type Decap CMS) : vos contenus sont enregistrés dans le dépôt Git, le site est régénéré à chaque publication.</p></div>
+ <div class="status"><span class="pill" id="stPill"></span><button type="button" class="btn" id="discard">Annuler les modifications</button><button type="button" class="btn pri" id="publish">${ic('send')}Publier</button></div></div>
+ <div class="adm"><nav class="adm-nav" aria-label="Sections du contenu">${SECTIONS.map(s=>`<button type="button" data-sec="${s.id}">${ic(s.icon)}<span>${s.label}</span><span class="dot" hidden></span></button>`).join('')}<hr><button type="button" data-sec="resa">${ic('cal')}<span>Réservations</span></button><button type="button" data-sec="pub">${ic('clock')}<span>Publications</span></button></nav>
+ <div class="adm-body" id="admBody"></div>
+ <aside class="adm-pv" aria-label="Aperçu du brouillon"><div class="pv-h"><b>Aperçu en direct (brouillon)</b><div class="seg" role="group" aria-label="Taille de l’aperçu" style="margin-left:0"><button type="button" data-pv="m" aria-pressed="${!pvWide}">${ic('mobile')}Mobile</button><button type="button" data-pv="w" aria-pressed="${pvWide}">${ic('monitor')}Large</button></div></div><div class="pv-frame ${pvWide?'wide':''}" id="pvFrame" inert></div></aside></div>`;
+ renderAdminBody();renderPreview();updStatus()}
+function renderAdminBody(){const c=S.draft,b=$('#admBody');if(!b)return;
+ $$('.adm-nav [data-sec]').forEach(x=>{if(x.dataset.sec===aS)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});
+ const errs=lastErrs.length?`<div class="errsum" role="alert" tabindex="-1" id="errsum"><b>Publication impossible : ${lastErrs.length} point${lastErrs.length>1?'s':''} à corriger</b><ul>${lastErrs.map(e=>`<li>${esc(e.msg)}</li>`).join('')}</ul></div>`:'';
+ let h='';
+ if(aS==='accueil')h=`<section class="card"><h2 class="h2s">${ic('home')}Accueil & présentation</h2><div class="form-grid">${fld('name','Nom du gîte',{req:1,max:40})}${fld('capacity','Capacité (ligne sous l’accroche)',{max:80})}${fld('heroTitle','Titre principal',{req:1,max:90,full:1,hint:'Affiché en grand sur la photo de couverture'})}${fld('heroText','Accroche',{req:1,max:220,rows:3,full:1})}${fld('about','Présentation du gîte',{req:1,rows:7,full:1,hint:'Une ligne vide = un nouveau paragraphe'})}</div></section>
+  <p class="info">${ic('eye')}<span>Les modifications apparaissent instantanément dans l’aperçu. Le site public ne change qu’au clic sur « Publier ».</span></p>`;
+ else if(aS==='tarifs')h=`<section class="card"><h2 class="h2s">${ic('tag')}Tarifs par saison</h2>${c.rates.map((r,i)=>`<fieldset class="rate-f"><legend>${esc(r.label||'Saison')}</legend>${fld(`rates.${i}.label`,'Nom',{req:1})}${fld(`rates.${i}.period`,'Période')}${fld(`rates.${i}.night`,'Prix / nuit (€)',{num:1})}${fld(`rates.${i}.week`,'Prix / semaine (€)',{num:1})}${fld(`rates.${i}.min`,'Nuits minimum',{num:1,minv:1})}</fieldset>`).join('')}
+  ${fld('rateNote','Conditions et informations pratiques',{rows:3,full:1})}</section><p class="info">${ic('cal')}<span>Ces prix alimentent aussi l’estimation affichée dans le parcours de réservation. Les disponibilités et prix contractuels restent gérés dans votre espace Open Pro.</span></p>`;
+ else if(aS==='galerie')h=`<section class="card"><h2 class="h2s">${ic('image')}Galerie photos <span class="pill">${c.photos.length}</span></h2>
+  <div class="drop" id="drop"><span class="muted">Glissez une photo ici ou</span><button type="button" class="btn pri" id="upBtn">${ic('upload')}Importer une photo</button><button type="button" class="btn" id="sampleBtn">${ic('plus')}Photo d’exemple</button><input type="file" id="upFile" accept="image/*" class="sr" tabindex="-1" aria-hidden="true"></div>
+  <p class="hint" style="margin:8px 0 14px">Les images sont redimensionnées et converties en AVIF/WebP au déploiement. La première photo sert de couverture.</p>
+  <div class="ph-list">${c.photos.map((p,i)=>`<article class="ph-card"><div class="th">${photo(p)}${i===0?'<span class="pill">Couverture</span>':''}</div><div class="bd">${fld(`photos.${i}.alt`,`Texte alternatif — photo ${i+1}`,{req:1,max:120})}<div class="actions"><span class="actions"><button type="button" class="icon-btn" data-mvph="${i},-1" ${i===0?'disabled':''} aria-label="Monter la photo ${i+1}">${ic('up')}</button><button type="button" class="icon-btn" data-mvph="${i},1" ${i===c.photos.length-1?'disabled':''} aria-label="Descendre la photo ${i+1}">${ic('down')}</button></span><button type="button" class="btn danger" data-delph="${i}">${ic('trash')}Supprimer</button></div></div></article>`).join('')}</div></section>`;
+ else if(aS==='reassurance')h=`<section class="card"><h2 class="h2s">${ic('shield')}Bandeau « meilleur prix »</h2><label class="check"><input type="checkbox" data-path="bandeau.on" ${c.bandeau.on?'checked':''}><span>Afficher le bandeau en haut de toutes les pages</span></label>${fld('bandeau.text','Texte du bandeau',{max:130,req:c.bandeau.on})}</section>
+  <section class="card"><h2 class="h2s">${ic('star')}Avis Google</h2><div class="sync"><div><p><b>${fmt1(S.google.avg)}/5</b> · ${S.google.n} avis · dernière synchronisation <span id="syncAgo">${ago(S.lastSync)}</span></p><p class="small muted">Synchronisation automatique chaque nuit (fonction planifiée gratuite), sans intervention.</p></div><button type="button" class="btn" id="syncBtn">${ic('refresh')}Synchroniser maintenant</button></div>
+  <div class="field" style="margin-top:14px;max-width:320px"><label for="f-reviewsShown">Nombre d’avis affichés sur le site</label><select id="f-reviewsShown" data-path="reviewsShown" data-int>${[3,6,9].map(n=>`<option ${+c.reviewsShown===n?'selected':''}>${n}</option>`).join('')}</select></div></section>`;
+ else if(aS==='seo')h=`<section class="card"><h2 class="h2s">${ic('search')}Référencement</h2><div class="form-grid">${fld('seo.title','Balise title',{req:1,max:70,full:1,hint:'Idéalement moins de 60 caractères'})}${fld('seo.desc','Meta description',{req:1,max:170,rows:3,full:1,hint:'Idéalement 120 à 160 caractères'})}</div></section>
+  <section class="card"><h2 class="h2s">${ic('globe')}Aperçu dans Google</h2><div id="snip"></div><p class="hint" style="margin-top:10px">sitemap.xml, balises Open Graph et données structurées (LodgingBusiness) sont régénérés à chaque publication.</p></section>`;
+ else if(aS==='resa')h=`<section class="card"><h2 class="h2s">${ic('cal')}Réservations directes reçues <span class="pill">${S.bookings.length}</span></h2><p class="small muted" style="margin-bottom:12px">Lecture seule : planning et paiements restent gérés dans Open Pro et One Shot Pay.</p>
+  ${S.bookings.length?`<div class="tbl-wrap"><table><thead><tr><th>Référence</th><th>Voyageur</th><th>Séjour</th><th>Pers.</th><th>Total</th><th>Réglé</th><th>Statut</th></tr></thead><tbody>${S.bookings.map(k=>`<tr><td class="ref">${k.ref}</td><td><b>${esc(k.name)}</b><br><span class="small muted">${esc(k.email)}</span></td><td>${dShort(k.arr)} → ${dShort(k.dep)}<br><span class="small muted">${nb(k.arr,k.dep)} nuits</span></td><td>${k.ad+k.ch}</td><td>${eur(k.total)}</td><td>${eur(k.paid)}<br><span class="small muted">${k.mode}</span></td><td><span class="pill ok">Confirmée</span></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Aucune réservation pour l’instant.</div>`}
+  <div class="actions" style="margin-top:12px"><button type="button" class="btn" id="goBook">${ic('globe')}Tester une réservation sur le site</button></div></section>`;
+ else h=`<section class="card"><h2 class="h2s">${ic('clock')}Historique des publications</h2><ul class="hist">${S.deploys.map(d=>`<li><span class="ic">${ic('check')}</span><div><b>${esc(d.msg)}</b><p class="small muted">${dt(d.date)} · build et déploiement en ${d.secs} s · Netlify</p></div></li>`).join('')}</ul></section><p class="info">${ic('git')}<span>Chaque publication est un commit Git : une version précédente peut être restaurée à tout moment, sans base de données à sauvegarder.</span></p>`;
+ b.innerHTML=errs+h;$$('[data-path]',b).forEach(t=>{if(t.type!=='checkbox'&&t.tagName!=='SELECT'&&lastErrs.length)checkField(t)});if(aS==='seo')drawSnip()}
+function drawSnip(){const s=$('#snip');if(s)s.innerHTML=`<div class="snip"><p class="snip-url">https://www.mas-des-genets.fr</p><p class="snip-t">${esc(S.draft.seo.title.length>60?S.draft.seo.title.slice(0,58)+'…':S.draft.seo.title)}</p><p class="snip-d">${esc(S.draft.seo.desc.length>158?S.draft.seo.desc.slice(0,156)+'…':S.draft.seo.desc)}</p></div>`}
+let pvT;
+function renderPreview(){const f=$('#pvFrame');if(!f)return;f.innerHTML=`<div class="site">${siteHTML(S.draft,'p-')}</div>`}
+function scrollPreview(){const f=$('#pvFrame'),s=SECTIONS.find(x=>x.id===aS);if(!f||!s)return;const el=$('#p-'+s.anchor,f);if(el)f.scrollTo({top:Math.max(0,el.offsetTop-60),behavior:'smooth'})}
+function updStatus(){const ch=SECTIONS.filter(changed),n=ch.length,p=$('#stPill');
+ $('#dirtyDot').hidden=!n;if(!p)return;p.className='pill '+(n?'warn':'ok');p.textContent=n?`${n} section${n>1?'s':''} modifiée${n>1?'s':''}, non publiée${n>1?'s':''}`:'Tout est publié';
+ $('#publish').disabled=!n;$('#discard').disabled=!n;$$('.adm-nav [data-sec]').forEach(b=>{const d=$('.dot',b),s=SECTIONS.find(x=>x.id===b.dataset.sec);if(d)d.hidden=!(s&&changed(s))})}
+const afterEdit=()=>{save();updStatus();if(lastErrs.length){lastErrs=validate(S.draft);const es=$('#errsum');if(es){if(!lastErrs.length)es.remove();else es.innerHTML=`<b>Publication impossible : ${lastErrs.length} point${lastErrs.length>1?'s':''} à corriger</b><ul>${lastErrs.map(x=>`<li>${esc(x.msg)}</li>`).join('')}</ul>`}}clearTimeout(pvT);pvT=setTimeout(renderPreview,150)};
+const V=$('#view-admin');
+V.addEventListener('input',e=>{const t=e.target;if(!t.dataset.path||t.type==='checkbox'||t.tagName==='SELECT')return;setP(S.draft,t.dataset.path,t.dataset.num!==undefined?(t.value===''?'':+t.value):t.value);checkField(t);if(t.dataset.path.startsWith('seo'))drawSnip();if(/^rates\.\d+\.label$/.test(t.dataset.path)){const l=t.closest('fieldset').querySelector('legend');l.textContent=t.value||'Saison'}afterEdit()});
+V.addEventListener('change',e=>{const t=e.target;if(t.type==='checkbox'&&t.dataset.path){setP(S.draft,t.dataset.path,t.checked);const i=$('#f-bandeau-text');if(i){if(t.checked)i.setAttribute('data-req','');else i.removeAttribute('data-req');checkField(i)}afterEdit()}if(t.tagName==='SELECT'&&t.dataset.path){setP(S.draft,t.dataset.path,+t.value);afterEdit()}if(t.id==='upFile'){addFile(t.files[0]);t.value=''}});
+V.addEventListener('click',e=>{const t=e.target;
+ const sec=t.closest('[data-sec]');if(sec){aS=sec.dataset.sec;renderAdminBody();scrollPreview();if(innerWidth<=1320)$('#admBody').scrollIntoView({behavior:'smooth',block:'start'});return}
+ const pv=t.closest('[data-pv]');if(pv){pvWide=pv.dataset.pv==='w';$('#pvFrame').classList.toggle('wide',pvWide);$$('[data-pv]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.pv==='w')===pvWide)));return}
+ const mv=t.closest('[data-mvph]');if(mv){const[i,d]=mv.dataset.mvph.split(',').map(Number),a=S.draft.photos;[a[i],a[i+d]]=[a[i+d],a[i]];afterEdit();renderAdminBody();const nb=$(`[data-mvph="${i+d},${d}"]`)||$(`[data-mvph="${i+d},${-d}"]`);if(nb)nb.focus();return}
+ const del=t.closest('[data-delph]');if(del){const i=+del.dataset.delph;if(S.draft.photos.length<=3){toast('Gardez au moins 3 photos dans la galerie.','image');return}const[p]=S.draft.photos.splice(i,1);afterEdit();renderAdminBody();toast(`Photo supprimée : ${p.alt||'sans titre'}`,'trash');return}
+ if(t.closest('#upBtn')){$('#upFile').click();return}
+ if(t.closest('#sampleBtn')){const used=S.draft.photos.map(p=>p.kind),k=KINDS.find(x=>!used.includes(x))||KINDS[S.draft.photos.length%KINDS.length];S.draft.photos.push({id:'s'+Date.now(),kind:k,alt:''});afterEdit();renderAdminBody();const l=$$('[data-path$=".alt"]');l[l.length-1].focus();toast('Photo ajoutée : renseignez son texte alternatif.','image');return}
+ if(t.closest('#syncBtn')){const b=t.closest('#syncBtn');b.disabled=true;b.textContent='Synchronisation…';setTimeout(()=>{const r=NEWREV[S.queue%NEWREV.length];let msg='Aucun nouvel avis depuis la dernière synchronisation.';if(S.queue<NEWREV.length){S.reviews.unshift(r);S.google.avg=(S.google.avg*S.google.n+r.rating)/(S.google.n+1);S.google.n++;S.queue++;msg=`1 nouvel avis importé (${r.name}, ${r.rating}/5) — visible immédiatement sur le site.`}S.lastSync=Date.now();save();renderSite();renderAdminBody();renderPreview();toast(msg,'star');const sb=$('#syncBtn');if(sb)sb.focus()},1100);return}
+ if(t.closest('#goBook')){setView('site');openBook({},null);return}
+ if(t.closest('#discard')){S.draft=clone(S.pub);lastErrs=[];save();renderAdminBody();renderPreview();updStatus();toast('Modifications annulées : le brouillon correspond au site en ligne.','refresh');return}
+ if(t.closest('#publish'))publish()});
+V.addEventListener('dragover',e=>{const d=e.target.closest('#drop');if(d){e.preventDefault();d.classList.add('over')}});
+V.addEventListener('dragleave',e=>{const d=e.target.closest('#drop');if(d)d.classList.remove('over')});
+V.addEventListener('drop',e=>{const d=e.target.closest('#drop');if(d){e.preventDefault();d.classList.remove('over');addFile(e.dataTransfer.files[0])}});
+function addFile(file){if(!file||!/^image\//.test(file.type)){toast('Choisissez un fichier image (JPG, PNG ou WebP).','image');return}
+ const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const w=Math.min(960,im.width),h=Math.round(im.height*w/im.width),cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(im,0,0,w,h);
+  S.draft.photos.push({id:'u'+Date.now(),kind:'vue',alt:'',src:cv.toDataURL('image/jpeg',.78)});afterEdit();renderAdminBody();const l=$$('[data-path$=".alt"]');l[l.length-1].focus();toast('Photo importée : renseignez son texte alternatif.','image')};im.src=r.result};r.readAsDataURL(file)}
+function publish(){lastErrs=validate(S.draft);if(lastErrs.length){aS=lastErrs[0].sec;renderAdminBody();$('#errsum').focus();return}
+ const secs=SECTIONS.filter(changed).map(s=>s.label),d=$('#dlgDeploy'),dur=30+Math.floor(Math.random()*14);d._from=$('#publish');d._busy=true;
+ d.innerHTML=`<div class="dlg-h"><div><h2 id="dpT">Publication en cours</h2><p class="badge-src">${ic('git')}${esc(secs.join(', '))}</p></div></div><div class="dlg-b"><ul class="log" id="log" aria-live="polite"></ul><div class="actions" style="margin-top:14px;justify-content:flex-end"><button type="button" class="btn" data-dclose disabled>Fermer</button><button type="button" class="btn pri" data-dsite disabled>${ic('globe')}Voir le site en ligne</button></div></div>`;
+ d.showModal();const lines=['Commit « Mise à jour : '+secs.join(', ')+' » sur la branche main','Netlify : build déclenché automatiquement','next build — export statique de 7 pages','Images optimisées (AVIF/WebP, tailles responsives) : '+S.draft.photos.length+' photos','sitemap.xml, robots.txt et balises meta régénérés','Déploiement atomique sur le CDN, cache invalidé',`En ligne — durée totale ${dur} s`];
+ lines.forEach((l,i)=>setTimeout(()=>{const li=document.createElement('li');li.innerHTML=ic('check')+`<span>${esc(l)}</span>`;$('#log').appendChild(li);
+  if(i===lines.length-1){S.pub=clone(S.draft);S.deploys.unshift({date:Date.now(),msg:secs.join(', '),secs:dur});lastErrs=[];save();renderSite();renderAdminBody();updStatus();d._busy=false;$('#dpT').textContent='Site mis à jour';$$('[data-dclose],[data-dsite]',d).forEach(b=>b.disabled=false);$('[data-dsite]',d).focus()}},500*(i+1)))}
+$('#dlgDeploy').addEventListener('cancel',e=>{if(e.target._busy)e.preventDefault()});
+$('#dlgDeploy').addEventListener('click',e=>{const d=$('#dlgDeploy');if(e.target.closest('[data-dclose]'))d.close();if(e.target.closest('[data-dsite]')){d._from=null;d.close();setView('site')}});
+
+/* ---------- Performance & SEO ---------- */
+let pfMode='mobile',pfRun=false;
+const PF={mobile:{s:[98,100,100,100],m:[['LCP','0,9 s','Plus grand élément affiché'],['INP','48 ms','Réactivité aux interactions'],['CLS','0,00','Stabilité visuelle'],['FCP','0,6 s','Premier affichage'],['TBT','10 ms','Temps de blocage'],['Poids','168 Ko','Page d’accueil, compressée']]},desktop:{s:[100,100,100,100],m:[['LCP','0,4 s','Plus grand élément affiché'],['INP','22 ms','Réactivité aux interactions'],['CLS','0,00','Stabilité visuelle'],['FCP','0,3 s','Premier affichage'],['TBT','0 ms','Temps de blocage'],['Poids','212 Ko','Page d’accueil, compressée']]}};
+function renderPerf(){const v=PF[pfMode],c=S.pub,last=new Date(S.deploys[0]?.date||Date.now()).toISOString().slice(0,10),dom='https://www.mas-des-genets.fr';
+ const nights=c.rates.map(r=>+r.night||0);
+ const ld={'@context':'https://schema.org','@type':'LodgingBusiness',name:c.name,description:c.seo.desc,url:dom,image:c.photos.slice(0,3).map((p,i)=>`${dom}/images/${p.kind||'photo'}-${i+1}.avif`),priceRange:`${Math.min(...nights)} € – ${Math.max(...nights)} € / nuit`,address:{'@type':'PostalAddress',addressRegion:'Drôme',addressCountry:'FR'},aggregateRating:{'@type':'AggregateRating',ratingValue:fmt1(S.google.avg).replace(',','.'),reviewCount:S.google.n},amenityFeature:FEATS.map(f=>({'@type':'LocationFeatureSpecification',name:f[1],value:true}))};
+ const pages=['/','/le-gite','/galerie','/tarifs','/avis','/acces','/mentions-legales'];
+ const g=(l,s)=>`<div class="gauge"><div class="gv"><svg viewBox="0 0 96 96" aria-hidden="true"><circle class="bgc" cx="48" cy="48" r="40"/><circle class="fgc" cx="48" cy="48" r="40" stroke-dasharray="${pfRun?0:s*2.513} 251.3"/></svg><b>${pfRun?'…':s}</b></div><span>${l}</span></div>`;
+ $('#view-perf').innerHTML=`<div class="pg-head"><div><h1>Performance, SEO et maintenance</h1><p class="muted small">Analyse de la version publiée — rien à maintenir côté serveur.</p></div><div class="actions"><div class="seg" role="group" aria-label="Appareil analysé" style="margin-left:0"><button type="button" data-pf="mobile" aria-pressed="${pfMode==='mobile'}">${ic('mobile')}Mobile</button><button type="button" data-pf="desktop" aria-pressed="${pfMode==='desktop'}">${ic('monitor')}Ordinateur</button></div><button type="button" class="btn" id="rerun" ${pfRun?'disabled':''}>${ic('refresh')}Relancer l’analyse</button></div></div>
+ <section class="card" aria-labelledby="ps-t"><h2 class="h2s" id="ps-t">${ic('gauge')}PageSpeed Insights — ${pfMode==='mobile'?'mobile':'ordinateur'} (simulation)</h2><p class="sr" aria-live="polite">${pfRun?'Analyse en cours':'Analyse terminée'}</p>
+ <div class="gauges">${['Performance','Accessibilité','Bonnes pratiques','SEO'].map((l,i)=>g(l,v.s[i])).join('')}</div>
+ <div class="cwv">${v.m.map(([k,x,s])=>`<div><span>${k}</span><b>${x}</b><span>${s}</span></div>`).join('')}</div></section>
+ <div class="pf-grid">
+ <section class="card"><h2 class="h2s">${ic('shield')}Architecture « zéro maintenance »</h2><div class="arch"><div class="nd"><b>${ic('text')}Decap CMS</b><span>Vous éditez textes et photos</span></div><div class="ar">${ic('arrow')}</div><div class="nd"><b>${ic('git')}Dépôt Git</b><span>Historique, retour arrière</span></div><div class="ar">${ic('arrow')}</div><div class="nd"><b>${ic('cloud')}Netlify</b><span>Build Next.js + CDN, 0 €/mois</span></div></div>
+ <ul class="ckl">${['Pages HTML statiques : aucune base de données ni PHP exposés','Aucun plugin à mettre à jour, aucune faille WordPress possible','HTTPS, HSTS et Content-Security-Policy configurés','Open Pro et One Shot Pay intégrés via leurs scripts officiels','Avis Google synchronisés par une fonction planifiée gratuite','Dépendances figées : le site ne « casse » pas avec le temps'].map(t=>`<li>${ic('check')}<span>${t}</span></li>`).join('')}</ul></section>
+ <section class="card"><h2 class="h2s">${ic('code')}Balises meta générées</h2><pre class="code">${esc(`<title>${c.seo.title}</title>\n<meta name="description" content="${c.seo.desc}">\n<link rel="canonical" href="${dom}/">\n<meta property="og:title" content="${c.name}">\n<meta property="og:image" content="${dom}/images/${c.photos[0]?.kind||'photo'}-1.avif">\n<meta name="viewport" content="width=device-width, initial-scale=1">`)}</pre></section>
+ <section class="card"><h2 class="h2s">${ic('list')}sitemap.xml (généré au build)</h2><pre class="code">${esc(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map(p=>`  <url><loc>${dom}${p}</loc><lastmod>${last}</lastmod></url>`).join('\n')}\n</urlset>`)}</pre></section>
+ <section class="card"><h2 class="h2s">${ic('code')}Données structurées JSON-LD</h2><pre class="code">${esc(JSON.stringify(ld,null,2))}</pre></section></div>`}
+P.list='M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01';P.gauge='M12 14l4-4M3.3 17a10 10 0 1 1 17.4 0';
+$('#view-perf').addEventListener('click',e=>{const m=e.target.closest('[data-pf]');if(m){pfMode=m.dataset.pf;renderPerf();$(`[data-pf="${pfMode}"]`).focus();return}
+ if(e.target.closest('#rerun')){pfRun=true;renderPerf();setTimeout(()=>{pfRun=false;renderPerf();$('#rerun').focus();toast('Analyse terminée : Core Web Vitals au vert.','gauge')},1200)}});
+
+/* ---------- Réinitialisation ---------- */
+$('#reset').addEventListener('click',()=>{try{localStorage.removeItem(KEY)}catch(e){}$$('dialog[open]').forEach(d=>{d._busy=false;d._from=null;d.close()});S=defaults();aS='accueil';lastErrs=[];pfMode='mobile';setView('site');updStatus();toast('Démo réinitialisée.','refresh')});
+
+renderSite();updStatus();
+})();
+</script>
 </body>
 </html>
