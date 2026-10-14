@@ -2,20 +2,1025 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Assistance informatique — réservation</title>
+<meta name="description" content="Site vitrine d’un service d’assistance informatique avec pages services, tarifs, à propos et contact, réservation de créneau sur planning, paiement en ligne en mode test et espace gérant pour suivre les rendez-vous.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F7F9;--panel:#FFFFFF;--panel-2:#EEF1F5;--ink:#141B26;--muted:#535E6E;--line:#DDE2E9;--line-2:#B4BECB;
+  --accent:#1F4FB8;--accent-ink:#FFFFFF;--accent-soft:#E3EBFA;--accent-text:#1A439E;
+  --hero:#0F1D36;--hero-ink:#F2F5FB;--hero-muted:#BAC6DB;--hero-line:rgba(255,255,255,.16);
+  --band:#FFF4D6;--band-ink:#6B4700;
+  --ok:#1B6B3D;--ok-soft:#DDF1E4;--warn:#8A4A00;--warn-soft:#FCEBD3;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#1F4FB8;--info-soft:#E3EBFA;--gray:#4C5663;--gray-soft:#E8ECF0;
+  --shadow:0 1px 2px rgba(20,27,38,.05),0 6px 18px rgba(20,27,38,.06);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Sora","Manrope",system-ui,sans-serif;
+  --px:clamp(16px,2.5vw,32px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0D1117;--panel:#151B24;--panel-2:#1C2430;--ink:#E6EAF0;--muted:#A0ABBA;--line:#263040;--line-2:#3E4A5D;
+  --accent:#86A9F5;--accent-ink:#0A1530;--accent-soft:#1A2742;--accent-text:#A9C2F8;
+  --hero:#101B30;--hero-ink:#EEF2FA;--hero-muted:#AEBBD2;
+  --band:#2D2410;--band-ink:#F0C877;
+  --ok:#74D39D;--ok-soft:#14301F;--warn:#F2B866;--warn-soft:#352612;--bad:#FF959C;--bad-soft:#3B1B1E;--info:#9CBBF7;--info-soft:#1A2742;--gray:#B7C0CB;--gray-soft:#232C38;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent-text)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);letter-spacing:-.015em}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:14px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.print-only{display:none}
+
+.demo-band{background:var(--band);font-size:13.5px;padding:4px var(--px);display:flex;gap:4px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13.5px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.demo-band button svg{width:16px;height:16px}
+
+.top{position:sticky;top:0;z-index:40;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px 20px;padding:8px var(--px);flex-wrap:wrap;min-height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:18px;color:var(--ink);text-decoration:none;min-height:44px}
+.brand small{display:block;font:500 12px/1.2 var(--font);color:var(--muted);letter-spacing:0}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:2px;align-items:center;flex:1;min-width:0}
+#nav a{min-height:44px;display:inline-flex;align-items:center;gap:7px;padding:0 13px;border-radius:10px;text-decoration:none;color:var(--muted);font-weight:600;white-space:nowrap}
+#nav a:hover{background:var(--panel-2);color:var(--ink)}
+#nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+#nav .nl-adm{margin-left:auto;border:1px solid var(--line-2)}
+#menuBtn{display:none;margin-left:auto}
+@media (max-width:980px){
+  #menuBtn{display:inline-flex}
+  #nav{display:none;order:3;width:100%;flex:none;flex-direction:column;align-items:stretch;padding:6px 0 10px}
+  #nav.open{display:flex}
+  #nav .nl-adm{margin-left:0}
+}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:700;cursor:pointer;color:var(--ink);text-align:center;text-decoration:none;font-size:15px}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.light{background:#fff;border-color:#fff;color:#0F1D36}
+.btn.light:hover{background:#E8EEFA}
+.btn.outline-l{background:transparent;border-color:var(--hero-line);color:var(--hero-ink)}
+.btn.outline-l:hover{background:rgba(255,255,255,.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn.icon{padding:0;width:44px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.block{width:100%}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:999px;line-height:1.5}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--info-soft);color:var(--info)}.b-gray{background:var(--gray-soft);color:var(--gray)}
+
+/* vitrine */
+.sec{padding:56px var(--px)}
+.in{max-width:1240px;margin:0 auto}
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 24px;flex-wrap:wrap;margin-bottom:28px}
+.sec-h h2{font-size:clamp(24px,3vw,32px)}
+.sec-h p{max-width:620px}
+.eyebrow{font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text);margin-bottom:8px}
+.hero{background:var(--hero);color:var(--hero-ink);padding:0 var(--px)}
+.hero .in{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:40px;align-items:center;padding:64px 0}
+.hero h1{font-size:clamp(30px,4.6vw,54px);margin-bottom:18px}
+.hero h1 em{font-style:normal;color:#9DBBFF}
+.hero .lead{font-size:18px;color:var(--hero-muted);max-width:600px;margin-bottom:28px}
+.hero .eyebrow{color:#9DBBFF}
+.pts{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:28px;color:var(--hero-muted);font-size:14.5px}
+.pts li{display:flex;gap:8px;align-items:center}
+.pts svg{color:#9DBBFF}
+.hcard{border:1px solid var(--hero-line);background:rgba(255,255,255,.05);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:16px}
+.hcard .big{font-family:var(--head);font-size:24px;font-weight:700}
+.hcard .row{display:flex;gap:12px;align-items:center;padding-top:14px;border-top:1px solid var(--hero-line);color:var(--hero-muted);font-size:14.5px}
+.hcard .row b{color:var(--hero-ink)}
+@media (max-width:860px){.hero .in{grid-template-columns:minmax(0,1fr);padding:40px 0}}
+
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow);min-width:0}
+.svc{display:flex;flex-direction:column;gap:12px}
+.svc .ico{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center}
+.svc h3{font-size:19px}
+.svc ul{display:flex;flex-direction:column;gap:6px;font-size:14.5px;color:var(--muted)}
+.svc li{display:flex;gap:8px;align-items:flex-start}
+.svc li svg{width:17px;height:17px;color:var(--ok);margin-top:3px}
+.svc .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--line)}
+.price{font-family:var(--head);font-weight:700;font-size:22px}
+.price small{font:500 13px var(--font);color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--panel-2);color:var(--muted);display:inline-flex;gap:5px;align-items:center}
+.chip svg{width:14px;height:14px}
+
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;counter-reset:s}
+.how li{position:relative;padding:22px 22px 22px 74px;background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.how li::before{counter-increment:s;content:counter(s);position:absolute;left:22px;top:22px;width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-family:var(--head)}
+.how h3{font-size:17px;margin-bottom:6px}
+@media (max-width:820px){.how{grid-template-columns:minmax(0,1fr)}}
+.alt{background:var(--panel-2)}
+.quote{display:flex;flex-direction:column;gap:14px}
+.stars{display:flex;gap:2px;color:#B86E00}
+@media (prefers-color-scheme:dark){.stars{color:#F0B24D}}
+.stars svg{width:17px;height:17px;fill:currentColor;stroke:none}
+.who{display:flex;gap:12px;align-items:center;margin-top:auto}
+.av{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700;flex:none}
+.zone{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:820px){.zone{grid-template-columns:minmax(0,1fr)}}
+.cta{background:var(--accent);color:var(--accent-ink);border-radius:20px;padding:32px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.cta h2{font-size:clamp(22px,2.6vw,28px)}
+.cta .btn{background:var(--accent-ink);color:var(--accent);border-color:var(--accent-ink)}
+.page-h{padding:44px var(--px) 8px}
+.page-h h1{font-size:clamp(28px,3.6vw,40px);margin-bottom:10px}
+.page-h p{max-width:700px}
+details.faq{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+details.faq summary{cursor:pointer;padding:14px 18px;font-weight:700;min-height:44px;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::after{content:"+";font-size:22px;color:var(--accent-text);line-height:1}
+details.faq[open] summary::after{content:"–"}
+details.faq p{padding:0 18px 16px;color:var(--muted)}
+.two{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.stats b{display:block;font-family:var(--head);font-size:24px}
+@media (max-width:480px){.stats{grid-template-columns:minmax(0,1fr)}}
+.portrait{aspect-ratio:4/3;border-radius:18px;background:var(--hero);display:grid;place-items:center;color:#9DBBFF;position:relative;overflow:hidden}
+.portrait span{font-family:var(--head);font-size:64px;font-weight:700;color:var(--hero-ink)}
+.portrait p{position:absolute;bottom:14px;left:16px;right:16px;color:var(--hero-muted);font-size:14px}
+.list-ic{display:flex;flex-direction:column;gap:14px}
+.list-ic li{display:flex;gap:12px;align-items:flex-start}
+.list-ic li>svg{color:var(--accent-text);margin-top:2px}
+footer{background:var(--panel);border-top:1px solid var(--line);padding:36px var(--px) 28px;margin-top:40px}
+footer .in{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:24px}
+footer h3{font-size:15px;margin-bottom:10px}
+footer li{margin-bottom:6px;color:var(--muted);font-size:14.5px}
+footer .legal{max-width:1240px;margin:24px auto 0;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:700;font-size:14px}
+.field.full{grid-column:1/-1}
+.hint{font-size:13px;color:var(--muted)}
+.err{font-size:13.5px;color:var(--bad);font-weight:700}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{min-height:96px;resize:vertical}
+[aria-invalid="true"]{border-color:var(--bad)!important}
+.fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:600px){.fg{grid-template-columns:minmax(0,1fr)}}
+.check{display:flex;gap:10px;align-items:flex-start;min-height:44px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0}
+
+/* booking */
+.app{padding:24px var(--px) 40px}
+.app-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 20px;flex-wrap:wrap;margin-bottom:20px}
+.app-h h1{font-size:clamp(24px,3vw,32px)}
+.steps{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.steps li{flex:1;min-width:0}
+.steps button,.steps span.sx{width:100%;display:flex;gap:10px;align-items:center;min-height:48px;padding:6px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-weight:700;font-size:14px;color:var(--muted);text-align:left}
+.steps button{cursor:pointer}
+.steps button:hover{border-color:var(--line-2)}
+.steps .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--panel-2);font-size:13px;flex:none}
+.steps .cur{border-color:var(--accent);color:var(--ink)}
+.steps .cur .n{background:var(--accent);color:var(--accent-ink)}
+.steps .ok .n{background:var(--ok-soft);color:var(--ok)}
+.steps .ok .n svg{width:16px;height:16px}
+@media (max-width:700px){.steps li:not(.c) .lb{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.steps li{flex:0 0 auto}.steps li.c{flex:1}.steps button,.steps span.sx{justify-content:center}}
+.bk{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);gap:24px;align-items:start}
+@media (max-width:1000px){.bk{grid-template-columns:minmax(0,1fr)}.sum{position:static}}
+.bk-main{display:flex;flex-direction:column;gap:22px}
+.st-h{font-size:22px;margin-bottom:4px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:12px;margin-top:12px}
+.opt{position:relative;display:flex;gap:14px;align-items:flex-start;padding:16px;border:1.5px solid var(--line);border-radius:14px;background:var(--panel);cursor:pointer;min-width:0}
+.opt:hover{border-color:var(--line-2)}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt .oi{width:42px;height:42px;border-radius:11px;background:var(--panel-2);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.opt:has(input:checked) .oi{background:var(--accent);color:var(--accent-ink)}
+.opt .ob{display:flex;flex-direction:column;gap:3px;min-width:0}
+.opt .om{font-weight:700;font-size:14px;margin-top:4px}
+.opt .tick{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2)}
+.opt:has(input:checked) .tick{border-color:var(--accent);background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/13px no-repeat}
+.opt .ob b{padding-right:26px}
+.wk{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wk b{min-width:0;flex:1;text-align:center;font-size:15px}
+.days{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:14px}
+@media (max-width:640px){.days{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.day{min-height:72px;border:1.5px solid var(--line);background:var(--panel);border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px 4px;min-width:0}
+.day .dw{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700}
+.day .dd{font-family:var(--head);font-weight:700;font-size:18px}
+.day .df{font-size:12px;color:var(--ok);font-weight:700}
+.day:disabled{cursor:not-allowed;background:var(--panel-2);opacity:.75}
+.day:disabled .df{color:var(--muted)}
+.day[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,128px),1fr));gap:8px;margin-top:14px}
+.slot{min-height:52px;border:1.5px solid var(--line-2);border-radius:12px;background:var(--panel);font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;padding:4px}
+.slot small{font-weight:500;font-size:12px;color:var(--muted)}
+.slot:hover:not(:disabled){border-color:var(--accent)}
+.slot:disabled{border-style:dashed;border-color:var(--line);color:var(--muted);cursor:not-allowed;text-decoration:line-through}
+.slot:disabled small{text-decoration:none}
+.slot[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.slot[aria-pressed="true"] small{color:var(--accent-ink)}
+.nav-st{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:6px}
+.sum{position:sticky;top:84px}
+.sum h2{font-size:18px;margin-bottom:14px}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:0}
+.dl dt{color:var(--muted);font-size:14px}
+.dl dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere}
+.tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);gap:12px}
+.tot b{font-family:var(--head);font-size:24px}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--muted);margin-top:14px}
+.note svg{width:18px;height:18px;margin-top:2px;color:var(--ok)}
+.test{display:flex;gap:10px;align-items:flex-start;background:var(--band);color:var(--ink);border:1px dashed var(--band-ink);border-radius:12px;padding:12px 14px;font-size:14px}
+.test b{color:var(--band-ink)}
+.cardbox{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--panel-2);display:flex;flex-direction:column;gap:14px}
+.done{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 0}
+.done .ck{width:68px;height:68px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.done .ck svg{width:34px;height:34px;stroke-width:2.6}
+.ref{font-family:var(--head);font-weight:700;font-size:20px;letter-spacing:.03em}
+.spin{width:18px;height:18px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* admin */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px;margin-bottom:20px}
+.kpi{display:flex;gap:14px;align-items:center}
+.kpi .ki{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent-text)}
+.kpi b{display:block;font-family:var(--head);font-size:24px;line-height:1.15}
+.kpi span{font-size:13.5px;color:var(--muted)}
+.adm{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:1360px){.adm{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-bottom:12px}
+.card-h h2{font-size:19px}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);font-size:14px;overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--panel-2);font-weight:700}
+tr:last-child td{border-bottom:0}
+.plan{min-width:760px;table-layout:fixed}
+.plan th:first-child,.plan td:first-child{width:64px;color:var(--muted);font-weight:700}
+.plan th.today{color:var(--accent-text)}
+.plan td{padding:4px;height:56px}
+.plan td.lunch{background:var(--panel-2);text-align:center;color:var(--muted);font-size:12.5px;height:28px;padding:4px}
+.pc{width:100%;height:100%;min-height:48px;border-radius:9px;border:1px solid transparent;cursor:pointer;text-align:left;padding:5px 8px;font-size:12.5px;line-height:1.3;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.pc b{font-size:13px;overflow-wrap:anywhere}
+.pc.bk-info{background:var(--info-soft);color:var(--ink);border-color:var(--info)}
+.pc.bk-warn{background:var(--warn-soft);color:var(--ink);border-color:var(--warn)}
+.pc.bk-gray{background:var(--gray-soft);color:var(--ink);border-color:var(--line-2)}
+.pc.free{background:transparent;border:1px dashed var(--line);color:var(--muted);align-items:center;justify-content:center}
+.pc.free:hover{border-color:var(--accent);color:var(--accent-text)}
+.pc.blk{background:repeating-linear-gradient(135deg,var(--panel-2) 0 6px,transparent 6px 12px);border:1px solid var(--line-2);color:var(--muted);align-items:center;justify-content:center;font-weight:700}
+.pc.past{cursor:default;border:0;background:transparent;color:var(--muted);align-items:center;justify-content:center}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.filters .field{flex:1 1 180px}
+.tbl{min-width:640px}
+.tbl td .lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font-weight:700;color:var(--accent-text);text-decoration:underline;text-underline-offset:3px;text-align:left;overflow-wrap:anywhere}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.legend{display:flex;gap:8px 14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid}
+
+dialog{border:0;border-radius:18px;padding:0;width:min(580px,calc(100vw - 24px));max-height:calc(100vh - 32px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(8,14,26,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:19px}
+.dlg-b{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.dlg-f{padding:14px 20px 18px;border-top:1px solid var(--line)}
+.dlg-b .dl dd{text-align:left}
+@media (max-width:480px){.dlg-b .dl{grid-template-columns:minmax(0,1fr)}.dlg-b .dl dt{margin-top:4px}}
+
+#toasts{position:fixed;right:16px;bottom:16px;z-index:100;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 32px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:600;font-size:14.5px;display:flex;gap:10px;align-items:flex-start;animation:tin .2s ease-out}
+.toast svg{margin-top:1px}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+
+@media print{
+  body{background:#fff;color:#000}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;font:13pt/1.5 var(--font);color:#000}
+  #printArea table td,#printArea table th{border-bottom:1px solid #ccc;color:#000;background:#fff}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="resetBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.2L3 16M3 21v-5h5"/></svg>Réinitialiser la démo</button></div>
+
+<header class="top">
+  <a class="brand" href="#/accueil" aria-label="Nodal Assistance, accueil">
+    <span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M8 10l3 3 5-5"/></svg></span>
+    <span>Nodal Assistance<small>Dépannage informatique</small></span>
+  </a>
+  <button class="btn icon" id="menuBtn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Ouvrir le menu"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <nav id="nav" aria-label="Navigation principale">
+    <a href="#/accueil">Accueil</a>
+    <a href="#/services">Services &amp; tarifs</a>
+    <a href="#/reserver">Réserver</a>
+    <a href="#/apropos">À propos</a>
+    <a href="#/contact">Contact</a>
+    <a href="#/gerant" class="nl-adm"><i data-ic="grid"></i>Espace gérant</a>
+  </nav>
+</header>
+
+<main id="main">
+<!-- ACCUEIL -->
+<section data-page="accueil">
+  <div class="hero"><div class="in">
+    <div>
+      <p class="eyebrow">Particuliers &amp; petites entreprises</p>
+      <h1 tabindex="-1">Votre informatique dépannée, <em>sans jargon</em> et sans attendre.</h1>
+      <p class="lead">Ordinateur lent, imprimante capricieuse, virus, nouvelle box : un technicien vous aide à domicile, à l’atelier ou à distance. Choisissez votre créneau en ligne et réglez en toute sécurité.</p>
+      <div class="actions">
+        <a class="btn light" href="#/reserver"><i data-ic="cal"></i>Réserver un créneau</a>
+        <a class="btn outline-l" href="#/services">Voir les tarifs</a>
+      </div>
+      <ul class="pts">
+        <li><i data-ic="check"></i>Intervention sous 48 h</li>
+        <li><i data-ic="check"></i>Prix annoncé avant de réserver</li>
+        <li><i data-ic="check"></i>Paiement en ligne ou sur place</li>
+      </ul>
+    </div>
+    <div class="hcard">
+      <p class="muted" style="color:var(--hero-muted)">Prochain créneau disponible</p>
+      <p class="big" id="nextSlot">—</p>
+      <a class="btn light block" href="#/reserver">Choisir mon créneau</a>
+      <div class="row"><i data-ic="star"></i><span><b>4,9 / 5</b> sur 186 avis clients</span></div>
+      <div class="row"><i data-ic="clock"></i><span><b>Lun.–sam.</b> 9 h – 12 h · 14 h – 18 h</span></div>
+      <div class="row"><i data-ic="phone"></i><span><b>04 78 00 12 34</b> · urgence entreprises</span></div>
+    </div>
+  </div></div>
+
+  <div class="sec"><div class="in">
+    <div class="sec-h"><div><p class="eyebrow">Prestations</p><h2>Ce que je peux faire pour vous</h2></div><a class="btn" href="#/services">Tous les tarifs <i data-ic="arrow"></i></a></div>
+    <div class="grid3" id="homeSvc"></div>
+  </div></div>
+
+  <div class="sec alt"><div class="in">
+    <div class="sec-h"><div><p class="eyebrow">Simple et rapide</p><h2>Comment ça marche</h2></div></div>
+    <ol class="how">
+      <li><h3>Choisissez la prestation</h3><p class="muted">Le prix et la durée sont affichés d’avance : pas de surprise sur la facture.</p></li>
+      <li><h3>Réservez un créneau</h3><p class="muted">Le planning affiche les disponibilités en temps réel, du lundi au samedi.</p></li>
+      <li><h3>Réglez comme vous voulez</h3><p class="muted">Carte bancaire en ligne, ou sur place le jour de l’intervention.</p></li>
+    </ol>
+  </div></div>
+
+  <div class="sec"><div class="in">
+    <div class="sec-h"><div><p class="eyebrow">Avis clients</p><h2>Ils m’ont fait confiance</h2></div></div>
+    <div class="grid3" id="quotes"></div>
+  </div></div>
+
+  <div class="sec alt"><div class="in zone">
+    <div>
+      <p class="eyebrow">Zone d’intervention</p>
+      <h2 style="font-size:clamp(24px,3vw,32px);margin-bottom:12px">Montval et alentours</h2>
+      <p class="muted">Déplacement offert dans un rayon de 15 km autour de l’atelier, 10 € au-delà (jusqu’à 30 km). Assistance à distance partout en France.</p>
+    </div>
+    <div class="chips" aria-label="Communes desservies" role="list">
+      <span class="chip" role="listitem"><i data-ic="pin"></i>Montval</span><span class="chip" role="listitem"><i data-ic="pin"></i>Saint-Aubin-la-Rive</span><span class="chip" role="listitem"><i data-ic="pin"></i>Les Granges</span><span class="chip" role="listitem"><i data-ic="pin"></i>Beaulieu-sur-Orne</span><span class="chip" role="listitem"><i data-ic="pin"></i>Villeneuve-les-Prés</span><span class="chip" role="listitem"><i data-ic="pin"></i>Marcilly</span><span class="chip" role="listitem"><i data-ic="pin"></i>Le Puy-Fort</span><span class="chip" role="listitem"><i data-ic="pin"></i>Chanteloup</span>
+    </div>
+  </div></div>
+
+  <div class="sec"><div class="in">
+    <div class="cta"><div><h2>Un souci informatique aujourd’hui ?</h2><p>Réservez en 2 minutes, je m’occupe du reste.</p></div><a class="btn" href="#/reserver">Réserver un créneau</a></div>
+  </div></div>
+</section>
+
+<!-- SERVICES -->
+<section data-page="services" hidden>
+  <div class="page-h"><div class="in">
+    <p class="eyebrow">Services &amp; tarifs</p>
+    <h1 tabindex="-1">Des prix clairs, affichés avant de réserver</h1>
+    <p class="muted">Tarifs TTC. Si l’intervention dure moins longtemps que prévu, vous ne payez que le temps passé. Prestations à domicile éligibles au crédit d’impôt de 50 % (services à la personne).</p>
+  </div></div>
+  <div class="sec" style="padding-top:28px"><div class="in">
+    <div class="grid3" id="allSvc"></div>
+  </div></div>
+  <div class="sec alt"><div class="in two">
+    <div>
+      <p class="eyebrow">Professionnels</p>
+      <h2 style="font-size:clamp(22px,2.8vw,30px);margin-bottom:12px">Contrat de maintenance TPE</h2>
+      <p class="muted" style="margin-bottom:16px">Pour les commerces, cabinets et associations de 1 à 10 postes : un interlocuteur unique, des sauvegardes vérifiées et une intervention prioritaire.</p>
+      <ul class="list-ic">
+        <li><i data-ic="shield"></i><span>Surveillance des sauvegardes et mises à jour chaque mois</span></li>
+        <li><i data-ic="clock"></i><span>Intervention sous 4 h ouvrées en cas de panne bloquante</span></li>
+        <li><i data-ic="phone"></i><span>Assistance à distance illimitée pour les petits soucis</span></li>
+      </ul>
+      <p style="margin:18px 0 14px"><span class="price">dès 49 €</span> <span class="muted">HT / mois</span></p>
+      <a class="btn primary" href="#/contact" data-subject="Contrat de maintenance">Demander un devis</a>
+    </div>
+    <div>
+      <h2 style="font-size:20px;margin-bottom:14px">Questions fréquentes</h2>
+      <details class="faq"><summary>Que se passe-t-il si le problème n’est pas réglé ?</summary><p>Si je ne trouve pas de solution, seul le diagnostic est facturé (25 €). Je vous oriente alors vers la meilleure option : réparation, remplacement de pièce ou matériel neuf.</p></details>
+      <details class="faq"><summary>Puis-je annuler ou déplacer mon rendez-vous ?</summary><p>Oui, gratuitement jusqu’à 24 h avant le créneau. Le paiement en ligne est alors intégralement remboursé.</p></details>
+      <details class="faq"><summary>Comment fonctionne l’assistance à distance ?</summary><p>Vous recevez par e-mail un lien vers un petit logiciel sécurisé. Vous voyez tout ce que je fais et pouvez couper la connexion à tout moment.</p></details>
+      <details class="faq"><summary>Quels moyens de paiement acceptez-vous ?</summary><p>Carte bancaire en ligne lors de la réservation, ou sur place : carte, chèque, espèces. Une facture vous est envoyée par e-mail.</p></details>
+    </div>
+  </div></div>
+</section>
+
+<!-- RÉSERVER -->
+<section data-page="reserver" class="app" hidden>
+  <div class="app-h"><div><h1 tabindex="-1">Réserver une intervention</h1><p class="muted">Quatre étapes, environ deux minutes. Annulation gratuite jusqu’à 24 h avant.</p></div></div>
+  <ol class="steps" id="bkSteps" aria-label="Étapes de la réservation"></ol>
+  <div class="bk">
+    <div class="card bk-main" id="bkBody"></div>
+    <aside class="card sum" id="bkSum" aria-label="Récapitulatif"></aside>
+  </div>
+</section>
+
+<!-- À PROPOS -->
+<section data-page="apropos" hidden>
+  <div class="page-h"><div class="in"><p class="eyebrow">À propos</p><h1 tabindex="-1">Un technicien de proximité, joignable et patient</h1></div></div>
+  <div class="sec" style="padding-top:24px"><div class="in two">
+    <div>
+      <p style="margin-bottom:14px">Je m’appelle Thomas Bernier. Après dix ans au support informatique d’une entreprise de 300 salariés, j’ai créé Nodal Assistance pour offrir aux particuliers et aux petites structures le même niveau de service, avec des explications claires et des prix justes.</p>
+      <p class="muted">J’interviens chez vous, dans vos locaux ou à distance, et je prends le temps de vous montrer comment éviter que le problème ne revienne.</p>
+      <div class="stats">
+        <div><b>1 200+</b><span class="muted small">interventions réalisées</span></div>
+        <div><b>4,9 / 5</b><span class="muted small">satisfaction moyenne</span></div>
+        <div><b>48 h</b><span class="muted small">délai moyen d’intervention</span></div>
+      </div>
+      <h2 style="font-size:20px;margin:6px 0 14px">Mes engagements</h2>
+      <ul class="list-ic">
+        <li><i data-ic="euro"></i><span><b>Prix annoncés d’avance.</b> Le tarif affiché est celui que vous payez.</span></li>
+        <li><i data-ic="lock"></i><span><b>Confidentialité.</b> Vos fichiers et mots de passe ne sont jamais conservés.</span></li>
+        <li><i data-ic="book"></i><span><b>Pédagogie.</b> Une fiche récapitulative est remise après chaque intervention.</span></li>
+      </ul>
+    </div>
+    <div class="portrait" aria-hidden="true"><span>TB</span><p>Atelier : 12 rue des Forges, Montval</p></div>
+  </div></div>
+</section>
+
+<!-- CONTACT -->
+<section data-page="contact" hidden>
+  <div class="page-h"><div class="in"><p class="eyebrow">Contact</p><h1 tabindex="-1">Une question avant de réserver ?</h1><p class="muted">Réponse sous 2 h ouvrées. Pour une panne bloquante, préférez le téléphone.</p></div></div>
+  <div class="sec" style="padding-top:24px"><div class="in two">
+    <form class="card" id="contactForm" novalidate>
+      <div class="fg">
+        <div class="field"><label for="cName">Nom et prénom</label><input type="text" id="cName" autocomplete="name" aria-describedby="cNameE"><p class="err" id="cNameE"></p></div>
+        <div class="field"><label for="cMail">E-mail</label><input type="email" id="cMail" autocomplete="email" aria-describedby="cMailE"><p class="err" id="cMailE"></p></div>
+        <div class="field"><label for="cTel">Téléphone <span class="muted">(facultatif)</span></label><input type="tel" id="cTel" autocomplete="tel"></div>
+        <div class="field"><label for="cSubj">Objet</label><select id="cSubj"><option>Question sur une prestation</option><option>Demande de devis</option><option>Contrat de maintenance</option><option>Suivi d’une intervention</option></select></div>
+        <div class="field full"><label for="cMsg">Message</label><textarea id="cMsg" aria-describedby="cMsgE"></textarea><p class="err" id="cMsgE"></p></div>
+      </div>
+      <div class="actions" style="margin-top:16px"><button class="btn primary" type="submit"><i data-ic="mail"></i>Envoyer le message</button></div>
+      <p id="cOk" class="small" role="status" style="margin-top:12px;color:var(--ok);font-weight:700"></p>
+    </form>
+    <div class="card">
+      <ul class="list-ic">
+        <li><i data-ic="phone"></i><span><b>04 78 00 12 34</b><br><span class="muted small">Lun.–sam., 9 h – 18 h</span></span></li>
+        <li><i data-ic="mail"></i><span><b>bonjour@nodal-assistance.fr</b><br><span class="muted small">Réponse sous 2 h ouvrées</span></span></li>
+        <li><i data-ic="pin"></i><span><b>12 rue des Forges, 00000 Montval</b><br><span class="muted small">Atelier sur rendez-vous uniquement</span></span></li>
+        <li><i data-ic="clock"></i><span><b>Horaires</b><br><span class="muted small">9 h – 12 h et 14 h – 18 h, du lundi au samedi</span></span></li>
+      </ul>
+      <a class="btn primary block" href="#/reserver" style="margin-top:20px">Réserver directement un créneau</a>
+    </div>
+  </div></div>
+</section>
+
+<!-- GÉRANT -->
+<section data-page="gerant" class="app" hidden>
+  <div class="app-h">
+    <div><h1 tabindex="-1">Espace gérant</h1><p class="muted">Vue réservée au professionnel : planning, encaissements et suivi des interventions.</p></div>
+    <div class="actions"><button class="btn" type="button" id="csvBtn"><i data-ic="dl"></i>Exporter (CSV)</button><a class="btn primary" href="#/reserver"><i data-ic="plus"></i>Nouvelle réservation</a></div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="adm">
+    <div class="card">
+      <div class="card-h"><h2>Planning de la semaine</h2>
+        <div class="wk"><button class="btn icon" type="button" id="aPrev" aria-label="Semaine précédente"><i data-ic="cl"></i></button><b id="aWk" aria-live="polite"></b><button class="btn icon" type="button" id="aNext" aria-label="Semaine suivante"><i data-ic="cr"></i></button></div>
+      </div>
+      <p class="hint" style="margin-bottom:10px">Cliquez sur un créneau libre pour le bloquer (congé, rendez-vous personnel) : il disparaît aussitôt du planning public.</p>
+      <div class="tw"><table class="plan" id="plan"></table></div>
+      <div class="legend"><span><i style="background:var(--info-soft);border-color:var(--info)"></i>Confirmée</span><span><i style="background:var(--warn-soft);border-color:var(--warn)"></i>À clôturer</span><span><i style="background:var(--gray-soft);border-color:var(--line-2)"></i>Terminée</span><span><i style="border-color:var(--line-2);border-style:dashed"></i>Libre</span><span><i style="background:var(--panel-2);border-color:var(--line-2)"></i>Bloqué</span></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Réservations</h2><span class="muted small" id="aCount" aria-live="polite"></span></div>
+      <div class="filters">
+        <div class="field"><label for="aQ">Rechercher</label><input type="search" id="aQ" placeholder="Nom, référence, prestation…"></div>
+        <div class="field"><label for="aSt">Statut</label><select id="aSt"><option value="all">Toutes</option><option value="up">À venir</option><option value="due">À encaisser</option><option value="close">À clôturer</option><option value="done">Terminées</option><option value="cancel">Annulées</option></select></div>
+      </div>
+      <div class="tw"><table class="tbl" id="tbl"></table></div>
+    </div>
+  </div>
+</section>
 </main>
+
+<footer>
+  <div class="in">
+    <div><p class="brand" style="font-size:17px">Nodal Assistance</p><p class="muted small">Dépannage, installation et formation informatique pour particuliers et TPE, à domicile, à l’atelier ou à distance.</p></div>
+    <div><h3>Contact</h3><ul><li>04 78 00 12 34</li><li>bonjour@nodal-assistance.fr</li><li>12 rue des Forges, Montval</li></ul></div>
+    <div><h3>Horaires</h3><ul><li>Lundi – samedi</li><li>9 h – 12 h · 14 h – 18 h</li></ul></div>
+    <div><h3>Liens</h3><ul><li><a href="#/services">Services &amp; tarifs</a></li><li><a href="#/reserver">Réserver</a></li><li><a href="#/contact">Contact</a></li></ul></div>
+  </div>
+  <p class="legal">© 2026 Nodal Assistance — entreprise fictive. SIRET 000 000 000 00000. TVA non applicable, art. 293 B du CGI.</p>
+</footer>
+
+<dialog id="dlg" aria-labelledby="dlgT"><div id="dlgBody"></div></dialog>
+<div id="toasts" aria-live="polite" role="status"></div>
+<div id="printArea" class="print-only"></div>
+
+<script>
+(()=>{
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const IC={
+ wifi:'<path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0"/><circle cx="12" cy="19.5" r="1"/>',
+ home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+ book:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+ db:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/>',
+ tool:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
+ clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+ cl:'<path d="m15 18-6-6 6-6"/>',cr:'<path d="m9 18 6-6-6-6"/>',
+ arrow:'<path d="M5 12h14M13 5l7 7-7 7"/>',
+ x:'<path d="M18 6 6 18M6 6l12 12"/>',
+ lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+ print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+ phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+ mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>',
+ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ grid:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+ star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+ euro:'<path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/>',
+ dl:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+ trend:'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]||''}</svg>`;
+$$('i[data-ic]').forEach(e=>e.outerHTML=ic(e.dataset.ic));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=n=>n.toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const monday=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());return addD(x,-((x.getDay()+6)%7))};
+const F=o=>new Intl.DateTimeFormat('fr-FR',o);
+const fLong=F({weekday:'long',day:'numeric',month:'long'}),fShort=F({weekday:'short',day:'numeric',month:'short'}),fDM=F({day:'numeric',month:'long'}),fW=F({weekday:'short'});
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const hh=h=>`${pad(h)}:00`;
+
+const SV=[
+ {id:'distance',name:'Assistance à distance',icon:'wifi',dur:1,price:35,modes:['distance'],short:'Prise en main sécurisée de votre ordinateur pour régler un souci rapidement.',items:['Messagerie, impression, lenteurs','Logiciel bloqué, mise à jour ratée','Sans déplacement, partout en France']},
+ {id:'depannage',name:'Dépannage à domicile',icon:'home',dur:1,price:59,modes:['domicile'],short:'Diagnostic et réparation sur place, chez vous ou dans vos locaux.',items:['Ordinateur qui ne démarre plus','Wi-Fi, box, imprimante en panne','Diagnostic inclus dans le prix']},
+ {id:'install',name:'Installation & mise en service',icon:'monitor',dur:2,price:89,modes:['domicile','atelier'],short:'Nouvel ordinateur, box ou imprimante : tout est prêt à l’emploi.',items:['Transfert de vos fichiers et favoris','Comptes, antivirus et sauvegarde','Imprimante et Wi-Fi reliés']},
+ {id:'nettoyage',name:'Nettoyage & sécurité',icon:'shield',dur:2,price:79,modes:['atelier','domicile','distance'],short:'Suppression des virus et logiciels indésirables, démarrage accéléré.',items:['Analyse antivirus complète','Nettoyage des programmes inutiles','Mises à jour de sécurité']},
+ {id:'cours',name:'Cours particulier',icon:'book',dur:1,price:45,modes:['domicile','distance'],short:'Apprendre à son rythme : smartphone, e-mails, photos, démarches en ligne.',items:['Programme adapté à votre niveau','Fiche mémo remise après le cours','Idéal pour les débutants']},
+ {id:'donnees',name:'Récupération de données',icon:'db',dur:1,price:69,modes:['atelier'],short:'Disque dur, clé USB ou carte mémoire défaillants : on récupère vos fichiers.',items:['Diagnostic du support','Copie sur un nouveau support','Devis avant toute opération lourde']}
+];
+const svc=id=>SV.find(s=>s.id===id);
+const MODES={domicile:{label:'À domicile',icon:'home',hint:'Déplacement offert jusqu’à 15 km'},atelier:{label:'À l’atelier',icon:'tool',hint:'Dépôt au 12 rue des Forges, Montval'},distance:{label:'À distance',icon:'wifi',hint:'Lien de connexion envoyé par e-mail'}};
+const HOURS=[9,10,11,14,15,16,17];
+const ZONE_FEE=10;
+const durTxt=d=>d===1?'1 h':`${d} h`;
+const QUOTES=[
+ ['Mon ordinateur portable mettait 10 minutes à démarrer. Thomas l’a remis d’aplomb en une heure et m’a expliqué comment éviter que ça recommence.','Monique D.','Particulière, Montval'],
+ ['Réservation en ligne très simple, paiement à l’avance et intervention à l’heure pile. Notre caisse et l’imprimante du magasin refonctionnent.','Laurent P.','Gérant de boutique, Marcilly'],
+ ['Des cours à domicile d’une grande patience : je fais maintenant mes visios avec mes petits-enfants toute seule.','Josette R.','Particulière, Les Granges']
+];
+
+/* ---------- state ---------- */
+const KEY='demo-491283-v1';
+const NAMES=[['Martine','Lefèvre'],['Jacques','Roussel'],['Sophie','Garnier'],['Karim','Benali'],['Élodie','Marchand'],['Bernard','Collin'],['Nathalie','Perrin'],['Lucas','Fontaine'],['Hélène','Robin'],['Patrick','Gauthier'],['Camille','Dumas'],['Yves','Brunet'],['Agnès','Lemoine'],['Julien','Carré'],['Odile','Vasseur'],['Marc','Tessier'],['Inès','Moreau'],['Gérard','Lambert']];
+const ADDR=['8 allée des Peupliers, Montval','23 rue du Moulin, Saint-Aubin-la-Rive','5 place de l’Église, Marcilly','41 avenue Jean-Jaurès, Montval','2 impasse des Lilas, Les Granges','17 chemin de la Côte, Chanteloup'];
+const NOTES={distance:'Outlook ne reçoit plus les e-mails depuis hier.',depannage:'L’ordinateur s’éteint tout seul au bout de quelques minutes.',install:'Nouvel ordinateur portable à configurer, récupérer les photos de l’ancien.',nettoyage:'Beaucoup de publicités qui s’ouvrent, ordinateur très lent.',cours:'Apprendre à envoyer des photos par e-mail et utiliser la visio.',donnees:'Disque dur externe qui ne s’ouvre plus, photos de famille dessus.'};
+const SEED=[[-1,3,10,'depannage','domicile',1],[-1,4,14,'install','domicile',1],[0,0,9,'depannage','domicile',1],[0,0,14,'distance','distance',1],[0,1,10,'install','domicile',1],[0,1,15,'cours','domicile',0],[0,2,9,'nettoyage','atelier',1],[0,2,16,'distance','distance',0],[0,3,10,'depannage','domicile',0],[0,3,14,'install','atelier',1],[0,4,9,'cours','distance',1],[0,4,11,'donnees','atelier',0],[0,4,15,'depannage','domicile',1],[0,5,10,'nettoyage','domicile',1],[1,0,10,'install','domicile',1],[1,1,14,'depannage','domicile',0],[1,2,9,'distance','distance',1],[1,3,15,'cours','domicile',1]];
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function startOf(b){const d=pd(b.date);d.setHours(b.hour);return d}
+function seed(){
+  const m0=monday(new Date()),now=new Date();
+  const bookings=SEED.map((r,i)=>{
+    const[w,d,h,s,mode,online]=r,[f,l]=NAMES[i%NAMES.length];
+    const date=ymd(addD(m0,w*7+d));
+    const zone=(mode==='domicile'&&i%4===1)?'2':'1';
+    const b={id:'b'+i,ref:'NA-'+(1001+i),svc:s,mode,date,hour:h,
+      c:{first:f,last:l,email:`${norm(f)}.${norm(l)}@exemple.fr`,phone:`06 ${pad(12+i)} ${pad(34+i)} ${pad(56-i)} ${pad(70+i%20)}`,address:mode==='domicile'?ADDR[i%ADDR.length]:'',zone,note:NOTES[s]},
+      pay:online?'card':'onsite',paid:!!online,status:'confirmé',total:svc(s).price+(mode==='domicile'&&zone==='2'?ZONE_FEE:0),created:Date.now()-86400e3*(5+i)};
+    if(startOf(b)<now){b.status='terminé';b.paid=true;}
+    return b;
+  });
+  // une intervention passée laissée à clôturer
+  const tc=bookings.find(b=>b.status==='terminé'&&monday(pd(b.date)).getTime()===m0.getTime());
+  if(tc){tc.status='confirmé';if(tc.pay==='onsite')tc.paid=false;}
+  const sat=ymd(addD(m0,5)),sat2=ymd(addD(m0,12));
+  return{bookings,blocked:[sat+'|14',sat+'|15',sat+'|16',sat+'|17',sat2+'|14',sat2+'|15',sat2+'|16',sat2+'|17'],seq:1001+SEED.length};
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.bookings))return s}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+let st=load()||seed();
+
+function busy(k,h){
+  if(st.blocked.includes(k+'|'+h))return'blocked';
+  return st.bookings.find(b=>b.status!=='annulé'&&b.date===k&&h>=b.hour&&h<b.hour+svc(b.svc).dur)||null;
+}
+function slotState(k,h,dur){
+  const d=pd(k);if(d.getDay()===0)return'closed';
+  for(let i=0;i<dur;i++){const x=h+i;if(!HOURS.includes(x))return'short';if(busy(k,x))return'busy'}
+  const t=new Date(d);t.setHours(h);if(t-Date.now()<2*3600e3)return'past';
+  return'free';
+}
+const isFree=(k,h,dur)=>slotState(k,h,dur)==='free';
+function firstFree(dur=1){const m=monday(new Date());for(let i=0;i<35;i++){const d=addD(m,i);if(d.getDay()===0)continue;const k=ymd(d);for(const h of HOURS)if(isFree(k,h,dur))return{k,h}}return null}
+function weekDays(off){const m=addD(monday(new Date()),off*7);return[0,1,2,3,4,5].map(i=>addD(m,i))}
+const wkLabel=ds=>`Semaine du ${fDM.format(ds[0])} au ${fDM.format(ds[5])}`;
+
+function bStat(b){
+  if(b.status==='annulé')return['Annulée','bad'];
+  if(b.status==='terminé')return['Terminée','gray'];
+  if(startOf(b)<new Date())return['À clôturer','warn'];
+  return['Confirmée','info'];
+}
+function bPay(b){
+  if(b.status==='annulé')return b.paid?['Remboursé','gray']:['—','gray'];
+  return b.paid?['Payé','ok']:['À régler','warn'];
+}
+const badge=([t,c])=>`<span class="badge b-${c}">${esc(t)}</span>`;
+
+/* ---------- toasts / dialog ---------- */
+function toast(msg,icon='check'){const t=document.createElement('div');t.className='toast';t.innerHTML=ic(icon)+`<span>${esc(msg)}</span>`;$('#toasts').append(t);setTimeout(()=>t.remove(),4200)}
+const dlg=$('#dlg');
+function openDlg(title,body,foot=''){
+  $('#dlgBody').innerHTML=`<div class="dlg-h"><h2 id="dlgT">${esc(title)}</h2><button class="btn icon ghost" type="button" data-close aria-label="Fermer">${ic('x')}</button></div><div class="dlg-b">${body}</div>${foot?`<div class="dlg-f actions">${foot}</div>`:''}`;
+  if(!dlg.open)dlg.showModal();
+}
+dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.closest('[data-close]'))dlg.close()});
+
+/* ---------- print / ics ---------- */
+function receipt(b){
+  const s=svc(b.svc),d=pd(b.date),fee=b.total-s.price;
+  return `<div style="max-width:680px;margin:0 auto;padding:24px">
+  <h1 style="font-family:var(--head);font-size:24pt;margin:0 0 4px">Nodal Assistance</h1>
+  <p>12 rue des Forges, 00000 Montval · 04 78 00 12 34 · bonjour@nodal-assistance.fr</p>
+  <hr style="margin:18px 0"><h2 style="font-size:16pt;margin:0 0 12px">Récapitulatif de réservation ${esc(b.ref)}</h2>
+  <p><b>Client :</b> ${esc(b.c.first)} ${esc(b.c.last)} — ${esc(b.c.email)} — ${esc(b.c.phone)}</p>
+  ${b.c.address?`<p><b>Adresse d’intervention :</b> ${esc(b.c.address)}</p>`:''}
+  <p><b>Date :</b> ${cap(fLong.format(d))} ${d.getFullYear()}, ${hh(b.hour)} – ${hh(b.hour+s.dur)}</p>
+  <p><b>Lieu :</b> ${MODES[b.mode].label}</p>
+  <table style="width:100%;margin:16px 0;border-collapse:collapse"><tr><th style="text-align:left">Désignation</th><th style="text-align:right">Montant TTC</th></tr>
+  <tr><td>${esc(s.name)} (${durTxt(s.dur)})</td><td style="text-align:right">${eur(s.price)}</td></tr>
+  ${fee?`<tr><td>Frais de déplacement (zone 15–30 km)</td><td style="text-align:right">${eur(fee)}</td></tr>`:''}
+  <tr><td><b>Total</b></td><td style="text-align:right"><b>${eur(b.total)}</b></td></tr></table>
+  <p><b>Règlement :</b> ${b.pay==='card'?'carte bancaire en ligne':'sur place le jour de l’intervention'} — ${bPay(b)[0]}</p>
+  <p style="margin-top:18px;font-size:10pt">TVA non applicable, art. 293 B du CGI. Document de démonstration, entreprise fictive.</p></div>`;
+}
+function printB(b){$('#printArea').innerHTML=receipt(b);window.print()}
+function ics(b){
+  const s=svc(b.svc),d=pd(b.date),f=h=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(h)}0000`;
+  const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nodal Assistance//FR','BEGIN:VEVENT',`UID:${b.ref}@nodal-assistance.fr`,`DTSTAMP:${f(b.hour)}`,`DTSTART:${f(b.hour)}`,`DTEND:${f(b.hour+s.dur)}`,`SUMMARY:${s.name} — Nodal Assistance`,`LOCATION:${b.mode==='domicile'?b.c.address:MODES[b.mode].label}`,`DESCRIPTION:Réservation ${b.ref}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));a.download=b.ref+'.ics';document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+
+/* ---------- vitrine ---------- */
+function svcCard(s,full){
+  return `<article class="card svc"><div class="ico">${ic(s.icon)}</div><h3>${esc(s.name)}</h3><p class="muted">${esc(s.short)}</p>
+  ${full?`<ul>${s.items.map(x=>`<li>${ic('check')}<span>${esc(x)}</span></li>`).join('')}</ul>`:''}
+  <div class="chips">${s.modes.map(m=>`<span class="chip">${ic(MODES[m].icon)}${MODES[m].label}</span>`).join('')}<span class="chip">${ic('clock')}${durTxt(s.dur)}</span></div>
+  <div class="foot"><span class="price">${eur(s.price)}<small> TTC</small></span><button class="btn primary" type="button" data-book="${s.id}" aria-label="Réserver : ${esc(s.name)}">Réserver</button></div></article>`;
+}
+$('#homeSvc').innerHTML=SV.map(s=>svcCard(s,false)).join('');
+$('#allSvc').innerHTML=SV.map(s=>svcCard(s,true)).join('');
+$('#quotes').innerHTML=QUOTES.map(q=>`<figure class="card quote" style="margin:0"><div class="stars" aria-label="5 étoiles sur 5">${ic('star','i').repeat(5)}</div><blockquote style="margin:0">${esc(q[0])}</blockquote><figcaption class="who"><span class="av" aria-hidden="true">${q[1][0]}</span><span><b>${esc(q[1])}</b><br><span class="muted small">${esc(q[2])}</span></span></figcaption></figure>`).join('');
+function renderHome(){const f=firstFree(1);$('#nextSlot').textContent=f?`${cap(fLong.format(pd(f.k)))} à ${hh(f.h)}`:'Planning complet';}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-book]');
+  if(b){const s=svc(b.dataset.book);bk=newBk();bk.svc=s.id;if(s.modes.length===1){bk.mode=s.modes[0];bk.step=2}location.hash='#/reserver';renderBK(true);}
+  const sj=e.target.closest('[data-subject]');if(sj)setTimeout(()=>{$('#cSubj').value=sj.dataset.subject},0);
+});
+
+/* contact */
+$('#contactForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const n=$('#cName'),m=$('#cMail'),g=$('#cMsg');let bad=null;
+  const chk=(el,ok,msg)=>{el.setAttribute('aria-invalid',!ok);$('#'+el.id+'E').textContent=ok?'':msg;if(!ok&&!bad)bad=el};
+  chk(n,n.value.trim().length>=2,'Indiquez votre nom.');
+  chk(m,/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m.value.trim()),'Adresse e-mail invalide.');
+  chk(g,g.value.trim().length>=10,'Votre message doit faire au moins 10 caractères.');
+  if(bad){bad.focus();return}
+  $('#cOk').textContent='Merci, votre message a bien été transmis. Réponse sous 2 h ouvrées.';
+  toast(`Message envoyé — accusé de réception à ${m.value.trim()} (simulation)`,'mail');
+  e.target.reset();
+});
+
+/* ---------- réservation ---------- */
+function newBk(){return{step:1,svc:null,mode:null,week:0,day:null,hour:null,c:{first:'',last:'',email:'',phone:'',address:'',zone:'1',note:'',cgv:false},pay:'card',card:{name:'',num:'',exp:'',cvc:''},done:null,busy:false}}
+let bk=newBk();
+const STEPS=['Prestation','Créneau','Coordonnées','Paiement'];
+const bTotal=()=>{if(!bk.svc)return 0;return svc(bk.svc).price+(bk.mode==='domicile'&&bk.c.zone==='2'?ZONE_FEE:0)};
+
+function renderBK(focusHead,focusSel){
+  const cur=bk.done?5:bk.step;
+  $('#bkSteps').innerHTML=STEPS.map((l,i)=>{const n=i+1,ok=n<cur,c=n===cur;
+    const inner=`<span class="n">${ok?ic('check'):n}</span><span class="lb">${l}</span>`;
+    return `<li class="${c?'c':''}">${ok&&!bk.done?`<button type="button" class="ok" data-goto="${n}" aria-label="Revenir à l’étape ${n} : ${l}">${inner}</button>`:`<span class="sx ${c?'cur':''} ${ok?'ok':''}" ${c?'aria-current="step"':''}>${inner}</span>`}</li>`}).join('');
+  const body=$('#bkBody');
+  body.innerHTML=bk.done?stepDone():[step1,step2,step3,step4][bk.step-1]();
+  renderSum();
+  bindBK();
+  if(focusSel){const el=$(focusSel,body);if(el)el.focus()}
+  else if(focusHead){const h=$('.st-h',body);if(h)h.focus({preventScroll:false})}
+}
+function renderSum(){
+  const s=bk.svc&&svc(bk.svc),b=bk.done&&st.bookings.find(x=>x.id===bk.done);
+  const fee=bk.mode==='domicile'&&bk.c.zone==='2';
+  $('#bkSum').innerHTML=`<h2>Votre réservation</h2><dl class="dl">
+    <dt>Prestation</dt><dd>${s?esc(s.name):'—'}</dd>
+    <dt>Durée</dt><dd>${s?durTxt(s.dur):'—'}</dd>
+    <dt>Lieu</dt><dd>${bk.mode?MODES[bk.mode].label:'—'}</dd>
+    <dt>Date</dt><dd>${bk.day?cap(fLong.format(pd(bk.day))):'—'}</dd>
+    <dt>Horaire</dt><dd>${bk.hour!=null&&s?`${hh(bk.hour)} – ${hh(bk.hour+s.dur)}`:'—'}</dd>
+    ${s?`<dt>${esc(s.name)}</dt><dd>${eur(s.price)}</dd>`:''}
+    ${fee?`<dt>Déplacement 15–30 km</dt><dd>${eur(ZONE_FEE)}</dd>`:''}
+  </dl><div class="tot"><span>Total TTC</span><b>${eur(bTotal())}</b></div>
+  ${b?`<p class="note">${ic('check')}<span>${b.paid?'Réglé par carte (mode test).':'À régler le jour de l’intervention.'}</span></p>`:`<p class="note">${ic('shield')}<span>Annulation gratuite jusqu’à 24 h avant le rendez-vous.</span></p><p class="note">${ic('lock')}<span>Paiement sécurisé ou règlement sur place, au choix.</span></p>`}`;
+}
+function step1(){
+  const s=bk.svc&&svc(bk.svc);
+  return `<div><h2 class="st-h" tabindex="-1">Quelle prestation vous faut-il ?</h2><p class="muted">Prix TTC, déplacement offert jusqu’à 15 km.</p></div>
+  <fieldset><legend class="sr">Prestation</legend><div class="opts">${SV.map(x=>`<label class="opt"><input type="radio" name="svc" value="${x.id}" ${bk.svc===x.id?'checked':''}><span class="tick" aria-hidden="true"></span><span class="oi">${ic(x.icon)}</span><span class="ob"><b>${esc(x.name)}</b><span class="muted small">${esc(x.short)}</span><span class="om">${eur(x.price)} · ${durTxt(x.dur)}</span></span></label>`).join('')}</div></fieldset>
+  ${s?`<fieldset><legend class="flabel">Où souhaitez-vous l’intervention ?</legend><div class="opts">${s.modes.map(m=>`<label class="opt"><input type="radio" name="mode" value="${m}" ${bk.mode===m?'checked':''}><span class="tick" aria-hidden="true"></span><span class="oi">${ic(MODES[m].icon)}</span><span class="ob"><b>${MODES[m].label}</b><span class="muted small">${MODES[m].hint}</span></span></label>`).join('')}</div></fieldset>`:''}
+  <p class="err" id="e1" role="alert"></p>
+  <div class="nav-st"><span></span><button class="btn primary" type="button" id="n1">Choisir un créneau ${ic('arrow')}</button></div>`;
+}
+function step2(){
+  const s=svc(bk.svc);
+  const freeCount=k=>HOURS.filter(h=>isFree(k,h,s.dur)).length;
+  if(!bk.day&&!bk.autoW){bk.autoW=true;while(bk.week<6&&!weekDays(bk.week).some(d=>freeCount(ymd(d))>0))bk.week++}
+  const ds=weekDays(bk.week),keys=ds.map(ymd);
+  if(!bk.day||!keys.includes(bk.day)){bk.day=keys.find(k=>freeCount(k)>0)||keys[0];bk.hour=null}
+  const todayK=ymd(new Date());
+  return `<div><h2 class="st-h" tabindex="-1">Choisissez votre créneau</h2><p class="muted">${esc(s.name)} · ${MODES[bk.mode].label} · durée prévue ${durTxt(s.dur)}</p></div>
+  <div><div class="wk"><button class="btn icon" type="button" id="wPrev" aria-label="Semaine précédente" ${bk.week<=0?'disabled':''}>${ic('cl')}</button><b aria-live="polite">${wkLabel(ds)}</b><button class="btn icon" type="button" id="wNext" aria-label="Semaine suivante" ${bk.week>=6?'disabled':''}>${ic('cr')}</button></div>
+  <div class="days" role="group" aria-label="Jour">${ds.map((d,i)=>{const k=keys[i],n=freeCount(k);return `<button type="button" class="day" data-day="${k}" aria-pressed="${bk.day===k}" ${n?'':'disabled'} aria-label="${cap(fLong.format(d))}, ${n?n+' créneau'+(n>1?'x':'')+' libre'+(n>1?'s':''):'complet'}"><span class="dw">${k===todayK?'Auj.':fW.format(d)}</span><span class="dd">${d.getDate()}</span><span class="df">${n?n+' libre'+(n>1?'s':''):'Complet'}</span></button>`}).join('')}</div></div>
+  <div><p class="flabel">${cap(fLong.format(pd(bk.day)))}</p>
+  <div class="slots" role="group" aria-label="Horaires disponibles">${HOURS.map(h=>{const ss=slotState(bk.day,h,s.dur),ok=ss==='free';const why={busy:'Réservé',past:'Passé',short:'Trop court',closed:'Fermé'}[ss]||'';
+    return `<button type="button" class="slot" data-h="${h}" aria-pressed="${bk.hour===h}" ${ok?'':'disabled'} aria-label="${hh(h)} à ${hh(h+s.dur)}${ok?'':', indisponible'}">${hh(h)}<small>${ok?'→ '+hh(h+s.dur):why}</small></button>`}).join('')}</div></div>
+  <p class="err" id="e2" role="alert"></p>
+  <div class="nav-st"><button class="btn" type="button" data-goto="1">${ic('cl')}Retour</button><button class="btn primary" type="button" id="n2">Continuer ${ic('arrow')}</button></div>`;
+}
+function fld(id,label,type,val,opt={}){return `<div class="field ${opt.full?'full':''}"><label for="${id}">${label}${opt.optional?' <span class="muted">(facultatif)</span>':''}</label>${type==='textarea'?`<textarea id="${id}" aria-describedby="${id}E">${esc(val)}</textarea>`:`<input type="${type}" id="${id}" value="${esc(val)}" ${opt.ac?`autocomplete="${opt.ac}"`:''} aria-describedby="${id}E">`}${opt.hint?`<span class="hint">${opt.hint}</span>`:''}<p class="err" id="${id}E"></p></div>`}
+function step3(){
+  const c=bk.c,home=bk.mode==='domicile';
+  return `<div><h2 class="st-h" tabindex="-1">Vos coordonnées</h2><p class="muted">Pour vous envoyer la confirmation et vous joindre si besoin.</p></div>
+  <form id="f3" novalidate><div class="fg">
+    ${fld('fFirst','Prénom','text',c.first,{ac:'given-name'})}${fld('fLast','Nom','text',c.last,{ac:'family-name'})}
+    ${fld('fEmail','E-mail','email',c.email,{ac:'email'})}${fld('fPhone','Téléphone','tel',c.phone,{ac:'tel',hint:'Ex. : 06 12 34 56 78'})}
+    ${home?fld('fAddr','Adresse d’intervention','text',c.address,{ac:'street-address',full:true})+`<div class="field full"><label for="fZone">Distance depuis Montval</label><select id="fZone"><option value="1" ${c.zone==='1'?'selected':''}>Moins de 15 km — déplacement offert</option><option value="2" ${c.zone==='2'?'selected':''}>Entre 15 et 30 km — +10 €</option></select></div>`:''}
+    ${fld('fNote','Décrivez votre problème','textarea',c.note,{full:true,optional:true,hint:'Marque de l’appareil, message d’erreur, depuis quand…'})}
+    <div class="field full"><label class="check"><input type="checkbox" id="fCgv" ${c.cgv?'checked':''} aria-describedby="fCgvE"><span>J’accepte les conditions générales de vente et la politique de confidentialité.</span></label><p class="err" id="fCgvE"></p></div>
+  </div>
+  <div class="nav-st" style="margin-top:18px"><button class="btn" type="button" data-goto="2">${ic('cl')}Retour</button><button class="btn primary" type="submit">Passer au paiement ${ic('arrow')}</button></div></form>`;
+}
+function step4(){
+  const k=bk.card,t=eur(bTotal());
+  return `<div><h2 class="st-h" tabindex="-1">Règlement</h2><p class="muted">Choisissez de payer maintenant ou le jour de l’intervention.</p></div>
+  <fieldset><legend class="sr">Mode de règlement</legend><div class="opts">
+    <label class="opt"><input type="radio" name="pay" value="card" ${bk.pay==='card'?'checked':''}><span class="tick" aria-hidden="true"></span><span class="oi">${ic('card')}</span><span class="ob"><b>Payer maintenant par carte</b><span class="muted small">Créneau garanti, facture envoyée par e-mail.</span></span></label>
+    <label class="opt"><input type="radio" name="pay" value="onsite" ${bk.pay==='onsite'?'checked':''}><span class="tick" aria-hidden="true"></span><span class="oi">${ic('euro')}</span><span class="ob"><b>Régler sur place</b><span class="muted small">Carte, chèque ou espèces le jour J.</span></span></label>
+  </div></fieldset>
+  <form id="f4" novalidate>
+  ${bk.pay==='card'?`<div class="cardbox">
+    <div class="test">${ic('info')}<span><b>Mode test — aucun débit réel.</b> Carte acceptée : 4242 4242 4242 4242. Carte refusée : 4000 0000 0000 0002. Date future et CVC quelconques.</span></div>
+    <div><button class="btn" type="button" id="fillCard">${ic('card')}Remplir avec la carte de test</button></div>
+    <div class="fg">
+      ${fld('kName','Titulaire de la carte','text',k.name||(bk.c.first+' '+bk.c.last).trim(),{ac:'cc-name',full:true})}
+      <div class="field full"><label for="kNum">Numéro de carte</label><input type="text" id="kNum" inputmode="numeric" autocomplete="cc-number" value="${esc(k.num)}" placeholder="1234 5678 9012 3456" aria-describedby="kNumE"><p class="err" id="kNumE"></p></div>
+      <div class="field"><label for="kExp">Expiration (MM/AA)</label><input type="text" id="kExp" inputmode="numeric" autocomplete="cc-exp" value="${esc(k.exp)}" placeholder="MM/AA" aria-describedby="kExpE"><p class="err" id="kExpE"></p></div>
+      <div class="field"><label for="kCvc">CVC</label><input type="text" id="kCvc" inputmode="numeric" autocomplete="cc-csc" value="${esc(k.cvc)}" placeholder="123" aria-describedby="kCvcE"><p class="err" id="kCvcE"></p></div>
+    </div>
+    <p class="note" style="margin:0">${ic('lock')}<span>Paiement chiffré, traité par un prestataire certifié (simulation).</span></p>
+  </div>`:`<p class="note" style="margin:0">${ic('info')}<span>Votre créneau est réservé sans prépaiement. Merci de prévenir au moins 24 h à l’avance en cas d’empêchement.</span></p>`}
+  <p class="err" id="payErr" role="alert" style="margin-top:12px"></p>
+  <div class="nav-st" style="margin-top:14px"><button class="btn" type="button" data-goto="3">${ic('cl')}Retour</button><button class="btn primary" type="submit" id="payBtn" ${bk.busy?'disabled':''}>${bk.pay==='card'?ic('lock')+'Payer '+t:'Confirmer la réservation'}</button></div>
+  </form>`;
+}
+function stepDone(){
+  const b=st.bookings.find(x=>x.id===bk.done);if(!b)return'';
+  const s=svc(b.svc);
+  return `<div class="done"><div class="ck">${ic('check')}</div><h2 class="st-h" tabindex="-1">Réservation confirmée</h2><p class="ref">${esc(b.ref)}</p>
+  <p class="muted">${esc(s.name)} — ${cap(fLong.format(pd(b.date)))} de ${hh(b.hour)} à ${hh(b.hour+s.dur)}, ${MODES[b.mode].label.toLowerCase()}.</p>
+  <p class="small">Un e-mail de confirmation a été envoyé à <b class="wrap">${esc(b.c.email)}</b> (simulation). Un rappel SMS partira la veille.</p></div>
+  <div class="actions" style="justify-content:center">
+    <button class="btn" type="button" id="dPrint">${ic('print')}Imprimer le récapitulatif</button>
+    <button class="btn" type="button" id="dIcs">${ic('cal')}Ajouter à mon agenda</button>
+    <a class="btn" href="#/gerant">${ic('grid')}Voir côté gérant</a>
+    <button class="btn primary" type="button" id="dNew">${ic('plus')}Nouvelle réservation</button>
+  </div>`;
+}
+function setErr(id,msg){const el=$('#'+id);if(el){el.setAttribute('aria-invalid',!!msg);}const e=$('#'+id+'E');if(e)e.textContent=msg||''}
+function luhn(n){let s=0,a=false;for(let i=n.length-1;i>=0;i--){let d=+n[i];if(a){d*=2;if(d>9)d-=9}s+=d;a=!a}return s%10===0}
+
+function bindBK(){
+  const body=$('#bkBody');
+  $$('[data-goto]').forEach(b=>b.onclick=()=>{bk.step=+b.dataset.goto;renderBK(true)});
+  if(bk.done){
+    const b=st.bookings.find(x=>x.id===bk.done);
+    $('#dPrint').onclick=()=>printB(b);$('#dIcs').onclick=()=>{ics(b);toast('Fichier agenda (.ics) téléchargé','cal')};
+    $('#dNew').onclick=()=>{bk=newBk();renderBK(true)};return;
+  }
+  if(bk.step===1){
+    $$('input[name=svc]',body).forEach(r=>r.onchange=()=>{const s=svc(r.value);bk.svc=s.id;bk.mode=s.modes.length===1?s.modes[0]:(s.modes.includes(bk.mode)?bk.mode:null);bk.hour=null;renderBK(false,`input[value="${s.id}"]`)});
+    $$('input[name=mode]',body).forEach(r=>r.onchange=()=>{bk.mode=r.value;renderBK(false,`input[name=mode][value="${r.value}"]`)});
+    $('#n1').onclick=()=>{const e=!bk.svc?'Choisissez une prestation.':!bk.mode?'Indiquez où doit avoir lieu l’intervention.':'';$('#e1').textContent=e;if(!e){bk.step=2;renderBK(true)}};
+  }
+  if(bk.step===2){
+    $('#wPrev').onclick=()=>{bk.week--;bk.day=null;renderBK(false,'#wPrev:not(:disabled)')||0;if(document.activeElement===document.body)$('#wNext').focus()};
+    $('#wNext').onclick=()=>{bk.week++;bk.day=null;renderBK(false,'#wNext:not(:disabled)');if(document.activeElement===document.body)$('#wPrev').focus()};
+    $$('.day',body).forEach(b=>b.onclick=()=>{bk.day=b.dataset.day;if(bk.hour!=null&&!isFree(bk.day,bk.hour,svc(bk.svc).dur))bk.hour=null;renderBK(false,`[data-day="${bk.day}"]`)});
+    $$('.slot',body).forEach(b=>b.onclick=()=>{bk.hour=+b.dataset.h;renderBK(false,`[data-h="${bk.hour}"]`)});
+    $('#n2').onclick=()=>{const ok=bk.hour!=null&&isFree(bk.day,bk.hour,svc(bk.svc).dur);$('#e2').textContent=ok?'':'Sélectionnez un horaire disponible.';if(ok){bk.step=3;renderBK(true)}};
+  }
+  if(bk.step===3){
+    const map={fFirst:'first',fLast:'last',fEmail:'email',fPhone:'phone',fAddr:'address',fNote:'note'};
+    Object.entries(map).forEach(([id,k])=>{const el=$('#'+id);if(el)el.oninput=()=>{bk.c[k]=el.value}});
+    const z=$('#fZone');if(z)z.onchange=()=>{bk.c.zone=z.value;renderSum()};
+    $('#fCgv').onchange=e=>{bk.c.cgv=e.target.checked};
+    $('#f3').onsubmit=e=>{
+      e.preventDefault();const c=bk.c;let first=null;
+      const v=(id,msg)=>{setErr(id,msg);if(msg&&!first)first=id};
+      v('fFirst',c.first.trim()?'':'Indiquez votre prénom.');
+      v('fLast',c.last.trim()?'':'Indiquez votre nom.');
+      v('fEmail',/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c.email.trim())?'':'Adresse e-mail invalide (ex. : nom@domaine.fr).');
+      v('fPhone',/^(?:\+33\s?|0)[1-9](?:[\s.-]?\d{2}){4}$/.test(c.phone.trim())?'':'Numéro de téléphone français invalide.');
+      if(bk.mode==='domicile')v('fAddr',c.address.trim().length>=6?'':'Indiquez l’adresse complète d’intervention.');
+      v('fCgv',c.cgv?'':'Vous devez accepter les conditions pour réserver.');
+      if(first){$('#'+first).focus();return}
+      bk.step=4;renderBK(true);
+    };
+  }
+  if(bk.step===4){
+    $$('input[name=pay]',body).forEach(r=>r.onchange=()=>{bk.pay=r.value;renderBK(false,`input[name=pay][value="${r.value}"]`)});
+    const n=$('#kNum'),x=$('#kExp'),cv=$('#kCvc'),nm=$('#kName');
+    if(n){
+      nm.oninput=()=>{bk.card.name=nm.value};
+      n.oninput=()=>{const d=n.value.replace(/\D/g,'').slice(0,16);n.value=d.replace(/(.{4})(?=.)/g,'$1 ');bk.card.num=n.value};
+      x.oninput=()=>{let d=x.value.replace(/\D/g,'').slice(0,4);if(d.length>2)d=d.slice(0,2)+'/'+d.slice(2);x.value=d;bk.card.exp=d};
+      cv.oninput=()=>{cv.value=cv.value.replace(/\D/g,'').slice(0,4);bk.card.cvc=cv.value};
+      $('#fillCard').onclick=()=>{const y=(new Date().getFullYear()+3)%100;n.value='4242 4242 4242 4242';x.value='12/'+pad(y);cv.value='123';if(!nm.value.trim())nm.value='Client Test';Object.assign(bk.card,{num:n.value,exp:x.value,cvc:cv.value,name:nm.value});$$('.err',body).forEach(e=>e.textContent='');$$('[aria-invalid]',body).forEach(e=>e.setAttribute('aria-invalid','false'));toast('Carte de test renseignée','card')};
+    }
+    $('#f4').onsubmit=e=>{
+      e.preventDefault();if(bk.busy)return;$('#payErr').textContent='';
+      const s=svc(bk.svc);
+      if(!isFree(bk.day,bk.hour,s.dur)){$('#payErr').textContent='Ce créneau vient d’être pris. Choisissez-en un autre.';return}
+      if(bk.pay==='card'){
+        let first=null;const v=(id,msg)=>{setErr(id,msg);if(msg&&!first)first=id};
+        const num=n.value.replace(/\D/g,''),[mm,yy]=x.value.split('/').map(Number);
+        v('kName',nm.value.trim().length>=2?'':'Indiquez le nom du titulaire.');
+        v('kNum',num.length===16&&luhn(num)?'':'Numéro de carte invalide.');
+        const exp=mm>=1&&mm<=12&&yy>=0?new Date(2000+yy,mm,0,23,59):null;
+        v('kExp',exp&&exp>new Date()?'':'Date d’expiration invalide ou dépassée.');
+        v('kCvc',/^\d{3,4}$/.test(cv.value)?'':'CVC à 3 chiffres.');
+        if(first){$('#'+first).focus();return}
+        bk.busy=true;const btn=$('#payBtn');btn.disabled=true;btn.innerHTML='<span class="spin" aria-hidden="true"></span>Paiement en cours…';
+        setTimeout(()=>{bk.busy=false;
+          if(num==='4000000000000002'){btn.disabled=false;btn.innerHTML=ic('lock')+'Payer '+eur(bTotal());$('#payErr').textContent='Paiement refusé par la banque (carte de test refusée). Essayez la carte 4242 4242 4242 4242.';setErr('kNum',' ');$('#kNumE').textContent='';n.focus();return}
+          finish(true);
+        },1300);
+      }else finish(false);
+    };
+  }
+}
+function finish(paid){
+  const s=svc(bk.svc),id='b'+Date.now();
+  const b={id,ref:'NA-'+(st.seq++),svc:s.id,mode:bk.mode,date:bk.day,hour:bk.hour,c:{...bk.c,address:bk.mode==='domicile'?bk.c.address:'',zone:bk.mode==='domicile'?bk.c.zone:'1'},pay:paid?'card':'onsite',paid,status:'confirmé',total:bTotal(),created:Date.now(),fresh:true};
+  delete b.c.cgv;
+  st.bookings.push(b);save();bk.done=id;
+  renderBK(true);window.scrollTo({top:0});
+  toast(paid?`Paiement de ${eur(b.total)} accepté (mode test)`:'Réservation enregistrée','check');
+  setTimeout(()=>toast(`E-mail de confirmation envoyé à ${b.c.email} (simulation)`,'mail'),700);
+}
+
+/* ---------- gérant ---------- */
+let aw=0;const af={q:'',st:'all'};
+function renderAdm(){
+  const now=new Date(),m0=monday(now),mStart=new Date(now.getFullYear(),now.getMonth(),1);
+  const live=st.bookings.filter(b=>b.status!=='annulé');
+  const up=live.filter(b=>b.status==='confirmé'&&startOf(b)>=now);
+  const cashed=live.filter(b=>b.paid&&startOf(b)>=mStart&&startOf(b)<new Date(now.getFullYear(),now.getMonth()+1,1)).reduce((a,b)=>a+b.total,0);
+  const due=live.filter(b=>!b.paid);
+  const wk=weekDays(0).map(ymd);let tot=0,occ=0;
+  wk.forEach(k=>HOURS.forEach(h=>{const x=busy(k,h);if(x==='blocked')return;tot++;if(x)occ++}));
+  const K=[['cal',up.length,'interventions à venir'],['euro',eur(cashed),'encaissé ce mois-ci'],['clock',eur(due.reduce((a,b)=>a+b.total,0)),`à encaisser (${due.length})`],['trend',(tot?Math.round(occ/tot*100):0)+' %','taux de remplissage cette semaine']];
+  $('#kpis').innerHTML=K.map(k=>`<div class="card kpi"><span class="ki">${ic(k[0])}</span><div><b>${k[1]}</b><span>${k[2]}</span></div></div>`).join('');
+  renderPlan();renderTbl();
+}
+function renderPlan(){
+  const ds=weekDays(aw),keys=ds.map(ymd),todayK=ymd(new Date());
+  $('#aWk').textContent=wkLabel(ds);$('#aPrev').disabled=aw<=-4;$('#aNext').disabled=aw>=8;
+  const skip=new Set();let h='<thead><tr><th scope="col"><span class="sr">Heure</span></th>'+ds.map((d,i)=>`<th scope="col" class="${keys[i]===todayK?'today':''}">${cap(fShort.format(d))}</th>`).join('')+'</tr></thead><tbody>';
+  HOURS.forEach((hr,ri)=>{
+    if(hr===14)h+=`<tr><td class="lunch" colspan="7">Pause déjeuner · 12:00 – 14:00</td></tr>`;
+    h+=`<tr><th scope="row" style="background:none;font-size:13px">${hh(hr)}</th>`;
+    keys.forEach((k,ci)=>{
+      if(skip.has(k+hr))return;
+      const x=busy(k,hr),lbl=`${cap(fLong.format(pd(k)))} à ${hh(hr)}`;
+      if(x==='blocked'){h+=`<td><button type="button" class="pc blk" data-unblock="${k}|${hr}" aria-label="Créneau bloqué le ${lbl}, débloquer">Bloqué</button></td>`;return}
+      if(x){
+        const s=svc(x.svc),st2=bStat(x);
+        if(x.hour!==hr){h+='<td></td>';return}
+        const span=s.dur>1&&HOURS.includes(hr+1)?2:1;if(span>1)skip.add(k+(hr+1));
+        h+=`<td ${span>1?'rowspan="2"':''}><button type="button" class="pc bk-${st2[1]}" data-open="${x.id}" aria-label="${esc(x.ref)}, ${esc(x.c.first+' '+x.c.last)}, ${esc(s.name)}, ${lbl}, ${st2[0]}"><b>${esc(x.c.first[0])}. ${esc(x.c.last)}</b><span>${esc(s.name)}</span><span>${hh(x.hour)}–${hh(x.hour+s.dur)} · ${MODES[x.mode].label}</span></button></td>`;
+        return;
+      }
+      const t=pd(k);t.setHours(hr);
+      if(t<new Date())h+=`<td><span class="pc past" aria-label="Passé">—</span></td>`;
+      else h+=`<td><button type="button" class="pc free" data-block="${k}|${hr}" aria-label="Libre le ${lbl}, bloquer ce créneau">Libre</button></td>`;
+    });
+    h+='</tr>';
+  });
+  $('#plan').innerHTML=h+'</tbody>';
+}
+function renderTbl(){
+  const now=new Date(),q=norm(af.q.trim());
+  let L=st.bookings.filter(b=>{
+    if(q&&!norm(`${b.ref} ${b.c.first} ${b.c.last} ${svc(b.svc).name} ${b.c.email}`).includes(q))return false;
+    const past=startOf(b)<now;
+    switch(af.st){case'up':return b.status==='confirmé'&&!past;case'due':return b.status!=='annulé'&&!b.paid;case'close':return b.status==='confirmé'&&past;case'done':return b.status==='terminé';case'cancel':return b.status==='annulé';}
+    return true;
+  }).sort((a,b)=>startOf(a)-startOf(b));
+  if(af.st==='all'||af.st==='done'){const fut=L.filter(b=>startOf(b)>=now),pa=L.filter(b=>startOf(b)<now).reverse();L=[...fut,...pa]}
+  $('#aCount').textContent=`${L.length} réservation${L.length>1?'s':''}`;
+  $('#tbl').innerHTML=`<thead><tr><th scope="col">Réf.</th><th scope="col">Date</th><th scope="col">Client</th><th scope="col">Prestation</th><th scope="col">Montant</th><th scope="col">Paiement</th><th scope="col">Statut</th></tr></thead><tbody>${L.length?L.map(b=>{const s=svc(b.svc);return `<tr><td><button type="button" class="lnk" data-open="${b.id}">${esc(b.ref)}</button>${b.fresh?' <span class="badge b-ok">Nouveau</span>':''}</td><td>${cap(fShort.format(pd(b.date)))}<br><span class="muted">${hh(b.hour)}</span></td><td>${esc(b.c.first+' '+b.c.last)}<br><span class="muted small">${esc(b.c.phone)}</span></td><td>${esc(s.name)}<br><span class="muted small">${MODES[b.mode].label}</span></td><td>${eur(b.total)}</td><td>${badge(bPay(b))}</td><td>${badge(bStat(b))}</td></tr>`}).join(''):`<tr><td colspan="7" class="empty">Aucune réservation ne correspond à ces critères.</td></tr>`}</tbody>`;
+}
+function openB(id,confirmCancel){
+  const b=st.bookings.find(x=>x.id===id);if(!b)return;const s=svc(b.svc);
+  const body=confirmCancel?`<p>Annuler la réservation <b>${esc(b.ref)}</b> de ${esc(b.c.first+' '+b.c.last)} ? Le créneau sera libéré dans le planning public.</p>${b.paid?`<div class="test">${ic('info')}<span>Le paiement de <b>${eur(b.total)}</b> sera remboursé sur la carte du client (simulation).</span></div>`:''}`
+  :`<div class="actions">${badge(bStat(b))}${badge(bPay(b))}</div><dl class="dl">
+    <dt>Client</dt><dd>${esc(b.c.first+' '+b.c.last)}</dd><dt>E-mail</dt><dd>${esc(b.c.email)}</dd><dt>Téléphone</dt><dd>${esc(b.c.phone)}</dd>
+    <dt>Prestation</dt><dd>${esc(s.name)} · ${durTxt(s.dur)}</dd><dt>Date</dt><dd>${cap(fLong.format(pd(b.date)))}, ${hh(b.hour)} – ${hh(b.hour+s.dur)}</dd>
+    <dt>Lieu</dt><dd>${MODES[b.mode].label}${b.c.address?' — '+esc(b.c.address):''}</dd><dt>Montant</dt><dd>${eur(b.total)} · ${b.pay==='card'?'carte en ligne':'sur place'}</dd>
+    ${b.c.note?`<dt>Problème</dt><dd>${esc(b.c.note)}</dd>`:''}</dl>`;
+  const foot=confirmCancel?`<button class="btn" type="button" data-act="back">Retour</button><button class="btn danger" type="button" data-act="docancel">Confirmer l’annulation</button>`
+  :[b.status!=='annulé'&&!b.paid?`<button class="btn primary" type="button" data-act="paid">${ic('euro')}Marquer payé</button>`:'',
+    b.status==='confirmé'?`<button class="btn" type="button" data-act="done">${ic('check')}Intervention terminée</button>`:'',
+    `<button class="btn" type="button" data-act="print">${ic('print')}Récapitulatif</button>`,
+    b.status!=='annulé'?`<button class="btn" type="button" data-act="mail">${ic('mail')}Renvoyer la confirmation</button>`:'',
+    b.status==='confirmé'?`<button class="btn danger" type="button" data-act="cancel">Annuler</button>`:''].join('');
+  openDlg(confirmCancel?'Annuler la réservation':'Réservation '+b.ref,body,foot);
+  $$('[data-act]',dlg).forEach(x=>x.onclick=()=>{
+    const a=x.dataset.act;
+    if(a==='cancel')return openB(id,true);
+    if(a==='back')return openB(id);
+    if(a==='print')return printB(b);
+    if(a==='mail')return toast(`Confirmation renvoyée à ${b.c.email} (simulation)`,'mail');
+    if(a==='paid'){b.paid=true;toast(`${b.ref} marquée comme payée`)}
+    if(a==='done'){b.status='terminé';if(!b.paid)toast('Intervention clôturée — paiement encore à encaisser','info');else toast(`${b.ref} clôturée, facture envoyée (simulation)`)}
+    if(a==='docancel'){b.status='annulé';toast(b.paid?`${b.ref} annulée — remboursement de ${eur(b.total)} émis (simulation)`:`${b.ref} annulée, client prévenu par e-mail (simulation)`)}
+    b.fresh=false;save();renderAdm();openB(id);
+  });
+}
+$('#plan').addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]');if(o)return openB(o.dataset.open);
+  const bl=e.target.closest('[data-block]');if(bl){st.blocked.push(bl.dataset.block);save();renderAdm();const el=$(`[data-unblock="${bl.dataset.block}"]`);el&&el.focus();toast('Créneau bloqué : il n’est plus proposé aux clients','lock');return}
+  const ub=e.target.closest('[data-unblock]');if(ub){st.blocked=st.blocked.filter(x=>x!==ub.dataset.unblock);save();renderAdm();const el=$(`[data-block="${ub.dataset.unblock}"]`);el&&el.focus();toast('Créneau débloqué et de nouveau réservable','check')}
+});
+$('#tbl').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o)openB(o.dataset.open)});
+$('#aPrev').onclick=()=>{aw--;renderPlan()};$('#aNext').onclick=()=>{aw++;renderPlan()};
+$('#aQ').oninput=e=>{af.q=e.target.value;renderTbl()};$('#aSt').onchange=e=>{af.st=e.target.value;renderTbl()};
+dlg.addEventListener('close',()=>{if(location.hash.includes('gerant'))renderAdm()});
+$('#csvBtn').onclick=()=>{
+  const rows=[['Référence','Date','Heure','Client','E-mail','Téléphone','Prestation','Lieu','Montant','Paiement','Statut']].concat(st.bookings.slice().sort((a,b)=>startOf(a)-startOf(b)).map(b=>[b.ref,b.date,hh(b.hour),b.c.first+' '+b.c.last,b.c.email,b.c.phone,svc(b.svc).name,MODES[b.mode].label,String(b.total).replace('.',','),bPay(b)[0],bStat(b)[0]]));
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='reservations.csv';document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+  toast('Export CSV téléchargé','dl');
+};
+
+/* ---------- routeur ---------- */
+const PAGES=['accueil','services','reserver','apropos','contact','gerant'];
+let first=true;
+function route(){
+  let p=location.hash.replace(/^#\/?/,'')||'accueil';if(!PAGES.includes(p))p='accueil';
+  $$('[data-page]').forEach(s=>s.hidden=s.dataset.page!==p);
+  $$('#nav a').forEach(a=>a.getAttribute('href')==='#/'+p?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+  $('#nav').classList.remove('open');$('#menuBtn').setAttribute('aria-expanded','false');
+  if(p==='accueil')renderHome();
+  if(p==='reserver')renderBK(false);
+  if(p==='gerant')renderAdm();
+  if(!first){window.scrollTo(0,0);const h=$(`[data-page="${p}"] h1`);h&&h.focus({preventScroll:true})}
+  first=false;
+}
+window.addEventListener('hashchange',route);
+$('#menuBtn').onclick=()=>{const o=$('#nav').classList.toggle('open');$('#menuBtn').setAttribute('aria-expanded',o);$('#menuBtn').setAttribute('aria-label',o?'Fermer le menu':'Ouvrir le menu')};
+$('#resetBtn').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}st=seed();bk=newBk();aw=0;af.q='';af.st='all';$('#aQ').value='';$('#aSt').value='all';if(dlg.open)dlg.close();route();toast('Démo réinitialisée','check')};
+route();
+})();
+</script>
 </body>
 </html>
