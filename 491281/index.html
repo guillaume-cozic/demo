@@ -2,20 +2,928 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Gestion d'opérations immobilières</title>
+<meta name="description" content="Application de marchand de biens : trésorerie réelle et prévisionnelle, factures PDF ou photo, opérations ventilées par poste, rentabilité budget/réel, rapprochement bancaire, exports comptables et historique partagé entre associés.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F3F4F0;--panel:#FFFFFF;--panel-2:#F0F1EC;--ink:#18211E;--muted:#52605A;--line:#DDE1D9;--line-2:#B9C0B5;
+  --accent:#1E5A48;--accent-ink:#FFFFFF;--accent-soft:#DDECE5;--accent-text:#174A3B;
+  --brass:#8A5A14;--brass-soft:#F5EAD6;--band:#F6EEDC;--band-ink:#6E4A0E;
+  --ok:#1C6B3E;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A8262F;--bad-soft:#FAE1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4E5A55;--gray-soft:#E7EBE6;
+  --shadow:0 1px 2px rgba(20,33,28,.05),0 4px 14px rgba(20,33,28,.05);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0E1412;--panel:#151D1A;--panel-2:#1B2521;--ink:#E2E9E5;--muted:#9DACA5;--line:#25312C;--line-2:#3B4A43;
+  --accent:#6CC3A2;--accent-ink:#06211A;--accent-soft:#163329;--accent-text:#90D6BA;
+  --brass:#E2B266;--brass-soft:#33281A;--band:#2B2414;--band-ink:#EFC77E;
+  --ok:#73D39C;--ok-soft:#15301F;--warn:#F0B661;--warn-soft:#352613;--bad:#FF9198;--bad-soft:#3B1B1E;--info:#97BFF0;--info-soft:#172A40;--gray:#B3C0BA;--gray-soft:#222D29;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em;font-weight:800}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13px}.wrap{overflow-wrap:anywhere}.num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:4px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:700;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 16px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;min-width:0}
+.brand small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.tab{min-height:44px;display:inline-flex;gap:7px;align-items:center;padding:0 12px;border-radius:10px;border:0;background:transparent;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:11.5px;background:var(--bad-soft);color:var(--bad);border-radius:999px;padding:0 7px;font-weight:800}
+.who{display:flex;align-items:center;gap:10px;min-width:0;margin-left:auto}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.sync .dot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none}
+.sync.busy .dot{background:var(--brass);animation:pulse .8s infinite alternate}
+@keyframes pulse{to{opacity:.3}}
+.avs{display:flex}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:800;background:var(--panel-2);color:var(--ink);border:2px solid var(--panel);margin-left:-6px}
+.av.me{background:var(--accent);color:var(--accent-ink)}
+.who select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px;font-weight:600;max-width:190px}
+@media (max-width:1180px){#nav{order:3;flex-basis:100%}}
+@media (max-width:560px){.sync span:last-child{display:none}.avs{display:none}.who select{max-width:150px}.brand small{display:none}}
+main{padding:20px clamp(16px,2vw,32px) 80px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:700;cursor:pointer;color:var(--ink);text-align:center;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{min-height:44px;padding:0 10px;font-size:13.5px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border:1px solid transparent;background:transparent;border-radius:10px;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.actions.end{justify-content:flex-end;margin-top:16px}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font:inherit;font-weight:700;color:var(--accent-text);text-align:left;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px;overflow-wrap:anywhere}
+.lnk:hover{text-decoration-color:currentColor}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-weight:700;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:700}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=date],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.fgrid.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:560px){.fgrid,.fgrid.g3{grid-template-columns:minmax(0,1fr)}}
+fieldset{border:1px solid var(--line);border-radius:12px;margin:14px 0 0;padding:12px;min-width:0}
+legend{padding:0 6px;font-weight:800;font-size:13.5px}
+
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h>div{min-width:0}
+.page-h h1{font-size:clamp(22px,2.4vw,28px)}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 15px;min-width:0;box-shadow:var(--shadow)}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:700}
+.kpi .v{font-size:clamp(19px,1.8vw,25px);font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.25;margin:3px 0 2px}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+.grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.grid.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.span2{grid-column:span 2}.grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0;box-shadow:var(--shadow)}
+.card h2{font-size:16.5px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:12px}
+.card-h>*{min-width:0}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;border-radius:999px;padding:2px 10px;line-height:1.5}
+.c-gray{background:var(--gray-soft);color:var(--gray)}.c-info{background:var(--info-soft);color:var(--info)}.c-ok{background:var(--ok-soft);color:var(--ok)}.c-warn{background:var(--warn-soft);color:var(--warn)}.c-bad{background:var(--bad-soft);color:var(--bad)}.c-acc{background:var(--accent-soft);color:var(--accent-text)}.c-brass{background:var(--brass-soft);color:var(--brass)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:13.5px;font-weight:600}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px}
+
+.tblw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tblw table{min-width:760px}
+.tblw.narrow table{min-width:520px}
+th,td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+thead th{background:var(--panel-2);font-size:12.5px;color:var(--muted);font-weight:800}
+tbody tr:last-child>*{border-bottom:0}
+tfoot td{background:var(--panel-2);font-weight:800;border-bottom:0;border-top:1px solid var(--line-2)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td .lnk{min-height:32px}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--panel-2)}
+.sub{display:block;font-size:12.5px;color:var(--muted);font-weight:500}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;font-weight:700;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:18px;height:3px;border-radius:2px;background:var(--accent)}
+.sw.fc{background:repeating-linear-gradient(90deg,var(--brass) 0 5px,transparent 5px 8px)}
+.chart{width:100%;min-height:220px}
+.chart svg{display:block}
+.chart text{fill:var(--muted);font:600 11px var(--font)}
+.acc{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.acc:last-child{border-bottom:0}
+.acc>div{min-width:0;flex:1}
+.bk{width:40px;height:40px;border-radius:10px;background:var(--panel-2);display:grid;place-items:center;color:var(--accent-text);flex:none}
+.amt{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.list li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list li>div{min-width:0;flex:1}
+.alert{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;margin-top:8px;font-weight:700;font-size:13.5px;min-width:0}
+.alert>span{flex:1;min-width:0}
+.alert .btn{min-height:44px}
+
+.ops{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.opc{display:flex;flex-direction:column;gap:10px;text-align:left;cursor:pointer;width:100%;font:inherit;color:inherit}
+.opc:hover{border-color:var(--accent)}
+.opc .h3{display:block;font-size:16.5px;font-weight:800;line-height:1.25}
+main:focus{outline:none}
+.opc .row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px}
+.opc .row b{font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.bar>span{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar>span.over{background:var(--bad)}
+.pbars{display:grid;gap:3px;margin-top:5px}
+.pbars .bar{height:6px}
+.pbars .bar>span.b{background:var(--line-2)}
+
+.filters{display:grid;gap:10px;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));margin-bottom:12px;align-items:end}
+@media (max-width:900px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.filters .field:first-child{grid-column:1/-1}}
+@media (max-width:420px){.filters{grid-template-columns:minmax(0,1fr)}}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);max-width:100%;overflow-x:auto}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+
+dialog{border:1px solid var(--line);border-radius:16px;padding:0;width:min(680px,calc(100vw - 20px));max-height:calc(100dvh - 20px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:auto}
+dialog::backdrop{background:rgba(8,18,14,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 10px 10px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:18px;min-width:0;overflow-wrap:anywhere}
+#dlgBody{padding:16px 18px 18px}
+.sr-file{position:absolute;opacity:0;width:1px;height:1px}
+.dropzone{display:flex;gap:12px;align-items:center;border:1.5px dashed var(--line-2);border-radius:12px;padding:14px;cursor:pointer;min-height:64px;background:var(--panel-2)}
+.dropzone svg{width:26px;height:26px;color:var(--accent-text)}
+.sr-file:focus-visible+.dropzone{outline:3px solid var(--accent);outline-offset:2px}
+.fileprev{display:flex;gap:10px;align-items:center;margin-top:8px;min-width:0}
+.fileprev:empty{display:none}
+.fileprev img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.dl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+@media (max-width:520px){.dl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dl div{background:var(--panel-2);border-radius:10px;padding:8px 10px;min-width:0}
+.dl dt{font-size:12px;color:var(--muted);font-weight:700}
+.dl dd{margin:0;font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.doc{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0;min-width:0;flex-wrap:wrap}
+.doc>div{min-width:0;flex:1}
+.doc img{max-width:100%;max-height:220px;border-radius:8px;display:block}
+.doc .ph{width:44px;height:54px;border-radius:6px;background:var(--bad-soft);color:var(--bad);display:grid;place-items:center;font-size:11px;font-weight:800;flex:none}
+.cands{display:grid;gap:8px;margin:8px 0 4px}
+.cand{display:flex;gap:10px;justify-content:space-between;align-items:center;width:100%;text-align:left;border:1px solid var(--line-2);background:var(--panel);border-radius:12px;padding:10px 12px;cursor:pointer;min-height:56px}
+.cand:hover{border-color:var(--accent);background:var(--accent-soft)}
+.cand>span:first-child{min-width:0;overflow-wrap:anywhere}
+.txhead{background:var(--panel-2);border-radius:12px;padding:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.txhead>div{min-width:0;overflow-wrap:anywhere}
+h3.sec{font-size:14.5px;margin:16px 0 4px}
+.log li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.log li:last-child{border-bottom:0}
+.log li>div{min-width:0;flex:1;overflow-wrap:anywhere}
+.log .av{margin:0;width:34px;height:34px;flex:none}
+.checks li{display:flex;gap:10px;padding:7px 0;align-items:flex-start}
+.checks svg{color:var(--ok);margin-top:2px}
+.mbar{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:4px 12px;align-items:center;margin:10px 0}
+@media (max-width:560px){.mbar{grid-template-columns:minmax(0,1fr)}}
+.mbar .bars{display:grid;gap:4px}
+.mbar .bars div{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;min-width:0}
+.mbar .bars i{display:block;height:12px;border-radius:4px;background:var(--line-2);min-width:2px}
+.mbar .bars i.p{background:var(--accent)}
+.mbar .bars i.neg{background:var(--bad)}
+.exp{display:flex;flex-direction:column;gap:10px}
+.exp h3{font-size:15.5px;display:flex;gap:8px;align-items:center}
+.exp p{font-size:13.5px;color:var(--muted);flex:1}
+#toasts{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:100;display:grid;gap:8px;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:12px;font-weight:700;font-size:14px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:tin .2s ease-out}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+.back{margin-bottom:8px}
+.opsel{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:0 10px;font-weight:700}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  body{background:#fff}
+  #printArea{display:block;color:#000;background:#fff;font:10.5pt/1.4 var(--font)}
+  #printArea h1{font-size:17pt;margin-bottom:4pt}#printArea h2{font-size:12.5pt;margin:14pt 0 6pt}
+  #printArea table{font-size:9.5pt;min-width:0}
+  #printArea th,#printArea td{color:#000;background:#fff;border-bottom:1px solid #bbb;padding:4pt 6pt}
+  #printArea tfoot td{font-weight:800;border-top:1.5px solid #000}
+  #printArea .pm{color:#444}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" id="resetBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M4 4v4h4M20 20v-4h-4"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24" style="width:22px;height:22px"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6M9 11h.01M15 11h.01"/></svg></span><span>Lotis<small>Opérations immobilières</small></span></div>
+  <nav id="nav" aria-label="Sections"></nav>
+  <div class="who">
+    <span class="sync" id="sync" role="status"><span class="dot" aria-hidden="true"></span><span id="syncTxt">Synchronisé</span></span>
+    <div class="avs" id="avs" aria-hidden="true"></div>
+    <label class="sr" for="userSel">Associé connecté</label>
+    <select id="userSel"></select>
+  </div>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg-h"><h2 id="dlgTitle"></h2><button type="button" class="icon-btn" id="dlgClose" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div id="dlgBody"></div>
+</dialog>
+<div id="toasts" aria-live="polite"></div>
+<div id="printArea"></div>
+<script>
+(function(){
+'use strict';
+const TODAY='2026-10-14';
+const KEY='lotis-demo-491281';
+const POSTES=[['achat','Achat'],['notaire','Frais de notaire'],['travaux','Travaux'],['interets','Intérêts bancaires'],['agence',"Frais d'agence"],['divers','Taxes & divers']];
+const PL=Object.fromEntries(POSTES);
+const USERS=[{id:'u1',name:'Julien Marchal',ini:'JM'},{id:'u2',name:'Sophie Lambert',ini:'SL'},{id:'u3',name:'Karim Benali',ini:'KB'}];
+const OPST={Acquisition:'c-info',Travaux:'c-warn',Commercialisation:'c-acc',Vendu:'c-ok'};
+const MONTHS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const CATS_OUT=['Honoraires comptables','Frais bancaires','Remboursement emprunt','Assurance','Autre dépense'];
+const CATS_IN=['Vente','Déblocage de prêt','Apport en compte courant d’associés','Autre recette'];
+
+const IC={
+ dash:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+ building:'<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/>',
+ file:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+ bank:'<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>',
+ trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+ download:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',
+ history:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ check:'<path d="M5 12l5 5 9-10"/>',
+ upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+ refresh:'<path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M4 4v4h4M20 20v-4h-4"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+ alert:'<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17.5v.01"/>',
+ back:'<path d="M15 6l-6 6 6 6"/>',
+ print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="1"/><path d="M6 14h12v7H6z"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 7l9 6 9-6"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+ table:'<rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M3 15h18M9 4v16"/>',
+ clip:'<path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+ lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'
+};
+const ic=(n,extra)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true"${extra?' style="'+extra+'"':''}>${IC[n]}</svg>`;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf0=new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const nf2=new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2});
+const eur=n=>nf0.format(Math.round(n));
+const eur2=n=>nf2.format(n);
+const sgn=n=>(n>0?'+':'')+eur2(n);
+const pct=n=>isFinite(n)?(n*100).toLocaleString('fr-FR',{maximumFractionDigits:1})+' %':'—';
+const fdate=d=>d?d.slice(8,10)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'—';
+const p2=n=>String(n).padStart(2,'0');
+const isoD=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const addDays=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return isoD(d)};
+const sum=(a,f)=>a.reduce((s,x)=>s+(+f(x)||0),0);
+const parseAmt=v=>{v=String(v==null?'':v).replace(/[\s  €]/g,'').replace(',','.');if(v==='')return NaN;return /^-?\d+(\.\d+)?$/.test(v)?Number(v):NaN};
+const nowTime=()=>{const d=new Date();return p2(d.getHours())+':'+p2(d.getMinutes())};
+const uName=id=>(USERS.find(u=>u.id===id)||USERS[0]).name;
+const uIni=id=>(USERS.find(u=>u.id===id)||USERS[0]).ini;
+
+/* ---------- Données fictives ---------- */
+function seed(){
+ const ops=[
+  {id:'op1',name:'Immeuble des Tanneurs',addr:'12 rue des Tanneurs, Villeurbanne',status:'Travaux',lots:'Division en 4 lots',sale:780000,saleReal:0,saleDate:'2027-03-15',budget:{achat:420000,notaire:31500,travaux:145000,interets:18000,agence:0,divers:6000}},
+  {id:'op2',name:'Maison de ville — Écully',addr:'5 chemin des Vignes, Écully',status:'Commercialisation',lots:'Maison 140 m²',sale:455000,saleReal:0,saleDate:'2026-11-28',budget:{achat:310000,notaire:23000,travaux:62000,interets:9500,agence:12000,divers:2500}},
+  {id:'op3',name:'Plateau à aménager — Lyon 3e',addr:'48 rue des Remparts, Lyon 3e',status:'Acquisition',lots:'Plateau 210 m² → 3 lots',sale:470000,saleReal:0,saleDate:'2027-09-30',budget:{achat:265000,notaire:20000,travaux:95000,interets:11000,agence:0,divers:3000}},
+  {id:'op4',name:'Appartement T3 — Caluire',addr:'9 allée des Tilleuls, Caluire-et-Cuire',status:'Vendu',lots:'T3 72 m²',sale:289000,saleReal:292000,saleDate:'2026-07-10',budget:{achat:198000,notaire:15500,travaux:28000,interets:4200,agence:8000,divers:1000}}
+ ];
+ const I=[
+  ['op1','achat','ACTE-0312','Prix d’acquisition — Étude Martel',420000,420000,420000,'2026-03-12','2026-03-12','pdf'],
+  ['op1','notaire','NOT-2026-118','Étude Martel & Associés',31500,31200,31200,'2026-03-12','2026-03-12','pdf'],
+  ['op1','travaux','F-2026-0412','BTP Rhône Rénovation',60000,48000,48000,'2026-06-20','2026-07-20','pdf'],
+  ['op1','travaux','F-2026-0587','BTP Rhône Rénovation',45000,38500,0,'2026-09-30','2026-10-30','pdf'],
+  ['op1','travaux','EL-2209','Électricité Saône Pro',22000,14600,7300,'2026-09-05','2026-10-05','image'],
+  ['op1','travaux','DEV-PLB-771','Plomberie Vidal (devis signé)',18000,0,0,'2026-10-01','2026-11-15',null],
+  ['op1','interets','INT-T2-T3','Banque Cerf — prêt opération',18000,6750,6750,'2026-05-06','2026-09-07','pdf'],
+  ['op1','divers','TF-2026','Taxe foncière 2026',6000,2840,2840,'2026-04-15','2026-04-15','pdf'],
+  ['op2','achat','ACTE-1121','Prix d’acquisition — Étude Perrin',310000,310000,310000,'2025-11-21','2025-11-21','pdf'],
+  ['op2','notaire','NOT-2025-944','Étude Perrin',23000,22800,22800,'2025-11-21','2025-11-21','pdf'],
+  ['op2','travaux','F-2026-0301','Atelier Menuiserie Berthet',30000,31800,31800,'2026-04-28','2026-05-15','pdf'],
+  ['op2','travaux','PEI-118','Peinture & Finitions Roux',18000,19400,19400,'2026-05-25','2026-06-05','image'],
+  ['op2','travaux','CUI-55','Cuisines Lumière',14000,12900,0,'2026-09-22','2026-10-20','pdf'],
+  ['op2','agence','MAND-ECU','Agence Quatre Saisons (mandat)',12000,0,0,'2026-09-01','2026-11-28',null],
+  ['op2','interets','INT-2026-ECU','Banque Cerf — prêt opération',9500,7100,7100,'2026-08-04','2026-08-04','pdf'],
+  ['op2','divers','DIAG-09','Diagnostics Immo Contrôle',1200,980,980,'2026-06-10','2026-06-18','image'],
+  ['op3','achat','COMP-0905','Prix d’acquisition (acte prévu)',265000,0,0,'2026-09-05','2026-12-05',null],
+  ['op3','notaire','NOT-PROV-L3','Étude Martel & Associés (provision)',20000,0,0,'2026-09-05','2026-12-05',null],
+  ['op3','travaux','ARCH-14','Cabinet d’architecture Lenoir',9000,4500,0,'2026-10-01','2026-10-25','pdf'],
+  ['op3','divers','GEO-31','Géomètre-expert Falcon',2000,1650,1650,'2026-09-10','2026-09-15','pdf'],
+  ['op4','achat','ACTE-0115','Prix d’acquisition — Étude Perrin',198000,198000,198000,'2026-01-15','2026-01-15','pdf'],
+  ['op4','notaire','NOT-2026-021','Étude Perrin',15500,15200,15200,'2026-01-15','2026-01-15','pdf'],
+  ['op4','travaux','F-2026-0110','BTP Rhône Rénovation',28000,29100,29100,'2026-03-20','2026-04-20','pdf'],
+  ['op4','interets','INT-CAL','Banque Cerf — prêt opération',4200,4050,4050,'2026-08-12','2026-08-12','pdf'],
+  ['op4','agence','HON-CAL','Agence Quatre Saisons',8000,8000,8000,'2026-07-10','2026-07-10','pdf']
+ ];
+ const inv=I.map((r,k)=>({id:'i'+(k+1),op:r[0],poste:r[1],ref:r[2],supplier:r[3],prevu:r[4],facture:r[5],paye:r[6],date:r[7],due:r[8],file:r[9]?{name:r[2]+(r[9]==='pdf'?'.pdf':'.jpg'),kind:r[9]}:null}));
+ const byRef=ref=>inv.find(i=>i.ref===ref).id;
+ const T=[
+  ['acc1','2026-05-06','PRLV SEPA BANQUE CERF ECH INTERETS PRET TANNEURS',-2250,'INT-T2-T3'],
+  ['acc1','2026-05-14','VIR SEPA ATELIER MENUISERIE BERTHET FAC F-2026-0301',-31800,'F-2026-0301'],
+  ['acc2','2026-05-20','VIR APPORT ASSOCIES COMPTE COURANT',60000,{cat:CATS_IN[2],op:''}],
+  ['acc1','2026-06-03','VIR SEPA PEINTURE FINITIONS ROUX PEI-118',-19400,'PEI-118'],
+  ['acc1','2026-06-18','VIR SEPA DIAGNOSTICS IMMO CONTROLE',-980,'DIAG-09'],
+  ['acc2','2026-06-25','FRAIS TENUE DE COMPTE T2',-45,null],
+  ['acc1','2026-07-06','PRLV SEPA BANQUE CERF ECH INTERETS PRET TANNEURS',-2250,'INT-T2-T3'],
+  ['acc1','2026-07-10','VIR ETUDE PERRIN PRIX VENTE CALUIRE',292000,{cat:'Vente',op:'op4'}],
+  ['acc1','2026-07-10','VIR SEPA AGENCE QUATRE SAISONS HON CALUIRE',-8000,'HON-CAL'],
+  ['acc1','2026-07-22','VIR SEPA BTP RHONE RENOVATION F-2026-0412',-48000,'F-2026-0412'],
+  ['acc1','2026-08-04','PRLV SEPA BANQUE CERF INTERETS PRET ECULLY',-7100,'INT-2026-ECU'],
+  ['acc1','2026-08-12','REMBT ANTICIPE PRET CALUIRE',-180000,{cat:'Remboursement emprunt',op:'op4'}],
+  ['acc1','2026-08-12','PRLV SEPA BANQUE CERF SOLDE INTERETS CALUIRE',-4050,'INT-CAL'],
+  ['acc1','2026-09-07','PRLV SEPA BANQUE CERF ECH INTERETS PRET TANNEURS',-2250,'INT-T2-T3'],
+  ['acc1','2026-09-15','CB GEOMETRE EXPERT FALCON',-1650,'GEO-31'],
+  ['acc2','2026-09-28','VIR SEPA CUISINES LUMIERE ACOMPTE 50%',-6450,null],
+  ['acc1','2026-10-02','VIR SEPA ELECTRICITE SAONE PRO EL-2209',-7300,'EL-2209'],
+  ['acc1','2026-10-08','PRLV SEPA CABINET COMPTABLE HONORAIRES OCT',-960,null],
+  ['acc1','2026-10-12','VIR SEPA BTP RHONE RENOVATION F-2026-0587',-38500,null]
+ ];
+ const tx=T.map((r,k)=>({id:'t'+(k+1),acc:r[0],date:r[1],label:r[2],amount:r[3],match:r[4]==null?null:(typeof r[4]==='string'?{type:'inv',id:byRef(r[4])}:{type:'cat',cat:r[4].cat,op:r[4].op})}));
+ const fc=[
+  ['2026-11-05','Honoraires expert-comptable',-960,''],
+  ['2026-11-28','Vente maison de ville — Écully (acte)',455000,'op2'],
+  ['2026-11-28','Remboursement prêt — Écully',-300000,'op2'],
+  ['2026-12-05','Déblocage prêt acquisition — Plateau Lyon 3e',240000,'op3'],
+  ['2026-12-05','Honoraires expert-comptable',-960,''],
+  ['2027-01-05','Honoraires expert-comptable',-960,''],
+  ['2027-01-10','Assurance multirisque immeubles',-1850,''],
+  ['2027-02-05','Honoraires expert-comptable',-960,''],
+  ['2027-02-20','Vente lots 1 et 2 — Immeuble des Tanneurs',390000,'op1'],
+  ['2027-03-05','Honoraires expert-comptable',-960,''],
+  ['2027-03-15','Vente lots 3 et 4 — Immeuble des Tanneurs',395000,'op1'],
+  ['2027-03-15','Remboursement prêt — Immeuble des Tanneurs',-330000,'op1']
+ ].map((r,k)=>({id:'f'+(k+1),date:r[0],label:r[1],amount:r[2],op:r[3]}));
+ const log=[
+  ['2026-10-14T08:47','u2','a lancé la synchronisation bancaire : 1 nouvelle transaction importée'],
+  ['2026-10-13T18:05','u1','a ajouté la facture ARCH-14 — Cabinet d’architecture Lenoir (Plateau Lyon 3e)'],
+  ['2026-10-13T11:20','u3','a modifié le budget Travaux de « Immeuble des Tanneurs » : 140 000 € → 145 000 €'],
+  ['2026-10-12T16:40','u2','a rapproché le virement de 7 300 € avec la facture EL-2209'],
+  ['2026-10-09T09:15','u1','a passé « Maison de ville — Écully » au statut Commercialisation'],
+  ['2026-10-07T14:02','u3','a exporté les dépenses de septembre (Excel) pour le cabinet comptable'],
+  ['2026-10-01T10:30','u2','a ajouté le mouvement prévisionnel « Déblocage prêt acquisition — Plateau Lyon 3e »']
+ ].map(r=>({ts:r[0],user:r[1],text:r[2]}));
+ return {v:1,seq:100,user:'u1',ops,inv,tx,fc,log,
+  acc:[{id:'acc1',name:'Compte courant professionnel',bank:'Banque Cerf',iban:'FR76 •••• •••• •••• 4821',base:95000},{id:'acc2',name:'Compte de réserve opérations',bank:'Crédit Alpin Pro',iban:'FR76 •••• •••• •••• 0937',base:140000}],
+  pending:[{acc:'acc1',date:TODAY,label:'VIR SEPA CABINET ARCHITECTURE LENOIR ARCH-14',amount:-4500},{acc:'acc2',date:TODAY,label:'COMMISSION D’INTERVENTION',amount:-16}],
+  lastSync:'08:47',lastBackup:'03:00',sim:0};
+}
+let S;
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.v===1&&s.ops)return s}catch(e){}return seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S=load();
+const fileUrls={};
+let view='dash',curOp=null,horizon=90,bankF='todo',bankAcc='';
+const fInv={q:'',op:'',st:'',poste:''};
+const expF={op:'',from:'2026-01-01',to:TODAY};
+
+/* ---------- Calculs ---------- */
+const opById=id=>S.ops.find(o=>o.id===id);
+const opName=id=>{const o=opById(id);return o?o.name:'Société (frais généraux)'};
+const engaged=i=>i.facture>0?i.facture:i.prevu;
+const reste=i=>Math.max(0,engaged(i)-i.paye);
+function invStatus(i){
+ if(!i.facture)return i.paye>0?'partiel':'prevue';
+ if(i.paye>=i.facture)return 'payee';
+ if(i.due&&i.due<TODAY)return 'retard';
+ return i.paye>0?'partiel':'apayer';
+}
+const STL={prevue:['Prévue','c-gray'],apayer:['À payer','c-info'],partiel:['Partiel','c-warn'],retard:['En retard','c-bad'],payee:['Payée','c-ok']};
+const stChip=i=>{const s=STL[invStatus(i)];return `<span class="chip ${s[1]}">${s[0]}</span>`};
+function opStats(o){
+ const invs=S.inv.filter(i=>i.op===o.id);
+ const rows=POSTES.map(([k,l])=>{const li=invs.filter(i=>i.poste===k);const b=o.budget[k]||0;const f=sum(li,i=>i.facture),p=sum(li,i=>i.paye),e=sum(li,engaged),r=sum(li,reste);const proj=o.status==='Vendu'?f:Math.max(b,e);return {k,l,b,f,p,e,r,proj,ecart:proj-b}});
+ const T=key=>sum(rows,r=>r[key]);
+ const budget=T('b'),fact=T('f'),paid=T('p'),eng=T('e'),rest=T('r'),proj=T('proj');
+ const sale=o.status==='Vendu'&&o.saleReal?o.saleReal:o.sale;
+ const mBud=o.sale-budget,mProj=sale-proj;
+ return {rows,invs,budget,fact,paid,eng,rest,proj,sale,mBud,mProj,tBud:mBud/budget,tProj:mProj/proj};
+}
+const accBal=(a,upto)=>a.base+sum(S.tx.filter(t=>t.acc===a.id&&(!upto||t.date<=upto)),t=>t.amount);
+const totalBal=upto=>sum(S.acc,a=>accBal(a,upto));
+function forecastItems(){
+ const items=S.fc.map(f=>({date:f.date,label:f.label,op:f.op,amount:f.amount,kind:'fc',id:f.id}));
+ S.inv.forEach(i=>{const r=reste(i);if(r>0){let d=i.due||i.date;const late=d<TODAY;if(late)d=TODAY;items.push({date:d,label:i.supplier+' · '+i.ref,op:i.op,amount:-r,kind:'inv',id:i.id,late,prev:!i.facture})}});
+ return items.filter(x=>x.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)||b.amount-a.amount);
+}
+const unmatched=()=>S.tx.filter(t=>!t.match);
+const suggestion=t=>t.amount<0?S.inv.find(i=>i.facture>0&&Math.abs(reste(i)-Math.abs(t.amount))<0.01):null;
+
+/* ---------- Infrastructure ---------- */
+function log(text,user){S.log.unshift({ts:TODAY+'T'+nowTime(),user:user||S.user,text})}
+function commit(text,user){if(text)log(text,user);save();render();flashSync()}
+let syncTimer;
+function flashSync(msg){const s=$('#sync');s.classList.add('busy');$('#syncTxt').textContent=msg||'Synchronisation…';clearTimeout(syncTimer);syncTimer=setTimeout(()=>{s.classList.remove('busy');$('#syncTxt').textContent='Synchronisé à '+nowTime()},700)}
+function toast(msg,icon){const t=document.createElement('div');t.className='toast';t.innerHTML=ic(icon||'check')+'<span>'+esc(msg)+'</span>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200)}
+const dlg=$('#dlg');
+function modal(title,html,mount){$('#dlgTitle').textContent=title;const b=$('#dlgBody');b.innerHTML=html;if(!dlg.open)dlg.showModal();b.scrollTop=0;dlg.scrollTop=0;if(mount)mount(b);const f=b.querySelector('input:not([type=file]):not([type=hidden]),select,textarea');if(f)f.focus();else $('#dlgClose').focus()}
+const closeModal=()=>{if(dlg.open)dlg.close()};
+$('#dlgClose').onclick=closeModal;
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeModal();if(e.target.closest('[data-close]'))closeModal()});
+const fld=(name,label,input,o)=>{o=o||{};return `<div class="field${o.full?' full':''}"><label for="f_${name}">${label}</label>${input}${o.hint?`<span class="hint">${o.hint}</span>`:''}<span class="err" id="e_${name}" data-err="${name}"></span></div>`};
+const inp=(name,val,attrs)=>`<input ${attrs||''} type="text" id="f_${name}" name="${name}" value="${esc(val)}" aria-describedby="e_${name}">`;
+const sel=(name,opts,val)=>`<select id="f_${name}" name="${name}" aria-describedby="e_${name}">${opts.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(val)?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
+const opOpts=all=>[...(all?[['',all]]:[]),...S.ops.map(o=>[o.id,o.name])];
+function showErrs(form,errs){form.querySelectorAll('[data-err]').forEach(e=>{const n=e.dataset.err;e.textContent=errs[n]||'';const f=form.querySelector('[name="'+n+'"]');if(f)f.setAttribute('aria-invalid',errs[n]?'true':'false')});const first=Object.keys(errs)[0];if(first){const f=form.querySelector('[name="'+first+'"]');if(f)f.focus()}return !first}
+
+/* ---------- En-tête ---------- */
+const TABS=[['dash','Trésorerie','dash'],['ops','Opérations','building'],['inv','Factures & dépenses','file'],['bank','Banque','bank'],['rent','Rentabilité','trend'],['exp','Exports','download'],['hist','Historique & accès','history']];
+function renderHeader(){
+ const late=S.inv.filter(i=>invStatus(i)==='retard').length,um=unmatched().length;
+ $('#nav').innerHTML=TABS.map(([v,l,i])=>{const c=v==='inv'&&late?`<span class="cnt" aria-label="${late} en retard">${late}</span>`:v==='bank'&&um?`<span class="cnt" aria-label="${um} à rapprocher">${um}</span>`:'';return `<button type="button" class="tab" data-act="go" data-view="${v}"${view===v?' aria-current="page"':''}>${ic(i)}${l}${c}</button>`}).join('');
+ $('#userSel').innerHTML=USERS.map(u=>`<option value="${u.id}"${u.id===S.user?' selected':''}>${esc(u.name)}</option>`).join('');
+ $('#avs').innerHTML=USERS.map(u=>`<span class="av${u.id===S.user?' me':''}" title="${esc(u.name)}">${u.ini}</span>`).join('');
+}
+$('#userSel').onchange=e=>{S.user=e.target.value;save();renderHeader();toast('Connecté en tant que '+uName(S.user),'users')};
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)go(b.dataset.view)});
+function go(v){view=v;if(v!=='ops')curOp=null;render();window.scrollTo(0,0);$('#main').focus({preventScroll:true})}
+
+function render(){
+ renderHeader();
+ const m=$('#main');
+ m.innerHTML=({dash:vDash,ops:vOps,inv:vInv,bank:vBank,rent:vRent,exp:vExp,hist:vHist})[view]();
+ if(view==='dash')drawChart();
+ if(view==='inv')updInv();
+}
+
+/* ---------- Trésorerie ---------- */
+function vDash(){
+ const cur=totalBal(),m=TODAY.slice(0,7);
+ const mt=S.tx.filter(t=>t.date.startsWith(m));
+ const mIn=sum(mt.filter(t=>t.amount>0),t=>t.amount),mOut=-sum(mt.filter(t=>t.amount<0),t=>t.amount);
+ const fi=forecastItems();const lim=addDays(TODAY,horizon);
+ const fH=cur+sum(fi.filter(x=>x.date<=lim),x=>x.amount);
+ const fourn=sum(S.inv,i=>i.facture>0?Math.max(0,i.facture-i.paye):0);
+ const late=S.inv.filter(i=>invStatus(i)==='retard'),um=unmatched();
+ let run=cur;
+ const up=fi.filter(x=>x.date<=lim).map(x=>{run+=x.amount;return `<tr><td>${fdate(x.date)}${x.late?'<span class="sub neg">en retard</span>':''}</td><td>${x.kind==='inv'?`<button type="button" class="lnk" data-act="inv" data-id="${x.id}">${esc(x.label)}</button>`:esc(x.label)}<span class="sub">${x.kind==='inv'?(x.prev?'Dépense prévue':'Facture à payer'):'Mouvement prévisionnel'}</span></td><td>${esc(x.op?opName(x.op):'Société')}</td><td class="n ${x.amount<0?'neg':'pos'}">${sgn(x.amount)}</td><td class="n">${eur(run)}</td><td>${x.kind==='fc'?`<button type="button" class="icon-btn" data-act="delFc" data-id="${x.id}" aria-label="Supprimer le mouvement ${esc(x.label)}">${ic('trash')}</button>`:''}</td></tr>`}).join('');
+ return `<div class="page-h"><div><h1>Trésorerie</h1><p class="muted">Situation au ${fdate(TODAY)} · ${S.acc.length} comptes synchronisés · données partagées entre les 3 associés</p></div>
+ <div class="actions"><button type="button" class="btn" data-act="addInv">${ic('upload')}Ajouter une facture</button><button type="button" class="btn primary" data-act="addFc">${ic('plus')}Mouvement prévisionnel</button></div></div>
+ <div class="kpis">
+  <div class="kpi"><div class="l">Trésorerie réelle</div><div class="v">${eur(cur)}</div><div class="s">Somme des soldes bancaires</div></div>
+  <div class="kpi"><div class="l">Entrées d'octobre</div><div class="v pos">${eur(mIn)}</div><div class="s">${mt.filter(t=>t.amount>0).length} opération(s)</div></div>
+  <div class="kpi"><div class="l">Sorties d'octobre</div><div class="v neg">${eur(mOut)}</div><div class="s">${mt.filter(t=>t.amount<0).length} opération(s)</div></div>
+  <div class="kpi"><div class="l">Fournisseurs restant à payer</div><div class="v">${eur(fourn)}</div><div class="s">${late.length} facture(s) en retard</div></div>
+  <div class="kpi"><div class="l">Prévisionnel à ${horizon} jours</div><div class="v ${fH<0?'neg':''}">${eur(fH)}</div><div class="s">au ${fdate(lim)}</div></div>
+ </div>
+ <div class="grid g3">
+  <section class="card span2" aria-labelledby="hChart"><div class="card-h"><h2 id="hChart">Trésorerie réelle et prévisionnelle</h2><div class="legend"><span><i class="sw" aria-hidden="true"></i>Réel (soldes bancaires)</span><span><i class="sw fc" aria-hidden="true"></i>Prévisionnel</span></div></div><div id="chart" class="chart"></div></section>
+  <section class="card" aria-labelledby="hAcc"><div class="card-h"><h2 id="hAcc">Comptes bancaires</h2><button type="button" class="btn sm" data-act="go" data-view="bank">Voir</button></div>
+   ${S.acc.map(a=>`<div class="acc"><span class="bk">${ic('bank')}</span><div><b>${esc(a.name)}</b><span class="sub">${esc(a.bank)} · ${esc(a.iban)}</span></div><span class="amt">${eur2(accBal(a))}</span></div>`).join('')}
+   <p class="small muted" style="margin-top:4px">Dernière synchronisation : aujourd'hui à ${esc(S.lastSync)}</p>
+   ${late.length?`<div class="alert c-bad">${ic('alert')}<span>${late.length} facture(s) en retard de paiement</span><button type="button" class="btn sm" data-act="lateInv">Voir</button></div>`:''}
+   ${um.length?`<div class="alert c-warn">${ic('link')}<span>${um.length} transaction(s) à rapprocher</span><button type="button" class="btn sm" data-act="go" data-view="bank">Traiter</button></div>`:'<div class="alert c-ok">'+ic('check')+'<span>Toutes les transactions sont rapprochées</span></div>'}
+  </section>
+  <section class="card span2" aria-labelledby="hUp"><div class="card-h"><h2 id="hUp">Mouvements à venir</h2><div class="seg" role="group" aria-label="Horizon">${[30,90,180].map(h=>`<button type="button" data-act="hz" data-h="${h}" aria-pressed="${horizon===h}">${h} jours</button>`).join('')}</div></div>
+   <div class="tblw"><table><thead><tr><th>Date</th><th>Libellé</th><th>Opération</th><th class="n">Montant</th><th class="n">Solde projeté</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${up||'<tr><td colspan="6" class="muted">Aucun mouvement prévu sur la période.</td></tr>'}</tbody></table></div>
+  </section>
+  <section class="card" aria-labelledby="hLast"><div class="card-h"><h2 id="hLast">Dernières transactions</h2></div>
+   <ul class="list">${S.tx.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).slice(0,7).map(t=>`<li><div><span class="wrap small" style="font-weight:700">${esc(t.label)}</span><span class="sub">${fdate(t.date)} · ${t.match?'Rapprochée':'<span class="neg">À rapprocher</span>'}</span></div><span class="amt ${t.amount<0?'neg':'pos'}">${sgn(t.amount)}</span></li>`).join('')}</ul>
+  </section>
+ </div>`;
+}
+function nice(r){const p=Math.pow(10,Math.floor(Math.log10(r)));const f=r/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
+function drawChart(){
+ const el=$('#chart');if(!el)return;
+ const w=Math.max(260,el.clientWidth),narrow=w<520,h=narrow?220:270,pl=narrow?50:62,pr=10,pt=14,pb=28;
+ const eoms=[];for(let k=0;k<11;k++)eoms.push(isoD(new Date(2026,5+k,0)));
+ const j=eoms.findIndex(d=>d>=TODAY),cur=totalBal(),fi=forecastItems();
+ const real=[];for(let k=0;k<j;k++)real.push([k,totalBal(eoms[k]),eoms[k]]);
+ const xt=j-1+(+TODAY.slice(8))/(+eoms[j].slice(8));
+ real.push([xt,cur,TODAY]);
+ const fc=[[xt,cur,TODAY]];for(let k=j;k<eoms.length;k++)fc.push([k,cur+sum(fi.filter(x=>x.date<=eoms[k]),x=>x.amount),eoms[k]]);
+ const vals=real.concat(fc).map(p=>p[1]);let mn=Math.min(0,...vals),mx=Math.max(...vals)*1.06;
+ const st=nice((mx-mn)/4);mn=Math.floor(mn/st)*st;mx=Math.ceil(mx/st)*st;
+ const X=x=>pl+x/(eoms.length-1)*(w-pl-pr),Y=v=>pt+(1-(v-mn)/(mx-mn))*(h-pt-pb);
+ let g='';for(let v=mn;v<=mx+1;v+=st){g+=`<line x1="${pl}" x2="${w-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" ${v===0?'stroke-width="1.5" stroke="var(--line-2)"':''}/><text x="${pl-6}" y="${Y(v)+4}" text-anchor="end">${Math.round(v/1000).toLocaleString('fr-FR')} k€</text>`}
+ eoms.forEach((d,k)=>{if(narrow&&k%2)return;g+=`<text x="${X(k)}" y="${h-8}" text-anchor="middle">${MONTHS[(4+k)%12]}</text>`});
+ const path=pts=>pts.map((p,k)=>(k?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ');
+ const area=path(real)+` L${X(xt)} ${Y(Math.max(mn,0))} L${X(0)} ${Y(Math.max(mn,0))}Z`;
+ const dot=(p,c)=>`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="var(--panel)" stroke="${c}" stroke-width="2"><title>${fdate(p[2])} : ${eur(p[1])}</title></circle>`;
+ el.innerHTML=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Trésorerie : ${eur(cur)} aujourd'hui, ${eur(fc[fc.length-1][1])} prévus fin mars 2027">${g}
+ <path d="${area}" fill="var(--accent)" opacity=".1"/>
+ <line x1="${X(xt)}" x2="${X(xt)}" y1="${pt}" y2="${h-pb}" stroke="var(--muted)" stroke-dasharray="2 3"/><text x="${X(xt)+5}" y="${pt+10}">Aujourd'hui</text>
+ <path d="${path(real)}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+ <path d="${path(fc)}" fill="none" stroke="var(--brass)" stroke-width="2.5" stroke-dasharray="6 4" stroke-linejoin="round"/>
+ ${real.map(p=>dot(p,'var(--accent)')).join('')}${fc.slice(1).map(p=>dot(p,'var(--brass)')).join('')}</svg>`;
+}
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(drawChart,120)});
+
+function openFcForm(){
+ modal('Nouveau mouvement prévisionnel',`<form id="fcForm" novalidate><div class="fgrid">
+  ${fld('label','Libellé',inp('label',''),{full:true})}
+  ${fld('dir','Sens',sel('dir',[['in','Entrée d’argent'],['out','Sortie d’argent']],'in'))}
+  ${fld('amount','Montant (€)',inp('amount','','inputmode="decimal" autocomplete="off"'))}
+  ${fld('date','Date prévue',`<input type="date" id="f_date" name="date" value="${addDays(TODAY,30)}" min="${TODAY}" aria-describedby="e_date">`)}
+  ${fld('op','Opération',sel('op',opOpts('Société (frais généraux)'),''))}
+ </div><div class="actions end"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">Ajouter au prévisionnel</button></div></form>`,b=>{
+  b.querySelector('form').onsubmit=e=>{e.preventDefault();const f=e.target,d=new FormData(f),errs={};
+   const label=d.get('label').trim(),a=parseAmt(d.get('amount')),date=d.get('date');
+   if(!label)errs.label='Indiquez un libellé.';if(!(a>0))errs.amount='Saisissez un montant positif (ex. 12 500).';if(!date||date<TODAY)errs.date='Choisissez une date à venir.';
+   if(!showErrs(f,errs))return;
+   const amount=d.get('dir')==='out'?-a:a;
+   S.fc.push({id:'f'+(++S.seq),date,label,amount,op:d.get('op')});closeModal();
+   commit(`a ajouté le mouvement prévisionnel « ${label} » (${sgn(amount)})`);toast('Mouvement ajouté au prévisionnel');
+  }});
+}
+
+/* ---------- Opérations ---------- */
+function vOps(){
+ if(curOp&&opById(curOp))return vOpDetail(opById(curOp));
+ const all=S.ops.map(o=>[o,opStats(o)]);
+ return `<div class="page-h"><div><h1>Opérations</h1><p class="muted">${S.ops.length} opérations · dépenses ventilées par poste</p></div><button type="button" class="btn primary" data-act="addOp">${ic('plus')}Nouvelle opération</button></div>
+ <div class="kpis">
+  <div class="kpi"><div class="l">Opérations en cours</div><div class="v">${S.ops.filter(o=>o.status!=='Vendu').length}</div><div class="s">${S.ops.filter(o=>o.status==='Vendu').length} vendue(s)</div></div>
+  <div class="kpi"><div class="l">Capital engagé (en cours)</div><div class="v">${eur(sum(all.filter(a=>a[0].status!=='Vendu'),a=>a[1].paid))}</div><div class="s">Dépenses déjà payées</div></div>
+  <div class="kpi"><div class="l">Marge projetée totale</div><div class="v">${eur(sum(all,a=>a[1].mProj))}</div><div class="s">Budget initial : ${eur(sum(all,a=>a[1].mBud))}</div></div>
+ </div>
+ <div class="ops">${all.map(([o,s])=>{const p=s.budget?s.eng/s.budget:0;return `<button type="button" class="card opc" data-act="op" data-id="${o.id}">
+  <span style="display:flex;justify-content:space-between;gap:8px;width:100%"><span style="min-width:0"><span class="h3">${esc(o.name)}</span><span class="sub">${esc(o.addr)}</span></span><span class="chip ${OPST[o.status]}" style="align-self:flex-start">${o.status}</span></span>
+  <span class="row" style="width:100%"><span class="muted">Budget</span><b>${eur(s.budget)}</b></span>
+  <span class="row" style="width:100%"><span class="muted">Engagé</span><b>${eur(s.eng)} · ${pct(p)}</b></span>
+  <span class="bar" style="width:100%" aria-hidden="true"><span class="${p>1?'over':''}" style="width:${Math.min(100,p*100)}%"></span></span>
+  <span class="row" style="width:100%"><span class="muted">${o.status==='Vendu'?'Marge réalisée':'Marge projetée'}</span><b class="${s.mProj<s.mBud?'neg':'pos'}">${eur(s.mProj)} (${pct(s.tProj)})</b></span>
+ </button>`}).join('')}</div>`;
+}
+function vOpDetail(o){
+ const s=opStats(o);
+ return `<button type="button" class="btn sm back" data-act="back">${ic('back')}Toutes les opérations</button>
+ <div class="page-h"><div><h1>${esc(o.name)}</h1><p class="muted">${esc(o.addr)} · ${esc(o.lots)} · vente ${o.status==='Vendu'?'réalisée le':'prévue le'} ${fdate(o.saleDate)}</p></div>
+ <div class="actions"><label class="sr" for="opStatus">Statut de l'opération</label><select id="opStatus" class="opsel" data-id="${o.id}">${Object.keys(OPST).map(k=>`<option${k===o.status?' selected':''}>${k}</option>`).join('')}</select>
+ <button type="button" class="btn" data-act="editOp" data-id="${o.id}">${ic('edit')}Budget & infos</button><button type="button" class="btn" data-act="printOp" data-id="${o.id}">${ic('print')}Fiche PDF</button><button type="button" class="btn primary" data-act="addInv" data-op="${o.id}">${ic('plus')}Ajouter une dépense</button></div></div>
+ <div class="kpis">
+  <div class="kpi"><div class="l">Prix de vente ${o.status==='Vendu'?'réel':'prévu'}</div><div class="v">${eur(s.sale)}</div><div class="s">${o.status==='Vendu'?'Prévu : '+eur(o.sale):'Budget de revente'}</div></div>
+  <div class="kpi"><div class="l">Budget prévisionnel</div><div class="v">${eur(s.budget)}</div><div class="s">Prix de revient prévu</div></div>
+  <div class="kpi"><div class="l">Facturé / payé</div><div class="v">${eur(s.fact)}</div><div class="s">Payé : ${eur(s.paid)} · reste ${eur(s.rest)}</div></div>
+  <div class="kpi"><div class="l">Coût de revient projeté</div><div class="v ${s.proj>s.budget?'neg':''}">${eur(s.proj)}</div><div class="s">Écart : ${s.proj-s.budget>0?'+':''}${eur(s.proj-s.budget)}</div></div>
+  <div class="kpi"><div class="l">${o.status==='Vendu'?'Marge réalisée':'Marge projetée'}</div><div class="v ${s.mProj<s.mBud?'neg':'pos'}">${eur(s.mProj)}</div><div class="s">${pct(s.tProj)} du prix de revient · prévu ${eur(s.mBud)}</div></div>
+ </div>
+ <div class="grid g2">
+ <section class="card" aria-labelledby="hPost"><div class="card-h"><h2 id="hPost">Budget prévisionnel / dépenses réelles par poste</h2></div>
+  <div class="tblw"><table><thead><tr><th>Poste</th><th class="n">Budget</th><th class="n">Facturé</th><th class="n">Payé</th><th class="n">Reste à payer</th><th class="n">Projeté</th><th class="n">Écart</th></tr></thead><tbody>
+  ${s.rows.map(r=>{const mx=Math.max(r.b,r.proj,1);return `<tr><td><b>${r.l}</b><div class="pbars" aria-hidden="true"><span class="bar"><span class="b" style="width:${r.b/mx*100}%"></span></span><span class="bar"><span class="${r.proj>r.b?'over':''}" style="width:${r.proj/mx*100}%"></span></span></div></td><td class="n">${eur(r.b)}</td><td class="n">${eur(r.f)}</td><td class="n">${eur(r.p)}</td><td class="n">${eur(r.r)}</td><td class="n">${eur(r.proj)}</td><td class="n ${r.ecart>0?'neg':r.ecart<0?'pos':''}">${r.ecart>0?'+':''}${eur(r.ecart)}</td></tr>`}).join('')}
+  </tbody><tfoot><tr><td>Total</td><td class="n">${eur(s.budget)}</td><td class="n">${eur(s.fact)}</td><td class="n">${eur(s.paid)}</td><td class="n">${eur(s.rest)}</td><td class="n">${eur(s.proj)}</td><td class="n ${s.proj>s.budget?'neg':'pos'}">${s.proj-s.budget>0?'+':''}${eur(s.proj-s.budget)}</td></tr></tfoot></table></div>
+  <p class="hint" style="margin-top:8px">Barre grise : budget · barre verte : coût projeté (rouge si dépassement). Projeté = le plus élevé entre budget et montants engagés${o.status==='Vendu'?' ; opération vendue : coûts facturés définitifs':''}.</p>
+ </section>
+ <section class="card" aria-labelledby="hOpInv"><div class="card-h"><h2 id="hOpInv">Factures et dépenses (${s.invs.length})</h2></div>
+  ${invTable(s.invs.slice().sort((a,b)=>b.date.localeCompare(a.date)),true)}
+ </section></div>`;
+}
+function openOpForm(id){
+ const o=id?opById(id):null;
+ const v=o||{name:'',addr:'',status:'Acquisition',lots:'',sale:'',saleReal:'',saleDate:addDays(TODAY,365),budget:{}};
+ modal(o?'Budget & informations':'Nouvelle opération',`<form novalidate><div class="fgrid">
+  ${fld('name','Nom de l’opération',inp('name',v.name,'autocomplete="off"'),{full:true})}
+  ${fld('addr','Adresse du bien',inp('addr',v.addr,'autocomplete="off"'),{full:true})}
+  ${fld('status','Statut',sel('status',Object.keys(OPST).map(k=>[k,k]),v.status))}
+  ${fld('lots','Description / lots',inp('lots',v.lots))}
+  ${fld('sale','Prix de vente prévu (€)',inp('sale',v.sale,'inputmode="decimal"'))}
+  ${fld('saleReal','Prix de vente réel (€)',inp('saleReal',v.saleReal||'','inputmode="decimal"'),{hint:'Une fois l’acte de vente signé'})}
+  ${fld('saleDate','Date de vente',`<input type="date" id="f_saleDate" name="saleDate" value="${esc(v.saleDate)}" aria-describedby="e_saleDate">`)}
+ </div><fieldset><legend>Budget prévisionnel par poste (€)</legend><div class="fgrid g3">
+  ${POSTES.map(([k,l])=>fld('b_'+k,l,inp('b_'+k,v.budget[k]!=null?v.budget[k]:'','inputmode="decimal"'))).join('')}
+ </div></fieldset>
+ <div class="actions end"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">${o?'Enregistrer':'Créer l’opération'}</button></div></form>`,b=>{
+  b.querySelector('form').onsubmit=e=>{e.preventDefault();const f=e.target,d=new FormData(f),errs={};
+   const name=d.get('name').trim(),sale=parseAmt(d.get('sale')),sr=d.get('saleReal').trim()?parseAmt(d.get('saleReal')):0;
+   if(!name)errs.name='Donnez un nom à l’opération.';
+   if(!(sale>0))errs.sale='Prix de vente prévu requis.';
+   if(!(sr>=0))errs.saleReal='Montant invalide.';
+   if(!d.get('saleDate'))errs.saleDate='Date requise.';
+   const budget={};POSTES.forEach(([k])=>{const raw=d.get('b_'+k).trim();const n=raw?parseAmt(raw):0;if(!(n>=0))errs['b_'+k]='Montant invalide.';budget[k]=n||0});
+   if(!(budget.achat>0)&&!errs.b_achat)errs.b_achat='Indiquez le prix d’achat.';
+   if(!showErrs(f,errs))return;
+   const data={name,addr:d.get('addr').trim(),status:d.get('status'),lots:d.get('lots').trim(),sale,saleReal:sr,saleDate:d.get('saleDate'),budget};
+   closeModal();
+   if(o){const changes=POSTES.filter(([k])=>(o.budget[k]||0)!==budget[k]).map(([k,l])=>`${l} : ${eur(o.budget[k]||0)} → ${eur(budget[k])}`);Object.assign(o,data);commit(`a mis à jour « ${name} »${changes.length?' — budget '+changes.join(', '):''}`);toast('Opération mise à jour')}
+   else{const id='op'+(++S.seq);S.ops.push(Object.assign({id},data));curOp=id;view='ops';commit(`a créé l’opération « ${name} » (budget ${eur(sum(Object.values(budget),x=>x))})`);toast('Opération créée')}
+  }});
+}
+
+/* ---------- Factures ---------- */
+function invTable(list,compact){
+ if(!list.length)return '<div class="empty">Aucune facture ne correspond.</div>';
+ return `<div class="tblw"><table><thead><tr><th>Fournisseur / réf.</th>${compact?'':'<th>Opération</th>'}<th>Poste</th><th>Échéance</th><th class="n">Prévu</th><th class="n">Facturé</th><th class="n">Payé</th><th class="n">Reste</th><th>Statut</th></tr></thead><tbody>
+ ${list.map(i=>`<tr><td><b class="wrap">${esc(i.supplier)}</b><br><button type="button" class="lnk" data-act="inv" data-id="${i.id}">${esc(i.ref)}</button>${i.file?` <span class="muted" title="Justificatif joint">${ic('clip','width:14px;height:14px;vertical-align:-2px')}<span class="sr">justificatif joint</span></span>`:''}</td>${compact?'':`<td>${esc(opName(i.op))}</td>`}<td>${PL[i.poste]}</td><td>${fdate(i.due)}</td><td class="n">${eur2(i.prevu)}</td><td class="n">${eur2(i.facture)}</td><td class="n">${eur2(i.paye)}</td><td class="n"><b>${eur2(reste(i))}</b></td><td>${stChip(i)}</td></tr>`).join('')}
+ </tbody>${compact?'':`<tfoot><tr><td colspan="4">Total (${list.length})</td><td class="n">${eur2(sum(list,i=>i.prevu))}</td><td class="n">${eur2(sum(list,i=>i.facture))}</td><td class="n">${eur2(sum(list,i=>i.paye))}</td><td class="n">${eur2(sum(list,reste))}</td><td></td></tr></tfoot>`}</table></div>`;
+}
+function invFiltered(){const q=fInv.q.toLowerCase().trim();return S.inv.filter(i=>{const st=invStatus(i);return (!fInv.op||i.op===fInv.op)&&(!fInv.poste||i.poste===fInv.poste)&&(!fInv.st||(fInv.st==='open'?i.facture>0&&reste(i)>0:st===fInv.st))&&(!q||(i.ref+' '+i.supplier).toLowerCase().includes(q))}).sort((a,b)=>(b.due||'').localeCompare(a.due||''))}
+function vInv(){
+ const all=S.inv;
+ return `<div class="page-h"><div><h1>Factures & dépenses</h1><p class="muted">Montants prévus, facturés, payés et restant à payer · justificatifs PDF ou photo</p></div><button type="button" class="btn primary" data-act="addInv">${ic('upload')}Ajouter une facture</button></div>
+ <div class="kpis">
+  <div class="kpi"><div class="l">Prévu</div><div class="v">${eur(sum(all,i=>i.prevu))}</div></div>
+  <div class="kpi"><div class="l">Facturé</div><div class="v">${eur(sum(all,i=>i.facture))}</div></div>
+  <div class="kpi"><div class="l">Payé</div><div class="v pos">${eur(sum(all,i=>i.paye))}</div></div>
+  <div class="kpi"><div class="l">Reste à payer</div><div class="v neg">${eur(sum(all,reste))}</div><div class="s">dont prévu non facturé : ${eur(sum(all.filter(i=>!i.facture),reste))}</div></div>
+ </div>
+ <section class="card"><div class="filters">
+  <div class="field"><label for="q">Rechercher</label><input type="search" id="q" value="${esc(fInv.q)}" placeholder="Fournisseur, référence…" data-f="q"></div>
+  <div class="field"><label for="fop">Opération</label><select id="fop" data-f="op">${opOpts('Toutes').map(([v,l])=>`<option value="${v}"${v===fInv.op?' selected':''}>${esc(l)}</option>`).join('')}</select></div>
+  <div class="field"><label for="fpo">Poste</label><select id="fpo" data-f="poste"><option value="">Tous</option>${POSTES.map(([k,l])=>`<option value="${k}"${k===fInv.poste?' selected':''}>${l}</option>`).join('')}</select></div>
+  <div class="field"><label for="fst">Statut</label><select id="fst" data-f="st">${[['','Tous'],['open','Reste à payer'],['retard','En retard'],['partiel','Partiel'],['apayer','À payer'],['payee','Payée'],['prevue','Prévue (non facturée)']].map(([v,l])=>`<option value="${v}"${v===fInv.st?' selected':''}>${l}</option>`).join('')}</select></div>
+ </div><p class="sr" id="invCount" aria-live="polite"></p><div id="invTbl"></div></section>`;
+}
+function updInv(){const l=invFiltered();const t=$('#invTbl');if(t)t.innerHTML=invTable(l);const c=$('#invCount');if(c)c.textContent=l.length+' facture(s) affichée(s)'}
+function openInvForm(id,preset){
+ preset=preset||{};
+ const i=id?S.inv.find(x=>x.id===id):null;
+ const d0=preset.date||TODAY;
+ const v=i||{ref:'',supplier:preset.supplier||'',op:preset.op||(S.ops.find(o=>o.status!=='Vendu')||S.ops[0]).id,poste:preset.poste||'travaux',prevu:preset.amount!=null?preset.amount:'',facture:preset.amount!=null?preset.amount:'',paye:0,date:d0,due:addDays(d0,30),file:null};
+ let pending=null;
+ modal(i?'Modifier la facture':(preset.txId?'Créer une dépense depuis la transaction':'Ajouter une facture ou dépense'),`<form novalidate>
+  <div><input type="file" id="f_file" name="file" accept="application/pdf,image/*" class="sr-file" aria-describedby="e_file"><label for="f_file" class="dropzone">${ic('upload')}<span><b>${v.file?'Remplacer le justificatif':'Joindre la facture'}</b><br><span class="small muted">PDF ou photo prise depuis l'iPhone · 10 Mo max · stockage privé</span></span></label>
+  <div id="filePrev" class="fileprev">${v.file?`${ic('clip')}<span class="small wrap">${esc(v.file.name)}</span>`:''}</div><span class="err" data-err="file" id="e_file"></span></div>
+  <div class="fgrid" style="margin-top:14px">
+  ${fld('supplier','Fournisseur',inp('supplier',v.supplier,'autocomplete="off"'),{full:true})}
+  ${fld('ref','N° de facture',inp('ref',v.ref,'autocomplete="off"'),{hint:'Facultatif pour une dépense prévue'})}
+  ${fld('op','Opération',sel('op',opOpts(),v.op))}
+  ${fld('poste','Poste',sel('poste',POSTES,v.poste))}
+  ${fld('date','Date de facture',`<input type="date" id="f_date" name="date" value="${esc(v.date)}" aria-describedby="e_date">`)}
+  ${fld('due','Échéance de paiement',`<input type="date" id="f_due" name="due" value="${esc(v.due)}" aria-describedby="e_due">`)}
+  ${fld('prevu','Montant prévu (€ TTC)',inp('prevu',v.prevu,'inputmode="decimal" autocomplete="off"'),{hint:'Devis ou budget'})}
+  ${fld('facture','Montant facturé (€ TTC)',inp('facture',v.facture,'inputmode="decimal" autocomplete="off"'),{hint:'0 si pas encore facturé'})}
+  ${fld('paye','Déjà payé (€)',inp('paye',preset.txId?0:v.paye,'inputmode="decimal" autocomplete="off"'+(preset.txId?' readonly':'')),{hint:preset.txId?'Sera réglé par la transaction bancaire':''})}
+  </div>
+  <div class="actions end"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">${i?'Enregistrer':'Ajouter'}</button></div></form>`,b=>{
+  const f=b.querySelector('form'),fi=b.querySelector('#f_file');
+  fi.onchange=()=>{const file=fi.files[0];const pv=b.querySelector('#filePrev');const e=b.querySelector('#e_file');e.textContent='';pending=null;if(!file)return;
+   const okType=file.type==='application/pdf'||file.type.startsWith('image/');
+   if(!okType){e.textContent='Format non accepté : PDF ou image uniquement.';pv.innerHTML='';return}
+   if(file.size>10*1024*1024){e.textContent='Fichier trop lourd (10 Mo maximum).';pv.innerHTML='';return}
+   pending=file;const url=URL.createObjectURL(file);pending._url=url;
+   pv.innerHTML=(file.type.startsWith('image/')?`<img src="${url}" alt="Aperçu de la photo de facture">`:`<span class="chip c-bad">PDF</span>`)+`<span class="small wrap">${esc(file.name)} · ${(file.size/1024).toFixed(0)} Ko</span>`;
+  };
+  f.onsubmit=e=>{e.preventDefault();const d=new FormData(f),errs={};
+   const supplier=d.get('supplier').trim();
+   let facture=d.get('facture').trim()?parseAmt(d.get('facture')):0;
+   let prevu=d.get('prevu').trim()?parseAmt(d.get('prevu')):facture;
+   const paye=d.get('paye').trim()?parseAmt(d.get('paye')):0;
+   if(!supplier)errs.supplier='Indiquez le fournisseur.';
+   if(!(prevu>=0))errs.prevu='Montant invalide (ex. 12 500,00).';
+   if(!(facture>=0))errs.facture='Montant invalide (ex. 12 500,00).';
+   if(!(paye>=0))errs.paye='Montant invalide.';
+   else if(!errs.facture&&paye>facture)errs.paye='Le montant payé ne peut pas dépasser le montant facturé.';
+   if(!errs.prevu&&!errs.facture&&!prevu&&!facture)errs.prevu='Renseignez au moins un montant prévu ou facturé.';
+   const date=d.get('date'),due=d.get('due');
+   if(!date)errs.date='Date requise.';
+   if(due&&date&&due<date)errs.due='L’échéance précède la date de facture.';
+   if(!showErrs(f,errs))return;
+   const data={supplier,ref:d.get('ref').trim(),op:d.get('op'),poste:d.get('poste'),prevu,facture,paye,date,due:due||date};
+   closeModal();
+   let target=i;
+   if(i){Object.assign(i,data);if(!i.ref)i.ref='DEP-'+i.id}
+   else{target=Object.assign({id:'i'+(++S.seq),file:null},data);if(!target.ref)target.ref='DEP-'+S.seq;S.inv.push(target)}
+   if(pending){target.file={name:pending.name,kind:pending.type.startsWith('image/')?'image':'pdf'};fileUrls[target.id]=pending._url}
+   let msg=i?`a modifié la facture ${target.ref} — ${supplier}`:`a ajouté la facture ${target.ref} — ${supplier} (${opName(target.op)}, ${PL[target.poste]}, ${eur2(engaged(target))})`;
+   if(preset.txId){const t=S.tx.find(x=>x.id===preset.txId);if(t&&!t.match){t.match={type:'inv',id:target.id};target.paye=Math.min(engaged(target),target.paye+Math.abs(t.amount));msg+=' et l’a rapprochée de la transaction bancaire'}}
+   commit(msg);toast(i?'Facture mise à jour':'Facture ajoutée'+(pending?' avec son justificatif':''));
+  };
+ });
+}
+function openInvDetail(id){
+ const i=S.inv.find(x=>x.id===id);if(!i)return;
+ const r=reste(i),e=engaged(i),url=fileUrls[i.id],txs=S.tx.filter(t=>t.match&&t.match.type==='inv'&&t.match.id===i.id);
+ let doc;
+ if(i.file&&url&&i.file.kind==='image')doc=`<div><img src="${url}" alt="Justificatif ${esc(i.ref)}"><p class="small muted wrap" style="margin-top:6px">${esc(i.file.name)}</p></div>`;
+ else if(i.file)doc=`<span class="ph">${i.file.kind==='image'?'JPG':'PDF'}</span><div><b class="wrap">${esc(i.file.name)}</b><span class="sub">Stocké dans l'espace documents privé de la société</span></div>${url?`<a class="btn sm" href="${url}" target="_blank" rel="noopener">Ouvrir</a>`:`<button type="button" class="btn sm" data-act="fakeOpen">Ouvrir</button>`}`;
+ else doc=`<div><b>Aucun justificatif</b><span class="sub">Ajoutez le PDF ou une photo de la facture</span></div><input type="file" id="attach" accept="application/pdf,image/*" class="sr-file"><label for="attach" class="btn sm">${ic('upload')}Joindre</label>`;
+ modal(i.supplier,`<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div style="min-width:0"><p class="wrap"><b>${esc(i.ref)}</b> · ${esc(opName(i.op))} · ${PL[i.poste]}</p><p class="small muted">Facture du ${fdate(i.date)} · échéance ${fdate(i.due)}</p></div>${stChip(i)}</div>
+ <dl class="dl"><div><dt>Prévu</dt><dd>${eur2(i.prevu)}</dd></div><div><dt>Facturé</dt><dd>${eur2(i.facture)}</dd></div><div><dt>Payé</dt><dd>${eur2(i.paye)}</dd></div><div><dt>Reste à payer</dt><dd>${eur2(r)}</dd></div></dl>
+ <div class="bar" aria-hidden="true"><span style="width:${e?Math.min(100,i.paye/e*100):0}%"></span></div>
+ ${i.facture&&i.prevu&&i.facture!==i.prevu?`<p class="small ${i.facture>i.prevu?'neg':'pos'}" style="margin-top:6px">Écart facturé / prévu : ${i.facture>i.prevu?'+':''}${eur2(i.facture-i.prevu)}</p>`:''}
+ <div class="doc">${doc}</div>
+ ${r>0?`<form id="payForm" novalidate><div class="fgrid"><div class="field"><label for="payAmt">Montant du paiement (€)</label><input type="text" inputmode="decimal" id="payAmt" name="pay" value="${String(r).replace('.',',')}" aria-describedby="e_pay"><span class="err" id="e_pay" data-err="pay"></span></div><div class="field" style="justify-content:flex-end"><button class="btn primary">${ic('check')}Enregistrer le paiement</button></div></div></form>`:''}
+ <h3 class="sec">Paiements rapprochés</h3>
+ ${txs.length?`<ul class="list">${txs.map(t=>`<li><div><span class="small wrap" style="font-weight:700">${esc(t.label)}</span><span class="sub">${fdate(t.date)} · ${esc(S.acc.find(a=>a.id===t.acc).name)}</span></div><span class="amt">${eur2(t.amount)}</span></li>`).join('')}</ul>`:'<p class="small muted">Aucune transaction bancaire liée.</p>'}
+ <div class="actions end"><button type="button" class="btn danger" id="delInv">${ic('trash')}Supprimer</button><button type="button" class="btn" id="editInv">${ic('edit')}Modifier</button></div>`,b=>{
+  const pf=b.querySelector('#payForm');
+  if(pf)pf.onsubmit=ev=>{ev.preventDefault();const a=parseAmt(pf.pay.value);const errs={};if(!(a>0))errs.pay='Montant invalide.';else if(a>r+0.001)errs.pay='Supérieur au reste à payer ('+eur2(r)+').';if(!showErrs(pf,errs))return;
+   if(!i.facture)i.facture=i.prevu;i.paye=Math.round((i.paye+a)*100)/100;commit(`a enregistré un paiement de ${eur2(a)} sur la facture ${i.ref}`);toast('Paiement enregistré');openInvDetail(i.id)};
+  b.querySelector('#editInv').onclick=()=>openInvForm(i.id);
+  const del=b.querySelector('#delInv');
+  del.onclick=()=>{if(del.dataset.c){S.inv=S.inv.filter(x=>x.id!==i.id);S.tx.forEach(t=>{if(t.match&&t.match.type==='inv'&&t.match.id===i.id)t.match=null});closeModal();commit(`a supprimé la facture ${i.ref} — ${i.supplier}`);toast('Facture supprimée (récupérable via l’historique)','trash')}else{del.dataset.c=1;del.innerHTML=ic('trash')+'Confirmer la suppression'}};
+  const at=b.querySelector('#attach');
+  if(at)at.onchange=()=>{const file=at.files[0];if(!file)return;if(!(file.type==='application/pdf'||file.type.startsWith('image/'))){toast('Format non accepté : PDF ou image','alert');return}
+   i.file={name:file.name,kind:file.type.startsWith('image/')?'image':'pdf'};fileUrls[i.id]=URL.createObjectURL(file);commit(`a joint le justificatif « ${file.name} » à la facture ${i.ref}`);toast('Justificatif ajouté');openInvDetail(i.id)};
+ });
+}
+
+/* ---------- Banque ---------- */
+function vBank(){
+ const um=unmatched();
+ const list=S.tx.filter(t=>(!bankAcc||t.acc===bankAcc)&&(bankF==='all'||(bankF==='todo'?!t.match:!!t.match))).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+ const desc=t=>{if(!t.match){const sg=suggestion(t);return sg?`<span class="chip c-brass">Suggestion</span> <span class="small wrap">${esc(sg.ref)} · ${esc(sg.supplier)}</span><div class="actions" style="margin-top:6px"><button type="button" class="btn sm primary" data-act="accept" data-id="${t.id}" data-inv="${sg.id}">${ic('check')}Valider</button><button type="button" class="btn sm" data-act="match" data-id="${t.id}">Autre…</button></div>`:`<button type="button" class="btn sm" data-act="match" data-id="${t.id}">${ic('link')}Rapprocher</button>`}
+  if(t.match.type==='inv'){const i=S.inv.find(x=>x.id===t.match.id);return `<span class="chip c-ok">${ic('check','width:13px;height:13px')}Facture</span> ${i?`<button type="button" class="lnk small" data-act="inv" data-id="${i.id}">${esc(i.ref)}</button><span class="sub">${esc(opName(i.op))}</span>`:''}<div><button type="button" class="lnk small" style="color:var(--muted)" data-act="unmatch" data-id="${t.id}">Annuler le rapprochement</button></div>`}
+  return `<span class="chip c-acc">${esc(t.match.cat)}</span><span class="sub">${esc(t.match.op?opName(t.match.op):'Société')}</span><div><button type="button" class="lnk small" style="color:var(--muted)" data-act="unmatch" data-id="${t.id}">Annuler</button></div>`};
+ return `<div class="page-h"><div><h1>Banque & rapprochement</h1><p class="muted">Transactions récupérées automatiquement · rapprochement avec les factures et dépenses</p></div><button type="button" class="btn primary" data-act="sync" id="syncBtn">${ic('refresh')}Synchroniser les comptes</button></div>
+ <div class="grid g3" style="margin-bottom:16px">
+  ${S.acc.map(a=>`<div class="card"><div class="acc" style="padding:0;border:0"><span class="bk">${ic('bank')}</span><div><b>${esc(a.name)}</b><span class="sub">${esc(a.bank)} · ${esc(a.iban)}</span></div></div><p class="amt" style="font-size:22px;margin:10px 0 2px">${eur2(accBal(a))}</p><p class="small muted">${S.tx.filter(t=>t.acc===a.id&&!t.match).length} à rapprocher · synchro ${esc(S.lastSync)}</p></div>`).join('')}
+  <div class="card"><h2 style="display:flex;gap:8px;align-items:center">${ic('lock')}Connexion sécurisée</h2><p class="small muted" style="margin-top:8px">Accès en lecture seule via un agrégateur bancaire agréé (DSP2) : aucun identifiant bancaire stocké dans l'application. Consentement valable jusqu'au 12/01/2027, renouvelable en un clic.</p><span class="chip c-ok" style="margin-top:8px">Mode simulation</span></div>
+ </div>
+ <section class="card"><div class="card-h"><div class="seg" role="group" aria-label="Filtrer les transactions">${[['todo','À rapprocher ('+um.length+')'],['done','Rapprochées'],['all','Toutes']].map(([k,l])=>`<button type="button" data-act="bf" data-f="${k}" aria-pressed="${bankF===k}">${l}</button>`).join('')}</div>
+  <div class="field" style="flex:0 1 260px"><label class="sr" for="bAcc">Compte</label><select id="bAcc">${[['','Tous les comptes'],...S.acc.map(a=>[a.id,a.name])].map(([v,l])=>`<option value="${v}"${v===bankAcc?' selected':''}>${esc(l)}</option>`).join('')}</select></div></div>
+  ${list.length?`<div class="tblw"><table><thead><tr><th>Date</th><th>Libellé bancaire</th><th>Compte</th><th class="n">Montant</th><th>Rapprochement</th></tr></thead><tbody>${list.map(t=>`<tr><td>${fdate(t.date)}</td><td class="small" style="font-weight:700">${esc(t.label)}</td><td class="small">${esc(S.acc.find(a=>a.id===t.acc).name)}</td><td class="n ${t.amount<0?'neg':'pos'}"><b>${sgn(t.amount)}</b></td><td>${desc(t)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">${bankF==='todo'?'Tout est rapproché. Lancez une synchronisation pour récupérer les nouvelles transactions.':'Aucune transaction.'}</div>`}
+ </section>`;
+}
+function matchInv(t,i){t.match={type:'inv',id:i.id};if(!i.facture)i.facture=i.prevu;i.paye=Math.round((i.paye+Math.abs(t.amount))*100)/100;commit(`a rapproché « ${t.label} » (${eur2(t.amount)}) avec la facture ${i.ref}`);toast('Transaction rapprochée — facture '+i.ref+' mise à jour','link')}
+function openMatch(id){
+ const t=S.tx.find(x=>x.id===id);if(!t)return;const abs=Math.abs(t.amount),out=t.amount<0;
+ const cands=out?S.inv.filter(i=>reste(i)>0).map(i=>({i,d:Math.abs(reste(i)-abs)})).sort((a,b)=>a.d-b.d).slice(0,5):[];
+ modal('Rapprocher la transaction',`<div class="txhead"><div><b class="small">${esc(t.label)}</b><span class="sub">${fdate(t.date)} · ${esc(S.acc.find(a=>a.id===t.acc).name)}</span></div><span class="amt ${out?'neg':'pos'}">${sgn(t.amount)}</span></div>
+ ${out?`<h3 class="sec">Factures ouvertes les plus proches</h3><ul class="cands">${cands.map(({i,d})=>`<li><button type="button" class="cand" data-inv="${i.id}"><span><b>${esc(i.supplier)}</b> · ${esc(i.ref)}<span class="sub">${esc(opName(i.op))} · reste ${eur2(reste(i))}</span></span>${d<0.01?'<span class="chip c-ok">Montant exact</span>':abs<reste(i)?'<span class="chip c-warn">Paiement partiel</span>':'<span class="chip c-gray">Écart '+eur(d)+'</span>'}</button></li>`).join('')||'<li class="muted small">Aucune facture ouverte.</li>'}</ul>
+ <button type="button" class="btn" id="mkInv" style="margin-top:6px">${ic('plus')}Créer une dépense à partir de cette transaction</button>`:''}
+ <h3 class="sec">Ou catégoriser sans facture</h3>
+ <form id="catForm" novalidate><div class="fgrid">${fld('cat','Catégorie',sel('cat',(out?CATS_OUT:CATS_IN).map(c=>[c,c]),''))}${fld('op','Opération',sel('op',opOpts('Société (frais généraux)'),''))}</div>
+ <div class="actions end"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">Catégoriser</button></div></form>`,b=>{
+  b.querySelectorAll('.cand').forEach(c=>c.onclick=()=>{const i=S.inv.find(x=>x.id===c.dataset.inv);closeModal();matchInv(t,i)});
+  const mk=b.querySelector('#mkInv');if(mk)mk.onclick=()=>{const lab=t.label.replace(/^(VIR SEPA|PRLV SEPA|VIR|PRLV|CB)\s+/,'');openInvForm(null,{supplier:lab.charAt(0)+lab.slice(1).toLowerCase(),amount:abs,date:t.date,txId:t.id,poste:'divers'})};
+  b.querySelector('#catForm').onsubmit=e=>{e.preventDefault();const d=new FormData(e.target);t.match={type:'cat',cat:d.get('cat'),op:d.get('op')};closeModal();commit(`a catégorisé « ${t.label} » en ${d.get('cat')}${d.get('op')?' ('+opName(d.get('op'))+')':''}`);toast('Transaction catégorisée')};
+ });
+}
+
+/* ---------- Rentabilité ---------- */
+function vRent(){
+ const all=S.ops.map(o=>[o,opStats(o)]);
+ const tb=sum(all,a=>a[1].mBud),tp=sum(all,a=>a[1].mProj),cost=sum(all,a=>a[1].proj);
+ const mx=Math.max(1,...all.map(a=>Math.max(Math.abs(a[1].mBud),Math.abs(a[1].mProj))));
+ const over=[];all.forEach(([o,s])=>s.rows.forEach(r=>{if(r.ecart>0)over.push({o,r})}));over.sort((a,b)=>b.r.ecart-a.r.ecart);
+ return `<div class="page-h"><div><h1>Rentabilité</h1><p class="muted">Budget prévisionnel comparé aux dépenses réelles, marge par opération</p></div><button type="button" class="btn" data-act="exp" data-kind="rent" data-fmt="pdf">${ic('print')}Synthèse PDF</button></div>
+ <div class="kpis">
+  <div class="kpi"><div class="l">Marge prévisionnelle (budget)</div><div class="v">${eur(tb)}</div></div>
+  <div class="kpi"><div class="l">Marge projetée / réalisée</div><div class="v ${tp<tb?'neg':'pos'}">${eur(tp)}</div><div class="s">Écart : ${tp-tb>0?'+':''}${eur(tp-tb)}</div></div>
+  <div class="kpi"><div class="l">Taux de marge moyen</div><div class="v">${pct(tp/cost)}</div><div class="s">sur prix de revient projeté</div></div>
+ </div>
+ <div class="grid g3">
+ <section class="card span2" aria-labelledby="hRt"><div class="card-h"><h2 id="hRt">Marge par opération</h2></div>
+  <div class="tblw"><table><thead><tr><th>Opération</th><th class="n">Prix de vente</th><th class="n">Coût budgété</th><th class="n">Coût projeté</th><th class="n">Marge prévue</th><th class="n">Marge projetée</th><th class="n">Taux</th></tr></thead><tbody>
+  ${all.map(([o,s])=>`<tr><td><button type="button" class="lnk" data-act="op" data-id="${o.id}">${esc(o.name)}</button><span class="sub"><span class="chip ${OPST[o.status]}">${o.status}</span></span></td><td class="n">${eur(s.sale)}</td><td class="n">${eur(s.budget)}</td><td class="n ${s.proj>s.budget?'neg':''}">${eur(s.proj)}</td><td class="n">${eur(s.mBud)}</td><td class="n ${s.mProj<s.mBud?'neg':'pos'}"><b>${eur(s.mProj)}</b></td><td class="n">${pct(s.tProj)}</td></tr>`).join('')}
+  </tbody><tfoot><tr><td>Total</td><td class="n">${eur(sum(all,a=>a[1].sale))}</td><td class="n">${eur(sum(all,a=>a[1].budget))}</td><td class="n">${eur(cost)}</td><td class="n">${eur(tb)}</td><td class="n">${eur(tp)}</td><td class="n">${pct(tp/cost)}</td></tr></tfoot></table></div>
+  <h3 class="sec" style="margin-top:18px">Marge prévue / projetée</h3>
+  ${all.map(([o,s])=>`<div class="mbar"><span class="small wrap" style="font-weight:700">${esc(o.name)}</span><div class="bars"><div><i style="width:${Math.abs(s.mBud)/mx*70}%"></i><span>Prévue ${eur(s.mBud)}</span></div><div><i class="${s.mProj<0?'neg':'p'}" style="width:${Math.abs(s.mProj)/mx*70}%"></i><span>Projetée ${eur(s.mProj)}</span></div></div></div>`).join('')}
+ </section>
+ <section class="card" aria-labelledby="hOv"><div class="card-h"><h2 id="hOv">Dépassements de budget</h2></div>
+  ${over.length?`<ul class="list">${over.map(({o,r})=>`<li><span class="bk" style="color:var(--bad)">${ic('alert')}</span><div><b>${r.l}</b><span class="sub">${esc(o.name)} · budget ${eur(r.b)}</span></div><span class="amt neg">+${eur(r.ecart)}</span></li>`).join('')}</ul>`:'<div class="empty">Aucun dépassement.</div>'}
+  <p class="hint" style="margin-top:8px">Mis à jour en temps réel à chaque facture ajoutée ou modifiée.</p>
+ </section></div>`;
+}
+
+/* ---------- Exports ---------- */
+function vExp(){
+ const card=(icn,title,txt,btns)=>`<div class="card exp"><h3>${ic(icn)}${title}</h3><p>${txt}</p><div class="actions">${btns}</div></div>`;
+ const b=(kind,fmt,l)=>`<button type="button" class="btn sm" data-act="exp" data-kind="${kind}" data-fmt="${fmt}">${ic(fmt==='pdf'?'print':fmt==='xls'?'table':'download')}${l}</button>`;
+ return `<div class="page-h"><div><h1>Exports comptables</h1><p class="muted">Fichiers Excel / CSV et PDF prêts à transmettre au cabinet comptable</p></div></div>
+ <section class="card" style="margin-bottom:16px"><div class="fgrid g3">
+  <div class="field"><label for="eOp">Opération</label><select id="eOp" data-e="op">${opOpts('Toutes les opérations').map(([v,l])=>`<option value="${v}"${v===expF.op?' selected':''}>${esc(l)}</option>`).join('')}</select></div>
+  <div class="field"><label for="eFrom">Du</label><input type="date" id="eFrom" data-e="from" value="${expF.from}"></div>
+  <div class="field"><label for="eTo">Au</label><input type="date" id="eTo" data-e="to" value="${expF.to}"></div>
+ </div><p class="small muted" style="margin-top:8px" id="expCount" aria-live="polite">${expInv().length} facture(s) et ${expTx().length} transaction(s) sur la période.</p></section>
+ <div class="grid g3">
+  ${card('file','Factures & dépenses','Fournisseur, référence, opération, poste, montants prévus / facturés / payés / restants, statut et nom du justificatif.',b('inv','csv','CSV')+b('inv','xls','Excel'))}
+  ${card('bank','Transactions bancaires','Relevé consolidé des comptes avec la pièce rapprochée ou la catégorie de chaque ligne.',b('tx','csv','CSV')+b('tx','xls','Excel'))}
+  ${card('trend','Synthèse de rentabilité','Budget, coût projeté et marge par opération, ventilés par poste.',b('rent','csv','CSV')+b('rent','pdf','PDF'))}
+ </div>
+ <section class="card" style="margin-top:16px"><div class="card-h"><h2>Envoyer au comptable</h2><span class="chip c-gray">Simulation</span></div>
+ <form id="sendForm" novalidate><div class="fgrid g3">
+  <div class="field"><label for="f_mail">E-mail du cabinet</label><input type="email" id="f_mail" name="mail" value="compta@cabinet-exemple.fr" autocomplete="email" aria-describedby="e_mail"><span class="err" id="e_mail" data-err="mail"></span></div>
+  <div class="field"><label for="f_pack">Contenu</label><select id="f_pack" name="pack"><option>Factures + transactions (Excel)</option><option>Pack complet (Excel + PDF + justificatifs)</option></select></div>
+  <div class="field" style="justify-content:flex-end"><button class="btn primary">${ic('mail')}Envoyer</button></div>
+ </div></form></section>`;
+}
+const inRange=d=>d>=expF.from&&d<=expF.to;
+const expInv=()=>S.inv.filter(i=>(!expF.op||i.op===expF.op)&&inRange(i.date));
+const expTx=()=>S.tx.filter(t=>{const op=t.match?(t.match.type==='inv'?(S.inv.find(i=>i.id===t.match.id)||{}).op:t.match.op):'';return (!expF.op||op===expF.op)&&inRange(t.date)});
+const fr=n=>(Math.round(n*100)/100).toFixed(2).replace('.',',');
+function rowsFor(kind){
+ if(kind==='inv')return [['Date','Échéance','Référence','Fournisseur','Opération','Poste','Prévu','Facturé','Payé','Reste à payer','Statut','Justificatif'],...expInv().map(i=>[fdate(i.date),fdate(i.due),i.ref,i.supplier,opName(i.op),PL[i.poste],fr(i.prevu),fr(i.facture),fr(i.paye),fr(reste(i)),STL[invStatus(i)][0],i.file?i.file.name:''])];
+ if(kind==='tx')return [['Date','Compte','Libellé','Débit','Crédit','Rapprochement','Opération'],...expTx().map(t=>{const m=t.match;let r='À rapprocher',op='';if(m&&m.type==='inv'){const i=S.inv.find(x=>x.id===m.id);r='Facture '+(i?i.ref:'');op=i?opName(i.op):''}else if(m){r=m.cat;op=m.op?opName(m.op):''}return [fdate(t.date),S.acc.find(a=>a.id===t.acc).name,t.label,t.amount<0?fr(-t.amount):'',t.amount>0?fr(t.amount):'',r,op]})];
+ const rows=[['Opération','Statut','Poste','Budget','Facturé','Payé','Coût projeté','Écart']];
+ S.ops.filter(o=>!expF.op||o.id===expF.op).forEach(o=>{const s=opStats(o);s.rows.forEach(r=>rows.push([o.name,o.status,r.l,fr(r.b),fr(r.f),fr(r.p),fr(r.proj),fr(r.ecart)]));rows.push([o.name,o.status,'MARGE (vente '+fr(s.sale)+')',fr(s.mBud),'','',fr(s.mProj),fr(s.mProj-s.mBud)])});
+ return rows;
+}
+function dl(name,content,type){const bl=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800)}
+function doExport(kind,fmt){
+ const names={inv:'factures-depenses',tx:'transactions-bancaires',rent:'rentabilite-operations'};
+ const base=names[kind]+'_'+expF.from+'_'+expF.to;
+ if(fmt==='pdf'){printRent();log('a exporté la synthèse de rentabilité (PDF)');save();return}
+ const rows=rowsFor(kind);
+ if(fmt==='csv')dl(base+'.csv','﻿'+rows.map(r=>r.map(c=>{c=String(c==null?'':c);return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(';')).join('\r\n'),'text/csv;charset=utf-8');
+ else dl(base+'.xls','<html><head><meta charset="utf-8"></head><body><table border="1">'+rows.map((r,k)=>'<tr>'+r.map(c=>k?'<td>'+esc(c)+'</td>':'<th>'+esc(c)+'</th>').join('')+'</tr>').join('')+'</table></body></html>','application/vnd.ms-excel');
+ commit(`a exporté ${names[kind].replace(/-/g,' ')} (${fmt==='xls'?'Excel':'CSV'}, ${rows.length-1} lignes)`);toast('Fichier '+(fmt==='xls'?'Excel':'CSV')+' téléchargé','download');
+}
+function printHead(t){return `<h1>${esc(t)}</h1><p class="pm">Lotis · édité le ${fdate(TODAY)} par ${esc(uName(S.user))} · période du ${fdate(expF.from)} au ${fdate(expF.to)} · données fictives</p>`}
+function printRent(){
+ const ops=S.ops.filter(o=>!expF.op||o.id===expF.op);
+ let h=printHead('Synthèse de rentabilité des opérations');
+ h+=`<h2>Vue d'ensemble</h2><table><thead><tr><th>Opération</th><th>Statut</th><th>Vente</th><th>Coût budgété</th><th>Coût projeté</th><th>Marge prévue</th><th>Marge projetée</th><th>Taux</th></tr></thead><tbody>${ops.map(o=>{const s=opStats(o);return `<tr><td>${esc(o.name)}</td><td>${o.status}</td><td>${eur(s.sale)}</td><td>${eur(s.budget)}</td><td>${eur(s.proj)}</td><td>${eur(s.mBud)}</td><td>${eur(s.mProj)}</td><td>${pct(s.tProj)}</td></tr>`}).join('')}</tbody></table>`;
+ ops.forEach(o=>h+=opPrintBlock(o));
+ $('#printArea').innerHTML=h;window.print();
+}
+function opPrintBlock(o){const s=opStats(o);return `<h2>${esc(o.name)} — ${esc(o.addr)}</h2><table><thead><tr><th>Poste</th><th>Budget</th><th>Facturé</th><th>Payé</th><th>Reste</th><th>Projeté</th><th>Écart</th></tr></thead><tbody>${s.rows.map(r=>`<tr><td>${r.l}</td><td>${eur(r.b)}</td><td>${eur(r.f)}</td><td>${eur(r.p)}</td><td>${eur(r.r)}</td><td>${eur(r.proj)}</td><td>${eur(r.ecart)}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td>${eur(s.budget)}</td><td>${eur(s.fact)}</td><td>${eur(s.paid)}</td><td>${eur(s.rest)}</td><td>${eur(s.proj)}</td><td>${eur(s.proj-s.budget)}</td></tr></tfoot></table><p class="pm">Prix de vente ${eur(s.sale)} · marge ${o.status==='Vendu'?'réalisée':'projetée'} ${eur(s.mProj)} (${pct(s.tProj)}) · marge prévue ${eur(s.mBud)}</p>`}
+function printOp(id){const o=opById(id);const s=opStats(o);$('#printArea').innerHTML=printHead('Fiche opération')+opPrintBlock(o)+`<h2>Factures et dépenses</h2><table><thead><tr><th>Date</th><th>Réf.</th><th>Fournisseur</th><th>Poste</th><th>Facturé</th><th>Payé</th><th>Reste</th></tr></thead><tbody>${s.invs.map(i=>`<tr><td>${fdate(i.date)}</td><td>${esc(i.ref)}</td><td>${esc(i.supplier)}</td><td>${PL[i.poste]}</td><td>${eur2(i.facture)}</td><td>${eur2(i.paye)}</td><td>${eur2(reste(i))}</td></tr>`).join('')}</tbody></table>`;window.print()}
+
+/* ---------- Historique & accès ---------- */
+let histU='';
+function vHist(){
+ const l=S.log.filter(x=>!histU||x.user===histU);
+ return `<div class="page-h"><div><h1>Historique & accès</h1><p class="muted">Journal des modifications, comptes des associés, sauvegardes</p></div><button type="button" class="btn" data-act="simulate">${ic('users')}Simuler une modification d'un associé</button></div>
+ <div class="grid g3">
+ <section class="card span2" aria-labelledby="hLog"><div class="card-h"><h2 id="hLog">Journal des modifications</h2><div class="field" style="flex:0 1 240px"><label class="sr" for="hU">Filtrer par associé</label><select id="hU"><option value="">Tous les associés</option>${USERS.map(u=>`<option value="${u.id}"${u.id===histU?' selected':''}>${esc(u.name)}</option>`).join('')}</select></div></div>
+  <ul class="log">${l.slice(0,60).map(x=>`<li><span class="av${x.user===S.user?' me':''}" aria-hidden="true">${uIni(x.user)}</span><div><b>${esc(uName(x.user))}</b> ${esc(x.text)}<span class="sub">${fdate(x.ts.slice(0,10))} à ${x.ts.slice(11,16)}</span></div></li>`).join('')||'<li class="muted">Aucune entrée.</li>'}</ul>
+ </section>
+ <div style="display:grid;gap:16px;align-content:start;min-width:0">
+ <section class="card" aria-labelledby="hSec"><div class="card-h"><h2 id="hSec">Données & sécurité</h2></div>
+  <ul class="checks small">
+   <li>${ic('check')}<span><b>Base de données centralisée</b> (PostgreSQL) sur serveur hébergé en France, chiffrement au repos et en transit</span></li>
+   <li>${ic('check')}<span><b>Stockage privé des factures</b> : liens d'accès temporaires, jamais publics</span></li>
+   <li>${ic('check')}<span><b>Sauvegardes automatiques</b> quotidiennes, 30 jours de rétention, copie externalisée (NAS possible en second site)</span></li>
+   <li>${ic('check')}<span><b>Historique complet</b> : chaque modification est tracée et réversible</span></li>
+   <li>${ic('check')}<span><b>Temps réel</b> : les modifications d'un associé apparaissent instantanément chez les autres</span></li>
+  </ul>
+  <p class="small muted" style="margin:8px 0" id="bkTxt">Dernière sauvegarde : aujourd'hui à ${esc(S.lastBackup)}</p>
+  <button type="button" class="btn" data-act="backup">${ic('shield')}Lancer une sauvegarde</button>
+ </section>
+ <section class="card" aria-labelledby="hUsr"><div class="card-h"><h2 id="hUsr">Comptes associés</h2></div>
+  <ul class="list">${USERS.map(u=>`<li><span class="av${u.id===S.user?' me':''}" style="margin:0;width:36px;height:36px" aria-hidden="true">${u.ini}</span><div><b>${esc(u.name)}</b><span class="sub">Associé · accès complet · double authentification active</span></div>${u.id===S.user?'<span class="chip c-acc">Vous</span>':''}</li>`).join('')}</ul>
+  <p class="hint" style="margin-top:6px">Accès web et iPhone avec le même compte. Changez d'associé en haut à droite pour voir l'historique s'enrichir à son nom.</p>
+ </section></div></div>`;
+}
+const SIMS=[
+ u=>{const i={id:'i'+(++S.seq),op:'op1',poste:'travaux',ref:'SER-4410',supplier:'Serrurerie Dumas',prevu:2400,facture:2380,paye:0,date:TODAY,due:addDays(TODAY,30),file:{name:'SER-4410.jpg',kind:'image'}};S.inv.push(i);return `a ajouté la facture SER-4410 — Serrurerie Dumas (photo, ${eur2(2380)})`},
+ u=>{const o=opById('op3');if(o){o.budget.travaux+=8000;return 'a modifié le budget Travaux de « '+o.name+' » : +8 000 €'}return 'a consulté le tableau de bord'},
+ u=>{S.fc.push({id:'f'+(++S.seq),date:addDays(TODAY,45),label:'Acompte réservation lot 1 — Immeuble des Tanneurs',amount:25000,op:'op1'});return 'a ajouté le mouvement prévisionnel « Acompte réservation lot 1 » (+25 000 €)'}
+];
+function simulate(){
+ const others=USERS.filter(u=>u.id!==S.user);const u=others[S.sim%others.length];
+ const text=SIMS[S.sim%SIMS.length](u);S.sim++;
+ flashSync('Mise à jour reçue…');log(text,u.id);save();setTimeout(()=>{render();toast(u.name+' '+text,'users')},500);
+}
+
+/* ---------- Événements ---------- */
+const main=$('#main');
+main.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const a=b.dataset.act,id=b.dataset.id;
+ if(a==='go')go(b.dataset.view);
+ else if(a==='op'){view='ops';curOp=id;render();window.scrollTo(0,0)}
+ else if(a==='back'){curOp=null;render()}
+ else if(a==='inv')openInvDetail(id);
+ else if(a==='addInv')openInvForm(null,{op:b.dataset.op});
+ else if(a==='addOp')openOpForm();
+ else if(a==='editOp')openOpForm(id);
+ else if(a==='printOp'){printOp(id);log('a édité la fiche PDF de « '+opById(id).name+' »');save()}
+ else if(a==='addFc')openFcForm();
+ else if(a==='delFc'){const f=S.fc.find(x=>x.id===id);S.fc=S.fc.filter(x=>x.id!==id);commit(`a supprimé le mouvement prévisionnel « ${f.label} »`);toast('Mouvement supprimé','trash')}
+ else if(a==='hz'){horizon=+b.dataset.h;render()}
+ else if(a==='lateInv'){fInv.st='retard';fInv.op='';fInv.poste='';fInv.q='';go('inv')}
+ else if(a==='bf'){bankF=b.dataset.f;render()}
+ else if(a==='match')openMatch(id);
+ else if(a==='accept'){const t=S.tx.find(x=>x.id===id),i=S.inv.find(x=>x.id===b.dataset.inv);if(t&&i&&!t.match)matchInv(t,i)}
+ else if(a==='unmatch'){const t=S.tx.find(x=>x.id===id);if(t&&t.match){if(t.match.type==='inv'){const i=S.inv.find(x=>x.id===t.match.id);if(i)i.paye=Math.max(0,Math.round((i.paye-Math.abs(t.amount))*100)/100)}t.match=null;commit(`a annulé le rapprochement de « ${t.label} »`);toast('Rapprochement annulé')}}
+ else if(a==='sync'){b.disabled=true;b.innerHTML=ic('refresh')+'Synchronisation…';flashSync('Connexion aux banques…');setTimeout(()=>{const n=S.pending.length;S.pending.forEach(p=>S.tx.push(Object.assign({id:'t'+(++S.seq),match:null},p)));S.pending=[];S.lastSync=nowTime();bankF='todo';commit(n?`a synchronisé les comptes : ${n} nouvelle(s) transaction(s)`:'');toast(n?n+' nouvelle(s) transaction(s) importée(s) (simulation)':'Aucune nouvelle transaction','bank')},1200)}
+ else if(a==='exp')doExport(b.dataset.kind,b.dataset.fmt);
+ else if(a==='backup'){b.disabled=true;b.textContent='Sauvegarde en cours…';setTimeout(()=>{S.lastBackup=nowTime();commit('a lancé une sauvegarde manuelle (chiffrée, copie externalisée)');toast('Sauvegarde terminée (simulation)','shield')},1300)}
+ else if(a==='simulate')simulate();
+});
+main.addEventListener('input',e=>{const t=e.target;if(t.dataset.f==='q'){fInv.q=t.value;updInv()}});
+main.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.f&&t.dataset.f!=='q'){fInv[t.dataset.f]=t.value;updInv()}
+ else if(t.id==='opStatus'){const o=opById(t.dataset.id);const old=o.status;o.status=t.value;if(o.status==='Vendu'&&!o.saleReal)o.saleReal=o.sale;commit(`a passé « ${o.name} » du statut ${old} à ${o.status}`);toast('Statut mis à jour')}
+ else if(t.id==='bAcc'){bankAcc=t.value;render()}
+ else if(t.id==='hU'){histU=t.value;render()}
+ else if(t.dataset.e){expF[t.dataset.e]=t.value||(t.dataset.e==='from'?'2000-01-01':TODAY);const c=$('#expCount');if(c)c.textContent=`${expInv().length} facture(s) et ${expTx().length} transaction(s) sur la période.`}
+});
+main.addEventListener('submit',e=>{if(e.target.id!=='sendForm')return;e.preventDefault();const f=e.target;const m=f.mail.value.trim();const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m);if(!showErrs(f,ok?{}:{mail:'Adresse e-mail invalide.'}))return;commit(`a envoyé « ${f.pack.value} » au cabinet comptable (${m})`);toast('E-mail envoyé au comptable (simulation)','mail')});
+$('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('[data-act="fakeOpen"]');if(b)toast('Document fictif : aperçu indisponible dans la démo','file')});
+$('#resetBtn').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}S=seed();view='dash';curOp=null;horizon=90;bankF='todo';bankAcc='';histU='';Object.assign(fInv,{q:'',op:'',st:'',poste:''});Object.assign(expF,{op:'',from:'2026-01-01',to:TODAY});closeModal();render();window.scrollTo(0,0);toast('Démo réinitialisée','refresh')};
+render();
+$('#syncTxt').textContent='Synchronisé à '+S.lastSync;
+})();
+</script>
 </body>
 </html>
