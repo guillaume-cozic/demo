@@ -2,20 +2,911 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Réservation d'ateliers peinture</title>
+<meta name="description" content="Site d'ateliers de peinture avec réservation et paiement Stripe Checkout en mode test (cartes de test, 3D Secure, refus), confirmation imprimable, et espace atelier pour suivre paiements, places, remboursements et webhooks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F8F4EE;--panel:#FFFFFF;--panel-2:#F2ECE4;--ink:#2B221D;--muted:#665950;--line:#E6DDD2;--line-2:#CDBFB1;
+  --accent:#A3431D;--accent-ink:#FFFFFF;--accent-soft:#F6E3D8;--accent-text:#8A3815;
+  --band:#F3E7CF;--band-ink:#6E4A00;
+  --ok:#2C6A3C;--ok-soft:#E0EFE3;--warn:#865700;--warn-soft:#F8ECCF;--bad:#A3302A;--bad-soft:#F8E0DE;--gray:#5A5048;--gray-soft:#ECE6DF;
+  --stripe:#4F46E5;--stripe-ink:#FFFFFF;--stripe-soft:#ECEBFD;--stripe-text:#3F37C9;
+  --shadow:0 1px 2px rgba(43,34,29,.05),0 6px 18px rgba(43,34,29,.07);
+  --font:"Work Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#16120F;--panel:#201A16;--panel-2:#2A231E;--ink:#F1E9E1;--muted:#BBAC9F;--line:#3A3029;--line-2:#56493F;
+  --accent:#E8946C;--accent-ink:#2A1208;--accent-soft:#3B2419;--accent-text:#F2B091;
+  --band:#2E2513;--band-ink:#EFC57A;
+  --ok:#82CC96;--ok-soft:#1B2E20;--warn:#E9BC62;--warn-soft:#33280F;--bad:#F59A92;--bad-soft:#3A1C1A;--gray:#C4B8AE;--gray-soft:#2E2722;
+  --stripe:#A9A4FF;--stripe-ink:#15114A;--stripe-soft:#24214A;--stripe-text:#C3BFFF;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13.5px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2.2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:20px;min-width:0}
+.mark{width:38px;height:38px;border-radius:50% 50% 50% 14%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.seg{margin-left:auto;display:flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);min-width:0;flex-wrap:wrap}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+@media (max-width:760px){.seg{margin-left:0;width:100%}.seg button{flex:1 1 0;justify-content:center;min-height:44px;padding:0 6px;font-size:14px}.seg button svg{display:none}}
+main{padding:22px clamp(16px,2.2vw,32px) 90px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.block{width:100%}
+.btn.sm{min-height:44px;padding:0 12px;font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font:inherit;font-weight:600;color:var(--accent-text);text-align:left;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],input[type=time],input[type=search],select{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:520px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);min-width:0}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}.pill.gray{background:var(--gray-soft);color:var(--gray)}.pill.st{background:var(--stripe-soft);color:var(--stripe-text)}.pill.ac{background:var(--accent-soft);color:var(--accent-text)}
+
+/* ---------- Site public ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:center;margin-bottom:26px}
+.hero h1{font-size:clamp(28px,4vw,44px);margin-bottom:10px}
+.hero p.lead{font-size:17px;color:var(--muted);max-width:60ch}
+.hero-facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px;font-size:14px;color:var(--muted)}
+.hero-facts span{display:inline-flex;gap:6px;align-items:center}
+.hero-art{border-radius:20px;overflow:hidden;aspect-ratio:16/10;border:1px solid var(--line)}
+.hero-art svg{display:block;width:100%;height:100%}
+@media (max-width:820px){.hero{grid-template-columns:minmax(0,1fr)}.hero-art{display:none}}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.chip{min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:18px}
+.ws{display:flex;flex-direction:column;overflow:hidden}
+.ws .art{aspect-ratio:16/8;background:var(--panel-2)}
+.ws .art svg{display:block;width:100%;height:100%}
+.ws .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.ws h3{font-size:20px}
+.ws .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;color:var(--muted)}
+.ws .meta span{display:inline-flex;gap:5px;align-items:center}
+.ws .dates{display:flex;flex-direction:column;gap:4px;font-size:14px;border-top:1px dashed var(--line);padding-top:10px}
+.ws .dates li{display:flex;justify-content:space-between;gap:10px}
+.ws .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.price{font-family:var(--head);font-size:24px;font-weight:700}
+.price small{font-family:var(--font);font-size:13px;color:var(--muted);font-weight:500}
+.secure{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:26px;color:var(--muted);font-size:13.5px;text-align:center;flex-wrap:wrap}
+
+.success{max-width:760px;margin:0 auto;padding:28px}
+.success .ico{width:58px;height:58px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;margin-bottom:14px}
+.success .ico svg{width:30px;height:30px}
+.recap{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:8px 16px;margin:18px 0;padding:16px;background:var(--panel-2);border-radius:12px}
+.recap dt{color:var(--muted);font-size:14px}.recap dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+@media (max-width:520px){.recap{grid-template-columns:minmax(0,1fr)}.recap dd{margin-bottom:6px}}
+
+/* ---------- Dialogues ---------- */
+dialog{border:0;padding:0;border-radius:18px;background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3);width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgba(20,14,10,.55)}
+.dlg-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:18px 20px 8px}
+.dlg-h h2{font-size:22px}
+.dlg-b{padding:8px 20px 12px;display:flex;flex-direction:column;gap:14px}
+.dlg-f{padding:12px 20px 18px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid var(--line)}
+.x{width:44px;height:44px;border-radius:10px;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;flex:none;color:var(--ink)}
+.x:hover{background:var(--panel-2)}
+.slots{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.slots legend{font-weight:600;font-size:13.5px;margin-bottom:6px;padding:0}
+.slot{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer}
+.slot:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.slot:has(input:disabled){opacity:.6;cursor:not-allowed}
+.slot input{width:20px;height:20px;accent-color:var(--accent);flex:none;margin:0}
+.slot .t{flex:1;min-width:0}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;min-height:44px;cursor:pointer}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;background:var(--panel-2);border-radius:12px;gap:10px}
+.total b{font-family:var(--head);font-size:22px}
+
+/* ---------- Checkout simulé ---------- */
+dialog.co{width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border-radius:0;background:var(--panel)}
+.co-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:100%}
+.co-sum{background:var(--panel-2);padding:clamp(18px,5vw,64px);display:flex;flex-direction:column;gap:18px;align-items:flex-end}
+.co-pay{padding:clamp(18px,5vw,64px);display:flex;flex-direction:column;align-items:flex-start}
+.co-inner{width:100%;max-width:440px;display:flex;flex-direction:column;gap:16px}
+.co-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.testbadge{background:#F5A524;color:#3A2400;font-size:11.5px;font-weight:700;letter-spacing:.06em;border-radius:6px;padding:2px 8px;text-transform:uppercase}
+.co-amount{font-size:clamp(30px,4vw,40px);font-weight:700;letter-spacing:-.02em}
+.co-line{display:flex;justify-content:space-between;gap:12px;font-size:14.5px;padding:10px 0;border-bottom:1px solid var(--line)}
+.co-line.tot{font-weight:700;border:0}
+.cardbox{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--panel)}
+.cardbox input{border:0!important;border-radius:0!important;box-shadow:none!important}
+.cardbox .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line-2)}
+.cardbox{position:relative}
+.cardbox #cCvc{border-left:1px solid var(--line-2)!important}
+.cardbox.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.btn.stripe{background:var(--stripe);border-color:var(--stripe);color:var(--stripe-ink);min-height:50px;font-size:16px}
+.btn.stripe:hover{filter:brightness(1.07)}
+.testcards{border:1px dashed var(--line-2);border-radius:12px;padding:12px;font-size:13.5px}
+.testcards ul{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.testcards li{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.testcards code{font-size:13px}
+.co-foot{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.spin{width:18px;height:18px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+@media (max-width:820px){.co-grid{grid-template-columns:minmax(0,1fr)}.co-sum{align-items:stretch}.co-inner{max-width:none}}
+
+/* ---------- Espace atelier ---------- */
+.ph{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.ph h1{font-size:clamp(24px,3vw,30px)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px;margin-bottom:18px}
+.kpi{padding:16px}
+.kpi .l{font-size:13.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.kpi .v{font-family:var(--head);font-size:28px;font-weight:700;margin-top:4px}
+.kpi .s{font-size:13px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:1100px){.cols{grid-template-columns:minmax(0,1fr)}}
+.sec{padding:16px}
+.sec-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sec-h h2{font-size:19px}
+.filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,200px);gap:10px;margin-bottom:12px}
+@media (max-width:560px){.filters{grid-template-columns:minmax(0,1fr)}}
+.tbl-wrap{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:780px;font-size:14px}
+th,td{padding:10px 12px;text-align:left;vertical-align:middle;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.sess{display:flex;flex-direction:column;gap:10px}
+.sess li{padding:10px 12px;border:1px solid var(--line);border-radius:12px}
+.sess .r{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.full i{background:var(--ok)}
+.evts{display:flex;flex-direction:column;gap:8px}
+.evts details{border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.evts summary{cursor:pointer;min-height:48px;padding:8px 12px;display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;list-style:none}
+.evts summary::-webkit-details-marker{display:none}
+.evts summary .id{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere;min-width:0}
+.evts summary .tm{margin-left:auto;font-size:13px;color:var(--muted)}
+pre{margin:0;padding:12px 14px;background:var(--panel-2);border-radius:0 0 12px 12px;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:8px}
+
+/* ---------- Intégration ---------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px;margin:18px 0}
+.step{padding:16px;display:flex;flex-direction:column;gap:8px}
+.step .n{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;font-weight:700}
+.step h3{font-size:17px}
+.int-cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:1000px){.int-cols{grid-template-columns:minmax(0,1fr)}}
+.code{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.code .cap{font-size:12.5px;font-weight:600;padding:6px 12px;background:var(--panel-2);border-bottom:1px solid var(--line);color:var(--muted)}
+.code pre{border-radius:0}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opt{padding:14px;border:1px solid var(--line);border-radius:12px}
+.opt h3{font-size:16px;margin-bottom:4px}
+.tl{display:flex;flex-direction:column;gap:0}
+.tl li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.tl li:last-child{border:0}
+.tl b{color:var(--accent-text)}
+.incl li{display:flex;gap:8px;align-items:flex-start;padding:5px 0}
+.incl svg{color:var(--ok);margin-top:3px}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:1000;width:min(460px,calc(100vw - 24px));pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);font-size:14.5px;display:flex;gap:10px;align-items:flex-start}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;color:#000;font:13pt/1.5 Georgia,serif;padding:20px}
+  #printArea h1{font-size:22pt;margin-bottom:6px}
+  #printArea table{min-width:0;font-size:12pt;margin-top:14px}
+  #printArea td,#printArea th{border-bottom:1px solid #999;background:none;color:#000}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-brush" viewBox="0 0 24 24"><path d="M9.06 11.9 17.1 3.9a2.1 2.1 0 0 1 3 3l-8.04 8.04"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></symbol>
+  <symbol id="i-euro" viewBox="0 0 24 24"><path d="M18 7a7 7 0 1 0 0 10M4 10h10M4 14h10"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+  <symbol id="i-shop" viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9h18M9 20v-6h6v6"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/></symbol>
+</svg>
+
+<div class="demo-band" role="note">
+  <span><b>Démonstration</b> — données fictives, paiements Stripe simulés en mode test</span>
+  <button type="button" id="resetBtn"><svg class="i"><use href="#i-reset"/></svg>Réinitialiser la démo</button>
+</div>
+
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i"><use href="#i-brush"/></svg></span><span>Atelier Pigment</span></div>
+  <nav class="seg" aria-label="Vues de la démonstration">
+    <button type="button" data-view="site" aria-pressed="true"><svg class="i"><use href="#i-shop"/></svg>Site public</button>
+    <button type="button" data-view="admin" aria-pressed="false"><svg class="i"><use href="#i-chart"/></svg>Espace atelier</button>
+    <button type="button" data-view="int" aria-pressed="false"><svg class="i"><use href="#i-code"/></svg>Intégration</button>
+  </nav>
+</header>
+
+<main id="main">
+  <!-- SITE PUBLIC -->
+  <section id="v-site" aria-labelledby="siteTitle">
+    <div id="catalog">
+      <div class="hero">
+        <div>
+          <p class="pill ac" style="margin-bottom:12px">Saison automne 2026</p>
+          <h1 id="siteTitle">Ateliers de peinture en petit groupe</h1>
+          <p class="lead">Aquarelle, acrylique, huile : choisissez votre atelier, une date, et réservez votre place en payant en ligne. Paiement sécurisé par carte, confirmation immédiate par email.</p>
+          <div class="hero-facts">
+            <span><svg class="i"><use href="#i-pin"/></svg>12 rue des Tanneurs, Nantes (adresse fictive)</span>
+            <span><svg class="i"><use href="#i-users"/></svg>6 à 10 participants</span>
+            <span><svg class="i"><use href="#i-brush"/></svg>Matériel fourni</span>
+          </div>
+        </div>
+        <div class="hero-art" id="heroArt"></div>
+      </div>
+      <div class="toolbar" role="group" aria-label="Filtrer par technique" id="chips"></div>
+      <p class="sr" aria-live="polite" id="catCount"></p>
+      <div class="ws-grid" id="wsGrid"></div>
+      <p class="secure"><svg class="i"><use href="#i-lock"/></svg>Paiement sécurisé par Stripe — vos données bancaires ne transitent jamais par ce site. Annulation gratuite jusqu'à 48 h avant l'atelier.</p>
+    </div>
+    <div id="success" hidden></div>
+  </section>
+
+  <!-- ESPACE ATELIER -->
+  <section id="v-admin" hidden aria-labelledby="adminTitle">
+    <div class="ph">
+      <div>
+        <h1 id="adminTitle">Réservations &amp; paiements</h1>
+        <p class="muted">Chaque paiement Stripe réussi crée la réservation et décompte les places automatiquement (webhook).</p>
+      </div>
+      <div class="actions">
+        <span class="pill warn">Clés Stripe : mode test</span>
+        <button type="button" class="btn" id="addSessBtn"><svg class="i"><use href="#i-plus"/></svg>Nouvelle séance</button>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="cols">
+      <div class="card sec">
+        <div class="sec-h"><h2>Paiements reçus</h2><span class="muted small" id="bkCount"></span></div>
+        <div class="filters">
+          <div class="field"><label for="q">Rechercher</label><input type="search" id="q" placeholder="Nom, email, référence, atelier…"></div>
+          <div class="field"><label for="fStatus">Statut</label>
+            <select id="fStatus"><option value="">Tous</option><option value="paid">Payé</option><option value="refunded">Remboursé</option></select></div>
+        </div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th scope="col">Référence</th><th scope="col">Client</th><th scope="col">Atelier</th><th scope="col" class="num">Places</th><th scope="col" class="num">Montant</th><th scope="col">Statut</th><th scope="col">Payé le</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+          <tbody id="bkBody"></tbody>
+        </table></div>
+      </div>
+      <div class="card sec">
+        <div class="sec-h"><h2>Remplissage des séances</h2></div>
+        <ul class="sess" id="sessList"></ul>
+      </div>
+    </div>
+    <div class="card sec" style="margin-top:18px">
+      <div class="sec-h"><h2>Événements Stripe reçus (webhook)</h2><span class="pill ok"><svg class="i" style="width:14px;height:14px"><use href="#i-check"/></svg>Signature vérifiée</span></div>
+      <div class="events-grid evts" id="evts"></div>
+    </div>
+  </section>
+
+  <!-- INTÉGRATION -->
+  <section id="v-int" hidden aria-labelledby="intTitle">
+    <div class="ph"><div>
+      <h1 id="intTitle">Comment le paiement est branché sur votre site</h1>
+      <p class="muted">Un bouton « Réserver et payer » sur chaque atelier, la page de paiement hébergée par Stripe, et une confirmation automatique.</p>
+    </div></div>
+    <div class="steps">
+      <div class="card step"><span class="n">1</span><h3>Le client choisit</h3><p class="muted small">Atelier, date et nombre de places sur votre site. Les séances complètes ne sont plus réservables.</p></div>
+      <div class="card step"><span class="n">2</span><h3>Stripe Checkout</h3><p class="muted small">Page de paiement sécurisée Stripe (carte, Apple Pay, Google Pay), 3D Secure géré, conforme DSP2.</p></div>
+      <div class="card step"><span class="n">3</span><h3>Webhook</h3><p class="muted small"><code>checkout.session.completed</code> enregistre la réservation et décompte les places, sans double comptage.</p></div>
+      <div class="card step"><span class="n">4</span><h3>Confirmation</h3><p class="muted small">Page de remerciement, email au client et à vous, reçu Stripe envoyé automatiquement.</p></div>
+    </div>
+    <div class="int-cols">
+      <div class="card sec">
+        <div class="sec-h"><h2>Deux options selon votre site</h2></div>
+        <div class="opts">
+          <div class="opt"><h3>Option A — Payment Links</h3><p class="muted small">Un lien de paiement Stripe par atelier, collé dans un bouton (WordPress, Wix, Squarespace, HTML…). Aucun serveur à maintenir. Idéal si le nombre de places est suivi à la main.</p></div>
+          <div class="opt"><h3>Option B — Checkout + webhook</h3><p class="muted small">Ce que montre cette démo : places décomptées en temps réel, séances complètes bloquées, tableau de suivi et remboursements. Petit back-end PHP / Laravel.</p></div>
+        </div>
+        <div class="code"><div class="cap">Le bouton sur votre page</div><pre><code>&lt;form action="/reservation/checkout" method="post"&gt;
+  &lt;input type="hidden" name="seance_id" value="42"&gt;
+  &lt;button type="submit"&gt;Réserver et payer&lt;/button&gt;
+&lt;/form&gt;</code></pre></div>
+        <div class="code"><div class="cap">Création de la session de paiement (PHP / Laravel)</div><pre><code>$seance = Seance::findOrFail($request-&gt;seance_id);
+abort_if($seance-&gt;placesRestantes() &lt; $request-&gt;places, 409);
+
+$session = $stripe-&gt;checkout-&gt;sessions-&gt;create([
+    'mode' =&gt; 'payment',
+    'customer_email' =&gt; $request-&gt;email,
+    'line_items' =&gt; [[
+        'price_data' =&gt; [
+            'currency' =&gt; 'eur',
+            'unit_amount' =&gt; $seance-&gt;atelier-&gt;prix_centimes,
+            'product_data' =&gt; ['name' =&gt; $seance-&gt;libelle()],
+        ],
+        'quantity' =&gt; $request-&gt;places,
+    ]],
+    'metadata' =&gt; ['seance_id' =&gt; $seance-&gt;id],
+    'success_url' =&gt; route('merci').'?session_id={CHECKOUT_SESSION_ID}',
+    'cancel_url' =&gt; route('ateliers'),
+]);
+
+return redirect($session-&gt;url, 303);</code></pre></div>
+        <div class="code"><div class="cap">Réception du webhook</div><pre><code>$event = Webhook::constructEvent(
+    $request-&gt;getContent(),
+    $request-&gt;header('Stripe-Signature'),
+    config('services.stripe.webhook_secret')
+);
+
+if ($event-&gt;type === 'checkout.session.completed') {
+    Reservation::confirmerDepuisStripe($event-&gt;data-&gt;object); // idempotent
+}</code></pre></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+        <div class="card sec">
+          <div class="sec-h"><h2>Livraison en une semaine</h2></div>
+          <ol class="tl">
+            <li><b>J1</b><span>Compte Stripe en mode test, produits et tarifs des ateliers.</span></li>
+            <li><b>J2</b><span>Bouton « Réserver et payer » intégré à vos pages, choix de la date.</span></li>
+            <li><b>J3</b><span>Webhook : enregistrement des réservations, gestion des places, emails.</span></li>
+            <li><b>J4</b><span>Recette avec les cartes de test : succès, refus, 3D Secure, remboursement.</span></li>
+            <li><b>J5</b><span>Passage en clés live, premier paiement réel vérifié avec vous.</span></li>
+          </ol>
+        </div>
+        <div class="card sec">
+          <div class="sec-h"><h2>Inclus</h2></div>
+          <ul class="incl">
+            <li><svg class="i"><use href="#i-check"/></svg><span>Paiement carte, Apple Pay et Google Pay</span></li>
+            <li><svg class="i"><use href="#i-check"/></svg><span>Page de confirmation et email au client</span></li>
+            <li><svg class="i"><use href="#i-check"/></svg><span>Notification à chaque nouvelle réservation</span></li>
+            <li><svg class="i"><use href="#i-check"/></svg><span>Remboursements depuis le tableau de bord Stripe</span></li>
+            <li><svg class="i"><use href="#i-check"/></svg><span>Clés secrètes côté serveur uniquement, signature des webhooks vérifiée</span></li>
+            <li><svg class="i"><use href="#i-check"/></svg><span>Courte documentation pour ajouter une nouvelle date vous-même</span></li>
+          </ul>
+        </div>
+        <div class="card sec">
+          <p class="small muted">Essayez le parcours : onglet <b>Site public</b>, réservez un atelier et payez avec la carte de test <code>4242 4242 4242 4242</code>. La réservation apparaît ensuite dans <b>Espace atelier</b>.</p>
+          <div class="actions" style="margin-top:10px"><button type="button" class="btn primary" data-goto="site">Essayer une réservation</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
+
+<!-- Dialogue de réservation -->
+<dialog id="dBook" aria-labelledby="dBookT">
+  <form id="bookForm" novalidate>
+    <div class="dlg-h"><div><p class="muted small" id="dBookSub"></p><h2 id="dBookT">Réserver</h2></div><button type="button" class="x" data-close aria-label="Fermer"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-b">
+      <fieldset class="slots" id="slots"><legend>Choisissez une date</legend></fieldset>
+      <p class="err" id="eSlot"></p>
+      <div class="grid2">
+        <div class="field"><label for="bQty">Nombre de places</label><select id="bQty"></select></div>
+        <div class="field"><label for="bPhone">Téléphone <span class="muted">(facultatif)</span></label><input type="tel" id="bPhone" autocomplete="tel"></div>
+        <div class="field"><label for="bName">Nom et prénom</label><input type="text" id="bName" autocomplete="name"><p class="err" id="eName"></p></div>
+        <div class="field"><label for="bEmail">Email</label><input type="email" id="bEmail" autocomplete="email"><p class="err" id="eEmail"></p></div>
+      </div>
+      <label class="check"><input type="checkbox" id="bCgv"><span>J'accepte les conditions de réservation (annulation gratuite jusqu'à 48 h avant).</span></label>
+      <p class="err" id="eCgv"></p>
+      <div class="total"><span>Total à payer</span><b id="bTotal">0 €</b></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="btn" data-close>Annuler</button>
+      <button type="submit" class="btn primary"><svg class="i"><use href="#i-lock"/></svg>Payer avec Stripe</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Stripe Checkout simulé -->
+<dialog id="dCo" class="co" aria-labelledby="coTitle">
+  <div class="co-grid">
+    <div class="co-sum"><div class="co-inner">
+      <div class="co-top">
+        <button type="button" class="btn ghost" id="coCancel" style="padding:0 8px"><svg class="i"><use href="#i-back"/></svg>Atelier Pigment</button>
+        <span class="testbadge">Mode test</span>
+      </div>
+      <div>
+        <p class="muted" id="coItem"></p>
+        <p class="co-amount" id="coAmount"></p>
+      </div>
+      <div id="coLines"></div>
+    </div></div>
+    <div class="co-pay"><form class="co-inner" id="coForm" novalidate>
+      <h2 id="coTitle" style="font-family:var(--font);font-weight:600;font-size:20px">Payer par carte</h2>
+      <div class="field"><label for="cEmail">Email</label><input type="email" id="cEmail" autocomplete="email"><p class="err" id="ecEmail"></p></div>
+      <div class="field">
+        <span class="flabel" id="cardLbl">Informations de la carte</span>
+        <div class="cardbox" id="cardBox" role="group" aria-labelledby="cardLbl">
+          <label for="cNum" class="sr">Numéro de carte</label>
+          <input type="text" id="cNum" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234" maxlength="23">
+          <div class="row">
+            <label for="cExp" class="sr">Date d'expiration (MM / AA)</label>
+            <input type="text" id="cExp" inputmode="numeric" autocomplete="cc-exp" placeholder="MM / AA" maxlength="7">
+            <label for="cCvc" class="sr">Cryptogramme (CVC)</label>
+            <input type="text" id="cCvc" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC" maxlength="4">
+          </div>
+        </div>
+        <p class="err" id="ecCard" role="alert"></p>
+      </div>
+      <div class="field"><label for="cHolder">Nom du titulaire</label><input type="text" id="cHolder" autocomplete="cc-name"><p class="err" id="ecHolder"></p></div>
+      <div class="field"><label for="cCountry">Pays</label><select id="cCountry" autocomplete="country"><option>France</option><option>Belgique</option><option>Suisse</option><option>Luxembourg</option><option>Canada</option></select></div>
+      <button type="submit" class="btn stripe block" id="coPay"></button>
+      <div class="testcards">
+        <b>Cartes de test</b> <span class="muted">— n'importe quelle date future et CVC</span>
+        <ul>
+          <li><code>4242 4242 4242 4242</code><button type="button" class="btn sm ghost" data-card="4242424242424242">Paiement accepté</button></li>
+          <li><code>4000 0025 0000 3155</code><button type="button" class="btn sm ghost" data-card="4000002500003155">3D Secure</button></li>
+          <li><code>4000 0000 0000 0002</code><button type="button" class="btn sm ghost" data-card="4000000000000002">Carte refusée</button></li>
+          <li><code>4000 0000 0000 9995</code><button type="button" class="btn sm ghost" data-card="4000000000009995">Fonds insuffisants</button></li>
+        </ul>
+      </div>
+      <p class="co-foot"><svg class="i"><use href="#i-lock"/></svg>Page de paiement Stripe simulée — aucune transaction réelle.</p>
+    </form></div>
+  </div>
+</dialog>
+
+<!-- 3D Secure -->
+<dialog id="d3ds" aria-labelledby="d3dsT" style="width:min(420px,calc(100vw - 24px))">
+  <div class="dlg-h"><div><span class="testbadge">Mode test</span><h2 id="d3dsT" style="margin-top:8px">Authentification 3D Secure</h2></div></div>
+  <div class="dlg-b"><p>Votre banque demande de confirmer ce paiement de <b id="d3dsAmt"></b>. En production, le client valide dans l'application de sa banque.</p></div>
+  <div class="dlg-f"><button type="button" class="btn danger" id="d3dsFail">Refuser l'authentification</button><button type="button" class="btn primary" id="d3dsOk">Valider</button></div>
+</dialog>
+
+<!-- Détail / remboursement -->
+<dialog id="dDetail" aria-labelledby="dDetailT"><div id="detailBody"></div></dialog>
+
+<!-- Nouvelle séance -->
+<dialog id="dSess" aria-labelledby="dSessT">
+  <form id="sessForm" novalidate>
+    <div class="dlg-h"><h2 id="dSessT">Nouvelle séance</h2><button type="button" class="x" data-close aria-label="Fermer"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="dlg-b">
+      <div class="field"><label for="sWs">Atelier</label><select id="sWs"></select></div>
+      <div class="grid2">
+        <div class="field"><label for="sDate">Date</label><input type="date" id="sDate"><p class="err" id="esDate"></p></div>
+        <div class="field"><label for="sTime">Heure de début</label><input type="time" id="sTime" value="10:00"></div>
+        <div class="field"><label for="sCap">Nombre de places</label><input type="number" id="sCap" min="1" max="20" value="8"><p class="err" id="esCap"></p></div>
+      </div>
+      <p class="hint">La séance devient immédiatement réservable sur le site public.</p>
+    </div>
+    <div class="dlg-f"><button type="button" class="btn" data-close>Annuler</button><button type="submit" class="btn primary">Publier la séance</button></div>
+  </form>
+</dialog>
+
+<div id="toasts" aria-live="polite" role="status"></div>
+<div id="printArea" aria-hidden="true"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='demo-491315-v1';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=c=>(c/100).toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const fDate=d=>new Date(d).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const fShort=d=>new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const fTime=d=>new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const fDT=d=>new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const rid=(n)=>{const a='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';let s='';for(let i=0;i<n;i++)s+=a[Math.floor(Math.random()*a.length)];return s};
+const icon=(id,st='')=>`<svg class="i" ${st}><use href="#i-${id}"/></svg>`;
+
+const WS=[
+  {id:'w1',name:'Aquarelle botanique',tech:'Aquarelle',level:'Débutant',dur:'3 h',price:6500,desc:'Feuillages, fleurs et transparences : les bases du lavis et du mouillé sur mouillé.',pal:['#7FA88B','#D9A441','#C96F53','#E9EFE6']},
+  {id:'w2',name:'Acrylique au couteau',tech:'Acrylique',level:'Tous niveaux',dur:'3 h',price:7200,desc:'Matière, empâtements et couleurs franches pour un paysage abstrait sur toile.',pal:['#2E5E8C','#E2B13C','#C2452D','#EDE7DD']},
+  {id:'w3',name:'Nature morte à l’huile',tech:'Huile',level:'Intermédiaire',dur:'4 h',price:9500,desc:'Composition, lumière et glacis autour d’une nature morte de saison.',pal:['#6B3E26','#B9823A','#3F5A4A','#F1E6D4']},
+  {id:'w4',name:'Petits peintres (6–11 ans)',tech:'Enfants',level:'Enfants',dur:'1 h 30',price:2800,desc:'Gouache et collages autour d’un artiste célèbre. Tablier fourni.',pal:['#E0573B','#3A8FC9','#F2C230','#F6F0E6']},
+  {id:'w5',name:'Carnet de voyage',tech:'Aquarelle',level:'Tous niveaux',dur:'3 h',price:7000,desc:'Croquis rapides au feutre et aquarelle légère, sur le motif dans le quartier.',pal:['#4E7FA0','#C99B5B','#8DA86A','#EEF1EE']},
+  {id:'w6',name:'Portrait à l’huile',tech:'Huile',level:'Confirmé',dur:'5 h',price:12000,desc:'Proportions du visage, carnations et modelé avec modèle vivant.',pal:['#8C4A3A','#D8A27F','#3D3A4F','#F2E8DE']}
+];
+const TECHS=['Tous','Aquarelle','Acrylique','Huile','Enfants'];
+
+function seed(){
+  const sessions=[
+    ['s11','w5','2026-10-18T09:30',8,5],['s7','w4','2026-10-21T14:30',10,5],['s3','w2','2026-10-22T18:30',8,4],
+    ['s1','w1','2026-10-24T10:00',8,3],['s8','w4','2026-10-28T14:30',10,2],['s5','w3','2026-10-31T14:00',6,4],
+    ['s4','w2','2026-11-05T18:30',8,2],['s9','w5','2026-11-08T09:30',8,2],['s2','w1','2026-11-14T10:00',8,1],
+    ['s6','w3','2026-11-21T14:00',6,0],['s10','w6','2026-11-28T10:00',6,1]
+  ].map(([id,wid,date,capacity,base])=>({id,wid,date,capacity,base}));
+  const raw=[
+    ['Camille Renaud','camille.renaud@exemple.fr','s1',2,'paid','2026-10-02T19:12'],
+    ['Julien Morel','j.morel@exemple.fr','s3',1,'paid','2026-10-04T08:41'],
+    ['Sophie Lambert','sophie.lambert@exemple.fr','s5',2,'paid','2026-10-05T21:03'],
+    ['Inès Bouvier','ines.bouvier@exemple.fr','s7',3,'paid','2026-10-07T12:27'],
+    ['Marc Delattre','marc.delattre@exemple.fr','s4',2,'refunded','2026-10-08T17:55'],
+    ['Léa Fontaine','lea.fontaine@exemple.fr','s9',1,'paid','2026-10-09T10:18'],
+    ['Nadia Chevalier','nadia.chevalier@exemple.fr','s11',2,'paid','2026-10-10T22:40'],
+    ['Hugo Perrin','hugo.perrin@exemple.fr','s10',1,'paid','2026-10-12T07:59'],
+    ['Claire Vasseur','claire.vasseur@exemple.fr','s2',1,'paid','2026-10-13T13:34'],
+    ['Thomas Girard','thomas.girard@exemple.fr','s8',2,'paid','2026-10-14T18:06']
+  ];
+  const st={sessions,bookings:[],events:[],seq:412};
+  raw.forEach(([name,email,sid,qty,status,at])=>{
+    const s=sessions.find(x=>x.id===sid), w=WS.find(x=>x.id===s.wid);
+    const b={ref:'RES-2026-0'+(st.seq++),name,email,sid,qty,amount:w.price*qty,status,at:new Date(at).toISOString(),pi:'pi_3Q'+rid(22),cs:'cs_test_a1'+rid(28),card:'4242'};
+    st.bookings.push(b);
+    pushEvents(st,b,new Date(at).getTime());
+    if(status==='refunded'){b.refundedAt=new Date(new Date(at).getTime()+86400000*2).toISOString();st.events.push(evt('charge.refunded',b,new Date(b.refundedAt).getTime()))}
+  });
+  return st;
+}
+function evt(type,b,t){
+  let obj;
+  if(type==='checkout.session.completed')obj={id:b.cs,object:'checkout.session',amount_total:b.amount,currency:'eur',customer_email:b.email,payment_intent:b.pi,payment_status:'paid',metadata:{seance_id:b.sid,places:String(b.qty),reference:b.ref}};
+  else if(type==='payment_intent.succeeded')obj={id:b.pi,object:'payment_intent',amount:b.amount,currency:'eur',status:'succeeded'};
+  else if(type==='payment_intent.payment_failed')obj={id:b.pi,object:'payment_intent',amount:b.amount,currency:'eur',status:'requires_payment_method',last_payment_error:{code:b.code,decline_code:b.decline}};
+  else obj={id:'ch_3Q'+rid(22),object:'charge',payment_intent:b.pi,amount_refunded:b.amount,refunded:true};
+  return {id:'evt_1Q'+rid(22),type,created:t,livemode:false,data:{object:obj}};
+}
+function pushEvents(st,b,t){st.events.push(evt('payment_intent.succeeded',b,t));st.events.push(evt('checkout.session.completed',b,t+800))}
+
+let S;
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);return}}catch(e){}S=seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+const ws=id=>WS.find(w=>w.id===id);
+const sess=id=>S.sessions.find(s=>s.id===id);
+const booked=s=>s.base+S.bookings.filter(b=>b.sid===s.id&&b.status==='paid').reduce((a,b)=>a+b.qty,0);
+const left=s=>Math.max(0,s.capacity-booked(s));
+const sortedSess=()=>[...S.sessions].sort((a,b)=>a.date.localeCompare(b.date));
+
+function toast(msg,ic='check'){
+  const t=document.createElement('div');t.className='toast';t.innerHTML=icon(ic)+'<span>'+msg+'</span>';
+  $('#toasts').appendChild(t);setTimeout(()=>t.remove(),4800);
+}
+
+/* ---------- Illustrations ---------- */
+function art(p,seed){
+  const v=seed%3;
+  const strokes=[
+    `<path d="M-10 120 C 60 60, 140 150, 220 90 S 360 60, 420 110" stroke="${p[0]}" stroke-width="38" fill="none" stroke-linecap="round" opacity=".9"/><circle cx="300" cy="62" r="34" fill="${p[1]}" opacity=".85"/><path d="M40 170 C 120 140, 200 190, 300 160" stroke="${p[2]}" stroke-width="22" fill="none" stroke-linecap="round" opacity=".85"/>`,
+    `<rect x="40" y="30" width="120" height="130" rx="8" fill="${p[0]}" opacity=".85" transform="rotate(-6 100 95)"/><path d="M170 160 C 220 40, 300 40, 380 140" stroke="${p[1]}" stroke-width="30" fill="none" stroke-linecap="round"/><circle cx="250" cy="150" r="22" fill="${p[2]}"/>`,
+    `<ellipse cx="130" cy="110" rx="80" ry="48" fill="${p[0]}" opacity=".8"/><path d="M200 40 C 260 90, 300 30, 370 70" stroke="${p[1]}" stroke-width="26" fill="none" stroke-linecap="round"/><path d="M220 150 L 360 170" stroke="${p[2]}" stroke-width="18" stroke-linecap="round"/><circle cx="90" cy="60" r="16" fill="${p[2]}" opacity=".9"/>`
+  ][v];
+  return `<svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="200" fill="${p[3]}"/>${strokes}</svg>`;
+}
+$('#heroArt').innerHTML=art(['#A3431D','#D9A441','#2E5E8C','#F1E6D4'],0).replace('viewBox="0 0 400 200"','viewBox="40 0 320 200"');
+
+/* ---------- Vues ---------- */
+function setView(v){
+  $$('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));
+  ['site','admin','int'].forEach(x=>$('#v-'+x).hidden=x!==v);
+  if(v==='admin')renderAdmin();
+  window.scrollTo(0,0);
+}
+$$('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+document.addEventListener('click',e=>{const g=e.target.closest('[data-goto]');if(g){setView(g.dataset.goto);showCatalog()}});
+
+/* ---------- Catalogue ---------- */
+let tech='Tous';
+function renderChips(){
+  $('#chips').innerHTML=TECHS.map(t=>`<button type="button" class="chip" aria-pressed="${t===tech}" data-tech="${t}">${t}</button>`).join('');
+}
+$('#chips').addEventListener('click',e=>{const b=e.target.closest('[data-tech]');if(!b)return;tech=b.dataset.tech;renderChips();renderCatalog()});
+function renderCatalog(){
+  const list=WS.filter(w=>tech==='Tous'||w.tech===tech);
+  $('#catCount').textContent=list.length+' atelier'+(list.length>1?'s':'')+' affiché'+(list.length>1?'s':'');
+  $('#wsGrid').innerHTML=list.map((w,i)=>{
+    const ss=sortedSess().filter(s=>s.wid===w.id);
+    const any=ss.some(s=>left(s)>0);
+    const dates=ss.length?ss.map(s=>{const l=left(s);return `<li><span>${cap(fShort(s.date))} · ${fTime(s.date)}</span>${l?`<span class="${l<=2?'pill warn':'muted'}">${l} place${l>1?'s':''}</span>`:'<span class="pill bad">Complet</span>'}</li>`}).join(''):'<li class="muted">Prochaines dates bientôt</li>';
+    return `<article class="card ws"><div class="art">${art(w.pal,WS.indexOf(w))}</div><div class="body">
+      <span class="pill ac" style="align-self:flex-start">${esc(w.tech)}</span>
+      <h3>${esc(w.name)}</h3>
+      <div class="meta"><span>${icon('clock')}${w.dur}</span><span>${icon('gauge')}${w.level}</span></div>
+      <p class="muted small">${esc(w.desc)}</p>
+      <ul class="dates" aria-label="Dates disponibles">${dates}</ul>
+      <div class="foot"><span class="price">${eur(w.price)} <small>/ pers.</small></span>
+      <button type="button" class="btn primary" data-book="${w.id}" ${any?'':'disabled'}>${any?'Réserver et payer':'Complet'}</button></div>
+    </div></article>`}).join('');
+}
+$('#wsGrid').addEventListener('click',e=>{const b=e.target.closest('[data-book]');if(b)openBook(b.dataset.book)});
+
+/* ---------- Réservation ---------- */
+let cur=null; // {wid,sid,qty,name,email,phone}
+function openBook(wid,keep){
+  const w=ws(wid);
+  if(!keep)cur={wid};
+  $('#dBookSub').textContent=w.tech+' · '+w.dur+' · '+eur(w.price)+' / pers.';
+  $('#dBookT').textContent=w.name;
+  const ss=sortedSess().filter(s=>s.wid===wid);
+  if(!cur.sid||!left(sess(cur.sid))){const f=ss.find(s=>left(s)>0);cur.sid=f&&f.id}
+  $('#slots').innerHTML='<legend>Choisissez une date</legend>'+ss.map(s=>{const l=left(s);return `<label class="slot"><input type="radio" name="slot" value="${s.id}" ${s.id===cur.sid?'checked':''} ${l?'':'disabled'}><span class="t"><b>${cap(fDate(s.date))}</b><br><span class="muted small">${fTime(s.date)} · ${w.dur}</span></span>${l?`<span class="${l<=2?'pill warn':'pill gray'}">${l} place${l>1?'s':''}</span>`:'<span class="pill bad">Complet</span>'}</label>`}).join('');
+  $('#bName').value=cur.name||'';$('#bEmail').value=cur.email||'';$('#bPhone').value=cur.phone||'';$('#bCgv').checked=!!keep;
+  ['eSlot','eName','eEmail','eCgv'].forEach(i=>$('#'+i).textContent='');
+  ['bName','bEmail'].forEach(i=>$('#'+i).removeAttribute('aria-invalid'));
+  fillQty(cur.qty||1);
+  $('#dBook').showModal();
+}
+function fillQty(want){
+  const s=cur.sid&&sess(cur.sid);const max=s?Math.min(4,left(s)):1;
+  const q=Math.min(want,max);
+  $('#bQty').innerHTML=Array.from({length:max},(_,i)=>`<option value="${i+1}" ${i+1===q?'selected':''}>${i+1} ${i?'personnes':'personne'}</option>`).join('');
+  updTotal();
+}
+function updTotal(){$('#bTotal').textContent=eur(ws(cur.wid).price*(+$('#bQty').value||1))}
+$('#slots').addEventListener('change',e=>{if(e.target.name==='slot'){cur.sid=e.target.value;fillQty(+$('#bQty').value||1);$('#eSlot').textContent=''}});
+$('#bQty').addEventListener('change',updTotal);
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+$('#bookForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  let ok=true,first=null;
+  const setErr=(inp,errId,msg)=>{$('#'+errId).textContent=msg;if(inp){inp.setAttribute('aria-invalid',msg?'true':'false')}if(msg){ok=false;first=first||inp}};
+  setErr(null,'eSlot',cur.sid?'':'Choisissez une date disponible.');
+  const n=$('#bName').value.trim(),m=$('#bEmail').value.trim();
+  setErr($('#bName'),'eName',n.length<2?'Indiquez votre nom.':'');
+  setErr($('#bEmail'),'eEmail',!EMAIL.test(m)?'Adresse email invalide.':'');
+  setErr($('#bCgv'),'eCgv',$('#bCgv').checked?'':'Veuillez accepter les conditions.');
+  if(!ok){(first||$('#slots input:not(:disabled)'))?.focus();return}
+  Object.assign(cur,{name:n,email:m,phone:$('#bPhone').value.trim(),qty:+$('#bQty').value});
+  $('#dBook').close();
+  openCheckout();
+});
+
+/* ---------- Checkout simulé ---------- */
+function openCheckout(){
+  const w=ws(cur.wid),s=sess(cur.sid),total=w.price*cur.qty;
+  $('#coItem').textContent='Payer Atelier Pigment';
+  $('#coAmount').textContent=eur(total);
+  $('#coLines').innerHTML=`<div class="co-line"><span><b>${esc(w.name)}</b><br><span class="muted small">${cap(fDate(s.date))} à ${fTime(s.date)}<br>Qté ${cur.qty} × ${eur(w.price)}</span></span><span>${eur(total)}</span></div><div class="co-line"><span>TVA</span><span class="muted">incluse</span></div><div class="co-line tot"><span>Total dû</span><span>${eur(total)}</span></div>`;
+  $('#cEmail').value=cur.email;$('#cNum').value='';$('#cExp').value='';$('#cCvc').value='';$('#cHolder').value=cur.name;
+  ['ecEmail','ecCard','ecHolder'].forEach(i=>$('#'+i).textContent='');$('#cardBox').classList.remove('bad');
+  setPayBtn(false);
+  $('#dCo').showModal();
+  setTimeout(()=>$('#cNum').focus(),30);
+}
+function setPayBtn(busy){
+  const b=$('#coPay'),t=ws(cur.wid).price*cur.qty;b.disabled=busy;
+  b.innerHTML=busy?'<span class="spin" aria-hidden="true"></span>Traitement…':icon('lock')+'Payer '+eur(t);
+}
+$('#coCancel').addEventListener('click',()=>{$('#dCo').close();toast('Paiement annulé — aucun montant débité. Retour sur le site.','back')});
+$('#dCo').addEventListener('cancel',e=>{e.preventDefault();$('#coCancel').click()});
+$('#cNum').addEventListener('input',e=>{const d=e.target.value.replace(/\D/g,'').slice(0,19);e.target.value=d.replace(/(.{4})/g,'$1 ').trim()});
+$('#cExp').addEventListener('input',e=>{let d=e.target.value.replace(/\D/g,'').slice(0,4);if(d.length===1&&+d>1)d='0'+d;e.target.value=d.length>2?d.slice(0,2)+' / '+d.slice(2):d});
+$('#cCvc').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,4)});
+$$('[data-card]').forEach(b=>b.addEventListener('click',()=>{
+  const c=b.dataset.card;$('#cNum').value=c.replace(/(.{4})/g,'$1 ').trim();
+  const y=(new Date().getFullYear()+3)%100;$('#cExp').value='12 / '+String(y).padStart(2,'0');$('#cCvc').value='123';
+  $('#ecCard').textContent='';$('#cardBox').classList.remove('bad');$('#coPay').focus();
+}));
+function luhn(n){let s=0,alt=false;for(let i=n.length-1;i>=0;i--){let d=+n[i];if(alt){d*=2;if(d>9)d-=9}s+=d;alt=!alt}return s%10===0}
+function cardErr(msg){$('#ecCard').textContent=msg;$('#cardBox').classList.toggle('bad',!!msg)}
+$('#coForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const em=$('#cEmail').value.trim(),num=$('#cNum').value.replace(/\s/g,''),exp=$('#cExp').value.replace(/\D/g,''),cvc=$('#cCvc').value,h=$('#cHolder').value.trim();
+  let ok=true;
+  $('#ecEmail').textContent=EMAIL.test(em)?'':(ok=false,'Adresse email invalide.');
+  $('#ecHolder').textContent=h.length>1?'':(ok=false,'Nom du titulaire requis.');
+  let ce='';
+  if(num.length<13||!luhn(num))ce='Le numéro de carte est invalide.';
+  else if(exp.length!==4)ce='La date d’expiration est incomplète.';
+  else{const m=+exp.slice(0,2),y=2000+ +exp.slice(2),n=new Date();if(m<1||m>12)ce='Le mois d’expiration est invalide.';else if(y<n.getFullYear()||(y===n.getFullYear()&&m<n.getMonth()+1))ce='La carte est expirée.'}
+  if(!ce&&cvc.length<3)ce='Le cryptogramme (CVC) est incomplet.';
+  cardErr(ce);if(ce)ok=false;
+  if(!ok){(ce?$('#cNum'):!EMAIL.test(em)?$('#cEmail'):$('#cHolder')).focus();return}
+  cur.email=em;cur.card=num.slice(-4);
+  setPayBtn(true);
+  setTimeout(()=>{
+    if(num==='4000000000000002')return fail('Votre carte a été refusée.','card_declined','generic_decline');
+    if(num==='4000000000009995')return fail('Fonds insuffisants sur votre carte. Essayez une autre carte.','card_declined','insufficient_funds');
+    if(num==='4000002500003155'){$('#d3dsAmt').textContent=eur(ws(cur.wid).price*cur.qty);$('#d3ds').showModal();return}
+    succeed();
+  },1100);
+});
+$('#d3dsOk').addEventListener('click',()=>{$('#d3ds').close();setTimeout(succeed,500)});
+$('#d3dsFail').addEventListener('click',()=>{$('#d3ds').close();fail('Authentification 3D Secure échouée. Le paiement n’a pas abouti.','payment_intent_authentication_failure','')});
+$('#d3ds').addEventListener('cancel',e=>{e.preventDefault();$('#d3dsFail').click()});
+function fail(msg,code,decline){
+  setPayBtn(false);cardErr(msg);$('#cNum').focus();
+  const w=ws(cur.wid);
+  S.events.push(evt('payment_intent.payment_failed',{pi:'pi_3Q'+rid(22),amount:w.price*cur.qty,code,decline},Date.now()));save();
+}
+function succeed(){
+  const s=sess(cur.sid),w=ws(cur.wid);
+  if(left(s)<cur.qty){setPayBtn(false);cardErr('Il ne reste plus assez de places sur cette séance.');return}
+  const b={ref:'RES-2026-0'+(S.seq++),name:cur.name,email:cur.email,phone:cur.phone,sid:cur.sid,qty:cur.qty,amount:w.price*cur.qty,status:'paid',at:new Date().toISOString(),pi:'pi_3Q'+rid(22),cs:'cs_test_a1'+rid(28),card:cur.card,fresh:true};
+  S.bookings.push(b);pushEvents(S,b,Date.now());save();
+  $('#dCo').close();
+  showSuccess(b);renderCatalog();
+  toast('Email de confirmation envoyé à '+esc(b.email)+' (simulation)','mail');
+}
+
+/* ---------- Confirmation ---------- */
+function showSuccess(b){
+  const s=sess(b.sid),w=ws(s.wid);
+  $('#catalog').hidden=true;const el=$('#success');el.hidden=false;
+  el.innerHTML=`<div class="card success" tabindex="-1" id="succCard">
+    <div class="ico">${icon('check')}</div>
+    <h1 style="font-size:clamp(26px,3.4vw,34px)">Réservation confirmée</h1>
+    <p class="muted" style="margin-top:6px">Merci ${esc(b.name.split(' ')[0])}, votre paiement a été accepté et ${b.qty>1?'vos places sont réservées':'votre place est réservée'}.</p>
+    <dl class="recap">
+      <dt>Atelier</dt><dd>${esc(w.name)}</dd>
+      <dt>Date</dt><dd>${cap(fDate(s.date))} à ${fTime(s.date)} (${w.dur})</dd>
+      <dt>Participants</dt><dd>${b.qty}</dd>
+      <dt>Montant payé</dt><dd>${eur(b.amount)} — carte •••• ${esc(b.card)}</dd>
+      <dt>Référence</dt><dd>${b.ref}</dd>
+      <dt>Lieu</dt><dd>12 rue des Tanneurs, Nantes (adresse fictive)</dd>
+    </dl>
+    <p class="small muted" style="margin-bottom:16px">${icon('mail','style="vertical-align:-4px"')} Un email récapitulatif a été envoyé à <b>${esc(b.email)}</b> (simulation). Stripe envoie aussi son reçu de paiement.</p>
+    <div class="actions">
+      <button type="button" class="btn primary" id="sPrint">${icon('print')}Imprimer le reçu</button>
+      <button type="button" class="btn" id="sIcs">${icon('dl')}Ajouter au calendrier</button>
+      <button type="button" class="btn ghost" id="sBack">${icon('back')}Retour aux ateliers</button>
+    </div>
+    <p class="small muted" style="margin-top:14px">Côté atelier : la réservation apparaît dans <button type="button" class="lnk" data-goto="admin">l'espace atelier</button>.</p>
+  </div>`;
+  window.scrollTo(0,0);$('#succCard').focus();
+  $('#sPrint').onclick=()=>printReceipt(b);
+  $('#sIcs').onclick=()=>ics(b);
+  $('#sBack').onclick=showCatalog;
+}
+function showCatalog(){$('#success').hidden=true;$('#catalog').hidden=false}
+function printReceipt(b){
+  const s=sess(b.sid),w=ws(s.wid);
+  $('#printArea').innerHTML=`<h1>Atelier Pigment — Reçu de réservation</h1><p>Référence ${b.ref} · payé le ${new Date(b.at).toLocaleString('fr-FR')}</p>
+  <table><tr><th>Client</th><td>${esc(b.name)} — ${esc(b.email)}</td></tr><tr><th>Atelier</th><td>${esc(w.name)}</td></tr><tr><th>Date</th><td>${cap(fDate(s.date))} à ${fTime(s.date)}</td></tr><tr><th>Places</th><td>${b.qty} × ${eur(w.price)}</td></tr><tr><th>Total TTC</th><td><b>${eur(b.amount)}</b></td></tr><tr><th>Paiement</th><td>Carte •••• ${esc(b.card)} via Stripe (${b.pi})</td></tr></table>
+  <p style="margin-top:16px">Document de démonstration — données fictives.</p>`;
+  window.print();
+}
+function ics(b){
+  const s=sess(b.sid),w=ws(s.wid),d=new Date(s.date),h=parseFloat(w.dur.replace(',','.'))||3;
+  const fmt=x=>x.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const end=new Date(d.getTime()+(w.dur==='1 h 30'?1.5:h)*3600000);
+  const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Atelier Pigment//FR','BEGIN:VEVENT','UID:'+b.ref+'@atelier-pigment.example','DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(d),'DTEND:'+fmt(end),'SUMMARY:'+w.name,'LOCATION:12 rue des Tanneurs, Nantes','DESCRIPTION:Réservation '+b.ref+' - '+b.qty+' place(s)','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));a.download=b.ref+'.ics';document.body.appendChild(a);a.click();a.remove();
+  toast('Fichier calendrier téléchargé','dl');
+}
+
+/* ---------- Espace atelier ---------- */
+function renderAdmin(){
+  const paid=S.bookings.filter(b=>b.status==='paid'),ref=S.bookings.filter(b=>b.status==='refunded');
+  const ca=paid.reduce((a,b)=>a+b.amount,0),rf=ref.reduce((a,b)=>a+b.amount,0);
+  const capT=S.sessions.reduce((a,s)=>a+s.capacity,0),bk=S.sessions.reduce((a,s)=>a+booked(s),0);
+  const full=S.sessions.filter(s=>!left(s)).length;
+  $('#kpis').innerHTML=[
+    ['euro','Encaissé en ligne',eur(ca),paid.length+' paiement'+(paid.length>1?'s':'')+' réussi'+(paid.length>1?'s':'')],
+    ['users','Places vendues',bk+' / '+capT,'toutes séances à venir'],
+    ['gauge','Taux de remplissage',Math.round(bk/capT*100)+' %',full+' séance'+(full>1?'s':'')+' complète'+(full>1?'s':'')],
+    ['undo','Remboursé',eur(rf),ref.length+' remboursement'+(ref.length>1?'s':'')]
+  ].map(([i,l,v,s])=>`<div class="card kpi"><p class="l">${icon(i)}${l}</p><p class="v">${v}</p><p class="s">${s}</p></div>`).join('');
+  renderBookings();renderSessions();renderEvents();
+}
+function renderBookings(){
+  const q=$('#q').value.trim().toLowerCase(),f=$('#fStatus').value;
+  const rows=[...S.bookings].sort((a,b)=>b.at.localeCompare(a.at)).filter(b=>{
+    if(f&&b.status!==f)return false;if(!q)return true;
+    const w=ws(sess(b.sid).wid);return [b.ref,b.name,b.email,w.name].join(' ').toLowerCase().includes(q);
+  });
+  $('#bkCount').textContent=rows.length+' résultat'+(rows.length>1?'s':'');
+  $('#bkBody').innerHTML=rows.length?rows.map(b=>{const s=sess(b.sid),w=ws(s.wid);return `<tr>
+    <td><button type="button" class="lnk" data-detail="${b.ref}">${b.ref}</button>${b.fresh?' <span class="pill ac">Nouveau</span>':''}</td>
+    <td><b>${esc(b.name)}</b><br><span class="muted small wrap">${esc(b.email)}</span></td>
+    <td>${esc(w.name)}<br><span class="muted small">${fShort(s.date)} · ${fTime(s.date)}</span></td>
+    <td class="num">${b.qty}</td><td class="num"><b>${eur(b.amount)}</b></td>
+    <td>${b.status==='paid'?'<span class="pill ok">Payé</span>':'<span class="pill gray">Remboursé</span>'}</td>
+    <td>${fDT(b.at)}</td>
+    <td>${b.status==='paid'?`<button type="button" class="btn sm" data-refund="${b.ref}">${icon('undo')}Rembourser</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Aucune réservation ne correspond.</td></tr>';
+}
+$('#q').addEventListener('input',renderBookings);$('#fStatus').addEventListener('change',renderBookings);
+$('#bkBody').addEventListener('click',e=>{
+  const d=e.target.closest('[data-detail]'),r=e.target.closest('[data-refund]');
+  if(d)openDetail(d.dataset.detail);if(r)openDetail(r.dataset.refund,true);
+});
+function renderSessions(){
+  $('#sessList').innerHTML=sortedSess().map(s=>{const w=ws(s.wid),b=booked(s),p=Math.round(b/s.capacity*100);return `<li>
+    <div class="r"><b>${esc(w.name)}</b>${left(s)?`<span class="small muted">${b} / ${s.capacity} places</span>`:'<span class="pill ok">Complet</span>'}</div>
+    <span class="small muted">${cap(fDate(s.date))} · ${fTime(s.date)}</span>
+    <div class="bar ${left(s)?'':'full'}" role="img" aria-label="${p} % rempli"><i style="width:${p}%"></i></div></li>`}).join('');
+}
+function renderEvents(){
+  const ev=[...S.events].sort((a,b)=>b.created-a.created).slice(0,24);
+  const cls={'checkout.session.completed':'ok','payment_intent.succeeded':'st','charge.refunded':'warn','payment_intent.payment_failed':'bad'};
+  $('#evts').innerHTML=ev.map(e=>`<details><summary><span class="pill ${cls[e.type]||'gray'}">${e.type}</span><span class="id">${e.id}</span><span class="tm">${fDT(e.created)}</span></summary><pre>${esc(JSON.stringify({id:e.id,type:e.type,livemode:e.livemode,data:e.data},null,2))}</pre></details>`).join('');
+}
+function openDetail(ref,refund){
+  const b=S.bookings.find(x=>x.ref===ref),s=sess(b.sid),w=ws(s.wid);
+  b.fresh=false;save();
+  $('#detailBody').innerHTML=`<div class="dlg-h"><div><p class="muted small">${b.ref}</p><h2 id="dDetailT">${refund?'Rembourser la réservation':'Détail de la réservation'}</h2></div><button type="button" class="x" data-close aria-label="Fermer">${icon('x')}</button></div>
+  <div class="dlg-b"><dl class="recap" style="margin:0">
+    <dt>Client</dt><dd>${esc(b.name)}<br><span class="muted small">${esc(b.email)}${b.phone?' · '+esc(b.phone):''}</span></dd>
+    <dt>Atelier</dt><dd>${esc(w.name)}<br><span class="muted small">${cap(fDate(s.date))} à ${fTime(s.date)}</span></dd>
+    <dt>Places</dt><dd>${b.qty}</dd><dt>Montant</dt><dd>${eur(b.amount)} — carte •••• ${esc(b.card||'4242')}</dd>
+    <dt>Statut</dt><dd>${b.status==='paid'?'<span class="pill ok">Payé</span>':'<span class="pill gray">Remboursé le '+fDT(b.refundedAt)+'</span>'}</dd>
+    <dt>PaymentIntent</dt><dd class="small" style="font-family:ui-monospace,monospace">${b.pi}</dd>
+  </dl>
+  ${refund?`<p>Le client sera remboursé de <b>${eur(b.amount)}</b> sur sa carte (5 à 10 jours ouvrés) et ${b.qty>1?'les '+b.qty+' places seront remises':'la place sera remise'} en vente.</p>`:''}</div>
+  <div class="dlg-f">${refund?`<button type="button" class="btn" data-close>Annuler</button><button type="button" class="btn danger" id="doRefund">${icon('undo')}Confirmer le remboursement</button>`:
+   `<button type="button" class="btn" id="reMail">${icon('mail')}Renvoyer la confirmation</button>${b.status==='paid'?`<button type="button" class="btn danger" id="toRefund">${icon('undo')}Rembourser</button>`:''}`}</div>`;
+  const dl=$('#dDetail');if(!dl.open)dl.showModal();
+  $('#doRefund')&&($('#doRefund').onclick=()=>{
+    b.status='refunded';b.refundedAt=new Date().toISOString();S.events.push(evt('charge.refunded',b,Date.now()));save();
+    dl.close();renderAdmin();renderCatalog();
+    toast('Remboursement de '+eur(b.amount)+' émis (mode test) — email envoyé au client (simulation)','undo');
+  });
+  $('#toRefund')&&($('#toRefund').onclick=()=>openDetail(ref,true));
+  $('#reMail')&&($('#reMail').onclick=()=>toast('Confirmation renvoyée à '+esc(b.email)+' (simulation)','mail'));
+  renderBookings();
+}
+
+/* ---------- Nouvelle séance ---------- */
+$('#sWs').innerHTML=WS.map(w=>`<option value="${w.id}">${esc(w.name)}</option>`).join('');
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+$('#addSessBtn').addEventListener('click',()=>{
+  $('#sDate').min=todayISO();$('#sDate').value='';$('#esDate').textContent='';$('#esCap').textContent='';
+  $('#sDate').removeAttribute('aria-invalid');$('#dSess').showModal();
+});
+$('#sessForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const d=$('#sDate').value,t=$('#sTime').value||'10:00',c=+$('#sCap').value;
+  let ok=true;
+  const de=!d?'Choisissez une date.':d<todayISO()?'La date doit être à venir.':'';
+  $('#esDate').textContent=de;$('#sDate').setAttribute('aria-invalid',de?'true':'false');if(de)ok=false;
+  const ce=(!c||c<1||c>20)?'Entre 1 et 20 places.':'';$('#esCap').textContent=ce;if(ce)ok=false;
+  if(!ok){(de?$('#sDate'):$('#sCap')).focus();return}
+  const s={id:'s'+Date.now(),wid:$('#sWs').value,date:d+'T'+t,capacity:c,base:0};
+  S.sessions.push(s);save();$('#dSess').close();renderAdmin();renderCatalog();
+  toast('Séance publiée : '+esc(ws(s.wid).name)+', '+fShort(s.date)+' — réservable sur le site','cal');
+});
+
+/* ---------- Généralités ---------- */
+document.addEventListener('click',e=>{if(e.target.closest('[data-close]')){e.target.closest('dialog').close()}});
+$$('dialog:not(.co)').forEach(d=>d.addEventListener('click',e=>{if(e.target===d)d.close()}));
+$('#resetBtn').addEventListener('click',()=>{
+  try{localStorage.removeItem(KEY)}catch(e){}
+  S=seed();save();tech='Tous';renderChips();renderCatalog();showCatalog();
+  if(!$('#v-admin').hidden)renderAdmin();
+  toast('Démo réinitialisée','reset');
+});
+
+renderChips();renderCatalog();
+})();
+</script>
 </body>
 </html>
