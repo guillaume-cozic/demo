@@ -2,20 +2,890 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Chambres d'hôtes en Dordogne</title>
+<meta name="description" content="Site de chambres d'hôtes en français, anglais et néerlandais avec calendrier de disponibilités, réservation directe et paiement d'acompte en mode test, plus un espace propriétaire (planning, réservations, tarifs, synchronisation iCal avec Booking).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F8F4EC;--panel:#FFFFFF;--panel-2:#F2ECE1;--ink:#2B241E;--muted:#625849;--line:#E4DBCC;--line-2:#C8BBA6;
+  --accent:#3E5F3A;--accent-ink:#FFFFFF;--accent-soft:#E2EBDC;--accent-text:#2F4A2C;
+  --ochre:#8F5410;--ochre-soft:#F6E6CD;--bad:#A3302A;--bad-soft:#F7E0DD;--ok:#2F6B35;--ok-soft:#E0EFDC;
+  --bk:#24569A;--bk-soft:#DDE7F5;--blk:#5F574D;--blk-soft:#E8E2D8;--band:#F3E6CC;--band-ink:#6E420C;
+  --sky:#DCE8EB;--sun:#F1C676;--hill2:#AEBF93;--hill1:#7F9A66;--stone:#E6D6B8;--stone2:#CDB993;--roof:#9C5A3C;--win:#5A4A3A;--tree:#4E6B3E;--lav:#8D7AB6;--water:#8FB5C4;
+  --shadow:0 1px 2px rgba(43,36,30,.05),0 6px 18px rgba(43,36,30,.07);
+  --font:"Work Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#15120E;--panel:#1E1A15;--panel-2:#28231C;--ink:#F0E9DE;--muted:#B8AD9C;--line:#372F26;--line-2:#4F4537;
+  --accent:#9CC491;--accent-ink:#13200F;--accent-soft:#24331F;--accent-text:#B7DAAC;
+  --ochre:#E6B36B;--ochre-soft:#382A16;--bad:#F29C93;--bad-soft:#3D1F1C;--ok:#9ED39A;--ok-soft:#1D3020;
+  --bk:#9DBEF0;--bk-soft:#1C2B42;--blk:#C9BEAE;--blk-soft:#302A22;--band:#2E2414;--band-ink:#EDC37E;
+  --sky:#1D2830;--sun:#D9B26A;--hill2:#3A4832;--hill1:#2C3A26;--stone:#8C7F69;--stone2:#6E634F;--roof:#6E3F2C;--win:#F2D58A;--tree:#2B3E23;--lav:#6C5B93;--water:#3E6170;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+a{color:var(--accent-text)}
+.muted{color:var(--muted)}.small{font-size:13.5px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.star{width:16px;height:16px;fill:var(--ochre)}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band .bbtn{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.mode{display:flex;border:1px solid var(--line-2);border-radius:10px;padding:2px;background:var(--panel)}
+.mode button{min-height:40px;border:0;background:transparent;border-radius:8px;padding:0 12px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.mode button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-decoration:none;text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.block{width:100%}
+.btn.sm{min-height:44px;padding:0 12px;font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],input[type=url],input[type=search],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:80px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
+.ck{display:flex;align-items:flex-start;gap:10px;min-height:44px;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer;font-size:14px}
+.ck input{width:20px;height:20px;accent-color:var(--accent);margin:0;flex:none}
+.ck:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;line-height:1.5}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--ochre-soft);color:var(--ochre)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-bk{background:var(--bk-soft);color:var(--bk)}.b-dir{background:var(--accent-soft);color:var(--accent-text)}.b-blk{background:var(--blk-soft);color:var(--blk)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--ochre-soft);color:var(--ochre);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0}
+
+/* ---------- Site public ---------- */
+.pub-top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px 20px;padding:8px clamp(16px,3vw,32px);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);min-width:0}
+.brand b{font-family:var(--head);font-weight:600;font-size:19px;display:block;line-height:1.1}
+.brand small{display:block;color:var(--muted);font-size:12.5px}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.mark svg{width:24px;height:24px}
+.pub-nav{display:flex;gap:2px;margin-left:auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+.pub-nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 12px;border-radius:10px;color:var(--ink);text-decoration:none;font-weight:500;white-space:nowrap}
+.pub-nav a:hover{background:var(--panel-2)}
+.langs{display:flex;border:1px solid var(--line-2);border-radius:10px;padding:2px;background:var(--panel)}
+.langs button{min-width:44px;min-height:40px;border:0;background:transparent;border-radius:8px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+@media (max-width:860px){.pub-nav{order:5;width:100%;margin-left:0}.top-r{margin-left:auto}.brand small{display:none}}
+.top-r{display:flex;gap:8px;align-items:center}
+@media (max-width:420px){.top-r .btn{display:none}}
+.sec{padding:clamp(40px,6vw,72px) clamp(16px,3vw,32px);scroll-margin-top:110px}
+.in{max-width:1240px;margin:0 auto}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ochre)}
+.sec-h{margin-bottom:24px;display:grid;gap:6px}
+.sec-h h2{font-size:clamp(26px,3.2vw,36px)}
+.sec-h p{color:var(--muted);max-width:64ch}
+.hero{padding:clamp(28px,5vw,64px) clamp(16px,3vw,32px);background:var(--panel-2);border-bottom:1px solid var(--line)}
+.hero .in{display:grid;gap:28px;grid-template-columns:minmax(0,1fr);align-items:center}
+@media (min-width:940px){.hero .in{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}}
+.hero h1{font-size:clamp(30px,4.4vw,52px);margin:10px 0 14px;font-weight:500}
+.hero p.lead{font-size:17px;color:var(--muted);max-width:52ch}
+.hero .actions{margin-top:22px}
+.perks{display:grid;gap:8px;margin-top:22px}
+.perks li{display:flex;gap:10px;align-items:center;font-weight:500}
+.perks svg{color:var(--accent)}
+.art{border-radius:20px;overflow:hidden;border:1px solid var(--line);display:block;width:100%;height:auto;background:var(--sky)}
+.rooms{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.room{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.room .art{border-radius:0;border:0;border-bottom:1px solid var(--line)}
+.room-b{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.room h3{font-size:21px}
+.facts{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted)}
+.facts span{display:inline-flex;gap:6px;align-items:center}
+.room-f{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.price{font-family:var(--head);font-weight:600;font-size:24px;line-height:1.1}
+.off{opacity:.6}
+/* Disponibilités */
+.av-ctrl{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.av-ctrl .field{flex:0 1 240px}
+.av-grid{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.av-grid{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr)}.av-side{position:sticky;top:100px;align-self:start}}
+.cal-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.icon-btn{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);display:grid;place-items:center;cursor:pointer}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.months{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr))}
+.mtitle{font-size:18px;margin-bottom:8px;text-align:center}
+.wk,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.wk span{text-align:center;font-size:12px;font-weight:600;color:var(--muted);padding:2px 0}
+.day{min-height:48px;border:1px solid var(--line);background:var(--panel);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:2px;font-weight:600;font-size:14px;line-height:1.15;min-width:0}
+.day small{font-size:11px;font-weight:600;color:var(--accent-text)}
+.day:not(:disabled):hover{border-color:var(--accent)}
+.day:disabled{cursor:default}
+.day.past{background:transparent;border-color:transparent;color:var(--muted);font-weight:400}
+.day.full{background:var(--panel-2);color:var(--muted);text-decoration:line-through;font-weight:400}
+.day.full small{display:none}
+.day.can-end{border-style:dashed;border-color:var(--accent)}
+.day.s-in{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent-text);text-decoration:none}
+.day.s-start,.day.s-end{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:700}
+.day.s-start small,.day.s-end small,.day.s-in small{color:inherit}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:14px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:16px;height:16px;border-radius:4px;border:1px solid var(--line-2);display:inline-block}
+.calmsg{min-height:24px;margin-top:10px;font-weight:600;font-size:14px;color:var(--ochre)}
+.stay{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:12px 0}
+.stay div{background:var(--panel-2);border-radius:10px;padding:8px 12px;min-width:0}
+.stay small{display:block;color:var(--muted);font-size:12.5px;font-weight:600}
+.stay b{overflow-wrap:anywhere}
+.offer{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;margin-top:10px}
+.offer.na{background:var(--panel-2)}
+.offer-h{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.offer-h h3{font-size:18px}
+.lines{display:grid;gap:2px;font-size:14px}
+.lines div{display:flex;justify-content:space-between;gap:8px}
+.lines .tot{font-weight:700;font-size:15.5px;border-top:1px solid var(--line);padding-top:4px;margin-top:2px}
+/* Lieu / avis / contact */
+.two{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.feat{display:grid;gap:10px}
+.feat li{display:flex;gap:12px;align-items:center}
+.feat .ico{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.revs{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.rev blockquote{margin:8px 0 12px;font-family:var(--head);font-size:17px;font-weight:500;line-height:1.45}
+.foot{padding:28px clamp(16px,3vw,32px);border-top:1px solid var(--line);color:var(--muted);font-size:14px;background:var(--panel-2)}
+.foot .in{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+/* Modale */
+dialog{border:0;border-radius:18px;padding:0;width:min(640px,calc(100vw - 24px));max-height:92vh;background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(20,16,12,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 10px;position:sticky;top:0;background:var(--panel);z-index:2;border-bottom:1px solid var(--line)}
+.dlg-h h2{font-size:22px}
+.dlg-b{padding:16px 20px 20px;display:grid;gap:14px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--muted);margin-top:4px}
+.steps span{display:inline-flex;align-items:center;gap:6px}
+.steps span[aria-current="step"]{color:var(--accent-text)}
+.steps i{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;border:1px solid var(--line-2);font-style:normal;font-size:12px}
+.steps span[aria-current="step"] i,.steps .dn i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.recap{background:var(--panel-2);border-radius:12px;padding:12px 14px;display:grid;gap:4px;font-size:14px}
+.radio-row{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.done-ic{width:56px;height:56px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.done-ic svg{width:28px;height:28px}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:10px}
+.dl div{background:var(--panel-2);border-radius:10px;padding:8px 12px;min-width:0}
+.dl dt{font-size:12.5px;color:var(--muted);font-weight:600}
+.dl dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+dl{margin:0}
+.toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:100;display:grid;gap:8px;width:min(440px,calc(100vw - 32px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);font-weight:500;display:flex;gap:10px;align-items:center;animation:tin .25s ease-out}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+
+/* ---------- Espace propriétaire ---------- */
+.adm-top{position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);flex-wrap:wrap}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--ochre-soft);color:var(--ochre);border-radius:999px;padding:0 7px}
+@media (max-width:900px){.tabs{order:3;width:100%}}
+.adm-main{padding:20px clamp(16px,2vw,32px) 60px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:26px}
+.kpis{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));margin-bottom:16px}
+.kpi small{display:block;color:var(--muted);font-weight:600;font-size:13px}
+.kpi b{display:block;font-family:var(--head);font-size:30px;font-weight:600;line-height:1.2}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi.hl{background:var(--accent-soft);border-color:transparent}
+.kpi.hl b{color:var(--accent-text)}
+.panels{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr))}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.card-h h2{font-size:19px}
+.rows li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rows li:last-child{border-bottom:0}
+.rows .who{min-width:0;flex:1 1 180px}
+.rows .who b{display:block;overflow-wrap:anywhere}
+.bar{height:10px;border-radius:999px;background:var(--panel-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar.bk i{background:var(--bk)}
+.meter{display:grid;gap:4px;margin-bottom:12px}
+.meter div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:14px;flex-wrap:wrap}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+.tblw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle;overflow-wrap:anywhere}
+thead th{background:var(--panel-2);font-size:13px;color:var(--muted)}
+tbody tr:last-child>*{border-bottom:0}
+.num{font-variant-numeric:tabular-nums}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font:inherit;font-weight:600;color:var(--accent-text);text-align:left;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.resa{min-width:920px}
+.filters{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));margin-bottom:14px;align-items:end}
+/* Planning */
+.plan{min-width:1100px;table-layout:fixed;font-size:13px}
+.plan th,.plan td{padding:0;border-right:1px solid var(--line);height:52px;text-align:center}
+.plan thead th{padding:4px 0;line-height:1.2}
+.plan thead th b{display:block;font-size:15px;color:var(--ink)}
+.plan .rh{position:sticky;left:0;z-index:2;background:var(--panel);text-align:left;padding:6px 10px;width:130px;font-weight:600;font-size:14px;color:var(--ink)}
+.plan thead .rh{background:var(--panel-2);z-index:3}
+.plan .we{background:color-mix(in srgb,var(--panel-2) 60%,transparent)}
+.plan thead th.today{background:var(--accent);color:var(--accent-ink)}
+.plan thead th.today b{color:var(--accent-ink)}
+.free{width:100%;height:52px;border:0;background:transparent;cursor:pointer;color:transparent;display:grid;place-items:center}
+.free:hover,.free:focus-visible{background:var(--accent-soft);color:var(--accent-text)}
+.pbar{width:calc(100% - 6px);margin:0 3px;height:40px;border-radius:8px;border:1px solid;cursor:pointer;font-size:12.5px;font-weight:600;padding:2px 8px;text-align:left;overflow:hidden;line-height:1.25;overflow-wrap:anywhere;display:block}
+.pbar.direct,.pbar.tel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.pbar.booking{background:var(--bk-soft);border-color:var(--bk);color:var(--bk)}
+.pbar.bloque{background:var(--blk-soft);border-color:var(--blk);color:var(--blk);border-style:dashed}
+.pbar.attente{border-style:dashed;border-width:2px}
+.plan-ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.rcards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.switch{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-weight:600}
+.switch input{width:20px;height:20px;accent-color:var(--accent)}
+.ical{display:grid;gap:10px;grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.log li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.log li:last-child{border:0}
+.spin{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+@media print{
+  .demo-band,#app,.toasts,.no-print{display:none!important}
+  body{background:#fff;color:#000}
+  dialog{position:static;box-shadow:none;width:auto;max-height:none;border:0}
+  dialog::backdrop{display:none}
+  .dlg-h{position:static}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band" role="region" aria-label="Bandeau de démonstration">
+  <span><b>Démonstration</b> — données fictives</span>
+  <div class="mode" role="group" aria-label="Vue affichée">
+    <button type="button" data-act="mode" data-m="public" aria-pressed="true">Site des clients</button>
+    <button type="button" data-act="mode" data-m="admin" aria-pressed="false">Espace propriétaire</button>
+  </div>
+  <button type="button" class="bbtn" data-act="reset"><svg class="i" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Réinitialiser</button>
+</div>
+<div id="app"></div>
+<dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- Utilitaires ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const P=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+const add=(s,n)=>{const d=P(s);d.setDate(d.getDate()+n);return iso(d)};
+const diff=(a,b)=>Math.round((P(b)-P(a))/864e5);
+const TODAY=iso(new Date());
+const LS='demo-491366';
+const LOCS={fr:'fr-FR',en:'en-GB',nl:'nl-NL'};
+const cap1=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+const IC={
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ left:'<path d="M15 18l-6-6 6-6"/>',right:'<path d="M9 18l6-6-6-6"/>',
+ check:'<path d="M20 6L9 17l-5-5"/>',x:'<path d="M18 6L6 18M6 6l12 12"/>',
+ sync:'<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+ pool:'<path d="M2 20c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"/><path d="M8 16V5a2 2 0 0 1 4 0M16 16V5a2 2 0 0 0-4 0M8 9h8M8 13h8"/>',
+ coffee:'<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/>',
+ car:'<path d="M5 17h14v-5l-2-5H7l-2 5v5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M5 12h14"/>',
+ wifi:'<path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/>',
+ pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+ mail:'<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M22 6l-10 7L2 6"/>',
+ print:'<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+ copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+ home:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+ list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ bed:'<path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/>',
+ lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ ext:'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>',
+ tag:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><path d="M7 7h.01"/>',
+ area:'<path d="M3 3h18v18H3zM3 9h18M9 21V9"/>',
+ globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+ leaf:'<path d="M3 21c0-9 6-16 18-18-1 11-7 17-15 17"/><path d="M3 21l9-9"/>'
+};
+const ic=(n,c='i')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const STAR='<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+/* ---------- Illustrations SVG ---------- */
+function scene(v,label){
+ let s=`<svg class="art" viewBox="0 0 400 ${v===9?300:220}" role="img" aria-label="${esc(label)}"><rect width="400" height="300" fill="var(--sky)"/><circle cx="325" cy="58" r="24" fill="var(--sun)"/>`;
+ s+=`<path d="M0 140 Q100 100 200 132 T400 118 V300 H0Z" fill="var(--hill2)"/>`;
+ if(v===2) s+=`<path d="M0 120 L40 104 L70 118 L70 165 L0 165Z" fill="var(--stone2)"/><path d="M330 115 L370 100 L400 108 V160 H330Z" fill="var(--stone2)"/>`;
+ s+=`<path d="M0 178 Q120 150 240 172 T400 164 V300 H0Z" fill="var(--hill1)"/>`;
+ const house=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--stone)"/><polygon points="${x-10},${y+2} ${x+w/2},${y-34} ${x+w+10},${y+2}" fill="var(--roof)"/><rect x="${x+w*.18}" y="${y+16}" width="14" height="18" fill="var(--win)"/><rect x="${x+w*.62}" y="${y+16}" width="14" height="18" fill="var(--win)"/><rect x="${x+w*.42}" y="${y+h-28}" width="16" height="28" rx="7" fill="var(--win)"/>`;
+ const tower=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--stone)"/><polygon points="${x-8},${y+2} ${x+w/2},${y-50} ${x+w+8},${y+2}" fill="var(--roof)"/><rect x="${x+w/2-6}" y="${y+14}" width="12" height="16" rx="6" fill="var(--win)"/><rect x="${x+w/2-7}" y="${y+h-30}" width="14" height="20" fill="var(--win)"/>`;
+ const tree=(x,y,r)=>`<rect x="${x-3}" y="${y}" width="6" height="${r+8}" fill="var(--win)"/><circle cx="${x}" cy="${y}" r="${r}" fill="var(--tree)"/><circle cx="${x+r*.6}" cy="${y+4}" r="${r*.7}" fill="var(--tree)"/>`;
+ if(v===0){s+=house(160,130,110,62)+tree(92,140,30)+tree(330,150,20)}
+ if(v===1){s+=house(250,124,90,56);for(let i=0;i<6;i++)s+=`<path d="M${-20+i*48} 220 Q${20+i*48} ${170+i*2} ${70+i*40} 175" stroke="var(--lav)" stroke-width="12" fill="none" stroke-linecap="round"/>`}
+ if(v===2){s+=`<path d="M0 200 Q100 170 200 190 T400 182 V220 H0Z" fill="var(--water)"/>`+house(170,124,80,50)+tree(80,150,22)}
+ if(v===3){s+=tower(180,104,52,90)+house(250,138,80,52)+tree(110,150,26)}
+ if(v===9){s+=house(110,150,150,80)+tower(270,130,56,100)+tree(60,165,32)+tree(370,180,22)+`<rect x="0" y="262" width="400" height="38" fill="var(--hill1)"/><rect x="140" y="250" width="120" height="16" rx="4" fill="var(--water)"/>`}
+ return s+'</svg>';
+}
+
+/* ---------- Traductions ---------- */
+const T={
+fr:{brand_tag:'Chambres d’hôtes en Périgord Noir',nav_rooms:'Les chambres',nav_avail:'Disponibilités',nav_region:'Le lieu',nav_contact:'Contact',nav_lbl:'Navigation principale',book_now:'Réserver',lang_lbl:'Langue',
+hero_k:'Chambres d’hôtes · Dordogne',hero_t:'Quatre chambres au calme, entre Sarlat et la vallée de la Vézère',hero_p:'Une ancienne ferme en pierre restaurée, sa piscine, son verger de noyers et un petit-déjeuner fait maison chaque matin.',hero_cta:'Voir les disponibilités',hero_rooms:'Découvrir les chambres',hero_b1:'Meilleur prix garanti en réservant en direct',hero_b2:'Aucuns frais de réservation',hero_b3:'Annulation gratuite jusqu’à 14 jours avant l’arrivée',hero_art:'Illustration de la ferme en pierre et de son pigeonnier',
+rooms_t:'Les chambres',rooms_p:'Petit-déjeuner inclus dans toutes les chambres. Linge de maison et Wi-Fi fournis.',pers:'{n} pers.',from:'À partir de',night:'/ nuit',see:'Voir les dates',bf:'Petit-déjeuner inclus',
+av_k:'Réservation en direct',av_t:'Disponibilités et réservation',av_p:'Choisissez vos dates : les prix affichés sont nos tarifs en direct, sans commission.',room:'Chambre',all:'Toutes les chambres',guests:'Voyageurs',prev:'Mois précédent',next:'Mois suivant',
+lg_free:'Disponible',lg_full:'Complet',lg_sel:'Votre séjour',lg_count:'Chiffre = chambres libres',free_n:'{n} chambre(s) libre(s)',full_a:'complet',
+pick_a:'Sélectionnez votre date d’arrivée.',pick_d:'Sélectionnez maintenant votre date de départ.',min_n:'Séjour de 2 nuits minimum en juillet et août.',bad_range:'Ces dates ne sont pas disponibles en continu : choisissez un autre départ.',
+arr:'Arrivée',dep:'Départ',nights1:'1 nuit',nightsN:'{n} nuits',clear:'Modifier les dates',res_t:'Chambres disponibles',res_none:'Aucune chambre libre pour ces dates et ce nombre de voyageurs.',unav:'Indisponible à ces dates',too_small:'Capacité insuffisante',stay:'Hébergement',tax:'Taxe de séjour',total:'Total',book:'Réserver',empty_t:'Votre séjour',empty_p:'Choisissez une date d’arrivée puis de départ dans le calendrier.',
+place_k:'La maison',place_t:'Le lieu',place_p:'Au milieu des noyers, sur un coteau, notre ferme du XVIIIᵉ siècle est idéalement placée pour découvrir le Périgord Noir… ou ne rien faire du tout au bord de la piscine.',am1:'Piscine chauffée de mai à septembre',am2:'Petit-déjeuner maison et produits locaux',am3:'Parking privé et borne de recharge',am4:'Wi-Fi dans toutes les chambres',near_t:'À proximité',n1:'Sarlat-la-Canéda — 15 min',n2:'Lascaux IV — 25 min',n3:'Canoë sur la Vézère — 10 min',n4:'Château de Beynac — 20 min',
+rev_t:'Ils ont séjourné chez nous',r1:'Des hôtes adorables, une très belle chambre et le meilleur petit-déjeuner de notre voyage. Nous reviendrons !',r2:'Endroit très calme, parfait pour les enfants avec la piscine. Réserver en direct était simple et moins cher.',r3:'Maison en pierre pleine de charme, idéalement située pour visiter Sarlat et les grottes.',stars:'5 sur 5',
+ct_k:'Contact',ct_t:'Une question ?',ct_p:'Nous répondons en français, en anglais et en néerlandais.',name:'Nom',email:'Email',msg:'Message',send:'Envoyer',sent:'Message envoyé (simulation).',foot:'Lieu-dit Les Combes · 24220 Dordogne · +33 5 53 00 00 00',
+m_title:'Réserver {room}',st1:'Coordonnées',st2:'Paiement',st3:'Confirmation',f_name:'Nom complet',f_email:'Email',f_phone:'Téléphone (facultatif)',f_country:'Pays',f_guests:'Nombre de voyageurs',f_time:'Heure d’arrivée prévue',f_msg:'Message pour vos hôtes (facultatif)',f_cgv:'J’accepte les conditions de réservation (annulation gratuite jusqu’à 14 jours avant l’arrivée).',
+c_FR:'France',c_GB:'Royaume-Uni',c_NL:'Pays-Bas',c_BE:'Belgique',c_DE:'Allemagne',c_OT:'Autre',cont:'Continuer vers le paiement',back:'Retour',
+test:'Mode test — aucun débit réel. Utilisez la carte 4242 4242 4242 4242.',dep30:'Acompte de 30 % aujourd’hui',depAll:'Régler la totalité',dep_hint:'Solde à régler sur place.',card:'Numéro de carte',exp:'Expiration (MM/AA)',cvc:'CVC',pay:'Payer {x}',paying:'Paiement en cours…',
+done_t:'Réservation confirmée',done_p:'Merci {name} ! Un email de confirmation vient d’être envoyé à {email}.',ref:'Référence',paid:'Payé',due:'Reste à régler sur place',print:'Imprimer la confirmation',close:'Fermer',
+e_req:'Champ obligatoire.',e_email:'Adresse email invalide.',e_g:'Cette chambre accueille {n} personnes maximum.',e_cgv:'Merci d’accepter les conditions.',e_card:'Numéro de carte invalide (16 chiffres).',e_exp:'Date invalide ou expirée.',e_cvc:'3 chiffres.',t_mail:'Email de confirmation envoyé (simulation).',t_taken:'Désolé, ces dates viennent d’être réservées.'},
+en:{brand_tag:'Guest rooms in the Périgord Noir',nav_rooms:'Rooms',nav_avail:'Availability',nav_region:'The house',nav_contact:'Contact',nav_lbl:'Main navigation',book_now:'Book',lang_lbl:'Language',
+hero_k:'Bed & breakfast · Dordogne',hero_t:'Four peaceful rooms between Sarlat and the Vézère valley',hero_p:'A restored stone farmhouse with a pool, a walnut orchard and a homemade breakfast every morning.',hero_cta:'Check availability',hero_rooms:'Discover the rooms',hero_b1:'Best price guaranteed when you book direct',hero_b2:'No booking fees',hero_b3:'Free cancellation up to 14 days before arrival',hero_art:'Illustration of the stone farmhouse and its dovecote',
+rooms_t:'The rooms',rooms_p:'Breakfast included with every room. Bed linen, towels and Wi-Fi provided.',pers:'{n} guests',from:'From',night:'/ night',see:'See dates',bf:'Breakfast included',
+av_k:'Book direct',av_t:'Availability & booking',av_p:'Pick your dates: prices shown are our direct rates, with no commission.',room:'Room',all:'All rooms',guests:'Guests',prev:'Previous month',next:'Next month',
+lg_free:'Available',lg_full:'Fully booked',lg_sel:'Your stay',lg_count:'Number = rooms available',free_n:'{n} room(s) available',full_a:'fully booked',
+pick_a:'Select your arrival date.',pick_d:'Now select your departure date.',min_n:'Minimum stay of 2 nights in July and August.',bad_range:'These dates are not available in a row: please choose another departure date.',
+arr:'Arrival',dep:'Departure',nights1:'1 night',nightsN:'{n} nights',clear:'Change dates',res_t:'Available rooms',res_none:'No room available for these dates and number of guests.',unav:'Not available for these dates',too_small:'Not enough beds',stay:'Accommodation',tax:'Tourist tax',total:'Total',book:'Book',empty_t:'Your stay',empty_p:'Choose an arrival date, then a departure date in the calendar.',
+place_k:'The house',place_t:'The place',place_p:'Nestled among walnut trees on a hillside, our 18th-century farmhouse is ideally located to explore the Périgord Noir… or to do nothing at all by the pool.',am1:'Heated pool from May to September',am2:'Homemade breakfast with local produce',am3:'Private parking and EV charging',am4:'Wi-Fi in every room',near_t:'Nearby',n1:'Sarlat-la-Canéda — 15 min',n2:'Lascaux IV — 25 min',n3:'Canoeing on the Vézère — 10 min',n4:'Château de Beynac — 20 min',
+rev_t:'What our guests say',r1:'Lovely hosts, a beautiful room and the best breakfast of our whole trip. We will be back!',r2:'Very quiet place, perfect for the kids with the pool. Booking direct was simple and cheaper.',r3:'Charming stone house, ideally located to visit Sarlat and the caves.',stars:'5 out of 5',
+ct_k:'Contact',ct_t:'Any questions?',ct_p:'We reply in French, English and Dutch.',name:'Name',email:'Email',msg:'Message',send:'Send',sent:'Message sent (simulation).',foot:'Lieu-dit Les Combes · 24220 Dordogne, France · +33 5 53 00 00 00',
+m_title:'Book {room}',st1:'Your details',st2:'Payment',st3:'Confirmation',f_name:'Full name',f_email:'Email',f_phone:'Phone (optional)',f_country:'Country',f_guests:'Number of guests',f_time:'Estimated arrival time',f_msg:'Message to your hosts (optional)',f_cgv:'I accept the booking terms (free cancellation up to 14 days before arrival).',
+c_FR:'France',c_GB:'United Kingdom',c_NL:'Netherlands',c_BE:'Belgium',c_DE:'Germany',c_OT:'Other',cont:'Continue to payment',back:'Back',
+test:'Test mode — no real charge. Use card 4242 4242 4242 4242.',dep30:'30% deposit today',depAll:'Pay in full',dep_hint:'Balance payable on arrival.',card:'Card number',exp:'Expiry (MM/YY)',cvc:'CVC',pay:'Pay {x}',paying:'Processing payment…',
+done_t:'Booking confirmed',done_p:'Thank you {name}! A confirmation email has just been sent to {email}.',ref:'Reference',paid:'Paid',due:'Balance due on arrival',print:'Print confirmation',close:'Close',
+e_req:'Required field.',e_email:'Invalid email address.',e_g:'This room sleeps {n} guests maximum.',e_cgv:'Please accept the terms.',e_card:'Invalid card number (16 digits).',e_exp:'Invalid or expired date.',e_cvc:'3 digits.',t_mail:'Confirmation email sent (simulation).',t_taken:'Sorry, these dates have just been booked.'},
+nl:{brand_tag:'Chambres d’hôtes in de Périgord Noir',nav_rooms:'Kamers',nav_avail:'Beschikbaarheid',nav_region:'Het huis',nav_contact:'Contact',nav_lbl:'Hoofdnavigatie',book_now:'Boeken',lang_lbl:'Taal',
+hero_k:'Bed & breakfast · Dordogne',hero_t:'Vier rustige kamers tussen Sarlat en het Vézèredal',hero_p:'Een gerestaureerde stenen boerderij met zwembad, notenboomgaard en elke ochtend een huisgemaakt ontbijt.',hero_cta:'Bekijk beschikbaarheid',hero_rooms:'Ontdek de kamers',hero_b1:'Laagste prijs gegarandeerd bij direct boeken',hero_b2:'Geen boekingskosten',hero_b3:'Gratis annuleren tot 14 dagen voor aankomst',hero_art:'Illustratie van de stenen boerderij en de duiventoren',
+rooms_t:'De kamers',rooms_p:'Ontbijt inbegrepen bij alle kamers. Beddengoed, handdoeken en wifi aanwezig.',pers:'{n} pers.',from:'Vanaf',night:'/ nacht',see:'Bekijk data',bf:'Ontbijt inbegrepen',
+av_k:'Direct boeken',av_t:'Beschikbaarheid & boeken',av_p:'Kies uw data: de getoonde prijzen zijn onze directe tarieven, zonder commissie.',room:'Kamer',all:'Alle kamers',guests:'Gasten',prev:'Vorige maand',next:'Volgende maand',
+lg_free:'Beschikbaar',lg_full:'Volgeboekt',lg_sel:'Uw verblijf',lg_count:'Cijfer = vrije kamers',free_n:'{n} kamer(s) vrij',full_a:'volgeboekt',
+pick_a:'Kies uw aankomstdatum.',pick_d:'Kies nu uw vertrekdatum.',min_n:'Minimaal 2 nachten in juli en augustus.',bad_range:'Deze data zijn niet aaneensluitend beschikbaar: kies een andere vertrekdatum.',
+arr:'Aankomst',dep:'Vertrek',nights1:'1 nacht',nightsN:'{n} nachten',clear:'Data wijzigen',res_t:'Beschikbare kamers',res_none:'Geen kamer beschikbaar voor deze data en dit aantal gasten.',unav:'Niet beschikbaar op deze data',too_small:'Onvoldoende capaciteit',stay:'Verblijf',tax:'Toeristenbelasting',total:'Totaal',book:'Boeken',empty_t:'Uw verblijf',empty_p:'Kies in de kalender een aankomst- en daarna een vertrekdatum.',
+place_k:'Het huis',place_t:'De plek',place_p:'Tussen de notenbomen op een heuvel ligt onze 18e-eeuwse boerderij: ideaal om de Périgord Noir te ontdekken… of om gewoon niets te doen bij het zwembad.',am1:'Verwarmd zwembad van mei tot september',am2:'Huisgemaakt ontbijt met lokale producten',am3:'Eigen parkeerplaats en laadpaal',am4:'Wifi in alle kamers',near_t:'In de buurt',n1:'Sarlat-la-Canéda — 15 min',n2:'Lascaux IV — 25 min',n3:'Kanoën op de Vézère — 10 min',n4:'Kasteel van Beynac — 20 min',
+rev_t:'Wat onze gasten zeggen',r1:'Geweldige gastheren, een prachtige kamer en het beste ontbijt van onze hele reis. We komen terug!',r2:'Heel rustige plek, perfect voor de kinderen met het zwembad. Direct boeken was eenvoudig en goedkoper.',r3:'Charmant stenen huis, ideaal gelegen om Sarlat en de grotten te bezoeken.',stars:'5 van 5',
+ct_k:'Contact',ct_t:'Een vraag?',ct_p:'Wij antwoorden in het Frans, Engels en Nederlands.',name:'Naam',email:'E-mail',msg:'Bericht',send:'Versturen',sent:'Bericht verstuurd (simulatie).',foot:'Lieu-dit Les Combes · 24220 Dordogne, Frankrijk · +33 5 53 00 00 00',
+m_title:'{room} boeken',st1:'Uw gegevens',st2:'Betaling',st3:'Bevestiging',f_name:'Volledige naam',f_email:'E-mail',f_phone:'Telefoon (optioneel)',f_country:'Land',f_guests:'Aantal gasten',f_time:'Verwachte aankomsttijd',f_msg:'Bericht aan uw gastheren (optioneel)',f_cgv:'Ik ga akkoord met de boekingsvoorwaarden (gratis annuleren tot 14 dagen voor aankomst).',
+c_FR:'Frankrijk',c_GB:'Verenigd Koninkrijk',c_NL:'Nederland',c_BE:'België',c_DE:'Duitsland',c_OT:'Anders',cont:'Verder naar betaling',back:'Terug',
+test:'Testmodus — er wordt niets afgeschreven. Gebruik kaart 4242 4242 4242 4242.',dep30:'Aanbetaling van 30% vandaag',depAll:'Volledig betalen',dep_hint:'Restbedrag te voldoen bij aankomst.',card:'Kaartnummer',exp:'Vervaldatum (MM/JJ)',cvc:'CVC',pay:'{x} betalen',paying:'Betaling wordt verwerkt…',
+done_t:'Boeking bevestigd',done_p:'Bedankt {name}! Er is zojuist een bevestigingsmail verzonden naar {email}.',ref:'Referentie',paid:'Betaald',due:'Restbedrag bij aankomst',print:'Bevestiging afdrukken',close:'Sluiten',
+e_req:'Verplicht veld.',e_email:'Ongeldig e-mailadres.',e_g:'Deze kamer biedt plaats aan maximaal {n} personen.',e_cgv:'Ga akkoord met de voorwaarden.',e_card:'Ongeldig kaartnummer (16 cijfers).',e_exp:'Ongeldige of verlopen datum.',e_cvc:'3 cijfers.',t_mail:'Bevestigingsmail verzonden (simulatie).',t_taken:'Helaas, deze data zijn zojuist geboekt.'}
+};
+
+/* ---------- Données ---------- */
+const ROOMS0=[
+ {id:'noyer',name:'Le Noyer',price:95,cap:2,size:18,online:true,art:0,desc:{fr:'Poutres apparentes et parquet de chêne, vue sur le verger de noyers. Lit 160.',en:'Exposed beams and oak floors, overlooking the walnut orchard. King-size bed.',nl:'Houten balken en eiken vloer, met uitzicht op de notenboomgaard. Bed 160 cm.'}},
+ {id:'lavande',name:'La Lavande',price:105,cap:2,size:22,online:true,art:1,desc:{fr:'En rez-de-jardin, terrasse privée face aux lavandes et à la piscine.',en:'Garden level, with a private terrace facing the lavender and the pool.',nl:'Op tuinniveau, met eigen terras aan de lavendel en het zwembad.'}},
+ {id:'vezere',name:'La Vézère',price:115,cap:3,size:26,online:true,art:2,desc:{fr:'Grande chambre lumineuse avec lit d’appoint et douche à l’italienne.',en:'Bright, spacious room with an extra bed and a walk-in shower.',nl:'Ruime, lichte kamer met extra bed en inloopdouche.'}},
+ {id:'pigeonnier',name:'Le Pigeonnier',price:145,cap:4,size:38,online:true,art:3,desc:{fr:'Suite sur deux niveaux dans l’ancien pigeonnier en pierre, idéale en famille.',en:'Two-level suite in the old stone dovecote, ideal for families.',nl:'Suite op twee verdiepingen in de oude stenen duiventoren, ideaal voor gezinnen.'}}
+];
+const GUESTS=[['Claire Dumas','FR','fr'],['James Whitfield','GB','en'],['Sanne de Vries','NL','nl'],['Thomas Leroy','FR','fr'],['Emma Clarke','GB','en'],['Pieter Janssen','NL','nl'],['Lucie Moreau','FR','fr'],['Oliver Bennett','GB','en'],['Femke Bakker','NL','nl'],['Hugo Bernard','BE','fr'],['Sophie Wright','GB','en'],['Daan Visser','NL','nl'],['Margaux Petit','FR','fr'],['Henry Collins','GB','en'],['Lotte Smit','NL','nl'],['Lukas Weber','DE','en']];
+const mailOf=n=>n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]+/g,'.')+'@exemple.net';
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+let S, U={lang:'fr',mode:'public',tab:'dash',room:'all',guests:2,start:null,end:null,cal:null,planStart:add(TODAY,-2),f:{q:'',src:'',st:'',per:'next'}};
+U.cal=TODAY.slice(0,8)+'01';
+try{const l=localStorage.getItem(LS+'-lang');if(l&&T[l])U.lang=l}catch(e){}
+
+const roomById=id=>S.rooms.find(r=>r.id===id);
+const isDirect=b=>b.source==='direct'||b.source==='tel';
+function nightPrice(r,d){const m=P(d).getMonth();return (m===6||m===7)?Math.round(r.price*(1+(S?S.season:20)/100)):r.price}
+function quote(r,start,end,g){let sum=0,n=0;for(let d=start;d<end;d=add(d,1)){sum+=nightPrice(r,d);n++}const tax=Math.round(.88*g*n*100)/100;return{n,sum,tax,total:Math.round((sum+tax)*100)/100}}
+function seed(){
+ const r=rng(491366),bk=[];let n=131;
+ ROOMS0.forEach((room,ri)=>{
+  let cur=add(TODAY,-14+ri*3);
+  while(diff(TODAY,cur)<110){
+   cur=add(cur,Math.floor(r()*5));
+   const len=2+Math.floor(r()*4),x=r(),src=x<.46?'direct':x<.9?'booking':'bloque';
+   const g=GUESTS[Math.floor(r()*GUESTS.length)];
+   const start=cur,end=add(cur,len),guests=Math.min(room.cap,2+Math.floor(r()*2));
+   const total=src==='bloque'?0:quote(room,start,end,guests).total;
+   let status='confirmee',paid=total;
+   if(src==='direct'&&start>TODAY){paid=Math.round(total*.3);if(r()<.3){status='attente';paid=0}}
+   bk.push({id:src==='booking'?'BKG-'+(4821930000+Math.floor(r()*99999)):src==='bloque'?'BLQ-'+pad(n++):'CC-26-'+String(n++).padStart(4,'0'),
+     room:room.id,start,end,name:src==='bloque'?'':g[0],email:src==='bloque'?'':mailOf(g[0]),country:g[1],lang:g[2],guests,status,source:src,total,paid,
+     note:src==='bloque'?(r()<.5?'Usage personnel':'Travaux de peinture'):'',created:add(start,-20-Math.floor(r()*60))});
+   cur=end;
+  }
+ });
+ return bk;
+}
+function fresh(){return{rooms:JSON.parse(JSON.stringify(ROOMS0)),bookings:seed(),season:20,seq:300,lastSync:Date.now()-9*60000,log:[{at:Date.now()-9*60000,txt:'Synchronisation automatique — aucun changement'},{at:Date.now()-24*60000,txt:'Export iCal lu par Booking (4 calendriers)'}]}}
+function load(){try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o&&o.today===TODAY&&o.data&&o.data.rooms)return o.data}catch(e){}return fresh()}
+function save(){try{localStorage.setItem(LS,JSON.stringify({today:TODAY,data:S}))}catch(e){}}
+S=load();
+
+const active=b=>b.status!=='annulee';
+function busy(rid,night){return S.bookings.some(b=>b.room===rid&&active(b)&&b.start<=night&&night<b.end)}
+function bookingAt(rid,night){return S.bookings.find(b=>b.room===rid&&active(b)&&b.start<=night&&night<b.end)}
+function roomFree(rid,a,b){for(let d=a;d<b;d=add(d,1))if(busy(rid,d))return false;return true}
+const online=()=>S.rooms.filter(r=>r.online);
+const fits=()=>online().filter(r=>U.room==='all'?r.cap>=U.guests:r.id===U.room);
+const nightOK=d=>d>=TODAY&&fits().some(r=>!busy(r.id,d));
+const rangeOK=(a,b)=>fits().some(r=>roomFree(r.id,a,b));
+const minN=d=>{const m=P(d).getMonth();return(m===6||m===7)?2:1};
+
+/* ---------- Formats ---------- */
+const t=(k,v)=>{let s=(T[U.lang]&&T[U.lang][k])??T.fr[k]??k;if(v)for(const x in v)s=s.split('{'+x+'}').join(v[x]);return s};
+const eur=(x,l)=>new Intl.NumberFormat(LOCS[l||U.lang],{style:'currency',currency:'EUR',minimumFractionDigits:Number.isInteger(x)?0:2,maximumFractionDigits:2}).format(x);
+const fd=(s,o,l)=>new Intl.DateTimeFormat(LOCS[l||U.lang],o).format(P(s));
+const DS={day:'numeric',month:'short'},DM={weekday:'short',day:'numeric',month:'short'},DL={weekday:'long',day:'numeric',month:'long',year:'numeric'};
+const nights=n=>n===1?t('nights1'):t('nightsN',{n});
+const aeur=x=>eur(x,'fr'),afd=(s,o)=>fd(s,o||DM,'fr');
+
+function toast(msg,icon='check'){const el=document.createElement('div');el.className='toast';el.innerHTML=ic(icon)+'<span>'+esc(msg)+'</span>';$('#toasts').appendChild(el);setTimeout(()=>el.remove(),4200)}
+
+/* ---------- Rendu général ---------- */
+function render(){
+ document.querySelectorAll('[data-act="mode"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.m===U.mode)));
+ document.documentElement.lang=U.mode==='public'?U.lang:'fr';
+ if(U.mode==='public')renderPublic();else renderAdmin();
+}
+
+/* ---------- Site public ---------- */
+function renderPublic(){
+ document.title='Le Clos des Combes — '+t('brand_tag');
+ const langs=['fr','en','nl'].map(l=>`<button type="button" data-act="lang" data-l="${l}" aria-pressed="${U.lang===l}" lang="${l}" aria-label="${{fr:'Français',en:'English',nl:'Nederlands'}[l]}">${l.toUpperCase()}</button>`).join('');
+ const rooms=S.rooms.map(r=>`<article class="card room${r.online?'':' off'}">
+   ${scene(r.art,r.name)}
+   <div class="room-b"><h3>${esc(r.name)}</h3>
+   <div class="facts"><span>${ic('users')}${t('pers',{n:r.cap})}</span><span>${ic('area')}${r.size} m²</span><span>${ic('coffee')}${t('bf')}</span></div>
+   <p class="muted">${esc(r.desc[U.lang])}</p>
+   <div class="room-f"><div><span class="small muted">${t('from')}</span><div class="price">${eur(r.price)} <span class="small muted" style="font-family:var(--font)">${t('night')}</span></div></div>
+   ${r.online?`<button type="button" class="btn" data-act="seeRoom" data-id="${r.id}">${ic('cal')}${t('see')}</button>`:''}</div></div></article>`).join('');
+ const rv=[['r1','Margaret H.','c_GB'],['r2','Joost V.','c_NL'],['r3','Isabelle R.','c_FR']];
+ $('#app').innerHTML=`
+ <header class="pub-top" id="top">
+  <a class="brand" href="#top"><span class="mark">${ic('leaf')}</span><span><b>Le Clos des Combes</b><small>${t('brand_tag')}</small></span></a>
+  <nav class="pub-nav" aria-label="${t('nav_lbl')}"><a href="#chambres">${t('nav_rooms')}</a><a href="#dispo">${t('nav_avail')}</a><a href="#lieu">${t('nav_region')}</a><a href="#contact">${t('nav_contact')}</a></nav>
+  <div class="top-r"><div class="langs" role="group" aria-label="${t('lang_lbl')}">${langs}</div><a class="btn primary" href="#dispo">${t('book_now')}</a></div>
+ </header>
+ <main>
+ <section class="hero"><div class="in">
+  <div><p class="kicker">${t('hero_k')}</p><h1>${t('hero_t')}</h1><p class="lead">${t('hero_p')}</p>
+   <div class="actions"><a class="btn primary" href="#dispo">${ic('cal')}${t('hero_cta')}</a><a class="btn" href="#chambres">${t('hero_rooms')}</a></div>
+   <ul class="perks"><li>${ic('check')}${t('hero_b1')}</li><li>${ic('check')}${t('hero_b2')}</li><li>${ic('check')}${t('hero_b3')}</li></ul></div>
+  <div>${scene(9,t('hero_art'))}</div>
+ </div></section>
+ <section class="sec" id="chambres"><div class="in"><div class="sec-h"><p class="kicker">${t('nav_rooms')}</p><h2>${t('rooms_t')}</h2><p>${t('rooms_p')}</p></div><div class="rooms">${rooms}</div></div></section>
+ <section class="sec" id="dispo" style="background:var(--panel-2)"><div class="in">
+  <div class="sec-h"><p class="kicker">${t('av_k')}</p><h2>${t('av_t')}</h2><p>${t('av_p')}</p></div>
+  <div class="av-ctrl">
+   <div class="field"><label for="fRoom">${t('room')}</label><select id="fRoom" data-ch="room"><option value="all">${t('all')}</option>${online().map(r=>`<option value="${r.id}"${U.room===r.id?' selected':''}>${esc(r.name)} — ${t('pers',{n:r.cap})}</option>`).join('')}</select></div>
+   <div class="field"><label for="fGuests">${t('guests')}</label><select id="fGuests" data-ch="guests">${[1,2,3,4].map(n=>`<option value="${n}"${U.guests===n?' selected':''}>${n}</option>`).join('')}</select></div>
+  </div>
+  <div class="av-grid"><div class="card" id="cal"></div><aside class="card av-side" id="side" aria-live="polite"></aside></div>
+ </div></section>
+ <section class="sec" id="lieu"><div class="in two">
+  <div><div class="sec-h"><p class="kicker">${t('place_k')}</p><h2>${t('place_t')}</h2><p>${t('place_p')}</p></div>
+   <ul class="feat"><li><span class="ico">${ic('pool')}</span>${t('am1')}</li><li><span class="ico">${ic('coffee')}</span>${t('am2')}</li><li><span class="ico">${ic('car')}</span>${t('am3')}</li><li><span class="ico">${ic('wifi')}</span>${t('am4')}</li></ul></div>
+  <div class="card"><h3 style="font-size:21px;margin-bottom:10px">${t('near_t')}</h3><ul class="feat">${['n1','n2','n3','n4'].map(k=>`<li><span class="ico">${ic('pin')}</span>${t(k)}</li>`).join('')}</ul></div>
+ </div></section>
+ <section class="sec" style="background:var(--panel-2)"><div class="in"><div class="sec-h"><h2>${t('rev_t')}</h2></div>
+  <div class="revs">${rv.map(x=>`<figure class="card rev" style="margin:0"><div role="img" aria-label="${t('stars')}" style="display:flex;gap:2px">${STAR.repeat(5)}</div><blockquote>« ${t(x[0])} »</blockquote><figcaption class="small muted">${x[1]} · ${t(x[2])}</figcaption></figure>`).join('')}</div>
+ </div></section>
+ <section class="sec" id="contact"><div class="in two">
+  <div class="sec-h"><p class="kicker">${t('ct_k')}</p><h2>${t('ct_t')}</h2><p>${t('ct_p')}</p><p class="muted" style="display:flex;gap:8px;align-items:center;margin-top:8px">${ic('mail')} bonjour@closdescombes.example</p></div>
+  <form class="card fgrid" id="contactForm" novalidate>
+   <div class="field"><label for="cName">${t('name')}</label><input type="text" id="cName" autocomplete="name"><span class="err" id="cName-e"></span></div>
+   <div class="field"><label for="cMail">${t('email')}</label><input type="email" id="cMail" autocomplete="email"><span class="err" id="cMail-e"></span></div>
+   <div class="field full"><label for="cMsg">${t('msg')}</label><textarea id="cMsg"></textarea><span class="err" id="cMsg-e"></span></div>
+   <div class="field full"><button class="btn primary" type="submit">${ic('mail')}${t('send')}</button></div>
+  </form>
+ </div></section>
+ </main>
+ <footer class="foot"><div class="in"><span>© 2026 Le Clos des Combes</span><span>${t('foot')}</span></div></footer>`;
+ renderAvail();
+}
+
+function wkNames(){return Array.from({length:7},(_,i)=>cap1(new Intl.DateTimeFormat(LOCS[U.lang],{weekday:'short'}).format(new Date(2024,0,1+i)).replace('.','')))}
+function monthHTML(ym){
+ const d0=P(ym),y=d0.getFullYear(),m=d0.getMonth(),off=(d0.getDay()+6)%7,nd=new Date(y,m+1,0).getDate();
+ let h=`<div class="month"><h3 class="mtitle">${cap1(new Intl.DateTimeFormat(LOCS[U.lang],{month:'long',year:'numeric'}).format(d0))}</h3><div class="wk" aria-hidden="true">${wkNames().map(w=>`<span>${w}</span>`).join('')}</div><div class="days">`;
+ for(let i=0;i<off;i++)h+='<span></span>';
+ for(let k=1;k<=nd;k++)h+=dayCell(iso(new Date(y,m,k)));
+ return h+'</div></div>';
+}
+function dayCell(d){
+ const{start,end}=U,past=d<TODAY,selecting=start&&!end&&d>start;
+ const free=past?0:fits().filter(r=>!busy(r.id,d)).length;
+ const endOK=selecting&&rangeOK(start,d);
+ let cls='day',ok=!past&&(free>0||endOK);
+ if(past)cls+=' past';else if(free===0)cls+=' full';
+ if(endOK)cls+=' can-end';
+ if(d===start)cls+=' s-start';if(d===end)cls+=' s-end';if(start&&end&&d>start&&d<end)cls+=' s-in';
+ const lbl=fd(d,DL)+(past?'':', '+(free?t('free_n',{n:free}):t('full_a')));
+ const sel=d===start||d===end;
+ return `<button type="button" class="${cls}" data-act="day" data-date="${d}" aria-label="${esc(lbl)}" aria-pressed="${sel}"${ok||sel?'':' disabled'}>${+d.slice(8)}${!past&&U.room==='all'?`<small aria-hidden="true">${free}</small>`:''}</button>`;
+}
+let calMsg='';
+function renderAvail(focusSel){
+ const nm=add(U.cal,40).slice(0,8)+'01';
+ const canPrev=U.cal>TODAY.slice(0,8)+'01';
+ $('#cal').innerHTML=`<div class="cal-h"><button type="button" class="icon-btn" data-act="calPrev" aria-label="${t('prev')}"${canPrev?'':' disabled'}>${ic('left')}</button><span class="small muted">${U.start&&!U.end?t('pick_d'):t('pick_a')}</span><button type="button" class="icon-btn" data-act="calNext" aria-label="${t('next')}">${ic('right')}</button></div>
+ <div class="months">${monthHTML(U.cal)}${monthHTML(nm)}</div>
+ <div class="legend"><span><i class="sw" style="background:var(--panel)"></i>${t('lg_free')}</span><span><i class="sw" style="background:var(--panel-2)"></i>${t('lg_full')}</span><span><i class="sw" style="background:var(--accent)"></i>${t('lg_sel')}</span>${U.room==='all'?`<span>${t('lg_count')}</span>`:''}</div>
+ <p class="calmsg" role="alert">${esc(calMsg)}</p>`;
+ renderSide();
+ if(focusSel){const el=document.querySelector(focusSel);if(el&&!el.disabled)el.focus()}
+}
+function renderSide(){
+ const s=$('#side');
+ if(!U.start){s.innerHTML=`<h3 style="font-size:20px">${t('empty_t')}</h3><p class="muted" style="margin-top:6px">${t('empty_p')}</p><div class="empty" style="margin-top:14px">${ic('cal')}</div>`;return}
+ let h=`<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><h3 style="font-size:20px">${t('empty_t')}</h3><button type="button" class="btn ghost sm" data-act="clearDates">${t('clear')}</button></div>
+ <div class="stay"><div><small>${t('arr')}</small><b>${fd(U.start,DM)}</b></div><div><small>${t('dep')}</small><b>${U.end?fd(U.end,DM):'—'}</b></div></div>`;
+ if(!U.end){s.innerHTML=h+`<p class="muted">${t('pick_d')}</p>`;return}
+ const n=diff(U.start,U.end);
+ h+=`<p style="font-weight:600">${nights(n)} · ${t('guests')} : ${U.guests}</p><h4 class="sr">${t('res_t')}</h4>`;
+ const list=online().filter(r=>U.room==='all'||r.id===U.room).map(r=>({r,ok:roomFree(r.id,U.start,U.end),big:r.cap>=U.guests,q:quote(r,U.start,U.end,U.guests)}));
+ list.sort((a,b)=>(b.ok&&b.big)-(a.ok&&a.big));
+ if(!list.some(x=>x.ok&&x.big))h+=`<p class="note" style="margin-top:10px">${t('res_none')}</p>`;
+ h+=list.map(({r,ok,big,q})=>ok&&big?`<div class="offer"><div class="offer-h"><h3>${esc(r.name)}</h3><span class="small muted">${t('pers',{n:r.cap})}</span></div>
+  <div class="lines"><div><span>${t('stay')} · ${nights(q.n)}</span><span class="num">${eur(q.sum)}</span></div><div><span>${t('tax')}</span><span class="num">${eur(q.tax)}</span></div><div class="tot"><span>${t('total')}</span><span class="num">${eur(q.total)}</span></div></div>
+  <button type="button" class="btn primary block" data-act="book" data-id="${r.id}">${t('book')} — ${esc(r.name)}</button></div>`
+  :`<div class="offer na"><div class="offer-h"><h3>${esc(r.name)}</h3><span class="small muted">${ok?t('too_small'):t('unav')}</span></div></div>`).join('');
+ s.innerHTML=h;
+}
+function pickDay(d){
+ calMsg='';
+ if(!U.start||U.end||d<=U.start){if(nightOK(d)){U.start=d;U.end=null}}
+ else if(rangeOK(U.start,d)){if(diff(U.start,d)<minN(U.start))calMsg=t('min_n');else U.end=d}
+ else if(nightOK(d)){U.start=d;calMsg=t('bad_range')}
+ renderAvail(`[data-date="${d}"]`);
+}
+
+/* ---------- Tunnel de réservation ---------- */
+let M=null;
+function stepsHTML(n){return `<div class="steps">${[t('st1'),t('st2'),t('st3')].map((l,i)=>`<span${i+1===n?' aria-current="step"':''} class="${i+1<n?'dn':''}"><i>${i+1<n?'✓':i+1}</i>${l}</span>`).join('<span aria-hidden="true">›</span>')}</div>`}
+function openDlg(html){const d=$('#dlg');d.innerHTML=html;if(!d.open)d.showModal();const f=d.querySelector('input,select,textarea');if(f)f.focus()}
+function closeDlg(){const d=$('#dlg');if(d.open)d.close()}
+function recapHTML(){const r=roomById(M.room),q=quote(r,M.start,M.end,M.guests);return `<div class="recap"><b>${esc(r.name)}</b><span>${fd(M.start,DM)} → ${fd(M.end,DM)} · ${nights(q.n)}</span><span>${t('total')} : <b>${eur(q.total)}</b> <span class="muted">(${t('tax')} ${eur(q.tax)})</span></span></div>`}
+function openBook(id){
+ const r=roomById(id);M={room:id,start:U.start,end:U.end,guests:Math.min(U.guests,r.cap),step:1,f:{name:'',email:'',phone:'',country:{fr:'FR',en:'GB',nl:'NL'}[U.lang],time:'17:00',msg:'',cgv:false},pay:'dep'};
+ bookStep();
+}
+function bookStep(){
+ const r=roomById(M.room),q=quote(r,M.start,M.end,M.guests),f=M.f;
+ const head=`<div class="dlg-h"><div><h2 id="dlgTitle">${t('m_title',{room:esc(r.name)})}</h2>${stepsHTML(M.step)}</div><button type="button" class="icon-btn no-print" data-act="close" aria-label="${t('close')}">${ic('x')}</button></div>`;
+ if(M.step===1){
+  openDlg(head+`<form class="dlg-b" id="bookForm" novalidate>${recapHTML()}<div class="fgrid">
+   <div class="field"><label for="bName">${t('f_name')}</label><input type="text" id="bName" autocomplete="name" value="${esc(f.name)}"><span class="err" id="bName-e"></span></div>
+   <div class="field"><label for="bMail">${t('f_email')}</label><input type="email" id="bMail" autocomplete="email" value="${esc(f.email)}"><span class="err" id="bMail-e"></span></div>
+   <div class="field"><label for="bPhone">${t('f_phone')}</label><input type="tel" id="bPhone" autocomplete="tel" value="${esc(f.phone)}"></div>
+   <div class="field"><label for="bCountry">${t('f_country')}</label><select id="bCountry">${['FR','GB','NL','BE','DE','OT'].map(c=>`<option value="${c}"${f.country===c?' selected':''}>${t('c_'+c)}</option>`).join('')}</select></div>
+   <div class="field"><label for="bGuests">${t('f_guests')}</label><input type="number" id="bGuests" min="1" max="${r.cap}" value="${M.guests}" inputmode="numeric"><span class="err" id="bGuests-e"></span></div>
+   <div class="field"><label for="bTime">${t('f_time')}</label><select id="bTime">${['15:00','16:00','17:00','18:00','19:00','20:00','21:00'].map(h=>`<option${f.time===h?' selected':''}>${h}</option>`).join('')}</select></div>
+   <div class="field full"><label for="bMsg">${t('f_msg')}</label><textarea id="bMsg">${esc(f.msg)}</textarea></div>
+   <div class="field full"><label class="ck"><input type="checkbox" id="bCgv"${f.cgv?' checked':''}><span>${t('f_cgv')}</span></label><span class="err" id="bCgv-e"></span></div>
+  </div><button class="btn primary block" type="submit">${t('cont')}${ic('right')}</button></form>`);
+ }else if(M.step===2){
+  const dep=Math.round(q.total*.3*100)/100,amt=M.pay==='dep'?dep:q.total;
+  openDlg(head+`<form class="dlg-b" id="payForm" novalidate>${recapHTML()}
+   <p class="note">${ic('lock')}<span>${t('test')}</span></p>
+   <fieldset style="border:0;margin:0;padding:0;min-width:0"><legend class="sr">${t('st2')}</legend><div class="radio-row">
+    <label class="ck"><input type="radio" name="pay" value="dep" data-ch="pay"${M.pay==='dep'?' checked':''}><span><b>${t('dep30')}</b><br><span class="small">${eur(dep)} · ${t('dep_hint')}</span></span></label>
+    <label class="ck"><input type="radio" name="pay" value="all" data-ch="pay"${M.pay==='all'?' checked':''}><span><b>${t('depAll')}</b><br><span class="small">${eur(q.total)}</span></span></label>
+   </div></fieldset>
+   <div class="fgrid">
+    <div class="field full"><label for="pCard">${t('card')}</label><input type="text" id="pCard" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" data-fmt="card"><span class="err" id="pCard-e"></span></div>
+    <div class="field"><label for="pExp">${t('exp')}</label><input type="text" id="pExp" inputmode="numeric" autocomplete="cc-exp" placeholder="12/28" data-fmt="exp"><span class="err" id="pExp-e"></span></div>
+    <div class="field"><label for="pCvc">${t('cvc')}</label><input type="text" id="pCvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"><span class="err" id="pCvc-e"></span></div>
+   </div>
+   <div class="actions"><button type="button" class="btn" data-act="bookBack">${ic('left')}${t('back')}</button><button class="btn primary" type="submit" id="payBtn" style="flex:1">${ic('lock')}${t('pay',{x:eur(amt)})}</button></div>
+  </form>`);
+ }else{
+  const b=S.bookings.find(x=>x.id===M.ref);
+  openDlg(head+`<div class="dlg-b"><div style="display:flex;gap:14px;align-items:center"><span class="done-ic">${ic('check')}</span><div><h3 style="font-size:22px">${t('done_t')}</h3><p class="muted">${t('done_p',{name:esc(b.name.split(' ')[0]),email:esc(b.email)})}</p></div></div>
+   <dl class="dl"><div><dt>${t('ref')}</dt><dd>${b.id}</dd></div><div><dt>${t('room')}</dt><dd>${esc(r.name)}</dd></div><div><dt>${t('arr')}</dt><dd>${fd(b.start,DL)} · ${esc(f.time)}</dd></div><div><dt>${t('dep')}</dt><dd>${fd(b.end,DL)}</dd></div><div><dt>${t('guests')}</dt><dd>${b.guests}</dd></div><div><dt>${t('total')}</dt><dd>${eur(b.total)}</dd></div><div><dt>${t('paid')}</dt><dd>${eur(b.paid)}</dd></div><div><dt>${t('due')}</dt><dd>${eur(Math.round((b.total-b.paid)*100)/100)}</dd></div></dl>
+   <p class="small muted">Le Clos des Combes · ${t('foot')}</p>
+   <div class="actions no-print"><button type="button" class="btn" data-act="print">${ic('print')}${t('print')}</button><button type="button" class="btn primary" data-act="close" style="flex:1">${t('close')}</button></div>
+   <p class="small muted no-print" lang="fr">Côté propriétaire : la réservation apparaît déjà dans le planning (bandeau « Espace propriétaire »).</p></div>`);
+ }
+}
+function setErr(id,msg){const i=$('#'+id),e=$('#'+id+'-e');if(i)i.setAttribute('aria-invalid',msg?'true':'false');if(e)e.textContent=msg||'';return !msg}
+const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function submitBook(){
+ const r=roomById(M.room),f=M.f;
+ f.name=$('#bName').value.trim();f.email=$('#bMail').value.trim();f.phone=$('#bPhone').value.trim();f.country=$('#bCountry').value;f.time=$('#bTime').value;f.msg=$('#bMsg').value;f.cgv=$('#bCgv').checked;
+ const g=parseInt($('#bGuests').value,10);
+ let ok=setErr('bName',f.name.length<2?t('e_req'):'');
+ ok=setErr('bMail',!f.email?t('e_req'):!EMAIL.test(f.email)?t('e_email'):'')&&ok;
+ ok=setErr('bGuests',!(g>=1&&g<=r.cap)?t('e_g',{n:r.cap}):'')&&ok;
+ ok=setErr('bCgv',f.cgv?'':t('e_cgv'))&&ok;
+ if(!ok){const x=document.querySelector('#dlg [aria-invalid="true"]');if(x)x.focus();return}
+ M.guests=g;M.step=2;bookStep();
+}
+function submitPay(){
+ const num=$('#pCard').value.replace(/\D/g,''),ex=$('#pExp').value.trim(),cvc=$('#pCvc').value.trim();
+ let ok=setErr('pCard',num.length!==16?t('e_card'):'');
+ const m=ex.match(/^(\d{2})\s*\/\s*(\d{2})$/);let vex=false;
+ if(m){const mo=+m[1],yr=2000+ +m[2];vex=mo>=1&&mo<=12&&new Date(yr,mo,0)>=P(TODAY)}
+ ok=setErr('pExp',vex?'':t('e_exp'))&&ok;
+ ok=setErr('pCvc',/^\d{3,4}$/.test(cvc)?'':t('e_cvc'))&&ok;
+ if(!ok){const x=document.querySelector('#dlg [aria-invalid="true"]');if(x)x.focus();return}
+ const btn=$('#payBtn');btn.disabled=true;btn.innerHTML=`<svg class="i spin" viewBox="0 0 24 24" aria-hidden="true">${IC.sync}</svg>${t('paying')}`;
+ setTimeout(()=>{
+  if(!roomFree(M.room,M.start,M.end)){closeDlg();toast(t('t_taken'),'x');renderAvail();return}
+  const r=roomById(M.room),q=quote(r,M.start,M.end,M.guests);
+  const id='CC-26-'+String(++S.seq).padStart(4,'0');
+  S.bookings.push({id,room:M.room,start:M.start,end:M.end,name:M.f.name,email:M.f.email,phone:M.f.phone,country:M.f.country,lang:U.lang,guests:M.guests,status:'confirmee',source:'direct',total:q.total,paid:M.pay==='dep'?Math.round(q.total*.3*100)/100:q.total,note:M.f.msg,time:M.f.time,created:TODAY,fresh:true});
+  save();M.ref=id;M.step=3;bookStep();toast(t('t_mail'),'mail');
+  U.start=U.end=null;renderAvail();
+ },1100);
+}
+
+/* ---------- Espace propriétaire ---------- */
+const SRC={direct:['Site (direct)','b-dir'],tel:['Téléphone','b-dir'],booking:['Booking','b-bk'],bloque:['Blocage','b-blk']};
+const STA={confirmee:['Confirmée','b-ok'],attente:['Acompte attendu','b-warn'],annulee:['Annulée','b-bad']};
+const CTRY={FR:'France',GB:'Royaume-Uni',NL:'Pays-Bas',BE:'Belgique',DE:'Allemagne',OT:'Autre'};
+const LNG={fr:'français',en:'anglais',nl:'néerlandais'};
+const badge=(m,k)=>`<span class="badge ${m[k][1]}">${m[k][0]}</span>`;
+const who=b=>b.source==='bloque'?'Indisponible':b.name;
+function ago(ts){const m=Math.max(0,Math.round((Date.now()-ts)/60000));return m<1?'à l’instant':m<60?`il y a ${m} min`:`il y a ${Math.round(m/60)} h`}
+function renderAdmin(){
+ document.title='Gestion — Le Clos des Combes';
+ const pend=S.bookings.filter(b=>b.status==='attente').length;
+ const tabs=[['dash','Tableau de bord','home'],['plan','Planning','cal'],['resa','Réservations','list'],['rooms','Chambres & tarifs','tag'],['sync','Synchronisation','sync']];
+ $('#app').innerHTML=`<header class="adm-top"><div class="brand"><span class="mark">${ic('leaf')}</span><span><b>Le Clos des Combes</b><small>Espace propriétaire</small></span></div>
+ <nav class="tabs" aria-label="Sections de gestion">${tabs.map(([k,l,i])=>`<button type="button" class="tab" data-act="tab" data-t="${k}"${U.tab===k?' aria-current="page"':''}>${ic(i)}${l}${k==='resa'&&pend?` <span class="cnt" aria-label="${pend} à traiter">${pend}</span>`:''}</button>`).join('')}</nav>
+ <button type="button" class="btn sm" data-act="mode" data-m="public" style="margin-left:auto">${ic('ext')}Voir le site</button></header>
+ <main class="adm-main" id="adm">${({dash:aDash,plan:aPlan,resa:aResa,rooms:aRooms,sync:aSync})[U.tab]()}</main>`;
+ if(U.tab==='resa')renderResaTable();
+}
+function occ(rid,a,n){let c=0;for(let i=0;i<n;i++)if(busy(rid,add(a,i)))c++;return c}
+function aDash(){
+ const act=S.bookings.filter(active),real=act.filter(b=>b.source!=='bloque');
+ const arr7=real.filter(b=>b.start>=TODAY&&b.start<=add(TODAY,7));
+ const arrToday=real.filter(b=>b.start===TODAY).length,depToday=real.filter(b=>b.end===TODAY).length;
+ const on=online();const occN=on.reduce((s,r)=>s+occ(r.id,TODAY,30),0),occP=Math.round(occN/(on.length*30||1)*100);
+ const dir=real.filter(isDirect),bkg=real.filter(b=>b.source==='booking');
+ const dRev=dir.reduce((s,b)=>s+b.total,0),bRev=bkg.reduce((s,b)=>s+b.total,0);
+ const saved=Math.round(dRev*.17),paidCom=Math.round(bRev*.17);
+ const share=Math.round(dRev/((dRev+bRev)||1)*100);
+ const next=real.filter(b=>b.start>=TODAY).sort((a,b)=>a.start.localeCompare(b.start)).slice(0,7);
+ const pend=S.bookings.filter(b=>b.status==='attente');
+ return `<div class="page-h"><div><h1>Bonjour</h1><p class="muted">${cap1(afd(TODAY,DL))} · ${arrToday} arrivée(s), ${depToday} départ(s) aujourd’hui</p></div><button type="button" class="btn primary" data-act="newEntry">${ic('plus')}Réservation téléphone / blocage</button></div>
+ <div class="kpis">
+  <div class="card kpi"><small>Arrivées sur 7 jours</small><b>${arr7.length}</b><span>${arr7.reduce((s,b)=>s+b.guests,0)} voyageurs attendus</span></div>
+  <div class="card kpi"><small>Taux d’occupation (30 j)</small><b>${occP} %</b><span>${occN} nuits sur ${on.length*30}</span></div>
+  <div class="card kpi"><small>CA réservations directes</small><b>${aeur(Math.round(dRev))}</b><span>${share} % du chiffre d’affaires</span></div>
+  <div class="card kpi hl"><small>Commissions évitées</small><b>${aeur(saved)}</b><span>vs 17 % prélevés par Booking (${aeur(paidCom)} payés)</span></div>
+ </div>
+ <div class="panels">
+  <section class="card"><div class="card-h"><h2>Prochaines arrivées</h2><button type="button" class="btn ghost sm" data-act="tab" data-t="plan">Planning ${ic('right')}</button></div>
+   <ul class="rows">${next.map(b=>`<li><div class="who"><b>${esc(b.name)}</b><span class="small muted">${afd(b.start)} · ${esc(roomById(b.room).name)} · ${b.guests} pers. · ${LNG[b.lang]}</span></div>${badge(SRC,b.source)}<button type="button" class="btn sm" data-act="detail" data-id="${b.id}">Détails</button></li>`).join('')||'<li class="muted">Aucune arrivée prévue.</li>'}</ul></section>
+  <section class="card"><div class="card-h"><h2>À traiter</h2><span class="badge b-warn">${pend.length}</span></div>
+   ${pend.length?`<ul class="rows">${pend.map(b=>`<li><div class="who"><b>${esc(b.name)}</b><span class="small muted">${afd(b.start)} → ${afd(b.end)} · ${esc(roomById(b.room).name)} · acompte de ${aeur(Math.round(b.total*.3))} attendu</span></div><button type="button" class="btn sm" data-act="detail" data-id="${b.id}">Ouvrir</button></li>`).join('')}</ul>`:'<div class="empty">Tout est à jour.</div>'}</section>
+  <section class="card"><div class="card-h"><h2>Canaux de réservation</h2></div>
+   <div class="meter"><div><b>Site (direct)</b><span>${dir.length} séjours · ${aeur(Math.round(dRev))}</span></div><div class="bar"><i style="width:${share}%"></i></div></div>
+   <div class="meter"><div><b>Booking</b><span>${bkg.length} séjours · ${aeur(Math.round(bRev))}</span></div><div class="bar bk"><i style="width:${100-share}%"></i></div></div>
+   <p class="small muted">Chaque réservation déplacée de Booking vers le site fait économiser environ 17 % du montant du séjour.</p></section>
+  <section class="card"><div class="card-h"><h2>Occupation à 30 jours</h2><span class="small muted">Synchro Booking ${ago(S.lastSync)}</span></div>
+   ${on.map(r=>{const o=occ(r.id,TODAY,30);return `<div class="meter"><div><b>${esc(r.name)}</b><span>${o} / 30 nuits</span></div><div class="bar"><i style="width:${Math.round(o/30*100)}%"></i></div></div>`}).join('')}</section>
+ </div>`;
+}
+function aPlan(){
+ const N=21,days=Array.from({length:N},(_,i)=>add(U.planStart,i)),vEnd=add(U.planStart,N);
+ let rows='';
+ S.rooms.forEach(r=>{
+  let tds='',d=U.planStart;
+  while(d<vEnd){
+   const b=bookingAt(r.id,d);
+   if(b){const e=b.end<vEnd?b.end:vEnd,span=diff(d,e);
+    tds+=`<td colspan="${span}"><button type="button" class="pbar ${b.source}${b.status==='attente'?' attente':''}" data-act="detail" data-id="${b.id}" aria-label="${esc(who(b))}, ${SRC[b.source][0]}, du ${afd(b.start,DS)} au ${afd(b.end,DS)}">${esc(who(b))}</button></td>`;d=e}
+   else{tds+=`<td class="${[0,6].includes(P(d).getDay())?'we':''}">${d>=TODAY?`<button type="button" class="free" data-act="newEntry" data-room="${r.id}" data-date="${d}" aria-label="${esc(r.name)}, ${afd(d,DL)} : libre — ajouter">${ic('plus')}</button>`:''}</td>`;d=add(d,1)}
+  }
+  rows+=`<tr><th scope="row" class="rh">${esc(r.name)}${r.online?'':'<br><span class="small muted">hors ligne</span>'}</th>${tds}</tr>`;
+ });
+ return `<div class="page-h"><div><h1>Planning</h1><p class="muted">Toutes les réservations, site et Booking, sur un seul calendrier. Cliquez sur une case libre pour bloquer une date ou saisir une réservation téléphonique.</p></div></div>
+ <div class="plan-ctrl"><button type="button" class="icon-btn" data-act="planMove" data-n="-7" aria-label="Semaine précédente">${ic('left')}</button><button type="button" class="btn sm" data-act="planMove" data-n="0">Aujourd’hui</button><button type="button" class="icon-btn" data-act="planMove" data-n="7" aria-label="Semaine suivante">${ic('right')}</button>
+ <b style="margin:0 8px">${afd(days[0],DS)} – ${afd(days[N-1],{day:'numeric',month:'short',year:'numeric'})}</b>
+ <span class="badge b-dir">Site / téléphone</span><span class="badge b-bk">Booking</span><span class="badge b-blk">Blocage</span><span class="small muted">Pointillés : acompte attendu</span></div>
+ <div class="tblw"><table class="plan"><caption class="sr">Planning des chambres sur 21 jours</caption><thead><tr><th class="rh" scope="col">Chambre</th>${days.map(d=>`<th scope="col" class="${[0,6].includes(P(d).getDay())?'we':''}${d===TODAY?' today':''}">${cap1(afd(d,{weekday:'short'}).replace('.',''))}<b>${+d.slice(8)}</b></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function aResa(){
+ const f=U.f;
+ return `<div class="page-h"><div><h1>Réservations</h1><p class="muted">Réservations directes, téléphoniques et importées de Booking.</p></div><button type="button" class="btn primary" data-act="newEntry">${ic('plus')}Nouvelle réservation</button></div>
+ <div class="filters">
+  <div class="field"><label for="fq">Rechercher</label><input type="search" id="fq" data-in="q" value="${esc(f.q)}" placeholder="Nom, email, référence"></div>
+  <div class="field"><label for="fper">Période</label><select id="fper" data-in="per">${[['next','À venir et en cours'],['past','Passées'],['','Toutes']].map(([v,l])=>`<option value="${v}"${f.per===v?' selected':''}>${l}</option>`).join('')}</select></div>
+  <div class="field"><label for="fsrc">Canal</label><select id="fsrc" data-in="src"><option value="">Tous</option>${Object.keys(SRC).map(k=>`<option value="${k}"${f.src===k?' selected':''}>${SRC[k][0]}</option>`).join('')}</select></div>
+  <div class="field"><label for="fst">Statut</label><select id="fst" data-in="st"><option value="">Tous</option>${Object.keys(STA).map(k=>`<option value="${k}"${f.st===k?' selected':''}>${STA[k][0]}</option>`).join('')}</select></div>
+ </div><div id="resaTbl"></div>`;
+}
+function renderResaTable(){
+ const f=U.f,q=f.q.toLowerCase();
+ let l=S.bookings.filter(b=>(!f.src||b.source===f.src)&&(!f.st||b.status===f.st)&&(f.per==='next'?b.end>=TODAY:f.per==='past'?b.end<TODAY:true)&&(!q||(b.name+' '+b.email+' '+b.id+' '+b.note).toLowerCase().includes(q)));
+ l.sort((a,b)=>f.per==='past'?b.start.localeCompare(a.start):a.start.localeCompare(b.start));
+ $('#resaTbl').innerHTML=`<p class="small muted" style="margin-bottom:8px" aria-live="polite">${l.length} résultat(s)</p>`+(l.length?`<div class="tblw"><table class="resa"><thead><tr><th scope="col">Référence</th><th scope="col">Client</th><th scope="col">Chambre</th><th scope="col">Séjour</th><th scope="col">Canal</th><th scope="col">Statut</th><th scope="col" class="num">Montant</th><th scope="col" class="num">Encaissé</th></tr></thead><tbody>
+ ${l.map(b=>`<tr><td><button type="button" class="lnk" data-act="detail" data-id="${b.id}">${b.id}</button>${b.fresh?' <span class="badge b-ok">Nouveau</span>':''}</td><td><b>${esc(who(b))}</b>${b.source!=='bloque'?`<br><span class="small muted">${CTRY[b.country]||''} · ${b.guests} pers.</span>`:`<br><span class="small muted">${esc(b.note)}</span>`}</td><td>${esc(roomById(b.room).name)}</td><td>${afd(b.start,DS)} → ${afd(b.end,DS)}<br><span class="small muted">${diff(b.start,b.end)} nuit(s)</span></td><td>${badge(SRC,b.source)}</td><td>${b.source==='bloque'?'—':badge(STA,b.status)}</td><td class="num">${b.total?aeur(b.total):'—'}</td><td class="num">${b.total?aeur(b.paid):'—'}</td></tr>`).join('')}
+ </tbody></table></div>`:'<div class="empty">Aucune réservation ne correspond à ces filtres.</div>');
+}
+function aRooms(){
+ return `<div class="page-h"><div><h1>Chambres & tarifs</h1><p class="muted">Les modifications sont appliquées immédiatement sur le site (FR, EN, NL).</p></div></div>
+ <form id="roomsForm" novalidate><div class="rcards">${S.rooms.map(r=>`<fieldset class="card" style="margin:0"><legend class="sr">${esc(r.name)}</legend>${scene(r.art,r.name)}<h2 style="font-size:20px;margin:12px 0 8px">${esc(r.name)}</h2>
+  <div class="fgrid"><div class="field"><label for="p-${r.id}">Prix par nuit (€)</label><input type="number" id="p-${r.id}" min="30" max="1000" value="${r.price}" inputmode="numeric"><span class="err" id="p-${r.id}-e"></span></div>
+  <div class="field"><label for="c-${r.id}">Capacité</label><select id="c-${r.id}">${[1,2,3,4,5,6].map(n=>`<option${r.cap===n?' selected':''}>${n}</option>`).join('')}</select></div></div>
+  <label class="switch"><input type="checkbox" id="o-${r.id}"${r.online?' checked':''}>Réservable en ligne</label></fieldset>`).join('')}</div>
+  <div class="card" style="margin-top:16px;display:grid;gap:12px"><h2 style="font-size:19px">Saisonnalité</h2><div class="fgrid"><div class="field"><label for="season">Majoration juillet-août (%)</label><input type="number" id="season" min="0" max="100" value="${S.season}"><span class="hint">2 nuits minimum appliquées automatiquement en juillet-août.</span><span class="err" id="season-e"></span></div>
+  <div class="field"><span class="flabel">Taxe de séjour</span><p style="min-height:44px;display:flex;align-items:center">0,88 € / personne / nuit</p></div></div>
+  <div class="actions"><button class="btn primary" type="submit">${ic('check')}Enregistrer</button></div></div></form>`;
+}
+function aSync(){
+ return `<div class="page-h"><div><h1>Synchronisation des calendriers</h1><p class="muted">Le site et Booking partagent leurs disponibilités par iCal : une nuit réservée d’un côté est bloquée de l’autre, sans double réservation.</p></div>
+ <button type="button" class="btn primary" data-act="sync" id="syncBtn">${ic('sync')}Synchroniser maintenant</button></div>
+ <div class="panels">
+  <section class="card"><div class="card-h"><h2>Calendriers par chambre</h2><span class="small muted">Dernière synchro ${ago(S.lastSync)} · automatique toutes les 15 min</span></div>
+  ${S.rooms.map(r=>`<div style="border-top:1px solid var(--line);padding:12px 0;display:grid;gap:10px"><b>${esc(r.name)}</b>
+   <div class="ical"><div class="field"><label for="ex-${r.id}">Lien d’export à coller dans Booking</label><input type="url" id="ex-${r.id}" readonly value="https://closdescombes.example/ical/${r.id}.ics"></div><button type="button" class="btn" data-act="copy" data-v="https://closdescombes.example/ical/${r.id}.ics" aria-label="Copier le lien d’export ${esc(r.name)}">${ic('copy')}Copier</button></div>
+   <div class="field"><label for="im-${r.id}">Lien d’import fourni par Booking</label><input type="url" id="im-${r.id}" value="https://admin.booking.example/ical/${r.id}-7f3a92.ics"></div></div>`).join('')}</section>
+  <section class="card"><div class="card-h"><h2>Journal</h2></div><ul class="log">${S.log.slice(0,10).map(l=>`<li><span class="muted small" style="min-width:110px">${new Date(l.at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span><span style="flex:1;min-width:0">${esc(l.txt)}</span></li>`).join('')}</ul></section>
+ </div>`;
+}
+function openDetail(id){
+ const b=S.bookings.find(x=>x.id===id);if(!b)return;const r=roomById(b.room),n=diff(b.start,b.end),rest=Math.round((b.total-b.paid)*100)/100;
+ const bl=b.source==='bloque';
+ const items=bl?[['Chambre',r.name],['Du',afd(b.start,DL)],['Au',afd(b.end,DL)],['Nuits',n],['Motif',b.note||'—']]
+  :[['Référence',b.id],['Chambre',r.name],['Arrivée',afd(b.start,DL)+(b.time?' · '+b.time:'')],['Départ',afd(b.end,DL)],['Nuits / voyageurs',n+' nuit(s) · '+b.guests+' pers.'],['Email',b.email||'—'],['Pays',CTRY[b.country]||'—'],['Langue des emails',LNG[b.lang]],['Montant',aeur(b.total)],['Encaissé',aeur(b.paid)],['Reste dû',aeur(rest)]];
+ let acts='';
+ if(b.status==='attente')acts+=`<button type="button" class="btn primary" data-act="bConfirm" data-id="${b.id}">${ic('check')}Acompte reçu — confirmer</button>`;
+ if(!bl&&isDirect(b)&&active(b)&&rest>0)acts+=`<button type="button" class="btn" data-act="bSettle" data-id="${b.id}">${ic('check')}Marquer comme soldée</button>`;
+ if(!bl&&isDirect(b)&&active(b))acts+=`<button type="button" class="btn" data-act="bMail" data-id="${b.id}">${ic('mail')}Renvoyer la confirmation</button>`;
+ if(!bl)acts+=`<button type="button" class="btn" data-act="print">${ic('print')}Imprimer</button>`;
+ if(bl)acts+=`<button type="button" class="btn danger" data-act="bCancel" data-id="${b.id}">${ic('x')}Supprimer le blocage</button>`;
+ else if(isDirect(b)&&active(b))acts+=`<button type="button" class="btn danger" data-act="bCancel" data-id="${b.id}">${ic('x')}Annuler la réservation</button>`;
+ openDlg(`<div class="dlg-h"><div><h2 id="dlgTitle">${esc(bl?'Blocage — '+r.name:b.name)}</h2><div class="actions" style="margin-top:6px">${badge(SRC,b.source)}${bl?'':badge(STA,b.status)}</div></div><button type="button" class="icon-btn no-print" data-act="close" aria-label="Fermer">${ic('x')}</button></div>
+ <div class="dlg-b"><dl class="dl">${items.map(([k,v])=>`<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+ ${b.note&&!bl?`<p class="recap"><b>Message du client</b><span>${esc(b.note)}</span></p>`:''}
+ ${b.source==='booking'?`<p class="note">${ic('globe')}<span>Réservation importée depuis Booking par synchronisation iCal : les modifications et annulations se font sur l’extranet Booking, puis remontent ici automatiquement.</span></p>`:''}
+ <div class="actions no-print" id="dActs">${acts}</div></div>`);
+}
+function openEntry(room,date){
+ const r0=room||S.rooms[0].id,d0=date||add(TODAY,1);
+ openDlg(`<div class="dlg-h"><div><h2 id="dlgTitle">Nouvelle entrée au planning</h2><p class="small muted">Réservation prise par téléphone ou email, ou blocage de dates.</p></div><button type="button" class="icon-btn" data-act="close" aria-label="Fermer">${ic('x')}</button></div>
+ <form class="dlg-b" id="entryForm" novalidate><div class="fgrid">
+  <div class="field"><label for="eType">Type</label><select id="eType" data-ch="etype"><option value="tel">Réservation (téléphone, email)</option><option value="bloque">Blocage (indisponible)</option></select></div>
+  <div class="field"><label for="eRoom">Chambre</label><select id="eRoom">${S.rooms.map(r=>`<option value="${r.id}"${r.id===r0?' selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
+  <div class="field"><label for="eStart">Arrivée</label><input type="date" id="eStart" min="${TODAY}" value="${d0}"><span class="err" id="eStart-e"></span></div>
+  <div class="field"><label for="eN">Nombre de nuits</label><input type="number" id="eN" min="1" max="30" value="2"><span class="err" id="eN-e"></span></div>
+  <div class="field tel-only"><label for="eName">Nom du client</label><input type="text" id="eName"><span class="err" id="eName-e"></span></div>
+  <div class="field tel-only"><label for="eMail">Email (facultatif)</label><input type="email" id="eMail"><span class="err" id="eMail-e"></span></div>
+  <div class="field tel-only"><label for="eG">Voyageurs</label><input type="number" id="eG" min="1" max="6" value="2"></div>
+  <div class="field tel-only"><label for="eLang">Langue des emails</label><select id="eLang"><option value="fr">Français</option><option value="en">Anglais</option><option value="nl">Néerlandais</option></select></div>
+  <div class="field full"><label for="eNote">Note</label><input type="text" id="eNote" placeholder="Ex. : arrivée tardive, travaux…"></div>
+ </div><div class="actions"><button class="btn primary" type="submit">${ic('check')}Ajouter au planning</button><button type="button" class="btn" data-act="close">Annuler</button></div></form>`);
+}
+function submitEntry(){
+ const type=$('#eType').value,room=$('#eRoom').value,start=$('#eStart').value,n=parseInt($('#eN').value,10),name=$('#eName').value.trim(),email=$('#eMail').value.trim(),g=parseInt($('#eG').value,10)||2;
+ let ok=setErr('eStart',!/^\d{4}-\d{2}-\d{2}$/.test(start)||start<TODAY?'Date invalide.':'');
+ ok=setErr('eN',!(n>=1&&n<=30)?'Entre 1 et 30 nuits.':'')&&ok;
+ if(type==='tel'){ok=setErr('eName',name.length<2?'Nom obligatoire.':'')&&ok;ok=setErr('eMail',email&&!EMAIL.test(email)?'Email invalide.':'')&&ok}
+ if(ok&&!roomFree(room,start,add(start,n)))ok=setErr('eStart','Chambre déjà occupée sur une partie de ces dates.');
+ if(!ok)return;
+ const r=roomById(room),end=add(start,n),q=quote(r,start,end,g);
+ const b={id:type==='tel'?'CC-26-'+String(++S.seq).padStart(4,'0'):'BLQ-'+(++S.seq),room,start,end,name:type==='tel'?name:'',email,country:'FR',lang:type==='tel'?$('#eLang').value:'fr',guests:g,status:type==='tel'?'attente':'confirmee',source:type,total:type==='tel'?q.total:0,paid:0,note:$('#eNote').value.trim(),created:TODAY,fresh:true};
+ S.bookings.push(b);save();closeDlg();
+ toast(type==='tel'?`Réservation ajoutée — dates bloquées sur Booking à la prochaine synchro`:`Dates bloquées sur le site et sur Booking`);
+ renderAdmin();
+}
+function doSync(){
+ const btn=$('#syncBtn');if(btn){btn.disabled=true;btn.innerHTML=`<svg class="i spin" viewBox="0 0 24 24" aria-hidden="true">${IC.sync}</svg>Synchronisation…`}
+ setTimeout(()=>{
+  const r=rng(Date.now()&0xffff);let made=null;
+  const rooms=online().slice().sort(()=>r()-.5);
+  outer:for(const off of [12,16,20,25,30,38,45]){for(const rm of rooms){const s=add(TODAY,off+Math.floor(r()*3));if(roomFree(rm.id,s,add(s,3))){const g=GUESTS[Math.floor(r()*GUESTS.length)],q=quote(rm,s,add(s,3),2);made={id:'BKG-'+(4821990000+Math.floor(r()*9999)),room:rm.id,start:s,end:add(s,3),name:g[0],email:mailOf(g[0]),country:g[1],lang:g[2],guests:2,status:'confirmee',source:'booking',total:q.total,paid:q.total,note:'',created:TODAY,fresh:true};break outer}}}
+  S.lastSync=Date.now();
+  if(made){S.bookings.push(made);S.log.unshift({at:Date.now(),txt:`1 réservation importée depuis Booking : ${made.name}, ${roomById(made.room).name}, ${afd(made.start,DS)} → ${afd(made.end,DS)} (dates bloquées sur le site)`})}
+  else S.log.unshift({at:Date.now(),txt:'Synchronisation manuelle — aucun changement'});
+  save();renderAdmin();toast(made?'1 nouvelle réservation importée depuis Booking':'Calendriers à jour','sync');
+ },1200);
+}
+
+/* ---------- Évènements ---------- */
+const ACT={
+ mode:b=>{U.mode=b.dataset.m;closeDlg();render();window.scrollTo(0,0)},
+ reset:()=>{try{localStorage.removeItem(LS)}catch(e){}S=fresh();U.start=U.end=null;U.room='all';U.guests=2;U.cal=TODAY.slice(0,8)+'01';U.planStart=add(TODAY,-2);U.f={q:'',src:'',st:'',per:'next'};calMsg='';closeDlg();render();toast('Démo réinitialisée','sync')},
+ lang:b=>{U.lang=b.dataset.l;try{localStorage.setItem(LS+'-lang',U.lang)}catch(e){}calMsg='';render();const x=document.querySelector(`[data-act="lang"][data-l="${U.lang}"]`);if(x)x.focus()},
+ seeRoom:b=>{const r=roomById(b.dataset.id);U.room=r.id;if(U.guests>r.cap)U.guests=r.cap;U.start=U.end=null;calMsg='';renderPublic();const s=$('#dispo');s.scrollIntoView();setTimeout(()=>$('#fRoom').focus({preventScroll:true}),300)},
+ day:b=>pickDay(b.dataset.date),
+ calPrev:()=>{U.cal=add(U.cal,-1).slice(0,8)+'01';renderAvail('[data-act="calPrev"]')},
+ calNext:()=>{U.cal=add(U.cal,40).slice(0,8)+'01';renderAvail('[data-act="calNext"]')},
+ clearDates:()=>{U.start=U.end=null;calMsg='';renderAvail();const f=document.querySelector('.day:not(:disabled)');if(f)f.focus()},
+ book:b=>openBook(b.dataset.id),
+ bookBack:()=>{M.step=1;bookStep()},
+ close:()=>closeDlg(),
+ print:()=>window.print(),
+ tab:b=>{U.tab=b.dataset.t;renderAdmin();const x=document.querySelector(`.tab[data-t="${U.tab}"]`);if(x)x.focus()},
+ detail:b=>openDetail(b.dataset.id),
+ planMove:b=>{const n=+b.dataset.n;U.planStart=n?add(U.planStart,n):add(TODAY,-2);renderAdmin();const x=document.querySelector(`[data-act="planMove"][data-n="${b.dataset.n}"]`);if(x)x.focus()},
+ newEntry:b=>openEntry(b.dataset.room,b.dataset.date),
+ bConfirm:b=>{const x=S.bookings.find(y=>y.id===b.dataset.id);x.status='confirmee';x.paid=Math.round(x.total*.3*100)/100;save();renderAdmin();openDetail(x.id);toast(`Confirmation envoyée en ${LNG[x.lang]} (simulation)`,'mail')},
+ bSettle:b=>{const x=S.bookings.find(y=>y.id===b.dataset.id);x.paid=x.total;x.status='confirmee';save();renderAdmin();openDetail(x.id);toast('Séjour soldé')},
+ bMail:b=>{const x=S.bookings.find(y=>y.id===b.dataset.id);toast(`Email envoyé à ${x.email} en ${LNG[x.lang]} (simulation)`,'mail')},
+ bCancel:b=>{const x=S.bookings.find(y=>y.id===b.dataset.id);
+  if(b.dataset.sure!=='1'){b.dataset.sure='1';b.innerHTML=ic('x')+(x.source==='bloque'?'Confirmer la suppression':'Confirmer l’annulation');return}
+  if(x.source==='bloque')S.bookings=S.bookings.filter(y=>y!==x);else x.status='annulee';
+  save();closeDlg();renderAdmin();toast(x.source==='bloque'?'Blocage supprimé : dates de nouveau réservables':`Réservation annulée — email envoyé en ${LNG[x.lang]} (simulation)`)},
+ copy:b=>{const v=b.dataset.v;try{navigator.clipboard.writeText(v).then(()=>toast('Lien copié'),()=>toast('Lien : '+v,'copy'))}catch(e){toast('Lien : '+v,'copy')}},
+ sync:()=>doSync()
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(b&&!b.disabled&&ACT[b.dataset.act]){ACT[b.dataset.act](b,e)}});
+$('#dlg').addEventListener('click',e=>{if(e.target.id==='dlg')closeDlg()});
+document.addEventListener('change',e=>{
+ const el=e.target,k=el.dataset.ch;
+ if(k==='room'){U.room=el.value;if(U.room!=='all'){const r=roomById(U.room);if(U.guests>r.cap)U.guests=r.cap}U.start=U.end=null;calMsg='';renderAvail();$('#fGuests').value=U.guests}
+ else if(k==='guests'){U.guests=+el.value;if(U.room!=='all'&&roomById(U.room).cap<U.guests){U.room='all';$('#fRoom').value='all'}if(U.start&&U.end&&!rangeOK(U.start,U.end))U.end=null;if(U.start&&!nightOK(U.start))U.start=U.end=null;renderAvail()}
+ else if(k==='pay'){M.pay=el.value;const r=roomById(M.room),q=quote(r,M.start,M.end,M.guests),amt=M.pay==='dep'?Math.round(q.total*.3*100)/100:q.total;$('#payBtn').innerHTML=ic('lock')+t('pay',{x:eur(amt)})}
+ else if(k==='etype'){document.querySelectorAll('.tel-only').forEach(x=>x.hidden=el.value!=='tel')}
+ else if(el.dataset.in){U.f[el.dataset.in]=el.value;renderResaTable()}
+});
+document.addEventListener('input',e=>{
+ const el=e.target;
+ if(el.dataset.in==='q'){U.f.q=el.value;renderResaTable()}
+ if(el.dataset.fmt==='card'){el.value=el.value.replace(/\D/g,'').slice(0,16).replace(/(\d{4})(?=\d)/g,'$1 ')}
+ if(el.dataset.fmt==='exp'){let v=el.value.replace(/\D/g,'').slice(0,4);if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);el.value=v}
+});
+document.addEventListener('submit',e=>{
+ const id=e.target.id;if(!id)return;e.preventDefault();
+ if(id==='bookForm')submitBook();
+ else if(id==='payForm')submitPay();
+ else if(id==='entryForm')submitEntry();
+ else if(id==='contactForm'){
+  const n=$('#cName').value.trim(),m=$('#cMail').value.trim(),x=$('#cMsg').value.trim();
+  let ok=setErr('cName',n?'':t('e_req'));ok=setErr('cMail',!m?t('e_req'):!EMAIL.test(m)?t('e_email'):'')&&ok;ok=setErr('cMsg',x?'':t('e_req'))&&ok;
+  if(!ok){const f=document.querySelector('#contactForm [aria-invalid="true"]');if(f)f.focus();return}
+  e.target.reset();toast(t('sent'),'mail');
+ }
+ else if(id==='roomsForm'){
+  let ok=true;S.rooms.forEach(r=>{const v=+$('#p-'+r.id).value;ok=setErr('p-'+r.id,!(v>=30&&v<=1000)?'Entre 30 et 1000 €.':'')&&ok});
+  const sv=+$('#season').value;ok=setErr('season',!(sv>=0&&sv<=100)?'Entre 0 et 100 %.':'')&&ok;
+  if(!ok)return;
+  S.rooms.forEach(r=>{r.price=+$('#p-'+r.id).value;r.cap=+$('#c-'+r.id).value;r.online=$('#o-'+r.id).checked});S.season=sv;
+  if(U.room!=='all'&&!roomById(U.room).online)U.room='all';
+  save();toast('Tarifs enregistrés — le site est à jour');
+ }
+});
+render();
+})();
+</script>
 </body>
 </html>
