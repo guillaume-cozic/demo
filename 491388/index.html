@@ -4,18 +4,889 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Réservation hôtelière B2B</title>
+<meta name="description" content="Plateforme B2B de réservation d’hôtels pour agences de voyages : recherche multi-fournisseurs (Algérie, Tunisie, international), réservation sur crédit agence, vouchers, factures, commissions et back-office, en français, arabe et anglais.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F4F2EE;--surface:#FFFFFF;--surface2:#EFECE6;--text:#1C2329;--muted:#56616B;--line:#E0DAD0;--fline:#8A939B;
+  --brand:#0C5A62;--brand-ink:#FFFFFF;--brand-soft:#DDEEEE;--accent:#9A4F14;
+  --ok:#1B6E40;--ok-soft:#E1F2E7;--warn:#7E5200;--warn-soft:#FAEFD3;--err:#B02A1E;--err-soft:#FCE6E3;--info:#24518A;--info-soft:#E2EAF6;
+  --focus:#1F5FD1;--shadow:0 1px 2px rgba(20,30,35,.05),0 4px 14px rgba(20,30,35,.05);
+  --font:"IBM Plex Sans","IBM Plex Sans Arabic",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F1519;--surface:#172026;--surface2:#1E2930;--text:#E7ECEF;--muted:#A2AEB7;--line:#2B3841;--fline:#62717C;
+  --brand:#5BBCC4;--brand-ink:#05282B;--brand-soft:#16343A;--accent:#E3A56B;
+  --ok:#6BCF93;--ok-soft:#15301F;--warn:#E9BC5A;--warn-soft:#352A10;--err:#FF9184;--err-soft:#3A1815;--info:#9AC0F2;--info-soft:#172A40;
+  --focus:#8CB8FF;--shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.2);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+[dir=rtl] body{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",system-ui,sans-serif}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25}
+h1{font-size:22px}h2{font-size:17px}h3{font-size:16px}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.sm{font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.i.f{fill:currentColor;stroke:none}
+.demo-band{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;padding:2px 24px;background:var(--surface2);border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.demo-band button{min-height:44px;display:inline-flex;align-items:center;gap:6px;background:none;border:0;color:var(--text);font-weight:600;cursor:pointer;padding:0 6px;border-radius:6px}
+.top{display:flex;align-items:center;gap:12px 20px;flex-wrap:wrap;padding:10px 24px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;white-space:nowrap}
+.brand b{color:var(--brand);font-weight:700}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center}
+.logo .i{width:20px;height:20px}
+nav.main{display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin}
+nav.main button{min-height:44px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;background:none;border:0;padding:0 12px;border-radius:8px;color:var(--muted);font-weight:500;cursor:pointer}
+nav.main button:hover{background:var(--surface2);color:var(--text)}
+nav.main button[aria-current=page]{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--surface2);font-size:13px;min-height:44px}
+.chip b{font-weight:700}
+.lang{min-height:44px;width:auto;padding:0 10px}
+.seg{display:inline-flex;border:1px solid var(--fline);border-radius:9px;overflow:hidden}
+.seg button{min-height:42px;padding:0 12px;border:0;background:var(--surface);cursor:pointer;font-weight:500}
+.seg button[aria-pressed=true]{background:var(--brand);color:var(--brand-ink);font-weight:600}
+@media (max-width:1000px){nav.main{order:3;flex-basis:100%}}
+main{padding:20px 24px 56px}
+@media (max-width:640px){main,.top,.demo-band{padding-inline:16px}.chip .lbl{display:none}}
+.phead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.phead>*{min-width:0}
+.btn{min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--fline);background:var(--surface);color:var(--text);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.dng{color:var(--err);border-color:var(--err)}
+.btn.ghost{border-color:transparent;background:none}
+.btn:disabled{opacity:.6;cursor:wait}
+.lnk{background:none;border:0;color:var(--brand);font-weight:600;cursor:pointer;min-height:44px;padding:0 4px;text-decoration:underline;text-underline-offset:3px;text-align:start;overflow-wrap:anywhere}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border:0;background:none;border-radius:8px;cursor:pointer;color:var(--text)}
+.icon-btn:hover{background:var(--surface2)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label,.lbl-t{font-size:13px;font-weight:600;color:var(--muted)}
+input,select,textarea{min-height:44px;padding:8px 12px;border:1px solid var(--fline);border-radius:8px;background:var(--surface);width:100%;min-width:0}
+textarea{min-height:76px;resize:vertical}
+[aria-invalid=true]{border-color:var(--err);box-shadow:0 0 0 1px var(--err)}
+.err-msg{color:var(--err);font-size:13px;font-weight:500}
+.err-msg:empty{display:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0;box-shadow:var(--shadow)}
+.card>h2{margin-bottom:12px}
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.6;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.bdg.ok{background:var(--ok-soft);color:var(--ok)}.bdg.warn{background:var(--warn-soft);color:var(--warn)}.bdg.err{background:var(--err-soft);color:var(--err)}.bdg.info{background:var(--info-soft);color:var(--info)}.bdg.brand{background:var(--brand-soft);color:var(--brand)}
+.alert{padding:12px 14px;border-radius:10px;display:flex;gap:10px;align-items:flex-start}
+.alert.err{background:var(--err-soft);color:var(--err)}.alert.warn{background:var(--warn-soft);color:var(--warn)}.alert.ok{background:var(--ok-soft);color:var(--ok)}
+/* search */
+.sform{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(2,minmax(0,1.15fr)) repeat(3,minmax(0,.75fr)) auto;gap:12px;align-items:end}
+.sform .full{grid-column:1/-1}
+@media (max-width:1150px){.sform{grid-template-columns:repeat(3,minmax(0,1fr))}.sform .sbtn{grid-column:1/-1}}
+@media (max-width:640px){.sform{grid-template-columns:repeat(2,minmax(0,1fr))}.sform .dest{grid-column:1/-1}}
+.inline-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.inline-f select{width:auto;max-width:100%}
+.prog{margin-top:16px}
+.prog-h{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-bottom:10px}
+.sups{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:8px}
+.sups li{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;padding:8px 10px;border-radius:8px;background:var(--surface2);align-items:center}
+.sups li small{grid-column:2;color:var(--muted);font-size:12px}
+.sups li.ok>.i{color:var(--ok)}.sups li.off{opacity:.75}
+.spin{animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.res{display:grid;grid-template-columns:270px minmax(0,1fr);gap:20px;margin-top:20px;align-items:start}
+@media (max-width:900px){.res{grid-template-columns:minmax(0,1fr)}}
+.filters{position:sticky;top:84px}
+@media (max-width:900px){.filters{position:static}}
+.filters summary{min-height:44px;display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;list-style:none}
+.filters summary::-webkit-details-marker{display:none}
+.fbody{display:grid;gap:14px;margin-top:8px}
+.checks{display:grid;gap:0}
+.ck{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer}
+.ck input{width:20px;height:20px;min-height:0;flex:none;accent-color:var(--brand)}
+.hlist{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1700px){.hlist{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rhead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline;margin-bottom:12px}
+.hc{display:grid;grid-template-columns:170px minmax(0,1fr);gap:16px}
+@media (max-width:640px){.hc{grid-template-columns:minmax(0,1fr)}}
+.ph{border-radius:10px;min-height:130px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:12px;position:relative;overflow:hidden}
+.ph .i{width:40px;height:40px;stroke-width:1.5;opacity:.9}
+.ph span{font-weight:600;font-size:13px}
+.z-DZ{background:#0C5A62}.z-TN{background:#2D5682}.z-INT{background:#5C4680}
+.hh{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hh>div{min-width:0}
+.stars{display:inline-flex;color:var(--accent);vertical-align:middle}
+.stars .i{width:15px;height:15px}
+.loc{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px;margin-top:2px}
+.loc .i{width:15px;height:15px}
+.from{text-align:end}
+.from strong{display:block;font-size:20px}
+.amen{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.of{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,1.1fr) auto;gap:8px 14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.of .oi{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.of .oi .tags{display:flex;gap:6px;flex-wrap:wrap}
+.ocx{font-size:13px;display:flex;gap:6px;align-items:flex-start}
+.ocx .i{width:16px;height:16px;margin-top:2px}
+.ocx.ok{color:var(--ok)}.ocx.no{color:var(--err)}
+.op{text-align:end;display:flex;flex-direction:column}
+.op strong{font-size:17px}
+.op small{color:var(--muted);font-size:12px}
+@media (max-width:760px){.of{grid-template-columns:minmax(0,1fr) auto}.of .oi,.of .ocx{grid-column:1/-1}.op{text-align:start}}
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.qd{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.skel{height:150px;border-radius:12px;background:var(--surface2);animation:pl 1.2s ease-in-out infinite}
+@keyframes pl{50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+/* tables */
+.toolbar{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
+@media (max-width:700px){.toolbar{grid-template-columns:minmax(0,1fr)}}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;min-width:860px}
+table.narrow{min-width:560px}
+th,td{padding:10px 12px;text-align:start;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);background:var(--surface2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td .sub{display:block;font-size:12.5px;color:var(--muted)}
+td.num,th.num{text-align:end}
+.acts{display:flex;gap:4px;flex-wrap:wrap}
+.acts .btn{min-height:44px;padding:0 10px;font-size:13.5px}
+.counts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+/* kpi & dash */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px;margin-bottom:16px}
+.kpi .v{font-size:24px;font-weight:700;margin-top:4px;overflow-wrap:anywhere}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:1200px){.dgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:720px){.dgrid{grid-template-columns:minmax(0,1fr)}}
+.bars{display:grid;gap:10px}
+.bar .bl{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.bar .bl span:first-child{overflow-wrap:anywhere}
+.bar .bt{height:10px;border-radius:6px;background:var(--surface2);margin-top:4px;overflow:hidden}
+.bar .bf{height:100%;background:var(--brand);border-radius:6px}
+.alist li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.alist li:last-child{border-bottom:0}
+.alist li>div{min-width:0;flex:1}
+.alist .i{margin-top:2px}
+.meter{height:8px;border-radius:5px;background:var(--surface2);overflow:hidden;margin-top:6px;min-width:80px}
+.meter i{display:block;height:100%;background:var(--brand)}
+.meter.hi i{background:var(--err)}.meter.mid i{background:var(--accent)}
+.cols2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1000px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.stack{display:grid;gap:16px;min-width:0}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:minmax(0,.7fr) repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.g2,.g3{grid-template-columns:minmax(0,1fr)}}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:10px 0 0;font-size:14px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;overflow-wrap:anywhere}
+.supgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.sh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sh>div{min-width:0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+code{overflow-wrap:anywhere}
+pre{background:var(--surface2);padding:12px;border-radius:8px;overflow:auto;margin:0;white-space:pre}
+.log{max-height:280px;overflow:auto;display:grid;gap:2px}
+.log li{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--line);overflow-wrap:anywhere}
+.switch{min-height:44px;display:inline-flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;font-weight:600;padding:0 4px}
+.switch .tr{width:40px;height:24px;border-radius:12px;background:var(--fline);position:relative;flex:none;transition:background .15s}
+.switch .tr::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch[aria-checked=true] .tr{background:var(--brand)}
+.switch[aria-checked=true] .tr::after{transform:translateX(16px)}
+[dir=rtl] .switch[aria-checked=true] .tr::after{transform:translateX(-16px)}
+.mk input{max-width:110px}
+.simout{display:grid;gap:8px;margin-top:14px}
+.simout div{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;background:var(--surface2)}
+/* dialog */
+dialog{border:0;border-radius:14px;padding:0;width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(10,18,22,.55)}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px 10px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+[dir=rtl] .dh{padding:10px 18px 10px 12px}
+.db{padding:18px;display:grid;gap:16px}
+.df{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface)}
+.recap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;padding:14px;border-radius:10px;background:var(--surface2)}
+@media (max-width:600px){.recap{grid-template-columns:minmax(0,1fr)}}
+.pbox{display:grid;gap:6px;align-content:start;font-size:14px}
+.pbox div{display:flex;justify-content:space-between;gap:8px}
+.pbox .tot{border-top:1px solid var(--line);padding-top:8px;font-size:16px}
+fieldset.fs{border:1px solid var(--line);border-radius:10px;padding:12px 14px 14px;margin:0;min-width:0}
+fieldset.fs legend{font-weight:600;font-size:14px;padding:0 6px}
+.radio{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;flex-wrap:wrap}
+.radio input{width:20px;height:20px;min-height:0;accent-color:var(--brand)}
+.done{text-align:center;display:grid;gap:10px;justify-items:center;padding:10px 0}
+.done .big{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--ok-soft);color:var(--ok)}
+.done .big.p{background:var(--warn-soft);color:var(--warn)}
+.done .big .i{width:30px;height:30px}
+.tl{display:grid;gap:8px;border-inline-start:2px solid var(--line);padding-inline-start:14px}
+.tl li{font-size:14px}
+.tl li small{color:var(--muted);display:block}
+/* documents */
+.doc{background:#fff;color:#1d1d1d;border:1px solid #d8d8d8;border-radius:8px;padding:24px;display:grid;gap:18px;font-size:14px}
+.doc .dtop{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2px solid #0C5A62;padding-bottom:14px}
+.doc .dtop>div{min-width:0}
+.doc h3{font-size:20px;color:#0C5A62}
+.doc .m{color:#555}
+.doc .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+@media (max-width:560px){.doc .grid{grid-template-columns:minmax(0,1fr)}.doc{padding:16px}}
+.doc .lb{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:#555;display:block}
+.doc .refbox{border:2px dashed #0C5A62;border-radius:8px;padding:10px 14px;text-align:center}
+.doc .refbox strong{font-size:20px;display:block;overflow-wrap:anywhere}
+.doc table{min-width:0;font-size:13.5px}
+.doc th{background:#f1f1f1;color:#444}
+.doc th,.doc td{border-bottom:1px solid #ddd}
+.doc .note{background:#f5f5f2;padding:10px 12px;border-radius:6px;color:#333}
+.toasts{position:fixed;inset-block-end:16px;inset-inline-end:16px;display:grid;gap:8px;z-index:200;max-width:calc(100vw - 32px)}
+.toast{background:#1E2A30;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:8px;align-items:center;font-size:14px;animation:tin .2s ease-out}
+@media (prefers-color-scheme:dark){.toast{background:#EDF2F4;color:#11191D}}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+@media print{
+  body>*:not(dialog){display:none!important}
+  dialog{position:static;width:auto;max-height:none;box-shadow:none;border:0;overflow:visible}
+  dialog::backdrop{display:none}
+  .no-print,.dh,.df,.toasts{display:none!important}
+  .db{padding:0}.doc{border:0;padding:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span id="band-t"><b>Démonstration</b> — données fictives</span><button type="button" data-a="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span id="band-r">Réinitialiser la démo</span></button></div>
+<div id="app"></div>
+<dialog id="dlg" aria-labelledby="dlg-t"></dialog>
+<script>
+"use strict";
+/* ---------- i18n ---------- */
+const T={
+fr:{demo1:"Démonstration",demo2:"données fictives",reset:"Réinitialiser la démo",resetDone:"Démo réinitialisée",navLabel:"Navigation principale",language:"Langue",viewAs:"Afficher en tant que",roleAgency:"Agence",roleAdmin:"Administrateur",
+nav_search:"Recherche",nav_bookings:"Réservations",nav_invoices:"Factures",nav_account:"Mon compte",nav_dash:"Tableau de bord",nav_agencies:"Agences",nav_pricing:"Tarifs & commissions",nav_suppliers:"Fournisseurs",
+cur:"DA",available:"Disponible",searchTitle:"Rechercher un hôtel",dest:"Destination",ci:"Arrivée",co:"Départ",rooms:"Chambres",adultsPR:"Adultes / ch.",adults:"adultes",children:"Enfants",childrenL:"enfants",forAgency:"Réserver pour l’agence",searchBtn:"Rechercher",
+errDates:"La date de départ doit être postérieure à l’arrivée.",errPast:"La date d’arrivée ne peut pas être passée.",errLong:"Séjour limité à 30 nuits.",
+zDZ:"Algérie",zTN:"Tunisie",zINT:"International",querying:"Interrogation des fournisseurs…",queried:"{n} sources interrogées en {ms} ms",offersFound:"{o} offres reçues, {d} doublons fusionnés",offers:"offres",off:"désactivé",wait:"en attente…",
+filters:"Filtres",fName:"Nom de l’hôtel",sort:"Trier par",sPrice:"Prix croissant",sStars:"Catégorie",sName:"Nom",stars:"Étoiles",starsL:"étoiles",board:"Pension",anyBoard:"Toutes",refundOnly:"Annulation gratuite uniquement",suppliers:"Fournisseurs",
+hotelsFound:"{n} hôtels disponibles",noResult:"Aucun hôtel ne correspond à ces filtres.",from:"à partir de",nights:"nuits",roomsShort:"ch.",seeAll:"Voir les {n} offres",fewer:"Réduire",instant:"Confirmation immédiate",onRequest:"Sur demande",
+freeCancel:"Annulation gratuite jusqu’au {d}",nonRef:"Non remboursable",netAgency:"Net agence",commission:"Commission",supplierCost:"Coût fournisseur",margin:"Marge",book:"Réserver",
+r_std:"Chambre double standard",r_sea:"Chambre double vue mer",r_sup:"Chambre supérieure",r_fam:"Chambre familiale",r_ste:"Suite junior",
+b_RO:"Logement seul",b_BB:"Petit-déjeuner",b_HB:"Demi-pension",b_FB:"Pension complète",b_AI:"Tout compris",
+a_wifi:"Wi-Fi",a_pool:"Piscine",a_park:"Parking",a_spa:"Spa",a_beach:"Plage",a_shuttle:"Navette aéroport",a_gym:"Salle de sport",a_hammam:"Hammam",
+ar_centre:"Centre-ville",ar_sea:"Front de mer",ar_biz:"Quartier d’affaires",ar_tour:"Zone touristique",ar_old:"Vieille ville",
+bookTitle:"Finaliser la réservation",dates:"Dates",occupancy:"Occupation",boardL:"Pension",roomL:"Chambre",policy:"Annulation",priceClient:"Prix client",roomN:"Chambre {n} — occupant principal",civ:"Civilité",mr:"M.",mrs:"Mme",first:"Prénom",last:"Nom",
+cref:"Référence dossier agence",request:"Demande particulière (non garantie)",payment:"Règlement",payCredit:"Débit du compte agence",payCard:"Carte bancaire / CIB",testMode:"mode test",cardNo:"Numéro de carte",cardExp:"Expiration",cardCvc:"Cryptogramme",testCard:"Carte de test pré-remplie, aucun débit réel.",
+terms:"J’ai vérifié les noms des voyageurs et j’accepte les conditions d’annulation.",cancel:"Annuler",confirmBook:"Confirmer la réservation",required:"Champ obligatoire",errCredit:"Crédit agence insuffisant : payez par carte ou déclarez un versement.",errCard:"Numéro de carte invalide (16 chiffres).",errTerms:"Veuillez cocher la confirmation.",
+agencySuspended:"Ce compte agence est suspendu : réservation impossible. Contactez l’administrateur de la plateforme.",sending:"Transmission au fournisseur {s}…",bookedOk:"Réservation confirmée",bookedPending:"Demande transmise — en attente de confirmation du fournisseur",bookRef:"Référence",supRef:"Confirmation fournisseur",
+emailSent:"Email de confirmation envoyé à l’agence (simulation)",cardPaid:"Paiement accepté (mode test)",viewVoucher:"Voucher",viewInvoice:"Facture",goBookings:"Voir les réservations",close:"Fermer",
+st_confirmed:"Confirmée",st_pending:"En attente",st_cancelled:"Annulée",searchBk:"Rechercher (réf., voyageur, hôtel)",status:"Statut",allStatus:"Tous les statuts",allAgencies:"Toutes les agences",exportCsv:"Exporter CSV",csvDone:"Export CSV généré",
+th_ref:"Référence",th_hotel:"Hôtel",th_guest:"Voyageur",th_stay:"Séjour",th_amount:"Montant",th_actions:"Actions",th_agency:"Agence",th_supplier:"Fournisseur",
+cancelTitle:"Annuler la réservation {id}",confirm:"Confirmer",refuse:"Refuser",details:"Réservation {id}",fee:"Frais d’annulation",refund:"Montant recrédité",cancelReason:"Motif",cr1:"Demande du client",cr2:"Changement de dates",cr3:"Problème de visa",confirmCancel:"Confirmer l’annulation",cancelDone:"Annulation transmise au fournisseur (simulation)",
+h_created:"Réservation créée",h_confirmed:"Confirmée par le fournisseur",h_pending:"Envoyée au fournisseur (sur demande)",h_cancelled:"Annulée",h_refused:"Refusée par le fournisseur",h_invoice:"Facture émise",h_av:"Avoir émis",history:"Historique",
+voucherTitle:"Voucher d’hébergement",print:"Imprimer / PDF",voucherNote:"Prestation réglée par l’agence. Seuls les extras sont à régler par le client à l’hôtel.",guests:"Voyageurs",address:"Adresse",bookedBy:"Réservé par",
+invTitle:"Facture",creditNote:"Avoir",billedTo:"Facturé à",publicPrice:"Prix public",netToPay:"Net à payer",refundL:"Remboursement suite à annulation",paidCredit:"Compte agence",paidCard:"Carte (mode test)",inclTax:"Montants TTC en dinars algériens (DZD).",desc:"Désignation",total:"Total",
+invNo:"N°",type:"Type",date:"Date",amount:"Montant",settlement:"Règlement",show:"Afficher",noRows:"Aucun résultat.",
+creditLimit:"Plafond de crédit",outstanding:"Encours",category:"Catégorie",movements:"Mouvements du compte",label:"Libellé",debit:"Débit",credit:"Crédit",declarePay:"Déclarer un versement",payAmount:"Montant (DA)",payDate:"Date du versement",payMode:"Mode",payRef:"Référence bancaire",
+m_transfer:"Virement",m_cheque:"Chèque",m_cash:"Versement espèces",send:"Envoyer",payDeclared:"Versement déclaré, en attente de validation",pendingVal:"En attente de validation",openBal:"Solde d’ouverture",payRecv:"Versement reçu",bookingDebit:"Réservation",cancelCredit:"Annulation",agencyInfo:"Informations agence",user:"Utilisateur",errAmount:"Montant invalide",errFuture:"Date future non autorisée",
+kRevenue:"Volume de ventes",kMargin:"Marge plateforme",kActive:"Réservations actives",kPending:"En attente fournisseur",kAgencies:"Agences actives",salesByDest:"Ventes par destination",salesBySup:"Achats par fournisseur",alerts:"À traiter",latest:"Dernières réservations",
+alPending:"{n} réservation(s) en attente de confirmation",alPay:"{n} versement(s) agence à valider",alCredit:"{a} : {p} % du crédit utilisé",alSusp:"{a} : compte suspendu",noAlert:"Rien à signaler.",
+newAgency:"Nouvelle agence",editAgency:"Modifier l’agence",edit:"Modifier",name:"Raison sociale",city:"Ville",email:"Email",rc:"N° registre du commerce",st_active:"Active",st_suspended:"Suspendue",suspend:"Suspendre",activate:"Réactiver",usage:"Utilisation",save:"Enregistrer",saved:"Modifications enregistrées",
+paysToValidate:"Versements à valider",validate:"Valider",reject:"Rejeter",payValidated:"Versement validé : crédit agence mis à jour",payRejected:"Versement rejeté",agencyCreated:"Agence créée — identifiants envoyés par email (simulation)",errEmail:"Email invalide",
+markups:"Majorations par zone et fournisseur (%)",markupsHelp:"Pourcentage appliqué au coût fournisseur pour obtenir le prix client. Effet immédiat sur les résultats de recherche.",cats:"Commissions par catégorie d’agence (%)",catsHelp:"Part du prix client reversée à l’agence, déduite à la facturation.",
+simulator:"Simulateur de prix",netCost:"Coût fournisseur (DA)",negMargin:"Attention : marge négative, la commission dépasse la majoration.",zone:"Zone",supplier:"Fournisseur",invalidRule:"Valeur entre 0 et 50",
+proto:"Protocole",endpoint:"Point d’accès",zones:"Zones couvertes",latency:"Latence moyenne",success:"Taux de succès",mapped:"Hôtels mappés",enabled:"Actif",testConn:"Tester la connexion",testing:"Test en cours…",sampleReq:"Exemple d’échange",logs:"Journal des appels API",
+connOk:"{s} : connexion OK ({ms} ms)",directContracts:"Contrats directs",supOn:"{s} activé",supOff:"{s} désactivé : exclu des recherches",popular:"Destinations fréquentes",emptySearch:"Lancez une recherche pour comparer en une fois les offres de tous les fournisseurs connectés.",
+confirmedToast:"Réservation {id} confirmée",refusedToast:"Réservation {id} refusée",nightsN:"{n} nuits",platform:"Plateforme de réservation hôtelière B2B",count:"{n} réservations",invCount:"{n} documents",mkFor:"Majoration {z} — {s}",syncNote:"Catalogue synchronisé chaque nuit, prix et disponibilités en temps réel."},
+en:{demo1:"Demo",demo2:"fictitious data",reset:"Reset demo",resetDone:"Demo reset",navLabel:"Main navigation",language:"Language",viewAs:"View as",roleAgency:"Agency",roleAdmin:"Administrator",
+nav_search:"Search",nav_bookings:"Bookings",nav_invoices:"Invoices",nav_account:"My account",nav_dash:"Dashboard",nav_agencies:"Agencies",nav_pricing:"Pricing & commissions",nav_suppliers:"Suppliers",
+cur:"DZD",available:"Available",searchTitle:"Search hotels",dest:"Destination",ci:"Check-in",co:"Check-out",rooms:"Rooms",adultsPR:"Adults / room",adults:"adults",children:"Children",childrenL:"children",forAgency:"Book for agency",searchBtn:"Search",
+errDates:"Check-out must be after check-in.",errPast:"Check-in cannot be in the past.",errLong:"Stay limited to 30 nights.",
+zDZ:"Algeria",zTN:"Tunisia",zINT:"International",querying:"Querying suppliers…",queried:"{n} sources queried in {ms} ms",offersFound:"{o} offers received, {d} duplicates merged",offers:"offers",off:"disabled",wait:"waiting…",
+filters:"Filters",fName:"Hotel name",sort:"Sort by",sPrice:"Lowest price",sStars:"Star rating",sName:"Name",stars:"Stars",starsL:"stars",board:"Board",anyBoard:"All",refundOnly:"Free cancellation only",suppliers:"Suppliers",
+hotelsFound:"{n} hotels available",noResult:"No hotel matches these filters.",from:"from",nights:"nights",roomsShort:"rm",seeAll:"See all {n} offers",fewer:"Show less",instant:"Instant confirmation",onRequest:"On request",
+freeCancel:"Free cancellation until {d}",nonRef:"Non-refundable",netAgency:"Agency net",commission:"Commission",supplierCost:"Supplier cost",margin:"Margin",book:"Book",
+r_std:"Standard double room",r_sea:"Sea view double room",r_sup:"Superior room",r_fam:"Family room",r_ste:"Junior suite",
+b_RO:"Room only",b_BB:"Bed & breakfast",b_HB:"Half board",b_FB:"Full board",b_AI:"All inclusive",
+a_wifi:"Wi-Fi",a_pool:"Pool",a_park:"Parking",a_spa:"Spa",a_beach:"Beach",a_shuttle:"Airport shuttle",a_gym:"Gym",a_hammam:"Hammam",
+ar_centre:"City centre",ar_sea:"Seafront",ar_biz:"Business district",ar_tour:"Tourist area",ar_old:"Old town",
+bookTitle:"Complete booking",dates:"Dates",occupancy:"Occupancy",boardL:"Board",roomL:"Room",policy:"Cancellation",priceClient:"Customer price",roomN:"Room {n} — lead guest",civ:"Title",mr:"Mr",mrs:"Mrs",first:"First name",last:"Last name",
+cref:"Agency file reference",request:"Special request (not guaranteed)",payment:"Payment",payCredit:"Charge agency account",payCard:"Bank card / CIB",testMode:"test mode",cardNo:"Card number",cardExp:"Expiry",cardCvc:"CVC",testCard:"Prefilled test card, no real charge.",
+terms:"I have checked guest names and accept the cancellation policy.",cancel:"Cancel",confirmBook:"Confirm booking",required:"Required field",errCredit:"Insufficient agency credit: pay by card or declare a payment.",errCard:"Invalid card number (16 digits).",errTerms:"Please tick the confirmation.",
+agencySuspended:"This agency account is suspended: booking unavailable. Please contact the platform administrator.",sending:"Sending to supplier {s}…",bookedOk:"Booking confirmed",bookedPending:"Request sent — awaiting supplier confirmation",bookRef:"Reference",supRef:"Supplier confirmation",
+emailSent:"Confirmation email sent to the agency (simulation)",cardPaid:"Payment approved (test mode)",viewVoucher:"Voucher",viewInvoice:"Invoice",goBookings:"View bookings",close:"Close",
+st_confirmed:"Confirmed",st_pending:"Pending",st_cancelled:"Cancelled",searchBk:"Search (ref, guest, hotel)",status:"Status",allStatus:"All statuses",allAgencies:"All agencies",exportCsv:"Export CSV",csvDone:"CSV export generated",
+th_ref:"Reference",th_hotel:"Hotel",th_guest:"Guest",th_stay:"Stay",th_amount:"Amount",th_actions:"Actions",th_agency:"Agency",th_supplier:"Supplier",
+cancelTitle:"Cancel booking {id}",confirm:"Confirm",refuse:"Decline",details:"Booking {id}",fee:"Cancellation fee",refund:"Amount credited back",cancelReason:"Reason",cr1:"Customer request",cr2:"Change of dates",cr3:"Visa issue",confirmCancel:"Confirm cancellation",cancelDone:"Cancellation sent to supplier (simulation)",
+h_created:"Booking created",h_confirmed:"Confirmed by supplier",h_pending:"Sent to supplier (on request)",h_cancelled:"Cancelled",h_refused:"Declined by supplier",h_invoice:"Invoice issued",h_av:"Credit note issued",history:"History",
+voucherTitle:"Accommodation voucher",print:"Print / PDF",voucherNote:"Service prepaid by the agency. Only extras are payable by the guest at the hotel.",guests:"Guests",address:"Address",bookedBy:"Booked by",
+invTitle:"Invoice",creditNote:"Credit note",billedTo:"Billed to",publicPrice:"Public price",netToPay:"Net payable",refundL:"Refund after cancellation",paidCredit:"Agency account",paidCard:"Card (test mode)",inclTax:"Amounts incl. VAT in Algerian dinars (DZD).",desc:"Description",total:"Total",
+invNo:"No.",type:"Type",date:"Date",amount:"Amount",settlement:"Payment",show:"View",noRows:"No results.",
+creditLimit:"Credit limit",outstanding:"Outstanding",category:"Tier",movements:"Account activity",label:"Label",debit:"Debit",credit:"Credit",declarePay:"Declare a payment",payAmount:"Amount (DZD)",payDate:"Payment date",payMode:"Method",payRef:"Bank reference",
+m_transfer:"Bank transfer",m_cheque:"Cheque",m_cash:"Cash deposit",send:"Submit",payDeclared:"Payment declared, awaiting validation",pendingVal:"Awaiting validation",openBal:"Opening balance",payRecv:"Payment received",bookingDebit:"Booking",cancelCredit:"Cancellation",agencyInfo:"Agency details",user:"User",errAmount:"Invalid amount",errFuture:"Future date not allowed",
+kRevenue:"Sales volume",kMargin:"Platform margin",kActive:"Active bookings",kPending:"Awaiting supplier",kAgencies:"Active agencies",salesByDest:"Sales by destination",salesBySup:"Purchases by supplier",alerts:"To do",latest:"Latest bookings",
+alPending:"{n} booking(s) awaiting confirmation",alPay:"{n} agency payment(s) to validate",alCredit:"{a}: {p}% of credit used",alSusp:"{a}: account suspended",noAlert:"Nothing to report.",
+newAgency:"New agency",editAgency:"Edit agency",edit:"Edit",name:"Company name",city:"City",email:"Email",rc:"Trade register no.",st_active:"Active",st_suspended:"Suspended",suspend:"Suspend",activate:"Reactivate",usage:"Usage",save:"Save",saved:"Changes saved",
+paysToValidate:"Payments to validate",validate:"Validate",reject:"Reject",payValidated:"Payment validated: agency credit updated",payRejected:"Payment rejected",agencyCreated:"Agency created — credentials emailed (simulation)",errEmail:"Invalid email",
+markups:"Markups by zone and supplier (%)",markupsHelp:"Percentage added to supplier cost to get the customer price. Applies instantly to search results.",cats:"Commission by agency tier (%)",catsHelp:"Share of the customer price paid back to the agency, deducted on invoice.",
+simulator:"Price simulator",netCost:"Supplier cost (DZD)",negMargin:"Warning: negative margin, commission exceeds markup.",zone:"Zone",supplier:"Supplier",invalidRule:"Value between 0 and 50",
+proto:"Protocol",endpoint:"Endpoint",zones:"Coverage",latency:"Avg. latency",success:"Success rate",mapped:"Mapped hotels",enabled:"Enabled",testConn:"Test connection",testing:"Testing…",sampleReq:"Sample exchange",logs:"API call log",
+connOk:"{s}: connection OK ({ms} ms)",directContracts:"Direct contracts",supOn:"{s} enabled",supOff:"{s} disabled: excluded from searches",popular:"Popular destinations",emptySearch:"Run a search to compare offers from all connected suppliers at once.",
+confirmedToast:"Booking {id} confirmed",refusedToast:"Booking {id} declined",nightsN:"{n} nights",platform:"B2B hotel booking platform",count:"{n} bookings",invCount:"{n} documents",mkFor:"Markup {z} — {s}",syncNote:"Catalogue synced nightly, live prices and availability."},
+ar:{demo1:"عرض توضيحي",demo2:"بيانات وهمية",reset:"إعادة تعيين العرض",resetDone:"تمت إعادة تعيين العرض",navLabel:"التنقل الرئيسي",language:"اللغة",viewAs:"العرض بصفة",roleAgency:"وكالة",roleAdmin:"المسؤول",
+nav_search:"البحث",nav_bookings:"الحجوزات",nav_invoices:"الفواتير",nav_account:"حسابي",nav_dash:"لوحة القيادة",nav_agencies:"الوكالات",nav_pricing:"الأسعار والعمولات",nav_suppliers:"المزوّدون",
+cur:"د.ج",available:"المتاح",searchTitle:"البحث عن فندق",dest:"الوجهة",ci:"الوصول",co:"المغادرة",rooms:"الغرف",adultsPR:"بالغون / غرفة",adults:"بالغين",children:"الأطفال",childrenL:"أطفال",forAgency:"الحجز لحساب الوكالة",searchBtn:"بحث",
+errDates:"يجب أن يكون تاريخ المغادرة بعد تاريخ الوصول.",errPast:"لا يمكن أن يكون تاريخ الوصول في الماضي.",errLong:"الإقامة محدودة بـ 30 ليلة.",
+zDZ:"الجزائر",zTN:"تونس",zINT:"دولي",querying:"جارٍ استعلام المزوّدين…",queried:"تم استعلام {n} مصادر في {ms} مللي ثانية",offersFound:"{o} عرضًا مستلمًا، ودمج {d} مكررات",offers:"عروض",off:"معطّل",wait:"قيد الانتظار…",
+filters:"التصفية",fName:"اسم الفندق",sort:"الترتيب حسب",sPrice:"السعر الأدنى",sStars:"التصنيف",sName:"الاسم",stars:"النجوم",starsL:"نجوم",board:"نوع الإقامة",anyBoard:"الكل",refundOnly:"الإلغاء المجاني فقط",suppliers:"المزوّدون",
+hotelsFound:"{n} فنادق متاحة",noResult:"لا يوجد فندق يطابق هذه المعايير.",from:"ابتداءً من",nights:"ليالٍ",roomsShort:"غرفة",seeAll:"عرض كل العروض ({n})",fewer:"عرض أقل",instant:"تأكيد فوري",onRequest:"عند الطلب",
+freeCancel:"إلغاء مجاني حتى {d}",nonRef:"غير قابل للاسترداد",netAgency:"الصافي للوكالة",commission:"العمولة",supplierCost:"تكلفة المزوّد",margin:"الهامش",book:"احجز",
+r_std:"غرفة مزدوجة عادية",r_sea:"غرفة مزدوجة مطلة على البحر",r_sup:"غرفة ممتازة",r_fam:"غرفة عائلية",r_ste:"جناح صغير",
+b_RO:"إقامة فقط",b_BB:"مع الفطور",b_HB:"نصف إقامة",b_FB:"إقامة كاملة",b_AI:"شامل كليًا",
+a_wifi:"واي فاي",a_pool:"مسبح",a_park:"موقف سيارات",a_spa:"سبا",a_beach:"شاطئ",a_shuttle:"نقل من المطار",a_gym:"قاعة رياضة",a_hammam:"حمّام",
+ar_centre:"وسط المدينة",ar_sea:"الواجهة البحرية",ar_biz:"حي الأعمال",ar_tour:"المنطقة السياحية",ar_old:"المدينة القديمة",
+bookTitle:"إتمام الحجز",dates:"التواريخ",occupancy:"الإشغال",boardL:"نوع الإقامة",roomL:"الغرفة",policy:"الإلغاء",priceClient:"سعر العميل",roomN:"الغرفة {n} — النزيل الرئيسي",civ:"اللقب",mr:"السيد",mrs:"السيدة",first:"الاسم",last:"اللقب العائلي",
+cref:"مرجع ملف الوكالة",request:"طلب خاص (غير مضمون)",payment:"الدفع",payCredit:"الخصم من حساب الوكالة",payCard:"بطاقة بنكية / CIB",testMode:"وضع الاختبار",cardNo:"رقم البطاقة",cardExp:"تاريخ الانتهاء",cardCvc:"رمز التحقق",testCard:"بطاقة اختبار معبأة مسبقًا، دون أي خصم فعلي.",
+terms:"تحققت من أسماء المسافرين وأوافق على شروط الإلغاء.",cancel:"إلغاء",confirmBook:"تأكيد الحجز",required:"حقل إلزامي",errCredit:"رصيد الوكالة غير كافٍ: ادفع بالبطاقة أو صرّح بدفعة.",errCard:"رقم البطاقة غير صالح (16 رقمًا).",errTerms:"يرجى تأكيد الموافقة.",
+agencySuspended:"حساب هذه الوكالة معلّق: الحجز غير ممكن. يرجى الاتصال بمسؤول المنصة.",sending:"جارٍ الإرسال إلى المزوّد {s}…",bookedOk:"تم تأكيد الحجز",bookedPending:"تم إرسال الطلب — في انتظار تأكيد المزوّد",bookRef:"المرجع",supRef:"تأكيد المزوّد",
+emailSent:"تم إرسال بريد التأكيد إلى الوكالة (محاكاة)",cardPaid:"تم قبول الدفع (وضع الاختبار)",viewVoucher:"القسيمة",viewInvoice:"الفاتورة",goBookings:"عرض الحجوزات",close:"إغلاق",
+st_confirmed:"مؤكد",st_pending:"قيد الانتظار",st_cancelled:"ملغى",searchBk:"بحث (مرجع، نزيل، فندق)",status:"الحالة",allStatus:"كل الحالات",allAgencies:"كل الوكالات",exportCsv:"تصدير CSV",csvDone:"تم إنشاء ملف CSV",
+th_ref:"المرجع",th_hotel:"الفندق",th_guest:"النزيل",th_stay:"الإقامة",th_amount:"المبلغ",th_actions:"إجراءات",th_agency:"الوكالة",th_supplier:"المزوّد",
+cancelTitle:"إلغاء الحجز {id}",confirm:"تأكيد",refuse:"رفض",details:"الحجز {id}",fee:"رسوم الإلغاء",refund:"المبلغ المسترد",cancelReason:"السبب",cr1:"طلب العميل",cr2:"تغيير التواريخ",cr3:"مشكلة في التأشيرة",confirmCancel:"تأكيد الإلغاء",cancelDone:"تم إرسال الإلغاء إلى المزوّد (محاكاة)",
+h_created:"تم إنشاء الحجز",h_confirmed:"أكّده المزوّد",h_pending:"أُرسل إلى المزوّد (عند الطلب)",h_cancelled:"ملغى",h_refused:"رفضه المزوّد",h_invoice:"صدرت الفاتورة",h_av:"صدر إشعار دائن",history:"السجل",
+voucherTitle:"قسيمة الإقامة",print:"طباعة / PDF",voucherNote:"الخدمة مدفوعة من طرف الوكالة. الإضافات فقط على حساب النزيل في الفندق.",guests:"المسافرون",address:"العنوان",bookedBy:"حُجز بواسطة",
+invTitle:"فاتورة",creditNote:"إشعار دائن",billedTo:"فاتورة إلى",publicPrice:"السعر العام",netToPay:"الصافي المستحق",refundL:"استرداد بعد الإلغاء",paidCredit:"حساب الوكالة",paidCard:"بطاقة (وضع الاختبار)",inclTax:"المبالغ شاملة الرسوم بالدينار الجزائري.",desc:"البيان",total:"المجموع",
+invNo:"رقم",type:"النوع",date:"التاريخ",amount:"المبلغ",settlement:"الدفع",show:"عرض",noRows:"لا توجد نتائج.",
+creditLimit:"سقف الائتمان",outstanding:"المستحق",category:"الفئة",movements:"حركات الحساب",label:"البيان",debit:"مدين",credit:"دائن",declarePay:"التصريح بدفعة",payAmount:"المبلغ (د.ج)",payDate:"تاريخ الدفع",payMode:"الطريقة",payRef:"المرجع البنكي",
+m_transfer:"تحويل بنكي",m_cheque:"شيك",m_cash:"إيداع نقدي",send:"إرسال",payDeclared:"تم التصريح بالدفعة، في انتظار المصادقة",pendingVal:"في انتظار المصادقة",openBal:"الرصيد الافتتاحي",payRecv:"دفعة مستلمة",bookingDebit:"حجز",cancelCredit:"إلغاء",agencyInfo:"معلومات الوكالة",user:"المستخدم",errAmount:"مبلغ غير صالح",errFuture:"لا يُسمح بتاريخ مستقبلي",
+kRevenue:"حجم المبيعات",kMargin:"هامش المنصة",kActive:"الحجوزات النشطة",kPending:"في انتظار المزوّد",kAgencies:"الوكالات النشطة",salesByDest:"المبيعات حسب الوجهة",salesBySup:"المشتريات حسب المزوّد",alerts:"للمعالجة",latest:"آخر الحجوزات",
+alPending:"{n} حجز في انتظار التأكيد",alPay:"{n} دفعة وكالة للمصادقة",alCredit:"{a}: تم استخدام {p}% من الائتمان",alSusp:"{a}: الحساب معلّق",noAlert:"لا شيء للإبلاغ عنه.",
+newAgency:"وكالة جديدة",editAgency:"تعديل الوكالة",edit:"تعديل",name:"الاسم التجاري",city:"المدينة",email:"البريد الإلكتروني",rc:"رقم السجل التجاري",st_active:"نشطة",st_suspended:"معلّقة",suspend:"تعليق",activate:"إعادة التفعيل",usage:"الاستخدام",save:"حفظ",saved:"تم حفظ التعديلات",
+paysToValidate:"دفعات للمصادقة",validate:"مصادقة",reject:"رفض",payValidated:"تمت المصادقة: تم تحديث رصيد الوكالة",payRejected:"تم رفض الدفعة",agencyCreated:"تم إنشاء الوكالة — أُرسلت بيانات الدخول (محاكاة)",errEmail:"بريد إلكتروني غير صالح",
+markups:"الزيادات حسب المنطقة والمزوّد (%)",markupsHelp:"نسبة تُضاف إلى تكلفة المزوّد للحصول على سعر العميل. تُطبّق فورًا على نتائج البحث.",cats:"العمولات حسب فئة الوكالة (%)",catsHelp:"حصة الوكالة من سعر العميل، تُخصم عند الفوترة.",
+simulator:"محاكي الأسعار",netCost:"تكلفة المزوّد (د.ج)",negMargin:"تنبيه: هامش سلبي، العمولة تتجاوز الزيادة.",zone:"المنطقة",supplier:"المزوّد",invalidRule:"قيمة بين 0 و 50",
+proto:"البروتوكول",endpoint:"نقطة الوصول",zones:"المناطق المغطاة",latency:"متوسط زمن الاستجابة",success:"نسبة النجاح",mapped:"الفنادق المربوطة",enabled:"مفعّل",testConn:"اختبار الاتصال",testing:"جارٍ الاختبار…",sampleReq:"مثال على التبادل",logs:"سجل استدعاءات API",
+connOk:"{s}: الاتصال ناجح ({ms} مللي ثانية)",directContracts:"عقود مباشرة",supOn:"تم تفعيل {s}",supOff:"تم تعطيل {s}: مستبعد من البحث",popular:"وجهات شائعة",emptySearch:"ابدأ البحث لمقارنة عروض جميع المزوّدين المتصلين دفعة واحدة.",
+confirmedToast:"تم تأكيد الحجز {id}",refusedToast:"تم رفض الحجز {id}",nightsN:"{n} ليالٍ",platform:"منصة حجز فندقي للمهنيين",count:"{n} حجوزات",invCount:"{n} مستندات",mkFor:"الزيادة {z} — {s}",syncNote:"مزامنة الكتالوج ليلًا، والأسعار والتوفر في الوقت الفعلي."}
+};
+let S;
+function t(k,p){let s=(T[S.lang]&&T[S.lang][k])??T.fr[k]??k;if(p)for(const x in p)s=s.split("{"+x+"}").join(p[x]);return s}
+const LOC={fr:"fr-FR",en:"en-GB",ar:"ar-DZ-u-nu-latn"};
+const money=n=>new Intl.NumberFormat(LOC[S.lang],{maximumFractionDigits:0}).format(Math.round(n))+" "+t("cur");
+const num=n=>new Intl.NumberFormat(LOC[S.lang],{maximumFractionDigits:1}).format(n);
+const fd=s=>s?new Intl.DateTimeFormat(LOC[S.lang],{day:"2-digit",month:"short",year:"numeric"}).format(new Date(s+"T12:00:00")):"";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+const TODAY=iso(new Date());
+function addDays(s,n){const d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return iso(d)}
+function diff(a,b){return Math.round((new Date(b+"T12:00:00")-new Date(a+"T12:00:00"))/864e5)}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rng(s){let a=hash(s);return()=>{a=a+0x6D2B79F5|0;let x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296}}
+
+/* ---------- icons ---------- */
+const IC={search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',bed:'<path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="11.5" r="2"/>',file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/>',wallet:'<path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2"/><circle cx="16" cy="14.5" r="1"/>',chart:'<path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/>',building:'<path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4"/>',sliders:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',plug:'<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/>',pin:'<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',check:'<path d="m5 12 5 5 9-10"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',print:'<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3"/><path d="M7 14h10v7H7z"/>',download:'<path d="M12 3v12m-5-5 5 5 5-5M4 21h16"/>',plus:'<path d="M12 5v14M5 12h14"/>',star:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.5 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',alert:'<path d="M12 3 2 20h20zM12 10v4M12 17h.01"/>',eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',code:'<path d="m8 7-5 5 5 5M16 7l5 5-5 5"/>',loader:'<path d="M12 3a9 9 0 1 0 9 9"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',key:'<path d="M3 21V10l9-7 9 7v11h-6v-6H9v6z"/>'};
+const ic=(n,c="")=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const starsHtml=n=>`<span class="stars" role="img" aria-label="${n} ${t("starsL")}">${ic("star","f").repeat(n)}</span>`;
+
+/* ---------- static catalogue ---------- */
+const DEST=[
+{id:"alg",zone:"DZ",n:["Alger","Algiers","الجزائر العاصمة"],c:0,coast:1},{id:"orn",zone:"DZ",n:["Oran","Oran","وهران"],c:0,coast:1},{id:"cst",zone:"DZ",n:["Constantine","Constantine","قسنطينة"],c:0},{id:"ann",zone:"DZ",n:["Annaba","Annaba","عنابة"],c:0,coast:1},{id:"ghd",zone:"DZ",n:["Ghardaïa","Ghardaia","غرداية"],c:0},{id:"djn",zone:"DZ",n:["Djanet","Djanet","جانت"],c:0},
+{id:"ham",zone:"TN",n:["Hammamet","Hammamet","الحمامات"],c:1,coast:1},{id:"sou",zone:"TN",n:["Sousse","Sousse","سوسة"],c:1,coast:1},{id:"djb",zone:"TN",n:["Djerba","Djerba","جربة"],c:1,coast:1},{id:"tun",zone:"TN",n:["Tunis","Tunis","تونس العاصمة"],c:1,coast:1},
+{id:"ist",zone:"INT",n:["Istanbul","Istanbul","إسطنبول"],c:2,coast:1},{id:"dxb",zone:"INT",n:["Dubaï","Dubai","دبي"],c:3,coast:1},{id:"cai",zone:"INT",n:["Le Caire","Cairo","القاهرة"],c:4}];
+const COUNTRY=[["Algérie","Algeria","الجزائر"],["Tunisie","Tunisia","تونس"],["Turquie","Türkiye","تركيا"],["Émirats arabes unis","United Arab Emirates","الإمارات"],["Égypte","Egypt","مصر"]];
+const LI=()=>({fr:0,en:1,ar:2}[S.lang]);
+const D=id=>DEST.find(d=>d.id===id);
+const dn=d=>d.n[LI()],cn=d=>COUNTRY[d.c][LI()];
+const HN={alg:["Hôtel Casbah Horizon","Résidence Les Pins de Sidi Fredj","Grand Hôtel de l’Amirauté","Alger Marina Suites","Hôtel Jardins d’El Biar"],orn:["Hôtel Santa Cruz Panorama","Oran Corniche Resort","Hôtel Le Front de Mer","Résidence Les Andalouses"],cst:["Hôtel Les Ponts Suspendus","Cirta Grand Hôtel","Résidence Rhumel"],ann:["Hôtel Hippone Plage","Seraïdi Hills Resort","Annaba Bay Hôtel"],ghd:["Ksar Mzab Lodge","Hôtel Oasis de Beni Isguen"],djn:["Tassili Camp Lodge","Hôtel Erg Admer"],
+ham:["Yasmine Garden Resort","Hôtel Les Orangers Bleus","Medina Beach Club","Cap Bon Palm Hôtel"],sou:["Sousse Pearl Hôtel","Hôtel Kantaoui Marina","Riad El Kasbah Sousse"],djb:["Djerba Lagoon Resort","Hôtel Houmt Souk Palms","Dunes de Midoun Club"],tun:["Hôtel Carthage Avenue","Terrasses de Sidi Bou"],
+ist:["Bosphorus View Hotel","Sultanahmet Garden Inn","Taksim Central Suites"],dxb:["Creek Pearl Hotel","Marina Skyline Residence","Deira Souk Hotel"],cai:["Nile Garden Hotel","Pyramids View Lodge"]};
+const BASE={DZ:{3:9000,4:15500,5:26000},TN:{3:8200,4:13000,5:21000},INT:{3:14000,4:22000,5:38000}};
+const ROOMS=["std","sea","sup","fam","ste"],RM={std:1,sea:1.15,sup:1.12,fam:1.35,ste:1.6};
+const BOARDS=["RO","BB","HB","FB","AI"],BM={RO:.88,BB:1,HB:1.18,FB:1.32,AI:1.5};
+const AMEN=["wifi","pool","park","spa","beach","shuttle","gym","hammam"],AREAS=["centre","sea","biz","tour","old"];
+const HOTELS=[];
+DEST.forEach(d=>HN[d.id].forEach((name,i)=>{const r=rng(d.id+"h"+i);const stars=[3,4,4,5,5,3,4][Math.floor(r()*7)];
+ let am=AMEN.filter(a=>a!=="beach"||d.coast).filter(()=>r()<.5);if(!am.includes("wifi"))am.unshift("wifi");
+ let area=AREAS[Math.floor(r()*5)];if(area==="sea"&&!d.coast)area="centre";
+ HOTELS.push({id:d.id+"-"+i,name,dest:d.id,zone:d.zone,stars,base:BASE[d.zone][stars]*(.85+r()*.35),area,amen:am.slice(0,5),street:(10+Math.floor(r()*90))});}));
+const H=id=>HOTELS.find(h=>h.id===id);
+const SUP=[
+{id:"S1",name:"MedConnect",proto:"API REST · JSON",endpoint:"https://api.medconnect.example/v3/hotels/availability",zones:["DZ","TN","INT"],ref:"MC",mapped:2840},
+{id:"S2",name:"Sahel Beds",proto:"XML · SOAP (OTA 2015B)",endpoint:"https://xml.sahelbeds.example/ota/HotelAvailRQ",zones:["DZ","TN"],ref:"SB",mapped:1190},
+{id:"S3",name:"GlobeRooms",proto:"API REST · JSON",endpoint:"https://connect.globerooms.example/api/v2/search",zones:["TN","INT"],ref:"GR",mapped:5120},
+{id:"S4",name:"",proto:"Stock interne · allotements",endpoint:"—",zones:["DZ"],ref:"DIR",mapped:46}];
+const SP=id=>SUP.find(s=>s.id===id);
+const supName=id=>id==="S4"?t("directContracts"):SP(id).name;
+
+function offersFor(h,s,all){
+ const n=diff(s.ci,s.co),r=rng(h.id+s.ci+s.co+s.adults+s.children),d=D(h.dest);
+ const occ=[0,.8,1,1.3,1.55][s.adults]+.2*s.children;const raw=[];
+ SUP.filter(x=>x.zones.includes(h.zone)).forEach(sp=>{
+  const skip=r()<.25&&raw.length;const k=1+Math.floor(r()*3);if(skip)return;
+  for(let i=0;i<k;i++){let room=ROOMS[Math.floor(r()*5)];if(room==="sea"&&!d.coast)room="sup";
+   const board=h.zone==="INT"&&r()<.6?(r()<.5?"RO":"BB"):BOARDS[Math.floor(r()*5)];
+   const night=h.base*RM[room]*BM[board]*occ*(.93+r()*.14);const refund=r()<.7;
+   raw.push({id:h.id+sp.id+i,sup:sp.id,room,board,net:Math.round(night*n*s.rooms/10)*10,refund,deadline:refund?addDays(s.ci,-(2+Math.floor(r()*6))):null,onReq:r()<.12});}
+ });
+ const act=raw.filter(o=>all||S.suppliers[o.sup].on);const best={};
+ act.forEach(o=>{const k=o.room+o.board+o.refund;if(!best[k]||best[k].net>o.net)best[k]=o});
+ const list=Object.values(best);return{list,raw:act,dup:act.length-list.length};
+}
+const comOf=a=>S.cats[a.cat];
+function pricing(net,zone,sup,ag){const mk=(S.rules[zone]||{})[sup]??0,cr=comOf(ag);const sell=Math.round(net*(1+mk/100)/10)*10;const com=Math.round(sell*cr/100);const an=sell-com;return{net,mk,cr,sell,com,an,margin:an-net}}
+const AG=id=>S.agencies.find(a=>a.id===id);
+const ME="A1";
+const pricingAgency=()=>AG(S.role==="agency"?ME:(S.search.ag||ME));
+function usedOf(a){let u=a.open;S.bookings.forEach(b=>{if(b.ag!==a.id||b.pay!=="credit")return;u+=b.status==="cancelled"?b.fee:b.an});S.payments.forEach(p=>{if(p.ag===a.id&&p.status==="validated")u-=p.amount});return u}
+const availOf=a=>a.limit-usedOf(a);
+
+/* ---------- state ---------- */
+const KEY="b2b-hotel-demo-491388";
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function mkBooking({ag,h,s,o,guests,cref="",req="",pay="credit",created=TODAY,status}){
+ const p=pricing(o.net,h.zone,o.sup,AG(ag));S.seq++;
+ const b={id:"NZ-"+(24100+S.seq),ag,hid:h.id,ci:s.ci,co:s.co,rooms:s.rooms,adults:s.adults,children:s.children,room:o.room,board:o.board,sup:o.sup,net:p.net,sell:p.sell,com:p.com,cr:p.cr,an:p.an,margin:p.margin,refund:o.refund,deadline:o.deadline,status:"pending",supRef:"",guests,cref,req,pay,created,inv:"",av:"",fee:0,hist:[{d:created,k:"created"}]};
+ if((status||(o.onReq?"pending":"confirmed"))==="confirmed")confirmB(b,created);else b.hist.push({d:created,k:"pending"});
+ return b;
+}
+function confirmB(b,d){b.status="confirmed";b.supRef=SP(b.sup).ref+"-"+(1e6+Math.floor(Math.random()*9e6));b.hist.push({d,k:"confirmed",x:b.supRef});S.invSeq++;b.inv=`FA-${d.slice(0,4)}-${String(S.invSeq).padStart(5,"0")}`;b.hist.push({d,k:"invoice",x:b.inv})}
+function cancelB(b,d,fee){b.status="cancelled";b.fee=fee;b.cancelDate=d;b.hist.push({d,k:"cancelled"});if(b.inv&&b.an-fee>0){S.invSeq++;b.av=`AV-${d.slice(0,4)}-${String(S.invSeq).padStart(5,"0")}`;b.hist.push({d,k:"av",x:b.av})}}
+function feeOf(b){if(b.status==="pending")return 0;return b.refund&&TODAY<=b.deadline?0:b.an}
+function seed(){
+ const ci=addDays(TODAY,21);
+ S={lang:S?.lang||"fr",role:"agency",view:"search",seq:0,invSeq:180,
+  search:{dest:"alg",ci,co:addDays(ci,3),rooms:1,adults:2,children:0,ag:"A1"},
+  cats:{Standard:5,Silver:6,Gold:7},
+  rules:{DZ:{S1:10,S2:9,S4:12},TN:{S1:11,S2:10,S3:12},INT:{S1:13,S3:14}},
+  suppliers:{S1:{on:true,lat:310,ok:99.4},S2:{on:true,lat:640,ok:98.1},S3:{on:true,lat:420,ok:99.7},S4:{on:true,lat:35,ok:100}},
+  agencies:[
+   {id:"A1",name:"Sahara Horizons Voyages",city:"Alger",email:"resa@sahara-horizons.example",rc:"16/00-0123456 B 19",cat:"Gold",limit:3000000,open:420000,status:"active",user:"Karim Belkacem"},
+   {id:"A2",name:"Tassili Évasion",city:"Djanet",email:"contact@tassili-evasion.example",rc:"33/00-0045871 B 17",cat:"Silver",limit:1500000,open:180000,status:"active",user:"Lamia Rahmani"},
+   {id:"A3",name:"Bab El Bahr Tours",city:"Oran",email:"booking@babelbahr.example",rc:"31/00-0098214 B 20",cat:"Standard",limit:1000000,open:560000,status:"active",user:"Nassim Ferhat"},
+   {id:"A4",name:"Numidia Travel",city:"Constantine",email:"agence@numidia-travel.example",rc:"25/00-0067321 B 18",cat:"Silver",limit:2000000,open:250000,status:"active",user:"Selma Guerfi"},
+   {id:"A5",name:"Hodna Voyages",city:"M’Sila",email:"hodna.voyages@example.dz",rc:"28/00-0011876 B 21",cat:"Standard",limit:800000,open:760000,status:"suspended",user:"Omar Djebbar"},
+   {id:"A6",name:"Corniche Tours",city:"Annaba",email:"info@corniche-tours.example",rc:"23/00-0054410 B 22",cat:"Standard",limit:1200000,open:90000,status:"active",user:"Rym Bensaci"}],
+  bookings:[],
+  payments:[{id:"P1",ag:"A1",amount:350000,date:addDays(TODAY,-10),ref:"VIR-BDL-884120",mode:"transfer",status:"validated"},{id:"P2",ag:"A3",amount:200000,date:addDays(TODAY,-1),ref:"CHQ-0045871",mode:"cheque",status:"pending"},{id:"P3",ag:"A4",amount:150000,date:addDays(TODAY,-2),ref:"VIR-CPA-551902",mode:"transfer",status:"pending"}]};
+ const specs=[["A1","alg-0",-25,3,"confirmed","mrs","Amina","Haddad",-30,"credit"],["A1","ham-0",18,7,"confirmed","mr","Yacine","Bouzid",-5,"credit"],["A1","ist-1",30,4,"pending","mr","Rachid","Mansouri",-1,"credit"],["A1","djb-0",40,5,"confirmed","mrs","Leïla","Saïdi",-3,"card"],["A1","orn-1",6,2,"cancel","mr","Sofiane","Kaci",-12,"credit"],
+  ["A2","djn-0",12,4,"confirmed","mr","Hichem","Aït Ali",-8,"credit"],["A3","sou-1",22,6,"confirmed","mrs","Nadia","Benali",-6,"credit"],["A3","dxb-1",35,5,"confirmed","mr","Mehdi","Larbi",-2,"credit"],["A4","cst-0",9,2,"confirmed","mr","Walid","Cherif",-4,"credit"],["A4","tun-1",27,3,"pending","mrs","Samira","Toumi",0,"credit"],["A6","ann-0",15,3,"confirmed","mrs","Imane","Zerrouki",-7,"credit"],["A2","cai-0",45,5,"confirmed","mr","Farid","Hamidi",-9,"credit"]];
+ specs.forEach(([ag,hid,off,n,st,c,f,l,cr,pay])=>{const h=H(hid),s={ci:addDays(TODAY,off),co:addDays(TODAY,off+n),rooms:1,adults:2,children:0};const o=offersFor(h,s,true).list.sort((a,b)=>a.net-b.net)[0];
+  const b=mkBooking({ag,h,s,o,guests:[{c,f,l}],cref:"DOS-"+(3100+S.seq*7),pay,created:addDays(TODAY,cr),status:st==="pending"?"pending":"confirmed"});
+  if(st==="cancel")cancelB(b,addDays(TODAY,cr+3),0);S.bookings.unshift(b)});
+}
+try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+if(!S||!S.bookings)seed();
+
+/* ---------- UI state ---------- */
+let RUN=null;const EXP=new Set();
+const F={stars:[],board:"",refund:false,sup:[],q:"",sort:"price"};
+const BF={q:"",st:"",ag:""};let IQ="";
+const LOGS=[];
+function log(s){const d=new Date();LOGS.unshift(`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}  ${s}`);if(LOGS.length>40)LOGS.pop()}
+log("POST /ota/HotelAvailRQ  Sahel Beds  200  612 ms  (XML 48 Ko)");log("GET /v3/hotels/availability  MedConnect  200  298 ms");log("CRON catalogue sync  GlobeRooms  5 120 hôtels mappés, 14 nouveaux");
+
+const app=$("#app"),dlg=$("#dlg");
+function toast(msg){const host=dlg.open?dlg:document.body;let c=host.querySelector(":scope>.toasts");if(!c){c=document.createElement("div");c.className="toasts";c.setAttribute("role","status");c.setAttribute("aria-live","polite");host.appendChild(c)}
+ const e=document.createElement("div");e.className="toast";e.innerHTML=ic("check")+"<span>"+esc(msg)+"</span>";c.appendChild(e);setTimeout(()=>e.remove(),3800)}
+function modal(title,body,foot=""){dlg.innerHTML=`<div class="dh"><h2 id="dlg-t">${title}</h2><button type="button" class="icon-btn" data-a="close" aria-label="${t("close")}">${ic("x")}</button></div><div class="db">${body}</div>${foot?`<div class="df">${foot}</div>`:""}`;if(!dlg.open)dlg.showModal();dlg.scrollTop=0}
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+
+/* ---------- render ---------- */
+const NAV={agency:[["search","search"],["bookings","bed"],["invoices","file"],["account","wallet"]],admin:[["dash","chart"],["search","search"],["bookings","bed"],["invoices","file"],["agencies","building"],["pricing","sliders"],["suppliers","plug"]]};
+function header(){
+ const me=AG(ME);
+ return `<header class="top"><div class="brand"><span class="logo">${ic("key")}</span><span>Nzoul<b>Pro</b></span><span class="bdg brand">B2B</span></div>
+ <nav class="main" aria-label="${t("navLabel")}">${NAV[S.role].map(([v,i])=>`<button type="button" data-a="go" data-v="${v}"${S.view===v?' aria-current="page"':""}>${ic(i)}<span>${t("nav_"+v)}</span></button>`).join("")}</nav>
+ <div class="tools">${S.role==="agency"?`<span class="chip">${ic("wallet")}<span class="lbl">${t("available")}</span><b>${money(availOf(me))}</b></span>`:""}
+ <label class="sr" for="lang">${t("language")}</label><select id="lang" class="lang">${[["fr","Français"],["ar","العربية"],["en","English"]].map(([v,l])=>`<option value="${v}"${S.lang===v?" selected":""}>${l}</option>`).join("")}</select>
+ <div class="seg" role="group" aria-label="${t("viewAs")}"><button type="button" data-a="role" data-r="agency" aria-pressed="${S.role==="agency"}">${t("roleAgency")}</button><button type="button" data-a="role" data-r="admin" aria-pressed="${S.role==="admin"}">${t("roleAdmin")}</button></div></div></header>`;
+}
+const V={search:vSearch,bookings:vBookings,invoices:vInvoices,account:vAccount,dash:vDash,agencies:vAgencies,pricing:vPricing,suppliers:vSuppliers};
+function render(){
+ const h=document.documentElement;h.lang=S.lang;h.dir=S.lang==="ar"?"rtl":"ltr";
+ $("#band-t").innerHTML=`<b>${t("demo1")}</b> — ${t("demo2")}`;$("#band-r").textContent=t("reset");
+ if(!NAV[S.role].some(([v])=>v===S.view))S.view=NAV[S.role][0][0];
+ app.innerHTML=header()+`<main id="main">${V[S.view]()}</main>`;
+ if(S.view==="search")renderRun();if(S.view==="bookings")renderBk();if(S.view==="invoices")renderInv();if(S.view==="pricing")sim();
+}
+const stBadge=s=>`<span class="bdg ${s==="confirmed"||s==="active"?"ok":s==="pending"?"warn":"err"}">${t("st_"+s)}</span>`;
+
+/* ---------- search ---------- */
+function vSearch(){
+ const s=S.search,ag=pricingAgency(),opts=(n,a,b)=>Array.from({length:b-a+1},(_,i)=>`<option${a+i===n?" selected":""}>${a+i}</option>`).join("");
+ return `<div class="phead"><div><h1>${t("searchTitle")}</h1><p class="muted">${S.role==="agency"?`${esc(ag.name)} · ${esc(ag.user)} · ${ag.cat} (${comOf(ag)} %)`:t("syncNote")}</p></div>
+ ${S.role==="admin"?`<div class="inline-f field"><label for="f-ag">${t("forAgency")}</label><select id="f-ag">${S.agencies.map(a=>`<option value="${a.id}"${a.id===s.ag?" selected":""}>${esc(a.name)}</option>`).join("")}</select></div>`:""}</div>
+ <form id="sf" class="card sform" novalidate>
+  <div class="field dest"><label for="f-dest">${t("dest")}</label><select id="f-dest" name="dest">${["DZ","TN","INT"].map(z=>`<optgroup label="${t("z"+z)}">${DEST.filter(d=>d.zone===z).map(d=>`<option value="${d.id}"${d.id===s.dest?" selected":""}>${dn(d)} — ${cn(d)}</option>`).join("")}</optgroup>`).join("")}</select></div>
+  <div class="field"><label for="f-ci">${t("ci")}</label><input type="date" id="f-ci" name="ci" value="${s.ci}" min="${TODAY}"></div>
+  <div class="field"><label for="f-co">${t("co")}</label><input type="date" id="f-co" name="co" value="${s.co}" min="${addDays(TODAY,1)}"></div>
+  <div class="field"><label for="f-r">${t("rooms")}</label><select id="f-r" name="rooms">${opts(s.rooms,1,3)}</select></div>
+  <div class="field"><label for="f-a">${t("adultsPR")}</label><select id="f-a" name="adults">${opts(s.adults,1,4)}</select></div>
+  <div class="field"><label for="f-c">${t("children")}</label><select id="f-c" name="children">${opts(s.children,0,3)}</select></div>
+  <div class="field sbtn"><button class="btn pri" type="submit">${ic("search")}<span>${t("searchBtn")}</span></button></div>
+  <p id="sf-err" class="err-msg full" role="alert"></p>
+ </form><div id="run"></div>`;
+}
+function doSearch(){
+ const s={...S.search},h0=HOTELS.filter(h=>h.dest===s.dest),zone=D(s.dest).zone;
+ const sups=SUP.filter(x=>x.zones.includes(zone));let raw=0,dup=0;const map={},cnt={};
+ const hotels=h0.map(h=>{const r=offersFor(h,s,false);raw+=r.raw.length;dup+=r.dup;r.raw.forEach(o=>cnt[o.sup]=(cnt[o.sup]||0)+1);map[h.id]=r.list;return{h,offers:r.list}});
+ const rr=rng(s.dest+s.ci+Date.now());
+ RUN={s,status:"loading",hotels,map,raw,dup,ms:0,sups:sups.map(x=>({id:x.id,state:S.suppliers[x.id].on?"wait":"off",count:cnt[x.id]||0,ms:Math.round(S.suppliers[x.id].lat*(.75+rr()*.5))}))};
+ renderRun();
+ const act=RUN.sups.filter(x=>x.state==="wait");const run=RUN;
+ act.forEach(x=>setTimeout(()=>{if(RUN!==run)return;x.state="ok";log(`${x.id==="S2"?"POST /ota/HotelAvailRQ":"GET /availability"}  ${supName(x.id)}  200  ${x.ms} ms  ${x.count} ${t("offers")}`);if(act.every(y=>y.state==="ok")){RUN.status="done";RUN.ms=Math.max(...act.map(y=>y.ms))}renderRun()},x.ms*1.3));
+ if(!act.length){RUN.status="done";renderRun()}
+}
+function renderRun(){
+ const el=$("#run");if(!el)return;
+ if(!RUN){el.innerHTML=`<div class="card empty" style="margin-top:16px"><p>${t("emptySearch")}</p><p class="sm" style="margin-top:12px">${t("popular")}</p><div class="qd">${["alg","orn","ham","djb","ist","dxb"].map(id=>`<button type="button" class="btn" data-a="quick" data-d="${id}">${ic("pin")}${dn(D(id))}</button>`).join("")}</div></div>`;return}
+ const done=RUN.status==="done",act=RUN.sups.filter(x=>x.state!=="off").length;
+ const prog=`<section class="card prog" aria-live="polite"><div class="prog-h"><strong>${done?t("queried",{n:act,ms:RUN.ms}):t("querying")}</strong>${done?`<span class="muted sm">${t("offersFound",{o:RUN.raw,d:RUN.dup})}</span>`:""}</div>
+ <ul class="sups">${RUN.sups.map(x=>`<li class="${x.state}">${x.state==="ok"?ic("check"):x.state==="off"?ic("x"):ic("loader","spin")}<span>${esc(supName(x.id))}</span><small>${SP(x.id).proto}</small><small>${x.state==="ok"?`${x.count} ${t("offers")} · ${x.ms} ms`:x.state==="off"?t("off"):t("wait")}</small></li>`).join("")}</ul></section>`;
+ if(!done){el.innerHTML=prog+`<div class="res"><div class="skel"></div><div class="hlist"><div class="skel"></div><div class="skel"></div></div></div>`;return}
+ const admin=S.role==="admin",d=D(RUN.s.dest),wide=matchMedia("(min-width:901px)").matches;
+ el.innerHTML=prog+`<div class="res"><aside><details class="card filters"${wide?" open":""}><summary>${ic("sliders")}${t("filters")}</summary><div class="fbody">
+  <div class="field"><label for="ff-q">${t("fName")}</label><input id="ff-q" data-f="q" value="${esc(F.q)}" autocomplete="off"></div>
+  <div class="field"><label for="ff-s">${t("sort")}</label><select id="ff-s" data-f="sort">${[["price","sPrice"],["stars","sStars"],["name","sName"]].map(([v,k])=>`<option value="${v}"${F.sort===v?" selected":""}>${t(k)}</option>`).join("")}</select></div>
+  <fieldset class="fs"><legend>${t("stars")}</legend><div class="checks">${[5,4,3].map(n=>`<label class="ck"><input type="checkbox" data-f="stars" value="${n}"${F.stars.includes(n)?" checked":""}>${starsHtml(n)}</label>`).join("")}</div></fieldset>
+  <div class="field"><label for="ff-b">${t("board")}</label><select id="ff-b" data-f="board"><option value="">${t("anyBoard")}</option>${BOARDS.map(b=>`<option value="${b}"${F.board===b?" selected":""}>${t("b_"+b)}</option>`).join("")}</select></div>
+  <label class="ck"><input type="checkbox" data-f="refund"${F.refund?" checked":""}>${t("refundOnly")}</label>
+  ${admin?`<fieldset class="fs"><legend>${t("suppliers")}</legend><div class="checks">${RUN.sups.filter(x=>x.state==="ok").map(x=>`<label class="ck"><input type="checkbox" data-f="sup" value="${x.id}"${F.sup.includes(x.id)?" checked":""}>${esc(supName(x.id))}</label>`).join("")}</div></fieldset>`:""}
+ </div></details></aside>
+ <section aria-labelledby="hcount"><div class="rhead"><h2 id="hcount"></h2><span class="muted sm">${dn(d)}, ${cn(d)} · ${fd(RUN.s.ci)} – ${fd(RUN.s.co)} · ${t("nightsN",{n:diff(RUN.s.ci,RUN.s.co)})} · ${RUN.s.rooms} ${t("roomsShort")} · ${RUN.s.adults*RUN.s.rooms} ${t("adults")}${RUN.s.children?` + ${RUN.s.children*RUN.s.rooms} ${t("childrenL")}`:""}</span></div><div id="hlist" class="hlist"></div></section></div>`;
+ renderList();
+}
+function renderList(){
+ const el=$("#hlist");if(!el||!RUN)return;
+ const ag=pricingAgency(),q=F.q.trim().toLowerCase();
+ let items=RUN.hotels.map(({h,offers})=>({h,os:offers.filter(o=>S.suppliers[o.sup].on&&(!F.board||o.board===F.board)&&(!F.refund||o.refund)&&(!F.sup.length||F.sup.includes(o.sup))).map(o=>({...o,p:pricing(o.net,h.zone,o.sup,ag)})).sort((a,b)=>a.p.sell-b.p.sell)}))
+  .filter(x=>x.os.length&&(!F.stars.length||F.stars.includes(x.h.stars))&&(!q||x.h.name.toLowerCase().includes(q)));
+ items.sort(F.sort==="stars"?(a,b)=>b.h.stars-a.h.stars||a.os[0].p.sell-b.os[0].p.sell:F.sort==="name"?(a,b)=>a.h.name.localeCompare(b.h.name):(a,b)=>a.os[0].p.sell-b.os[0].p.sell);
+ $("#hcount").textContent=t("hotelsFound",{n:items.length});
+ el.innerHTML=items.length?items.map(hotelCard).join(""):`<div class="card empty">${t("noResult")}</div>`;
+}
+function hotelCard({h,os}){
+ const d=D(h.dest),s=RUN.s,admin=S.role==="admin",show=EXP.has(h.id)?os:os.slice(0,2);
+ return `<article class="card hc"><div class="ph z-${h.zone}" aria-hidden="true">${ic("building")}<span>${dn(d)}</span></div><div>
+ <div class="hh"><div><h3>${esc(h.name)}</h3>${starsHtml(h.stars)}<p class="loc">${ic("pin")}<span>${h.street}, ${t("ar_"+h.area)} — ${dn(d)}, ${cn(d)}</span></p></div>
+ <div class="from"><span class="muted sm">${t("from")}</span><strong>${money(os[0].p.sell)}</strong><span class="muted sm">${t("nightsN",{n:diff(s.ci,s.co)})} · ${s.rooms} ${t("roomsShort")}</span></div></div>
+ <ul class="amen">${h.amen.map(a=>`<li class="bdg">${t("a_"+a)}</li>`).join("")}</ul>
+ <div>${show.map(o=>`<div class="of"><div class="oi"><strong>${t("r_"+o.room)}</strong><span class="sm">${t("b_"+o.board)}</span><span class="tags">${o.onReq?`<span class="bdg warn">${ic("clock")}${t("onRequest")}</span>`:`<span class="bdg ok">${t("instant")}</span>`}${admin?`<span class="bdg info">${esc(supName(o.sup))}</span>`:""}</span></div>
+ <div class="ocx ${o.refund?"ok":"no"}">${o.refund?ic("check")+`<span>${t("freeCancel",{d:fd(o.deadline)})}</span>`:ic("x")+`<span>${t("nonRef")}</span>`}</div>
+ <div class="op"><strong>${money(o.p.sell)}</strong><small>${t("netAgency")} ${money(o.p.an)}</small><small>${t("commission")} ${o.p.cr} % : ${money(o.p.com)}</small>${admin?`<small>${t("supplierCost")} ${money(o.net)} · ${t("margin")} ${money(o.p.margin)}</small>`:""}</div>
+ <div><button type="button" class="btn pri" data-a="book" data-h="${h.id}" data-o="${o.id}" aria-label="${t("book")} — ${esc(h.name)}, ${t("r_"+o.room)}, ${t("b_"+o.board)}">${t("book")}</button></div></div>`).join("")}</div>
+ ${os.length>2?`<button type="button" class="lnk" data-a="exp" data-h="${h.id}" aria-expanded="${EXP.has(h.id)}">${EXP.has(h.id)?t("fewer"):t("seeAll",{n:os.length})}</button>`:""}
+ </div></article>`;
+}
+
+/* ---------- booking ---------- */
+let BK=null;
+function openBook(hid,oid){
+ const h=H(hid),o=RUN.map[hid].find(x=>x.id===oid),s=RUN.s,ag=pricingAgency(),p=pricing(o.net,h.zone,o.sup,ag),n=diff(s.ci,s.co),d=D(h.dest);
+ if(ag.status!=="active"){modal(t("bookTitle"),`<p class="alert err">${ic("alert")}<span>${t("agencySuspended")}</span></p>`,`<button type="button" class="btn" data-a="close">${t("close")}</button>`);return}
+ BK={h,o,s,p,ag:ag.id};
+ const rooms=Array.from({length:s.rooms},(_,i)=>`<fieldset class="fs"><legend>${t("roomN",{n:i+1})}</legend><div class="g3"><div class="field"><label for="g${i}c">${t("civ")}</label><select id="g${i}c" name="c${i}"><option value="mr">${t("mr")}</option><option value="mrs">${t("mrs")}</option></select></div><div class="field"><label for="g${i}f">${t("first")} *</label><input id="g${i}f" name="f${i}" autocomplete="off" required></div><div class="field"><label for="g${i}l">${t("last")} *</label><input id="g${i}l" name="l${i}" autocomplete="off" required></div></div></fieldset>`).join("");
+ modal(t("bookTitle"),`<div class="recap"><div><h3>${esc(h.name)}</h3><p class="sm muted">${starsHtml(h.stars)} ${dn(d)}, ${cn(d)}</p>
+ <dl class="kv"><dt>${t("dates")}</dt><dd>${fd(s.ci)} – ${fd(s.co)} (${t("nightsN",{n})})</dd><dt>${t("occupancy")}</dt><dd>${s.rooms} × ${t("r_"+o.room)} · ${s.adults*s.rooms} ${t("adults")}${s.children?`, ${s.children*s.rooms} ${t("childrenL")}`:""}</dd><dt>${t("boardL")}</dt><dd>${t("b_"+o.board)}</dd><dt>${t("policy")}</dt><dd>${o.refund?t("freeCancel",{d:fd(o.deadline)}):t("nonRef")}</dd></dl></div>
+ <div class="pbox"><div><span>${t("priceClient")}</span><strong>${money(p.sell)}</strong></div><div><span>${t("commission")} (${p.cr} %)</span><span>− ${money(p.com)}</span></div><div class="tot"><span>${t("netAgency")}</span><strong>${money(p.an)}</strong></div>${o.onReq?`<span class="bdg warn">${ic("clock")}${t("onRequest")}</span>`:""}</div></div>
+ <form id="bkf" novalidate class="stack">${rooms}
+ <div class="g2"><div class="field"><label for="b-ref">${t("cref")}</label><input id="b-ref" name="cref" autocomplete="off"></div><div class="field"><label for="b-req">${t("request")}</label><input id="b-req" name="req" autocomplete="off"></div></div>
+ <fieldset class="fs"><legend>${t("payment")}</legend>
+  <label class="radio"><input type="radio" name="pay" value="credit" checked><span>${t("payCredit")} <span class="muted sm">— ${t("available")} : ${money(availOf(ag))}</span></span></label>
+  <label class="radio"><input type="radio" name="pay" value="card"><span>${t("payCard")}</span> <span class="bdg warn">${t("testMode")}</span></label>
+  <div id="cardf" hidden class="stack" style="margin-top:8px"><p class="alert warn sm">${ic("alert")}<span>${t("testCard")}</span></p><div class="g3"><div class="field" style="grid-column:1/-1"><label for="cc-n">${t("cardNo")}</label><input id="cc-n" name="cc" inputmode="numeric" value="4242 4242 4242 4242" autocomplete="off"></div><div class="field"><label for="cc-e">${t("cardExp")}</label><input id="cc-e" value="12/29" autocomplete="off"></div><div class="field"><label for="cc-c">${t("cardCvc")}</label><input id="cc-c" value="123" inputmode="numeric" autocomplete="off"></div></div></div>
+  <p class="err-msg" id="pay-err" role="alert"></p>
+ </fieldset>
+ <label class="ck"><input type="checkbox" name="terms" id="b-terms"><span>${t("terms")}</span></label><p class="err-msg" id="terms-err" role="alert"></p></form>`,
+ `<button type="button" class="btn" data-a="close">${t("cancel")}</button><button type="submit" form="bkf" class="btn pri">${ic("check")}${t("confirmBook")}</button>`);
+}
+function setErr(inp,msg){inp.setAttribute("aria-invalid","true");const id=inp.id+"-e";let m=document.getElementById(id);if(!m){m=document.createElement("span");m.id=id;m.className="err-msg";inp.after(m)}m.textContent=msg;inp.setAttribute("aria-describedby",id)}
+function clearErr(f){f.querySelectorAll("[aria-invalid]").forEach(x=>{x.removeAttribute("aria-invalid");x.removeAttribute("aria-describedby")});f.querySelectorAll("span.err-msg").forEach(x=>x.remove());f.querySelectorAll("p.err-msg").forEach(x=>x.textContent="")}
+function submitBook(f){
+ clearErr(f);let first=null;const bad=(i,m)=>{setErr(i,m);first=first||i};
+ const guests=[];for(let i=0;i<BK.s.rooms;i++){const fi=f["f"+i],li=f["l"+i];if(!fi.value.trim())bad(fi,t("required"));if(!li.value.trim())bad(li,t("required"));guests.push({c:f["c"+i].value,f:fi.value.trim(),l:li.value.trim()})}
+ const pay=f.pay.value,ag=AG(BK.ag);
+ if(pay==="credit"&&BK.p.an>availOf(ag)){$("#pay-err").textContent=t("errCredit");first=first||f.pay[0]}
+ if(pay==="card"&&$("#cc-n").value.replace(/\s/g,"").length!==16)bad($("#cc-n"),t("errCard"));
+ if(!f.terms.checked){$("#terms-err").textContent=t("errTerms");f.terms.setAttribute("aria-invalid","true");first=first||f.terms}
+ if(first){first.focus();return}
+ const data={guests,cref:f.cref.value.trim(),req:f.req.value.trim(),pay};
+ modal(t("bookTitle"),`<div class="done"><span class="big p">${ic("loader","spin")}</span><p>${pay==="card"?t("cardPaid")+" · ":""}${t("sending",{s:S.role==="admin"?esc(supName(BK.o.sup)):"API"})}</p></div>`);
+ setTimeout(()=>{
+  const b=mkBooking({ag:BK.ag,h:BK.h,s:BK.s,o:BK.o,...data});S.bookings.unshift(b);save();
+  const ok=b.status==="confirmed";log(`POST /book  ${supName(b.sup)}  ${ok?"201":"202"}  ${b.id}${ok?"  "+b.supRef:"  ON_REQUEST"}`);
+  render();
+  modal(ok?t("bookedOk"):t("st_pending"),`<div class="done"><span class="big${ok?"":" p"}">${ok?ic("check"):ic("clock")}</span><h3>${ok?t("bookedOk"):t("bookedPending")}</h3>
+  <dl class="kv" style="text-align:start"><dt>${t("bookRef")}</dt><dd><strong>${b.id}</strong></dd>${ok?`<dt>${t("supRef")}</dt><dd>${b.supRef}</dd><dt>${t("invTitle")}</dt><dd>${b.inv}</dd>`:""}<dt>${t("th_hotel")}</dt><dd>${esc(BK.h.name)}</dd><dt>${t("netAgency")}</dt><dd>${money(b.an)}</dd></dl></div>`,
+  `<button type="button" class="btn" data-a="go" data-v="bookings">${t("goBookings")}</button>${ok?`<button type="button" class="btn" data-a="inv" data-id="${b.id}">${ic("file")}${t("viewInvoice")}</button><button type="button" class="btn pri" data-a="voucher" data-id="${b.id}">${ic("print")}${t("viewVoucher")}</button>`:""}`);
+  toast(t("emailSent"));
+ },1300);
+}
+
+/* ---------- bookings ---------- */
+function visibleBk(){return S.bookings.filter(b=>S.role==="admin"||b.ag===ME)}
+function vBookings(){
+ const admin=S.role==="admin",list=visibleBk(),c=s=>list.filter(b=>b.status===s).length;
+ return `<div class="phead"><div><h1>${t("nav_bookings")}</h1><p class="muted">${t("count",{n:list.length})}</p></div><button type="button" class="btn" data-a="csv">${ic("download")}${t("exportCsv")}</button></div>
+ <div class="counts">${["confirmed","pending","cancelled"].map(s=>`<button type="button" class="btn ghost" data-a="bkst" data-st="${s}" aria-pressed="${BF.st===s}">${stBadge(s)} <b>${c(s)}</b></button>`).join("")}</div>
+ <div class="toolbar"><div class="field"><label for="bq">${t("searchBk")}</label><input id="bq" data-bf="q" value="${esc(BF.q)}" type="search" autocomplete="off"></div>
+ <div class="field"><label for="bst">${t("status")}</label><select id="bst" data-bf="st"><option value="">${t("allStatus")}</option>${["confirmed","pending","cancelled"].map(s=>`<option value="${s}"${BF.st===s?" selected":""}>${t("st_"+s)}</option>`).join("")}</select></div>
+ ${admin?`<div class="field"><label for="bag">${t("th_agency")}</label><select id="bag" data-bf="ag"><option value="">${t("allAgencies")}</option>${S.agencies.map(a=>`<option value="${a.id}"${BF.ag===a.id?" selected":""}>${esc(a.name)}</option>`).join("")}</select></div>`:""}</div>
+ <div class="tw"><table><thead><tr><th>${t("th_ref")}</th>${admin?`<th>${t("th_agency")}</th>`:""}<th>${t("th_hotel")}</th><th>${t("th_guest")}</th><th>${t("th_stay")}</th><th class="num">${t("th_amount")}</th>${admin?`<th>${t("th_supplier")}</th>`:""}<th>${t("status")}</th><th>${t("th_actions")}</th></tr></thead><tbody id="btb"></tbody></table></div>`;
+}
+function filteredBk(){const q=BF.q.trim().toLowerCase();return visibleBk().filter(b=>(!BF.st||b.status===BF.st)&&(!BF.ag||b.ag===BF.ag)&&(!q||[b.id,b.cref,H(b.hid).name,...b.guests.map(g=>g.f+" "+g.l)].join(" ").toLowerCase().includes(q)))}
+function renderBk(){
+ const tb=$("#btb");if(!tb)return;const admin=S.role==="admin",rows=filteredBk();
+ tb.innerHTML=rows.length?rows.map(b=>{const h=H(b.hid),d=D(h.dest),g=b.guests[0],canCx=b.status!=="cancelled"&&b.ci>=TODAY;
+ return `<tr><td><button type="button" class="lnk" data-a="detail" data-id="${b.id}">${b.id}</button><span class="sub">${fd(b.created)}${b.cref?" · "+esc(b.cref):""}</span></td>${admin?`<td>${esc(AG(b.ag).name)}</td>`:""}
+ <td>${esc(h.name)}<span class="sub">${dn(d)}, ${cn(d)}</span></td><td>${t(g.c)} ${esc(g.f)} ${esc(g.l)}<span class="sub">${b.adults*b.rooms} ${t("adults")}${b.children?`, ${b.children*b.rooms} ${t("childrenL")}`:""}</span></td>
+ <td>${fd(b.ci)} – ${fd(b.co)}<span class="sub">${t("nightsN",{n:diff(b.ci,b.co)})} · ${t("b_"+b.board)}</span></td>
+ <td class="num"><strong>${money(b.sell)}</strong><span class="sub">${t("netAgency")} ${money(b.an)}</span></td>
+ ${admin?`<td>${esc(supName(b.sup))}<span class="sub">${t("margin")} ${money(b.margin)}</span></td>`:""}
+ <td>${stBadge(b.status)}${b.pay==="card"?`<span class="sub">${t("paidCard")}</span>`:""}</td>
+ <td><div class="acts">${b.status==="confirmed"?`<button type="button" class="btn" data-a="voucher" data-id="${b.id}">${t("viewVoucher")}</button>`:""}${b.inv?`<button type="button" class="btn" data-a="inv" data-id="${b.id}">${t("viewInvoice")}</button>`:""}
+ ${admin&&b.status==="pending"?`<button type="button" class="btn pri" data-a="okBk" data-id="${b.id}">${t("confirm")}</button><button type="button" class="btn dng" data-a="noBk" data-id="${b.id}">${t("refuse")}</button>`:""}
+ ${canCx?`<button type="button" class="btn dng" data-a="cx" data-id="${b.id}">${t("cancel")}</button>`:""}</div></td></tr>`}).join(""):`<tr><td colspan="9" class="empty">${t("noRows")}</td></tr>`;
+}
+const BKid=id=>S.bookings.find(b=>b.id===id);
+function openDetail(id){
+ const b=BKid(id),h=H(b.hid),d=D(h.dest),admin=S.role==="admin";
+ modal(t("details",{id:b.id}),`<div class="recap"><div><h3>${esc(h.name)}</h3><p class="sm muted">${starsHtml(h.stars)} ${dn(d)}, ${cn(d)}</p>
+ <dl class="kv"><dt>${t("status")}</dt><dd>${stBadge(b.status)}</dd><dt>${t("dates")}</dt><dd>${fd(b.ci)} – ${fd(b.co)}</dd><dt>${t("roomL")}</dt><dd>${b.rooms} × ${t("r_"+b.room)} · ${t("b_"+b.board)}</dd><dt>${t("guests")}</dt><dd>${b.guests.map(g=>`${t(g.c)} ${esc(g.f)} ${esc(g.l)}`).join("<br>")}</dd>
+ ${b.supRef?`<dt>${t("supRef")}</dt><dd>${b.supRef}</dd>`:""}<dt>${t("policy")}</dt><dd>${b.refund?t("freeCancel",{d:fd(b.deadline)}):t("nonRef")}</dd>${b.req?`<dt>${t("request")}</dt><dd>${esc(b.req)}</dd>`:""}${admin?`<dt>${t("th_agency")}</dt><dd>${esc(AG(b.ag).name)}</dd><dt>${t("th_supplier")}</dt><dd>${esc(supName(b.sup))}</dd>`:""}</dl></div>
+ <div class="pbox"><div><span>${t("priceClient")}</span><strong>${money(b.sell)}</strong></div><div><span>${t("commission")} (${b.cr} %)</span><span>− ${money(b.com)}</span></div><div class="tot"><span>${t("netAgency")}</span><strong>${money(b.an)}</strong></div>${admin?`<div class="sm muted"><span>${t("supplierCost")}</span><span>${money(b.net)}</span></div><div class="sm muted"><span>${t("margin")}</span><span>${money(b.margin)}</span></div>`:""}${b.status==="cancelled"?`<div class="sm"><span>${t("fee")}</span><span>${money(b.fee)}</span></div>`:""}</div></div>
+ <section><h3 style="margin-bottom:8px">${t("history")}</h3><ol class="tl">${b.hist.map(x=>`<li>${t("h_"+x.k)}${x.x?` — <strong>${x.x}</strong>`:""}<small>${fd(x.d)}</small></li>`).join("")}</ol></section>`,
+ `${b.status==="confirmed"?`<button type="button" class="btn" data-a="voucher" data-id="${b.id}">${t("viewVoucher")}</button>`:""}${b.inv?`<button type="button" class="btn" data-a="inv" data-id="${b.id}">${t("viewInvoice")}</button>`:""}<button type="button" class="btn pri" data-a="close">${t("close")}</button>`);
+}
+function openCancel(id){
+ const b=BKid(id),fee=feeOf(b),ref=b.pay==="credit"?b.an-fee:0;
+ modal(t("cancelTitle",{id:b.id}),`<p><strong>${esc(H(b.hid).name)}</strong> · ${fd(b.ci)} – ${fd(b.co)}</p>
+ <div class="pbox recap" style="grid-template-columns:minmax(0,1fr)"><div><span>${t("policy")}</span><span>${b.status==="pending"?t("st_pending"):b.refund?t("freeCancel",{d:fd(b.deadline)}):t("nonRef")}</span></div><div><span>${t("fee")}</span><strong>${money(fee)}</strong></div><div class="tot"><span>${t("refund")}</span><strong>${money(b.an-fee)}</strong></div></div>
+ ${fee>0?`<p class="alert warn">${ic("alert")}<span>${t("fee")} : ${money(fee)}</span></p>`:""}
+ <form id="cxf" data-id="${b.id}" novalidate><div class="field"><label for="cx-r">${t("cancelReason")}</label><select id="cx-r"><option>${t("cr1")}</option><option>${t("cr2")}</option><option>${t("cr3")}</option></select></div></form>`,
+ `<button type="button" class="btn" data-a="close">${t("close")}</button><button type="submit" form="cxf" class="btn dng">${t("confirmCancel")}</button>`);
+}
+
+/* ---------- documents ---------- */
+function docHead(title,no,date){return `<div class="dtop"><div><strong style="font-size:18px">Nzoul<span style="color:#0C5A62">Pro</span></strong><div class="m">${t("platform")}</div><div class="m">12, rue des Frères Fictifs — Alger</div></div><div style="text-align:end"><h3>${title}</h3><div><strong>${no}</strong></div><div class="m">${fd(date)}</div></div></div>`}
+function openVoucher(id){
+ const b=BKid(id),h=H(b.hid),d=D(h.dest),ag=AG(b.ag);
+ modal(t("voucherTitle"),`<div class="doc">${docHead(t("voucherTitle"),b.id,b.created)}
+ <div class="grid"><div class="refbox"><span class="lb">${t("supRef")}</span><strong>${b.supRef}</strong></div><div><span class="lb">${t("bookedBy")}</span><strong>${esc(ag.name)}</strong><div class="m">${esc(ag.city)} · ${esc(ag.email)}</div>${b.cref?`<div class="m">${t("cref")} : ${esc(b.cref)}</div>`:""}</div></div>
+ <div class="grid"><div><span class="lb">${t("th_hotel")}</span><strong>${esc(h.name)}</strong> ${"★".repeat(h.stars)}<div class="m">${t("address")} : ${h.street}, ${t("ar_"+h.area)}, ${dn(d)}, ${cn(d)}</div></div>
+ <div><span class="lb">${t("guests")}</span>${b.guests.map(g=>`<div>${t(g.c)} ${esc(g.f)} ${esc(g.l.toUpperCase())}</div>`).join("")}<div class="m">${b.adults*b.rooms} ${t("adults")}${b.children?`, ${b.children*b.rooms} ${t("childrenL")}`:""}</div></div>
+ <div><span class="lb">${t("ci")}</span><strong>${fd(b.ci)}</strong></div><div><span class="lb">${t("co")}</span><strong>${fd(b.co)}</strong> (${t("nightsN",{n:diff(b.ci,b.co)})})</div>
+ <div><span class="lb">${t("roomL")}</span>${b.rooms} × ${t("r_"+b.room)}</div><div><span class="lb">${t("boardL")}</span>${t("b_"+b.board)}</div></div>
+ ${b.req?`<div><span class="lb">${t("request")}</span>${esc(b.req)}</div>`:""}<p class="note">${t("voucherNote")}</p></div>`,
+ `<button type="button" class="btn" data-a="close">${t("close")}</button><button type="button" class="btn" data-a="mail">${t("send")} (email)</button><button type="button" class="btn pri" data-a="print">${ic("print")}${t("print")}</button>`);
+}
+function openInvoice(id,av){
+ const b=BKid(id),h=H(b.hid),d=D(h.dest),ag=AG(b.ag),n=diff(b.ci,b.co);
+ const lines=av?`<tr><td>${t("refundL")} — ${b.id} (${b.inv})</td><td class="num">− ${money(b.an-b.fee)}</td></tr>`
+ :`<tr><td>${esc(h.name)}, ${dn(d)} — ${b.rooms} × ${t("r_"+b.room)}, ${t("b_"+b.board)}<br><span class="m">${fd(b.ci)} – ${fd(b.co)} · ${t("nightsN",{n})} · ${b.guests.map(g=>esc(g.l.toUpperCase())).join(", ")}</span></td><td class="num">${money(b.sell)}</td></tr><tr><td>${t("commission")} ${esc(ag.cat)} (${b.cr} %)</td><td class="num">− ${money(b.com)}</td></tr>`;
+ modal(av?t("creditNote"):t("invTitle"),`<div class="doc">${docHead(av?t("creditNote"):t("invTitle"),av?b.av:b.inv,av?b.cancelDate:b.hist.find(x=>x.k==="invoice").d)}
+ <div class="grid"><div><span class="lb">${t("billedTo")}</span><strong>${esc(ag.name)}</strong><div class="m">${esc(ag.city)} — ${t("rc")} ${esc(ag.rc)}</div></div><div><span class="lb">${t("bookRef")}</span><strong>${b.id}</strong><div class="m">${t("settlement")} : ${b.pay==="card"?t("paidCard"):t("paidCredit")}</div></div></div>
+ <table><thead><tr><th>${t("desc")}</th><th class="num">${t("amount")}</th></tr></thead><tbody>${lines}<tr><td><strong>${av?t("total"):t("netToPay")}</strong></td><td class="num"><strong>${av?"− "+money(b.an-b.fee):money(b.an)}</strong></td></tr></tbody></table>
+ <p class="m sm">${t("inclTax")}</p></div>`,
+ `<button type="button" class="btn" data-a="close">${t("close")}</button><button type="button" class="btn pri" data-a="print">${ic("print")}${t("print")}</button>`);
+}
+
+/* ---------- invoices ---------- */
+function invRows(){const r=[];visibleBk().forEach(b=>{if(b.inv)r.push({no:b.inv,av:0,d:b.hist.find(x=>x.k==="invoice").d,b,amt:b.an});if(b.av)r.push({no:b.av,av:1,d:b.cancelDate,b,amt:-(b.an-b.fee)})});return r.sort((a,b)=>b.d.localeCompare(a.d)||b.no.localeCompare(a.no))}
+function vInvoices(){const admin=S.role==="admin";return `<div class="phead"><div><h1>${t("nav_invoices")}</h1><p class="muted" id="invc"></p></div></div>
+ <div class="toolbar"><div class="field"><label for="iq">${t("searchBk")}</label><input id="iq" type="search" value="${esc(IQ)}" autocomplete="off"></div></div>
+ <div class="tw"><table><thead><tr><th>${t("invNo")}</th><th>${t("type")}</th><th>${t("date")}</th>${admin?`<th>${t("th_agency")}</th>`:""}<th>${t("th_ref")}</th><th class="num">${t("amount")}</th><th>${t("settlement")}</th><th>${t("th_actions")}</th></tr></thead><tbody id="itb"></tbody></table></div>`}
+function renderInv(){const tb=$("#itb");if(!tb)return;const q=IQ.trim().toLowerCase(),admin=S.role==="admin";
+ const rows=invRows().filter(r=>!q||[r.no,r.b.id,H(r.b.hid).name,AG(r.b.ag).name].join(" ").toLowerCase().includes(q));
+ $("#invc").textContent=t("invCount",{n:rows.length});
+ tb.innerHTML=rows.length?rows.map(r=>`<tr><td><strong>${r.no}</strong></td><td>${r.av?`<span class="bdg warn">${t("creditNote")}</span>`:`<span class="bdg brand">${t("invTitle")}</span>`}</td><td>${fd(r.d)}</td>${admin?`<td>${esc(AG(r.b.ag).name)}</td>`:""}<td>${r.b.id}<span class="sub">${esc(H(r.b.hid).name)}</span></td><td class="num"><strong>${r.amt<0?"− ":""}${money(Math.abs(r.amt))}</strong></td><td>${r.b.pay==="card"?t("paidCard"):t("paidCredit")}</td><td><button type="button" class="btn" data-a="${r.av?"av":"inv"}" data-id="${r.b.id}">${ic("eye")}${t("show")}</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty">${t("noRows")}</td></tr>`}
+
+/* ---------- account ---------- */
+function meter(p){return `<div class="meter ${p>85?"hi":p>65?"mid":""}"><i style="width:${Math.min(100,p)}%"></i></div>`}
+function vAccount(){
+ const a=AG(ME),u=usedOf(a),p=Math.round(u/a.limit*100);const tx=[];
+ S.bookings.filter(b=>b.ag===ME&&b.pay==="credit").forEach(b=>{tx.push({d:b.created,l:`${t("bookingDebit")} ${b.id} — ${H(b.hid).name}`,deb:b.an});if(b.status==="cancelled"&&b.an-b.fee>0)tx.push({d:b.cancelDate,l:`${t("cancelCredit")} ${b.id}${b.av?" ("+b.av+")":""}`,cre:b.an-b.fee})});
+ S.payments.filter(x=>x.ag===ME&&x.status==="validated").forEach(x=>tx.push({d:x.date,l:`${t("payRecv")} — ${t("m_"+x.mode)} ${x.ref}`,cre:x.amount}));
+ tx.sort((x,y)=>y.d.localeCompare(x.d));
+ const pend=S.payments.filter(x=>x.ag===ME&&x.status==="pending");
+ return `<div class="phead"><div><h1>${t("nav_account")}</h1><p class="muted">${esc(a.name)} · ${esc(a.user)}</p></div></div>
+ <div class="kpis"><div class="card kpi"><div class="l">${t("creditLimit")}</div><div class="v">${money(a.limit)}</div></div><div class="card kpi"><div class="l">${t("outstanding")}</div><div class="v">${money(u)}</div>${meter(p)}<div class="s">${p} %</div></div><div class="card kpi"><div class="l">${t("available")}</div><div class="v" style="color:var(--ok)">${money(a.limit-u)}</div></div><div class="card kpi"><div class="l">${t("category")}</div><div class="v">${a.cat}</div><div class="s">${t("commission")} ${comOf(a)} %</div></div></div>
+ <div class="cols2"><section class="stack"><h2>${t("movements")}</h2><div class="tw"><table class="narrow"><thead><tr><th>${t("date")}</th><th>${t("label")}</th><th class="num">${t("debit")}</th><th class="num">${t("credit")}</th></tr></thead><tbody>
+ ${tx.map(x=>`<tr><td>${fd(x.d)}</td><td>${esc(x.l)}</td><td class="num">${x.deb?money(x.deb):""}</td><td class="num" style="color:var(--ok)">${x.cre?money(x.cre):""}</td></tr>`).join("")}<tr><td></td><td>${t("openBal")}</td><td class="num">${money(a.open)}</td><td></td></tr></tbody></table></div></section>
+ <aside class="stack"><form id="payf" class="card stack" novalidate><h2>${t("declarePay")}</h2>
+  <div class="g2"><div class="field"><label for="p-a">${t("payAmount")}</label><input id="p-a" name="amount" type="number" min="1" step="1" inputmode="numeric"></div><div class="field"><label for="p-d">${t("payDate")}</label><input id="p-d" name="date" type="date" value="${TODAY}" max="${TODAY}"></div>
+  <div class="field"><label for="p-m">${t("payMode")}</label><select id="p-m" name="mode"><option value="transfer">${t("m_transfer")}</option><option value="cheque">${t("m_cheque")}</option><option value="cash">${t("m_cash")}</option></select></div><div class="field"><label for="p-r">${t("payRef")}</label><input id="p-r" name="ref" autocomplete="off"></div></div>
+  <button type="submit" class="btn pri">${t("send")}</button>
+  ${pend.length?`<ul class="alist">${pend.map(x=>`<li>${ic("clock")}<div><strong>${money(x.amount)}</strong> · ${t("m_"+x.mode)} ${esc(x.ref)}<div class="sm muted">${fd(x.date)} — ${t("pendingVal")}</div></div></li>`).join("")}</ul>`:""}</form>
+  <div class="card"><h2>${t("agencyInfo")}</h2><dl class="kv"><dt>${t("name")}</dt><dd>${esc(a.name)}</dd><dt>${t("city")}</dt><dd>${esc(a.city)}</dd><dt>${t("email")}</dt><dd>${esc(a.email)}</dd><dt>${t("rc")}</dt><dd>${esc(a.rc)}</dd><dt>${t("user")}</dt><dd>${esc(a.user)}</dd><dt>${t("status")}</dt><dd>${stBadge(a.status)}</dd></dl></div></aside></div>`;
+}
+
+/* ---------- admin ---------- */
+function vDash(){
+ const act=S.bookings.filter(b=>b.status!=="cancelled"),sum=(a,k)=>a.reduce((s,b)=>s+b[k],0),pend=S.bookings.filter(b=>b.status==="pending");
+ const byD={};act.forEach(b=>{const k=H(b.hid).dest;byD[k]=(byD[k]||0)+b.sell});const dl=Object.entries(byD).sort((a,b)=>b[1]-a[1]).slice(0,7),dm=dl[0]?.[1]||1;
+ const byS={};act.forEach(b=>byS[b.sup]=(byS[b.sup]||0)+b.net);const sl=Object.entries(byS).sort((a,b)=>b[1]-a[1]),smx=sl[0]?.[1]||1;
+ const pp=S.payments.filter(p=>p.status==="pending");const al=[];
+ if(pend.length)al.push(["clock",t("alPending",{n:pend.length}),"bookings","pending"]);if(pp.length)al.push(["wallet",t("alPay",{n:pp.length}),"agencies"]);
+ S.agencies.forEach(a=>{const p=Math.round(usedOf(a)/a.limit*100);if(a.status==="suspended")al.push(["alert",t("alSusp",{a:a.name}),"agencies"]);else if(p>=75)al.push(["alert",t("alCredit",{a:a.name,p}),"agencies"])});
+ return `<div class="phead"><div><h1>${t("nav_dash")}</h1><p class="muted">${fd(TODAY)}</p></div></div>
+ <div class="kpis"><div class="card kpi"><div class="l">${t("kRevenue")}</div><div class="v">${money(sum(act,"sell"))}</div></div><div class="card kpi"><div class="l">${t("kMargin")}</div><div class="v">${money(sum(act,"margin"))}</div><div class="s">${num(sum(act,"margin")/Math.max(1,sum(act,"sell"))*100)} %</div></div><div class="card kpi"><div class="l">${t("kActive")}</div><div class="v">${act.length}</div></div><div class="card kpi"><div class="l">${t("kPending")}</div><div class="v" style="color:var(--warn)">${pend.length}</div></div><div class="card kpi"><div class="l">${t("kAgencies")}</div><div class="v">${S.agencies.filter(a=>a.status==="active").length} / ${S.agencies.length}</div></div></div>
+ <div class="dgrid"><section class="card"><h2>${t("salesByDest")}</h2><div class="bars">${dl.map(([k,v])=>`<div class="bar"><div class="bl"><span>${dn(D(k))}</span><span>${money(v)}</span></div><div class="bt"><div class="bf" style="width:${v/dm*100}%"></div></div></div>`).join("")}</div></section>
+ <section class="card"><h2>${t("salesBySup")}</h2><div class="bars">${sl.map(([k,v])=>`<div class="bar"><div class="bl"><span>${esc(supName(k))}</span><span>${money(v)}</span></div><div class="bt"><div class="bf" style="width:${v/smx*100}%;background:var(--accent)"></div></div></div>`).join("")}</div>
+ <h2 style="margin:18px 0 8px">${t("alerts")}</h2><ul class="alist">${al.length?al.map(([i,txt,v,st])=>`<li>${ic(i)}<div><button type="button" class="lnk" data-a="go" data-v="${v}"${st?` data-st="${st}"`:""}>${esc(txt)}</button></div></li>`).join(""):`<li>${t("noAlert")}</li>`}</ul></section>
+ <section class="card"><h2>${t("latest")}</h2><ul class="alist">${S.bookings.slice(0,7).map(b=>`<li><div><button type="button" class="lnk" data-a="detail" data-id="${b.id}">${b.id}</button> ${stBadge(b.status)}<div class="sm muted">${esc(AG(b.ag).name)} · ${esc(H(b.hid).name)}</div></div><strong class="sm">${money(b.sell)}</strong></li>`).join("")}</ul></section></div>`;
+}
+function vAgencies(){
+ const pp=S.payments.filter(p=>p.status==="pending");
+ return `<div class="phead"><div><h1>${t("nav_agencies")}</h1><p class="muted">${S.agencies.length} ${t("nav_agencies").toLowerCase()}</p></div><button type="button" class="btn pri" data-a="agForm">${ic("plus")}${t("newAgency")}</button></div>
+ <div class="tw"><table><thead><tr><th>${t("th_agency")}</th><th>${t("city")}</th><th>${t("category")}</th><th class="num">${t("creditLimit")}</th><th>${t("outstanding")}</th><th class="num">${t("available")}</th><th>${t("status")}</th><th>${t("th_actions")}</th></tr></thead><tbody>
+ ${S.agencies.map(a=>{const u=usedOf(a),p=Math.round(u/a.limit*100);return `<tr><td><strong>${esc(a.name)}</strong><span class="sub">${esc(a.email)}</span></td><td>${esc(a.city)}</td><td>${a.cat}<span class="sub">${t("commission")} ${comOf(a)} %</span></td><td class="num">${money(a.limit)}</td><td>${money(u)}${meter(p)}<span class="sub">${p} %</span></td><td class="num">${money(a.limit-u)}</td><td>${stBadge(a.status)}</td>
+ <td><div class="acts"><button type="button" class="btn" data-a="agForm" data-id="${a.id}">${t("edit")}</button><button type="button" class="btn${a.status==="active"?" dng":""}" data-a="agToggle" data-id="${a.id}">${a.status==="active"?t("suspend"):t("activate")}</button></div></td></tr>`}).join("")}</tbody></table></div>
+ <h2 style="margin:24px 0 12px">${t("paysToValidate")}</h2>
+ ${pp.length?`<div class="tw"><table class="narrow"><thead><tr><th>${t("th_agency")}</th><th>${t("date")}</th><th>${t("payMode")}</th><th>${t("payRef")}</th><th class="num">${t("amount")}</th><th>${t("th_actions")}</th></tr></thead><tbody>${pp.map(p=>`<tr><td>${esc(AG(p.ag).name)}</td><td>${fd(p.date)}</td><td>${t("m_"+p.mode)}</td><td>${esc(p.ref)}</td><td class="num"><strong>${money(p.amount)}</strong></td><td><div class="acts"><button type="button" class="btn pri" data-a="payOk" data-id="${p.id}">${t("validate")}</button><button type="button" class="btn dng" data-a="payNo" data-id="${p.id}">${t("reject")}</button></div></td></tr>`).join("")}</tbody></table></div>`:`<p class="card muted">${t("noAlert")}</p>`}`;
+}
+function agForm(id){
+ const a=id?AG(id):{name:"",city:"",email:"",rc:"",cat:"Standard",limit:500000,user:""};
+ modal(id?t("editAgency"):t("newAgency"),`<form id="agf" data-id="${id||""}" novalidate class="stack"><div class="g2">
+ <div class="field"><label for="ag-n">${t("name")} *</label><input id="ag-n" name="name" value="${esc(a.name)}"></div><div class="field"><label for="ag-c">${t("city")} *</label><input id="ag-c" name="city" value="${esc(a.city)}"></div>
+ <div class="field"><label for="ag-e">${t("email")} *</label><input id="ag-e" name="email" type="email" value="${esc(a.email)}"></div><div class="field"><label for="ag-r">${t("rc")}</label><input id="ag-r" name="rc" value="${esc(a.rc)}"></div>
+ <div class="field"><label for="ag-u">${t("user")}</label><input id="ag-u" name="user" value="${esc(a.user)}"></div>
+ <div class="field"><label for="ag-k">${t("category")}</label><select id="ag-k" name="cat">${Object.keys(S.cats).map(k=>`<option value="${k}"${a.cat===k?" selected":""}>${k} — ${S.cats[k]} %</option>`).join("")}</select></div>
+ <div class="field"><label for="ag-l">${t("creditLimit")} (${t("cur")}) *</label><input id="ag-l" name="limit" type="number" min="0" step="10000" value="${a.limit}"></div></div></form>`,
+ `<button type="button" class="btn" data-a="close">${t("cancel")}</button><button type="submit" form="agf" class="btn pri">${t("save")}</button>`);
+}
+function vPricing(){
+ return `<div class="phead"><div><h1>${t("nav_pricing")}</h1></div></div><div class="cols2"><div class="stack">
+ <form id="mkf" class="card stack" novalidate><h2>${t("markups")}</h2><p class="muted sm">${t("markupsHelp")}</p><div class="tw" style="box-shadow:none"><table class="narrow mk"><thead><tr><th>${t("zone")}</th>${SUP.map(s=>`<th>${esc(supName(s.id))}</th>`).join("")}</tr></thead><tbody>
+ ${["DZ","TN","INT"].map(z=>`<tr><th scope="row" style="text-transform:none;font-size:14px">${t("z"+z)}</th>${SUP.map(s=>`<td>${s.zones.includes(z)?`<label class="sr" for="mk-${z}-${s.id}">${t("mkFor",{z:t("z"+z),s:supName(s.id)})}</label><input id="mk-${z}-${s.id}" data-z="${z}" data-s="${s.id}" type="number" min="0" max="50" step="0.5" value="${S.rules[z][s.id]}">`:`<span class="muted">—</span>`}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+ <div><button type="submit" class="btn pri">${t("save")}</button></div></form>
+ <form id="catf" class="card stack" novalidate><h2>${t("cats")}</h2><p class="muted sm">${t("catsHelp")}</p><div class="g3" style="grid-template-columns:repeat(3,minmax(0,1fr))">${Object.keys(S.cats).map(k=>`<div class="field"><label for="cat-${k}">${k}</label><input id="cat-${k}" data-k="${k}" type="number" min="0" max="50" step="0.5" value="${S.cats[k]}"></div>`).join("")}</div><div><button type="submit" class="btn pri">${t("save")}</button></div></form></div>
+ <aside class="card"><h2>${t("simulator")}</h2><div class="stack"><div class="g2"><div class="field"><label for="sm-z">${t("zone")}</label><select id="sm-z" data-sim>${["DZ","TN","INT"].map(z=>`<option value="${z}">${t("z"+z)}</option>`).join("")}</select></div>
+ <div class="field"><label for="sm-s">${t("supplier")}</label><select id="sm-s" data-sim>${SUP.map(s=>`<option value="${s.id}">${esc(supName(s.id))}</option>`).join("")}</select></div>
+ <div class="field"><label for="sm-c">${t("category")}</label><select id="sm-c" data-sim>${Object.keys(S.cats).map(k=>`<option>${k}</option>`).join("")}</select></div>
+ <div class="field"><label for="sm-n">${t("netCost")}</label><input id="sm-n" data-sim type="number" min="0" step="1000" value="100000"></div></div><div id="simout" class="simout" aria-live="polite"></div></div></aside></div>`;
+}
+function sim(){
+ const o=$("#simout");if(!o)return;const z=$("#sm-z").value,s=$("#sm-s").value,net=Math.max(0,+$("#sm-n").value||0);
+ if(!SP(s).zones.includes(z)){o.innerHTML=`<p class="muted">—</p>`;return}
+ const p=pricing(net,z,s,{cat:$("#sm-c").value});
+ o.innerHTML=`<div><span>${t("supplierCost")}</span><strong>${money(net)}</strong></div><div><span>+ ${p.mk} %</span><span></span></div><div><span>${t("priceClient")}</span><strong>${money(p.sell)}</strong></div><div><span>${t("commission")} (${p.cr} %)</span><span>− ${money(p.com)}</span></div><div><span>${t("netAgency")}</span><strong>${money(p.an)}</strong></div><div style="background:var(--${p.margin<0?"err":"ok"}-soft);color:var(--${p.margin<0?"err":"ok"})"><span>${t("kMargin")}</span><strong>${money(p.margin)} (${num(net?p.margin/net*100:0)} %)</strong></div>${p.margin<0?`<p class="alert err sm">${ic("alert")}<span>${t("negMargin")}</span></p>`:""}`;
+}
+function vSuppliers(){
+ return `<div class="phead"><div><h1>${t("nav_suppliers")}</h1><p class="muted">${t("syncNote")}</p></div></div><div class="supgrid">
+ ${SUP.map(s=>{const st=S.suppliers[s.id];return `<article class="card stack"><div class="sh"><div><h2>${esc(supName(s.id))}</h2><span class="bdg info">${s.proto}</span></div>
+ <button type="button" class="switch" role="switch" aria-checked="${st.on}" data-a="supToggle" data-id="${s.id}" aria-label="${esc(supName(s.id))}"><span class="tr"></span><span>${st.on?t("enabled"):t("off")}</span></button></div>
+ <dl class="kv"><dt>${t("endpoint")}</dt><dd><code>${s.endpoint}</code></dd><dt>${t("zones")}</dt><dd>${s.zones.map(z=>t("z"+z)).join(", ")}</dd><dt>${t("latency")}</dt><dd>${st.lat} ms</dd><dt>${t("success")}</dt><dd>${num(st.ok)} %</dd><dt>${t("mapped")}</dt><dd>${num(s.mapped)}</dd></dl>
+ <div class="acts"><button type="button" class="btn" data-a="supTest" data-id="${s.id}"${st.on?"":" disabled"}>${ic("plug")}${t("testConn")}</button>${s.id!=="S4"?`<button type="button" class="btn" data-a="supSample" data-id="${s.id}">${ic("code")}${t("sampleReq")}</button>`:""}</div></article>`}).join("")}</div>
+ <section class="card" style="margin-top:16px"><h2>${t("logs")}</h2><ul class="log" id="logs" dir="ltr">${LOGS.map(l=>`<li>${esc(l)}</li>`).join("")}</ul></section>`;
+}
+function supSample(id){
+ const ci=S.search.ci,co=S.search.co;
+ const x=id==="S2"?`<OTA_HotelAvailRQ xmlns="http://www.opentravel.org/OTA/2003/05" Version="2.1">
+  <POS><Source><RequestorID ID="NZOUL-PRO" Type="22"/></Source></POS>
+  <AvailRequestSegments><AvailRequestSegment>
+    <StayDateRange Start="${ci}" End="${co}"/>
+    <RoomStayCandidates><RoomStayCandidate Quantity="1">
+      <GuestCounts><GuestCount AgeQualifyingCode="10" Count="2"/></GuestCounts>
+    </RoomStayCandidate></RoomStayCandidates>
+    <HotelSearchCriteria><Criterion><HotelRef HotelCityCode="ORN"/></Criterion></HotelSearchCriteria>
+  </AvailRequestSegment></AvailRequestSegments>
+</OTA_HotelAvailRQ>
+
+<!-- Réponse (extrait) -->
+<RoomRate RoomTypeCode="DBL-SEA" RatePlanCode="HB-NR">
+  <Total AmountAfterTax="68400.00" CurrencyCode="DZD"/>
+</RoomRate>`:`POST ${SP(id).endpoint}
+Authorization: Bearer ••••••••
+{
+  "destination": "${id==="S3"?"IST":"ALG"}",
+  "checkIn": "${ci}", "checkOut": "${co}",
+  "rooms": [{ "adults": 2, "children": [] }],
+  "currency": "DZD", "nationality": "DZ"
+}
+
+200 OK · ${S.suppliers[id].lat} ms
+{
+  "hotels": [{
+    "code": "${SP(id).ref}-48213",
+    "offers": [{ "room": "DBL-STD", "board": "BB",
+      "net": 41250.00, "refundable": true,
+      "cancelDeadline": "${addDays(ci,-3)}" }]
+  }]
+}`;
+ modal(`${esc(supName(id))} — ${t("sampleReq")}`,`<p class="sm muted">${SP(id).proto}</p><pre dir="ltr">${esc(x)}</pre>`,`<button type="button" class="btn pri" data-a="close">${t("close")}</button>`);
+}
+
+/* ---------- csv ---------- */
+function csv(){const rows=[["Ref","Agence","Hotel","Ville","Arrivee","Depart","Voyageur","Statut","Prix client","Net agence"]];
+ filteredBk().forEach(b=>{const h=H(b.hid);rows.push([b.id,AG(b.ag).name,h.name,D(h.dest).n[0],b.ci,b.co,b.guests[0].f+" "+b.guests[0].l,b.status,b.sell,b.an])});
+ const blob=new Blob(["﻿"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n")],{type:"text/csv"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="reservations.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast(t("csvDone"))}
+
+/* ---------- events ---------- */
+const A={
+ close:()=>dlg.close(),
+ reset:()=>{try{localStorage.removeItem(KEY)}catch(e){}seed();RUN=null;EXP.clear();Object.assign(F,{stars:[],board:"",refund:false,sup:[],q:"",sort:"price"});Object.assign(BF,{q:"",st:"",ag:""});IQ="";if(dlg.open)dlg.close();render();doSearch();toast(t("resetDone"))},
+ go:b=>{S.view=b.dataset.v;if(b.dataset.st)BF.st=b.dataset.st;if(dlg.open)dlg.close();save();render();window.scrollTo(0,0);$("#main h1")?.setAttribute("tabindex","-1");$("#main h1")?.focus({preventScroll:true})},
+ role:b=>{if(S.role===b.dataset.r)return;S.role=b.dataset.r;S.view=S.role==="admin"?"dash":"search";BF.ag="";save();render()},
+ quick:b=>{S.search.dest=b.dataset.d;save();render();doSearch()},
+ exp:b=>{const id=b.dataset.h;EXP.has(id)?EXP.delete(id):EXP.add(id);renderList()},
+ book:b=>openBook(b.dataset.h,b.dataset.o),
+ detail:b=>openDetail(b.dataset.id),
+ voucher:b=>openVoucher(b.dataset.id),
+ inv:b=>openInvoice(b.dataset.id,false),
+ av:b=>openInvoice(b.dataset.id,true),
+ print:()=>window.print(),
+ mail:()=>toast(t("emailSent")),
+ cx:b=>openCancel(b.dataset.id),
+ csv,
+ bkst:b=>{BF.st=BF.st===b.dataset.st?"":b.dataset.st;render()},
+ okBk:b=>{const x=BKid(b.dataset.id);confirmB(x,TODAY);log(`PUSH /booking-status  ${supName(x.sup)}  CONFIRMED  ${x.id}  ${x.supRef}`);save();render();toast(t("confirmedToast",{id:x.id}))},
+ noBk:b=>{const x=BKid(b.dataset.id);x.status="cancelled";x.fee=0;x.cancelDate=TODAY;x.hist.push({d:TODAY,k:"refused"});save();render();toast(t("refusedToast",{id:x.id}))},
+ agForm:b=>agForm(b.dataset.id),
+ agToggle:b=>{const a=AG(b.dataset.id);a.status=a.status==="active"?"suspended":"active";save();render();toast(`${a.name} : ${t("st_"+a.status)}`)},
+ payOk:b=>{const p=S.payments.find(x=>x.id===b.dataset.id);p.status="validated";save();render();toast(t("payValidated"))},
+ payNo:b=>{const p=S.payments.find(x=>x.id===b.dataset.id);p.status="rejected";save();render();toast(t("payRejected"))},
+ supToggle:b=>{const s=S.suppliers[b.dataset.id];s.on=!s.on;save();render();toast(t(s.on?"supOn":"supOff",{s:supName(b.dataset.id)}))},
+ supTest:b=>{const id=b.dataset.id;b.disabled=true;b.innerHTML=ic("loader","spin")+t("testing");const ms=Math.round(S.suppliers[id].lat*(.8+Math.random()*.4));
+  setTimeout(()=>{log(`${id==="S2"?"POST /ota/OTA_PingRQ":"GET /health"}  ${supName(id)}  200  ${ms} ms`);S.suppliers[id].lat=Math.round((S.suppliers[id].lat*3+ms)/4);save();if(S.view==="suppliers")render();toast(t("connOk",{s:supName(id),ms}))},ms+400)},
+ supSample:b=>supSample(b.dataset.id)
+};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(!b||b.disabled)return;const f=A[b.dataset.a];if(f){e.preventDefault();f(b,e)}});
+document.addEventListener("input",e=>{const x=e.target;
+ if(x.dataset.f){const k=x.dataset.f;if(k==="stars")F.stars=$$("[data-f=stars]:checked").map(i=>+i.value);else if(k==="sup")F.sup=$$("[data-f=sup]:checked").map(i=>i.value);else if(k==="refund")F.refund=x.checked;else F[k]=x.value;renderList();return}
+ if(x.dataset.bf){BF[x.dataset.bf]=x.value;renderBk();return}
+ if(x.id==="iq"){IQ=x.value;renderInv();return}
+ if(x.hasAttribute("data-sim"))sim();
+});
+document.addEventListener("change",e=>{const x=e.target;
+ if(x.id==="lang"){S.lang=x.value;save();render();$("#lang").focus();return}
+ if(x.id==="f-ag"){S.search.ag=x.value;save();renderList();return}
+ if(x.name==="pay"){$("#cardf").hidden=x.value!=="card";$("#pay-err").textContent=""}
+ if(x.id==="f-ci"){const co=$("#f-co");if(co.value<=x.value)co.value=addDays(x.value,Math.max(1,diff(S.search.ci,S.search.co)))}
+});
+document.addEventListener("submit",e=>{const f=e.target;e.preventDefault();
+ if(f.id==="sf"){const err=$("#sf-err");const ci=f.ci.value,co=f.co.value;[f.ci,f.co].forEach(i=>i.removeAttribute("aria-invalid"));
+  let m="";if(!ci||ci<TODAY){m=t("errPast");f.ci.setAttribute("aria-invalid","true")}else if(!co||co<=ci){m=t("errDates");f.co.setAttribute("aria-invalid","true")}else if(diff(ci,co)>30){m=t("errLong");f.co.setAttribute("aria-invalid","true")}
+  err.textContent=m;if(m)return;Object.assign(S.search,{dest:f.dest.value,ci,co,rooms:+f.rooms.value,adults:+f.adults.value,children:+f.children.value});save();EXP.clear();doSearch();return}
+ if(f.id==="bkf")return submitBook(f);
+ if(f.id==="cxf"){const b=BKid(f.dataset.id);const fee=feeOf(b);cancelB(b,TODAY,fee);log(`POST /cancel  ${supName(b.sup)}  200  ${b.id}`);save();dlg.close();render();toast(t("cancelDone"));return}
+ if(f.id==="payf"){clearErr(f);const a=+f.amount.value;let bad=null;if(!(a>0)){setErr(f.amount,t("errAmount"));bad=f.amount}if(!f.date.value||f.date.value>TODAY){setErr(f.date,t("errFuture"));bad=bad||f.date}if(!f.ref.value.trim()){setErr(f.ref,t("required"));bad=bad||f.ref}
+  if(bad){bad.focus();return}S.payments.push({id:"P"+Date.now(),ag:ME,amount:Math.round(a),date:f.date.value,ref:f.ref.value.trim(),mode:f.mode.value,status:"pending"});save();render();toast(t("payDeclared"));return}
+ if(f.id==="agf"){clearErr(f);let bad=null;const req=(i,c,m)=>{if(!c){setErr(i,m);bad=bad||i}};
+  req(f.name,f.name.value.trim(),t("required"));req(f.city,f.city.value.trim(),t("required"));req(f.email,/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value.trim()),t("errEmail"));req(f.limit,f.limit.value!==""&&+f.limit.value>=0,t("errAmount"));
+  if(bad){bad.focus();return}
+  const v={name:f.name.value.trim(),city:f.city.value.trim(),email:f.email.value.trim(),rc:f.rc.value.trim(),user:f.user.value.trim(),cat:f.cat.value,limit:+f.limit.value};
+  if(f.dataset.id){Object.assign(AG(f.dataset.id),v);toast(t("saved"))}else{S.agencies.push({id:"A"+Date.now(),open:0,status:"active",...v});toast(t("agencyCreated"))}
+  save();dlg.close();render();return}
+ if(f.id==="mkf"){clearErr(f);let bad=null;f.querySelectorAll("input").forEach(i=>{const v=+i.value;if(i.value===""||v<0||v>50){setErr(i,t("invalidRule"));bad=bad||i}});if(bad){bad.focus();return}
+  f.querySelectorAll("input").forEach(i=>S.rules[i.dataset.z][i.dataset.s]=+i.value);save();sim();toast(t("saved"));return}
+ if(f.id==="catf"){clearErr(f);let bad=null;f.querySelectorAll("input").forEach(i=>{const v=+i.value;if(i.value===""||v<0||v>50){setErr(i,t("invalidRule"));bad=bad||i}});if(bad){bad.focus();return}
+  f.querySelectorAll("input").forEach(i=>S.cats[i.dataset.k]=+i.value);save();sim();toast(t("saved"));return}
+});
+render();
+if(S.view==="search")doSearch();
+</script>
 </body>
 </html>
