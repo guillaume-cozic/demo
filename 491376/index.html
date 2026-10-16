@@ -2,20 +2,708 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Inscriptions restaurant d'entreprise</title>
+<meta name="description" content="Inscriptions au restaurant d'entreprise : menus sur plusieurs semaines, inscription à J-X avec choix du menu, annulation, et espace gestionnaire (saisie et publication des menus, fiche cuisine imprimable, liste des convives, réglages du délai et de la capacité).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F4EF;--panel:#FFFFFF;--panel-2:#F1EEE6;--ink:#1F2420;--muted:#565D55;--line:#E2DDD2;--line-2:#C3BCAE;
+  --accent:#2E6A4E;--accent-ink:#FFFFFF;--accent-soft:#E0EEE6;--accent-text:#22553D;
+  --band:#FBEFD9;--band-ink:#7A4A00;
+  --ok:#1E6A3F;--ok-soft:#DDF0E3;--warn:#8A4B00;--warn-soft:#FBEBD2;--bad:#A3282F;--bad-soft:#F9E1E2;--info:#25528A;--info-soft:#E1EAF6;--gray:#4F5650;--gray-soft:#ECE9E2;
+  --meat:#8C3B22;--meat-soft:#F7E4DC;--fish:#1F5585;--fish-soft:#E0EBF6;--veg:#2E6A2E;--veg-soft:#E2F1DD;
+  --shadow:0 1px 2px rgba(31,36,32,.05),0 4px 14px rgba(31,36,32,.06);
+  --font:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121512;--panel:#1A1E1A;--panel-2:#212621;--ink:#E8EBE6;--muted:#A6AEA4;--line:#2D332D;--line-2:#465046;
+  --accent:#7FCBA2;--accent-ink:#0E2A1C;--accent-soft:#1E3529;--accent-text:#9BDDB9;
+  --band:#2F2614;--band-ink:#F0C77E;
+  --ok:#7DD8A2;--ok-soft:#173023;--warn:#F0B661;--warn-soft:#352613;--bad:#FF959B;--bad-soft:#3B1C1E;--info:#9EC2F0;--info-soft:#182A40;--gray:#BCC3BA;--gray-soft:#272C27;
+  --meat:#F2A88C;--meat-soft:#3A2219;--fish:#9CC6F0;--fish-soft:#172A3D;--veg:#A3DB9A;--veg-soft:#1D311B;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1,h2{font-family:var(--head);letter-spacing:-.01em}
+h1{font-size:clamp(24px,3vw,30px)}
+h2{font-size:20px}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13.5px}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-family:var(--head);font-size:20px;display:block;line-height:1.1}
+.brand span{font-size:12.5px;color:var(--muted)}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.mark svg{width:22px;height:22px}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--ink)}
+.seg{margin-left:auto;display:flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);min-width:0}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+main{padding:22px clamp(16px,2vw,32px) 90px}
+@media (max-width:860px){.seg{margin-left:0;width:100%}.seg button{flex:1;justify-content:center;min-height:44px;padding:0 8px}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.dangerfill{background:var(--bad);border-color:var(--bad);color:#fff}
+@media (prefers-color-scheme:dark){.btn.dangerfill{color:#2A0D0F}}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.block{width:100%}
+.iconbtn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;color:var(--ink);flex:none}
+.iconbtn:hover{background:var(--panel-2)}
+.iconbtn:disabled{opacity:.45;cursor:not-allowed}
+.iconbtn.danger{color:var(--bad)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=search],input[type=number],input[type=time],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{min-height:70px;resize:vertical}
+input[aria-invalid=true]{border-color:var(--bad)}
+.check{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:10px 0;cursor:pointer}
+.check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex:none}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}.chip.info{background:var(--info-soft);color:var(--info)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}.chip.gray{background:var(--gray-soft);color:var(--gray)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip svg{width:14px;height:14px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:4px;vertical-align:1px}
+.tag.v{background:var(--meat-soft);color:var(--meat)}.tag.p{background:var(--fish-soft);color:var(--fish)}.tag.g{background:var(--veg-soft);color:var(--veg)}
+
+.pagehead{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.pagehead>div{min-width:0}
+.pagehead p{margin-top:4px}
+.who{width:min(100%,340px)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel>h2{font-size:18px;margin-bottom:12px}
+
+.weekbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.weekbar h2{font-size:19px;min-width:0}
+.weekbar .grow{flex:1}
+.weekbar .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.days{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){.days{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1000px){.days{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1280px){.days{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.day{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow);min-width:0}
+.day.mine{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow)}
+.day.closed,.day.past{background:var(--panel-2);box-shadow:none}
+.dayh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.dayh b{display:block;font-family:var(--head);font-size:19px;text-transform:capitalize}
+.dayh span.d{font-size:13.5px;color:var(--muted)}
+.mgroup h3{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.mgroup li{padding:2px 0;font-size:14.5px;overflow-wrap:anywhere;display:flex;gap:6px;align-items:flex-start}
+.mgroup li .dot{width:6px;height:6px;border-radius:50%;background:var(--line-2);margin-top:9px;flex:none}
+.mgroup li.sel{font-weight:700;color:var(--accent-text)}
+.mgroup li.sel .dot{background:var(--accent)}
+.menu{display:flex;flex-direction:column;gap:10px;flex:1}
+.cap{display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.cap .row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bar{height:8px;border-radius:99px;background:var(--gray-soft);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.bar.hot i{background:var(--warn)}.bar.full i{background:var(--bad)}
+.dl{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.dl svg{width:15px;height:15px}
+.mychoice{background:var(--accent-soft);color:var(--accent-text);border-radius:10px;padding:8px 10px;font-size:13.5px;overflow-wrap:anywhere}
+.day .actions .btn{flex:1}
+
+.empty{background:var(--panel);border:1px dashed var(--line-2);border-radius:14px;padding:36px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty svg{width:36px;height:36px;color:var(--muted)}
+
+.mylist{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.mylist{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1400px){.mylist{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.myitem{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.cal{width:62px;flex:none;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);text-align:center;padding:6px 0;align-self:flex-start}
+.cal b{display:block;font-family:var(--head);font-size:26px;line-height:1.1}
+.cal span{font-size:12px;font-weight:700;text-transform:uppercase}
+.myitem .body{min-width:0;flex:1;display:flex;flex-direction:column;gap:6px}
+.myitem h3{font-size:16px;text-transform:capitalize}
+.myitem .choices{font-size:14px;overflow-wrap:anywhere}
+.section-title{margin:28px 0 12px;font-size:18px}
+
+.tbl{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--panel-2);font-weight:700}
+tr:last-child td{border-bottom:0}
+td .sub{display:block;font-size:12.5px;color:var(--muted)}
+.note{color:var(--warn);font-weight:600}
+
+.daystrip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:12px;scrollbar-width:thin}
+.dchip{flex:none;width:128px;min-height:44px;display:flex;flex-direction:column;gap:5px;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:9px 11px;cursor:pointer}
+.dchip:hover{border-color:var(--line-2)}
+.dchip[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);background:var(--accent-soft)}
+.dchip .t{font-weight:700;font-size:14px;text-transform:capitalize}
+.dchip .s{font-size:12.5px;color:var(--muted)}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .v{font-family:var(--head);font-size:26px;font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+.kpi .v small{font-family:var(--font);font-size:14px;color:var(--muted);font-weight:500}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.dash{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.dash{grid-template-columns:minmax(0,1fr) minmax(0,1.8fr)}}
+.kgroup{margin-bottom:14px}
+.kgroup h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.krow{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:2px 10px;align-items:center;padding:4px 0}
+.krow .kl{font-size:14px;overflow-wrap:anywhere}
+.krow b{text-align:right;font-size:15px}
+.krow .bar{grid-column:1/-1;height:6px}
+.filters{display:grid;gap:10px;grid-template-columns:minmax(0,1fr);margin-bottom:12px}
+@media (min-width:640px){.filters{grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;align-items:end}}
+.panelhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.panelhead h2{font-size:18px}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.form-grid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:700px){.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.settings{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1100px){.settings{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+.preview{background:var(--accent-soft);color:var(--accent-text);border-radius:12px;padding:12px 14px;font-size:14.5px}
+.steps{display:grid;gap:14px;grid-template-columns:minmax(0,1fr);counter-reset:s}
+@media (min-width:760px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1300px){.steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.step{counter-increment:s;display:flex;flex-direction:column;gap:8px}
+.step::before{content:counter(s);width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-family:var(--head)}
+.step h3{font-size:16px}
+.step p{font-size:14px;color:var(--muted);flex:1}
+
+dialog{width:min(580px,calc(100vw - 20px));max-height:calc(100dvh - 20px);padding:0;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);box-shadow:0 20px 50px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(15,20,16,.5)}
+#dlgForm{display:flex;flex-direction:column;max-height:calc(100dvh - 22px)}
+.dlg-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dlg-head p{margin-top:2px;text-transform:none}
+.dlg-body{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.dlg-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--line)}
+@media (max-width:480px){.dlg-foot .btn{flex:1}}
+fieldset.opts{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+fieldset.opts legend{font-weight:700;font-size:14px;margin-bottom:6px;padding:0}
+.req{font-weight:500;color:var(--muted);font-size:12.5px}
+.opt{display:flex;gap:10px;align-items:center;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;overflow-wrap:anywhere}
+.opt:hover{border-color:var(--line-2)}
+.opt input{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.mrow{display:grid;gap:8px;grid-template-columns:minmax(0,1fr) 140px;align-items:end}
+@media (max-width:480px){.mrow{grid-template-columns:minmax(0,1fr)}}
+
+#toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 16px;font-size:14.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:10px;align-items:flex-start;animation:tin .2s ease-out}
+.toast svg{margin-top:2px}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}}
+
+#print{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  body>*:not(#print){display:none!important}
+  #print{display:block;font:12pt/1.4 var(--font);color:#000}
+  #print h1{font-size:20pt;margin-bottom:4pt}
+  #print h2{font-size:14pt;margin:14pt 0 6pt}
+  #print table{font-size:10.5pt}
+  #print th{background:#eee;color:#000}
+  #print th,#print td{border:1px solid #999;padding:4pt 6pt}
+  #print .cols{display:flex;gap:24pt}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="demo-band"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v20M4 2v6a3 3 0 0 0 6 0V2M17 22V2c-2.5 1-4 4-4 8h4"/></svg></span><div><b>Le Réfectoire</b><span>Restaurant d'entreprise</span></div></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="seg" role="group" aria-label="Choisir l'espace">
+    <button type="button" data-act="role" data-v="convive" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0 1 16 0v1"/></svg>Espace convive</button>
+    <button type="button" data-act="role" data-v="admin" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Gestion</button>
+  </div>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<div id="toasts" aria-live="polite"></div>
+<div id="print"></div>
+
+<script>
+(function(){
+'use strict';
+const I={
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
+ chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-3"/>',
+ book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/>',
+ gear:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+ help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
+ left:'<path d="m15 18-6-6 6-6"/>',right:'<path d="m9 18 6-6-6-6"/>',
+ x:'<path d="M18 6 6 18M6 6l12 12"/>',
+ print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+ dl:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+ clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+ edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+ eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z"/><circle cx="12" cy="12" r="3"/>',
+ lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+ users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+ mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/>'
+};
+const ic=(n,c)=>`<svg class="i${c?' '+c:''}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const FIRST=['Camille','Julien','Sophie','Thomas','Léa','Nicolas','Manon','Antoine','Chloé','Mathieu','Sarah','Romain','Laura','Hugo','Émilie','Lucas','Pauline','Maxime','Inès','Alexandre','Clara','Bastien','Julie','Karim','Élodie','Yanis','Marion','Florian','Aurélie','Mehdi'];
+const LAST=['Roux','Martin','Bernard','Petit','Durand','Leroy','Moreau','Simon','Laurent','Lefebvre','Michel','Garcia','David','Bertrand','Fontaine','Girard','Bonnet','Dupont','Lambert','Fournier','Mercier','Blanc','Guérin','Boyer','Garnier','Chevalier','François','Legrand','Gauthier','Perrin','Morel'];
+const SVCS=['Comptabilité','Ressources humaines','Production','Logistique','Commercial','Informatique','Qualité','Direction','Maintenance','Achats'];
+const ENT=['Velouté de potiron','Salade de lentilles, échalotes','Carottes râpées au cumin','Œuf mimosa','Taboulé à la menthe','Poireaux vinaigrette','Betteraves et feta','Terrine de campagne','Céleri rémoulade','Soupe à l’oignon'];
+const VIA=['Blanquette de veau, riz pilaf','Poulet rôti, pommes grenaille','Bœuf bourguignon, tagliatelles','Sauté de porc au caramel, riz','Hachis parmentier','Cuisse de canard, lentilles','Rôti de dinde, haricots verts'];
+const POI=['Dos de cabillaud, purée maison','Filet de lieu, sauce citron, riz','Saumon grillé, légumes vapeur','Brandade de morue','Merlu à la provençale, semoule'];
+const VEG=['Curry de légumes et lentilles corail','Lasagnes épinards et ricotta','Risotto aux champignons','Gratin de légumes, quinoa','Chili sin carne','Tarte aux poireaux, salade verte'];
+const DES=['Crème brûlée','Tarte aux pommes','Fromage blanc, coulis de fruits rouges','Mousse au chocolat','Salade de fruits frais','Riz au lait','Yaourt fermier','Clafoutis aux cerises','Fruit de saison','Île flottante'];
+const NOTES=['Sans gluten','Allergie fruits à coque','Sans porc','Portion réduite'];
+const HOL={'01-01':'Jour de l’an','05-01':'Fête du Travail','05-08':'Victoire 1945','07-14':'Fête nationale','08-15':'Assomption','11-01':'Toussaint','11-11':'Armistice','12-25':'Noël'};
+const TYPES={v:'Viande',p:'Poisson',g:'Végétarien'};
+const NWEEKS=5;
+
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=k=>{const a=k.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+const addDays=(d,n)=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x};
+const today0=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())};
+const mondayOf=d=>addDays(d,-((d.getDay()+6)%7));
+const diffDays=(a,b)=>Math.round((a-b)/864e5);
+const fmtShort=k=>parse(k).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const fmtLong=k=>parse(k).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const fmtDl=d=>d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' à '+pad(d.getHours())+'h'+pad(d.getMinutes());
+const rel=ms=>ms<36e5?Math.max(1,Math.round(ms/6e4))+' min':ms<48*36e5?Math.floor(ms/36e5)+' h':Math.floor(ms/864e5)+' jours';
+const tag=t=>`<span class="tag ${t}">${TYPES[t]}</span>`;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+const LS='refectoire-demo-491376';
+let S, ui;
+
+function seed(){
+  const r=rng(491376), base=mondayOf(today0());
+  const emps=[];
+  for(let i=0;i<90;i++)emps.push({id:'e'+i,n:FIRST[i%FIRST.length]+' '+LAST[i%LAST.length],s:SVCS[(i*7+3)%SVCS.length]});
+  emps[0].s='Comptabilité';
+  const s={v:1,base:key(base),me:'e0',settings:{delay:2,hour:'10:00',cap:70,cancel:true,remind:true},emps,weeks:[],menus:{},regs:{}};
+  S=s;
+  let n=0;
+  for(let w=0;w<NWEEKS;w++){
+    s.weeks.push({pub:w<NWEEKS-1});
+    for(let d=0;d<5;d++){
+      const k=key(addDays(base,w*7+d)),hol=HOL[k.slice(5)];
+      s.menus[k]={e:[ENT[(n*2)%ENT.length],ENT[(n*2+1)%ENT.length]],p:[{l:VIA[n%VIA.length],t:'v'},{l:POI[(n*3)%POI.length],t:'p'},{l:VEG[(n*2+1)%VEG.length],t:'g'}],d:[DES[(n*2)%DES.length],DES[(n*2+3)%DES.length]],closed:!!hol,reason:hol||''};
+      s.regs[k]=[];n++;
+    }
+  }
+  const others=emps.slice(1).map(e=>e.id);
+  const mk=u=>{const x=r();const reg={u,e:r()<.15?-1:(r()<.5?0:1),p:x<.45?0:x<.75?1:2,d:r()<.1?-1:(r()<.55?0:1),note:r()<.06?NOTES[Math.floor(r()*NOTES.length)]:'',at:Date.now()-Math.floor(r()*6*864e5)};return reg};
+  let oi=0;
+  Object.keys(s.menus).sort().forEach(k=>{
+    const st=status(k);
+    if(st==='ferme'||st==='draft')return;
+    let cnt,me=false;
+    if(st==='passe'){cnt=34+Math.floor(r()*28);me=r()<.6}
+    else if(st==='clos'){cnt=50+Math.floor(r()*14);me=true}
+    else{
+      cnt=oi===0?51:oi===1?70:oi===2?69:Math.max(8,Math.round(58-oi*3+r()*8));
+      me=oi===0||oi===3||oi===6;
+      oi++;
+    }
+    if(me)cnt--;
+    const pool=others.slice();
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+    pool.slice(0,cnt).forEach(u=>s.regs[k].push(mk(u)));
+    if(me)s.regs[k].push(Object.assign(mk('e0'),{note:''}));
+  });
+  return s;
+}
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(LS));if(s&&s.v===1&&s.base===key(mondayOf(today0())))return s}catch(e){}
+  return seed();
+}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+
+const emp=id=>S.emps.find(e=>e.id===id)||{n:'?',s:''};
+const weekOf=k=>Math.floor(diffDays(parse(k),parse(S.base))/7);
+const weekDays=w=>[0,1,2,3,4].map(d=>key(addDays(parse(S.base),w*7+d)));
+const myReg=k=>(S.regs[k]||[]).find(r=>r.u===S.me);
+function dl(k){const hm=S.settings.hour.split(':').map(Number);const d=addDays(parse(k),-S.settings.delay);d.setHours(hm[0]||0,hm[1]||0,0,0);return d}
+function status(k){
+  const m=S.menus[k];if(!m)return 'none';
+  if(m.closed)return 'ferme';
+  const w=S.weeks[weekOf(k)];if(!w||!w.pub)return 'draft';
+  if(parse(k)<today0())return 'passe';
+  if(Date.now()>=dl(k))return 'clos';
+  if(S.regs[k].length>=S.settings.cap)return 'complet';
+  return 'ouvert';
+}
+const hourTxt=()=>S.settings.hour.replace(':','h');
+const allKeys=()=>Object.keys(S.menus).sort();
+const myUpcoming=()=>allKeys().filter(k=>parse(k)>=today0()&&myReg(k));
+
+function initUi(){
+  let w=0;
+  for(let i=0;i<S.weeks.length;i++){if(weekDays(i).some(k=>['ouvert','complet'].includes(status(k)))){w=i;break}}
+  ui={role:'convive',view:'menus',week:w,aweek:Math.min(w,S.weeks.length-1),day:null,q:'',svc:''};
+}
+
+/* ---------- rendu ---------- */
+const NAV={
+  convive:[['menus','Menus & inscriptions','cal'],['mine','Mes inscriptions','check']],
+  admin:[['dash','Tableau de bord','chart'],['amenus','Menus','book'],['settings','Paramètres','gear'],['guide','Prise en main','help']]
+};
+function renderNav(){
+  $('#nav').innerHTML=NAV[ui.role].map(([v,l,i])=>{
+    const c=v==='mine'?`<span class="cnt">${myUpcoming().length}</span>`:'';
+    return `<button type="button" class="tab" data-act="go" data-v="${v}"${ui.view===v?' aria-current="page"':''}>${ic(i)}${l}${c}</button>`}).join('');
+  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===ui.role)));
+}
+function render(){
+  renderNav();
+  const V={menus:vMenus,mine:vMine,dash:vDash,amenus:vAMenus,settings:vSettings,guide:vGuide};
+  $('#main').innerHTML=V[ui.view]();
+  if(ui.view==='dash')renderRows();
+  if(ui.view==='settings')updatePreview();
+}
+function empty(t,p,btn){return `<div class="empty">${ic('cal')}<h2>${t}</h2><p class="muted">${p}</p>${btn||''}</div>`}
+function weekLabel(w){const d=weekDays(w);return 'Semaine du '+parse(d[0]).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})+' au '+parse(d[4]).toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}
+function weekbar(kind,w,meta){
+  return `<div class="weekbar">
+    <button type="button" class="iconbtn" data-act="wk" data-k="${kind}" data-d="-1" aria-label="Semaine précédente"${w<=0?' disabled':''}>${ic('left')}</button>
+    <h2 aria-live="polite">${weekLabel(w)}</h2>
+    <button type="button" class="iconbtn" data-act="wk" data-k="${kind}" data-d="1" aria-label="Semaine suivante"${w>=S.weeks.length-1?' disabled':''}>${ic('right')}</button>
+    <span class="grow"></span><div class="meta">${meta||''}</div></div>`;
+}
+function dayHead(k,chip){const d=parse(k);return `<header class="dayh"><div><b>${d.toLocaleDateString('fr-FR',{weekday:'long'})}</b><span class="d">${d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})}</span></div>${chip}</header>`}
+function menuHtml(m,r){
+  const li=(txt,sel)=>`<li${sel?' class="sel"':''}><span class="dot"></span><span>${txt}${sel?'<span class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"> (votre choix)</span>':''}</span></li>`;
+  return `<div class="menu">
+   <div class="mgroup"><h3>Entrées</h3><ul>${m.e.map((x,i)=>li(esc(x),r&&r.e===i)).join('')}</ul></div>
+   <div class="mgroup"><h3>Plats</h3><ul>${m.p.map((x,i)=>li(esc(x.l)+tag(x.t),r&&r.p===i)).join('')}</ul></div>
+   <div class="mgroup"><h3>Desserts</h3><ul>${m.d.map((x,i)=>li(esc(x),r&&r.d===i)).join('')}</ul></div></div>`;
+}
+function capHtml(k){
+  const n=S.regs[k].length,cap=S.settings.cap,pct=Math.min(100,Math.round(n/cap*100));
+  const left=Math.max(0,cap-n);
+  return `<div class="cap"><div class="row"><span><b>${n}</b> / ${cap} convives</span><span class="muted">${left===0?'Complet':left<=5?`Plus que ${left} place${left>1?'s':''}`:left+' places libres'}</span></div><div class="bar ${pct>=100?'full':pct>=90?'hot':''}" role="img" aria-label="Taux de remplissage ${pct} %"><i style="width:${pct}%"></i></div></div>`;
+}
+const ST={ouvert:['Ouvert','info'],complet:['Complet','bad'],clos:['Clôturé','gray'],passe:['Passé','gray'],ferme:['Fermé','gray'],draft:['Brouillon','warn']};
+function chip(st){const s=ST[st];return `<span class="chip ${s[1]}">${s[0]}</span>`}
+
+function choiceTxt(k,r){
+  const m=S.menus[k];
+  const p=m.p[r.p]?m.p[r.p].l:'—';
+  const parts=[r.e>=0&&m.e[r.e]?m.e[r.e]:'Sans entrée',p,r.d>=0&&m.d[r.d]?m.d[r.d]:'Sans dessert'];
+  return parts.map(esc).join(' · ');
+}
+function dayCard(k){
+  const m=S.menus[k],st=status(k),r=myReg(k);
+  if(st==='ferme')return `<article class="day closed">${dayHead(k,chip('ferme'))}<p class="muted">Restaurant fermé${m.reason?' — '+esc(m.reason):''}.</p></article>`;
+  const c=r?`<span class="chip ok">${ic('check')}Inscrit·e</span>`:chip(st);
+  let line='';
+  if(st==='ouvert'||st==='complet'){const t=dl(k);line=`<p class="dl">${ic('clock')}<span>Clôture ${fmtDl(t)} · dans ${rel(t-Date.now())}</span></p>`}
+  else if(st==='clos')line=`<p class="dl">${ic('lock')}<span>Inscriptions closes, liste transmise à la cuisine</span></p>`;
+  let act='';
+  const editable=st==='ouvert'||st==='complet';
+  if(r){
+    act=`<p class="mychoice">Votre menu : <b>${choiceTxt(k,r)}</b>${r.note?`<br>Remarque : ${esc(r.note)}`:''}</p>`;
+    if(editable)act+=`<div class="actions"><button type="button" class="btn" data-act="reg" data-k="${k}">${ic('edit')}Modifier</button>${S.settings.cancel?`<button type="button" class="btn danger" data-act="cancel" data-k="${k}">${ic('x')}Annuler</button>`:''}</div>`;
+  }else if(st==='ouvert')act=`<button type="button" class="btn primary block" data-act="reg" data-k="${k}">${ic('plus')}S'inscrire</button>`;
+  else if(st==='complet')act=`<button type="button" class="btn block" disabled>Complet</button>`;
+  return `<article class="day${r?' mine':''}${st==='passe'?' past':''}" aria-label="${esc(fmtLong(k))}">${dayHead(k,c)}${menuHtml(m,r)}${capHtml(k)}${line}${act}</article>`;
+}
+function vMenus(){
+  const w=ui.week,days=weekDays(w),pub=S.weeks[w].pub;
+  const mc=days.filter(k=>myReg(k)).length;
+  let h=`<div class="pagehead"><div><h1>Menus &amp; inscriptions</h1><p class="muted">Inscription jusqu'à <b>J-${S.settings.delay} à ${hourTxt()}</b> avec choix du menu · ${S.settings.cancel?'annulation possible jusqu’à la clôture':'annulation auprès du gestionnaire'}</p></div>
+   <div class="field who"><label for="who">Connecté·e en tant que</label><select id="who">${S.emps.map(e=>`<option value="${e.id}"${e.id===S.me?' selected':''}>${esc(e.n)} — ${esc(e.s)}</option>`).join('')}</select></div></div>`;
+  h+=weekbar('week',w,pub?`<span class="chip ${mc?'ok':'gray'}">${mc} repas réservé${mc>1?'s':''} cette semaine</span>`:'');
+  h+=pub?`<div class="days">${days.map(dayCard).join('')}</div>`:empty('Menus pas encore publiés','Le gestionnaire publie les menus chaque semaine. Consultez une autre semaine ou revenez bientôt.');
+  return h;
+}
+function vMine(){
+  const up=myUpcoming(),past=allKeys().filter(k=>parse(k)<today0()&&myReg(k)).reverse();
+  let h=`<div class="pagehead"><div><h1>Mes inscriptions</h1><p class="muted">${esc(emp(S.me).n)} · ${up.length} repas à venir</p></div></div>`;
+  if(!up.length)h+=empty('Aucune inscription à venir','Choisissez vos repas dans les menus des prochaines semaines.',`<button type="button" class="btn primary" data-act="go" data-v="menus">Voir les menus</button>`);
+  else h+=`<ul class="mylist">${up.map(k=>{
+    const r=myReg(k),st=status(k),d=parse(k),editable=st==='ouvert'||st==='complet';
+    const info=editable?`${ic('clock')}<span>${S.settings.cancel?'Modifiable ou annulable':'Modifiable'} jusqu'au ${fmtDl(dl(k))}</span>`:`${ic('lock')}<span>Clôturée : ${parse(k).getTime()===today0().getTime()?'bon appétit !':'plus modifiable'}</span>`;
+    return `<li class="myitem"><div class="cal" aria-hidden="true"><span>${d.toLocaleDateString('fr-FR',{weekday:'short'})}</span><b>${d.getDate()}</b><span>${d.toLocaleDateString('fr-FR',{month:'short'})}</span></div>
+     <div class="body"><h3>${esc(fmtLong(k))}</h3><p class="choices">${choiceTxt(k,r)}</p>${r.note?`<p class="small note">${esc(r.note)}</p>`:''}<p class="dl">${info}</p>
+     ${editable?`<div class="actions"><button type="button" class="btn" data-act="reg" data-k="${k}">${ic('edit')}Modifier</button>${S.settings.cancel?`<button type="button" class="btn danger" data-act="cancel" data-k="${k}">${ic('x')}Annuler</button>`:''}</div>`:''}</div></li>`}).join('')}</ul>`;
+  if(past.length)h+=`<h2 class="section-title">Historique</h2><div class="tbl"><table><thead><tr><th scope="col">Date</th><th scope="col">Menu choisi</th></tr></thead><tbody>${past.map(k=>`<tr><td>${esc(fmtShort(k))}</td><td>${choiceTxt(k,myReg(k))}</td></tr>`).join('')}</tbody></table></div>`;
+  return h;
+}
+
+/* ---------- gestion ---------- */
+function dashDays(){return allKeys().filter(k=>parse(k)>=today0()&&!S.menus[k].closed&&S.weeks[weekOf(k)].pub)}
+function counts(k){
+  const m=S.menus[k],c={e:m.e.map(()=>0),p:m.p.map(()=>0),d:m.d.map(()=>0),ne:0,nd:0};
+  S.regs[k].forEach(r=>{if(r.e>=0&&r.e<c.e.length)c.e[r.e]++;else c.ne++;if(r.p>=0&&r.p<c.p.length)c.p[r.p]++;if(r.d>=0&&r.d<c.d.length)c.d[r.d]++;else c.nd++});
+  return c;
+}
+function vDash(){
+  const days=dashDays();
+  if(!days.length)return `<div class="pagehead"><div><h1>Tableau de bord</h1></div></div>`+empty('Aucun service à venir','Publiez les menus des prochaines semaines dans l’onglet Menus.',`<button type="button" class="btn primary" data-act="go" data-v="amenus">Gérer les menus</button>`);
+  if(!days.includes(ui.day))ui.day=days[0];
+  const k=ui.day,m=S.menus[k],R=S.regs[k],cap=S.settings.cap,st=status(k),c=counts(k),t0=key(today0());
+  const strip=days.map(d=>{const n=S.regs[d].length,p=Math.min(100,Math.round(n/cap*100));
+    return `<button type="button" class="dchip" data-act="pickday" data-k="${d}" aria-pressed="${d===k}"><span class="t">${d===t0?'Aujourd’hui':esc(fmtShort(d))}</span><span class="bar ${p>=100?'full':p>=90?'hot':''}" aria-hidden="true"><i style="width:${p}%"></i></span><span class="s">${n}/${cap} · ${ST[status(d)][0].toLowerCase()}</span></button>`}).join('');
+  const veg=R.filter(r=>m.p[r.p]&&m.p[r.p].t==='g').length,notes=R.filter(r=>r.note).length;
+  const t=dl(k);
+  const kdl=st==='clos'?`<div class="v">Clôturées</div><div class="s">Liste définitive</div>`:`<div class="v">${rel(t-Date.now())}</div><div class="s">${fmtDl(t)}</div>`;
+  const krows=(arr,labels,extra)=>{const tot=Math.max(1,R.length);return labels.map((l,i)=>`<div class="krow"><span class="kl">${l}</span><b>${arr[i]}</b><span class="bar" aria-hidden="true"><i style="width:${Math.round(arr[i]/tot*100)}%"></i></span></div>`).join('')+(extra?`<div class="krow"><span class="kl muted">${extra[0]}</span><b>${extra[1]}</b></div>`:'')};
+  return `<div class="pagehead"><div><h1>Tableau de bord</h1><p class="muted">Suivi des inscriptions et fiche cuisine du ${esc(fmtLong(k))}</p></div>
+    <div class="actions"><button type="button" class="btn" data-act="print">${ic('print')}Imprimer la fiche cuisine</button><button type="button" class="btn" data-act="csv">${ic('dl')}Exporter (CSV)</button></div></div>
+  <div class="daystrip" role="group" aria-label="Choisir un service">${strip}</div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">Inscrits</div><div class="v">${R.length} <small>/ ${cap}</small></div><div class="s">${Math.round(R.length/cap*100)} % de remplissage</div></div>
+    <div class="kpi"><div class="l">Places restantes</div><div class="v">${Math.max(0,cap-R.length)}</div><div class="s">${chip(st)}</div></div>
+    <div class="kpi"><div class="l">Clôture des inscriptions</div>${kdl}</div>
+    <div class="kpi"><div class="l">Plats végétariens</div><div class="v">${veg}</div><div class="s">${notes} remarque${notes>1?'s':''} (allergies…)</div></div>
+  </div>
+  <div class="dash">
+    <section class="panel" aria-labelledby="kt"><h2 id="kt">Fiche cuisine</h2>
+      <div class="kgroup"><h3>Entrées</h3>${krows(c.e,m.e.map(esc),['Sans entrée',c.ne])}</div>
+      <div class="kgroup"><h3>Plats</h3>${krows(c.p,m.p.map(p=>esc(p.l)+tag(p.t)))}</div>
+      <div class="kgroup"><h3>Desserts</h3>${krows(c.d,m.d.map(esc),['Sans dessert',c.nd])}</div>
+    </section>
+    <section class="panel" aria-labelledby="lt">
+      <div class="panelhead"><h2 id="lt">Convives inscrits <span class="muted small" id="rowsCount"></span></h2>
+        <button type="button" class="btn primary" data-act="adminreg" data-k="${k}"${st==='passe'?' disabled':''}>${ic('plus')}Inscrire un convive</button></div>
+      <div class="filters">
+        <div class="field"><label for="q">Rechercher</label><input type="search" id="q" placeholder="Nom du convive" value="${esc(ui.q)}"></div>
+        <div class="field"><label for="svc">Service</label><select id="svc"><option value="">Tous</option>${SVCS.map(s=>`<option${ui.svc===s?' selected':''}>${esc(s)}</option>`).join('')}</select></div>
+      </div>
+      <div class="tbl"><table><thead><tr><th scope="col">Convive</th><th scope="col">Entrée</th><th scope="col">Plat</th><th scope="col">Dessert</th><th scope="col"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Actions</span></th></tr></thead><tbody id="rows"></tbody></table></div>
+    </section>
+  </div>`;
+}
+function renderRows(){
+  const tb=$('#rows');if(!tb)return;
+  const k=ui.day,m=S.menus[k],q=ui.q.trim().toLowerCase();
+  const rows=S.regs[k].map(r=>({r,e:emp(r.u)})).filter(x=>(!q||x.e.n.toLowerCase().includes(q))&&(!ui.svc||x.e.s===ui.svc)).sort((a,b)=>a.e.n.localeCompare(b.e.n,'fr'));
+  $('#rowsCount').textContent=`(${rows.length})`;
+  tb.innerHTML=rows.length?rows.map(({r,e})=>`<tr><td><b>${esc(e.n)}</b><span class="sub">${esc(e.s)}</span>${r.note?`<span class="sub note">${esc(r.note)}</span>`:''}</td>
+    <td>${r.e>=0&&m.e[r.e]?esc(m.e[r.e]):'<span class="muted">—</span>'}</td><td>${m.p[r.p]?esc(m.p[r.p].l):'—'}</td><td>${r.d>=0&&m.d[r.d]?esc(m.d[r.d]):'<span class="muted">—</span>'}</td>
+    <td><button type="button" class="iconbtn danger" data-act="admincancel" data-u="${r.u}" aria-label="Désinscrire ${esc(e.n)}"${status(k)==='passe'?' disabled':''}>${ic('x')}</button></td></tr>`).join(''):`<tr><td colspan="5" class="muted">Aucun convive ne correspond.</td></tr>`;
+}
+function vAMenus(){
+  const w=ui.aweek,days=weekDays(w),pub=S.weeks[w].pub;
+  const cards=days.map(k=>{const m=S.menus[k],st=status(k),n=S.regs[k].length;
+    const c=m.closed?chip('ferme'):`<span class="chip ${pub?'info':'warn'}">${pub?n+' inscrit'+(n>1?'s':''):'Brouillon'}</span>`;
+    return `<article class="day${m.closed?' closed':''}">${dayHead(k,c)}${m.closed?`<p class="muted">Fermé${m.reason?' — '+esc(m.reason):''}</p>`:menuHtml(m)}${pub&&!m.closed?`<p class="dl">${ic('clock')}<span>Clôture ${fmtDl(dl(k))}</span></p>`:''}
+     <button type="button" class="btn block" data-act="editmenu" data-k="${k}"${st==='passe'?' disabled':''}>${ic('edit')}${st==='passe'?'Service passé':'Modifier le menu'}</button></article>`}).join('');
+  return `<div class="pagehead"><div><h1>Menus</h1><p class="muted">Saisissez les menus semaine par semaine, puis publiez-les : les convives peuvent alors s'inscrire.</p></div></div>
+   ${weekbar('aweek',w,`<span class="chip ${pub?'ok':'warn'}">${pub?ic('eye')+'Publiée':'Brouillon — invisible des convives'}</span>`)}
+   <div class="toolbar"><button type="button" class="btn ${pub?'':'primary'}" data-act="pub">${ic(pub?'lock':'eye')}${pub?'Repasser en brouillon':'Publier la semaine'}</button>
+   <button type="button" class="btn" data-act="copyweek"${w>=S.weeks.length-1?' disabled':''}>${ic('copy')}Copier vers la semaine suivante</button></div>
+   <div class="days">${cards}</div>`;
+}
+function vSettings(){
+  const s=S.settings;
+  return `<div class="pagehead"><div><h1>Paramètres</h1><p class="muted">Règles d'inscription appliquées à tous les services.</p></div></div>
+  <div class="settings"><form class="panel" id="setForm" novalidate>
+    <h2>Inscriptions</h2>
+    <div class="form-grid">
+      <div class="field"><label for="s_delay">Délai d'inscription (J-X)</label><input type="number" id="s_delay" name="delay" min="0" max="14" value="${s.delay}" inputmode="numeric" aria-describedby="h_delay e_delay"><span class="hint" id="h_delay">Nombre de jours avant le repas où les inscriptions ferment.</span><span class="err" id="e_delay"></span></div>
+      <div class="field"><label for="s_hour">Heure de clôture</label><input type="time" id="s_hour" name="hour" value="${s.hour}" aria-describedby="e_hour"><span class="err" id="e_hour"></span></div>
+      <div class="field"><label for="s_cap">Capacité maximale par service</label><input type="number" id="s_cap" name="cap" min="10" max="200" value="${s.cap}" inputmode="numeric" aria-describedby="h_cap e_cap"><span class="hint" id="h_cap">Au-delà, le service s'affiche « Complet ».</span><span class="err" id="e_cap"></span></div>
+    </div>
+    <label class="check"><input type="checkbox" name="cancel"${s.cancel?' checked':''}><span><b>Annulation par le convive</b><br><span class="hint">Autorisée jusqu'à la clôture des inscriptions.</span></span></label>
+    <label class="check"><input type="checkbox" name="remind"${s.remind?' checked':''}><span><b>Email de rappel</b><br><span class="hint">Envoyé la veille de la clôture aux convives non inscrits.</span></span></label>
+    <div class="actions" style="margin-top:8px"><button type="submit" class="btn primary">Enregistrer</button></div>
+  </form>
+  <aside class="panel"><h2>Aperçu</h2><p class="preview" id="setPreview" aria-live="polite"></p>
+   <p class="muted small" style="margin-top:12px">Les changements s'appliquent immédiatement aux services à venir. Les inscriptions déjà enregistrées sont conservées.</p></aside></div>`;
+}
+function updatePreview(){
+  const f=$('#setForm'),p=$('#setPreview');if(!f||!p)return;
+  const d=parseInt(f.delay.value,10),h=f.hour.value;
+  const k=dashDays().find(x=>parse(x).getDay()===1)||dashDays()[0];
+  if(!k||isNaN(d)||!h){p.textContent='Renseignez le délai et l’heure.';return}
+  const t=addDays(parse(k),-d),hm=h.split(':');
+  p.innerHTML=`Pour le repas du <b>${esc(fmtLong(k))}</b>, les inscriptions fermeront le <b>${t.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} à ${hm[0]}h${hm[1]}</b>.`;
+}
+function vGuide(){
+  const st=[['Saisir les menus','Dans « Menus », renseignez entrées, plats (viande, poisson, végétarien) et desserts pour chaque jour. Marquez les jours fériés comme fermés.','amenus','Ouvrir les menus'],
+    ['Publier la semaine','Une semaine en brouillon reste invisible. Publiez-la quand elle est prête ; copiez-la vers la suivante pour gagner du temps.','amenus','Publier'],
+    ['Régler le délai J-X','Dans « Paramètres », choisissez combien de jours avant le repas les inscriptions ferment, l’heure limite et la capacité.','settings','Ouvrir les paramètres'],
+    ['Préparer le service','Le tableau de bord donne le nombre de convives et de plats par jour. Imprimez la fiche cuisine ou exportez la liste.','dash','Voir le tableau de bord']];
+  return `<div class="pagehead"><div><h1>Prise en main</h1><p class="muted">Les 4 gestes du gestionnaire, présentés lors de la formation à la mise en service.</p></div></div>
+  <ol class="steps">${st.map(s=>`<li class="panel step"><h3>${s[0]}</h3><p>${s[1]}</p><button type="button" class="btn" data-act="go" data-v="${s[2]}">${s[3]}</button></li>`).join('')}</ol>
+  <section class="panel" style="margin-top:16px"><h2>Côté convive</h2><p class="muted">Chaque collaborateur consulte les menus des semaines publiées, s'inscrit en choisissant son menu, puis peut modifier ou annuler jusqu'à la clôture. Une confirmation lui est envoyée par email.</p>
+  <div class="actions" style="margin-top:12px"><button type="button" class="btn primary" data-act="role" data-v="convive">${ic('users')}Essayer l’espace convive</button></div></section>`;
+}
+
+/* ---------- dialogues ---------- */
+const dlg=$('#dlg');let dlgSubmit=null,opener=null;
+function openDlg(o){
+  opener=document.activeElement;dlgSubmit=o.onSubmit;
+  dlg.innerHTML=`<form id="dlgForm" novalidate><div class="dlg-head"><div><h2 id="dlgT">${o.title}</h2>${o.sub?`<p class="muted small">${o.sub}</p>`:''}</div><button type="button" class="iconbtn" data-act="dlgclose" aria-label="Fermer">${ic('x')}</button></div>
+   <div class="dlg-body">${o.body}</div><div class="dlg-foot"><button type="button" class="btn" data-act="dlgclose">${o.cancel||'Fermer'}</button><button type="submit" class="btn ${o.danger?'dangerfill':'primary'}">${o.ok}</button></div></form>`;
+  if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');
+  const f=dlg.querySelector('.dlg-body input:not([type=hidden]),.dlg-body select');if(f)f.focus();
+}
+function closeDlg(){if(dlg.open)dlg.close()}
+dlg.addEventListener('close',()=>{dlg.innerHTML='';if(opener&&document.body.contains(opener))opener.focus()});
+function confirmDlg(title,text,ok,fn){openDlg({title,body:`<p>${text}</p>`,ok,cancel:'Retour',danger:true,onSubmit(){fn();return true}})}
+
+function regDialog(k,admin){
+  const m=S.menus[k],ex=admin?null:myReg(k);
+  const radios=(name,legend,items,sel,none)=>`<fieldset class="opts"><legend>${legend}</legend>${items.map((x,i)=>`<label class="opt"><input type="radio" name="${name}" value="${i}"${sel===i?' checked':''}><span>${x}</span></label>`).join('')}${none?`<label class="opt"><input type="radio" name="${name}" value="-1"${sel===-1?' checked':''}><span class="muted">${none}</span></label>`:''}</fieldset>`;
+  let body='';
+  if(admin){
+    const taken=new Set(S.regs[k].map(r=>r.u));
+    body+=`<div class="field"><label for="f_u">Convive</label><select id="f_u" name="u" aria-describedby="errU"><option value="">Choisir un collaborateur…</option>${S.emps.filter(e=>!taken.has(e.id)).sort((a,b)=>a.n.localeCompare(b.n,'fr')).map(e=>`<option value="${e.id}">${esc(e.n)} — ${esc(e.s)}</option>`).join('')}</select><span class="err" id="errU"></span></div>`;
+    if(status(k)==='clos')body+=`<p class="small muted">${ic('info')} Inscriptions closes : en tant que gestionnaire, vous pouvez encore ajouter un convive.</p>`;
+  }
+  body+=radios('e','Entrée',m.e.map(esc),ex?ex.e:0,'Pas d’entrée')
+    +radios('p','Plat <span class="req">(obligatoire)</span>',m.p.map(p=>esc(p.l)+tag(p.t)),ex?ex.p:null)+'<p class="err" id="errP" role="alert"></p>'
+    +radios('d','Dessert',m.d.map(esc),ex?ex.d:0,'Pas de dessert')
+    +`<div class="field"><label for="f_note">Allergie ou remarque (facultatif)</label><textarea id="f_note" name="note" maxlength="120">${ex?esc(ex.note):''}</textarea></div>`;
+  openDlg({title:admin?'Inscrire un convive':ex?'Modifier mon inscription':'Je m’inscris',sub:esc(fmtLong(k))+(admin||ex?'':` · clôture ${fmtDl(dl(k))}`),body,ok:ex?'Enregistrer':'Confirmer l’inscription',
+    onSubmit(f){
+      let ok=true;
+      const p=f.querySelector('input[name=p]:checked');
+      $('#errP').textContent=p?'':'Choisissez un plat.';
+      let u=S.me;
+      if(admin){u=f.u.value;$('#errU').textContent=u?'':'Choisissez un convive.';f.u.setAttribute('aria-invalid',String(!u));if(!u){ok=false;f.u.focus()}}
+      if(!p){if(ok)f.querySelector('input[name=p]').focus();ok=false}
+      if(!ok)return false;
+      const st=status(k);
+      if(!admin&&!ex&&st!=='ouvert'){toast(st==='complet'?'Ce service vient d’être complet.':'Les inscriptions sont closes pour ce jour.');render();return true}
+      if(!ex&&S.regs[k].length>=S.settings.cap){$('#errP').textContent='Capacité atteinte : augmentez-la dans Paramètres pour ajouter un convive.';return false}
+      const val=n=>{const x=f.querySelector(`input[name=${n}]:checked`);return x?+x.value:-1};
+      const rec={u,e:val('e'),p:+p.value,d:val('d'),note:f.note.value.trim().slice(0,120),at:Date.now()};
+      if(ex)Object.assign(ex,rec);else S.regs[k].push(rec);
+      save();render();
+      toast(admin?`${emp(u).n} est inscrit·e le ${fmtShort(k)} — confirmation envoyée par email (simulation)`:ex?'Choix modifié — email de confirmation envoyé (simulation)':`Inscription confirmée pour le ${fmtShort(k)} — email envoyé (simulation)`);
+      return true;
+    }});
+}
+function menuDialog(k){
+  const m=S.menus[k],n=S.regs[k].length;
+  const inp=(id,label,v)=>`<div class="field"><label for="${id}">${label}</label><input type="text" id="${id}" name="${id}" value="${esc(v||'')}" maxlength="60"></div>`;
+  const body=`<label class="check"><input type="checkbox" name="closed" id="f_closed"${m.closed?' checked':''}><span><b>Restaurant fermé ce jour</b><br><span class="hint">Jour férié, fermeture exceptionnelle…${n?` Les ${n} inscriptions seront annulées et les convives prévenus.`:''}</span></span></label>
+   <div class="field"><label for="f_reason">Motif de fermeture (facultatif)</label><input type="text" id="f_reason" name="reason" value="${esc(m.reason)}" maxlength="40"></div>
+   <fieldset class="opts"><legend>Entrées</legend>${inp('e0','Entrée 1',m.e[0])}${inp('e1','Entrée 2',m.e[1])}</fieldset>
+   <fieldset class="opts"><legend>Plats</legend>${[0,1,2].map(i=>`<div class="mrow">${inp('p'+i,'Plat '+(i+1)+(i===0?' (obligatoire)':''),m.p[i]&&m.p[i].l)}<div class="field"><label for="t${i}">Type</label><select id="t${i}" name="t${i}">${Object.keys(TYPES).map(t=>`<option value="${t}"${(m.p[i]?m.p[i].t:['v','p','g'][i])===t?' selected':''}>${TYPES[t]}</option>`).join('')}</select></div></div>`).join('')}<p class="err" id="errM" role="alert"></p></fieldset>
+   <fieldset class="opts"><legend>Desserts</legend>${inp('d0','Dessert 1',m.d[0])}${inp('d1','Dessert 2',m.d[1])}</fieldset>`;
+  openDlg({title:'Menu du '+esc(fmtLong(k)),sub:n?`${n} convive${n>1?'s':''} déjà inscrit${n>1?'s':''}`:'',body,ok:'Enregistrer le menu',onSubmit(f){
+    const closed=f.closed.checked,v=id=>f[id].value.trim();
+    const p=[0,1,2].map(i=>({l:v('p'+i),t:f['t'+i].value}));
+    if(!closed&&!p.some(x=>x.l)){$('#errM').textContent='Indiquez au moins un plat.';f.p0.setAttribute('aria-invalid','true');f.p0.focus();return false}
+    const wasOpen=!m.closed;
+    m.e=[v('e0'),v('e1')].filter(Boolean);m.p=p.filter(x=>x.l);m.d=[v('d0'),v('d1')].filter(Boolean);m.closed=closed;m.reason=v('reason');
+    let msg='Menu enregistré';
+    if(closed&&wasOpen&&n){S.regs[k]=[];msg=`Jour fermé — ${n} convive${n>1?'s':''} prévenu${n>1?'s':''} par email (simulation)`}
+    else if(n&&!closed)msg+=` — ${n} convive${n>1?'s':''} informé${n>1?'s':''} du changement (simulation)`;
+    S.regs[k].forEach(r=>{if(r.p>=m.p.length)r.p=0;if(r.e>=m.e.length)r.e=-1;if(r.d>=m.d.length)r.d=-1});
+    save();render();toast(msg);return true}});
+}
+
+/* ---------- impression & export ---------- */
+function printSheet(){
+  const k=ui.day,m=S.menus[k],c=counts(k),R=S.regs[k].map(r=>({r,e:emp(r.u)})).sort((a,b)=>a.e.n.localeCompare(b.e.n,'fr'));
+  const grp=(t,l,a)=>`<div><h2>${t}</h2><table><tbody>${l.map((x,i)=>`<tr><td>${esc(x)}</td><td><b>${a[i]}</b></td></tr>`).join('')}</tbody></table></div>`;
+  $('#print').innerHTML=`<h1>Fiche cuisine — ${esc(fmtLong(k))}</h1><p>${R.length} convives inscrits · capacité ${S.settings.cap}</p>
+   <div class="cols">${grp('Entrées',m.e.concat('Sans entrée'),c.e.concat(c.ne))}${grp('Plats',m.p.map(p=>p.l+' ('+TYPES[p.t]+')'),c.p)}${grp('Desserts',m.d.concat('Sans dessert'),c.d.concat(c.nd))}</div>
+   <h2>Liste des convives</h2><table><thead><tr><th>Convive</th><th>Service</th><th>Entrée</th><th>Plat</th><th>Dessert</th><th>Remarque</th></tr></thead><tbody>${R.map(({r,e})=>`<tr><td>${esc(e.n)}</td><td>${esc(e.s)}</td><td>${esc(m.e[r.e]||'—')}</td><td>${esc(m.p[r.p]?m.p[r.p].l:'—')}</td><td>${esc(m.d[r.d]||'—')}</td><td>${esc(r.note)}</td></tr>`).join('')}</tbody></table>`;
+  window.print();
+}
+function exportCsv(){
+  const k=ui.day,m=S.menus[k],q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const lines=[['Date','Convive','Service','Entrée','Plat','Dessert','Remarque'].map(q).join(';')].concat(S.regs[k].map(r=>{const e=emp(r.u);return [k,e.n,e.s,m.e[r.e]||'',m.p[r.p]?m.p[r.p].l:'',m.d[r.d]||'',r.note].map(q).join(';')}));
+  try{const b=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='inscriptions-'+k+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Export CSV téléchargé')}catch(e){toast('Export indisponible dans ce navigateur')}
+}
+
+function toast(msg){
+  const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.innerHTML=ic('check')+'<span>'+esc(msg)+'</span>';
+  $('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200);
+}
+
+/* ---------- événements ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+  const a=b.dataset.act,k=b.dataset.k;
+  switch(a){
+    case 'reset':try{localStorage.removeItem(LS)}catch(x){}S=seed();save();initUi();closeDlg();render();toast('Démo réinitialisée');break;
+    case 'role':ui.role=b.dataset.v;ui.view=ui.role==='admin'?'dash':'menus';render();$('#main').focus();break;
+    case 'go':ui.view=b.dataset.v;if(['menus','mine'].includes(ui.view))ui.role='convive';else ui.role='admin';render();$('#main').focus();break;
+    case 'wk':ui[k]=Math.max(0,Math.min(S.weeks.length-1,ui[k]+(+b.dataset.d)));render();{const nb=document.querySelector(`[data-act=wk][data-k=${k}][data-d="${b.dataset.d}"]`);if(nb&&!nb.disabled)nb.focus()}break;
+    case 'reg':regDialog(k,false);break;
+    case 'cancel':{const r=myReg(k);if(!r)break;confirmDlg('Annuler mon inscription ?',`Votre repas du <b>${esc(fmtLong(k))}</b> (${choiceTxt(k,r)}) sera annulé et la place libérée.`,'Oui, annuler',()=>{S.regs[k]=S.regs[k].filter(x=>x!==r);save();render();toast('Inscription annulée — email de confirmation envoyé (simulation)')});break}
+    case 'pickday':ui.day=k;render();{const nb=document.querySelector(`[data-act=pickday][data-k="${k}"]`);if(nb)nb.focus()}break;
+    case 'adminreg':regDialog(k,true);break;
+    case 'admincancel':{const u=b.dataset.u,k2=ui.day,n=emp(u).n;confirmDlg('Désinscrire ce convive ?',`<b>${esc(n)}</b> ne sera plus inscrit·e le ${esc(fmtLong(k2))}.`,'Désinscrire',()=>{S.regs[k2]=S.regs[k2].filter(r=>r.u!==u);save();render();toast(`${n} désinscrit·e — email envoyé (simulation)`)});break}
+    case 'print':printSheet();break;
+    case 'csv':exportCsv();break;
+    case 'editmenu':menuDialog(k);break;
+    case 'pub':{const w=S.weeks[ui.aweek],has=weekDays(ui.aweek).some(d=>S.regs[d].length);
+      if(w.pub&&has){toast('Impossible : des convives sont déjà inscrits sur cette semaine.');break}
+      w.pub=!w.pub;save();render();toast(w.pub?'Semaine publiée — les convives peuvent s’inscrire, notification envoyée (simulation)':'Semaine repassée en brouillon');break}
+    case 'copyweek':{const src=weekDays(ui.aweek),dst=weekDays(ui.aweek+1);
+      dst.forEach((d,i)=>{const s=S.menus[src[i]],t=S.menus[d];if(s.closed)return;t.e=s.e.slice();t.p=s.p.map(x=>({l:x.l,t:x.t}));t.d=s.d.slice();S.regs[d].forEach(r=>{if(r.p>=t.p.length)r.p=0})});
+      ui.aweek++;save();render();toast('Menus copiés — vérifiez puis publiez la semaine');break}
+    case 'dlgclose':closeDlg();break;
+  }
+});
+document.addEventListener('submit',e=>{
+  const f=e.target;e.preventDefault();
+  if(f.id==='dlgForm'){if(dlgSubmit&&dlgSubmit(f))closeDlg();return}
+  if(f.id==='setForm'){
+    const d=parseInt(f.delay.value,10),cap=parseInt(f.cap.value,10),h=f.hour.value;let ok=true;
+    const set=(id,msg)=>{$('#e_'+id).textContent=msg;f[id].setAttribute('aria-invalid',String(!!msg));if(msg&&ok){f[id].focus();ok=false}};
+    set('delay',isNaN(d)||d<0||d>14?'Indiquez un délai entre 0 et 14 jours.':'');
+    set('hour',/^\d{2}:\d{2}$/.test(h)?'':'Indiquez une heure valide.');
+    let capMsg=isNaN(cap)||cap<10||cap>200?'Indiquez une capacité entre 10 et 200.':'';
+    if(!capMsg){const over=dashDays().find(k=>S.regs[k].length>cap);if(over)capMsg=`${S.regs[over].length} convives sont déjà inscrits le ${fmtShort(over)}.`}
+    set('cap',capMsg);
+    if(!ok)return;
+    Object.assign(S.settings,{delay:d,hour:h,cap,cancel:f.cancel.checked,remind:f.remind.checked});save();render();toast('Paramètres enregistrés');
+  }
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){ui.q=e.target.value;renderRows()}
+  if(e.target.closest&&e.target.closest('#setForm'))updatePreview();
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='who'){S.me=e.target.value;save();render();const w=$('#who');if(w)w.focus();toast('Vous êtes maintenant '+emp(S.me).n)}
+  if(e.target.id==='svc'){ui.svc=e.target.value;renderRows()}
+});
+
+S=load();save();initUi();render();
+})();
+</script>
 </body>
 </html>
