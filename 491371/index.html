@@ -2,20 +2,771 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Agents IA logistique vins</title>
+<meta name="description" content="Console d'agents IA pour une logistique de vins : analyse des mails et complétion des fichiers Excel par règles métier, relances clients, dépôt ERP après validation, rendez-vous transport synchronisés avec l'agenda et circuit signature, envoi et impression des DRM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F4F1;--panel:#FFFFFF;--panel-2:#F2EEE9;--ink:#231A1D;--muted:#5C5155;--line:#E4DDD6;--line-2:#C7BCB4;
+  --accent:#7A1F3D;--accent-ink:#FFFFFF;--accent-soft:#F6E5EB;--accent-text:#6A1834;
+  --band:#FBF0DA;--band-ink:#6E4500;
+  --ok:#1D6B3F;--ok-soft:#DFF1E5;--warn:#7A4B00;--warn-soft:#FBEDCF;--bad:#A3242E;--bad-soft:#FAE2E3;--info:#28508A;--info-soft:#E2EAF6;--gray:#53575A;--gray-soft:#ECE9E5;
+  --ev-p:#E0A800;--ev-c:#0B8043;--ev-a:#D50000;
+  --shadow:0 1px 2px rgba(35,26,29,.05),0 4px 14px rgba(35,26,29,.06);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141012;--panel:#1D181A;--panel-2:#262022;--ink:#EEE7E9;--muted:#B3A6AB;--line:#342B2E;--line-2:#4D4246;
+  --accent:#E69AB2;--accent-ink:#2A0A15;--accent-soft:#3A1F29;--accent-text:#F2B8CA;
+  --band:#2F2614;--band-ink:#F0C77C;
+  --ok:#7AD6A0;--ok-soft:#173022;--warn:#F2BE6A;--warn-soft:#36280F;--bad:#FF959C;--bad-soft:#3D1B1E;--info:#9DC2F2;--info-soft:#182A40;--gray:#BDB4B7;--gray-soft:#2A2426;
+  --ev-p:#F6BF26;--ev-c:#33B679;--ev-a:#FF6B6B;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-family:var(--head);font-size:clamp(24px,3vw,30px);letter-spacing:-.01em}
+h2{font-size:16px;font-weight:700}
+h3{font-size:15px;font-weight:600}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13px}.wrap{overflow-wrap:anywhere}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+svg.lg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:4px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.band b{color:var(--band-ink)}
+.band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:6px 18px;padding:6px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;min-width:0}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted);line-height:1.1}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1 1 auto}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 12px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 7px;font-weight:700;min-width:20px;text-align:center}
+.eu{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ok);font-weight:600;white-space:nowrap}
+main{padding:20px clamp(16px,2vw,32px) 80px}
+
+.page-h{display:flex;gap:12px 20px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px}
+.page-h > div{min-width:0}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{min-height:44px;display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:0 14px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.btn[disabled]{opacity:.55;cursor:not-allowed;filter:none}
+.ibtn{min-width:44px;min-height:44px;display:inline-grid;place-items:center;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;cursor:pointer;padding:0}
+.ibtn:hover{background:var(--panel-2)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card > h2{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.sec{margin:6px 0 10px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;line-height:1.5;overflow-wrap:anywhere}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.warn{background:var(--warn-soft);color:var(--warn)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--info-soft);color:var(--info)}.pill.gray{background:var(--gray-soft);color:var(--gray)}.pill.accent{background:var(--accent-soft);color:var(--accent-text)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:0 6px;border-radius:6px;background:var(--panel);border:1px solid currentColor;line-height:1.5;white-space:nowrap}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi .v{font-family:var(--head);font-size:30px;font-weight:700;line-height:1.1;margin:4px 0}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600}
+.ov{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.ov > .col{display:grid;gap:16px;align-content:start;min-width:0}
+@media (min-width:1150px){.ov{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}}
+.queue li{border-top:1px solid var(--line)}
+.queue li:first-child{border-top:0}
+.qi{width:100%;display:flex;gap:12px;align-items:center;padding:8px 4px;min-height:52px;background:none;border:0;text-align:left;cursor:pointer;border-radius:8px}
+.qi:hover{background:var(--panel-2)}
+.qi .b{flex:1;min-width:0}
+.qi .b strong{display:block;overflow-wrap:anywhere}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.dot.bad{background:var(--bad)}.dot.warn{background:var(--warn)}.dot.accent{background:var(--accent)}.dot.info{background:var(--info)}
+.empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px}
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:12px}
+.agent{display:flex;flex-direction:column;gap:8px}
+.agent .ah{display:flex;gap:10px;align-items:flex-start}
+.agent .ah > div{min-width:0;flex:1}
+.aic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-text);flex:none}
+.agent p{font-size:13.5px;color:var(--muted)}
+.agent .stat{font-size:13px;font-weight:600}
+.agent .af{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.agent.opt{border-style:dashed;background:var(--panel-2);box-shadow:none}
+.addag{border:2px dashed var(--line-2);border-radius:14px;background:transparent;min-height:150px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-weight:600;padding:16px}
+.addag:hover{background:var(--panel);color:var(--ink)}
+.conn li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.conn li:first-child{border-top:0}
+.conn li > div{flex:1;min-width:0}
+.guard{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--ok-soft);color:var(--ink);font-size:13.5px;display:flex;gap:10px}
+.guard svg{color:var(--ok);margin-top:2px}
+.journal li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+.journal li:first-child{border-top:0}
+.journal time{color:var(--muted);font-variant-numeric:tabular-nums}
+.journal b{font-weight:600}
+.journal .h{color:var(--accent-text)}
+
+/* Mails */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chip{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:0 14px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;padding:0 12px;min-width:0;flex:1 1 200px;max-width:340px}
+.split{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:960px){.split{grid-template-columns:minmax(0,360px) minmax(0,1fr)}}
+@media (min-width:1500px){.split{grid-template-columns:minmax(0,420px) minmax(0,1fr)}}
+.mlist{display:flex;flex-direction:column;gap:6px;min-width:0}
+.mitem{width:100%;display:flex;gap:10px;text-align:left;padding:10px 12px;border:1px solid var(--line);background:var(--panel);border-radius:12px;cursor:pointer;min-height:44px}
+.mitem:hover{border-color:var(--line-2)}
+.mitem[aria-current="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.mi-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--panel-2);color:var(--muted)}
+.mi-ic.t-fichier{background:var(--ok-soft);color:var(--ok)}.mi-ic.t-rdv{background:var(--info-soft);color:var(--info)}
+.mi-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.mi-top{display:flex;justify-content:space-between;gap:8px;width:100%}
+.mi-top strong{min-width:0}
+.mi-s{font-size:13.5px;color:var(--muted)}
+.detail{display:grid;gap:14px;align-content:start;min-width:0}
+.dh{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.dh > div{min-width:0}
+.att{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--ok-soft);color:var(--ok);margin-top:8px;overflow-wrap:anywhere}
+details.orig{margin-top:10px;font-size:13.5px}
+details.orig summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--accent-text)}
+details.orig pre{white-space:pre-wrap;font:inherit;margin:0;padding:10px 12px;background:var(--panel-2);border-radius:10px;overflow-wrap:anywhere}
+.sumbar{display:flex;gap:8px;flex-wrap:wrap}
+.legend{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:10px 0}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:14px;height:14px;border-radius:4px;border:1px solid var(--line-2);display:inline-block}
+.sw.rule{background:var(--ok-soft)}.sw.man{background:var(--info-soft)}.sw.al{background:var(--bad-soft)}.sw.mq{background:var(--warn-soft)}
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%}
+.xls{min-width:960px;font-size:13.5px}
+.xls th,.xls td,.rt th,.rt td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+.xls th,.rt th{background:var(--panel-2);font-size:12.5px;font-weight:700;color:var(--muted)}
+.xls thead th:first-child{width:44px}
+.xls tr:last-child td,.rt tr:last-child td{border-bottom:0}
+.xls td.c-rule{background:var(--ok-soft)}.xls td.c-rule .tag{color:var(--ok)}
+.xls td.c-man{background:var(--info-soft)}.xls td.c-man .tag{color:var(--info)}
+.xls td.c-alerte{background:var(--bad-soft)}.xls td.c-manquant{background:var(--warn-soft)}
+.cellf{display:flex;gap:4px}
+.cellf input{min-height:44px;min-width:0;flex:1;border:1px solid var(--line-2);border-radius:8px;padding:0 8px;background:var(--panel)}
+.box{border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.box > div{min-width:0;flex:1}
+.box.bad{background:var(--bad-soft)}.box.bad > svg{color:var(--bad)}
+.box.ok{background:var(--ok-soft)}.box.ok > svg{color:var(--ok)}
+.box.info{background:var(--info-soft)}.box.info > svg{color:var(--info)}
+.box ul{margin-top:6px;display:grid;gap:6px}
+.box li{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.box li span{min-width:0;flex:1 1 220px}
+.path{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere}
+textarea{width:100%;min-height:200px;border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;background:var(--panel);resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+dl.kv{display:grid;grid-template-columns:minmax(0,160px) minmax(0,1fr);gap:6px 14px;margin:10px 0 0}
+dl.kv dt{color:var(--muted);font-size:13.5px}
+dl.kv dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+
+/* Agenda */
+.toolbar{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.wk{display:flex;gap:6px;align-items:center}
+.wk strong{min-width:0}
+.switch{min-height:44px;display:inline-flex;gap:10px;align-items:center;border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:0 14px 0 6px;cursor:pointer;font-weight:600}
+.switch .k{width:40px;height:24px;border-radius:999px;background:var(--line-2);position:relative;flex:none;transition:background .15s}
+.switch .k::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--panel);transition:left .15s}
+.switch[aria-pressed="true"] .k{background:var(--ok)}
+.switch[aria-pressed="true"] .k::after{left:19px}
+.lg-ev{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13px}
+.lg-ev span{display:inline-flex;gap:6px;align-items:center}
+.lg-ev i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.p-rdv{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1200px){.p-rdv{grid-template-columns:minmax(0,1fr) minmax(0,360px)}}
+.week{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.week{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.day{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:120px;min-width:0;display:flex;flex-direction:column;gap:8px}
+@media (min-width:760px){.day{min-height:380px}}
+.day h3{font-size:13.5px;text-transform:capitalize;color:var(--muted)}
+.ev{width:100%;text-align:left;border:1px solid var(--line);border-left:5px solid var(--ev-p);background:var(--panel-2);border-radius:8px;padding:7px 9px;cursor:pointer;font-size:13px;min-height:44px;display:flex;flex-direction:column;gap:2px}
+.ev.confirme{border-left-color:var(--ev-c)}.ev.annule{border-left-color:var(--ev-a)}
+.ev.annule .t{text-decoration:line-through}
+.ev .t{font-weight:700;overflow-wrap:anywhere}
+.ev .s{color:var(--muted);overflow-wrap:anywhere}
+.ev.hl{outline:3px solid var(--accent);outline-offset:1px}
+.det li{border-top:1px solid var(--line);padding:10px 0;display:grid;gap:6px}
+.det li:first-child{border-top:0}
+
+/* DRM */
+.dead{display:flex;gap:14px 24px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.dead .big{font-family:var(--head);font-size:32px;font-weight:700;color:var(--accent-text);line-height:1}
+.prog{height:10px;border-radius:999px;background:var(--panel-2);overflow:hidden;flex:1 1 200px;min-width:0;border:1px solid var(--line)}
+.prog i{display:block;height:100%;background:var(--ok)}
+.p-drm{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1150px){.p-drm{grid-template-columns:minmax(0,1fr) minmax(0,380px)}}
+.docs{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));align-content:start}
+.doc .dh h3{overflow-wrap:anywhere}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:12px 0}
+.st{display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:0}
+.st .bar{height:6px;border-radius:999px;background:var(--line)}
+.st.done .bar{background:var(--ok)}.st.cur .bar{background:var(--warn)}
+.st b{font-weight:600;overflow-wrap:anywhere}
+.st span{color:var(--muted)}
+.opt-r{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer;align-items:flex-start;min-height:44px}
+.opt-r input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
+.opt-r:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt-r span{min-width:0}
+.cm li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.cm li:first-child{border-top:0}
+.cm label{min-width:0;flex:1 1 140px;font-weight:600;font-size:14px}
+select,.inp{min-height:44px;border:1px solid var(--line-2);border-radius:10px;padding:0 10px;background:var(--panel);min-width:0;max-width:100%}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--line-2);border-top-color:var(--accent);animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+/* Règles */
+.rt{min-width:720px;font-size:14px}
+.rt td:last-child{width:60px}
+
+/* Modale */
+dialog{border:0;border-radius:16px;padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 32px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog.wide{width:min(820px,calc(100vw - 24px))}
+dialog::backdrop{background:rgba(25,12,17,.55)}
+.m-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.m-h h2{font-size:17px;min-width:0;overflow-wrap:anywhere}
+.m-b{padding:16px;display:grid;gap:14px}
+.m-f{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.fld{display:grid;gap:6px}
+.fld label,.fld legend{font-weight:600;font-size:14px}
+.fld .inp,.fld select{width:100%}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:8px;min-width:0}
+.err{color:var(--bad);font-size:13.5px;font-weight:600}
+.hint{font-size:13px;color:var(--muted)}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.25em;font-size:20px;text-align:center}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:100;width:min(440px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);padding:12px 14px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:flex-start}
+
+.drm-doc{font-family:Georgia,serif;color:#111;background:#fff;padding:22px;border:1px solid #ccc;border-radius:6px;font-size:13px}
+.drm-doc .dd-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:10px}
+.drm-doc table{margin:10px 0;font-size:12.5px}
+.drm-doc th,.drm-doc td{border:1px solid #999;padding:5px 7px;text-align:right}
+.drm-doc th:first-child,.drm-doc td:first-child{text-align:left}
+.drm-doc .sig{margin-top:14px;padding:10px;border:1px dashed #555}
+.drm-doc .fine{font-size:11px;color:#444;margin-top:10px}
+.dd-wrap{overflow-x:auto;position:relative}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  .drm-doc{border:0;padding:0}
+}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<div class="band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Réinitialiser la démo</button></div>
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-1 6a3 3 0 0 1-6 0z"/><path d="M12 12v7M8.5 21h7"/></svg></span><span>Quai Agents<small>Socle d'agents IA</small></span></div>
+  <nav id="nav" aria-label="Sections"></nav>
+  <span class="eu"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>Hébergé dans l'UE</span>
+</header>
+<main id="main" tabindex="-1"></main>
+<dialog id="dlg"></dialog>
+<div id="toasts" aria-live="polite" aria-atomic="false"></div>
+<div id="printArea"></div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ICONS={
+ home:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ doc:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+ rule:'<path d="M4 6h16M4 12h10M4 18h7"/><path d="m16 16 2 2 4-4"/>',
+ xls:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="m9 11 5 6M14 11l-5 6"/>',
+ check:'<path d="m5 12 5 5 9-10"/>',
+ alert:'<path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18v.01"/>',
+ send:'<path d="M4 12 20 4l-6 16-3-7z"/>',
+ print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ folder:'<path d="M3 6h6l2 2h10v11H3z"/>',
+ pen:'<path d="M4 20h4L20 8l-4-4L4 16z"/>',
+ shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+ bot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01"/>',
+ pause:'<path d="M9 5v14M15 5v14"/>',
+ play:'<path d="m7 4 13 8-13 8z"/>',
+ x:'<path d="M6 6l12 12M18 6 6 18"/>',
+ left:'<path d="m15 6-6 6 6 6"/>',right:'<path d="m9 6 6 6-6 6"/>',
+ inbox:'<path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6z"/>',
+ euro:'<path d="M17 6a7 7 0 1 0 0 12"/><path d="M4 10h9M4 14h9"/>',
+ plug:'<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+ box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+ truck:'<path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+const I=(n,c)=>`<svg class="${c||'i'}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
+
+const TODAY='2026-10-16';
+const DEADLINE='2026-11-10';
+const CLIENTS=['Vignobles Arnaudin','Château Peyrelongue','Domaine de la Garenne','Maison Darrigade','Clos des Tilleuls','Vignobles Sarraute'];
+const CODES={'Vignobles Arnaudin':'ARNAUDIN','Château Peyrelongue':'PEYRELONGUE','Domaine de la Garenne':'GARENNE','Maison Darrigade':'DARRIGADE','Clos des Tilleuls':'TILLEULS','Vignobles Sarraute':'SARRAUTE'};
+const EMAILS={'Vignobles Arnaudin':'logistique@arnaudin-vignobles.example','Château Peyrelongue':'direction@chateau-peyrelongue.example','Domaine de la Garenne':'export@domaine-garenne.example','Maison Darrigade':'achats@darrigade-negoce.example','Clos des Tilleuls':'contact@clos-tilleuls.example','Vignobles Sarraute':'admin@sarraute-vins.example'};
+const FIELDS=[['lot','Lot'],['cuvee','Cuvée'],['mill','Millésime'],['format','Format'],['cartons','Cartons'],['habillage','Habillage'],['mise','Instruction de mise'],['enlev','Enlèvement']];
+const FL=Object.fromEntries(FIELDS);
+const RULE_FIELDS={habillage:'Habillage',mise:'Instruction de mise'};
+const FORMATS=['37,5 cl','75 cl','150 cl'];
+const ERP_PATH='\\\\srv-erp\\imports\\entrants\\';
+const DRM_PATH='\\\\nas-bureau\\Douane\\DRM\\2026-10\\';
+const ST={propose:{l:'Proposé',c:'Banane (jaune)'},confirme:{l:'Confirmé',c:'Basilic (vert)'},annule:{l:'Annulé',c:'Tomate (rouge)'}};
+
+function seed(){return{
+ view:'home',sel:'m2',filter:'all',q:'',rq:'',rc:'',week:'2026-10-19',hl:'',rdvAuto:true,sigMode:'std',penny:false,poolIdx:0,seq:100,
+ agents:{mail:true,rdv:true,drm:true},extra:[],
+ drmModes:{'Vignobles Arnaudin':'direct','Château Peyrelongue':'validation','Domaine de la Garenne':'direct','Maison Darrigade':'validation','Clos des Tilleuls':'direct','Vignobles Sarraute':'direct'},
+ rules:[
+  {id:'R-01',client:'Vignobles Arnaudin',champ:'habillage',format:'*',valeur:'Capsule CRD bordeaux + contre-étiquette FR'},
+  {id:'R-02',client:'Vignobles Arnaudin',champ:'mise',format:'75 cl',valeur:'Carton 6 couché'},
+  {id:'R-03',client:'Château Peyrelongue',champ:'habillage',format:'*',valeur:'Capsule étain or + collerette millésime'},
+  {id:'R-04',client:'Château Peyrelongue',champ:'mise',format:'75 cl',valeur:'Caisse bois 12'},
+  {id:'R-05',client:'*',champ:'mise',format:'37,5 cl',valeur:'Carton 12 debout'},
+  {id:'R-06',client:'Domaine de la Garenne',champ:'habillage',format:'*',valeur:'Étiquette export US + back-label importateur'},
+  {id:'R-07',client:'Domaine de la Garenne',champ:'mise',format:'75 cl',valeur:'Carton 6 debout, palette filmée'},
+  {id:'R-08',client:'Château Peyrelongue',champ:'mise',format:'150 cl',valeur:'Caisse bois 3'}
+ ],
+ mails:[
+  {id:'m2',type:'fichier',fromName:'Domaine de la Garenne',from:EMAILS['Domaine de la Garenne'],subject:'Ordre de mise — export États-Unis',at:"Aujourd'hui 09:47",status:'analyse',manual:{},
+   body:"Bonjour,\nCi-joint notre ordre pour l'expédition US. Merci de prévoir l'habillage export habituel.\nPour les magnums, on vous confirme la date dès que possible.\n\nBien à vous,\nClaire Fontanet — Domaine de la Garenne",
+   file:{name:'Garenne_export_US.xlsx',client:'Domaine de la Garenne',rows:[
+    {lot:'GAR-1026-01',cuvee:'Cuvée Léonie',mill:'2020',format:'75 cl',cartons:'200',habillage:'',mise:'',enlev:'27/10/2026'},
+    {lot:'GAR-1026-02',cuvee:'Cuvée Léonie',mill:'2020',format:'150 cl',cartons:'24',habillage:'',mise:'',enlev:''}]}},
+  {id:'m1',type:'fichier',fromName:'Vignobles Arnaudin',from:EMAILS['Vignobles Arnaudin'],subject:'Habillage semaine 43',at:"Aujourd'hui 09:34",status:'analyse',manual:{},
+   body:"Bonjour,\nVeuillez trouver ci-joint le fichier pour l'habillage de la semaine 43. Enlèvement prévu le 22/10.\n\nCordialement,\nSophie Lamarque — Vignobles Arnaudin",
+   file:{name:'Arnaudin_S43.xlsx',client:'Vignobles Arnaudin',rows:[
+    {lot:'ARN-2643-01',cuvee:'Château Arnaudin rouge',mill:'2022',format:'75 cl',cartons:'120',habillage:'',mise:'',enlev:'22/10/2026'},
+    {lot:'ARN-2643-02',cuvee:'Les Graves Arnaudin blanc',mill:'2024',format:'75 cl',cartons:'60',habillage:'',mise:'Carton 6 debout',enlev:'22/10/2026'},
+    {lot:'ARN-2643-03',cuvee:'Château Arnaudin rouge',mill:'2021',format:'37,5 cl',cartons:'40',habillage:'',mise:'',enlev:'22/10/2026'}]}},
+  {id:'m4',type:'rdv',fromName:'Atlantique Route Express',from:'planning@atlantique-route.example',subject:'Confirmation RDV livraison jeudi 22/10 14h00',at:"Aujourd'hui 09:20",status:'ok',
+   body:"Bonjour,\nNous vous confirmons le rendez-vous de livraison pour Domaine de la Garenne le jeudi 22 octobre à 14h00, quai 2.\nRéf. ARE-7741\n\nService planning",
+   rdv:{ref:'ARE-7741',kind:'confirmation',op:'Livraison',client:'Domaine de la Garenne',day:'2026-10-22',time:'14:00'}},
+  {id:'m3',type:'rdv',fromName:'TransGironde Fret',from:'exploitation@transgironde.example',subject:'Proposition enlèvement mardi 20/10 — réf. TG-58214',at:"Aujourd'hui 09:12",status:'ok',
+   body:"Bonjour,\nNous pouvons passer enlever la commande Vignobles Arnaudin le mardi 20 octobre à 9h00. Merci de nous confirmer.\nRéf. TG-58214\n\nL'exploitation",
+   rdv:{ref:'TG-58214',kind:'proposition',op:'Enlèvement',client:'Vignobles Arnaudin',day:'2026-10-20',time:'09:00'}},
+  {id:'m6',type:'autre',fromName:'Salon des vins de l\'Atlantique',from:'info@salon-vins-atlantique.example',subject:"Lettre d'information — inscriptions exposants",at:"Aujourd'hui 08:44",status:'classe',note:'Classé sans action',body:"Les inscriptions exposants pour l'édition 2027 sont ouvertes."},
+  {id:'m5',type:'fichier',fromName:'Château Peyrelongue',from:EMAILS['Château Peyrelongue'],subject:'Instructions de mise — octobre',at:"Aujourd'hui 07:58",status:'depose',manual:{},
+   body:"Bonjour,\nVoici le fichier d'octobre. Habillage comme d'habitude.\n\nMarc Desclaux — Château Peyrelongue",
+   file:{name:'Peyrelongue_mise_octobre.xlsx',client:'Château Peyrelongue',rows:[
+    {lot:'PEY-1010-01',cuvee:'Château Peyrelongue',mill:'2019',format:'75 cl',cartons:'90',habillage:'',mise:'Caisse bois 12',enlev:'19/10/2026'}]}}
+ ],
+ events:[
+  {id:'e1',ref:'ML-3290',op:'Enlèvement',client:'Château Peyrelongue',tr:'Médoc Logistique',day:'2026-10-19',time:'10:00',st:'confirme',hist:['15/10 16:20 — confirmé par mail']},
+  {id:'e2',ref:'TG-58214',op:'Enlèvement',client:'Vignobles Arnaudin',tr:'TransGironde Fret',day:'2026-10-20',time:'09:00',st:'propose',hist:['09:12 — proposition détectée, couleur Banane']},
+  {id:'e4',ref:'TG-58230',op:'Enlèvement',client:'Clos des Tilleuls',tr:'TransGironde Fret',day:'2026-10-21',time:'15:30',st:'propose',hist:['15/10 11:02 — proposition détectée']},
+  {id:'e3',ref:'ARE-7741',op:'Livraison',client:'Domaine de la Garenne',tr:'Atlantique Route Express',day:'2026-10-22',time:'14:00',st:'confirme',hist:['09:20 — confirmation détectée, couleur Basilic']},
+  {id:'e6',ref:'ML-3295',op:'Livraison',client:'Vignobles Sarraute',tr:'Médoc Logistique',day:'2026-10-23',time:'11:00',st:'confirme',hist:['14/10 10:45 — confirmé par mail']},
+  {id:'e5',ref:'ML-3301',op:'Livraison',client:'Maison Darrigade',tr:'Médoc Logistique',day:'2026-10-27',time:'08:00',st:'confirme',hist:['15/10 09:30 — confirmé par mail']}
+ ],
+ drm:[
+  {id:'d1',client:'Vignobles Arnaudin',name:'DRM_2026-10_ARNAUDIN.pdf',depose:'08:29',signe:'08:29',sigType:'Signature standard (certificat + cachet)',envoi:'08:30',imprime:'08:31'},
+  {id:'d2',client:'Château Peyrelongue',name:'DRM_2026-10_PEYRELONGUE.pdf',depose:'08:38',signe:'08:39',sigType:'Signature standard (certificat + cachet)',attente:true},
+  {id:'d3',client:'Domaine de la Garenne',name:'DRM_2026-10_GARENNE.pdf',depose:'08:52',signe:'08:52',sigType:'Signature standard (certificat + cachet)',envoi:'08:53',imprime:'08:54'}
+ ],
+ journal:[
+  {t:'09:47',who:'Agent mail',txt:'Garenne_export_US.xlsx : 3 cellules complétées, 1 hors règle (magnum sans instruction de mise), 1 info manquante'},
+  {t:'09:34',who:'Agent mail',txt:'Arnaudin_S43.xlsx : 5 cellules complétées par règles, prêt à valider'},
+  {t:'09:20',who:'Agent RDV',txt:'ARE-7741 confirmé → Google Agenda, couleur Basilic'},
+  {t:'09:12',who:'Agent RDV',txt:'TG-58214 proposition → Google Agenda, couleur Banane'},
+  {t:'08:54',who:'Agent DRM',txt:'DRM_2026-10_GARENNE.pdf signé, envoyé, imprimé'},
+  {t:'08:39',who:'Agent DRM',txt:'DRM_2026-10_PEYRELONGUE.pdf signé — en attente de validation avant envoi'},
+  {t:'08:31',who:'Agent DRM',txt:'DRM_2026-10_ARNAUDIN.pdf signé, envoyé, imprimé'},
+  {t:'08:05',who:'Validation humaine',txt:'Peyrelongue_mise_octobre.xlsx validé et déposé sur le partage ERP'},
+  {t:'07:58',who:'Agent mail',txt:'Peyrelongue_mise_octobre.xlsx : 1 cellule complétée (R-03)'}
+ ]
+}}
+
+const POOL=[
+ {type:'rdv',fromName:'TransGironde Fret',from:'exploitation@transgironde.example',subject:'RE: Enlèvement mardi 20/10 — confirmé',
+  body:"Bonjour,\nSuite à votre accord, l'enlèvement Vignobles Arnaudin du mardi 20 octobre à 9h00 est confirmé.\nRéf. TG-58214\n\nL'exploitation",
+  rdv:{ref:'TG-58214',kind:'confirmation',op:'Enlèvement',client:'Vignobles Arnaudin',day:'2026-10-20',time:'09:00'}},
+ {type:'fichier',fromName:'Maison Darrigade',from:EMAILS['Maison Darrigade'],subject:'Commande habillage — nouvelle référence',
+  body:"Bonjour,\nPremière commande chez vous pour cette cuvée : ci-joint le fichier. Enlèvement souhaité le 29/10.\n\nThomas Larrieu — Maison Darrigade",
+  file:{name:'Darrigade_cmd_4410.xlsx',client:'Maison Darrigade',rows:[
+   {lot:'DAR-4410-01',cuvee:'Darrigade Sélection Bordeaux Supérieur',mill:'2023',format:'75 cl',cartons:'300',habillage:'',mise:'',enlev:'29/10/2026'},
+   {lot:'DAR-4410-02',cuvee:'Darrigade Sélection Bordeaux Supérieur',mill:'2023',format:'37,5 cl',cartons:'',habillage:'',mise:'',enlev:'29/10/2026'}]}},
+ {type:'rdv',fromName:'Médoc Logistique',from:'planning@medoc-logistique.example',subject:'Proposition de livraison vendredi 23/10 8h30',
+  body:"Bonjour,\nNous vous proposons une livraison pour Vignobles Arnaudin le vendredi 23 octobre à 8h30.\nRéf. ML-3307\n\nPlanning",
+  rdv:{ref:'ML-3307',kind:'proposition',op:'Livraison',client:'Vignobles Arnaudin',day:'2026-10-23',time:'08:30'}},
+ {type:'autre',facture:true,fromName:'Cartonnages du Sud-Ouest',from:'compta@cartonnages-so.example',subject:'Facture FA-2026-1187 — cartons octobre',
+  body:"Veuillez trouver ci-jointe la facture FA-2026-1187 d'un montant de 1 842,60 € TTC."},
+ {type:'rdv',fromName:'Atlantique Route Express',from:'planning@atlantique-route.example',subject:'Annulation RDV jeudi 22/10 — réf. ARE-7741',
+  body:"Bonjour,\nSuite à un incident véhicule, nous devons annuler le rendez-vous du jeudi 22 octobre 14h00. Nous revenons vers vous avec une nouvelle date.\nRéf. ARE-7741",
+  rdv:{ref:'ARE-7741',kind:'annulation',op:'Livraison',client:'Domaine de la Garenne',day:'2026-10-22',time:'14:00'}}
+];
+
+let S;const KEY='demo-491371-v1';
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);if(S&&S.mails)return}}catch(e){}S=seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function now(){return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+function log(who,txt){S.journal.unshift({t:now(),who,txt});if(S.journal.length>60)S.journal.length=60}
+function toast(msg,ic){const t=document.createElement('div');t.className='toast';t.innerHTML=I(ic||'check')+`<span>${esc(msg)}</span>`;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200)}
+
+/* Dates */
+const D=iso=>new Date(iso+'T12:00:00Z');
+const isoOf=d=>d.toISOString().slice(0,10);
+const addDays=(iso,n)=>{const d=D(iso);d.setUTCDate(d.getUTCDate()+n);return isoOf(d)};
+const monday=iso=>{const d=D(iso);const w=(d.getUTCDay()+6)%7;return addDays(iso,-w)};
+const fmt=(iso,o)=>D(iso).toLocaleDateString('fr-FR',Object.assign({timeZone:'UTC'},o));
+const daysTo=(a,b)=>Math.round((D(b)-D(a))/864e5);
+
+/* Moteur de règles */
+function findRule(client,champ,format){
+ const c=S.rules.filter(r=>r.champ===champ&&(r.client===client||r.client==='*')&&(r.format===format||r.format==='*'));
+ const sc=r=>(r.client!=='*'?2:0)+(r.format!=='*'?1:0);
+ c.sort((a,b)=>sc(b)-sc(a));return c[0];
+}
+function analyze(m){
+ if(m.frozen)return m.frozen;
+ let a=0,mq=0,rg=0;
+ const rows=m.file.rows.map((row,i)=>{const o={};FIELDS.forEach(([f])=>{
+  const v=row[f],man=m.manual&&m.manual[i+'.'+f];
+  if(v){o[f]={v,src:'client'};return}
+  if(man){o[f]={v:man.v,src:man.src};return}
+  if(RULE_FIELDS[f]){const r=findRule(m.file.client,f,row.format);if(r){o[f]={v:r.valeur,src:'regle',rule:r.id};rg++}else{o[f]={v:'',src:'alerte'};a++}return}
+  o[f]={v:'',src:'manquant'};mq++;});return o});
+ return{rows,a,mq,rg};
+}
+function mailStatus(m){
+ if(m.status==='file')return['En file — agent en pause','gray'];
+ if(m.type==='autre')return[m.note||'Classé sans action','gray'];
+ if(m.type==='rdv')return m.rdvPending?['RDV à appliquer','warn']:['Agenda mis à jour','ok'];
+ if(m.status==='depose')return["Déposé sur l'ERP",'ok'];
+ const A=analyze(m);
+ if(A.a)return['Hors règle','bad'];
+ if(A.mq)return m.relanceSent?['Relance envoyée','info']:['Info manquante','warn'];
+ return['Prêt à valider','accent'];
+}
+const isTodo=m=>['bad','warn','accent'].includes(mailStatus(m)[1]);
+
+function applyRdv(m){
+ const r=m.rdv;const st={proposition:'propose',confirmation:'confirme',annulation:'annule'}[r.kind];
+ let e=S.events.find(x=>x.ref===r.ref);
+ if(!e){e={id:'e'+(S.seq++),ref:r.ref,op:r.op,client:r.client,tr:m.fromName,day:r.day,time:r.time,st,hist:[]};S.events.push(e)}
+ else{e.st=st;if(r.kind!=='annulation'){e.day=r.day;e.time=r.time}}
+ e.hist.push(now()+' — '+ST[st].l.toLowerCase()+' (mail de '+m.fromName+'), couleur '+ST[st].c);
+ m.rdvPending=false;
+ log('Agent RDV',`${r.ref} ${ST[st].l.toLowerCase()} → Google Agenda mis à jour, couleur ${ST[st].c}`);
+}
+function ingest(m){
+ if(m.type==='autre'){m.status='classe';
+  if(m.facture){if(S.penny){m.note="Transmis à l'agent comptable";log('Agent comptable',`Facture ${m.subject.split(' ')[1]} pré-saisie dans Pennylane — à valider`)}else{m.note='Facture — classée (agent comptable non activé)'}}
+  log('Agent mail',`« ${m.subject} » classé : ${m.note||'sans action'}`);return}
+ if(!S.agents.mail){m.status='file';log('Socle','Agent mail en pause : « '+m.subject+' » mis en file');return}
+ if(m.type==='fichier'){m.status='analyse';const A=analyze(m);
+  log('Agent mail',`${m.file.name} : ${A.rg} cellule(s) complétée(s) par règle, ${A.a} hors règle, ${A.mq} info(s) manquante(s)`);return}
+ if(m.type==='rdv'){m.status='ok';log('Agent mail',`Rendez-vous détecté (${m.rdv.kind}) ${m.rdv.ref} → agent RDV`);
+  if(!S.agents.rdv){m.rdvPending=true;log('Socle','Agent RDV en pause : mise à jour agenda en attente');return}
+  if(S.rdvAuto)applyRdv(m);else m.rdvPending=true;}
+}
+
+/* DRM */
+const drmSent=()=>S.drm.filter(d=>d.envoi).length;
+function processDrm(d){
+ if(!S.agents.drm)return;
+ if(!d.signe&&!d.qes){setTimeout(()=>{if(d.signe||d.qes)return;if(S.sigMode==='qes'){d.qes=true;log('Agent DRM',`${d.name} : signature électronique qualifiée demandée au signataire`);save();render()}else sign(d,'Signature standard (certificat + cachet)')},900)}
+ else if(d.signe&&!d.attente&&!d.envoi)afterSign(d);
+ else if(d.envoi&&!d.imprime)printDoc(d);
+}
+function sign(d,type){d.qes=false;d.signe=now();d.sigType=type;log('Agent DRM',`${d.name} signé (${type})`);save();render();setTimeout(()=>afterSign(d),900)}
+function afterSign(d){if(S.drmModes[d.client]==='validation'){d.attente=true;log('Agent DRM',`${d.name} en attente de validation avant envoi`);save();render()}else send(d)}
+function send(d){d.attente=false;d.envoi=now();log('Agent DRM',`${d.name} envoyé à ${EMAILS[d.client]} (simulation)`);save();render();printDoc(d)}
+function printDoc(d){setTimeout(()=>{if(d.imprime)return;d.imprime=now();log('Agent DRM',`${d.name} imprimé — imprimante bureau RDC`);save();render()},1000)}
+
+/* File de validation */
+function queue(){const q=[];
+ S.mails.forEach(m=>{
+  if(m.type==='fichier'&&m.status==='analyse'){const[l,t]=mailStatus(m);if(t!=='info')q.push({tone:t,txt:`${l} — ${m.file.name}`,sub:m.fromName+(t==='accent'?' · dépôt sur le partage ERP':t==='warn'?' · relance prête à envoyer':' · règle à créer ou saisie'),act:'open-mail',id:m.id})}
+  if(m.type==='rdv'&&m.rdvPending)q.push({tone:'warn',txt:`RDV à appliquer — ${m.rdv.ref}`,sub:m.fromName+' · '+m.rdv.kind,act:'open-mail',id:m.id});
+  if(m.status==='file')q.push({tone:'info',txt:`En file — ${m.subject}`,sub:'Agent en pause',act:'open-mail',id:m.id});
+ });
+ S.drm.forEach(d=>{if(d.attente)q.push({tone:'accent',txt:`DRM à valider avant envoi — ${d.name}`,sub:d.client,act:'go-drm',id:d.id});if(d.qes&&!d.signe)q.push({tone:'warn',txt:`Signature qualifiée à confirmer — ${d.name}`,sub:d.client,act:'go-drm',id:d.id})});
+ return q;
+}
+
+/* Rendu */
+const VIEWS={home:vHome,mails:vMails,rdv:vRdv,drm:vDrm,rules:vRules};
+function renderNav(){
+ const todo=S.mails.filter(isTodo).length,rp=S.mails.filter(m=>m.rdvPending).length,dp=S.drm.filter(d=>d.attente||(d.qes&&!d.signe)).length;
+ const tabs=[['home','home','Vue d\'ensemble',0],['mails','mail','Mails & fichiers',todo],['rdv','cal','Rendez-vous',rp],['drm','doc','DRM',dp],['rules','rule','Règles métier',0]];
+ $('#nav').innerHTML=tabs.map(([v,ic,l,c])=>`<button class="tab" data-view="${v}" ${S.view===v?'aria-current="page"':''}>${I(ic)}${l}${c?`<span class="cnt" aria-label="${c} à traiter">${c}</span>`:''}</button>`).join('');
+}
+function keyOf(el){if(!el||!el.dataset)return null;if(el.id)return'#'+el.id;const a=el.dataset.act||el.dataset.view;if(!a)return null;let s=el.dataset.act?`[data-act="${a}"]`:`[data-view="${a}"]`;if(el.dataset.id)s+=`[data-id="${el.dataset.id}"]`;if(el.dataset.f)s+=`[data-f="${el.dataset.f}"]`;return s}
+function render(){
+ const ae=document.activeElement;const key=ae&&ae!==document.body&&!$('#dlg').open?keyOf(ae):null;
+ renderNav();$('#main').innerHTML=VIEWS[S.view]();
+ if(key){const el=document.querySelector(key);if(el)el.focus({preventScroll:true})}
+ save();
+}
+function go(v,noScroll){S.view=v;render();if(!noScroll){window.scrollTo(0,0);const h=$('#main h1');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}}
+
+function vHome(){
+ const q=queue();const ws=S.week;const wk=S.events.filter(e=>e.day>=monday(TODAY>ws?TODAY:ws)&&e.day<=addDays(monday(ws),4));
+ const evW=S.events.filter(e=>e.day>='2026-10-19'&&e.day<='2026-10-23');
+ const files=S.mails.filter(m=>m.type==='fichier'&&m.status!=='file');let rg=0;files.forEach(m=>rg+=analyze(m).rg);
+ const sent=drmSent(),dl=daysTo(TODAY,DEADLINE);
+ const agents=[
+  {k:'mail',ic:'inbox',n:'Mails & fichiers entrants',d:"Lit la boîte IONOS, complète les fichiers Excel selon les règles métier, alerte sur les cas hors règle, prépare les relances et dépose sur le partage ERP après validation.",s:`${files.length} fichiers · ${rg} cellules complétées · ${S.mails.filter(m=>m.relanceSent).length} relance(s)`,v:'mails'},
+  {k:'rdv',ic:'truck',n:'Rendez-vous transport',d:"Détecte propositions, confirmations et annulations dans les mails, met à jour Google Agenda (statut et code couleur).",s:`${S.events.length} RDV suivis · ${S.mails.filter(m=>m.rdvPending).length} à appliquer`,v:'rdv'},
+  {k:'drm',ic:'doc',n:'Documents douaniers (DRM)',d:"Surveille le disque partagé, signe, envoie au client ou met en attente de validation, puis lance l'impression avant l'échéance.",s:`${sent}/${CLIENTS.length} DRM envoyées · échéance J-${dl}`,v:'drm'}
+ ];
+ return `<div class="page-h"><div><h1>Vue d'ensemble</h1><p class="muted">Socle d'agents · ${fmt(TODAY,{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p></div>
+ <div class="acts"><button class="btn pri" data-act="sim-mail">${I('mail')}Simuler un mail entrant</button><button class="btn" data-act="sim-drm">${I('folder')}Simuler un dépôt DRM</button></div></div>
+ <div class="kpis">
+  <div class="kpi"><div class="l">Validations en attente</div><div class="v">${q.length}</div><div class="small muted">Actions sensibles soumises à accord</div></div>
+  <div class="kpi"><div class="l">Mails traités aujourd'hui</div><div class="v">${S.mails.length}</div><div class="small muted">${rg} cellules Excel complétées par règle</div></div>
+  <div class="kpi"><div class="l">RDV semaine du 19 oct.</div><div class="v">${evW.filter(e=>e.st==='confirme').length}<span class="small muted"> / ${evW.length} confirmés</span></div><div class="small muted">${evW.filter(e=>e.st==='propose').length} proposé(s), ${evW.filter(e=>e.st==='annule').length} annulé(s)</div></div>
+  <div class="kpi"><div class="l">DRM d'octobre envoyées</div><div class="v">${sent}<span class="small muted"> / ${CLIENTS.length}</span></div><div class="small muted">Échéance légale le 10/11 · J-${dl}</div></div>
+ </div>
+ <div class="ov"><div class="col">
+  <section class="card" aria-labelledby="hq"><h2 id="hq">File de validation humaine ${q.length?`<span class="cnt">${q.length}</span>`:''}</h2><p class="muted small" style="margin-bottom:8px">Aucun dépôt ERP, envoi client ou signature n'est exécuté sans votre accord.</p>
+  ${q.length?`<ul class="queue">${q.map(x=>`<li><button class="qi" data-act="${x.act}" data-id="${x.id}"><span class="dot ${x.tone}" aria-hidden="true"></span><span class="b"><strong>${esc(x.txt)}</strong><span class="small muted">${esc(x.sub)}</span></span>${I('right')}</button></li>`).join('')}</ul>`:`<div class="empty">Tout est à jour. Simulez un mail entrant pour voir les agents travailler.</div>`}</section>
+  <section aria-labelledby="ha"><h2 id="ha" class="sec">Agents</h2><div class="agents">
+  ${agents.map(a=>{const on=S.agents[a.k];return `<article class="card agent"><div class="ah"><span class="aic">${I(a.ic,'lg')}</span><div><h3>${a.n}</h3><span class="pill ${on?'ok':'gray'}">${on?'Actif':'En pause'}</span></div></div><p>${a.d}</p><div class="stat">${a.s}</div>
+   <div class="af"><button class="btn" data-view="${a.v}">Ouvrir</button><button class="btn" data-act="agent-toggle" data-id="${a.k}" aria-pressed="${!on}">${I(on?'pause':'play')}${on?'Mettre en pause':'Reprendre'}</button></div></article>`}).join('')}
+  ${S.penny?'':`<article class="card agent opt"><div class="ah"><span class="aic">${I('euro','lg')}</span><div><h3>Agent comptable (Pennylane)</h3><span class="pill gray">Option</span></div></div><p>Récupère les factures reçues par mail, les pré-saisit dans Pennylane et les soumet à validation.</p><div class="af"><button class="btn" data-act="add-agent" data-id="penny">${I('plus')}Activer l'option</button></div></article>`}
+  ${S.extra.map(x=>`<article class="card agent"><div class="ah"><span class="aic">${I(x.tpl==='penny'?'euro':'bot','lg')}</span><div><h3>${esc(x.name)}</h3><span class="pill info">${x.tpl==='penny'?'Actif — validation requise':'En configuration'}</span></div></div><p>${esc(TPL[x.tpl].d)}</p><div class="stat">Branché sur le socle : connecteurs, journal, validation humaine</div></article>`).join('')}
+  <button class="addag" data-act="add-agent">${I('plus','lg')}Ajouter un agent au socle<span class="small">Le socle est extensible</span></button>
+  </div></section>
+ </div><div class="col">
+  <section class="card" aria-labelledby="hs"><h2 id="hs">${I('plug')}Socle et connecteurs</h2>
+   <ul class="conn">
+    ${[['mail','Messagerie IONOS','IMAP / SMTP · relevé toutes les 2 min','ok','Connecté'],['cal','Google Agenda','API Calendar · agenda « Transports »','ok','Connecté'],['folder','Partage ERP',ERP_PATH,'ok','Monté'],['doc','Disque partagé DRM',DRM_PATH,'ok','Surveillé'],['euro','Pennylane','API · agent comptable',S.penny?'ok':'gray',S.penny?'Connecté':'Non configuré']].map(c=>`<li>${I(c[0])}<div><strong>${c[1]}</strong><div class="small muted path">${esc(c[2])}</div></div><span class="pill ${c[3]}">${c[4]}</span></li>`).join('')}
+   </ul>
+   <div class="guard">${I('shield')}<div><strong>Données et modèle hébergés dans l'UE</strong><br>Serveur dédié en France, modèle de langage hébergé dans l'UE, aucune donnée réutilisée pour l'entraînement. Journal d'audit conservé 12 mois.</div></div>
+  </section>
+  <section class="card" aria-labelledby="hj"><h2 id="hj">${I('clock')}Journal d'activité</h2>
+   <ul class="journal">${S.journal.slice(0,14).map(j=>`<li><time>${esc(j.t)}</time><span class="wrap"><b class="${j.who==='Validation humaine'?'h':''}">${esc(j.who)}</b> — ${esc(j.txt)}</span></li>`).join('')}</ul>
+  </section>
+ </div></div>`;
+}
+
+function mailItem(m){const[l,t]=mailStatus(m);const ic=m.type==='fichier'?'xls':m.type==='rdv'?'truck':'mail';
+ return `<li><button class="mitem" data-act="open-mail" data-id="${m.id}" aria-current="${m.id===S.sel}"><span class="mi-ic t-${m.type}">${I(ic)}</span><span class="mi-b"><span class="mi-top"><strong class="wrap">${esc(m.fromName)}</strong><span class="small muted">${esc(m.at.replace("Aujourd'hui ",''))}</span></span><span class="mi-s wrap">${esc(m.subject)}</span><span class="pill ${t}">${l}</span></span></button></li>`}
+function filteredMails(){const q=S.q.trim().toLowerCase();return S.mails.filter(m=>{
+ if(S.filter==='todo'&&!isTodo(m))return false;if(S.filter==='fichier'&&m.type!=='fichier')return false;if(S.filter==='rdv'&&m.type!=='rdv')return false;if(S.filter==='classe'&&m.type!=='autre')return false;
+ return !q||(m.fromName+' '+m.subject+' '+(m.file?m.file.name:'')).toLowerCase().includes(q)})}
+function listHTML(){const l=filteredMails();return l.length?`<ul class="mlist" aria-label="Mails">${l.map(mailItem).join('')}</ul>`:`<div class="empty">Aucun mail ne correspond.</div>`}
+function vMails(){
+ const m=S.mails.find(x=>x.id===S.sel)||S.mails[0];if(m)S.sel=m.id;
+ const F=[['all','Tous'],['todo','À traiter'],['fichier','Fichiers'],['rdv','Rendez-vous'],['classe','Classés']];
+ return `<div class="page-h"><div><h1>Mails & fichiers entrants</h1><p class="muted">Boîte <span class="path">logistique@</span> (IONOS) · analysée par l'agent mail</p></div><div class="acts"><button class="btn pri" data-act="sim-mail">${I('mail')}Simuler un mail entrant</button></div></div>
+ <div class="filters" role="group" aria-label="Filtrer les mails">${F.map(([k,l])=>`<button class="chip" data-act="filter" data-id="${k}" aria-pressed="${S.filter===k}">${l}</button>`).join('')}
+ <label class="sr" for="mq">Rechercher un mail</label><input id="mq" class="search" type="search" placeholder="Rechercher (client, objet, fichier)" value="${esc(S.q)}"></div>
+ <div class="split"><div id="mlist" style="min-width:0">${listHTML()}</div>
+ <section class="detail" id="detail" aria-label="Détail du mail">${m?detailHTML(m):'<div class="empty">Aucun mail.</div>'}</section></div>`;
+}
+function headHTML(m){const[l,t]=mailStatus(m);
+ return `<div class="card"><div class="dh"><div><h2 class="wrap">${esc(m.subject)}</h2><p class="small muted wrap">${esc(m.fromName)} &lt;${esc(m.from)}&gt; · ${esc(m.at)}</p>${m.file?`<span class="att">${I('xls')}${esc(m.file.name)}</span>`:''}</div><span class="pill ${t}">${l}</span></div>
+ <details class="orig"><summary>Mail d'origine</summary><pre>${esc(m.body)}</pre></details></div>`}
+function detailHTML(m){
+ if(m.status==='file')return headHTML(m)+`<div class="box info">${I('pause')}<div><strong>Agent en pause</strong><p class="small">Ce mail sera traité dès la reprise de l'agent (vue d'ensemble).</p></div></div>`;
+ if(m.type==='autre')return headHTML(m)+`<div class="box info">${I('inbox')}<div><strong>${esc(m.note||'Classé sans action')}</strong><p class="small">L'agent mail n'a détecté ni fichier client ni rendez-vous transport.${m.facture&&!S.penny?' Avec l\'option agent comptable, cette facture serait pré-saisie dans Pennylane.':''}</p></div></div>`;
+ if(m.type==='rdv'){const r=m.rdv;const e=S.events.find(x=>x.ref===r.ref);
+  return headHTML(m)+`<div class="card"><h2>${I('truck')} Rendez-vous détecté</h2><dl class="kv"><dt>Type</dt><dd>${r.kind[0].toUpperCase()+r.kind.slice(1)}</dd><dt>Référence</dt><dd>${esc(r.ref)}</dd><dt>Opération</dt><dd>${esc(r.op)} — ${esc(r.client)}</dd><dt>Transporteur</dt><dd>${esc(m.fromName)}</dd><dt>Date</dt><dd>${fmt(r.day,{weekday:'long',day:'numeric',month:'long'})} à ${r.time.replace(':','h')}</dd>${e?`<dt>Statut agenda</dt><dd>${ST[e.st].l} · ${ST[e.st].c}</dd>`:''}</dl>
+  <div class="row" style="margin-top:12px">${m.rdvPending?`<button class="btn pri" data-act="apply-rdv" data-id="${m.id}">${I('check')}Appliquer à Google Agenda</button>`:''}<button class="btn" data-act="goto-cal" data-id="${m.id}">${I('cal')}Voir dans l'agenda</button></div></div>`}
+ const A=analyze(m),locked=m.status==='depose';
+ const cells=[];A.rows.forEach((o,i)=>FIELDS.forEach(([f])=>{if(o[f].src==='alerte'||o[f].src==='manquant')cells.push({i,f,src:o[f].src,row:m.file.rows[i]})}));
+ const alerts=cells.filter(c=>c.src==='alerte'),miss=cells.filter(c=>c.src==='manquant');
+ let h=headHTML(m);
+ h+=`<div class="card"><div class="dh"><h2>${I('xls')} Fichier analysé</h2><div class="sumbar"><span class="pill ok">${A.rg} complétée(s) par règle</span>${A.a?`<span class="pill bad">${A.a} hors règle</span>`:''}${A.mq?`<span class="pill warn">${A.mq} manquante(s)</span>`:''}</div></div>
+ <div class="legend"><span><i class="sw"></i>Fourni par le client</span><span><i class="sw rule"></i>Complété par règle</span><span><i class="sw man"></i>Saisi ou reçu en réponse</span><span><i class="sw al"></i>Hors règle</span><span><i class="sw mq"></i>Information manquante</span></div>
+ <div class="tw"><table class="xls"><thead><tr><th scope="col">#</th>${FIELDS.map(([,l])=>`<th scope="col">${l}</th>`).join('')}</tr></thead><tbody>
+ ${A.rows.map((o,i)=>`<tr><th scope="row">${i+1}</th>${FIELDS.map(([f])=>cellHTML(m,i,f,o[f],locked)).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+ if(locked)return h+`<div class="box ok">${I('check')}<div><strong>Validé et déposé sur le partage de l'ERP</strong><p class="path">${esc(ERP_PATH+m.file.name.replace('.xlsx','_complet.xlsx'))}</p></div></div>`;
+ if(alerts.length)h+=`<div class="box bad">${I('alert')}<div><strong>Cas hors règle — alerte</strong><p class="small">Aucune règle métier ne couvre ces cellules. Créez la règle (elle servira aux prochains fichiers) ou saisissez la valeur dans le tableau.</p><ul>${alerts.map(c=>`<li><span>Ligne ${c.i+1} · ${FL[c.f]} — ${esc(m.file.client)}, ${esc(c.row.format)}</span><button class="btn" data-act="new-rule" data-client="${esc(m.file.client)}" data-champ="${c.f}" data-format="${esc(c.row.format)}">${I('plus')}Créer la règle</button></li>`).join('')}</ul></div></div>`;
+ if(miss.length){
+  if(m.relanceSent)h+=`<div class="box info">${I('send')}<div><strong>Relance envoyée à ${esc(m.from)}</strong><p class="small">Envoyée à ${esc(m.relanceSent)} (simulation). L'agent complètera le fichier à réception de la réponse.</p><div class="row" style="margin-top:8px"><button class="btn" data-act="sim-reply" data-id="${m.id}">${I('mail')}Simuler la réponse du client</button></div></div></div>`;
+  else h+=`<div class="card"><h2>${I('send')} Relance client préparée</h2><p class="small muted" style="margin-bottom:8px">Brouillon rédigé par l'agent, modifiable avant envoi.</p><label class="sr" for="rel">Texte de la relance</label><textarea id="rel">${esc(relanceText(m,miss))}</textarea><div class="row" style="margin-top:10px"><button class="btn pri" data-act="send-relance" data-id="${m.id}">${I('send')}Envoyer la relance</button><span class="small muted">À : ${esc(m.from)}</span></div></div>`;
+ }
+ const ok=!alerts.length&&!miss.length;
+ h+=`<div class="card"><h2>${I('folder')} Dépôt sur le partage ERP</h2><p class="small muted path" style="margin:4px 0 10px">${esc(ERP_PATH+m.file.name.replace('.xlsx','_complet.xlsx'))}</p><button class="btn ${ok?'pri':''}" data-act="deposit" data-id="${m.id}" ${ok?'':'disabled aria-describedby="dep-why"'}>${I('check')}Valider et déposer</button>${ok?'':`<p id="dep-why" class="small muted" style="margin-top:6px">Disponible quand toutes les cellules sont complétées.</p>`}</div>`;
+ return h;
+}
+function cellHTML(m,i,f,c,locked){
+ if(c.src==='client')return `<td>${esc(c.v)}</td>`;
+ if(c.src==='regle')return `<td class="c-rule">${esc(c.v)} <span class="tag">${c.rule}</span></td>`;
+ if(c.src==='manuel'||c.src==='reponse')return `<td class="c-man">${esc(c.v)} <span class="tag">${c.src==='manuel'?'Saisie':'Réponse client'}</span></td>`;
+ if(locked)return '<td>—</td>';
+ const fm=m.file.rows[i].format;
+ return `<td class="c-${c.src}"><div class="cellf"><input data-cell="${i}.${f}" data-mail="${m.id}" aria-label="${FL[f]}, ligne ${i+1} : ${c.src==='alerte'?'hors règle':'information manquante'}" placeholder="${c.src==='alerte'?'Hors règle':'Manquant'}">${c.src==='alerte'?`<button class="ibtn" data-act="new-rule" data-client="${esc(m.file.client)}" data-champ="${f}" data-format="${esc(fm)}" aria-label="Créer une règle pour ${FL[f]}, ligne ${i+1}" title="Créer une règle">${I('plus')}</button>`:''}</div></td>`;
+}
+function relanceText(m,miss){
+ const lines=miss.map(c=>`- Lot ${c.row.lot} (${c.row.cuvee} ${c.row.mill}, ${c.row.format}) : ${c.f==='enlev'?"date d'enlèvement souhaitée":c.f==='cartons'?'nombre de cartons':FL[c.f].toLowerCase()}`);
+ return `Bonjour,\n\nNous avons bien reçu votre fichier « ${m.file.name} ». Pour lancer la préparation, il nous manque les informations suivantes :\n${lines.join('\n')}\n\nPourriez-vous nous les communiquer en réponse à ce mail ?\n\nBien cordialement,\nL'équipe logistique`;
+}
+
+function vRdv(){
+ const ws=monday(S.week),days=[0,1,2,3,4].map(n=>addDays(ws,n));
+ const det=S.mails.filter(m=>m.type==='rdv');
+ return `<div class="page-h"><div><h1>Rendez-vous transport</h1><p class="muted">Agenda Google « Transports » · synchronisé par l'agent RDV</p></div><div class="acts"><button class="btn pri" data-act="sim-mail">${I('mail')}Simuler un mail entrant</button></div></div>
+ <div class="toolbar"><div class="wk" role="group" aria-label="Semaine affichée"><button class="ibtn" data-act="week" data-id="-7" aria-label="Semaine précédente">${I('left')}</button><strong>Du ${fmt(days[0],{day:'numeric',month:'short'})} au ${fmt(days[4],{day:'numeric',month:'short',year:'numeric'})}</strong><button class="ibtn" data-act="week" data-id="7" aria-label="Semaine suivante">${I('right')}</button></div>
+ <button class="switch" data-act="toggle-auto" aria-pressed="${S.rdvAuto}"><span class="k" aria-hidden="true"></span>Mise à jour automatique de l'agenda</button>
+ <div class="lg-ev" aria-label="Légende des couleurs">${Object.entries(ST).map(([k,v])=>`<span><i style="background:var(--ev-${k==='propose'?'p':k==='confirme'?'c':'a'})"></i>${v.l} — ${v.c}</span>`).join('')}</div></div>
+ <div class="p-rdv"><div class="week">${days.map(d=>{const ev=S.events.filter(e=>e.day===d).sort((a,b)=>a.time.localeCompare(b.time));
+  return `<section class="day" aria-label="${fmt(d,{weekday:'long',day:'numeric',month:'long'})}"><h3>${fmt(d,{weekday:'long',day:'numeric',month:'short'})}</h3>${ev.length?ev.map(e=>`<button class="ev ${e.st}${S.hl===e.ref?' hl':''}" data-act="ev" data-id="${e.id}"><span class="t">${e.time.replace(':','h')} · ${esc(e.op)} ${esc(e.client)}</span><span class="s">${esc(e.tr)} · ${esc(e.ref)}</span><span class="sr">Statut : ${ST[e.st].l}</span></button>`).join(''):'<p class="small muted">Aucun rendez-vous</p>'}</section>`}).join('')}</div>
+ <aside class="card" aria-labelledby="hd"><h2 id="hd">Détections dans les mails</h2><p class="small muted">${S.rdvAuto?"Mode automatique : l'agenda est mis à jour dès réception.":'Mode manuel : chaque détection attend votre accord.'}</p>
+ <ul class="det">${det.map(m=>`<li><div class="row" style="justify-content:space-between"><strong class="wrap">${esc(m.rdv.ref)} · ${m.rdv.kind}</strong><span class="pill ${m.rdvPending?'warn':'ok'}">${m.rdvPending?'À appliquer':'Appliqué'}</span></div><span class="small muted wrap">${esc(m.fromName)} · ${fmt(m.rdv.day,{weekday:'short',day:'numeric',month:'short'})} ${m.rdv.time.replace(':','h')}</span><div class="row">${m.rdvPending?`<button class="btn pri" data-act="apply-rdv" data-id="${m.id}">${I('check')}Appliquer</button>`:''}<button class="btn" data-act="open-mail" data-id="${m.id}">${I('mail')}Voir le mail</button></div></li>`).join('')}</ul></aside></div>`;
+}
+
+function vDrm(){
+ const sent=drmSent(),dl=daysTo(TODAY,DEADLINE);
+ const docs=S.drm.slice().reverse();
+ return `<div class="page-h"><div><h1>Documents douaniers (DRM)</h1><p class="muted path">Disque partagé surveillé : ${esc(DRM_PATH)}</p></div><div class="acts"><button class="btn pri" data-act="sim-drm">${I('folder')}Simuler un dépôt de DRM</button></div></div>
+ <div class="card dead"><div><div class="small muted">Échéance légale — période octobre 2026</div><div class="big">J-${dl}</div><div class="small">10 novembre 2026</div></div><div style="flex:1 1 260px;min-width:0"><div class="row" style="justify-content:space-between"><strong>${sent} / ${CLIENTS.length} DRM envoyées</strong><span class="small muted">${S.drm.filter(d=>d.imprime).length} imprimée(s)</span></div><div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${CLIENTS.length}" aria-valuenow="${sent}" aria-label="DRM envoyées"><i style="width:${Math.round(sent/CLIENTS.length*100)}%"></i></div><p class="small muted" style="margin-top:6px">${CLIENTS.length-S.drm.length?`En attente de dépôt : ${CLIENTS.filter(c=>!S.drm.some(d=>d.client===c)).join(', ')}`:'Toutes les DRM sont déposées.'}</p></div></div>
+ <div class="p-drm"><div class="docs">${docs.map(docCard).join('')}</div>
+ <aside style="display:grid;gap:16px;align-content:start;min-width:0">
+  <section class="card"><h2>${I('pen')} Mode de signature</h2><fieldset style="margin-top:10px"><legend class="sr">Mode de signature</legend>
+   <label class="opt-r"><input type="radio" name="sig" value="std" ${S.sigMode==='std'?'checked':''}><span><strong>Signature standard</strong><br><span class="small muted">Certificat de l'entreprise + cachet, apposés automatiquement.</span></span></label>
+   <label class="opt-r"><input type="radio" name="sig" value="qes" ${S.sigMode==='qes'?'checked':''}><span><strong>Signature électronique qualifiée</strong> <span class="pill info">Variante</span><br><span class="small muted">Prestataire de confiance eIDAS (UE) : le signataire confirme chaque document par code.</span></span></label></fieldset></section>
+  <section class="card"><h2>${I('send')} Envoi par client</h2><p class="small muted" style="margin-bottom:6px">Envoi direct ou validation humaine avant envoi.</p><ul class="cm">${CLIENTS.map((c,i)=>`<li><label for="cm${i}">${esc(c)}</label><select id="cm${i}" data-drmclient="${esc(c)}"><option value="direct" ${S.drmModes[c]==='direct'?'selected':''}>Envoi direct</option><option value="validation" ${S.drmModes[c]==='validation'?'selected':''}>Validation avant envoi</option></select></li>`).join('')}</ul></section>
+ </aside></div>`;
+}
+function docCard(d){
+ const s3=d.envoi?{c:'done',l:'Envoyé',t:d.envoi}:d.attente?{c:'cur',l:'À valider',t:'en attente'}:{c:'',l:'Envoi',t:''};
+ const s2=d.signe?{c:'done',l:'Signé',t:d.signe}:d.qes?{c:'cur',l:'Signature',t:'code requis'}:{c:S.agents.drm?'cur':'',l:'Signature',t:S.agents.drm?'en cours':'agent en pause'};
+ const steps=[{c:'done',l:'Déposé',t:d.depose},s2,s3,d.imprime?{c:'done',l:'Imprimé',t:d.imprime}:{c:d.envoi?'cur':'',l:'Impression',t:d.envoi?'en cours':''}];
+ const busy=(!d.signe&&!d.qes&&S.agents.drm)||(d.signe&&!d.attente&&!d.envoi)||(d.envoi&&!d.imprime);
+ const st=d.imprime?['Terminé','ok']:d.attente?['Validation requise','accent']:d.qes&&!d.signe?['Code signataire requis','warn']:!S.agents.drm&&!d.signe?['Agent en pause','gray']:['Traitement en cours','info'];
+ return `<article class="card doc"><div class="dh"><div><h3>${esc(d.name)}</h3><p class="small muted">${esc(d.client)} · ${esc(EMAILS[d.client])}</p></div><span class="pill ${st[1]}">${busy?'<span class="spin" aria-hidden="true"></span>':''}${st[0]}</span></div>
+ <div class="steps">${steps.map(s=>`<div class="st ${s.c}"><span class="bar"></span><b>${s.l}</b><span>${esc(s.t||'—')}</span></div>`).join('')}</div>
+ ${d.sigType?`<p class="small muted">${esc(d.sigType)}</p>`:''}
+ <div class="row" style="margin-top:10px">${d.attente?`<button class="btn pri" data-act="drm-validate" data-id="${d.id}">${I('send')}Valider et envoyer</button>`:''}${d.qes&&!d.signe?`<button class="btn pri" data-act="drm-qes" data-id="${d.id}">${I('pen')}Signer (code)</button>`:''}<button class="btn" data-act="drm-view" data-id="${d.id}">${I('eye')}Aperçu</button><button class="btn" data-act="drm-print" data-id="${d.id}">${I('print')}Imprimer</button></div></article>`;
+}
+function hash(s){let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))%9973;return h}
+function drmDocHTML(d){
+ const h=hash(d.client);const lines=[['Vins AOP rouges',420+h%300],['Vins AOP blancs',120+h%90],['Vins IGP / VSIG',40+h%35]];
+ const rows=lines.map(([l,s])=>{const e=Math.round(s*.18*10)/10,o=Math.round(s*.24*10)/10;return `<tr><td>${l}</td><td>${s.toLocaleString('fr-FR')},0</td><td>${e.toLocaleString('fr-FR')}</td><td>${o.toLocaleString('fr-FR')}</td><td>${(Math.round((s+e-o)*10)/10).toLocaleString('fr-FR')}</td></tr>`}).join('');
+ return `<div class="drm-doc"><div class="dd-h"><div><strong>DÉCLARATION RÉCAPITULATIVE MENSUELLE</strong><br>Période : octobre 2026</div><div>Entrepositaire agréé<br>N° accise : FR0${h}E00${(h%90)+10}</div></div>
+ <p><strong>Opérateur :</strong> ${esc(d.client)} — stock confié en entrepôt sous douane</p>
+ <div class="dd-wrap"><table><thead><tr><th>Catégorie</th><th>Stock début (hl)</th><th>Entrées</th><th>Sorties</th><th>Stock fin</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <div class="sig">${d.signe?`Signé le 16/10/2026 à ${esc(d.signe)}<br>${esc(d.sigType)}`:'Document non signé'}</div>
+ <p class="fine">Document fictif généré pour démonstration — aucune valeur déclarative.</p></div>`;
+}
+
+function vRules(){
+ return `<div class="page-h"><div><h1>Règles métier</h1><p class="muted">Utilisées par l'agent mail pour compléter les fichiers clients incomplets</p></div><div class="acts"><button class="btn pri" data-act="new-rule">${I('plus')}Nouvelle règle</button></div></div>
+ <div class="filters"><label class="sr" for="rc">Filtrer par client</label><select id="rc"><option value="">Tous les clients</option><option value="*" ${S.rc==='*'?'selected':''}>Règles générales</option>${CLIENTS.map(c=>`<option ${S.rc===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+ <label class="sr" for="rq">Rechercher une règle</label><input id="rq" class="search" type="search" placeholder="Rechercher une valeur" value="${esc(S.rq)}"></div>
+ <div class="tw"><table class="rt"><thead><tr><th scope="col">Réf.</th><th scope="col">Client</th><th scope="col">Champ</th><th scope="col">Format</th><th scope="col">Valeur appliquée</th><th scope="col">Utilisations</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody id="rbody">${rulesRows()}</tbody></table></div>
+ <p class="small muted" style="margin-top:10px">Priorité : règle client + format, puis client tous formats, puis règle générale. Sans règle applicable, la cellule est signalée « hors règle ».</p>`;
+}
+function ruleUses(){const u={};S.mails.forEach(m=>{if(m.type!=='fichier')return;analyze(m).rows.forEach(o=>Object.values(o).forEach(c=>{if(c.rule)u[c.rule]=(u[c.rule]||0)+1}))});return u}
+function rulesRows(){const u=ruleUses(),q=S.rq.trim().toLowerCase();
+ const l=S.rules.filter(r=>(!S.rc||r.client===S.rc)&&(!q||(r.valeur+' '+r.client+' '+r.id).toLowerCase().includes(q)));
+ if(!l.length)return `<tr><td colspan="7" class="muted">Aucune règle ne correspond.</td></tr>`;
+ return l.map(r=>`<tr><td><strong>${r.id}</strong></td><td>${r.client==='*'?'<em>Tous les clients</em>':esc(r.client)}</td><td>${RULE_FIELDS[r.champ]}</td><td>${r.format==='*'?'Tous':esc(r.format)}</td><td>${esc(r.valeur)}</td><td>${u[r.id]||0}</td><td><button class="ibtn" data-act="del-rule" data-id="${r.id}" aria-label="Supprimer la règle ${r.id}">${I('trash')}</button></td></tr>`).join('')}
+
+/* Modale */
+function modal(o){
+ const dlg=$('#dlg');dlg.className=o.wide?'wide':'';
+ dlg.innerHTML=`<form id="mf" novalidate><div class="m-h"><h2 id="mt">${o.title}</h2><button type="button" class="ibtn" data-close aria-label="Fermer">${I('x')}</button></div><div class="m-b">${o.body}</div><div class="m-f">${o.extra||''}<button type="button" class="btn" data-close>${o.onSubmit?'Annuler':'Fermer'}</button>${o.onSubmit?`<button class="btn pri" type="submit">${o.submitLabel||'Valider'}</button>`:''}</div></form>`;
+ dlg.setAttribute('aria-labelledby','mt');
+ dlg.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>dlg.close());
+ $('#mf').onsubmit=e=>{e.preventDefault();if(!o.onSubmit){dlg.close();return}if(o.onSubmit(new FormData(e.target),e.target)!==false)dlg.close()};
+ dlg.showModal();const f=dlg.querySelector('.m-b input:not([type=radio]),.m-b select,.m-b textarea')||dlg.querySelector('.m-b input');if(f)f.focus();
+}
+const TPL={
+ penny:{n:'Agent comptable (Pennylane)',d:'Récupère les factures fournisseurs reçues par mail, les pré-saisit dans Pennylane et les soumet à validation.'},
+ stock:{n:'Agent inventaire',d:"Rapproche les états de stock déposés par l'ERP des mouvements déclarés et signale les écarts."},
+ factu:{n:'Agent facturation transport',d:'Prépare les factures de transport à partir des rendez-vous confirmés et des bons de livraison.'}
+};
+function ruleModal(pre){pre=pre||{};
+ modal({title:'Nouvelle règle métier',submitLabel:'Créer la règle',body:`
+ <div class="fld"><label for="f-cl">Client</label><select id="f-cl" name="client"><option value="*">Tous les clients</option>${CLIENTS.map(c=>`<option ${pre.client===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+ <div class="row" style="align-items:flex-start"><div class="fld" style="flex:1 1 180px"><label for="f-ch">Champ à compléter</label><select id="f-ch" name="champ">${Object.entries(RULE_FIELDS).map(([k,l])=>`<option value="${k}" ${pre.champ===k?'selected':''}>${l}</option>`).join('')}</select></div>
+ <div class="fld" style="flex:1 1 140px"><label for="f-fo">Format</label><select id="f-fo" name="format"><option value="*">Tous formats</option>${FORMATS.map(f=>`<option ${pre.format===f?'selected':''}>${f}</option>`).join('')}</select></div></div>
+ <div class="fld"><label for="f-va">Valeur à appliquer</label><input id="f-va" class="inp" name="valeur" autocomplete="off" placeholder="ex. Caisse bois 1, couché" aria-describedby="f-er"><p id="f-er" class="err" role="alert"></p></div>
+ <p class="hint">Les fichiers en cours seront ré-analysés immédiatement avec cette règle.</p>`,
+ onSubmit(fd,form){const r={client:fd.get('client'),champ:fd.get('champ'),format:fd.get('format'),valeur:String(fd.get('valeur')||'').trim()};const er=form.querySelector('#f-er');
+  if(r.valeur.length<3){er.textContent='Indiquez la valeur à appliquer (3 caractères minimum).';form.querySelector('#f-va').focus();return false}
+  const dup=S.rules.find(x=>x.client===r.client&&x.champ===r.champ&&x.format===r.format);
+  if(dup){er.textContent=`La règle ${dup.id} couvre déjà ce cas. Supprimez-la d'abord dans « Règles métier ».`;return false}
+  const n=Math.max(0,...S.rules.map(x=>+x.id.slice(2)))+1;r.id='R-'+String(n).padStart(2,'0');S.rules.push(r);
+  log('Validation humaine',`Règle ${r.id} créée : ${RULE_FIELDS[r.champ]} ${r.client==='*'?'tous clients':r.client}, ${r.format==='*'?'tous formats':r.format} → ${r.valeur}`);
+  render();toast(`Règle ${r.id} créée — fichiers ré-analysés`);}});
+}
+
+/* Actions */
+const ACT={
+ reset(){try{localStorage.removeItem(KEY)}catch(e){}S=seed();render();window.scrollTo(0,0);toast('Démo réinitialisée')},
+ 'sim-mail'(){if(S.poolIdx>=POOL.length){toast('Plus de nouveaux mails dans ce scénario — réinitialisez la démo pour rejouer.','inbox');return}
+  const m=JSON.parse(JSON.stringify(POOL[S.poolIdx++]));m.id='m'+(S.seq++);m.at="Aujourd'hui "+now();m.manual={};S.mails.unshift(m);
+  log('Messagerie IONOS',`Nouveau mail de ${m.fromName} : « ${m.subject} »`);ingest(m);S.sel=m.id;
+  const[l]=mailStatus(m);toast(`Mail reçu de ${m.fromName} — ${l}`,'mail');if(S.view==='home'||S.view==='drm'||S.view==='rules')S.view='mails';render()},
+ 'open-mail'(id){S.sel=id;S.view='mails';render();if(innerWidth<960){const d=$('#detail');if(d)d.scrollIntoView({block:'start'})}},
+ filter(id){S.filter=id;render()},
+ deposit(id){const m=S.mails.find(x=>x.id===id);const A=analyze(m);const out=m.file.name.replace('.xlsx','_complet.xlsx');
+  modal({title:'Valider et déposer sur l\'ERP',submitLabel:'Valider et déposer',body:`<p>Le fichier complété sera déposé sur le partage de l'ERP, qui l'importera au prochain cycle.</p><dl class="kv"><dt>Fichier</dt><dd>${esc(out)}</dd><dt>Destination</dt><dd class="path">${esc(ERP_PATH)}</dd><dt>Lignes</dt><dd>${m.file.rows.length}</dd><dt>Complété par l'agent</dt><dd>${A.rg} cellule(s) par règle</dd></dl><p class="hint">Action sensible : tracée dans le journal d'audit avec votre validation.</p>`,
+  onSubmit(){m.frozen=analyze(m);m.status='depose';log('Validation humaine',`${m.file.name} validé`);log('Agent mail',`${out} déposé sur ${ERP_PATH}`);render();toast('Fichier déposé sur le partage ERP')}})},
+ 'send-relance'(id){const m=S.mails.find(x=>x.id===id);const t=$('#rel');if(t&&t.value.trim().length<20){toast('Le texte de la relance est trop court.','alert');t.focus();return}
+  m.relanceSent=now();log('Validation humaine',`Relance envoyée à ${m.from} pour ${m.file.name}`);render();toast('Relance envoyée (simulation)','send')},
+ 'sim-reply'(id){const m=S.mails.find(x=>x.id===id);const A=analyze(m);A.rows.forEach((o,i)=>{Object.entries(o).forEach(([f,c])=>{if(c.src==='manquant')m.manual[i+'.'+f]={v:f==='enlev'?'28/10/2026':f==='cartons'?'48':'Voir mail',src:'reponse'}})});
+  log('Agent mail',`Réponse de ${m.fromName} reçue : ${m.file.name} complété`);render();toast('Réponse du client intégrée au fichier','mail')},
+ 'new-rule'(id,b){ruleModal({client:b.dataset.client,champ:b.dataset.champ,format:b.dataset.format})},
+ 'del-rule'(id){const r=S.rules.find(x=>x.id===id);modal({title:`Supprimer la règle ${id} ?`,submitLabel:'Supprimer',body:`<p>${esc(r.valeur)} — ${r.client==='*'?'tous clients':esc(r.client)}.</p><p class="hint">Les fichiers non déposés concernés repasseront en « hors règle ».</p>`,onSubmit(){S.rules=S.rules.filter(x=>x.id!==id);log('Validation humaine',`Règle ${id} supprimée`);render();toast(`Règle ${id} supprimée`)}})},
+ week(id){S.week=addDays(monday(S.week),+id);S.hl='';render()},
+ 'toggle-auto'(){S.rdvAuto=!S.rdvAuto;log('Socle',`Agent RDV : mise à jour ${S.rdvAuto?'automatique':'avec validation'}`);if(S.rdvAuto&&S.agents.rdv)S.mails.filter(m=>m.rdvPending).forEach(applyRdv);render();toast(S.rdvAuto?'Mise à jour automatique activée':'Chaque mise à jour attendra votre accord')},
+ 'apply-rdv'(id){const m=S.mails.find(x=>x.id===id);applyRdv(m);S.hl=m.rdv.ref;render();toast(`Agenda mis à jour — ${m.rdv.ref}`,'cal')},
+ 'goto-cal'(id){const m=S.mails.find(x=>x.id===id);S.week=monday(m.rdv.day);S.hl=m.rdv.ref;go('rdv')},
+ ev(id){const e=S.events.find(x=>x.id===id);
+  modal({title:`${esc(e.op)} ${esc(e.client)}`,body:`<dl class="kv"><dt>Référence</dt><dd>${esc(e.ref)}</dd><dt>Transporteur</dt><dd>${esc(e.tr)}</dd><dt>Date</dt><dd>${fmt(e.day,{weekday:'long',day:'numeric',month:'long'})} à ${e.time.replace(':','h')}</dd><dt>Statut</dt><dd>${ST[e.st].l} · couleur ${ST[e.st].c}</dd></dl>
+  <div><h3 style="margin-bottom:6px">Historique</h3><ul class="small muted" style="display:grid;gap:4px">${e.hist.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>
+  <div class="row">${Object.keys(ST).filter(k=>k!==e.st).map(k=>`<button type="button" class="btn" data-act="ev-set" data-id="${e.id}" data-f="${k}">Marquer ${ST[k].l.toLowerCase()}</button>`).join('')}</div>`})},
+ 'ev-set'(id,b){const e=S.events.find(x=>x.id===id);const k=b.dataset.f;e.st=k;e.hist.push(now()+' — '+ST[k].l.toLowerCase()+' manuellement, couleur '+ST[k].c);log('Validation humaine',`${e.ref} marqué ${ST[k].l.toLowerCase()} → Google Agenda (simulation)`);$('#dlg').close();S.hl=e.ref;render();toast(`${e.ref} : ${ST[k].l.toLowerCase()}`,'cal')},
+ 'sim-drm'(){const c=CLIENTS.find(x=>!S.drm.some(d=>d.client===x));if(!c){toast("Toutes les DRM d'octobre sont déjà déposées.",'doc');return}
+  const d={id:'d'+(S.seq++),client:c,name:`DRM_2026-10_${CODES[c]}.pdf`,depose:now()};S.drm.push(d);log('Agent DRM',`Nouveau document détecté : ${DRM_PATH}${d.name}`);
+  S.view='drm';render();window.scrollTo(0,0);toast(`Dépôt détecté — ${d.name}`,'folder');processDrm(d)},
+ 'go-drm'(){go('drm')},
+ 'drm-validate'(id){const d=S.drm.find(x=>x.id===id);modal({title:'Valider l\'envoi de la DRM',submitLabel:'Valider et envoyer',body:`<p>${esc(d.name)} sera envoyée à <strong>${esc(EMAILS[d.client])}</strong> puis imprimée.</p><div class="dd-wrap">${drmDocHTML(d)}</div>`,wide:true,onSubmit(){log('Validation humaine',`Envoi de ${d.name} validé`);send(d);toast('DRM envoyée (simulation) — impression lancée','send')}})},
+ 'drm-qes'(id){const d=S.drm.find(x=>x.id===id);modal({title:'Signature électronique qualifiée',submitLabel:'Signer',body:`<p>Le prestataire de confiance a envoyé un code au signataire habilité.</p><div class="box info">${I('shield')}<div class="small">Code reçu par SMS (simulation) : <strong>482 913</strong></div></div><div class="fld"><label for="otp">Code à 6 chiffres</label><input id="otp" name="otp" class="inp code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" aria-describedby="otp-e"><p id="otp-e" class="err" role="alert"></p></div>`,
+  onSubmit(fd,form){if(String(fd.get('otp')).replace(/\s/g,'')!=='482913'){form.querySelector('#otp-e').textContent='Code incorrect. Saisissez le code indiqué ci-dessus.';form.querySelector('#otp').focus();return false}
+   sign(d,'Signature électronique qualifiée (eIDAS)');toast('Document signé (signature qualifiée)','pen')}})},
+ 'drm-view'(id){const d=S.drm.find(x=>x.id===id);modal({title:esc(d.name),wide:true,body:`<div class="dd-wrap">${drmDocHTML(d)}</div>`,extra:`<button type="button" class="btn pri" data-act="drm-print" data-id="${d.id}">${I('print')}Imprimer</button>`})},
+ 'drm-print'(id){const d=S.drm.find(x=>x.id===id);if($('#dlg').open)$('#dlg').close();$('#printArea').innerHTML=drmDocHTML(d);setTimeout(()=>window.print(),50)},
+ 'agent-toggle'(k){S.agents[k]=!S.agents[k];const on=S.agents[k];const n={mail:'Agent mail',rdv:'Agent RDV',drm:'Agent DRM'}[k];log('Socle',`${n} ${on?'repris':'mis en pause'}`);
+  if(on&&k==='mail')S.mails.filter(m=>m.status==='file').forEach(m=>{m.status=null;ingest(m)});
+  if(on&&k==='rdv'&&S.rdvAuto)S.mails.filter(m=>m.rdvPending).forEach(applyRdv);
+  if(on&&k==='drm')S.drm.forEach(processDrm);
+  render();toast(`${n} ${on?'repris':'en pause'}`,on?'play':'pause')},
+ 'add-agent'(id){const avail=Object.entries(TPL).filter(([k])=>!(k==='penny'&&S.penny));const pre=id&&TPL[id]?id:avail[0][0];
+  modal({title:'Ajouter un agent au socle',submitLabel:'Ajouter',body:`<fieldset><legend>Modèle d'agent</legend>${avail.map(([k,t])=>`<label class="opt-r"><input type="radio" name="tpl" value="${k}" ${k===pre?'checked':''}><span><strong>${t.n}</strong>${k==='penny'?' <span class="pill gray">Option</span>':''}<br><span class="small muted">${t.d}</span></span></label>`).join('')}</fieldset>
+  <p class="hint">Chaque nouvel agent réutilise le socle : connecteurs, règles, journal d'audit et file de validation humaine.</p>`,
+  onSubmit(fd){const k=fd.get('tpl');if(!k)return false;S.extra.push({tpl:k,name:TPL[k].n});if(k==='penny')S.penny=true;log('Socle',`${TPL[k].n} ajouté au socle`);render();toast(`${TPL[k].n} ajouté`,'bot')}})}
+};
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act],[data-view]');if(!b||b.disabled)return;
+ if(b.dataset.view){if($('#dlg').open)$('#dlg').close();go(b.dataset.view);return}
+ const f=ACT[b.dataset.act];if(f){e.preventDefault();f(b.dataset.id,b)}});
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.id==='mq'){S.q=t.value;$('#mlist').innerHTML=listHTML();save()}
+ if(t.id==='rq'){S.rq=t.value;$('#rbody').innerHTML=rulesRows();save()}});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.cell){const m=S.mails.find(x=>x.id===t.dataset.mail);const v=t.value.trim();if(!v)return;m.manual[t.dataset.cell]={v,src:'manuel'};const[i,f]=t.dataset.cell.split('.');log('Validation humaine',`${m.file.name} ligne ${+i+1} · ${FL[f]} saisi : ${v}`);render();toast('Valeur enregistrée')}
+ if(t.id==='rc'){S.rc=t.value;$('#rbody').innerHTML=rulesRows();save()}
+ if(t.name==='sig'&&!t.closest('dialog')){S.sigMode=t.value;log('Socle',`Mode de signature DRM : ${t.value==='qes'?'signature électronique qualifiée':'standard'}`);render();toast(t.value==='qes'?'Variante signature qualifiée activée':'Signature standard activée','pen')}
+ if(t.dataset.drmclient){S.drmModes[t.dataset.drmclient]=t.value;log('Socle',`DRM ${t.dataset.drmclient} : ${t.value==='direct'?'envoi direct':'validation avant envoi'}`);save();toast('Préférence enregistrée')}});
+
+load();render();S.drm.forEach(processDrm);
+})();
+</script>
 </body>
 </html>
