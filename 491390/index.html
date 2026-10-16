@@ -2,20 +2,811 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Crédits, Stripe et génération IA</title>
+<meta name="description" content="Console back-end d'une plateforme de mode IA : paiements Stripe idempotents, grand livre de crédits, générations IA avec réservation, nouvelles tentatives et remboursement automatique, API partenaires et grille d'audit avant lancement.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F4F2;--panel:#FFFFFF;--panel-2:#F2EFEC;--ink:#1F1A1D;--muted:#5C5358;--line:#E3DDD9;--line-2:#C7BEB9;
+  --accent:#6E2B57;--accent-ink:#FFFFFF;--accent-soft:#F3E4EE;--accent-text:#5E2149;
+  --band:#F7EDD9;--band-ink:#6E4500;
+  --ok:#1B6B3F;--ok-soft:#DDF0E4;--warn:#8A4A00;--warn-soft:#FAEBD3;--bad:#A3262F;--bad-soft:#F9E0E2;--info:#26508A;--info-soft:#E2EAF6;--gray:#50494D;--gray-soft:#ECE8E6;
+  --code:#F4F1EE;
+  --shadow:0 1px 2px rgba(31,26,29,.05),0 4px 14px rgba(31,26,29,.05);
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#141113;--panel:#1D191C;--panel-2:#262125;--ink:#EDE7EA;--muted:#ACA2A7;--line:#342D32;--line-2:#4C4349;
+  --accent:#E6A3CF;--accent-ink:#2A0E20;--accent-soft:#3A2033;--accent-text:#F0BFDF;
+  --band:#30260F;--band-ink:#EFC77E;
+  --ok:#78D3A0;--ok-soft:#15301F;--warn:#F0B866;--warn-soft:#352612;--bad:#FF959C;--bad-soft:#3C1B1F;--info:#9BC1F0;--info-soft:#172A40;--gray:#BFB6BA;--gray-soft:#2B2629;
+  --code:#171416;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.25;letter-spacing:-.01em}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+code,.mono{font-family:var(--mono);font-size:.92em}
+.muted{color:var(--muted)}.small{font-size:13px}.wrap{overflow-wrap:anywhere}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;min-width:0}
+.brand small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.mark{width:36px;height:36px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 13px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.modebox{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.modebox>span{font-size:13px;font-weight:600;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);min-width:0}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 12px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.seg button[data-mode="fragile"][aria-pressed="true"]{color:var(--bad)}
+.seg button[data-mode="robuste"][aria-pressed="true"]{color:var(--ok)}
+@media (max-width:860px){.modebox{margin-left:0;width:100%}.seg{flex:1}.seg button{flex:1;justify-content:center;min-height:44px}#nav{order:3;width:100%}}
+.modenote{margin:0 clamp(16px,2vw,32px);margin-top:14px}
+main{padding:18px clamp(16px,2vw,32px) 80px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 15px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{min-height:44px;padding:0 11px;font-size:13.5px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.block{width:100%}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:150px;font-family:var(--mono);font-size:13px;line-height:1.5}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:8px;font-weight:600;font-size:13.5px}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr))}
+.stack{display:grid;gap:14px;min-width:0}
+.opt{display:flex;align-items:flex-start;gap:10px;min-height:44px;padding:10px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);cursor:pointer;font-size:14px}
+.opt:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.opt input{width:18px;height:18px;accent-color:var(--accent);margin:2px 0 0;flex:none}
+.opt b{display:block}
+.opt span{min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:13.5px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card h2{font-size:17px}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.card-h>*{min-width:0}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:24px}
+.page-h p{max-width:90ch}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.bad{background:var(--bad-soft);color:var(--bad)}
+.note.ok{background:var(--ok-soft);color:var(--ok)}
+.note>div{min-width:0}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:12px}
+
+.g{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.g-side{grid-template-columns:minmax(0,380px) minmax(0,1fr)}}
+@media (min-width:1300px){.g3{grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.2fr)}.g-side{grid-template-columns:minmax(0,420px) minmax(0,1fr)}}
+@media (min-width:1000px) and (max-width:1299px){.g3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.g3>.span{grid-column:1/-1}}
+.mt{margin-top:16px}
+
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px}
+.kpi .l{font-size:13px;color:var(--muted);font-weight:600}
+.kpi .s{font-size:12.5px;color:var(--muted)}
+.kpi.bad .v{color:var(--bad)}.kpi.ok .v{color:var(--ok)}
+
+.steps{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr))}
+.step{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:12px 14px;cursor:pointer;min-height:44px}
+.step:hover{border-color:var(--accent)}
+.step .n{width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;flex:none;font-size:14px}
+.step b{display:block}
+.step span{font-size:13.5px;color:var(--muted)}
+.step>div{min-width:0}
+
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+thead th{background:var(--panel-2);font-size:12.5px;color:var(--muted);font-weight:600}
+tbody tr:last-child>*{border-bottom:0}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.pos{color:var(--ok);font-weight:600}.neg{color:var(--bad);font-weight:600}
+@media (max-width:640px){.rt thead{display:none}.rt tr{display:block;border-bottom:1px solid var(--line);padding:6px 0}.rt tbody tr:last-child{border-bottom:0}.rt td{display:flex;justify-content:space-between;gap:12px;border:0;padding:5px 12px;text-align:right}.rt td::before{content:attr(data-l);font-weight:600;color:var(--muted);font-size:13px;text-align:left;flex:none;max-width:45%}.rt td.num{text-align:right}}
+
+.feed{display:grid;gap:2px;max-height:520px;overflow:auto}
+.feed li{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:4px 10px;padding:7px 4px;border-bottom:1px solid var(--line);font-size:13.5px;align-items:start}
+.feed time{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:2px}
+.feed .m{overflow-wrap:anywhere}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:6px}
+.d-ok{background:var(--ok)}.d-info{background:var(--info)}.d-warn{background:var(--warn)}.d-bad{background:var(--bad)}
+.src{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-right:6px}
+
+.packs{display:grid;gap:8px}
+.packs .opt{align-items:center}
+.packs .pr{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.ev{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px}
+.ev-h{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ev-h>div{min-width:0}
+.ev ol{display:grid;gap:4px}
+.ev ol li{display:flex;gap:8px;font-size:13px;align-items:flex-start}
+.ev ol li .dot{margin-top:5px;flex:none}
+.evs{display:grid;gap:10px;max-height:640px;overflow:auto;padding-right:2px}
+
+.jobs{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr))}
+.job{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px;cursor:pointer;align-items:start}
+.job:hover{border-color:var(--accent)}
+.job .jt{font-size:14.5px;font-weight:600}
+.thumb{width:64px;height:80px;border-radius:9px;display:grid;place-items:center;position:relative;overflow:hidden;border:1px solid var(--line)}
+.thumb svg{width:44px;height:44px}
+.thumb .ai{position:absolute;right:3px;bottom:3px;background:var(--panel);color:var(--ok);border-radius:6px;padding:1px 4px;font-size:10px;font-weight:700}
+.jm{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12.5px;color:var(--muted);margin-top:4px}
+.bar{height:4px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--info);width:30%;animation:slide 1.2s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(330%)}}
+@media (prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
+
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow .badge{white-space:normal}
+.tl{display:grid;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.tl li{position:relative;padding:4px 0 10px 16px;font-size:13.5px}
+.tl li::before{content:"";position:absolute;left:-6px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--info)}
+.tl li.ok::before{background:var(--ok)}.tl li.warn::before{background:var(--warn)}.tl li.bad::before{background:var(--bad)}
+.tl time{font-family:var(--mono);font-size:12px;color:var(--muted);margin-right:6px}
+
+pre{margin:0;background:var(--code);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:var(--mono);font-size:12.5px;line-height:1.55;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+.resp-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted);font-weight:600}
+.kv dd{margin:0;overflow-wrap:anywhere}
+
+.au{display:grid;gap:8px}
+.au button{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px 14px;cursor:pointer;min-height:44px}
+.au button:hover{border-color:var(--accent)}
+.au b{display:block}
+.au .muted{font-size:13px}
+@media (max-width:560px){.au button{grid-template-columns:minmax(0,1fr)}}
+.prog{height:10px;border-radius:10px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--ok)}
+.plan{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
+.plan li{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel-2)}
+.plan b{display:block;margin-bottom:4px}
+.plan p{font-size:13.5px;color:var(--muted)}
+
+dialog{border:0;border-radius:16px;padding:0;width:min(680px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(15,10,14,.55)}
+.dlg-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dlg-h h2{font-size:18px;min-width:0;overflow-wrap:anywhere}
+.ib{width:44px;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);display:grid;place-items:center;cursor:pointer;flex:none}
+.dlg-b{padding:18px;display:grid;gap:14px}
+.secret{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.secret code{flex:1;min-width:0;background:var(--code);border:1px dashed var(--accent);border-radius:10px;padding:10px 12px;overflow-wrap:anywhere}
+
+#toasts{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:100;width:min(460px,calc(100vw - 24px))}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:11px 15px;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;gap:10px;align-items:flex-start}
+.toast.bad{background:var(--bad);color:#fff}
+@media (prefers-color-scheme:dark){.toast.bad{color:#2a0a0d}}
 </style>
 </head>
 <body>
+<div class="demo-band" role="note"><span><b>Démonstration — données fictives</b> · paiements Stripe en mode test, aucun appel réel</span><button type="button" id="resetBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Réinitialiser la démo</button></div>
+
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M12 4a2 2 0 0 1 2 2c0 1-1 1.6-2 2.2V9l8.5 6.2c.9.7.4 2.1-.7 2.1H4.2c-1.1 0-1.6-1.4-.7-2.1L12 9"/></svg></span><div>Vestia<small>Console back-end</small></div></div>
+  <nav id="nav" aria-label="Sections">
+    <button class="tab" data-view="overview" aria-current="page">Vue d'ensemble</button>
+    <button class="tab" data-view="pay">Paiements &amp; crédits</button>
+    <button class="tab" data-view="gen">Générations IA</button>
+    <button class="tab" data-view="api">API partenaires</button>
+    <button class="tab" data-view="audit">Audit avant lancement</button>
+  </nav>
+  <div class="modebox"><span id="modeLbl">Implémentation</span>
+    <div class="seg" role="group" aria-labelledby="modeLbl">
+      <button type="button" data-mode="fragile" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Sans garde-fous</button>
+      <button type="button" data-mode="robuste" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Fiabilisée</button>
+    </div>
+  </div>
+</header>
+<div class="modenote" id="modeNote"></div>
+
 <main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
+<!-- VUE D'ENSEMBLE -->
+<section id="v-overview" aria-labelledby="h-ov">
+  <div class="page-h"><div><h1 id="h-ov">Vue d'ensemble</h1><p class="muted">État des crédits, des paiements et des générations. Basculez l'implémentation en haut à droite pour comparer le comportement « sans garde-fous » et la version fiabilisée.</p></div></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-h"><h2>Parcours en 3 étapes</h2><span class="muted small">≈ 2 minutes</span></div>
+    <div class="steps">
+      <button class="step" data-go="pay"><span class="n">1</span><div><b>Acheter un pack avec relivraison du webhook</b><span>Stripe renvoie le même événement : les crédits ne doivent être ajoutés qu'une fois.</span></div></button>
+      <button class="step" data-go="gen"><span class="n">2</span><div><b>Lancer une génération qui échoue</b><span>Nouvelles tentatives, délai dépassé, puis libération des crédits réservés.</span></div></button>
+      <button class="step" data-go="api"><span class="n">3</span><div><b>Appeler l'API partenaire deux fois</b><span>Même Idempotency-Key : une seule génération, réponse rejouée.</span></div></button>
+    </div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="g g2">
+    <div class="card"><div class="card-h"><h2>Comptes</h2><span class="muted small">Solde = somme du grand livre</span></div><div class="tw"><table class="rt" id="accounts"></table></div></div>
+    <div class="card"><div class="card-h"><h2>Journal système</h2><div class="field" style="flex:0 1 200px"><label for="jf" class="sr-l">Filtrer</label><select id="jf"><option value="">Toutes les sources</option><option value="stripe">Stripe</option><option value="job">Générations</option><option value="api">API</option><option value="ledger">Grand livre</option><option value="system">Système</option></select></div></div><ul class="feed" id="journal" aria-live="polite"></ul></div>
+  </div>
+</section>
+
+<!-- PAIEMENTS -->
+<section id="v-pay" aria-labelledby="h-pay" hidden>
+  <div class="page-h"><div><h1 id="h-pay">Paiements Stripe &amp; crédits</h1><p class="muted">Chaque événement Stripe est enregistré par son identifiant (contrainte unique) dans la même transaction que l'écriture de crédits : une relivraison ne crédite jamais deux fois.</p></div></div>
+  <div class="g g3">
+    <div class="card stack">
+      <h2>Acheter des crédits</h2>
+      <div class="field"><label for="payUser">Compte</label><select id="payUser"></select></div>
+      <fieldset><legend>Pack</legend><div class="packs" id="packs"></div></fieldset>
+      <label class="opt"><input type="checkbox" id="redeliver" checked><span><b>Simuler une relivraison Stripe</b><span class="muted small">Le serveur répond trop lentement, Stripe renvoie le même événement.</span></span></label>
+      <button class="btn primary block" id="buyBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payer avec Stripe (mode test)</button>
+      <hr style="border:0;border-top:1px solid var(--line);margin:4px 0;width:100%">
+      <h2>Sécurité du webhook</h2>
+      <p class="muted small">Envoie un faux <code>checkout.session.completed</code> sans signature valide vers <code>/api/webhooks/stripe</code>.</p>
+      <button class="btn danger block" id="forgeBtn">Envoyer un webhook falsifié</button>
+    </div>
+    <div class="card"><div class="card-h"><h2>Webhooks Stripe reçus</h2><span class="badge b-gray" id="evCount"></span></div><div class="evs" id="events"></div></div>
+    <div class="card span"><div class="card-h"><h2>Grand livre des crédits</h2><div class="field" style="flex:0 1 220px"><label for="ledUser">Compte</label><select id="ledUser"></select></div></div>
+      <p class="muted small" style="margin-bottom:10px">Écritures en ajout seul : aucun solde n'est modifié « à la main ».</p>
+      <div class="tw" style="max-height:560px;overflow:auto"><table class="rt" id="ledger"></table></div></div>
+  </div>
+  <div class="card mt">
+    <div class="card-h"><div><h2>Réconciliation Stripe ↔ grand livre ↔ générations</h2><p class="muted small">Solde attendu = achats payés sur Stripe − générations réussies − réservations en cours. Tâche planifiée chaque nuit en production.</p></div><span id="reconBadge"></span></div>
+    <div class="tw"><table class="rt" id="recon"></table></div>
+  </div>
+</section>
+
+<!-- GÉNÉRATIONS -->
+<section id="v-gen" aria-labelledby="h-gen" hidden>
+  <div class="page-h"><div><h1 id="h-gen">Générations IA</h1><p class="muted">Cycle de vie fiabilisé : les crédits sont réservés à la création, consommés seulement en cas de succès, et libérés en cas d'échec, d'erreur définitive ou de délai dépassé.</p></div></div>
+  <div class="g g-side">
+    <form class="card stack" id="genForm" novalidate>
+      <h2>Nouvelle génération</h2>
+      <div class="field"><label for="genUser">Compte</label><select id="genUser"></select><span class="hint" id="genBal"></span></div>
+      <div class="fgrid">
+        <div class="field"><label for="genKind">Type</label><select id="genKind"></select></div>
+        <div class="field"><label for="genGarment">Vêtement</label><select id="genGarment"></select></div>
+      </div>
+      <fieldset><legend>Réponse simulée du service IA</legend><div class="stack" style="gap:8px" id="scen"></div></fieldset>
+      <p class="err" id="genErr" role="alert"></p>
+      <div class="actions">
+        <button class="btn primary" type="submit"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.9 5.8L20 10l-5 3.6 1.9 6.4L12 16.3 7.1 20 9 13.6 4 10l6.1-1.2z"/></svg>Lancer la génération</button>
+        <button class="btn" type="button" id="dblBtn">Simuler un double clic</button>
+      </div>
+      <div class="note"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div class="flow"><span class="badge b-info">réservation</span>→<span class="badge b-info">appel IA (60 s max, 3 essais)</span>→<span class="badge b-ok">capture</span>ou<span class="badge b-warn">libération</span></div></div>
+    </form>
+    <div class="card">
+      <div class="card-h"><h2>Tâches de génération</h2>
+        <div class="field" style="flex:0 1 220px"><label for="jobUser">Compte</label><select id="jobUser"></select></div></div>
+      <div class="chips" id="jobFilters" role="group" aria-label="Filtrer par statut" style="margin-bottom:14px">
+        <button class="chip" data-f="" aria-pressed="true">Toutes</button><button class="chip" data-f="active" aria-pressed="false">En cours</button><button class="chip" data-f="succeeded" aria-pressed="false">Réussies</button><button class="chip" data-f="failed" aria-pressed="false">Échouées</button>
+      </div>
+      <div class="jobs" id="jobs" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="v-api" aria-labelledby="h-api" hidden>
+  <div class="page-h"><div><h1 id="h-api">API partenaires</h1><p class="muted">API REST pour les boutiques et partenaires e-commerce : clés hachées, limite de débit par clé, <code>Idempotency-Key</code> obligatoire sur les créations facturées, webhooks signés.</p></div></div>
+  <div class="g g2" id="partners"></div>
+  <div class="g g2 mt">
+    <form class="card stack" id="apiForm" novalidate>
+      <div class="card-h" style="margin:0"><h2>Console d'appel</h2><span class="badge b-acc">sandbox</span></div>
+      <div class="fgrid">
+        <div class="field"><label for="apiKey">Clé API</label><select id="apiKey"></select></div>
+        <div class="field"><label for="apiEp">Point d'accès</label><select id="apiEp"><option value="post">POST /v1/generations</option><option value="get">GET /v1/generations/{id}</option><option value="credits">GET /v1/credits</option></select></div>
+      </div>
+      <div class="field" id="fIdem"><label for="apiIdem">En-tête Idempotency-Key</label><div class="actions" style="flex-wrap:nowrap"><input type="text" id="apiIdem" autocomplete="off" spellcheck="false"><button type="button" class="btn sm" id="idemNew">Nouvelle</button></div><span class="hint">Gardez la même valeur et renvoyez : la génération n'est pas dupliquée.</span></div>
+      <div class="field" id="fId" hidden><label for="apiId">Identifiant de génération</label><input type="text" id="apiId" autocomplete="off" spellcheck="false"></div>
+      <div class="field" id="fBody"><label for="apiBody">Corps JSON</label><textarea id="apiBody" spellcheck="false"></textarea><span class="hint"><code>test_scenario</code> (sandbox) : ok, retry, timeout, fatal, dupcb.</span></div>
+      <button class="btn primary" type="submit" id="apiSend"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>Envoyer la requête</button>
+      <div><p class="flabel" style="margin-bottom:6px">Équivalent cURL</p><pre id="apiCurl"></pre></div>
+    </form>
+    <div class="card"><div class="card-h"><h2>Réponse</h2><span class="muted small" id="rlInfo"></span></div><div id="apiRes" aria-live="polite"><div class="empty">Envoyez une requête pour voir la réponse.</div></div></div>
+  </div>
+</section>
+
+<!-- AUDIT -->
+<section id="v-audit" aria-labelledby="h-au" hidden>
+  <div class="page-h"><div><h1 id="h-au">Audit avant mise en production</h1><p class="muted">Grille des points critiques à vérifier sur la base Next.js / Prisma / Stripe existante. Statuts fictifs : cliquez sur un point pour voir le risque, le correctif et le test associé.</p></div></div>
+  <div class="g g-side">
+    <div class="stack">
+      <div class="card stack">
+        <h2>Avancement</h2>
+        <div class="prog" role="progressbar" aria-label="Points vérifiés" aria-valuemin="0" aria-valuemax="100" id="auProg"><i></i></div>
+        <p class="small" id="auSum"></p>
+        <div class="field"><label for="auSev">Sévérité</label><select id="auSev"><option value="">Toutes</option><option>Critique</option><option>Élevée</option><option>Moyenne</option></select></div>
+        <div class="field"><label for="auSt">Statut</label><select id="auSt"><option value="">Tous</option><option value="todo">À corriger</option><option value="fixed">Corrigé</option><option value="tested">Vérifié par test</option></select></div>
+      </div>
+      <div class="card"><h2 style="margin-bottom:10px">Plan sur 4 semaines</h2>
+        <ol class="plan">
+          <li><b>Semaine 1 — Lecture &amp; tests</b><p>Prise en main du code, cartographie des flux crédits, tests d'intégration sur les cas limites.</p></li>
+          <li><b>Semaine 2 — Stripe &amp; crédits</b><p>Webhooks idempotents, grand livre, transactions Prisma, réconciliation.</p></li>
+          <li><b>Semaine 3 — Jobs IA</b><p>File de tâches, délais, nouvelles tentatives, réservation / capture / libération.</p></li>
+          <li><b>Semaine 4 — API &amp; lancement</b><p>API partenaires, documentation, revue sécurité, mise en production surveillée.</p></li>
+        </ol></div>
+    </div>
+    <div class="card"><div class="card-h"><h2>Points de contrôle</h2><span class="badge b-gray" id="auCount"></span></div><div class="au" id="auList"></div></div>
+  </div>
+</section>
 </main>
+
+<dialog id="dlg" aria-labelledby="dlgT"><div class="dlg-h"><h2 id="dlgT"></h2><button class="ib" type="button" id="dlgX" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div><div class="dlg-b" id="dlgB"></div></dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AL='abcdefghijklmnopqrstuvwxyz0123456789';
+const rid=(p,n=10)=>p+Array.from({length:n},()=>AL[Math.random()*36|0]).join('');
+const fmtT=ts=>new Date(ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const fmtD=ts=>new Date(ts).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const eur=n=>n.toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const nf=n=>n.toLocaleString('fr-FR');
+const sg=n=>(n>0?'+':n<0?'−':'')+nf(Math.abs(n));
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const KEY='demo-491390-v1';
+
+const PACKS=[{id:'decouverte',name:'Découverte',credits:50,price:9},{id:'createur',name:'Créateur',credits:200,price:29},{id:'studio',name:'Studio',credits:600,price:79}];
+const KINDS={tryon:{label:'Essayage virtuel',cost:4},lookbook:{label:'Lookbook 4 visuels',cost:10},detourage:{label:'Détourage produit',cost:1},couleur:{label:'Variation de couleur',cost:2}};
+const GARMENTS={robe:{label:'Robe en lin écru',c:'#E6D8BE'},veste:{label:'Veste en jean brut',c:'#3E5A7A'},trench:{label:'Trench camel',c:'#B4825A'},chemise:{label:'Chemise rayée ciel',c:'#A7BED6'},pull:{label:'Pull col roulé bordeaux',c:'#6E2433'}};
+const SCEN={ok:{label:'Succès au premier essai',d:'Cas nominal.'},retry:{label:'Erreur 503 puis succès',d:'Le fournisseur est surchargé, la 2ᵉ tentative passe.'},timeout:{label:'Délai dépassé à chaque essai',d:'3 tentatives de 60 s, puis échec.'},fatal:{label:'Erreur 422 définitive',d:'Image source illisible : inutile de réessayer.'},dupcb:{label:'Succès + callback reçu deux fois',d:'Le fournisseur notifie deux fois la fin du job.'}};
+const ST={queued:['En file','b-gray'],running:['En cours','b-info'],retrying:['Nouvelle tentative','b-warn'],succeeded:['Réussie','b-ok'],failed:['Échouée','b-bad']};
+const ACTIVE=['queued','running','retrying'];
+const LT={achat:'Achat',reservation:'Réservation',capture:'Capture',liberation:'Libération',debit:'Débit',ajustement:'Ajustement'};
+
+const AUDIT=[
+ {id:'A1',sev:'Critique',area:'Stripe',title:'Webhook traité sans idempotence',risk:'Stripe garantit une livraison « au moins une fois ». Sans mémorisation de event.id, une relivraison (timeout, redéploiement) crédite le compte deux fois.',fix:'Table StripeEvent avec id unique, insérée dans la même transaction Prisma que l\'écriture de crédits. Un doublon lève P2002 : on répond 200 sans rien faire.',code:"await prisma.$transaction(async (tx) => {\n  await tx.stripeEvent.create({ data: { id: event.id, type: event.type } });\n  await tx.creditEntry.create({\n    data: { userId, amount: credits, kind: 'PURCHASE', ref: session.id },\n  });\n}); // P2002 sur stripeEvent.id → déjà traité, réponse 200",test:'Rejouer 2 fois le même événement avec stripe trigger / fixture : un seul crédit.',s0:'tested'},
+ {id:'A2',sev:'Critique',area:'Stripe',title:'Signature vérifiée sur un body déjà parsé',risk:'Dans un route handler Next.js, vérifier la signature sur JSON.stringify(body) échoue ou pousse à désactiver la vérification : n\'importe qui peut alors créditer un compte.',fix:'Lire le corps brut avec req.text() puis stripe.webhooks.constructEvent avec le secret de l\'endpoint.',code:"export async function POST(req: Request) {\n  const raw = await req.text();\n  const sig = req.headers.get('stripe-signature')!;\n  const event = stripe.webhooks.constructEvent(raw, sig, process.env.STRIPE_WEBHOOK_SECRET!);\n  // ...\n}",test:'Événement sans signature ou altéré → 400, aucun crédit.',s0:'fixed'},
+ {id:'A3',sev:'Critique',area:'Crédits',title:'Solde mis à jour en lecture puis écriture',risk:'Deux requêtes simultanées lisent le même solde puis écrivent chacune le leur : double dépense ou crédit perdu.',fix:'Grand livre en ajout seul + décrément conditionnel atomique (UPDATE … WHERE balance >= cost) ou verrou SELECT … FOR UPDATE.',code:"const res = await tx.wallet.updateMany({\n  where: { userId, available: { gte: cost } },\n  data: { available: { decrement: cost }, reserved: { increment: cost } },\n});\nif (res.count === 0) throw new InsufficientCredits();",test:'Test de charge : 20 requêtes parallèles sur un solde de 4 crédits → une seule réussit.',s0:'fixed'},
+ {id:'A4',sev:'Critique',area:'Jobs IA',title:'Débit définitif avant l\'appel IA, sans remboursement',risk:'Si le service IA échoue ou expire, l\'utilisateur a payé un résultat qu\'il n\'a jamais reçu.',fix:'Réservation à la création, capture uniquement à l\'état SUCCEEDED, libération à FAILED. Les deux transitions sont exclusives.',code:"// à la fin du job\nawait tx.job.updateMany({ where: { id, status: 'RUNNING' }, data: { status: 'FAILED' } });\nawait tx.creditEntry.create({ data: { userId, amount: +cost, kind: 'RELEASE', ref: id } });",test:'Scénarios 503, 422, timeout : solde final identique au solde initial.',s0:'todo'},
+ {id:'A5',sev:'Élevée',area:'Jobs IA',title:'Aucun délai maximal sur l\'appel au fournisseur',risk:'Une requête bloquée garde la réservation indéfiniment et occupe un worker ; une fonction serverless coupée laisse un job orphelin.',fix:'AbortController à 60 s, exécution hors requête HTTP (file de tâches), watchdog qui passe en FAILED les jobs RUNNING depuis plus de 10 min.',code:"const ctrl = new AbortController();\nconst t = setTimeout(() => ctrl.abort(), 60_000);\ntry { return await ai.generate(input, { signal: ctrl.signal }); }\nfinally { clearTimeout(t); }",test:'Fournisseur simulé qui ne répond jamais : job FAILED, crédits libérés.',s0:'todo'},
+ {id:'A6',sev:'Élevée',area:'Jobs IA',title:'Chaque nouvelle tentative redébite',risk:'La logique de retry réappelle la route facturée au lieu de rejouer seulement l\'appel IA : 3 essais = 3 débits.',fix:'Retry au niveau du worker, avec backoff exponentiel et liste des erreurs rejouables (429, 5xx, timeout). Le débit est attaché au job, pas à la tentative.',code:"const RETRYABLE = new Set([408, 429, 500, 502, 503, 504]);\nfor (let attempt = 1; attempt <= 3; attempt++) {\n  try { return await callAi(job); }\n  catch (e) { if (!RETRYABLE.has(e.status) || attempt === 3) throw e;\n    await sleep(2 ** attempt * 1000); }\n}",test:'Erreur 503 puis succès : une seule capture dans le grand livre.',s0:'todo'},
+ {id:'A7',sev:'Élevée',area:'Jobs IA',title:'Callback du fournisseur traité deux fois',risk:'Le service IA peut notifier deux fois la fin d\'un job ; sans transition conditionnelle, le résultat est facturé deux fois.',fix:'Transition d\'état conditionnelle (WHERE status = RUNNING) et signature HMAC du callback.',code:"const { count } = await prisma.job.updateMany({\n  where: { id, status: 'RUNNING' },\n  data: { status: 'SUCCEEDED', resultUrl },\n});\nif (count === 0) return; // déjà traité",test:'Rejouer le callback : 0 ligne modifiée, aucune écriture.',s0:'fixed'},
+ {id:'A8',sev:'Élevée',area:'API',title:'POST /v1/generations sans Idempotency-Key',risk:'Un partenaire qui réessaie après un timeout réseau crée et paie deux générations.',fix:'En-tête obligatoire ; la réponse est mémorisée 24 h par (clé API, Idempotency-Key) avec l\'empreinte du corps.',code:"const cached = await redis.get(`idem:${apiKeyId}:${idemKey}`);\nif (cached) {\n  const c = JSON.parse(cached);\n  if (c.bodyHash !== hash(body)) return error(422, 'idempotency_key_reused');\n  return replay(c.response);\n}",test:'Même requête envoyée 2 fois : même id de génération, un seul débit.',s0:'todo'},
+ {id:'A9',sev:'Moyenne',area:'API',title:'Clés API stockées en clair',risk:'Une fuite de la base expose toutes les intégrations partenaires.',fix:'Stockage du hash SHA-256 et d\'un préfixe affichable ; la clé complète n\'est montrée qu\'une fois à la création. Révocation immédiate.',code:"const secret = 'vst_live_' + randomBytes(24).toString('base64url');\nawait prisma.apiKey.create({ data: { orgId, prefix: secret.slice(0, 13), hash: sha256(secret) } });",test:'Clé révoquée → 401 dès la requête suivante.',s0:'fixed'},
+ {id:'A10',sev:'Moyenne',area:'API',title:'Pas de limite de débit par clé',risk:'Une boucle chez un partenaire épuise ses crédits et sature le fournisseur IA pour tous.',fix:'Fenêtre glissante par clé (Redis), réponse 429 avec Retry-After et en-têtes X-RateLimit-*.',code:"const n = await redis.incr(`rl:${keyId}:${minute}`);\nif (n === 1) await redis.expire(`rl:${keyId}:${minute}`, 60);\nif (n > LIMIT) return error(429, 'rate_limited', { 'Retry-After': '30' });",test:'9ᵉ requête de la minute → 429.',s0:'todo'},
+ {id:'A11',sev:'Moyenne',area:'Exploitation',title:'Aucune réconciliation Stripe ↔ crédits',risk:'Les écarts (webhook manqué, bug) ne sont découverts que par les réclamations clients.',fix:'Tâche nocturne comparant les paiements Stripe, le grand livre et les jobs ; alerte et écriture d\'ajustement tracée.',code:"for (const u of users) {\n  const expected = paid(u) - consumed(u) - reserved(u);\n  if (expected !== ledgerBalance(u)) alert({ userId: u.id, diff });\n}",test:'Injection d\'un écart en préproduction → alerte reçue.',s0:'todo'}
+];
+const AST={todo:['À corriger','b-bad'],fixed:['Corrigé','b-warn'],tested:['Vérifié par test','b-ok']};
+const SEVC={Critique:'b-bad','Élevée':'b-warn',Moyenne:'b-info'};
+
+let S, EPOCH=0;
+const view={cur:'overview',jf:'',ju:'',led:'',jrn:'',auSev:'',auSt:''};
+let lastApi=null, dlgJob=null;
+
+/* ---------- état ---------- */
+function J(src,lvl,msg){S.journal.unshift({ts:Date.now(),src,lvl,msg});if(S.journal.length>200)S.journal.length=200;}
+function L(u,type,amt,ref,note,ts){S.ledger.push({id:rid('cre_',8),ts:ts||Date.now(),u,type,amt,ref,note});}
+function jl(j,lvl,msg,ts){j.log.push({ts:ts||Date.now(),lvl,msg});}
+const user=id=>S.users.find(u=>u.id===id)||{name:id};
+const bal=u=>S.ledger.reduce((a,e)=>e.u===u?a+e.amt:a,0);
+const held=u=>S.jobs.reduce((a,j)=>j.u===u&&ACTIVE.includes(j.status)?a+j.cost:a,0);
+
+function seed(){
+ const now=Date.now(),h=36e5;
+ S={mode:'robuste',users:[
+  {id:'usr_8KQ2',name:'Inès Marchand',email:'ines.marchand@exemple.fr',kind:'client'},
+  {id:'usr_3HV7',name:'Théo Lambert',email:'theo.lambert@exemple.fr',kind:'client'},
+  {id:'usr_5MZ1',name:'Camille Roussel',email:'camille.roussel@exemple.fr',kind:'client'},
+  {id:'org_ALB',name:'Maison Albane',email:'tech@maison-albane.example',kind:'partenaire',plan:'Boutique — 8 req/min',webhook:'https://maison-albane.example/hooks/vestia'},
+  {id:'org_NRD',name:'Atelier Nord',email:'dev@atelier-nord.example',kind:'partenaire',plan:'E-commerce — 8 req/min',webhook:'https://api.atelier-nord.example/webhooks/ia'}],
+  ledger:[],payments:[],events:[],processed:[],jobs:[],keys:[],idem:{},rate:{},journal:[],stats:{idem:0},audit:{}};
+ AUDIT.forEach(a=>S.audit[a.id]=a.s0);
+ const pay=(u,pack,ts,dup)=>{const p=PACKS.find(x=>x.id===pack),sid=rid('cs_test_',16);
+  S.payments.push({id:sid,u,label:'Pack '+p.name,credits:p.credits,amount:p.price,status:'payée',ts,method:'Carte (Stripe)'});
+  const ev={id:rid('evt_',16),type:'checkout.session.completed',session:sid,u,credits:p.credits,pack:p.name,ts,deliveries:[{ts:ts+1500,n:1,res:`200 · +${p.credits} crédits`,lvl:'ok'}]};
+  if(dup)ev.deliveries.push({ts:ts+31000,n:2,res:'200 · déjà traité, ignoré (contrainte unique sur event.id)',lvl:'ok'});
+  S.events.push(ev);S.processed.push(ev.id);L(u,'achat',p.credits,sid,'Pack '+p.name,ts+1500);};
+ const inv=(u,credits,amount,ts)=>{const id=rid('in_test_',14);S.payments.push({id,u,label:'Forfait partenaire',credits,amount,status:'payée',ts,method:'Facture (Stripe Invoicing)'});L(u,'achat',credits,id,'Forfait partenaire '+nf(credits)+' crédits',ts);};
+ const sj=(u,kind,g,ok,ts,src,sc)=>{const k=KINDS[kind],j={id:rid('gen_',10),u,kind,cost:k.cost,sc:sc||(ok?'ok':'timeout'),garment:g,status:ok?'succeeded':'failed',attempts:ok?1:3,ts,src:src||'app',mode:'robuste',log:[]};
+  L(u,'reservation',-k.cost,j.id,'Crédits réservés',ts);jl(j,'info',`${k.cost} crédits réservés`,ts);
+  if(ok){jl(j,'info','Tentative 1/3 envoyée au service de génération',ts+500);jl(j,'ok','Visuel généré et stocké',ts+9000);L(u,'capture',0,j.id,`Réservation de ${k.cost} crédits confirmée`,ts+9000);jl(j,'ok',`Capture : ${k.cost} crédits consommés`,ts+9000);}
+  else{for(let a=1;a<=3;a++){jl(j,'info',`Tentative ${a}/3 envoyée au service de génération`,ts+a*62000);jl(j,'warn','Délai maximal de 60 s dépassé — appel annulé',ts+a*62000+60000);}
+   j.error='Délai dépassé après 3 tentatives';jl(j,'bad','Échec définitif',ts+190000);L(u,'liberation',k.cost,j.id,'Échec : réservation libérée',ts+190000);jl(j,'ok',`${k.cost} crédits libérés — aucun débit`,ts+190000);}
+  S.jobs.push(j);};
+ pay('usr_8KQ2','createur',now-30*h,true);pay('usr_3HV7','decouverte',now-26*h);pay('usr_5MZ1','studio',now-20*h);
+ inv('org_ALB',2000,450,now-72*h);inv('org_NRD',1000,240,now-60*h);
+ sj('usr_8KQ2','tryon','robe',true,now-29*h);sj('usr_8KQ2','lookbook','trench',true,now-28*h);sj('usr_8KQ2','tryon','pull',false,now-27*h);
+ sj('usr_3HV7','couleur','chemise',true,now-25*h);sj('usr_5MZ1','tryon','veste',true,now-19*h);sj('usr_5MZ1','detourage','pull',true,now-18*h);
+ sj('org_ALB','tryon','robe',true,now-8*h,'api');sj('org_ALB','detourage','chemise',true,now-7*h,'api');sj('org_NRD','lookbook','veste',true,now-5*h,'api');sj('org_NRD','tryon','trench',false,now-4*h,'api');
+ S.jobs.sort((a,b)=>b.ts-a.ts);
+ S.keys=[{id:'key_1',org:'org_ALB',name:'Boutique en ligne — production',prefix:'vst_live_k3Pq',created:now-70*h,last:now-7*h,revoked:false},
+  {id:'key_2',org:'org_NRD',name:'Serveur catalogue',prefix:'vst_live_9xTa',created:now-58*h,last:now-4*h,revoked:false},
+  {id:'key_3',org:'org_NRD',name:'Ancienne intégration',prefix:'vst_live_b2Lm',created:now-200*h,last:now-90*h,revoked:true}];
+ S.journal=[];
+ J('system','info','Démo initialisée : implémentation fiabilisée active');
+ return S;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);if(S&&S.users)return;}}catch(e){}seed();}
+function commit(){save();refresh();}
+
+/* ---------- Stripe ---------- */
+function deliver(evId){
+ const ev=S.events.find(e=>e.id===evId);if(!ev)return;
+ const n=ev.deliveries.length+1;let res,lvl;
+ if(ev.forged&&S.mode==='robuste'){res='400 · signature Stripe-Signature invalide, événement rejeté';lvl='ok';}
+ else if(ev.type!=='checkout.session.completed'){res='200 · paiement refusé, aucun crédit';lvl='info';}
+ else if(S.mode==='robuste'&&S.processed.includes(ev.id)){res='200 · déjà traité, ignoré (contrainte unique sur event.id)';lvl='ok';}
+ else{
+  L(ev.u,'achat',ev.credits,ev.session,(ev.forged?'Événement non signé':'Pack '+ev.pack)+(n>1?` — relivraison n° ${n}`:''));
+  if(S.mode==='robuste')S.processed.push(ev.id);
+  const bad=ev.forged||n>1;
+  res=`200 · +${ev.credits} crédits`+(ev.forged?' — signature non vérifiée !':n>1?' — crédités une deuxième fois':'');lvl=bad?'bad':'ok';
+ }
+ ev.deliveries.push({ts:Date.now(),n,res,lvl});
+ J('stripe',lvl==='ok'||lvl==='info'?(n>1||ev.forged?'ok':'info'):'bad',`${ev.type} ${ev.id} — livraison ${n} : ${res}`);
+ if(lvl==='bad')J('ledger','bad',`Écart introduit sur le compte de ${user(ev.u).name}`);
+}
+
+/* ---------- jobs ---------- */
+function createJob({u,kind,sc,idem,src,garment}){
+ const k=KINDS[kind];
+ if(S.mode==='robuste'&&idem){const ex=S.jobs.find(j=>j.u===u&&j.idem===idem);if(ex){S.stats.idem++;J('job','ok',`Requête dupliquée (Idempotency-Key ${idem}) : ${ex.id} renvoyé, aucun débit`);return{job:ex,replay:true};}}
+ if(bal(u)<k.cost)return{error:`Crédits insuffisants : ${k.cost} nécessaires, ${bal(u)} disponibles.`};
+ const j={id:rid('gen_',10),u,kind,cost:k.cost,sc,garment,status:'queued',attempts:0,ts:Date.now(),idem,src,mode:S.mode,log:[]};
+ S.jobs.unshift(j);
+ if(j.mode==='robuste'){L(u,'reservation',-k.cost,j.id,'Crédits réservés');jl(j,'info',`${k.cost} crédits réservés (non consommés)`);}
+ else{L(u,'debit',-k.cost,j.id,"Débit immédiat avant l'appel IA");jl(j,'warn',`${k.cost} crédits débités avant l'appel IA`);}
+ J('job','info',`${j.id} créé — ${k.label}, ${user(u).name}`);
+ setTimeout(()=>runJob(j.id),500);
+ return{job:j};
+}
+function outcome(sc,a){return sc==='ok'||sc==='dupcb'?'ok':sc==='retry'?(a===1?'503':'ok'):sc==='fatal'?'422':'timeout';}
+async function runJob(id){
+ const ep=EPOCH,g=()=>ep===EPOCH?S.jobs.find(x=>x.id===id):null;
+ let j=g();if(!j||!ACTIVE.includes(j.status))return;
+ for(let a=j.attempts+1;a<=3;a++){
+  j=g();if(!j)return;
+  j.attempts=a;j.status='running';jl(j,'info',`Tentative ${a}/3 envoyée au service de génération`);commit();
+  await wait(1300+Math.random()*600);
+  j=g();if(!j||!ACTIVE.includes(j.status))return;
+  const r=outcome(j.sc,a);
+  if(r==='ok'){finish(j,true);commit();if(j.sc==='dupcb'){await wait(900);j=g();if(!j)return;dupCallback(j);commit();}return;}
+  if(r==='422'){jl(j,'bad','Erreur 422 : image source illisible — erreur définitive, pas de nouvelle tentative');finish(j,false,'Image source invalide (422)');commit();return;}
+  jl(j,'warn',r==='timeout'?'Délai maximal de 60 s dépassé — appel annulé':'Erreur 503 du fournisseur (service surchargé)');
+  if(a<3){
+   if(j.mode==='fragile'){L(j.u,'debit',-j.cost,j.id,`Tentative ${a+1} débitée à nouveau`);jl(j,'bad',`Nouvelle tentative : ${j.cost} crédits débités une nouvelle fois`);}
+   j.status='retrying';jl(j,'info',`Nouvelle tentative dans ${2**a} s (backoff exponentiel)`);commit();
+   await wait(1000+a*400);
+  }
+ }
+ j=g();if(!j)return;finish(j,false,j.sc==='timeout'?'Délai dépassé après 3 tentatives':'Échec après 3 tentatives');commit();
+}
+function finish(j,ok,reason){
+ if(!ACTIVE.includes(j.status))return;
+ const nm=user(j.u).name;
+ if(ok){j.status='succeeded';jl(j,'ok','Visuel généré et stocké');
+  if(j.mode==='robuste'){L(j.u,'capture',0,j.id,`Réservation de ${j.cost} crédits confirmée`);jl(j,'ok',`Capture : ${j.cost} crédits consommés`);}
+  J('job','ok',`${j.id} réussi — ${nm}`);}
+ else{j.status='failed';j.error=reason;jl(j,'bad','Échec définitif : '+reason);
+  if(j.mode==='robuste'){L(j.u,'liberation',j.cost,j.id,'Échec : réservation libérée');jl(j,'ok',`${j.cost} crédits libérés — l'utilisateur n'est pas débité`);J('job','warn',`${j.id} échoué — ${j.cost} crédits rendus à ${nm}`);}
+  else{const lost=-S.ledger.filter(e=>e.ref===j.id).reduce((a,e)=>a+e.amt,0);jl(j,'bad',`Aucun remboursement : ${lost} crédits perdus`);J('job','bad',`${j.id} échoué — ${lost} crédits perdus pour ${nm}`);}}
+ const us=user(j.u);
+ if(us.kind==='partenaire'){const m=`Webhook generation.${ok?'succeeded':'failed'} envoyé à ${us.webhook} (signé HMAC-SHA256)`;jl(j,'info',m);J('api','info',m);}
+}
+function dupCallback(j){
+ if(j.mode==='robuste'){jl(j,'ok',"Callback dupliqué ignoré : UPDATE … WHERE status = 'RUNNING' → 0 ligne");J('job','ok',`${j.id} : callback dupliqué ignoré`);}
+ else{L(j.u,'debit',-j.cost,j.id,'Callback dupliqué : second débit');jl(j,'bad',`Callback dupliqué : ${j.cost} crédits débités une deuxième fois`);J('job','bad',`${j.id} : callback dupliqué, double débit`);}
+}
+
+/* ---------- réconciliation ---------- */
+function recon(){
+ return S.users.map(u=>{
+  const paid=S.payments.filter(p=>p.u===u.id&&p.status==='payée').reduce((a,p)=>a+p.credits,0);
+  const used=S.jobs.filter(j=>j.u===u.id&&j.status==='succeeded').reduce((a,j)=>a+j.cost,0);
+  const run=held(u.id);
+  const adj=S.ledger.filter(e=>e.u===u.id&&e.type==='ajustement').reduce((a,e)=>a+e.amt,0);
+  const exp=paid-used-run, act=bal(u.id);
+  return{u,paid,used,run,exp,act,diff:act-adj-exp,adj};
+ });
+}
+
+/* ---------- rendu ---------- */
+const badge=(t,c)=>`<span class="badge ${c}">${esc(t)}</span>`;
+const stB=s=>badge(ST[s][0],ST[s][1]);
+function garmentSvg(g,ok){const c=(GARMENTS[g]||GARMENTS.robe).c;
+ return `<span class="thumb" style="background:${ok?'var(--panel-2)':'var(--panel-2)'}" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M17 6l-9 5 3 9 4-2v24h18V18l4 2 3-9-9-5c-1 3-4 5-7 5s-6-2-7-5z" fill="${c}" stroke="rgba(0,0,0,.25)" stroke-width="1"/>${ok?'<circle cx="24" cy="5" r="0"/>':''}</svg>${ok?'<span class="ai">IA</span>':''}</span>`;}
+
+function refresh(){
+ // en-tête
+ $$('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===S.mode)));
+ $('#modeNote').innerHTML=S.mode==='fragile'?`<div class="note bad"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><div><b>Mode « sans garde-fous »</b> : comportement typique d'une implémentation non fiabilisée (pas d'idempotence, débit avant l'appel IA, aucun remboursement). Les écarts apparaissent dans la réconciliation. Repassez en « Fiabilisée » pour comparer.</div></div>`:'';
+ renderOverview();renderPay();renderGen();renderApiSide();renderAudit();
+ if(dlgJob&&$('#dlg').open)jobDetail(dlgJob);
+}
+function userOpts(sel,all,filter){const cur=sel.value;sel.innerHTML=(all?`<option value="">Tous les comptes</option>`:'')+S.users.filter(u=>!filter||filter(u)).map(u=>`<option value="${u.id}">${esc(u.name)}${u.kind==='partenaire'?' (partenaire)':''}</option>`).join('');if([...sel.options].some(o=>o.value===cur))sel.value=cur;}
+
+function renderOverview(){
+ const R=recon(),diff=R.reduce((a,r)=>a+Math.abs(r.diff),0);
+ const ok=S.jobs.filter(j=>j.status==='succeeded').length,ko=S.jobs.filter(j=>j.status==='failed').length,act=S.jobs.filter(j=>ACTIVE.includes(j.status)).length;
+ const freed=S.ledger.filter(e=>e.type==='liberation').reduce((a,e)=>a+e.amt,0);
+ const dedup=S.events.reduce((a,e)=>a+e.deliveries.filter(d=>/ignoré|rejeté/.test(d.res)).length,0);
+ $('#kpis').innerHTML=[
+  ['Crédits disponibles',nf(S.users.reduce((a,u)=>a+bal(u.id),0)),`${nf(S.users.reduce((a,u)=>a+held(u.id),0))} réservés en cours`,''],
+  ['Générations',`${ok} réussies`,`${ko} échouées · ${act} en cours`,''],
+  ['Crédits rendus après échec',nf(freed),'libérations automatiques','ok'],
+  ['Webhooks bloqués',nf(dedup),'doublons ou signatures invalides',''],
+  ['Requêtes API rejouées',nf(S.stats.idem),'Idempotency-Key reconnue',''],
+  ['Écart de réconciliation',diff?sg(R.reduce((a,r)=>a+r.diff,0))+' crédits':'0',diff?'à corriger avant lancement':'grand livre cohérent',diff?'bad':'ok']
+ ].map(k=>`<div class="card kpi ${k[3]}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join('');
+ $('#accounts').innerHTML=`<thead><tr><th>Compte</th><th>Type</th><th class="num">Disponible</th><th class="num">Réservé</th><th>Cohérence</th></tr></thead><tbody>`+R.map(r=>`<tr><td data-l="Compte"><b>${esc(r.u.name)}</b><div class="muted small wrap">${esc(r.u.email)}</div></td><td data-l="Type">${r.u.kind==='partenaire'?badge('Partenaire API','b-acc'):badge('Client','b-gray')}</td><td data-l="Disponible" class="num">${nf(r.act)}</td><td data-l="Réservé" class="num">${nf(r.run)}</td><td data-l="Cohérence">${r.diff?badge('Écart '+sg(r.diff),'b-bad'):badge('OK','b-ok')}</td></tr>`).join('')+'</tbody>';
+ const items=S.journal.filter(e=>!view.jrn||e.src===view.jrn).slice(0,60);
+ const SRC={stripe:'Stripe',job:'Génération',api:'API',ledger:'Grand livre',system:'Système'};
+ $('#journal').innerHTML=items.length?items.map(e=>`<li><time>${fmtT(e.ts)}</time><span class="dot d-${e.lvl}" aria-hidden="true"></span><span class="m"><span class="src">${SRC[e.src]}</span>${esc(e.msg)}</span></li>`).join(''):'<li class="empty" style="display:block">Aucun événement.</li>';
+}
+
+function renderPay(){
+ userOpts($('#payUser'),false,u=>u.kind==='client');userOpts($('#ledUser'),true);
+ if(!$('#packs').children.length)$('#packs').innerHTML=PACKS.map((p,i)=>`<label class="opt"><input type="radio" name="pack" value="${p.id}" ${i===1?'checked':''}><span><b>${p.name}</b><span class="muted small">${nf(p.credits)} crédits</span></span><span class="pr">${eur(p.price)}</span></label>`).join('');
+ const evs=[...S.events].sort((a,b)=>b.ts-a.ts);
+ $('#evCount').textContent=evs.length+' événements';
+ $('#events').innerHTML=evs.map(e=>`<article class="ev"><div class="ev-h"><div><code class="wrap">${esc(e.type)}</code><div class="muted small wrap">${esc(e.id)} · ${esc(user(e.u).name)}${e.credits&&e.type==='checkout.session.completed'?' · '+nf(e.credits)+' crédits':''}</div></div>${e.forged?badge('Non signé','b-bad'):''}</div><ol>${e.deliveries.map(d=>`<li><span class="dot d-${d.lvl}" aria-hidden="true"></span><span class="wrap"><span class="mono muted">${fmtT(d.ts)}</span> — livraison ${d.n} : ${esc(d.res)}</span></li>`).join('')}</ol><div class="actions"><button class="btn sm" data-replay="${e.id}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Rejouer l'événement</button></div></article>`).join('');
+ const led=S.ledger.filter(e=>!view.led||e.u===view.led).slice().sort((a,b)=>b.ts-a.ts).slice(0,80);
+ const tc={achat:'b-ok',reservation:'b-info',capture:'b-gray',liberation:'b-ok',debit:'b-warn',ajustement:'b-acc'};
+ $('#ledger').innerHTML=`<thead><tr><th>Date</th><th>Compte</th><th>Écriture</th><th class="num">Montant</th><th>Référence</th></tr></thead><tbody>`+(led.length?led.map(e=>`<tr><td data-l="Date">${fmtD(e.ts)}</td><td data-l="Compte">${esc(user(e.u).name)}</td><td data-l="Écriture">${badge(LT[e.type],tc[e.type])}<div class="muted small">${esc(e.note)}</div></td><td data-l="Montant" class="num ${e.amt>0?'pos':e.amt<0?'neg':''}">${e.amt===0?'0':sg(e.amt)}</td><td data-l="Référence"><code class="wrap">${esc(e.ref)}</code></td></tr>`).join(''):'<tr><td colspan="5">Aucune écriture.</td></tr>')+'</tbody>';
+ const R=recon(),bad=R.filter(r=>r.diff);
+ $('#reconBadge').innerHTML=bad.length?badge(bad.length+' compte(s) en écart','b-bad'):badge('Aucun écart','b-ok');
+ $('#recon').innerHTML=`<thead><tr><th>Compte</th><th class="num">Achats payés</th><th class="num">Consommé</th><th class="num">En cours</th><th class="num">Attendu</th><th class="num">Grand livre</th><th class="num">Écart</th><th>Action</th></tr></thead><tbody>`+R.map(r=>`<tr><td data-l="Compte"><b>${esc(r.u.name)}</b></td><td data-l="Achats payés" class="num">${nf(r.paid)}</td><td data-l="Consommé" class="num">${nf(r.used)}</td><td data-l="En cours" class="num">${nf(r.run)}</td><td data-l="Attendu" class="num">${nf(r.exp)}</td><td data-l="Grand livre" class="num">${nf(r.act-r.adj)}${r.adj?`<div class="muted small">ajust. ${sg(r.adj)}</div>`:''}</td><td data-l="Écart" class="num ${r.diff?'neg':'pos'}">${r.diff?sg(r.diff):'0'}</td><td data-l="Action">${r.diff?`<button class="btn sm" data-adj="${r.u.id}">Écriture d'ajustement</button>`:'<span class="muted small">—</span>'}</td></tr>`).join('')+'</tbody>';
+}
+
+function renderGen(){
+ userOpts($('#genUser'));userOpts($('#jobUser'),true);
+ if(!$('#genKind').options.length){$('#genKind').innerHTML=Object.entries(KINDS).map(([k,v])=>`<option value="${k}">${v.label} — ${v.cost} crédit${v.cost>1?'s':''}</option>`).join('');
+  $('#genGarment').innerHTML=Object.entries(GARMENTS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  $('#scen').innerHTML=Object.entries(SCEN).map(([k,v],i)=>`<label class="opt"><input type="radio" name="sc" value="${k}" ${k==='timeout'?'checked':''}><span><b>${v.label}</b><span class="muted small">${v.d}</span></span></label>`).join('');}
+ const u=$('#genUser').value;$('#genBal').textContent=`Solde disponible : ${nf(bal(u))} crédits · réservés : ${nf(held(u))}`;
+ const list=S.jobs.filter(j=>(!view.ju||j.u===view.ju)&&(!view.jf||(view.jf==='active'?ACTIVE.includes(j.status):j.status===view.jf)));
+ $('#jobs').innerHTML=list.length?list.slice(0,60).map(j=>{const net=S.ledger.filter(e=>e.ref===j.id).reduce((a,e)=>a+e.amt,0);
+  return `<button class="job" data-job="${j.id}">${garmentSvg(j.garment,j.status==='succeeded')}<div style="min-width:0"><div style="display:flex;gap:6px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap"><span class="jt">${esc(KINDS[j.kind].label)}</span>${stB(j.status)}</div><div class="muted small wrap">${esc(GARMENTS[j.garment].label)} · ${esc(user(j.u).name)}</div><div class="jm"><span>${j.attempts}/3 essai${j.attempts>1?'s':''}</span><span class="${net<-j.cost?'neg':''}">${ACTIVE.includes(j.status)?(j.mode==='robuste'?j.cost+' réservés':sg(net)+' débités'):(net===0?'0 crédit débité':sg(net)+' crédits')}</span>${j.src==='api'?'<span>via API</span>':''}${j.mode==='fragile'?'<span class="neg">sans garde-fous</span>':''}</div>${ACTIVE.includes(j.status)?'<div class="bar"><i></i></div>':''}</div></button>`}).join(''):'<div class="empty" style="grid-column:1/-1">Aucune tâche pour ce filtre.</div>';
+}
+
+function jobDetail(id){
+ const j=S.jobs.find(x=>x.id===id);if(!j)return;
+ const ents=S.ledger.filter(e=>e.ref===j.id),net=ents.reduce((a,e)=>a+e.amt,0);
+ let verdict;
+ if(ACTIVE.includes(j.status))verdict=`<div class="note">Tâche en cours : ${j.mode==='robuste'?`${j.cost} crédits réservés, ni consommés ni perdus.`:`${-net} crédits déjà débités.`}</div>`;
+ else if(j.status==='succeeded')verdict=net===-j.cost?`<div class="note ok">Résultat livré, ${j.cost} crédits consommés une seule fois.</div>`:`<div class="note bad">Résultat livré mais ${-net} crédits débités au lieu de ${j.cost}.</div>`;
+ else verdict=net===0?`<div class="note ok">Échec sans impact : la réservation a été libérée, l'utilisateur n'est pas débité.</div>`:`<div class="note bad">Échec facturé : ${-net} crédits perdus par l'utilisateur.</div>`;
+ $('#dlgT').textContent=KINDS[j.kind].label+' — '+GARMENTS[j.garment].label;
+ $('#dlgB').innerHTML=`<div class="actions">${stB(j.status)}${j.mode==='fragile'?badge('Sans garde-fous','b-bad'):badge('Fiabilisée','b-ok')}${j.src==='api'?badge('Via API','b-acc'):''}</div>${verdict}
+ <dl class="kv"><dt>Identifiant</dt><dd><code>${esc(j.id)}</code></dd><dt>Compte</dt><dd>${esc(user(j.u).name)}</dd><dt>Scénario</dt><dd>${esc(SCEN[j.sc].label)}</dd><dt>Créée</dt><dd>${fmtD(j.ts)}</dd>${j.idem?`<dt>Idempotency-Key</dt><dd><code>${esc(j.idem)}</code></dd>`:''}${j.error?`<dt>Erreur</dt><dd>${esc(j.error)}</dd>`:''}<dt>Coût</dt><dd>${j.cost} crédits · débit net ${net===0?'0':sg(net)}</dd></dl>
+ <div><h3 style="font-size:15px;margin-bottom:8px">Chronologie</h3><ol class="tl">${j.log.map(l=>`<li class="${l.lvl}"><time>${fmtT(l.ts)}</time>${esc(l.msg)}</li>`).join('')}</ol></div>
+ <div><h3 style="font-size:15px;margin-bottom:8px">Écritures liées</h3><div class="tw"><table><thead><tr><th>Écriture</th><th class="num">Montant</th><th>Note</th></tr></thead><tbody>${ents.map(e=>`<tr><td>${LT[e.type]}</td><td class="num ${e.amt>0?'pos':e.amt<0?'neg':''}">${e.amt===0?'0':sg(e.amt)}</td><td>${esc(e.note)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+/* ---------- API ---------- */
+function renderApiSide(){
+ const parts=S.users.filter(u=>u.kind==='partenaire');
+ $('#partners').innerHTML=parts.map(p=>{const ks=S.keys.filter(k=>k.org===p.id);
+  return `<div class="card"><div class="card-h"><div><h2>${esc(p.name)}</h2><p class="muted small wrap">${esc(p.plan)} · webhook <code>${esc(p.webhook)}</code></p></div><button class="btn sm" data-newkey="${p.id}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Créer une clé</button></div>
+  <div class="actions" style="margin-bottom:10px">${badge(nf(bal(p.id))+' crédits disponibles','b-ok')}${held(p.id)?badge(nf(held(p.id))+' réservés','b-info'):''}</div>
+  <div class="tw"><table class="rt"><thead><tr><th>Nom</th><th>Préfixe</th><th>Dernier usage</th><th>Statut</th><th>Action</th></tr></thead><tbody>${ks.map(k=>`<tr><td data-l="Nom">${esc(k.name)}</td><td data-l="Préfixe"><code class="wrap">${esc(k.prefix)}…</code></td><td data-l="Dernier usage">${k.last?fmtD(k.last):'jamais'}</td><td data-l="Statut">${k.revoked?badge('Révoquée','b-gray'):badge('Active','b-ok')}</td><td data-l="Action">${k.revoked?'—':`<button class="btn sm danger" data-revoke="${k.id}">Révoquer</button>`}</td></tr>`).join('')}</tbody></table></div></div>`}).join('');
+ const sel=$('#apiKey'),cur=sel.value;
+ sel.innerHTML=S.keys.map(k=>`<option value="${k.id}">${esc(user(k.org).name)} — ${esc(k.prefix)}…${k.revoked?' (révoquée)':''}</option>`).join('');
+ if([...sel.options].some(o=>o.value===cur))sel.value=cur;else{const a=S.keys.find(k=>!k.revoked);if(a)sel.value=a.id;}
+ updCurl();
+}
+function epUi(){const ep=$('#apiEp').value;$('#fIdem').hidden=ep!=='post';$('#fBody').hidden=ep!=='post';$('#fId').hidden=ep!=='get';
+ if(ep==='get'&&!$('#apiId').value){const k=S.keys.find(x=>x.id===$('#apiKey').value);const j=k&&S.jobs.find(x=>x.u===k.org);if(j)$('#apiId').value=j.id;}updCurl();}
+function updCurl(){const ep=$('#apiEp').value,k=S.keys.find(x=>x.id===$('#apiKey').value),base='https://api.vestia.example';
+ const auth=`  -H "Authorization: Bearer ${k?k.prefix:'…'}…"`;
+ let s;
+ if(ep==='post'){let b=$('#apiBody').value;try{b=JSON.stringify(JSON.parse(b))}catch(e){}s=`curl -X POST ${base}/v1/generations \\\n${auth} \\\n  -H "Idempotency-Key: ${$('#apiIdem').value}" \\\n  -H "Content-Type: application/json" \\\n  -d '${b}'`;}
+ else if(ep==='get')s=`curl ${base}/v1/generations/${$('#apiId').value||'{id}'} \\\n${auth}`;
+ else s=`curl ${base}/v1/credits \\\n${auth}`;
+ $('#apiCurl').textContent=s;}
+function apiCall(){
+ const k=S.keys.find(x=>x.id===$('#apiKey').value),ep=$('#apiEp').value,now=Date.now();
+ const H={'Content-Type':'application/json','X-Request-Id':rid('req_',12)};let st,body;
+ const method=ep==='post'?'POST':'GET',path=ep==='post'?'/v1/generations':ep==='get'?'/v1/generations/'+($('#apiId').value.trim()||'{id}'):'/v1/credits';
+ const out=()=>{lastApi={st,H,body,method,path,ts:now};renderApiRes();const lv=st<300?'ok':st===429||st===402?'warn':'bad';J('api',lv,`${method} ${path} → ${st}${H['Idempotent-Replayed']?' (rejouée)':''}${k?' — '+user(k.org).name:''}`);commit();};
+ if(!k||k.revoked){st=401;body={error:{code:'invalid_api_key',message:'Clé API absente, inconnue ou révoquée.'}};return out();}
+ const win=(S.rate[k.id]||[]).filter(t=>now-t<60000);S.rate[k.id]=win;
+ if(win.length>=8){st=429;H['Retry-After']=String(Math.ceil((60000-(now-win[0]))/1000));H['X-RateLimit-Remaining']='0';body={error:{code:'rate_limited',message:'Limite de 8 requêtes par minute atteinte pour cette clé.'}};return out();}
+ win.push(now);k.last=now;H['X-RateLimit-Limit']='8';H['X-RateLimit-Remaining']=String(8-win.length);
+ if(ep==='credits'){st=200;body={object:'credit_balance',available:bal(k.org),reserved:held(k.org),currency:'credits'};return out();}
+ if(ep==='get'){const id=$('#apiId').value.trim(),j=S.jobs.find(x=>x.id===id&&x.u===k.org);
+  if(!j){st=404;body={error:{code:'not_found',message:`Aucune génération ${id||'(id vide)'} pour ce partenaire.`}};return out();}
+  st=200;body=jobJson(j);return out();}
+ // POST
+ const idem=$('#apiIdem').value.trim(),raw=$('#apiBody').value;let b;
+ try{b=JSON.parse(raw);}catch(e){st=400;body={error:{code:'invalid_json',message:'Le corps de la requête n\'est pas un JSON valide.'}};return out();}
+ if(S.mode==='robuste'){
+  if(!idem){st=400;body={error:{code:'idempotency_key_required',message:'En-tête Idempotency-Key obligatoire sur les créations facturées.'}};return out();}
+  const ck=k.org+':'+idem,c=S.idem[ck];
+  if(c){if(c.hash!==JSON.stringify(b)){st=422;body={error:{code:'idempotency_key_reused',message:'Cette Idempotency-Key a déjà été utilisée avec un corps différent.'}};return out();}
+   S.stats.idem++;st=c.st;H['Idempotent-Replayed']='true';const j=S.jobs.find(x=>x.id===c.job);body=j?Object.assign(jobJson(j),{}):c.body;return out();}
+ }
+ const errs=[];
+ if(!b||typeof b!=='object')errs.push({field:'body',message:'objet attendu'});
+ else{if(!KINDS[b.type])errs.push({field:'type',message:'valeurs : '+Object.keys(KINDS).join(', ')});
+  if(typeof b.garment_image_url!=='string'||!/^https:\/\/[^\s]+\.[^\s]+/.test(b.garment_image_url))errs.push({field:'garment_image_url',message:'URL https requise'});
+  if(b.type==='tryon'&&!b.model_id)errs.push({field:'model_id',message:'requis pour un essayage virtuel'});
+  if(b.test_scenario&&!SCEN[b.test_scenario])errs.push({field:'test_scenario',message:'valeurs : '+Object.keys(SCEN).join(', ')});}
+ if(errs.length){st=400;body={error:{code:'validation_error',message:'Requête invalide.',details:errs}};return out();}
+ const gk=Object.keys(GARMENTS).find(g=>b.garment_image_url.includes(g))||Object.keys(GARMENTS)[Math.random()*5|0];
+ const r=createJob({u:k.org,kind:b.type,sc:b.test_scenario||'ok',idem:idem||null,src:'api',garment:gk});
+ if(r.error){st=402;body={error:{code:'insufficient_credits',message:r.error}};return out();}
+ st=202;body=jobJson(r.job);H.Location='/v1/generations/'+r.job.id;
+ if(S.mode==='robuste')S.idem[k.org+':'+idem]={hash:JSON.stringify(b),st:202,job:r.job.id};
+ out();
+}
+function jobJson(j){const o={id:j.id,object:'generation',type:j.kind,status:j.status,attempts:j.attempts,credits:{cost:j.cost,charged:-S.ledger.filter(e=>e.ref===j.id).reduce((a,e)=>a+e.amt,0)},created_at:new Date(j.ts).toISOString()};
+ if(j.status==='succeeded')o.result_url=`https://cdn.vestia.example/r/${j.id}.webp`;if(j.status==='failed')o.error={message:j.error};return o;}
+function renderApiRes(){if(!lastApi)return;const a=lastApi,c=a.st<300?'b-ok':a.st===429||a.st===402?'b-warn':'b-bad';
+ $('#apiRes').innerHTML=`<div class="resp-h">${badge('HTTP '+a.st,c)}<code class="wrap">${esc(a.method+' '+a.path)}</code><span class="muted small">${fmtT(a.ts)}</span>${a.H['Idempotent-Replayed']?badge('Réponse rejouée — aucun nouveau débit','b-acc'):''}</div>
+ <p class="flabel" style="margin:6px 0">En-têtes</p><pre>${esc(Object.entries(a.H).map(([k,v])=>k+': '+v).join('\n'))}</pre>
+ <p class="flabel" style="margin:12px 0 6px">Corps</p><pre>${esc(JSON.stringify(a.body,null,2))}</pre>
+ ${a.st===202||a.H['Idempotent-Replayed']?`<div class="actions" style="margin-top:12px"><button class="btn sm" type="button" data-job="${a.body.id}">Voir la tâche</button><button class="btn sm" type="button" id="pollBtn">Interroger le statut (GET)</button></div>`:''}`;
+ const k=S.keys.find(x=>x.id===$('#apiKey').value);$('#rlInfo').textContent=k?`${(S.rate[k.id]||[]).filter(t=>Date.now()-t<60000).length}/8 requêtes cette minute`:'';
+}
+function newIdem(){$('#apiIdem').value=(crypto.randomUUID?crypto.randomUUID():rid('',8)+'-'+rid('',4)+'-'+rid('',12));updCurl();}
+
+/* ---------- audit ---------- */
+function renderAudit(){
+ const n=AUDIT.length,t=AUDIT.filter(a=>S.audit[a.id]==='tested').length,f=AUDIT.filter(a=>S.audit[a.id]==='fixed').length,pc=Math.round((t+f*.5)/n*100);
+ $('#auProg i').style.width=pc+'%';$('#auProg').setAttribute('aria-valuenow',pc);
+ $('#auSum').textContent=`${t} vérifiés par test, ${f} corrigés, ${n-t-f} à corriger — ${pc} % du chemin vers la mise en production.`;
+ const list=AUDIT.filter(a=>(!view.auSev||a.sev===view.auSev)&&(!view.auSt||S.audit[a.id]===view.auSt));
+ $('#auCount').textContent=list.length+' / '+n;
+ $('#auList').innerHTML=list.length?list.map(a=>`<button data-au="${a.id}">${badge(a.sev,SEVC[a.sev])}<span style="min-width:0"><b>${esc(a.title)}</b><span class="muted">${esc(a.area)} · ${esc(a.risk.slice(0,110))}…</span></span>${badge(AST[S.audit[a.id]][0],AST[S.audit[a.id]][1])}</button>`).join(''):'<div class="empty">Aucun point pour ce filtre.</div>';
+}
+function auditDetail(id){const a=AUDIT.find(x=>x.id===id);dlgJob=null;
+ $('#dlgT').textContent=a.title;
+ $('#dlgB').innerHTML=`<div class="actions">${badge(a.sev,SEVC[a.sev])}${badge(a.area,'b-gray')}${badge(AST[S.audit[a.id]][0],AST[S.audit[a.id]][1])}</div>
+ <div><h3 style="font-size:15px;margin-bottom:4px">Risque</h3><p>${esc(a.risk)}</p></div>
+ <div><h3 style="font-size:15px;margin-bottom:4px">Correctif</h3><p>${esc(a.fix)}</p></div>
+ <pre>${esc(a.code)}</pre>
+ <div class="note"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div><b>Test associé :</b> ${esc(a.test)}</div></div>
+ <fieldset><legend>Statut</legend><div class="chips">${Object.entries(AST).map(([k,v])=>`<button class="chip" type="button" data-ast="${k}" data-aid="${a.id}" aria-pressed="${S.audit[a.id]===k}">${v[0]}</button>`).join('')}</div></fieldset>`;
+}
+
+/* ---------- dialogues ---------- */
+const dlg=$('#dlg');
+function openDlg(){if(!dlg.open)dlg.showModal();}
+$('#dlgX').addEventListener('click',()=>dlg.close());
+dlg.addEventListener('close',()=>{dlgJob=null;});
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close();});
+
+function checkout(){
+ const u=user($('#payUser').value),p=PACKS.find(x=>x.id===($('input[name=pack]:checked')||{}).value)||PACKS[1];dlgJob=null;
+ $('#dlgT').textContent='Paiement sécurisé';
+ $('#dlgB').innerHTML=`<div class="note warn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg><div><b>Mode test Stripe</b> — aucune carte n'est débitée. Carte acceptée : 4242 4242 4242 4242 · carte refusée : 4000 0000 0000 0002.</div></div>
+ <dl class="kv"><dt>Pack</dt><dd>${p.name} — ${nf(p.credits)} crédits</dd><dt>Montant</dt><dd><b>${eur(p.price)}</b> TTC</dd><dt>Compte</dt><dd>${esc(u.name)}</dd></dl>
+ <form id="coForm" class="stack" novalidate>
+  <div class="field"><label for="coMail">E-mail</label><input type="email" id="coMail" value="${esc(u.email)}" autocomplete="email"><span class="err" id="eMail"></span></div>
+  <div class="field"><label for="coCard">Numéro de carte</label><input type="text" id="coCard" inputmode="numeric" autocomplete="cc-number" value="4242 4242 4242 4242"><span class="err" id="eCard"></span></div>
+  <div class="fgrid"><div class="field"><label for="coExp">Expiration (MM/AA)</label><input type="text" id="coExp" inputmode="numeric" value="12/29" autocomplete="cc-exp"><span class="err" id="eExp"></span></div>
+  <div class="field"><label for="coCvc">CVC</label><input type="text" id="coCvc" inputmode="numeric" value="123" autocomplete="cc-csc"><span class="err" id="eCvc"></span></div></div>
+  <button class="btn primary block" type="submit" id="coPay">Payer ${eur(p.price)}</button>
+ </form>`;
+ openDlg();
+ $('#coForm').addEventListener('submit',async e=>{e.preventDefault();
+  const v=id=>$(id).value.trim(),set=(i,eid,m)=>{$(i).setAttribute('aria-invalid',m?'true':'false');$(eid).textContent=m||'';return !m;};
+  const num=v('#coCard').replace(/\s/g,'');const [mm,yy]=v('#coExp').split('/').map(Number);const d=new Date();
+  let ok=set('#coMail','#eMail',/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('#coMail'))?'':'Adresse e-mail invalide.');
+  ok=set('#coCard','#eCard',/^\d{16}$/.test(num)&&luhn(num)?'':'Numéro de carte invalide.')&&ok;
+  ok=set('#coExp','#eExp',mm>=1&&mm<=12&&(2000+yy>d.getFullYear()||(2000+yy===d.getFullYear()&&mm>=d.getMonth()+1))?'':'Date d\'expiration invalide ou dépassée.')&&ok;
+  ok=set('#coCvc','#eCvc',/^\d{3,4}$/.test(v('#coCvc'))?'':'CVC à 3 chiffres.')&&ok;
+  if(!ok){$('#coForm [aria-invalid="true"]').focus();return;}
+  const b=$('#coPay');b.disabled=true;b.textContent='Traitement…';await wait(900);
+  const declined=num==='4000000000000002',sid=rid('cs_test_',16),now=Date.now();
+  S.payments.push({id:sid,u:u.id,label:'Pack '+p.name,credits:p.credits,amount:p.price,status:declined?'refusée':'payée',ts:now,method:'Carte (Stripe)'});
+  const ev={id:rid('evt_',16),type:declined?'payment_intent.payment_failed':'checkout.session.completed',session:sid,u:u.id,credits:p.credits,pack:p.name,ts:now,deliveries:[]};
+  S.events.push(ev);dlg.close();
+  J('stripe',declined?'warn':'info',`Paiement ${declined?'refusé':'accepté'} — ${eur(p.price)} — ${u.name}`);
+  deliver(ev.id);commit();
+  toast(declined?'Paiement refusé par la banque (carte de test). Aucun crédit ajouté.':`Paiement accepté : +${p.credits} crédits. Reçu envoyé à ${u.email} (simulation).`,declined);
+  if(!declined&&$('#redeliver').checked){await wait(1600);deliver(ev.id);commit();
+   toast(S.mode==='robuste'?'Stripe a relivré l\'événement : doublon détecté, aucun crédit ajouté.':'Stripe a relivré l\'événement : crédits ajoutés une deuxième fois !',S.mode!=='robuste');}
+ });
+}
+function luhn(n){let s=0;for(let i=0;i<n.length;i++){let d=+n[n.length-1-i];if(i%2){d*=2;if(d>9)d-=9;}s+=d;}return s%10===0;}
+
+function newKey(org){dlgJob=null;$('#dlgT').textContent='Nouvelle clé API — '+user(org).name;
+ $('#dlgB').innerHTML=`<form id="kForm" class="stack" novalidate><div class="field"><label for="kName">Nom de la clé</label><input type="text" id="kName" placeholder="ex. Plugin boutique — préproduction"><span class="err" id="eK"></span></div><button class="btn primary" type="submit">Générer la clé</button></form>`;
+ openDlg();$('#kName').focus();
+ $('#kForm').addEventListener('submit',e=>{e.preventDefault();const nm=$('#kName').value.trim();
+  if(nm.length<3){$('#kName').setAttribute('aria-invalid','true');$('#eK').textContent='Nom de 3 caractères minimum.';$('#kName').focus();return;}
+  const secret='vst_live_'+rid('',28),k={id:rid('key_',6),org,name:nm,prefix:secret.slice(0,13),created:Date.now(),last:null,revoked:false};
+  S.keys.push(k);J('api','info',`Clé ${k.prefix}… créée pour ${user(org).name} (seul le hash SHA-256 est stocké)`);commit();
+  $('#apiKey').value=k.id;updCurl();
+  $('#dlgB').innerHTML=`<div class="note warn"><div>Copiez cette clé maintenant : elle ne sera plus jamais affichée. Seuls son préfixe et son empreinte SHA-256 sont conservés.</div></div><div class="secret"><code id="secretV">${secret}</code><button class="btn" type="button" id="cpBtn">Copier</button></div><button class="btn primary" type="button" id="kDone">J'ai copié la clé</button>`;
+  $('#cpBtn').addEventListener('click',()=>{try{navigator.clipboard.writeText(secret).then(()=>toast('Clé copiée dans le presse-papiers.'),()=>toast('Copie impossible : sélectionnez la clé manuellement.'));}catch(err){toast('Copie impossible : sélectionnez la clé manuellement.');}});
+  $('#kDone').addEventListener('click',()=>dlg.close());$('#cpBtn').focus();
+ });
+}
+function revoke(id){const k=S.keys.find(x=>x.id===id);dlgJob=null;$('#dlgT').textContent='Révoquer la clé ?';
+ $('#dlgB').innerHTML=`<p>La clé <code>${esc(k.prefix)}…</code> (${esc(k.name)}) de ${esc(user(k.org).name)} sera refusée (401) dès la prochaine requête. Action irréversible.</p><div class="actions"><button class="btn danger" type="button" id="rvOk">Révoquer</button><button class="btn" type="button" id="rvNo">Annuler</button></div>`;
+ openDlg();$('#rvNo').focus();$('#rvNo').addEventListener('click',()=>dlg.close());
+ $('#rvOk').addEventListener('click',()=>{k.revoked=true;J('api','warn',`Clé ${k.prefix}… révoquée (${user(k.org).name})`);commit();dlg.close();toast('Clé révoquée. Un e-mail d\'information a été envoyé au partenaire (simulation).');});}
+
+function toast(m,bad){const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.setAttribute('role','status');t.textContent=m;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4800);}
+
+/* ---------- événements ---------- */
+function go(v){view.cur=v;$$('.tab').forEach(t=>t.toggleAttribute('aria-current',false));$(`.tab[data-view="${v}"]`).setAttribute('aria-current','page');
+ $$('main>section').forEach(s=>s.hidden=s.id!=='v-'+v);window.scrollTo({top:0});try{history.replaceState(null,'','#'+v)}catch(e){}}
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)go(b.dataset.view);});
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.go;go(v);
+ if(v==='gen'){$('#genUser').value='usr_3HV7';const r=$('input[name=sc][value=timeout]');if(r)r.checked=true;refresh();}
+ if(v==='api'){$('#apiEp').value='post';epUi();}
+ const f={pay:'#buyBtn',gen:'#genForm button[type=submit]',api:'#apiSend'}[v];setTimeout(()=>$(f).focus(),50);}));
+$$('.seg button').forEach(b=>b.addEventListener('click',()=>{if(S.mode===b.dataset.mode)return;S.mode=b.dataset.mode;
+ J('system',S.mode==='fragile'?'warn':'ok',S.mode==='fragile'?'Implémentation « sans garde-fous » activée (comparaison)':'Implémentation fiabilisée activée');commit();
+ toast(S.mode==='fragile'?'Mode sans garde-fous : refaites le parcours et observez les écarts.':'Mode fiabilisé : idempotence, réservation et libération actives.',S.mode==='fragile');}));
+$('#resetBtn').addEventListener('click',()=>{EPOCH++;try{localStorage.removeItem(KEY)}catch(e){}seed();lastApi=null;$('#apiRes').innerHTML='<div class="empty">Envoyez une requête pour voir la réponse.</div>';$('#rlInfo').textContent='';
+ Object.assign(view,{jf:'',ju:'',led:'',jrn:'',auSev:'',auSt:''});['#jobUser','#ledUser','#jf','#auSev','#auSt','#apiId'].forEach(s=>$(s).value='');
+ $$('#jobFilters .chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.f==='')));newIdem();if(dlg.open)dlg.close();commit();toast('Démo réinitialisée.');});
+$('#jf').addEventListener('change',e=>{view.jrn=e.target.value;renderOverview();});
+$('#ledUser').addEventListener('change',e=>{view.led=e.target.value;renderPay();});
+$('#buyBtn').addEventListener('click',checkout);
+$('#forgeBtn').addEventListener('click',()=>{const ev={id:rid('evt_',16),type:'checkout.session.completed',session:'cs_inconnue',u:'usr_3HV7',credits:600,pack:'Studio',ts:Date.now(),deliveries:[],forged:true};
+ S.events.push(ev);deliver(ev.id);commit();toast(S.mode==='robuste'?'Webhook falsifié rejeté (400) : signature invalide.':'Webhook falsifié accepté : 600 crédits offerts à Théo Lambert !',S.mode!=='robuste');});
+$('#v-pay').addEventListener('click',e=>{const r=e.target.closest('[data-replay]');if(r){deliver(r.dataset.replay);commit();toast('Événement relivré : voir le résultat dans la liste.');return;}
+ const a=e.target.closest('[data-adj]');if(a){const R=recon().find(x=>x.u.id===a.dataset.adj);if(R&&R.diff){L(R.u.id,'ajustement',-R.diff,'recon_'+new Date().toISOString().slice(0,10),'Correction après réconciliation');J('ledger','ok',`Ajustement ${sg(-R.diff)} sur ${R.u.name} (tracé dans le grand livre)`);commit();toast('Écriture d\'ajustement enregistrée.');}}});
+$('#genUser').addEventListener('change',renderGen);
+$('#jobUser').addEventListener('change',e=>{view.ju=e.target.value;renderGen();});
+$('#jobFilters').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;view.jf=c.dataset.f;$$('#jobFilters .chip').forEach(x=>x.setAttribute('aria-pressed',String(x===c)));renderGen();});
+function launch(times){const u=$('#genUser').value,kind=$('#genKind').value,sc=($('input[name=sc]:checked')||{}).value||'ok',garment=$('#genGarment').value,idem=rid('ui_',12);
+ $('#genErr').textContent='';const res=[];for(let i=0;i<times;i++)res.push(createJob({u,kind,sc,idem,src:'app',garment}));
+ const err=res.find(r=>r.error);if(err&&!res.some(r=>r.job)){$('#genErr').textContent=err.error;commit();return;}
+ commit();
+ if(times>1){const n=new Set(res.filter(r=>r.job).map(r=>r.job.id)).size;toast(n===1?'Double clic absorbé : une seule tâche, un seul débit.':`Double clic : ${n} tâches créées et ${n} débits !`,n>1);}
+ else toast('Génération lancée : suivez son évolution dans la liste.');}
+$('#genForm').addEventListener('submit',e=>{e.preventDefault();launch(1);});
+$('#dblBtn').addEventListener('click',()=>launch(2));
+document.addEventListener('click',e=>{const j=e.target.closest('[data-job]');if(j){dlgJob=j.dataset.job;jobDetail(dlgJob);openDlg();return;}
+ const au=e.target.closest('[data-au]');if(au){auditDetail(au.dataset.au);openDlg();return;}
+ const as=e.target.closest('[data-ast]');if(as){S.audit[as.dataset.aid]=as.dataset.ast;commit();auditDetail(as.dataset.aid);const f=$(`[data-ast="${as.dataset.ast}"]`);if(f)f.focus();return;}
+ const nk=e.target.closest('[data-newkey]');if(nk){newKey(nk.dataset.newkey);return;}
+ const rv=e.target.closest('[data-revoke]');if(rv){revoke(rv.dataset.revoke);return;}
+ if(e.target.closest('#pollBtn')&&lastApi){$('#apiEp').value='get';$('#apiId').value=lastApi.body.id;epUi();apiCall();}
+});
+$('#apiForm').addEventListener('submit',e=>{e.preventDefault();apiCall();});
+$('#apiEp').addEventListener('change',epUi);
+$('#apiKey').addEventListener('change',()=>{$('#apiId').value='';epUi();});
+['#apiIdem','#apiBody','#apiId'].forEach(s=>$(s).addEventListener('input',updCurl));
+$('#idemNew').addEventListener('click',newIdem);
+$('#auSev').addEventListener('change',e=>{view.auSev=e.target.value;renderAudit();});
+$('#auSt').addEventListener('change',e=>{view.auSt=e.target.value;renderAudit();});
+
+/* ---------- démarrage ---------- */
+load();
+$('#apiBody').value=JSON.stringify({type:'tryon',garment_image_url:'https://cdn.maison-albane.example/produits/robe-lin-ecru.jpg',model_id:'mdl_ava_02',test_scenario:'ok'},null,2);
+newIdem();refresh();epUi();
+S.jobs.filter(j=>ACTIVE.includes(j.status)).forEach(j=>runJob(j.id));
+const h=(location.hash||'').slice(1);if(['overview','pay','gen','api','audit'].includes(h))go(h);
+})();
+</script>
 </body>
 </html>
