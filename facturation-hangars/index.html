@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Facturation marketplace hivernage</title>
-<meta name="description" content="Back-office de facturation d’une marketplace d’hivernage chez des agriculteurs : opérations Stripe et hors Stripe, autofactures au nom des loueurs, commissions, avoirs et remboursements, profils fiscaux et TVA, facturation électronique, e-reporting, DAC7, synchronisation Pennylane et architecture proposée.">
+<meta name="description" content="Back-office de facturation d’une marketplace de stockage chez des agriculteurs : contrats et échéances mensuelles, autofactures des loyers, commissions locataires, frais de service loueurs, résiliations et pénalités selon les conditions générales, impayés et compensations, reversements Stripe Connect, facturation électronique, e-reporting, DAC7 et architecture proposée.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
   --nav:#0D2752;--nav-2:#14336A;--nav-ink:#EEF3FC;--nav-muted:#B3C4E3;
   --ok:#17663B;--ok-soft:#DCF1E4;--warn:#8A5200;--warn-soft:#FBEBD0;--bad:#A3242A;--bad-soft:#FAE0E1;--gray:#4C586B;--gray-soft:#E8ECF2;
   --band:#E2EBFB;--band-ink:#173F96;
-  --c1:#1D4FB5;--c2:#7FA6E8;--c3:#C9D8F3;
+  --c1:#1D4FB5;--c2:#7FA6E8;--c3:#C9D8F3;--c4:#1F8A8A;
   --shadow:0 1px 2px rgba(15,27,45,.05),0 6px 18px rgba(15,27,45,.06);
   --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
   --pad:clamp(16px,2.4vw,32px);
@@ -27,7 +27,7 @@
   --nav:#0B1A36;--nav-2:#132A52;--nav-ink:#E8EFFC;--nav-muted:#A6B8DA;
   --ok:#6FD39A;--ok-soft:#12301F;--warn:#F1B65C;--warn-soft:#352612;--bad:#FF9A9E;--bad-soft:#3B1A1D;--gray:#B4BFCE;--gray-soft:#1F2A3D;
   --band:#13254A;--band-ink:#B9CEFF;
-  --c1:#78A2FF;--c2:#3F68B8;--c3:#26406F;
+  --c1:#78A2FF;--c2:#3F68B8;--c3:#26406F;--c4:#4FC1C1;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);color-scheme:dark;
 }}
 *{box-sizing:border-box}
@@ -89,7 +89,7 @@ main{min-width:0;padding:22px var(--pad) 48px}
 .btn[disabled]{opacity:.55;cursor:not-allowed}
 .link{background:none;border:0;padding:0;color:var(--primary-text);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px;min-height:44px;text-align:left}
 
-.badge{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 9px;line-height:1.5;white-space:normal}
+.badge{overflow-wrap:normal;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;border-radius:999px;padding:2px 9px;line-height:1.5;white-space:normal}
 .b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}
 .b-info{background:var(--primary-soft);color:var(--primary-text)}.b-gray{background:var(--gray-soft);color:var(--gray)}
 
@@ -240,10 +240,16 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const EUR=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"});
 const eur=c=>EUR.format((c||0)/100);
 const pad=(n,l)=>String(n).padStart(l,"0");
-const fd=d=>{const x=new Date(d);return pad(x.getDate(),2)+"/"+pad(x.getMonth()+1,2)+"/"+x.getFullYear()};
-const iso=d=>{const x=new Date(d);return x.getFullYear()+"-"+pad(x.getMonth()+1,2)+"-"+pad(x.getDate(),2)};
-const nowStamp=()=>"2026-10-18T"+pad(9+Math.floor((Date.now()/60000)%8),2)+":"+pad(Math.floor((Date.now()/1000)%60),2);
-const fdt=s=>{const d=new Date(s);return fd(d)+" "+pad(d.getHours(),2)+":"+pad(d.getMinutes(),2)};
+const TODAY="2026-10-18";
+const P=s=>{const[a,b,c]=s.slice(0,10).split("-").map(Number);return new Date(a,b-1,c)};
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1,2)+"-"+pad(d.getDate(),2);
+const fd=s=>{const d=P(s);return pad(d.getDate(),2)+"/"+pad(d.getMonth()+1,2)+"/"+d.getFullYear()};
+const fdt=s=>fd(s)+(s.length>10?" "+s.slice(11,16):"");
+const addDays=(s,n)=>{const d=P(s);d.setDate(d.getDate()+n);return iso(d)};
+const addMonths=(s,n)=>{const d=P(s);return iso(new Date(d.getFullYear(),d.getMonth()+n,d.getDate()))};
+const daysBetween=(a,b)=>Math.round((P(b)-P(a))/864e5);
+const monthsDiff=(a,b)=>{const x=P(a),y=P(b);return(y.getFullYear()-x.getFullYear())*12+y.getMonth()-x.getMonth()};
+let clock=0;const nowStamp=()=>{clock++;return TODAY+"T"+pad(9+Math.floor(clock/50)%8,2)+":"+pad(10+clock%50,2)};
 const ICONS={
   dash:'<path d="M3 13h8V3H3z"/><path d="M13 21h8V11h-8z"/><path d="M13 3v6h8V3z"/><path d="M3 21h8v-6H3z"/>',
   ops:'<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
@@ -260,9 +266,7 @@ const ICONS={
   sync:'<path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
   edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   dl:'<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
-  play:'<path d="m6 4 14 8-14 8z"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
-  bank:'<path d="M3 10h18L12 4z"/><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18"/>',
-  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  play:'<path d="m6 4 14 8-14 8z"/>',bank:'<path d="M3 10h18L12 4z"/><path d="M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18"/>',
   arrow:'<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'
 };
 const ic=n=>'<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[n]||"")+'</svg>';
@@ -276,13 +280,22 @@ let RUN=rng(987);
 
 /* ---------- référentiels ---------- */
 const PROFILES={
-  soc:{label:"Société agricole assujettie",short:"Société · TVA 20 %",tva:20,siren:true,tvaNum:true,doc:"AF"},
+  soc:{label:"Société agricole assujettie (GAEC, EARL, SCEA)",short:"Société · TVA 20 %",tva:20,siren:true,tvaNum:true,doc:"AF"},
   rsa:{label:"Exploitant individuel · régime simplifié agricole",short:"RSA · TVA 20 %",tva:20,siren:true,tvaNum:true,doc:"AF"},
   fb:{label:"Micro-entrepreneur · franchise en base",short:"Franchise 293 B",tva:0,siren:true,tvaNum:false,doc:"AF"},
-  part:{label:"Particulier non professionnel",short:"Particulier · DAC7",tva:0,siren:false,tvaNum:false,doc:"RC"}
+  part:{label:"Particulier (dont agriculteurs retraités)",short:"Particulier · DAC7",tva:0,siren:false,tvaNum:false,doc:"RC"}
 };
-const PLATFORM={name:"Hangarium SAS",addr:"12 rue des Granges, 35000 Rennes",siren:"",tva:""};
-const SOURCES={stripe:"Stripe",virement:"Virement",cheque:"Chèque"};
+const PLATFORM={name:"Hangarium SAS",addr:"8 rue des Granges, 45000 Orléans",siren:"",tva:""};
+const MODES={carte:"Carte",sepa:"Prélèvement SEPA",virement:"Virement (contrat pro)"};
+const FRAIS_SERVICE=300; // 3 € TTC par mois et par contrat en cours, dus par le loueur
+/* grille de commission locataire : € TTC par mois et par bien, fixe sur la période initiale */
+const GRID=[[12,1500,"12 mois"],[6,1900,"6 à 11 mois"],[3,2400,"3 à 5 mois"],[1,3000,"1 à 2 mois"]];
+function commissionFor(N,startMonth,nb){
+  const base=GRID.find(g=>N>=g[0])[1];const high=[9,10,11].includes(startMonth);
+  const first=Math.min(3000,base+(high?300:0));const extra=Math.round(first*.5);
+  return{total:first+extra*(nb-1),first,extra,high,label:GRID.find(g=>N>=g[0])[2]+(high?", haute saison":"")+(nb>1?", "+nb+" biens":"")};
+}
+const kindLabel={AF:"Autofacture loyer",RC:"Reçu loyer (particulier)",HC:"Commission locataire",FS:"Frais de service loueur",IN:"Indemnité de résiliation",AV:"Avoir loyer",HCA:"Avoir commission"};
 
 /* ---------- génération des données ---------- */
 function generate(){
@@ -311,70 +324,83 @@ function generate(){
     ["EARL du Littoral","soc","Aurélie Renaud","La Rochelle","17"],["Ferme Picard","ind","Denis Picard","Langres","52"]
   ];
   const loueurs=farms.map((f,i)=>{
-    let profile=f[1]==="soc"?"soc":(()=>{const r=R();return r<.4?"rsa":r<.72?"fb":"part"})();
-    if(i===12)profile="soc";if(i===2)profile="fb";if(i===21)profile="rsa";if(i===9)profile="part";
+    let profile=f[1]==="soc"?"soc":(()=>{const r=R();return r<.35?"rsa":r<.62?"fb":"part"})();
+    if(i===2)profile="fb";if(i===21)profile="rsa";if(i===9)profile="part";
     const siren=profile==="part"?"":makeSiren(R);
     return{id:"L"+pad(i+101,4),code:"L"+pad(i+101,4),name:f[0],contact:f[2],commune:f[3],dept:f[4],profile,
       siren,tva:PROFILES[profile].tvaNum?tvaFor(siren):"",
       nif:profile==="part"?String(int(1,3))+pad(int(0,999999999),9)+pad(int(0,999),3):"",
       mandat:profile==="part"?null:"2025-"+pad(int(2,9),2)+"-"+pad(int(1,28),2),
-      stripe:"acct_1P"+alnum(R,14),kyc:"actif",rate:R()<.7?15:18,seq:int(30,140),hangar:pick(["Hangar 600 m²","Hangar 900 m²","Grange 350 m²","Hangar 1 200 m²","Bâtiment 450 m²"])}
+      stripe:"acct_1P"+alnum(R,14),kyc:"actif",seq:int(30,140),
+      space:pick(["Hangar agricole 300 m²","Hangar 600 m², sol béton","Grange 250 m²","Hangar 1 000 m²","Bâtiment 450 m², électricité et eau"])}
   });
-  // anomalies volontaires
-  loueurs[2].siren="";               // franchise : SIREN manquant
-  loueurs[21].tva="";                // RSA : TVA intracom manquante
-  loueurs[30].mandat=null;           // mandat de facturation non signé
-  loueurs[17].kyc="vérification requise";
-  loueurs[33].kyc="vérification requise";
+  loueurs[2].siren="";loueurs[21].tva="";loueurs[30].mandat=null;
+  loueurs[17].kyc="informations manquantes";loueurs[33].kyc="informations manquantes";
   const first=["Jean","Marie","Philippe","Nathalie","Alain","Christine","Patrick","Sandrine","Didier","Valérie","Laurent","Catherine","Frédéric","Martine","Serge","Brigitte","Hervé","Véronique","Thierry","Dominique","Pascal","Corinne","Gérard","Françoise"];
-  const last=["Durand","Lefort","Mallet","Besson","Gaillard","Barbier","Arnaud","Roche","Colas","Huet","Lemoine","Carpentier","Brun","Giraud","Poirier","Leroux","Perret","Rey","Marchand","Aubert","Charpentier","Hubert","Riviere","Benoit"];
-  const pros=["Nautic Évasion SARL","Camping Les Dunes SAS","Loc’Aventure SAS","Garage Bertrand & Fils","Évasion Vans SARL","Club Nautique de l’Estuaire"];
-  const OBJ=[["Camping-car",6500,11000,["Fiat Ducato 7,2 m","Hymer B-Klasse 6,9 m","Pilote P696","Rapido 8096","Bürstner Lyseo 7,4 m"]],
-    ["Caravane",4000,7000,["Adria Altea 4,9 m","Caravelair Antarès","Sterckeman Starlett"]],
-    ["Bateau",5000,12000,["Voilier 8,5 m sur remorque","Semi-rigide 6 m","Bateau à moteur 5,8 m"]],
-    ["Voiture",3500,6000,["Cabriolet Mazda MX-5","Peugeot 205 GTI","Renault 4L de collection"]],
-    ["Moto",2000,3500,["BMW R 1250 GS","Honda Africa Twin"]],["Van aménagé",5000,8000,["Volkswagen California","Renault Trafic aménagé"]]];
-  const resas=[];let n=4180;
-  loueurs.forEach((l,li)=>{
+  const last=["Durand","Lefort","Mallet","Besson","Gaillard","Barbier","Arnaud","Roche","Colas","Huet","Lemoine","Carpentier","Brun","Giraud","Poirier","Leroux","Perret","Rey","Marchand","Aubert","Charpentier","Hubert","Rivière","Benoit"];
+  const pros=["Scènes & Lumières SARL","Matériaux Bertrand SAS","Sport Hiver Distribution","Atelier Meubles Rousseau","Primeurs du Val SARL","Festival des Trois Rivières (association)"];
+  const BIENS=[["Camping-car",3500,6500,["Fiat Ducato 7,2 m","Hymer B-Klasse 6,9 m","Pilote P696","Rapido 8096"]],["Caravane",2500,4500,["Adria Altea 4,9 m","Caravelair Antarès","Sterckeman Starlett"]],
+    ["Van aménagé",3000,5000,["Volkswagen California","Fourgon Renault Trafic"]],["Bateau",3000,6000,["Voilier 8,5 m sur remorque","Semi-rigide 6 m"]],
+    ["Voiture",2500,4500,["Cabriolet Mazda MX-5","Renault 4L de collection","Peugeot 205 GTI"]],["Moto",1500,2500,["BMW R 1250 GS","Honda Africa Twin"]],
+    ["Remorque",1500,3000,["Remorque plateau 3 m","Remorque porte-bateau"]],["Mobil-home",5000,8000,["Mobil-home 8 × 4 m"]]];
+  const BIENS_PRO=[["Matériel événementiel",9000,18000,["Scène mobile et praticables","Structures de chapiteau"]],["Marchandises sur palettes",8000,20000,["40 palettes, stock saisonnier","Stock dormant, 25 palettes"]],["Matériaux de construction",7000,15000,["Matériaux et outillage de chantier"]],["Camion",6000,9000,["Porteur 19 t"]]];
+  const contracts=[];let n=5180;
+  loueurs.forEach(l=>{
     const k=int(4,9);
     for(let j=0;j<k;j++){
-      const o=pick(OBJ);const monthly=Math.round(int(o[1],o[2])/100)*100;
-      const season=R()<.42;const due=season?Math.round(monthly*7*.9/100)*100:monthly;
-      const isPro=R()<.13;const tenant=isPro?{name:pick(pros),type:"pro",siren:makeSiren(R)}:{name:pick(first)+" "+pick(last),type:"part"};
-      const r=R();const source=r<.8?"stripe":r<.93?"virement":"cheque";
-      const day=int(1,17);
-      let status;
-      if(source==="stripe")status=R()<.025?"échoué":"payé";else status=R()<.7?"payé":"en attente";
-      const payId=source==="stripe"?"pi_3Q"+alnum(R,18):source==="virement"?"VIR-"+pad(int(10000,99999),6):"CHQ-"+pad(int(1000000,9999999),7);
-      resas.push({id:"R-26"+(n++),loueur:l.id,tenant,object:o[0],model:pick(o[3]),formula:season?"saison":"mensuel",
-        from:"2026-10-01",to:season?"2027-04-30":"2026-10-31",due,
-        pay:{id:status==="en attente"?null:payId,source,date:"2026-10-"+pad(day,2),amount:status==="payé"?due:0,status},
-        status:"active",doc:null,history:[{t:"2026-"+(season?"09":"10")+"-"+pad(int(1,day),2)+"T10:12",label:"Réservation confirmée sur la plateforme ("+(season?"saison d’hivernage":"location mensuelle")+")"}]});
+      const isPro=R()<.12;
+      const tenant=isPro?{name:pick(pros),type:"pro",siren:makeSiren(R)}:{name:pick(first)+" "+pick(last),type:"part"};
+      const nb=!isPro&&R()<.12?2:1;const biens=[];
+      for(let b=0;b<nb;b++){const o=pick(isPro&&R()<.7?BIENS_PRO:BIENS);biens.push({type:o[0],label:pick(o[3]),loyer:Math.round(int(o[1],o[2])/100)*100})}
+      const N=pick([1,3,6,7,7,12,12,12,12]);
+      let start=addDays(TODAY,int(-290,26));const sd=P(start);if(sd.getDate()>28)start=iso(new Date(sd.getFullYear(),sd.getMonth(),28));
+      const day=P(start).getDate();
+      const future=start>TODAY;
+      const booked=future?"2026-10-"+pad(int(1,17),2):addDays(start,-int(2,20));
+      const octDate="2026-10-"+pad(day,2);
+      let k,payDate,label;
+      if(future||start.slice(0,7)==="2026-10"){k=1;payDate=booked<"2026-10-01"&&!future?booked:booked;label="Acompte"}
+      else{k=monthsDiff(start,octDate)+1;payDate=octDate;label=k>N?"Renouvellement":"Échéance"}
+      const loyer=biens.reduce((a,b)=>a+b.loyer,0);const cm=commissionFor(N,P(start).getMonth()+1,nb);
+      const mode=isPro&&R()<.55?"virement":k===1?"carte":R()<.6?"sepa":"carte";
+      let st;
+      if(payDate>TODAY)st="programmé";
+      else if(mode==="virement")st=R()<.72?"payé":"en attente";
+      else if(mode==="sepa")st=k===1?"payé":R()<.06?"impayé":"payé";
+      else st=k===1?"payé":R()<.03?"impayé":"payé";
+      const id="C-26"+(n++);
+      contracts.push({id,loueur:l.id,tenant,biens,loyer,com:cm.total,comLabel:cm.label,N,start,booked,day,mode,
+        status:future?"à venir":k>N?"renouvellement":"en cours",end:null,credit:0,
+        e:{k,label,date:payDate,amount:loyer+cm.total,status:st,payId:st==="payé"?(mode==="virement"?"VIR-"+pad(int(10000,99999),6):"pi_3Q"+alnum(R,18)):null,paid:st==="payé"?loyer+cm.total:0,docs:[],block:null,
+          reason:st==="impayé"?(mode==="sepa"?"Prélèvement rejeté · AM04 provision insuffisante":"Carte refusée · insufficient_funds"):null},
+        history:[{t:booked,label:"Demande de réservation acceptée par le loueur, contrat de stockage signé ("+N+" mois)"}]});
     }
   });
-  // écarts de montant (virements partiels)
-  const partials=resas.filter(r=>r.pay.source==="virement"&&r.pay.status==="payé"&&r.due>9000).slice(0,2);
-  partials.forEach((r,i)=>{r.pay.amount=r.due-(i?2000:4500);r.pay.status="partiel"});
-  // lignes bancaires non rapprochées : virements reçus pour des réservations "en attente"
-  const pend=resas.filter(r=>r.pay.status==="en attente"&&r.pay.source==="virement").slice(0,4);
-  const bank=pend.map((r,i)=>({id:"BQ-"+pad(5521+i,5),date:"2026-10-"+pad(12+i,2),amount:r.due,label:"VIR SEPA "+r.tenant.name.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/’/g," ")+(i%2?" HIVERNAGE":" GARDIENNAGE OCT"),matched:null,hint:r.id}));
-  const orphans=[{id:"pi_3Q"+alnum(R,18),date:"2026-10-14",amount:8900,label:"Paiement reçu pour la réservation R-264011, introuvable côté plateforme (supprimée après paiement)",tenant:"Arnaud Besson",resolved:false}];
-  const S={v:3,loueurs,resas,docs:[],bank,orphans,audit:[],seqCom:27,seqComAv:3,closes:[{month:"2026-09",label:"Septembre 2026",date:"2026-10-01T06:00",coms:38,docs:412,ereport:"Accepté",penny:"Synchronisé"}],
-    ereport:{status:"à préparer"},penny:{last:"2026-10-18T07:42",errors:0},dac7:{exported:false}};
-  // documents existants
-  resas.forEach(r=>{if(r.pay.status==="payé")tryInvoice(S,r,r.pay.date+"T"+pad(int(7,20),2)+":"+pad(int(0,59),2),true)});
-  // un rejet PA sur une facture B2B
-  const b2b=S.docs.find(d=>d.kind==="AF"&&d.b2b);if(b2b){b2b.pa="Rejetée";b2b.paReason="SIREN du destinataire absent de l’annuaire des plateformes";b2b.badSiren=true}
-  S.audit.push({t:"2026-10-18T07:42",who:"Système",what:"Synchronisation Pennylane",detail:"64 écritures exportées, 0 erreur"});
-  S.audit.push({t:"2026-10-18T07:40",who:"Système",what:"Collecte plateforme",detail:"Webhooks réservations : 12 événements traités"});
+  // au moins 3 impayés
+  contracts.filter(c=>c.mode==="sepa"&&c.e.status==="payé").slice(0,Math.max(0,3-contracts.filter(c=>c.e.status==="impayé").length)).forEach(c=>{c.e.status="impayé";c.e.paid=0;c.e.payId=null;c.e.reason="Prélèvement rejeté · AM04 provision insuffisante"});
+  contracts.filter(c=>c.e.status==="impayé").forEach(c=>c.e.date=c.e.date>"2026-10-08"?"2026-10-0"+(2+c.day%5):c.e.date);
+  // écart de montant sur un virement pro
+  const part=contracts.find(c=>c.mode==="virement"&&c.e.status==="payé"&&c.e.amount>9000);
+  if(part){part.e.paid=part.e.amount-3000;part.e.status="partiel"}
+  // virements reçus non rapprochés
+  const pend=contracts.filter(c=>c.e.status==="en attente").slice(0,3);
+  const bank=pend.map((c,i)=>({id:"BQ-"+pad(5521+i,5),date:"2026-10-"+pad(12+i,2),amount:c.e.amount,label:"VIR SEPA "+c.tenant.name.toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’&()]/g," ").replace(/\s+/g," ")+" STOCKAGE OCT",matched:null}));
+  const orphans=[{id:"pi_3Q"+alnum(R,18),date:"2026-10-14",amount:4400,label:"Acompte encaissé pour une réservation supprimée ensuite côté plateforme (aucun contrat associé)",tenant:"Arnaud Besson",resolved:false}];
+  const S={v:4,loueurs,contracts,docs:[],bank,orphans,audit:[],seq:{HC:812,FS:41,IN:6,HCA:9},
+    closes:[{month:"2026-09",label:"Septembre 2026",date:"2026-10-01T06:00",fs:37,payout:0}],ereport:{status:"à préparer"},penny:{last:"2026-10-18T07:42"}};
+  contracts.forEach(c=>{if(c.e.status==="payé")issueDocs(S,c,c.e.date+"T"+pad(int(7,20),2)+":"+pad(int(10,59),2),true)});
+  const b2b=S.docs.find(d=>d.kind==="AF"&&d.b2b);if(b2b){b2b.pa="Rejetée";b2b.paReason="SIREN du destinataire absent de l’annuaire des plateformes"}
+  S.audit.push({t:"2026-10-18T07:42",who:"Système",what:"Synchronisation Pennylane",detail:"Écritures du 17/10 exportées, 0 erreur"});
+  S.audit.push({t:"2026-10-18T07:40",who:"Système",what:"Collecte plateforme",detail:"API Bubble : 14 contrats créés ou modifiés depuis la veille"});
   S.audit.push({t:"2026-10-17T18:03",who:"Camille Roussel",what:"Profil fiscal modifié",detail:"Ferme Durand : passage en franchise en base (attestation reçue)"});
-  S.audit.push({t:"2026-10-01T06:00",who:"Système",what:"Clôture de septembre 2026",detail:"38 factures de commission, lot e-reporting transmis"});
+  S.audit.push({t:"2026-10-05T06:00",who:"Système",what:"Reversements de septembre",detail:"Transferts Stripe Connect émis vers 38 loueurs, frais de service déduits"});
+  S.audit.push({t:"2026-10-01T06:00",who:"Système",what:"Clôture de septembre 2026",detail:"37 factures de frais de service, lot e-reporting transmis"});
   return S;
 }
 
 /* ---------- moteur de facturation ---------- */
 const L=id=>S.loueurs.find(l=>l.id===id);
-const RS=id=>S.resas.find(r=>r.id===id);
+const C=id=>S.contracts.find(c=>c.id===id);
 const D=id=>S.docs.find(d=>d.id===id);
 function blockReason(l){
   const p=PROFILES[l.profile];
@@ -383,52 +409,62 @@ function blockReason(l){
   if(l.profile!=="part"&&!l.mandat)return"Mandat de facturation non signé";
   return null;
 }
-function split(ttc,rate){if(!rate)return{ht:ttc,tva:0};const ht=Math.round(ttc/(1+rate/100));return{ht,tva:ttc-ht}}
-function tryInvoice(St,r,when,silent){
-  if(r.doc||r.pay.status!=="payé")return null;
-  const l=St.loueurs.find(x=>x.id===r.loueur);const br=blockReason(l);
-  if(br){r.block=br;return null}
-  r.block=null;const p=PROFILES[l.profile];const{ht,tva}=split(r.pay.amount,p.tva);
-  l.seq++;const kind=p.doc;
-  const num=(kind==="AF"?"AF-":"RC-")+l.code+"-26-"+pad(l.seq,4);
-  const com=Math.round(ht*l.rate/100);
-  const d={id:"D"+(St.docs.length+1)+"-"+alnum(RUN,4),num,kind,loueur:l.id,resa:r.id,date:when||nowStamp(),ht,tva,ttc:r.pay.amount,rate:p.tva,
-    com,comId:null,b2b:r.tenant.type==="pro"&&kind==="AF",penny:silent?"Synchronisé":"À synchroniser",
-    pa:kind==="RC"?"Hors champ":r.tenant.type==="pro"?(silent?"Acceptée":"Déposée"):"E-reporting",
-    profile:l.profile,mandat:l.mandat};
-  St.docs.push(d);r.doc=d.id;
-  r.history.push({t:d.date,label:(kind==="AF"?"Autofacture ":"Reçu ")+num+" émis(e) au nom de "+l.name});
-  if(d.pa==="Déposée")setTimeout(()=>{d.pa="Acceptée";save();if(cur.view==="conformite"||cur.view==="docs")render()},2500);
+const split=(ttc,rate)=>{if(!rate)return{ht:ttc,tva:0};const ht=Math.round(ttc/(1+rate/100));return{ht,tva:ttc-ht}};
+const newId=St=>"D"+(St.docs.length+1)+"-"+alnum(RUN,4);
+function pushDoc(St,d){St.docs.push(d);if(d.pa==="Déposée")setTimeout(()=>{d.pa="Acceptée";save();if(["conformite","docs"].includes(cur.view))render()},2500);return d}
+function hcDoc(St,c,when,silent){
+  St.seq.HC++;const{ht,tva}=split(c.com,20);
+  const d=pushDoc(St,{id:newId(St),num:"HC-2610-"+pad(St.seq.HC,4),kind:"HC",loueur:c.loueur,contract:c.id,date:when,ht,tva,ttc:c.com,rate:20,b2b:c.tenant.type==="pro",
+    penny:silent?"Synchronisé":"À synchroniser",pa:c.tenant.type==="pro"?(silent?"Acceptée":"Déposée"):"E-reporting"});
+  c.e.docs.push(d.id);return d;
+}
+function loyerDoc(St,c,when,silent){
+  const l=St.loueurs.find(x=>x.id===c.loueur);const br=blockReason(l);
+  if(br){c.e.block=br;return null}
+  c.e.block=null;const p=PROFILES[l.profile];const{ht,tva}=split(c.loyer,p.tva);l.seq++;
+  const d=pushDoc(St,{id:newId(St),num:p.doc+"-"+l.code+"-26-"+pad(l.seq,4),kind:p.doc,loueur:l.id,contract:c.id,date:when,ht,tva,ttc:c.loyer,rate:p.tva,
+    b2b:c.tenant.type==="pro"&&p.doc==="AF",penny:silent?"Synchronisé":"À synchroniser",
+    pa:p.doc==="RC"?"Hors champ":c.tenant.type==="pro"?(silent?"Acceptée":"Déposée"):"E-reporting",profile:l.profile,mandat:l.mandat});
+  c.e.docs.push(d.id);c.history.push({t:when,label:(p.doc==="AF"?"Autofacture ":"Reçu ")+d.num+" émis(e) au nom de "+l.name});
   return d;
 }
-function invoiceLoueur(l){let n=0;S.resas.filter(r=>r.loueur===l.id).forEach(r=>{if(tryInvoice(S,r))n++});return n}
+function issueDocs(St,c,when,silent){
+  when=when||nowStamp();
+  if(!c.e.docs.some(id=>St.docs.find(d=>d.id===id).kind==="HC")){const h=hcDoc(St,c,when,silent);c.history.push({t:when,label:"Paiement reçu ("+MODES[c.mode]+"), facture de commission "+h.num+" émise"})}
+  if(!c.e.docs.some(id=>["AF","RC"].includes(St.docs.find(d=>d.id===id).kind)))loyerDoc(St,c,when,silent);
+}
+function invoiceLoueur(l){let n=0;S.contracts.filter(c=>c.loueur===l.id&&c.e.status==="payé"&&c.e.block).forEach(c=>{if(loyerDoc(S,c,nowStamp()))n++});return n}
+const hasLoyerDoc=c=>c.e.docs.some(id=>["AF","RC"].includes(D(id).kind));
+const docOf=(c,k)=>c.e.docs.map(D).find(d=>d.kind===k);
 
 /* ---------- état ---------- */
-let S;const KEY="demo-facturation-hangars-v3";
+let S;const KEY="demo-facturation-hangars-v4";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&x.v===3){S=x;PLATFORM.siren=makeSiren(rng(42));PLATFORM.tva=tvaFor(PLATFORM.siren);return}}catch(e){}S=generate();save()}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&x.v===4){S=x;PLATFORM.siren=makeSiren(rng(42));PLATFORM.tva=tvaFor(PLATFORM.siren);return}}catch(e){}S=generate();save()}
 function log(what,detail){S.audit.unshift({t:nowStamp(),who:"Camille Roussel",what,detail});save()}
-function toast(msg){const t=document.createElement("div");t.className="toast";t.innerHTML=ic("check")+"<span>"+msg+"</span>";$("#toasts").appendChild(t);setTimeout(()=>t.remove(),4200)}
+function toast(msg){const t=document.createElement("div");t.className="toast";t.innerHTML=ic("check")+"<span>"+msg+"</span>";$("#toasts").appendChild(t);setTimeout(()=>t.remove(),4500)}
+const active=c=>["en cours","renouvellement","à venir"].includes(c.status);
 
-/* ---------- anomalies (calculées) ---------- */
+/* ---------- anomalies ---------- */
 function anomalies(){
   const out=[];
   S.loueurs.forEach(l=>{
     const br=blockReason(l);
-    if(br){const n=S.resas.filter(r=>r.loueur===l.id&&r.pay.status==="payé"&&!r.doc).length;
-      out.push({type:br.startsWith("Mandat")?"mandat":"profil",sev:"bad",title:br+" · "+l.name,desc:n+" paiement(s) encaissé(s) en attente de facturation. La facture ne peut pas être émise sans ces informations.",act:"fixLoueur",ref:l.id,btn:br.startsWith("Mandat")?"Relancer la signature":"Compléter le profil"})}
-    if(l.kyc!=="actif")out.push({type:"kyc",sev:"warn",title:"Stripe Connect : vérification requise · "+l.name,desc:"Le compte connecté "+l.stripe+" doit fournir une pièce d’identité : les reversements sont suspendus.",act:"kyc",ref:l.id,btn:"Envoyer le lien d’onboarding"});
+    if(br){const n=S.contracts.filter(c=>c.loueur===l.id&&c.e.block).length;
+      out.push({type:br.startsWith("Mandat")?"mandat":"profil",sev:"bad",title:br+" · "+l.name,desc:n+" loyer(s) encaissé(s) sans autofacture. La commission est facturée, mais la facture du loueur ne peut pas être émise sans ces informations.",act:"fixLoueur",ref:l.id,btn:br.startsWith("Mandat")?"Relancer la signature":"Compléter le profil"})}
+    if(l.kyc!=="actif"){const due=S.contracts.filter(c=>c.loueur===l.id&&["payé","partiel"].includes(c.e.status)).reduce((a,c)=>a+c.loyer,0);
+      out.push({type:"kyc",sev:"warn",title:"Reversement suspendu · "+l.name,desc:"Le compte Stripe "+l.stripe+" n’a pas fourni les informations légales nécessaires au transit des fonds : "+eur(due)+" de loyers en attente.",act:"kyc",ref:l.id,btn:"Envoyer le lien Stripe"})}
   });
+  S.contracts.filter(c=>c.e.status==="impayé"&&["en cours","renouvellement"].includes(c.status)).forEach(c=>out.push({type:"impaye",sev:"bad",title:"Impayé · "+c.id+" · "+eur(c.e.amount),desc:c.tenant.name+" · "+c.e.reason+" le "+fd(c.e.date)+" · loueur "+L(c.loueur).name+".",act:"impaye",ref:c.id,btn:"Traiter l’impayé"}));
   S.bank.filter(b=>!b.matched).forEach(b=>out.push({type:"rappro",sev:"warn",title:"Virement non rapproché · "+eur(b.amount),desc:b.label+" (reçu le "+fd(b.date)+", relevé bancaire importé via Pennylane)",act:"match",ref:b.id,btn:"Rapprocher"}));
-  S.orphans.filter(o=>!o.resolved).forEach(o=>out.push({type:"orphelin",sev:"bad",title:"Paiement Stripe orphelin · "+eur(o.amount),desc:o.label+".",act:"orphan",ref:o.id,btn:"Traiter"}));
-  S.resas.filter(r=>r.pay.status==="partiel").forEach(r=>out.push({type:"ecart",sev:"warn",title:"Écart de montant · "+r.id,desc:"Encaissé "+eur(r.pay.amount)+" pour "+eur(r.due)+" dus ("+r.tenant.name+", "+SOURCES[r.pay.source].toLowerCase()+").",act:"gap",ref:r.id,btn:"Régulariser"}));
-  S.resas.filter(r=>r.pay.status==="échoué"&&r.status==="active").forEach(r=>out.push({type:"echec",sev:"warn",title:"Paiement carte échoué · "+r.id,desc:r.tenant.name+" · "+eur(r.due)+" · motif Stripe : card_declined (insufficient_funds).",act:"retry",ref:r.id,btn:"Relancer le paiement"}));
+  S.orphans.filter(o=>!o.resolved).forEach(o=>out.push({type:"orphelin",sev:"bad",title:"Paiement Stripe sans contrat · "+eur(o.amount),desc:o.label+".",act:"orphan",ref:o.id,btn:"Traiter"}));
+  S.contracts.filter(c=>c.e.status==="partiel").forEach(c=>out.push({type:"ecart",sev:"warn",title:"Écart de montant · "+c.id,desc:"Reçu "+eur(c.e.paid)+" pour une échéance de "+eur(c.e.amount)+" ("+c.tenant.name+", virement).",act:"gap",ref:c.id,btn:"Régulariser"}));
   S.docs.filter(d=>d.pa==="Rejetée").forEach(d=>out.push({type:"rejet",sev:"bad",title:"Facture rejetée par la plateforme agréée · "+d.num,desc:d.paReason+".",act:"rejet",ref:d.id,btn:"Corriger et renvoyer"}));
   return out;
 }
 
 /* ---------- navigation ---------- */
-const VIEWS=[["dash","Tableau de bord","dash"],["ops","Opérations","ops"],["docs","Factures et clôture","doc"],["loueurs","Loueurs","farm"],["anomalies","Anomalies","alert"],["conformite","Conformité fiscale","shield"],["archi","Architecture","arch"],["audit","Journal d’audit","log"]];
+const VIEWS=[["dash","Tableau de bord","dash"],["ops","Contrats et échéances","ops"],["docs","Factures et clôture","doc"],["loueurs","Loueurs","farm"],["anomalies","Anomalies","alert"],["conformite","Conformité fiscale","shield"],["archi","Architecture","arch"],["audit","Journal d’audit","log"]];
 let cur={view:"dash",q:"",fs:"all",fsrc:"all",fl:"all",page:0,docKind:"all",lq:"",lp:"all"};
 function renderNav(){
   const na=anomalies().length;
@@ -438,70 +474,66 @@ function go(v){cur.view=v;cur.page=0;render();$("#view").focus({preventScroll:tr
 function render(){renderNav();const f={dash:vDash,ops:vOps,docs:vDocs,loueurs:vLoueurs,anomalies:vAnom,conformite:vConf,archi:vArchi,audit:vAudit}[cur.view];$("#view").innerHTML=f()}
 
 /* ---------- badges ---------- */
-function payBadge(r){
-  const s=r.status!=="active"?r.status:r.pay.status;
-  const m={"payé":"b-ok","en attente":"b-gray","échoué":"b-bad","partiel":"b-warn","annulée":"b-gray","résiliée":"b-gray"};
-  return'<span class="badge '+(m[s]||"b-gray")+'">'+esc(s.charAt(0).toUpperCase()+s.slice(1))+'</span>';
+const B=(cls,t)=>'<span class="badge '+cls+'">'+esc(t)+'</span>';
+function eBadge(c){const m={"payé":"b-ok","programmé":"b-info","en attente":"b-gray","impayé":"b-bad","partiel":"b-warn"};return B(m[c.e.status]||"b-gray",c.e.status.charAt(0).toUpperCase()+c.e.status.slice(1))}
+function cBadge(c){const m={"en cours":"b-ok","renouvellement":"b-info","à venir":"b-gray","résiliation programmée":"b-warn","résilié":"b-gray","annulé":"b-gray","procédure impayé":"b-bad"};return B(m[c.status]||"b-gray",c.status.charAt(0).toUpperCase()+c.status.slice(1))}
+function docCell(c){
+  const ds=c.e.docs.map(D);
+  if(!ds.length)return c.e.status==="partiel"?B("b-warn","À régulariser"):'<span class="muted">—</span>';
+  return ds.map(d=>'<span class="mono" style="display:block">'+esc(d.num)+'</span>').join("")+(c.e.block?'<span class="sub">'+B("b-bad","Loyer bloqué")+' '+esc(c.e.block)+'</span>':'');
 }
-function docCell(r){
-  if(r.doc){const d=D(r.doc);return'<span class="mono">'+esc(d.num)+'</span>'+(r.avoirs&&r.avoirs.length?'<span class="sub">+ '+r.avoirs.length+' avoir(s)</span>':'')}
-  if(r.block)return'<span class="badge b-bad">Bloquée</span><span class="sub">'+esc(r.block)+'</span>';
-  if(r.pay.status==="partiel")return'<span class="badge b-warn">À régulariser</span>';
-  return'<span class="muted">—</span>';
-}
-function paBadge(s){const m={"Acceptée":"b-ok","Déposée":"b-info","Rejetée":"b-bad","E-reporting":"b-info","Hors champ":"b-gray","Transmis":"b-info"};return'<span class="badge '+(m[s]||"b-gray")+'">'+esc(s)+'</span>'}
-const kindLabel={AF:"Autofacture",RC:"Reçu particulier",AV:"Avoir (autofacture)",COM:"Facture de commission",COMAV:"Avoir de commission"};
+function paBadge(s){const m={"Acceptée":"b-ok","Déposée":"b-info","Rejetée":"b-bad","E-reporting":"b-info","Hors champ":"b-gray"};return B(m[s]||"b-gray",s)}
+const echLabel=c=>c.e.label==="Renouvellement"?"Renouvellement n° "+(c.e.k-c.N):c.e.label==="Acompte"?"Acompte (1/"+c.N+")":"Échéance "+c.e.k+"/"+c.N;
 
 /* ---------- tableau de bord ---------- */
 function stats(){
-  const paid=S.resas.filter(r=>["payé","partiel"].includes(r.pay.status));
-  const enc=paid.reduce((a,r)=>a+r.pay.amount,0);
-  const refunds=S.docs.filter(d=>d.kind==="AV").reduce((a,d)=>a+d.ttc,0);
-  const af=S.docs.filter(d=>d.kind==="AF"||d.kind==="RC");
-  const com=af.reduce((a,d)=>a+d.com,0)+S.docs.filter(d=>d.kind==="AV").reduce((a,d)=>a+d.com,0);
-  const blocked=S.resas.filter(r=>r.pay.status==="payé"&&!r.doc).length;
-  return{enc,refunds,net:enc+refunds,af:af.length,com,blocked,stripe:paid.filter(r=>r.pay.source==="stripe").reduce((a,r)=>a+r.pay.amount,0)};
+  const paid=S.contracts.filter(c=>["payé","partiel"].includes(c.e.status));
+  const enc=paid.reduce((a,c)=>a+c.e.paid,0);
+  const comHt=S.docs.filter(d=>d.kind==="HC"||d.kind==="HCA").reduce((a,d)=>a+d.ht,0);
+  const loyers=paid.reduce((a,c)=>a+c.loyer,0);
+  const imp=S.contracts.filter(c=>c.e.status==="impayé"&&c.status!=="annulé");
+  const prog=S.contracts.filter(c=>c.e.status==="programmé"&&c.status!=="annulé"&&c.status!=="résilié");
+  const inCours=S.contracts.filter(c=>["en cours","renouvellement","résiliation programmée","procédure impayé"].includes(c.status)).length;
+  return{enc,comHt,loyers,imp,prog,inCours,cartes:paid.filter(c=>c.mode==="carte").reduce((a,c)=>a+c.e.paid,0)};
 }
 function chart(){
-  const days=[];for(let d=1;d<=18;d++){const k="2026-10-"+pad(d,2);let s=0,h=0;S.resas.forEach(r=>{if(r.pay.date===k&&["payé","partiel"].includes(r.pay.status)){if(r.pay.source==="stripe")s+=r.pay.amount;else h+=r.pay.amount}});days.push({d,s,h})}
-  const max=Math.max(...days.map(x=>x.s+x.h),1);const top=Math.ceil(max/100/500)*500*100;
-  const W=720,H=220,l=48,b=24,bw=(W-l-8)/18;
+  const days=[];for(let d=1;d<=18;d++){const k="2026-10-"+pad(d,2);const v={carte:0,sepa:0,virement:0};S.contracts.forEach(c=>{if(c.e.date===k&&["payé","partiel"].includes(c.e.status))v[c.mode]+=c.e.paid});days.push({d,...v})}
+  const max=Math.max(...days.map(x=>x.carte+x.sepa+x.virement),1);const top=Math.ceil(max/100/250)*250*100;
+  const W=720,H=220,l=48,b=24,bw=(W-l-8)/18;const col={carte:"var(--c1)",sepa:"var(--c2)",virement:"var(--c4)"};
   let g="";for(let i=0;i<=4;i++){const y=H-b-(H-b-10)*i/4;g+='<line x1="'+l+'" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/><text x="'+(l-6)+'" y="'+(y+4)+'" text-anchor="end">'+Math.round(top/100*i/4).toLocaleString("fr-FR")+' €</text>'}
-  days.forEach((x,i)=>{const hs=(H-b-10)*x.s/top,hh=(H-b-10)*x.h/top;const X=l+4+i*bw;
-    g+='<rect x="'+X+'" y="'+(H-b-hs)+'" width="'+(bw-6)+'" height="'+hs+'" fill="var(--c1)" rx="2"><title>'+x.d+' oct. · Stripe '+eur(x.s)+'</title></rect>';
-    g+='<rect x="'+X+'" y="'+(H-b-hs-hh)+'" width="'+(bw-6)+'" height="'+hh+'" fill="var(--c2)" rx="2"><title>'+x.d+' oct. · hors Stripe '+eur(x.h)+'</title></rect>';
+  days.forEach((x,i)=>{const X=l+4+i*bw;let y=H-b;
+    ["carte","sepa","virement"].forEach(m=>{const h=(H-b-10)*x[m]/top;if(h>0){y-=h;g+='<rect x="'+X+'" y="'+y+'" width="'+(bw-6)+'" height="'+h+'" fill="'+col[m]+'" rx="2"><title>'+x.d+' oct. · '+MODES[m]+' '+eur(x[m])+'</title></rect>'}});
     if(i%2===0)g+='<text x="'+(X+(bw-6)/2)+'" y="'+(H-6)+'" text-anchor="middle">'+x.d+'</text>'});
-  return'<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Encaissements par jour du 1er au 18 octobre, Stripe et hors Stripe">'+g+'</svg><div class="legend"><span><i style="background:var(--c1)"></i>Stripe</span><span><i style="background:var(--c2)"></i>Virements et chèques</span></div>';
+  return'<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Encaissements par jour du 1er au 18 octobre, par moyen de paiement">'+g+'</svg><div class="legend"><span><i style="background:var(--c1)"></i>Carte</span><span><i style="background:var(--c2)"></i>Prélèvement SEPA</span><span><i style="background:var(--c4)"></i>Virement (contrats pro)</span></div>';
 }
 function vDash(){
   const st=stats();const an=anomalies();const closed=S.closes.find(c=>c.month==="2026-10");
   const pendPa=S.docs.filter(d=>d.pa==="Déposée").length;
-  return'<div class="head"><div><h1>Tableau de bord</h1><p class="muted">Octobre 2026 · saison d’hivernage en cours</p></div><div class="row"><button type="button" class="btn" data-nav="ops">'+ic("search")+'Rechercher une opération</button><button type="button" class="btn primary" data-nav="docs">'+ic("play")+'Clôture du mois</button></div></div>'+
+  return'<div class="head"><div><h1>Tableau de bord</h1><p class="muted">Octobre 2026 · '+st.inCours+' contrats de stockage en cours dans l’échantillon</p></div><div class="row"><button type="button" class="btn" data-nav="ops">'+ic("search")+'Rechercher un contrat</button><button type="button" class="btn primary" data-nav="docs">'+ic("play")+'Clôture du mois</button></div></div>'+
   '<div class="grid kpis">'+
-  kpi("Encaissé ce mois",eur(st.enc),"dont "+eur(st.stripe)+" via Stripe")+
-  kpi("Commissions HT",eur(st.com),"après avoirs")+
-  kpi("Factures et reçus émis",st.af,"au nom de "+new Set(S.docs.filter(d=>d.kind==="AF"||d.kind==="RC").map(d=>d.loueur)).size+" loueurs")+
-  kpi("Remboursements",eur(-st.refunds),S.docs.filter(d=>d.kind==="AV").length+" avoir(s) ce mois")+
-  kpi("Paiements bloqués",st.blocked,st.blocked?"en attente d’un profil complet":"aucun blocage")+
+  kpi("Encaissé ce mois",eur(st.enc),"échéances et acomptes TTC")+
+  kpi("Commissions locataires HT",eur(st.comHt),"15 à 30 € TTC par bien et par mois")+
+  kpi("Loyers à reverser",eur(st.loyers),"moins 3 € de frais de service par contrat")+
+  kpi("Impayés",st.imp.length,eur(st.imp.reduce((a,c)=>a+c.e.amount,0))+" en attente de régularisation")+
+  kpi("Échéances programmées",st.prog.length,"d’ici le 31 octobre, "+eur(st.prog.reduce((a,c)=>a+c.e.amount,0)))+
   '</div>'+
   '<div class="grid cols-2" style="margin-top:16px">'+
    '<section class="card"><div class="card-h"><h2>Encaissements d’octobre</h2><span class="muted small">par jour, TTC</span></div>'+chart()+'</section>'+
    '<section class="card"><div class="card-h"><h2>Synchronisations</h2></div>'+
-     syncRow("var(--ok)","Plateforme de réservation","Webhooks reçus en continu · dernière collecte à 07:40")+
-     syncRow("var(--ok)","Stripe Connect","Webhooks à jour · 0 événement en échec · "+S.loueurs.filter(l=>l.kyc!=="actif").length+" compte(s) à vérifier")+
-     syncRow(S.penny.errors?"var(--bad)":"var(--ok)","Pennylane","Dernière synchronisation "+fdt(S.penny.last)+" · "+S.docs.filter(d=>d.penny==="À synchroniser").length+" document(s) en file")+
-     syncRow(pendPa?"var(--warn)":"var(--ok)","Plateforme agréée (factures électroniques)",pendPa+" facture(s) déposée(s) en attente de statut · "+S.docs.filter(d=>d.pa==="Rejetée").length+" rejet(s)")+
+     syncRow("var(--ok)","Plateforme de réservation (Bubble)","API Workflows et Data API · dernière collecte à 07:40")+
+     syncRow("var(--ok)","Stripe","Webhooks paiements, SEPA et Connect à jour · 0 événement en échec")+
+     syncRow("var(--ok)","Pennylane","Dernière synchronisation "+fdt(S.penny.last)+" · "+S.docs.filter(d=>d.penny==="À synchroniser").length+" document(s) en file")+
+     syncRow(pendPa?"var(--warn)":"var(--ok)","Plateforme agréée (factures électroniques)",pendPa+" facture(s) en attente de statut · "+S.docs.filter(d=>d.pa==="Rejetée").length+" rejet(s)")+
      '<button type="button" class="btn sm" data-act="syncPenny" style="margin-top:6px">'+ic("sync")+'Synchroniser Pennylane</button>'+
    '</section></div>'+
   '<div class="grid cols-2" style="margin-top:16px">'+
    '<section class="card"><div class="card-h"><h2>À traiter</h2><button type="button" class="link" data-nav="anomalies">Toutes les anomalies ('+an.length+')</button></div>'+
     (an.length?'<div class="list">'+an.slice(0,5).map(anItem).join("")+'</div>':'<p class="empty">Aucune anomalie : tout est prêt pour la clôture.</p>')+'</section>'+
-   '<section class="card"><h2>Clôture mensuelle</h2>'+(closed?'<p><span class="badge b-ok">Octobre clôturé</span></p><p class="muted small" style="margin-top:8px">'+closed.coms+' factures de commission émises le '+fdt(closed.date)+'.</p>':
-    '<p class="muted small">Prévue le 1<sup>er</sup> novembre à 6 h (automatique). Elle émet une facture de commission par loueur, le relevé de reversement, l’export Pennylane et le lot d’e-reporting.</p><div style="margin-top:12px">'+
-    '<div class="row" style="justify-content:space-between"><span class="small">Opérations prêtes</span><b class="small">'+S.docs.filter(d=>(d.kind==="AF"||d.kind==="RC")&&!d.comId).length+'</b></div>'+
-    '<div class="row" style="justify-content:space-between"><span class="small">Anomalies bloquantes</span><b class="small">'+an.filter(a=>a.sev==="bad").length+'</b></div></div>'+
+   '<section class="card"><h2>Clôture mensuelle</h2>'+(closed?'<p>'+B("b-ok","Octobre clôturé")+'</p><p class="muted small" style="margin-top:8px">'+closed.fs+' factures de frais de service et relevés de reversement émis le '+fdt(closed.date)+'.</p>':
+    '<p class="muted small">Prévue le 1<sup>er</sup> novembre à 6 h. Elle facture les frais de service aux loueurs, prépare les reversements Stripe Connect, exporte vers Pennylane et produit le lot d’e-reporting.</p>'+
+    '<div style="margin-top:12px"><div class="row" style="justify-content:space-between"><span class="small">Contrats facturables</span><b class="small">'+st.inCours+'</b></div><div class="row" style="justify-content:space-between"><span class="small">Anomalies bloquantes</span><b class="small">'+an.filter(a=>a.sev==="bad").length+'</b></div></div>'+
     '<button type="button" class="btn primary" style="margin-top:14px" data-nav="docs">Préparer la clôture</button>')+
-    '<h3 style="margin-top:20px;margin-bottom:8px">Répartition par profil fiscal</h3>'+profileBars()+'</section>'+
+    '<h3 style="margin-top:20px;margin-bottom:8px">Loueurs par profil fiscal</h3>'+profileBars()+'</section>'+
   '</div>';
 }
 const kpi=(l,v,s)=>'<div class="card kpi"><div class="l">'+l+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>';
@@ -509,201 +541,283 @@ const syncRow=(c,t,s)=>'<div class="sync" style="margin-bottom:12px"><span class
 function profileBars(){const n=S.loueurs.length;return Object.keys(PROFILES).map(k=>{const c=S.loueurs.filter(l=>l.profile===k).length;return'<div style="margin-bottom:8px"><div class="row small" style="justify-content:space-between"><span>'+PROFILES[k].short+'</span><span class="muted">'+c+' loueurs</span></div><div class="bar"><i style="width:'+(c/n*100)+'%"></i></div></div>'}).join("")}
 function anItem(a){const col=a.sev==="bad"?"b-bad":"b-warn";return'<div class="it"><div class="ico badge '+col+'" style="border-radius:10px;padding:0">'+ic("alert")+'</div><div class="bd"><b class="wrap">'+esc(a.title)+'</b><p class="muted small wrap">'+esc(a.desc)+'</p></div><div class="act"><button type="button" class="btn sm" data-act="'+a.act+'" data-id="'+a.ref+'">'+esc(a.btn)+'</button></div></div>'}
 
-/* ---------- opérations ---------- */
+/* ---------- contrats et échéances ---------- */
 function filteredOps(){
   const q=cur.q.trim().toLowerCase();
-  return S.resas.filter(r=>{
-    const l=L(r.loueur);const d=r.doc?D(r.doc):null;
-    if(q&&!(r.id.toLowerCase().includes(q)||r.tenant.name.toLowerCase().includes(q)||l.name.toLowerCase().includes(q)||(r.pay.id||"").toLowerCase().includes(q)||(d&&d.num.toLowerCase().includes(q))||r.object.toLowerCase().includes(q)||l.commune.toLowerCase().includes(q)))return false;
-    if(cur.fsrc!=="all"&&(cur.fsrc==="stripe"?r.pay.source!=="stripe":r.pay.source==="stripe"))return false;
-    if(cur.fl!=="all"&&r.loueur!==cur.fl)return false;
-    if(cur.fs==="payé"&&!(r.pay.status==="payé"&&r.status==="active"))return false;
-    if(cur.fs==="attente"&&!["en attente","échoué","partiel"].includes(r.pay.status))return false;
-    if(cur.fs==="bloque"&&!(r.pay.status==="payé"&&!r.doc))return false;
-    if(cur.fs==="annule"&&r.status==="active"&&!(r.avoirs&&r.avoirs.length))return false;
+  return S.contracts.filter(c=>{
+    const l=L(c.loueur);
+    if(q&&!(c.id.toLowerCase().includes(q)||c.tenant.name.toLowerCase().includes(q)||l.name.toLowerCase().includes(q)||(c.e.payId||"").toLowerCase().includes(q)||c.e.docs.some(id=>D(id).num.toLowerCase().includes(q))||c.biens.some(b=>(b.type+" "+b.label).toLowerCase().includes(q))||l.commune.toLowerCase().includes(q)))return false;
+    if(cur.fsrc!=="all"&&c.mode!==cur.fsrc)return false;
+    if(cur.fl!=="all"&&c.loueur!==cur.fl)return false;
+    const s=c.e.status;
+    if(cur.fs==="payé"&&s!=="payé")return false;
+    if(cur.fs==="programmé"&&s!=="programmé")return false;
+    if(cur.fs==="impayé"&&!["impayé","en attente","partiel"].includes(s))return false;
+    if(cur.fs==="bloque"&&!c.e.block)return false;
+    if(cur.fs==="fin"&&!["résilié","annulé","résiliation programmée","procédure impayé"].includes(c.status))return false;
+    if(cur.fs==="renouv"&&c.status!=="renouvellement")return false;
     return true;
   });
 }
 function vOps(){
   const all=filteredOps();const per=25;const pages=Math.max(1,Math.ceil(all.length/per));cur.page=Math.min(cur.page,pages-1);
   const rows=all.slice(cur.page*per,cur.page*per+per);
-  return'<div class="head"><div><h1>Opérations</h1><p class="muted">Réservations, paiements et documents réunis au même endroit : une ligne par échéance d’octobre.</p></div><button type="button" class="btn" data-act="csvOps">'+ic("dl")+'Exporter en CSV</button></div>'+
+  return'<div class="head"><div><h1>Contrats et échéances</h1><p class="muted">Un contrat de stockage par ligne, avec son échéance d’octobre (prélevée chaque mois à la date anniversaire).</p></div><button type="button" class="btn" data-act="csvOps">'+ic("dl")+'Exporter en CSV</button></div>'+
   '<div class="filters">'+
-   '<div class="f-q"><label for="q">Recherche</label><input type="search" id="q" value="'+esc(cur.q)+'" placeholder="Réservation, locataire, loueur, pi_…, n° de facture"></div>'+
-   sel("fs","Statut",[["all","Tous"],["payé","Payées et facturées"],["attente","Paiement en attente ou incomplet"],["bloque","Facturation bloquée"],["annule","Annulées ou avec avoir"]],cur.fs)+
-   sel("fsrc","Source du paiement",[["all","Toutes"],["stripe","Stripe"],["hors","Hors Stripe (virement, chèque)"]],cur.fsrc)+
+   '<div class="f-q"><label for="q">Recherche</label><input type="search" id="q" value="'+esc(cur.q)+'" placeholder="Contrat, locataire, loueur, bien, pi_…, n° de facture"></div>'+
+   sel("fs","Statut",[["all","Tous"],["payé","Échéance payée"],["programmé","Échéance programmée"],["impayé","Impayé ou en attente"],["bloque","Autofacture bloquée"],["renouv","En renouvellement tacite"],["fin","Résiliés ou annulés"]],cur.fs)+
+   sel("fsrc","Moyen de paiement",[["all","Tous"],["carte","Carte"],["sepa","Prélèvement SEPA"],["virement","Virement (contrat pro)"]],cur.fsrc)+
    sel("fl","Loueur",[["all","Tous les loueurs"]].concat(S.loueurs.map(l=>[l.id,l.name])),cur.fl)+
    '<div><button type="button" class="btn" data-act="clearF" style="width:100%">Effacer</button></div>'+
   '</div>'+
-  '<p class="muted small" style="margin-bottom:8px" aria-live="polite">'+all.length+' opération(s)</p>'+
-  '<div class="tbl"><table class="t-wide"><thead><tr><th>Réservation</th><th>Locataire</th><th>Loueur</th><th>Objet stocké</th><th class="num">Montant</th><th>Paiement</th><th>Statut</th><th>Document</th></tr></thead><tbody>'+
-  (rows.length?rows.map(r=>{const l=L(r.loueur);return'<tr class="clk" data-op="'+r.id+'" tabindex="0"><td><button type="button" class="link mono" data-op="'+r.id+'" style="min-height:0">'+r.id+'</button><span class="sub">'+(r.formula==="saison"?"Saison oct.→avr.":"Mensuel oct.")+'</span></td><td>'+esc(r.tenant.name)+'<span class="sub">'+(r.tenant.type==="pro"?"Professionnel":"Particulier")+'</span></td><td>'+esc(l.name)+'<span class="sub">'+esc(l.commune)+' ('+l.dept+')</span></td><td>'+esc(r.object)+'<span class="sub">'+esc(r.model)+'</span></td><td class="num">'+eur(r.due)+(r.pay.amount&&r.pay.amount!==r.due?'<span class="sub">encaissé '+eur(r.pay.amount)+'</span>':'')+'</td><td>'+SOURCES[r.pay.source]+'<span class="sub mono">'+esc(r.pay.id?r.pay.id.slice(0,16)+(r.pay.id.length>16?"…":""):"—")+'</span></td><td>'+payBadge(r)+'</td><td>'+docCell(r)+'</td></tr>'}).join(""):'<tr><td colspan="8" class="empty">Aucune opération ne correspond à ces filtres.</td></tr>')+
+  '<p class="muted small" style="margin-bottom:8px" aria-live="polite">'+all.length+' contrat(s)</p>'+
+  '<div class="tbl"><table class="t-wide"><thead><tr><th>Contrat</th><th>Locataire</th><th>Loueur</th><th>Biens stockés</th><th>Échéance d’octobre</th><th class="num">Montant</th><th>Paiement</th><th>Documents</th></tr></thead><tbody>'+
+  (rows.length?rows.map(c=>{const l=L(c.loueur);return'<tr class="clk" data-op="'+c.id+'" tabindex="0"><td><button type="button" class="link mono" data-op="'+c.id+'" style="min-height:0">'+c.id+'</button><span class="sub">'+cBadge(c)+'</span></td><td>'+esc(c.tenant.name)+'<span class="sub">'+(c.tenant.type==="pro"?"Professionnel":"Particulier")+'</span></td><td>'+esc(l.name)+'<span class="sub">'+esc(l.commune)+' ('+l.dept+')</span></td><td>'+c.biens.map(b=>esc(b.type)).join(" + ")+'<span class="sub">'+esc(c.biens[0].label)+'</span></td><td>'+echLabel(c)+'<span class="sub">'+fd(c.e.date)+'</span></td><td class="num">'+eur(c.e.amount)+'<span class="sub">loyer '+eur(c.loyer)+' + com. '+eur(c.com)+'</span></td><td>'+eBadge(c)+'<span class="sub">'+MODES[c.mode]+'</span></td><td>'+docCell(c)+'</td></tr>'}).join(""):'<tr><td colspan="8" class="empty">Aucun contrat ne correspond à ces filtres.</td></tr>')+
   '</tbody></table></div>'+
   '<div class="pager"><span>Page '+(cur.page+1)+' sur '+pages+'</span><div class="row"><button type="button" class="btn sm" data-act="prev"'+(cur.page?'':' disabled')+'>Précédent</button><button type="button" class="btn sm" data-act="next"'+(cur.page<pages-1?'':' disabled')+'>Suivant</button></div></div>';
 }
 function sel(id,lab,opts,val){return'<div><label for="'+id+'">'+lab+'</label><select id="'+id+'">'+opts.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>').join("")+'</select></div>'}
 
-/* détail d’une opération */
+function schedule(c){
+  const rows=[];const last=Math.max(c.N,c.e.k+1);const from=Math.max(1,c.e.k-3);
+  for(let i=from;i<=Math.min(last,from+7);i++){
+    const date=i===1?(c.e.k===1?c.e.date:c.booked):addMonths(c.start,i-1);
+    let st=i<c.e.k?"payée":i===c.e.k?({"payé":"payée","programmé":"programmée","impayé":"impayée"}[c.e.status]||c.e.status):"programmée";
+    if(c.end&&i>c.e.k&&addMonths(c.start,i-1)>c.end)st="non due";
+    if(c.status==="annulé"&&i>1)st="non due";
+    rows.push('<tr><td>'+(i===1?"Acompte":i>c.N?"Renouv. "+(i-c.N):"Échéance "+i)+'</td><td>'+fd(date)+'</td><td class="num">'+eur(c.loyer+c.com)+'</td><td>'+B({"payée":"b-ok","payé":"b-ok","programmée":"b-info","programmé":"b-info","impayée":"b-bad","non due":"b-gray","partiel":"b-warn","en attente":"b-gray"}[st]||"b-gray",st)+'</td></tr>');
+  }
+  return'<div class="tbl"><table><thead><tr><th>Échéance</th><th>Date</th><th class="num">Montant</th><th>Statut</th></tr></thead><tbody>'+rows.join("")+'</tbody></table></div>';
+}
 function openOp(id){
-  const r=RS(id);const l=L(r.loueur);const d=r.doc?D(r.doc):null;
-  const docs=S.docs.filter(x=>x.resa===r.id);
-  const net=d?d.ttc-Math.round(d.com*1.2):0;
-  const canCancel=r.status==="active";
+  const c=C(id);const l=L(c.loueur);const ds=S.docs.filter(d=>d.contract===c.id);
   let acts="";
-  if(canCancel&&d)acts+='<button type="button" class="btn danger" data-act="cancel" data-id="'+r.id+'">'+ic("refund")+'Annuler ou rembourser</button>';
-  else if(canCancel&&!d)acts+='<button type="button" class="btn danger" data-act="cancelSimple" data-id="'+r.id+'">'+ic("x")+'Annuler la réservation</button>';
-  if(r.block)acts+='<button type="button" class="btn" data-act="fixLoueur" data-id="'+l.id+'">'+ic("edit")+'Compléter le profil du loueur</button>';
-  if(r.pay.status==="partiel")acts+='<button type="button" class="btn" data-act="gap" data-id="'+r.id+'">Régulariser l’écart</button>';
-  if(r.pay.status==="échoué"&&r.status==="active")acts+='<button type="button" class="btn" data-act="retry" data-id="'+r.id+'">Relancer le paiement</button>';
-  if(r.pay.status==="en attente"&&r.status==="active"&&r.pay.source!=="stripe")acts+='<button type="button" class="btn" data-act="manualPay" data-id="'+r.id+'">'+ic(r.pay.source==="cheque"?"bank":"bank")+'Enregistrer le '+(r.pay.source==="cheque"?"chèque":"virement")+'</button>';
-  openDlg("Opération "+r.id,
+  if(cancelOptions(c).length)acts+='<button type="button" class="btn danger" data-act="cancel" data-id="'+c.id+'">'+ic("refund")+'Résilier, annuler ou rembourser</button>';
+  if(c.e.block)acts+='<button type="button" class="btn" data-act="fixLoueur" data-id="'+l.id+'">'+ic("edit")+'Compléter le profil du loueur</button>';
+  if(c.e.status==="partiel")acts+='<button type="button" class="btn" data-act="gap" data-id="'+c.id+'">Régulariser l’écart</button>';
+  if(c.e.status==="impayé"&&["en cours","renouvellement"].includes(c.status))acts+='<button type="button" class="btn" data-act="impaye" data-id="'+c.id+'">Traiter l’impayé</button>';
+  if(c.e.status==="en attente"&&c.mode==="virement")acts+='<button type="button" class="btn" data-act="manualPay" data-id="'+c.id+'">'+ic("bank")+'Enregistrer le virement</button>';
+  const reverse=l.kyc==="actif"?"reversement Stripe Connect le 5 novembre":"reversement suspendu (compte Stripe incomplet)";
+  openDlg("Contrat de stockage "+c.id,
    '<div class="grid cols-2" style="gap:20px"><div>'+
-    '<div class="row" style="margin-bottom:12px">'+payBadge(r)+(d?paBadge(d.pa):"")+'</div>'+
-    '<dl class="kv"><dt>Locataire</dt><dd>'+esc(r.tenant.name)+' · '+(r.tenant.type==="pro"?"professionnel, SIREN "+fmtSiren(r.tenant.siren):"particulier")+'</dd>'+
-    '<dt>Loueur</dt><dd>'+esc(l.name)+' ('+esc(l.commune)+')<br><span class="muted small">'+PROFILES[l.profile].label+' · commission '+l.rate+' %</span></dd>'+
-    '<dt>Objet</dt><dd>'+esc(r.object)+' · '+esc(r.model)+' · '+esc(l.hangar)+'</dd>'+
-    '<dt>Formule</dt><dd>'+(r.formula==="saison"?"Hivernage saison, du 01/10/2026 au 30/04/2027, payée en une fois":"Location mensuelle, octobre 2026")+'</dd>'+
-    '<dt>Montant dû</dt><dd>'+eur(r.due)+' TTC</dd>'+
-    '<dt>Paiement</dt><dd>'+SOURCES[r.pay.source]+(r.pay.id?' · <span class="mono">'+esc(r.pay.id)+'</span>':'')+(r.pay.amount?' · '+eur(r.pay.amount)+' le '+fd(r.pay.date):' · non reçu')+'</dd>'+
-    (d?'<dt>Ventilation</dt><dd>Loueur '+eur(d.ht)+' HT'+(d.tva?' + TVA '+eur(d.tva):'')+'<br>Commission plateforme '+eur(d.com)+' HT ('+l.rate+' %)<br><b>Reversement au loueur : '+eur(net)+'</b>'+(r.pay.source==="stripe"?' <span class="muted small">(transfert Stripe Connect vers '+esc(l.stripe)+')</span>':' <span class="muted small">(virement groupé du 5 novembre)</span>')+'</dd>':'')+
+    '<div class="row" style="margin-bottom:12px">'+cBadge(c)+eBadge(c)+(c.credit?B("b-info","Crédit locataire "+eur(c.credit)):"")+'</div>'+
+    '<dl class="kv"><dt>Locataire</dt><dd>'+esc(c.tenant.name)+' · '+(c.tenant.type==="pro"?"professionnel, SIREN "+fmtSiren(c.tenant.siren):"particulier")+'</dd>'+
+    '<dt>Loueur</dt><dd>'+esc(l.name)+' ('+esc(l.commune)+')<br><span class="muted small">'+PROFILES[l.profile].label+' · '+esc(l.space)+'</span></dd>'+
+    '<dt>Biens</dt><dd>'+c.biens.map(b=>esc(b.type)+' · '+esc(b.label)+' ('+eur(b.loyer)+')').join("<br>")+'</dd>'+
+    '<dt>Période initiale</dt><dd>'+c.N+' mois à partir du '+fd(c.start)+', puis renouvellement tacite mensuel'+(c.end?'<br><b>Fin : '+fd(c.end)+'</b>':'')+'</dd>'+
+    '<dt>Échéance mensuelle</dt><dd>'+eur(c.loyer+c.com)+' TTC le '+c.day+' de chaque mois<br><span class="muted small">Loyer du loueur '+eur(c.loyer)+' + commission '+eur(c.com)+' TTC ('+esc(c.comLabel)+')</span></dd>'+
+    '<dt>Paiement</dt><dd>'+MODES[c.mode]+(c.e.payId?' · <span class="mono">'+esc(c.e.payId)+'</span>':'')+(c.e.reason?'<br><span class="err">'+esc(c.e.reason)+'</span>':'')+'</dd>'+
+    (["payé","partiel"].includes(c.e.status)?'<dt>Ventilation</dt><dd>Loyer '+eur(c.loyer)+' → loueur, '+reverse+'<br>Commission '+eur(c.com)+' TTC → plateforme<br><span class="muted small">Frais de service de 3 € déduits à la clôture</span></dd>':'')+
     '</dl>'+
-    (r.block?'<p class="note w" style="margin-top:12px">Facturation bloquée : '+esc(r.block)+'. Le paiement est encaissé, la facture sera émise automatiquement dès que le profil du loueur sera complet.</p>':'')+
-   '</div><div><h3 style="margin-bottom:10px">Chronologie</h3><ul class="timeline">'+r.history.slice().sort((a,b)=>a.t<b.t?-1:1).map(h=>'<li class="'+(h.k||"")+'"><time>'+fdt(h.t)+'</time>'+esc(h.label)+'</li>').join("")+'</ul>'+
-    (docs.length?'<h3 style="margin:8px 0">Documents</h3><div class="list">'+docs.map(x=>'<div class="it"><div class="bd"><b class="mono wrap">'+esc(x.num)+'</b><span class="muted small">'+kindLabel[x.kind]+' · '+eur(x.ttc)+'</span></div><div class="act"><button type="button" class="btn sm" data-act="viewDoc" data-id="'+x.id+'">'+ic("doc")+'Voir</button></div></div>').join("")+'</div>':'')+
-   '</div></div>',
-   acts,true);
+    (c.e.block?'<p class="note w" style="margin-top:12px">Autofacture bloquée : '+esc(c.e.block)+'. Le paiement est encaissé et la commission facturée ; l’autofacture sera émise dès que le profil du loueur sera complet.</p>':'')+
+    '<h3 style="margin:16px 0 8px">Échéancier</h3>'+schedule(c)+
+   '</div><div><h3 style="margin-bottom:10px">Chronologie</h3><ul class="timeline">'+c.history.slice().sort((a,b)=>a.t<b.t?-1:1).map(h=>'<li class="'+(h.k||"")+'"><time>'+fdt(h.t)+'</time>'+esc(h.label)+'</li>').join("")+'</ul>'+
+    (ds.length?'<h3 style="margin:8px 0">Documents</h3><div class="list">'+ds.map(x=>'<div class="it"><div class="bd"><b class="mono wrap">'+esc(x.num)+'</b><span class="muted small">'+kindLabel[x.kind]+' · '+eur(x.ttc)+'</span></div><div class="act"><button type="button" class="btn sm" data-act="viewDoc" data-id="'+x.id+'">'+ic("doc")+'Voir</button></div></div>').join("")+'</div>':'')+
+   '</div></div>',acts,true);
 }
 
-/* annulation / remboursement / avoir */
+/* ---------- résiliations, annulations, remboursements (règles des CGVU) ---------- */
+function retractEligible(c){return c.tenant.type==="part"&&L(c.loueur).profile!=="part"&&daysBetween(c.booked,TODAY)<=14&&["à venir","en cours"].includes(c.status)}
+function cancelOptions(c){
+  const o=[];
+  if(c.status==="à venir")o.push("loc_avant","loueur_avant");
+  if(["en cours","renouvellement"].includes(c.status))o.push("loc_resil");
+  if(retractEligible(c))o.push("retract");
+  if(docOf(c,"HC")&&!["annulé"].includes(c.status))o.push("geste");
+  return o;
+}
+const OPT_LABEL={loc_resil:"Résiliation par le locataire",loc_avant:"Annulation par le locataire",loueur_avant:"Annulation par le loueur",retract:"Rétractation (14 jours)",geste:"Geste commercial"};
+function computeCancel(c,t,input){
+  const E=c.loyer+c.com;const r={t,pen:0,loueurPart:0,credit:0,refund:0,refLoyer:0,refCom:0,effective:null,rule:"",steps:[]};
+  if(t==="loc_resil"){
+    const next=c.e.date>TODAY?c.e.date:addMonths(c.e.date,1);r.effective=addDays(next,-1);
+    const paidCount=c.e.date>TODAY?c.e.k-1:c.e.k;const remaining=c.status==="renouvellement"?0:Math.max(0,c.N-paidCount);
+    r.pen=remaining===0?0:remaining===1?1:2;
+    r.rule=c.status==="renouvellement"?"Art. 8.2.2 : résiliation en période de renouvellement, sans frais.":remaining===0?"Art. 8.2.3 : aucune échéance restante sur la période initiale, sans frais.":remaining===1?"Art. 8.2.4 : une échéance restante, pénalité d’une échéance.":"Art. 8.2.5 : "+remaining+" échéances restantes, pénalité de deux échéances.";
+    if(r.pen){r.loueurPart=c.loyer;r.credit=E}
+    r.steps.push("Fin du contrat la veille de la prochaine échéance : <b>"+fd(r.effective)+"</b>. Les échéances antérieures restent dues.");
+  }
+  if(t==="loc_avant"){
+    r.pen=c.N===1?0:c.N===2?1:2;r.rule=c.N===1?"Art. 8.3.1 : période initiale d’une échéance, pas de frais supplémentaires.":c.N===2?"Art. 8.3.2 : deux échéances prévues, pénalité d’une échéance.":"Art. 8.3.3 : "+c.N+" échéances prévues, pénalité de deux échéances.";
+    if(r.pen)r.credit=E;
+    r.steps.push("L’acompte de "+eur(E)+" n’est pas remboursé (art. 6.5) ; le loueur conserve le loyer déjà reversé.");
+  }
+  if(t==="loueur_avant"){r.refund=E;r.refLoyer=c.loyer;r.refCom=c.com;r.rule="Art. 8.5.1 : le loueur annule avant le début, l’acompte est intégralement remboursé.";
+    r.steps.push("Reprise du loyer sur le compte Stripe du loueur (<span class=\"mono\">transfer_reversal</span>) par mandat exprès.")}
+  if(t==="retract"){
+    const startUse=c.e.k===1?c.start:c.e.date;const used=c.start>TODAY?0:Math.min(31,Math.max(0,daysBetween(startUse,TODAY)));
+    r.refund=E-Math.round(E*used/31);r.refLoyer=Math.round(r.refund*c.loyer/E);r.refCom=r.refund-r.refLoyer;
+    r.rule="Art. 5 : locataire consommateur face à un loueur professionnel, rétractation dans les 14 jours"+(used?", déduction de "+used+" jour(s) de stockage effectués.":".");
+  }
+  if(t==="geste"){const v=Math.round(parseFloat(String(input||"").replace(",","."))*100);const max=docOf(c,"HC").ttc;
+    if(!v||v<=0||v>max)return{err:"Montant entre 0,01 € et "+eur(max)+" (la commission de l’échéance)."};
+    r.refund=v;r.refCom=v;r.rule="Geste commercial pris sur la commission de la plateforme : le loyer du loueur n’est pas touché."}
+  if(r.pen){r.steps.push("Indemnité de résiliation de <b>"+eur(r.pen*E)+"</b> ("+r.pen+" échéance"+(r.pen>1?"s":"")+") prélevée sur le moyen de paiement enregistré"+(r.loueurPart?", dont "+eur(r.loueurPart)+" reversés au loueur":", conservée par la plateforme")+".");
+    r.steps.push("Crédit de "+eur(r.credit)+" ouvert au locataire, utilisable sur une réservation de 12 mois (art. 8.4).")}
+  if(r.refund){const lo=docOf(c,"AF")||docOf(c,"RC");
+    if(r.refLoyer)r.steps.push("Avoir sur le loyer"+(lo?" ("+esc(lo.num)+")":"")+" : −"+eur(r.refLoyer)+", émis au nom du loueur.");
+    if(r.refCom)r.steps.push("Avoir sur la commission ("+esc(docOf(c,"HC").num)+") : −"+eur(r.refCom)+" TTC.");
+    r.steps.push(c.mode==="virement"?"Virement de remboursement de "+eur(r.refund)+" ajouté au lot SEPA.":"Remboursement Stripe de <b>"+eur(r.refund)+"</b> sur le moyen de paiement du locataire.")}
+  if(!r.pen&&!r.refund)r.steps.push("Aucun mouvement financier.");
+  r.steps.push("Écritures envoyées à Pennylane, journal d’audit mis à jour.");
+  return r;
+}
 function openCancel(id){
-  const r=RS(id);const d=D(r.doc);
-  const days=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5)+1;
-  openDlg("Annuler ou rembourser "+r.id,
-   '<p class="muted small" style="margin-bottom:14px">La facture '+esc(d.num)+' n’est jamais modifiée : on émet un avoir qui la référence, on rembourse le locataire, puis la commission est ajustée.</p>'+
-   '<div class="seg" role="group" aria-label="Type d’opération"><button type="button" aria-pressed="true" data-ctype="total">Annulation totale</button><button type="button" aria-pressed="false" data-ctype="prorata">Résiliation anticipée</button><button type="button" aria-pressed="false" data-ctype="geste">Geste commercial</button></div>'+
+  const c=C(id);const opts=cancelOptions(c);
+  openDlg("Résilier, annuler ou rembourser · "+c.id,
+   '<p class="muted small" style="margin-bottom:14px">Les règles des conditions générales sont appliquées automatiquement. Aucune facture n’est modifiée : on émet des avoirs ou une indemnité.</p>'+
+   '<div class="seg" role="group" aria-label="Type d’opération">'+opts.map((o,i)=>'<button type="button" aria-pressed="'+(i===0)+'" data-ctype="'+o+'">'+OPT_LABEL[o]+'</button>').join("")+'</div>'+
    '<div id="cBody"></div>'+
-   '<div class="field"><label for="cMotif">Motif (journal d’audit)</label><select id="cMotif"><option>Demande du locataire</option><option>Véhicule retiré avant la fin de saison</option><option>Litige sur l’emplacement</option><option>Erreur de tarif</option></select></div>'+
+   '<div class="field"><label for="cMotif">Motif (journal d’audit)</label><select id="cMotif"><option>Demande du locataire</option><option>Vente du véhicule</option><option>Déménagement</option><option>Espace de stockage indisponible</option><option>Litige sur l’accès</option></select></div>'+
    '<div id="cPrev" class="card" style="background:var(--panel-2);box-shadow:none"></div>',
-   '<button type="button" class="btn" data-close>Fermer</button><button type="button" class="btn primary" data-act="doCancel" data-id="'+r.id+'">'+ic("check")+'Valider</button>');
-  const st={type:"total"};$("#dlg").dataset.ctype="total";
-  const body=()=>{const t=$("#dlg").dataset.ctype;
-    $("#cBody").innerHTML=t==="prorata"?'<div class="field"><label for="cDate">Date de fin effective</label><input type="date" id="cDate" min="'+r.from+'" max="'+r.to+'" value="'+(r.formula==="saison"?"2027-01-31":"2026-10-20")+'"><p class="muted small">Le locataire est remboursé des jours restants sur la période payée ('+days(r.from,r.to)+' jours).</p></div>':t==="geste"?'<div class="field"><label for="cAmt">Montant remboursé (€ TTC)</label><input type="number" id="cAmt" min="1" step="0.01" max="'+(d.ttc/100)+'" value="15"><p class="muted small">Maximum '+eur(d.ttc-(r.refunded||0))+'.</p></div>':'';
-    preview()};
-  const amount=()=>{const t=$("#dlg").dataset.ctype;const left=d.ttc-(r.refunded||0);
-    if(t==="total")return{v:left};
-    if(t==="prorata"){const v=$("#cDate").value;if(!v||v<r.from||v>r.to)return{err:"Choisissez une date comprise dans la période."};const rem=days(v,r.to)-1;return{v:Math.min(left,Math.round(d.ttc*rem/days(r.from,r.to))),info:rem+" jour(s) restant(s)"}}
-    const a=Math.round(parseFloat(($("#cAmt").value||"").replace(",","."))*100);if(!a||a<=0||a>left)return{err:"Montant entre 0,01 € et "+eur(left)+"."};return{v:a}};
-  const preview=()=>{const a=amount();const inp=$("#cDate")||$("#cAmt");if(inp)inp.setAttribute("aria-invalid",a.err?"true":"false");
-    if(a.err){$("#cPrev").innerHTML='<p class="err">'+a.err+'</p>';return}
-    const p=split(a.v,d.rate);const comAv=Math.round(p.ht*L(r.loueur).rate/100);const closed=!!d.comId;
-    $("#cPrev").innerHTML='<h3 style="margin-bottom:8px">Ce qui sera fait</h3><ol style="margin:0;padding-left:20px;font-size:14px;display:grid;gap:4px">'+
-      '<li>Avoir sur '+esc(d.num)+' : <b>−'+eur(a.v)+'</b> TTC ('+eur(p.ht)+' HT'+(p.tva?', TVA '+eur(p.tva):'')+')'+(a.info?' · '+a.info:'')+'</li>'+
-      '<li>'+(r.pay.source==="stripe"?'Remboursement Stripe sur la carte du locataire (<span class="mono">refund</span> sur '+esc(r.pay.id.slice(0,14))+'…)':'Virement de remboursement à émettre au locataire (ordre ajouté au lot SEPA)')+'</li>'+
-      '<li>Commission : −'+eur(comAv)+' HT, '+(closed?'avoir de commission émis au loueur (le mois est déjà clôturé)':'déduite de la facture de commission d’octobre')+'</li>'+
-      '<li>'+(r.pay.source==="stripe"?'Reprise sur le transfert Connect du loueur (<span class="mono">transfer_reversal</span>)':'Montant retenu sur le prochain reversement du loueur')+'</li>'+
-      '<li>Écritures envoyées à Pennylane, avoir transmis '+(d.b2b?'à la plateforme agréée':'dans le lot d’e-reporting')+'</li></ol>';
-    $("#dlg").dataset.amt=a.v};
-  $("#dlg").onclick=e=>{const b=e.target.closest("[data-ctype]");if(b){$("#dlg").querySelectorAll("[data-ctype]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));$("#dlg").dataset.ctype=b.dataset.ctype;body()}};
-  $("#dlg").oninput=preview;body();
+   '<button type="button" class="btn" data-close>Fermer</button><button type="button" class="btn primary" data-act="doCancel" data-id="'+c.id+'">'+ic("check")+'Valider</button>');
+  const dlg=$("#dlg");dlg.dataset.ctype=opts[0];
+  const body=()=>{$("#cBody").innerHTML=dlg.dataset.ctype==="geste"?'<div class="field"><label for="cAmt">Montant remboursé (€ TTC)</label><input type="number" id="cAmt" min="1" step="0.01" value="5"></div>':"";preview()};
+  const preview=()=>{const r=computeCancel(c,dlg.dataset.ctype,$("#cAmt")?$("#cAmt").value:null);const inp=$("#cAmt");if(inp)inp.setAttribute("aria-invalid",r.err?"true":"false");
+    $("#cPrev").innerHTML=r.err?'<p class="err">'+r.err+'</p>':'<p class="note" style="margin-bottom:10px">'+r.rule+'</p><h3 style="margin-bottom:8px">Ce qui sera fait</h3><ol style="margin:0;padding-left:20px;font-size:14px;display:grid;gap:4px">'+r.steps.map(s=>'<li>'+s+'</li>').join("")+'</ol>'};
+  dlg.onclick=e=>{const b=e.target.closest("[data-ctype]");if(b){dlg.querySelectorAll("[data-ctype]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));dlg.dataset.ctype=b.dataset.ctype;body()}};
+  dlg.oninput=preview;body();
+}
+function avoir(c,orig,kind,ttc,motif){
+  const l=L(c.loueur);let num;
+  if(kind==="AV"){l.seq++;num="AV-"+l.code+"-26-"+pad(l.seq,4)}else{S.seq.HCA++;num="HCA-2610-"+pad(S.seq.HCA,4)}
+  const p=split(ttc,orig.rate);
+  return pushDoc(S,{id:newId(S),num,kind,loueur:l.id,contract:c.id,date:nowStamp(),ht:-p.ht,tva:-p.tva,ttc:-ttc,rate:orig.rate,ref:orig.num,b2b:orig.b2b,
+    penny:"À synchroniser",pa:orig.pa==="Hors champ"?"Hors champ":orig.b2b?"Déposée":"E-reporting",profile:orig.profile,mandat:orig.mandat,motif});
 }
 function doCancel(id){
-  const r=RS(id);const d=D(r.doc);const l=L(r.loueur);const t=$("#dlg").dataset.ctype;
-  const err=$("#cPrev .err");if(err)return;
-  const v=+$("#dlg").dataset.amt;const motif=$("#cMotif").value;const p=split(v,d.rate);const comAv=Math.round(p.ht*l.rate/100);
-  l.seq++;const av={id:"D"+(S.docs.length+1)+"-"+alnum(RUN,4),num:"AV-"+l.code+"-26-"+pad(l.seq,4),kind:"AV",loueur:l.id,resa:r.id,date:nowStamp(),ht:-p.ht,tva:-p.tva,ttc:-v,rate:d.rate,com:-comAv,comId:null,ref:d.num,b2b:d.b2b,penny:"À synchroniser",pa:d.pa==="Hors champ"?"Hors champ":d.b2b?"Déposée":"E-reporting",profile:d.profile,mandat:d.mandat,motif};
-  S.docs.push(av);r.avoirs=(r.avoirs||[]).concat(av.id);r.refunded=(r.refunded||0)+v;
-  if(d.comId){S.seqComAv++;S.docs.push({id:"D"+(S.docs.length+1)+"-"+alnum(RUN,4),num:"HGA-2610-"+pad(S.seqComAv,4),kind:"COMAV",loueur:l.id,resa:r.id,date:nowStamp(),ht:-comAv,tva:-Math.round(comAv*.2),ttc:-comAv-Math.round(comAv*.2),rate:20,com:0,ref:D(d.comId).num,b2b:true,penny:"À synchroniser",pa:"Déposée"});av.comAdj=true}
-  if(t==="total")r.status="annulée";else if(t==="prorata")r.status="résiliée";
-  const refundId=r.pay.source==="stripe"?"re_3Q"+alnum(RUN,16):"SEPA-"+pad(Math.floor(RUN()*99999),5);
-  r.history.push({t:av.date,label:"Avoir "+av.num+" (−"+eur(v)+") · "+motif,k:"w"});
-  r.history.push({t:av.date,label:(r.pay.source==="stripe"?"Remboursement Stripe "+refundId:"Ordre de virement "+refundId)+" de "+eur(v)});
-  log(t==="total"?"Annulation":t==="prorata"?"Résiliation anticipée":"Geste commercial",r.id+" · avoir "+av.num+" de "+eur(v)+" · "+motif);
-  closeDlg();toast("Avoir "+av.num+" émis, remboursement de "+eur(v)+(r.pay.source==="stripe"?" envoyé à Stripe (simulation)":" ajouté au lot SEPA (simulation)")+".");
-  render();openOp(r.id);
+  const c=C(id);const dlg=$("#dlg");const t=dlg.dataset.ctype;const r=computeCancel(c,t,$("#cAmt")?$("#cAmt").value:null);
+  if(r.err)return;const motif=$("#cMotif").value;const l=L(c.loueur);const E=c.loyer+c.com;const made=[];
+  if(r.pen){S.seq.IN++;const d=pushDoc(S,{id:newId(S),num:"IN-2610-"+pad(S.seq.IN,4),kind:"IN",loueur:l.id,contract:c.id,date:nowStamp(),ht:r.pen*E,tva:0,ttc:r.pen*E,rate:0,b2b:c.tenant.type==="pro",
+    penny:"À synchroniser",pa:"Hors champ",pen:r.pen,loueurPart:r.loueurPart,rule:r.rule});c.e.docs.push(d.id);made.push(d.num);c.credit=r.credit}
+  if(r.refLoyer){const lo=docOf(c,"AF")||docOf(c,"RC");if(lo){const a=avoir(c,lo,"AV",r.refLoyer,motif);c.e.docs.push(a.id);made.push(a.num)}}
+  if(r.refCom){const a=avoir(c,docOf(c,"HC"),"HCA",r.refCom,motif);c.e.docs.push(a.id);made.push(a.num)}
+  if(t==="loc_resil"){c.status="résiliation programmée";c.end=r.effective}
+  if(t==="loc_avant"||t==="loueur_avant"||(t==="retract"&&c.start>TODAY)){c.status="annulé";c.end=TODAY}
+  if(t==="retract"&&c.start<=TODAY){c.status="résilié";c.end=TODAY}
+  c.history.push({t:nowStamp(),label:OPT_LABEL[t]+" · "+motif+(made.length?" · "+made.join(", "):""),k:"w"});
+  if(r.refund)c.history.push({t:nowStamp(),label:(c.mode==="virement"?"Ordre de virement ":"Remboursement Stripe re_3Q"+alnum(RUN,10)+" ")+"de "+eur(r.refund)});
+  if(t==="loueur_avant")c.history.push({t:nowStamp(),label:"Loyer de "+eur(c.loyer)+" repris sur le compte Connect du loueur"});
+  log(OPT_LABEL[t],c.id+" · "+r.rule.split(":")[0]+(made.length?" · "+made.join(", "):"")+" · "+motif);
+  closeDlg();toast(OPT_LABEL[t]+" enregistrée"+(made.length?" : "+made.join(", ")+" émis.":"."));render();openOp(c.id);
 }
 
-/* ---------- documents et clôture ---------- */
+/* ---------- impayés ---------- */
+function openImpaye(id){
+  const c=C(id);const l=L(c.loueur);const notif=[addDays(c.e.date,15),TODAY].sort()[1];const reg=addDays(notif,15);
+  const comp=Math.min(3,1)*c.loyer;
+  openDlg("Impayé · "+c.id,'<dl class="kv" style="margin-bottom:14px"><dt>Locataire</dt><dd>'+esc(c.tenant.name)+'</dd><dt>Échéance</dt><dd>'+echLabel(c)+' du '+fd(c.e.date)+' · '+eur(c.e.amount)+'</dd><dt>Incident</dt><dd class="err">'+esc(c.e.reason)+'</dd><dt>Loueur</dt><dd>'+esc(l.name)+'</dd></dl>'+
+   '<div class="grid cols-2" style="gap:12px"><div class="card" style="box-shadow:none"><h3>Représenter le paiement</h3><p class="muted small" style="margin:6px 0 12px">Nouvelle tentative de prélèvement et e-mail de relance au locataire. Intérêts de retard et indemnité de 40 € si l’impayé persiste (art. 6.9).</p><button type="button" class="btn" data-act="retry" data-id="'+c.id+'">'+ic("sync")+'Représenter</button></div>'+
+   '<div class="card" style="box-shadow:none"><h3>Résilier pour impayé</h3><p class="muted small" style="margin:6px 0 12px">Art. 8.1 : notification le <b>'+fd(notif)+'</b> (15 jours après l’incident), régularisation possible jusqu’au '+fd(reg)+', puis résiliation de plein droit. Pénalité d’une échéance ('+eur(c.e.amount)+'). Compensation au loueur : '+eur(comp)+' (art. 6.10.1, plafond 3 loyers), versée sous 3 mois.</p><button type="button" class="btn danger" data-act="resilImpaye" data-id="'+c.id+'">Lancer la procédure</button></div></div>',
+   '<button type="button" class="btn" data-close>Fermer</button>');
+}
+function resilImpaye(id){
+  const c=C(id);const notif=[addDays(c.e.date,15),TODAY].sort()[1];const reg=addDays(notif,15);
+  c.status="procédure impayé";c.end=addDays(reg,1);c.comp=c.loyer;
+  S.seq.IN++;const d=pushDoc(S,{id:newId(S),num:"IN-2610-"+pad(S.seq.IN,4),kind:"IN",loueur:c.loueur,contract:c.id,date:nowStamp(),ht:c.e.amount,tva:0,ttc:c.e.amount,rate:0,b2b:c.tenant.type==="pro",penny:"À synchroniser",pa:"Hors champ",pen:1,loueurPart:0,rule:"Art. 8.1 : résiliation pour défaut de paiement, pénalité d’une échéance.",recouvrer:true});
+  c.e.docs.push(d.id);
+  c.history.push({t:nowStamp(),label:"Procédure d’impayé : notification le "+fd(notif)+", régularisation jusqu’au "+fd(reg),k:"b"});
+  c.history.push({t:nowStamp(),label:"Indemnité "+d.num+" à recouvrer, compensation loueur de "+eur(c.comp)+" programmée",k:"w"});
+  log("Procédure d’impayé",c.id+" · fin prévue le "+fd(c.end)+" · compensation loueur "+eur(c.comp));
+  closeDlg();toast("Procédure lancée : notification programmée, compensation de "+eur(c.comp)+" prévue pour le loueur.");render();
+}
+
+/* ---------- factures et clôture ---------- */
 function vDocs(){
   const closed=S.closes.find(c=>c.month==="2026-10");
-  const kinds=[["all","Tous"],["AF","Autofactures"],["RC","Reçus particuliers"],["AV","Avoirs"],["COM","Commissions"],["COMAV","Avoirs de commission"]];
+  const kinds=[["all","Tous"],["AF","Autofactures"],["RC","Reçus"],["HC","Commissions"],["FS","Frais de service"],["IN","Indemnités"],["AV","Avoirs loyer"],["HCA","Avoirs commission"]];
   let docs=S.docs.slice().reverse();if(cur.docKind!=="all")docs=docs.filter(d=>d.kind===cur.docKind);
   const shown=docs.slice(0,60);
-  return'<div class="head"><div><h1>Factures et clôture</h1><p class="muted">Chaque paiement encaissé produit une autofacture au nom du loueur. La clôture mensuelle facture les commissions de la plateforme.</p></div></div>'+
+  return'<div class="head"><div><h1>Factures et clôture</h1><p class="muted">À chaque échéance payée : une autofacture du loyer au nom du loueur et une facture de commission au locataire. Chaque mois : les frais de service et les reversements des loueurs.</p></div></div>'+
   '<div class="grid cols-2"><section class="card" id="closeCard">'+closeCard(closed)+'</section>'+
-  '<section class="card"><h2>Numérotation</h2><p class="muted small" style="margin-bottom:10px">Une séquence continue par émetteur, sans trou ni doublon, verrouillée au moment de l’émission.</p>'+
-   '<div class="tbl"><table><thead><tr><th>Émetteur</th><th>Série</th><th>Exemple</th></tr></thead><tbody>'+
-   '<tr><td>Chaque loueur (autofacturation)</td><td class="mono">AF-{loueur}-AA-</td><td class="mono wrap">AF-L0101-26-0057</td></tr>'+
-   '<tr><td>Loueur particulier</td><td class="mono">RC-{loueur}-AA-</td><td class="mono wrap">RC-L0110-26-0012</td></tr>'+
-   '<tr><td>Avoirs (même série que l’émetteur)</td><td class="mono">AV-{loueur}-AA-</td><td class="mono wrap">AV-L0101-26-0058</td></tr>'+
-   '<tr><td>Hangarium (commissions)</td><td class="mono">HG-AAMM-</td><td class="mono wrap">HG-2610-0028</td></tr></tbody></table></div></section></div>'+
+  '<section class="card"><h2>Ce que paie qui</h2><div class="tbl"><table><thead><tr><th>Flux</th><th>Émetteur → destinataire</th><th class="num">Montant</th></tr></thead><tbody>'+
+   '<tr><td>Loyer du loueur</td><td>Loueur → locataire (autofacture, mandat)</td><td class="num">fixé par le loueur</td></tr>'+
+   '<tr><td>Commission</td><td>Plateforme → locataire</td><td class="num">15 à 30 € TTC</td></tr>'+
+   '<tr><td>Frais de service</td><td>Plateforme → loueur, déduits du reversement</td><td class="num">3 € TTC</td></tr>'+
+   '<tr><td>Indemnité de résiliation</td><td>Plateforme → locataire, part reversée au loueur</td><td class="num">1 ou 2 échéances</td></tr></tbody></table></div>'+
+   '<h3 style="margin:16px 0 8px">Grille de commission (par bien et par mois)</h3><div class="tbl"><table><thead><tr><th>Période initiale</th><th class="num">TTC</th></tr></thead><tbody>'+GRID.map(g=>'<tr><td>'+g[2]+'</td><td class="num">'+eur(g[1])+'</td></tr>').join("")+'</tbody></table></div>'+
+   '<p class="muted small" style="margin-top:8px">+3 € en haute saison (septembre à novembre), plafond 30 €. Bien supplémentaire sur le même contrat : −50 %. Montant figé pendant la période initiale. Grille versionnée avec date d’effet.</p></section></div>'+
   '<h2 style="margin:24px 0 10px">Documents émis</h2>'+
   '<div class="seg" role="group" aria-label="Type de document">'+kinds.map(k=>'<button type="button" data-kind="'+k[0]+'" aria-pressed="'+(cur.docKind===k[0])+'">'+k[1]+' ('+(k[0]==="all"?S.docs.length:S.docs.filter(d=>d.kind===k[0]).length)+')</button>').join("")+'</div>'+
   '<div class="tbl"><table class="t-wide"><thead><tr><th>Numéro</th><th>Type</th><th>Émetteur</th><th>Destinataire</th><th>Date</th><th class="num">HT</th><th class="num">TVA</th><th class="num">TTC</th><th>Statut électronique</th><th>Pennylane</th></tr></thead><tbody>'+
-  (shown.length?shown.map(d=>{const l=L(d.loueur);const r=d.resa?RS(d.resa):null;const isCom=d.kind==="COM"||d.kind==="COMAV";
-   return'<tr class="clk" data-doc="'+d.id+'" tabindex="0"><td><button type="button" class="link mono" data-doc="'+d.id+'" style="min-height:0">'+esc(d.num)+'</button>'+(d.ref?'<span class="sub">sur '+esc(d.ref)+'</span>':'')+'</td><td>'+kindLabel[d.kind]+'</td><td>'+(isCom?"Hangarium SAS":esc(l.name)+'<span class="sub">émise par Hangarium (mandat)</span>')+'</td><td>'+(isCom?esc(l.name):esc(r.tenant.name))+'</td><td class="dt">'+fd(d.date)+'</td><td class="num">'+eur(d.ht)+'</td><td class="num">'+eur(d.tva)+'</td><td class="num">'+eur(d.ttc)+'</td><td>'+paBadge(d.pa)+'</td><td>'+(d.penny==="Synchronisé"?'<span class="badge b-ok">Synchronisé</span>':'<span class="badge b-gray">En file</span>')+'</td></tr>'}).join(""):'<tr><td colspan="10" class="empty">Aucun document de ce type pour l’instant.</td></tr>')+
+  (shown.length?shown.map(d=>{const l=L(d.loueur);const c=d.contract?C(d.contract):null;const pl=["HC","FS","IN","HCA"].includes(d.kind);
+   return'<tr class="clk" data-doc="'+d.id+'" tabindex="0"><td><button type="button" class="link mono" data-doc="'+d.id+'" style="min-height:0">'+esc(d.num)+'</button>'+(d.ref?'<span class="sub">sur '+esc(d.ref)+'</span>':'')+'</td><td>'+kindLabel[d.kind]+'</td><td>'+(pl?"Hangarium SAS":esc(l.name)+'<span class="sub">émise par Hangarium (mandat)</span>')+'</td><td>'+(d.kind==="FS"?esc(l.name):esc(c.tenant.name))+'</td><td class="dt">'+fd(d.date)+'</td><td class="num">'+eur(d.ht)+'</td><td class="num">'+eur(d.tva)+'</td><td class="num">'+eur(d.ttc)+'</td><td>'+paBadge(d.pa)+'</td><td>'+(d.penny==="Synchronisé"?B("b-ok","Synchronisé"):B("b-gray","En file"))+'</td></tr>'}).join(""):'<tr><td colspan="10" class="empty">Aucun document de ce type pour l’instant.</td></tr>')+
   '</tbody></table></div>'+(docs.length>60?'<p class="muted small" style="margin-top:8px">60 documents les plus récents affichés sur '+docs.length+'.</p>':'');
+}
+function closeData(){
+  const by={};
+  S.contracts.forEach(c=>{const o=by[c.loueur]=by[c.loueur]||{loyers:0,nb:0,parts:0,comp:0,reprises:0};
+    if(["payé","partiel"].includes(c.e.status))o.loyers+=c.loyer;
+    c.e.docs.map(D).filter(d=>d.kind==="AV").forEach(d=>o.reprises+=-d.ttc);
+    if(["en cours","renouvellement","résiliation programmée","procédure impayé"].includes(c.status)||(c.status==="résilié"&&c.start<=TODAY))o.nb++;
+    c.e.docs.map(D).filter(d=>d.kind==="IN").forEach(d=>o.parts+=d.loueurPart||0);
+    if(c.comp)o.comp+=c.comp});
+  return by;
 }
 function closeCard(closed,steps){
   if(steps)return'<h2>Clôture d’octobre en cours</h2><ol class="steps">'+steps.map(s=>'<li class="'+s.st+'"><span class="st">'+(s.st==="done"?"✓":"")+'</span><span>'+s.l+'</span></li>').join("")+'</ol>';
-  if(closed)return'<div class="card-h"><h2>Octobre 2026 clôturé</h2><span class="badge b-ok">Terminé</span></div><dl class="kv"><dt>Date</dt><dd>'+fdt(closed.date)+'</dd><dt>Factures de commission</dt><dd>'+closed.coms+' (une par loueur)</dd><dt>Commissions HT</dt><dd>'+eur(closed.comHt)+'</dd><dt>Reversements loueurs</dt><dd>'+eur(closed.payout)+' · transferts Connect et lot SEPA du 5 novembre</dd><dt>Opérations reportées</dt><dd>'+closed.blocked+' (profil incomplet), facturées dès correction</dd><dt>E-reporting</dt><dd>Lot d’octobre prêt, voir Conformité fiscale</dd></dl><button type="button" class="btn" style="margin-top:12px" data-kind-go="COM">Voir les factures de commission</button>';
-  const an=anomalies();const ready=S.docs.filter(d=>(d.kind==="AF"||d.kind==="RC"||d.kind==="AV")&&!d.comId);
-  const ls=new Set(ready.map(d=>d.loueur));const com=ready.reduce((a,d)=>a+d.com,0);
-  return'<div class="card-h"><h2>Clôture d’octobre 2026</h2><span class="badge b-info">À lancer</span></div>'+
-   '<dl class="kv"><dt>Documents à facturer</dt><dd>'+ready.length+' autofactures, reçus et avoirs</dd><dt>Loueurs concernés</dt><dd>'+ls.size+'</dd><dt>Commissions HT</dt><dd>'+eur(com)+'</dd><dt>Bloquants</dt><dd>'+an.filter(a=>a.sev==="bad").length+' anomalie(s) · '+S.resas.filter(r=>r.pay.status==="payé"&&!r.doc).length+' paiement(s) non facturé(s)</dd></dl>'+
-   (an.length?'<p class="note w" style="margin-top:12px">Les opérations bloquées seront reportées au mois suivant : aucune facture n’est émise avec des données incomplètes.</p>':'')+
+  if(closed)return'<div class="card-h"><h2>Octobre 2026 clôturé</h2>'+B("b-ok","Terminé")+'</div><dl class="kv"><dt>Date</dt><dd>'+fdt(closed.date)+'</dd><dt>Frais de service</dt><dd>'+closed.fs+' factures, '+eur(closed.fsTotal)+' TTC</dd><dt>Reversements</dt><dd>'+eur(closed.payout)+' vers '+closed.nbL+' loueurs, transferts Stripe Connect le 5 novembre</dd><dt>Suspendus</dt><dd>'+eur(closed.held)+' (comptes Stripe incomplets)</dd><dt>Compensations</dt><dd>'+eur(closed.comp)+' d’impayés compensés aux loueurs</dd><dt>Autofactures reportées</dt><dd>'+closed.blocked+', émises dès correction du profil</dd></dl><button type="button" class="btn" style="margin-top:12px" data-kind-go="FS">Voir les factures de frais de service</button>';
+  const an=anomalies();const by=closeData();const ls=Object.keys(by).filter(k=>by[k].nb||by[k].loyers);
+  const loy=ls.reduce((a,k)=>a+by[k].loyers,0);const fs=ls.reduce((a,k)=>a+by[k].nb*FRAIS_SERVICE,0);
+  return'<div class="card-h"><h2>Clôture d’octobre 2026</h2>'+B("b-info","À lancer")+'</div>'+
+   '<dl class="kv"><dt>Loyers encaissés</dt><dd>'+eur(loy)+'</dd><dt>Frais de service</dt><dd>'+eur(fs)+' TTC ('+ls.reduce((a,k)=>a+by[k].nb,0)+' contrats × 3 €)</dd><dt>Loueurs à reverser</dt><dd>'+ls.length+'</dd><dt>Bloquants</dt><dd>'+an.filter(a=>a.sev==="bad").length+' anomalie(s) · '+S.contracts.filter(c=>c.e.block).length+' autofacture(s) en attente</dd></dl>'+
+   (an.length?'<p class="note w" style="margin-top:12px">Les reversements des comptes Stripe incomplets sont suspendus, et les autofactures bloquées sont reportées : rien n’est émis avec des données incomplètes.</p>':'')+
    '<p class="muted small" style="margin-top:10px">En production, la clôture tourne seule le 1<sup>er</sup> du mois à 6 h. Ici, vous pouvez la lancer en avance.</p>'+
    '<button type="button" class="btn primary" style="margin-top:12px" data-act="runClose">'+ic("play")+'Lancer la clôture maintenant</button>';
 }
 function runClose(){
-  const L1=["Collecte des réservations et paiements (plateforme, Stripe, banque)","Contrôles : profils fiscaux, mandats, rapprochements","Calcul des commissions par loueur","Émission des factures de commission (Factur-X)","Relevés de reversement et transferts Stripe Connect","Export des écritures vers Pennylane","Préparation du lot d’e-reporting"];
+  const L1=["Collecte des contrats (Bubble) et des paiements (Stripe, banque)","Contrôles : profils fiscaux, mandats, comptes Stripe, rapprochements","Factures de frais de service par loueur (3 € par contrat en cours)","Relevés de reversement : loyers, parts d’indemnités, compensations","Transferts Stripe Connect programmés au 5 novembre","Export des écritures vers Pennylane","Préparation du lot d’e-reporting"];
   const steps=L1.map(l=>({l,st:""}));let i=0;
   const tick=()=>{steps.forEach((s,k)=>s.st=k<i?"done":k===i?"run":"");const c=$("#closeCard");if(c)c.innerHTML=closeCard(null,steps);
-    if(i<steps.length){i++;setTimeout(tick,520)}else finishClose()};
+    if(i<steps.length){i++;setTimeout(tick,500)}else finishClose()};
   tick();
 }
 function finishClose(){
-  const ready=S.docs.filter(d=>(d.kind==="AF"||d.kind==="RC"||d.kind==="AV")&&!d.comId);
-  const by={};ready.forEach(d=>{(by[d.loueur]=by[d.loueur]||[]).push(d)});
-  let n=0,comHt=0,payout=0;
-  Object.keys(by).forEach(lid=>{const list=by[lid];const ht=list.reduce((a,d)=>a+d.com,0);if(ht===0&&!list.length)return;
-    S.seqCom++;const tva=Math.round(ht*.2);
-    const c={id:"D"+(S.docs.length+1)+"-"+alnum(RUN,4),num:"HG-2610-"+pad(S.seqCom,4),kind:"COM",loueur:lid,resa:null,date:"2026-10-31T23:59",ht,tva,ttc:ht+tva,rate:20,com:0,b2b:true,penny:"Synchronisé",pa:"Déposée",lines:list.map(d=>d.id),base:list.reduce((a,d)=>a+d.ht,0),enc:list.reduce((a,d)=>a+d.ttc,0)};
-    S.docs.push(c);list.forEach(d=>{d.comId=c.id;d.penny="Synchronisé"});n++;comHt+=ht;payout+=c.enc-c.ttc;
-    setTimeout(()=>{c.pa="Acceptée";save()},3000)});
+  const by=closeData();let n=0,fsTotal=0,payout=0,held=0,comp=0,nbL=0;
+  Object.keys(by).forEach(lid=>{const o=by[lid];const l=L(lid);if(!o.nb&&!o.loyers)return;
+    const fs=o.nb*FRAIS_SERVICE;
+    if(fs){S.seq.FS++;const p=PROFILES[l.profile];const assuj=p.tva>0;
+      pushDoc(S,{id:newId(S),num:"FS-2610-"+pad(S.seq.FS,4),kind:"FS",loueur:lid,contract:null,date:"2026-10-31T23:59",ht:fs-Math.round(fs/6),tva:Math.round(fs/6),ttc:fs,rate:20,b2b:l.profile!=="part",penny:"Synchronisé",pa:l.profile!=="part"?"Déposée":"E-reporting",nb:o.nb,loyers:o.loyers,parts:o.parts,comp:o.comp,reprises:o.reprises,assuj});n++;fsTotal+=fs}
+    const net=o.loyers+o.parts+o.comp-o.reprises-fs;
+    if(l.kyc==="actif"){payout+=net;nbL++}else held+=net;comp+=o.comp});
   S.docs.forEach(d=>{if(d.penny==="À synchroniser")d.penny="Synchronisé"});S.penny.last=nowStamp();
-  const blocked=S.resas.filter(r=>r.pay.status==="payé"&&!r.doc).length;
-  S.closes.push({month:"2026-10",label:"Octobre 2026",date:nowStamp(),coms:n,comHt,payout,blocked});
+  const blocked=S.contracts.filter(c=>c.e.block).length;
+  S.closes.push({month:"2026-10",label:"Octobre 2026",date:nowStamp(),fs:n,fsTotal,payout,held,comp,nbL,blocked});
   S.ereport.status="prêt";
-  log("Clôture d’octobre 2026",n+" factures de commission, "+eur(comHt)+" HT, "+blocked+" opération(s) reportée(s)");
-  toast("Clôture terminée : "+n+" factures de commission émises et synchronisées avec Pennylane.");render();
+  log("Clôture d’octobre 2026",n+" factures de frais de service, reversements "+eur(payout)+", suspendus "+eur(held));
+  toast("Clôture terminée : "+n+" factures de frais de service, "+eur(payout)+" de reversements programmés.");render();
 }
 
-/* aperçu d’un document */
+/* ---------- aperçu d’un document ---------- */
 function docHtml(d){
-  const l=L(d.loueur);const r=d.resa?RS(d.resa):null;const isCom=d.kind==="COM"||d.kind==="COMAV";const p=PROFILES[d.profile||l.profile];
-  const title={AF:"Facture",RC:"Reçu de location",AV:"Avoir",COM:"Facture de commission",COMAV:"Avoir de commission"}[d.kind];
-  const issuer=isCom?'<b>'+PLATFORM.name+'</b><br>'+PLATFORM.addr+'<br>SIREN '+fmtSiren(PLATFORM.siren)+'<br>TVA '+PLATFORM.tva
-    :'<b>'+esc(l.name)+'</b><br>'+esc(l.contact)+'<br>Lieu-dit les Granges, '+esc(l.dept)+' '+esc(l.commune)+'<br>'+(l.siren?'SIREN '+fmtSiren(l.siren):'Particulier, non assujetti')+(l.tva?'<br>TVA '+l.tva:'');
-  const client=isCom?'<b>'+esc(l.name)+'</b><br>'+esc(l.commune)+' ('+l.dept+')'+(l.siren?'<br>SIREN '+fmtSiren(l.siren):'')+(l.tva?'<br>TVA '+l.tva:'')
-    :'<b>'+esc(r.tenant.name)+'</b>'+(r.tenant.type==="pro"?'<br>SIREN '+fmtSiren(r.tenant.siren):'<br>Client particulier');
-  let lines;
-  if(d.kind==="COM"){lines='<tr><td>Commission de mise en relation et d’encaissement · octobre 2026<br><small>'+d.lines.length+' opération(s), base '+eur(d.base)+' HT, taux '+l.rate+' %</small></td><td class="num">1</td><td class="num">'+eur(d.ht)+'</td><td class="num">20 %</td><td class="num">'+eur(d.ht)+'</td></tr>'}
-  else if(d.kind==="COMAV"){lines='<tr><td>Annulation partielle de commission · '+esc(r.id)+'</td><td class="num">1</td><td class="num">'+eur(d.ht)+'</td><td class="num">20 %</td><td class="num">'+eur(d.ht)+'</td></tr>'}
-  else{lines='<tr><td>'+(d.kind==="AV"?"Remboursement · ":"")+'Gardiennage '+esc(r.object.toLowerCase())+' ('+esc(r.model)+')<br><small>'+(r.formula==="saison"?"Saison d’hivernage du 01/10/2026 au 30/04/2027":"Période du 01/10/2026 au 31/10/2026")+' · '+esc(l.hangar)+' · réservation '+r.id+'</small></td><td class="num">1</td><td class="num">'+eur(d.ht)+'</td><td class="num">'+(d.rate?d.rate+" %":"—")+'</td><td class="num">'+eur(d.ht)+'</td></tr>'}
+  const l=L(d.loueur);const c=d.contract?C(d.contract):null;const pl=["HC","FS","IN","HCA"].includes(d.kind);
+  const title={AF:"Facture",RC:"Reçu de location",HC:"Facture de commission",FS:"Facture de frais de service",IN:"Note d’indemnité de résiliation",AV:"Avoir",HCA:"Avoir sur commission"}[d.kind];
+  const loueurBlock='<b>'+esc(l.name)+'</b><br>'+esc(l.contact)+'<br>'+esc(l.dept)+' '+esc(l.commune)+(l.siren?'<br>SIREN '+fmtSiren(l.siren):'<br>Particulier, non assujetti')+(l.tva?'<br>TVA '+l.tva:'');
+  const tenantBlock=c?'<b>'+esc(c.tenant.name)+'</b>'+(c.tenant.type==="pro"?'<br>SIREN '+fmtSiren(c.tenant.siren):'<br>Client particulier'):'';
+  const issuer=pl?'<b>'+PLATFORM.name+'</b><br>'+PLATFORM.addr+'<br>SIREN '+fmtSiren(PLATFORM.siren)+'<br>TVA '+PLATFORM.tva:loueurBlock;
+  const client=d.kind==="FS"?loueurBlock:tenantBlock;
+  const per=c?(c.e.label==="Acompte"?"acompte, ":"")+"période du "+fd(c.e.date)+" au "+fd(addDays(addMonths(c.e.date,1),-1)):"";
+  const row=(t,s,ht,rate)=>'<tr><td>'+t+(s?'<br><small>'+s+'</small>':'')+'</td><td class="num">1</td><td class="num">'+eur(ht)+'</td><td class="num">'+(rate?rate+" %":"—")+'</td><td class="num">'+eur(ht)+'</td></tr>';
+  let lines="";
+  if(d.kind==="AF"||d.kind==="RC"||d.kind==="AV")lines=row((d.kind==="AV"?"Remboursement · ":"")+"Mise à disposition d’un espace de stockage · "+c.biens.map(b=>esc(b.type.toLowerCase())).join(" et "),esc(l.space)+" · contrat "+c.id+" · "+per,d.ht,d.rate);
+  if(d.kind==="HC"||d.kind==="HCA")lines=row((d.kind==="HCA"?"Geste commercial · ":"")+"Commission de service de la plateforme",c.biens.length+" bien(s) · "+esc(c.comLabel)+" · contrat "+c.id+" · "+per,d.ht,20);
+  if(d.kind==="FS")lines=row("Frais de service mensuels · octobre 2026",d.nb+" contrat(s) de stockage en cours × 3,00 € TTC",d.ht,20);
+  if(d.kind==="IN")lines=row("Indemnité de rupture anticipée · contrat "+c.id,d.pen+" échéance(s) de "+eur(c.loyer+c.com)+(d.loueurPart?" · dont "+eur(d.loueurPart)+" reversés au loueur":""),d.ht,0);
   const ment=[];
-  if(!isCom&&d.kind!=="RC")ment.push("Facture établie par "+PLATFORM.name+" au nom et pour le compte de "+l.name+" (autofacturation, mandat de facturation du "+(d.mandat?fd(d.mandat):"—")+", art. 289 I-2 du CGI).");
+  if(d.kind==="AF"||d.kind==="AV")ment.push("Facture établie par "+PLATFORM.name+" au nom et pour le compte de "+l.name+" (autofacturation, mandat de facturation du "+(d.mandat?fd(d.mandat):"—")+", art. 289 I-2 du CGI).");
   if(d.kind==="RC")ment.push("Reçu émis par "+PLATFORM.name+" pour le compte d’un particulier non assujetti à la TVA. Revenus déclarés par la plateforme au titre de DAC7.");
-  if(!isCom&&d.rate===0&&d.kind!=="RC")ment.push("TVA non applicable, art. 293 B du CGI.");
+  if((d.kind==="AF"||d.kind==="AV")&&d.rate===0)ment.push("TVA non applicable, art. 293 B du CGI.");
   if(d.ref)ment.push("Avoir se rapportant à la facture n° "+d.ref+".");
-  ment.push("Catégorie de l’opération : prestation de services.");
-  if(d.kind!=="RC")ment.push("TVA exigible à l’encaissement. Paiement reçu"+(r?" le "+fd(r.pay.date)+" ("+SOURCES[r.pay.source]+")":" par compensation sur les reversements")+".");
-  if(isCom)ment.push("Réglée par compensation sur les sommes encaissées pour le compte du loueur. Pénalités de retard : 3 fois le taux d’intérêt légal ; indemnité forfaitaire de recouvrement : 40 €.");
-  return'<div class="doc"><div class="dh"><div><h3>'+title+'</h3><div class="mono">'+esc(d.num)+'</div><div>Date : '+fd(d.date)+'</div></div><div style="text-align:right"><b style="color:#163F93">'+(isCom?"Hangarium":"Émise via Hangarium")+'</b><br><small>Format Factur-X (PDF/A-3 + XML CII)</small></div></div>'+
-   (!isCom&&d.kind!=="RC"?'<div class="mand">Autofacturation : émise par Hangarium au nom et pour le compte du loueur</div>':'')+
+  if(d.kind==="IN")ment.push(d.rule+" Somme non soumise à la TVA (indemnité), traitement à confirmer avec l’expert-comptable."+(d.recouvrer?" Créance à recouvrer.":""));
+  if(d.kind!=="RC")ment.push("Catégorie de l’opération : prestation de services.");
+  if(c&&d.kind!=="IN")ment.push("Paiement : "+MODES[c.mode]+" le "+fd(c.e.date)+".");
+  if(d.kind==="FS")ment.push("Réglée par compensation sur le reversement des loyers du mois. Loyers encaissés pour votre compte : "+eur(d.loyers)+(d.parts?", parts d’indemnités : "+eur(d.parts):"")+(d.comp?", compensation d’impayés : "+eur(d.comp):"")+(d.reprises?", reprises : −"+eur(d.reprises):"")+". Reversement net : "+eur(d.loyers+d.parts+d.comp-d.reprises-d.ttc)+".");
+  if(d.b2b)ment.push("Pénalités de retard : taux BCE majoré de 10 points ; indemnité forfaitaire de recouvrement : 40 €.");
+  return'<div class="doc"><div class="dh"><div><h3>'+title+'</h3><div class="mono">'+esc(d.num)+'</div><div>Date : '+fd(d.date)+'</div></div><div style="text-align:right"><b style="color:#163F93">'+(pl?"Hangarium":"Émise via Hangarium")+'</b><br><small>Format Factur-X (PDF/A-3 + XML CII)</small></div></div>'+
+   (d.kind==="AF"||d.kind==="AV"?'<div class="mand">Autofacturation : émise par Hangarium au nom et pour le compte du loueur</div>':'')+
    '<div class="pt"><div><small>Émetteur</small>'+issuer+'</div><div><small>Destinataire</small>'+client+'</div></div>'+
    '<table><thead><tr><th>Désignation</th><th class="num">Qté</th><th class="num">PU HT</th><th class="num">TVA</th><th class="num">Total HT</th></tr></thead><tbody>'+lines+'</tbody></table>'+
-   '<div class="tot"><div><span>Total HT</span><span>'+eur(d.ht)+'</span></div><div><span>TVA'+(d.rate?" "+d.rate+" %":"")+'</span><span>'+eur(d.tva)+'</span></div><div class="g"><span>Total TTC</span><span>'+eur(d.ttc)+'</span></div>'+
-   (d.kind==="COM"?'<div><span>Encaissé pour votre compte</span><span>'+eur(d.enc)+'</span></div><div class="g"><span>Reversement net</span><span>'+eur(d.enc-d.ttc)+'</span></div>':'')+'</div>'+
+   '<div class="tot"><div><span>Total HT</span><span>'+eur(d.ht)+'</span></div><div><span>TVA'+(d.rate?" "+d.rate+" %":"")+'</span><span>'+eur(d.tva)+'</span></div><div class="g"><span>Total TTC</span><span>'+eur(d.ttc)+'</span></div></div>'+
    '<div class="ment">'+ment.map(m=>'<p>'+esc(m)+'</p>').join("")+'</div></div>';
 }
 function openDoc(id){const d=D(id);
@@ -714,27 +828,26 @@ function openDoc(id){const d=D(id);
 function vLoueurs(){
   const q=cur.lq.trim().toLowerCase();
   const ls=S.loueurs.filter(l=>(!q||(l.name+" "+l.commune+" "+l.contact+" "+l.siren).toLowerCase().includes(q))&&(cur.lp==="all"||l.profile===cur.lp));
-  return'<div class="head"><div><h1>Loueurs</h1><p class="muted">Agriculteurs qui louent leurs hangars. Le profil fiscal détermine la TVA, le type de document et les obligations déclaratives.</p></div></div>'+
+  return'<div class="head"><div><h1>Loueurs</h1><p class="muted">Agriculteurs, actifs ou retraités, qui louent leurs bâtiments. Le profil fiscal détermine la TVA, le type de document et les déclarations.</p></div></div>'+
   '<div class="filters" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr)"><div class="f-q"><label for="lq">Recherche</label><input type="search" id="lq" value="'+esc(cur.lq)+'" placeholder="Exploitation, commune, exploitant, SIREN"></div>'+sel("lp","Profil fiscal",[["all","Tous"]].concat(Object.keys(PROFILES).map(k=>[k,PROFILES[k].label])),cur.lp)+'</div>'+
-  '<div class="tbl"><table class="t-wide"><thead><tr><th>Exploitation</th><th>Profil fiscal</th><th>SIREN / TVA</th><th>Mandat</th><th>Stripe Connect</th><th class="num">Encaissé oct.</th><th class="num">Commission</th><th>État</th></tr></thead><tbody>'+
-  ls.map(l=>{const br=blockReason(l);const rs=S.resas.filter(r=>r.loueur===l.id);const enc=rs.reduce((a,r)=>a+r.pay.amount,0);
-   return'<tr class="clk" data-loueur="'+l.id+'" tabindex="0"><td><button type="button" class="link" data-loueur="'+l.id+'" style="min-height:0">'+esc(l.name)+'</button><span class="sub">'+esc(l.contact)+' · '+esc(l.commune)+' ('+l.dept+') · '+rs.length+' location(s)</span></td><td>'+PROFILES[l.profile].short+'</td><td class="mono">'+(l.siren?fmtSiren(l.siren):(PROFILES[l.profile].siren?'<span class="badge b-bad">Manquant</span>':'—'))+(l.tva?'<span class="sub">'+l.tva+'</span>':PROFILES[l.profile].tvaNum?'<span class="sub"><span class="badge b-bad">TVA manquante</span></span>':'')+'</td><td>'+(l.profile==="part"?'<span class="muted">Non requis</span>':l.mandat?'Signé le '+fd(l.mandat):'<span class="badge b-bad">Non signé</span>')+'</td><td>'+(l.kyc==="actif"?'<span class="badge b-ok">Actif</span>':'<span class="badge b-warn">Vérification requise</span>')+'<span class="sub mono">'+l.stripe+'</span></td><td class="num">'+eur(enc)+'</td><td class="num">'+l.rate+' %</td><td>'+(br?'<span class="badge b-bad">Bloqué</span>':'<span class="badge b-ok">Prêt</span>')+'</td></tr>'}).join("")+
+  '<div class="tbl"><table class="t-wide"><thead><tr><th>Loueur</th><th>Profil fiscal</th><th>SIREN / TVA</th><th>Mandat</th><th>Stripe Connect</th><th class="num">Contrats</th><th class="num">Loyers oct.</th><th>État</th></tr></thead><tbody>'+
+  ls.map(l=>{const br=blockReason(l);const cs=S.contracts.filter(c=>c.loueur===l.id);const loy=cs.filter(c=>["payé","partiel"].includes(c.e.status)).reduce((a,c)=>a+c.loyer,0);
+   return'<tr class="clk" data-loueur="'+l.id+'" tabindex="0"><td><button type="button" class="link" data-loueur="'+l.id+'" style="min-height:0">'+esc(l.name)+'</button><span class="sub">'+esc(l.contact)+' · '+esc(l.commune)+' ('+l.dept+') · '+esc(l.space)+'</span></td><td>'+PROFILES[l.profile].short+'</td><td class="mono">'+(l.siren?fmtSiren(l.siren):(PROFILES[l.profile].siren?B("b-bad","Manquant"):'—'))+(l.tva?'<span class="sub">'+l.tva+'</span>':PROFILES[l.profile].tvaNum?'<span class="sub">'+B("b-bad","TVA manquante")+'</span>':'')+'</td><td>'+(l.profile==="part"?'<span class="muted">Non requis</span>':l.mandat?'Signé le '+fd(l.mandat):B("b-bad","Non signé"))+'</td><td>'+(l.kyc==="actif"?B("b-ok","Actif"):B("b-warn","Informations manquantes"))+'<span class="sub mono">'+l.stripe+'</span></td><td class="num">'+cs.filter(active).length+'</td><td class="num">'+eur(loy)+'</td><td>'+(br?B("b-bad","Bloqué"):B("b-ok","Prêt"))+'</td></tr>'}).join("")+
   '</tbody></table></div>';
 }
 function openLoueur(id){
-  const l=L(id);const p=PROFILES[l.profile];
+  const l=L(id);
   openDlg("Profil fiscal · "+l.name,
    '<div class="grid cols-2" style="gap:16px"><div>'+
     '<div class="field"><label for="fProfile">Profil fiscal</label><select id="fProfile">'+Object.keys(PROFILES).map(k=>'<option value="'+k+'"'+(k===l.profile?' selected':'')+'>'+PROFILES[k].label+'</option>').join("")+'</select></div>'+
     '<div class="field" id="wSiren"><label for="fSiren">SIREN</label><input type="text" id="fSiren" inputmode="numeric" maxlength="11" value="'+esc(l.siren)+'" autocomplete="off"><p class="muted small">9 chiffres, contrôlés par la clé de Luhn. Exemple valide : 732 829 320.</p><div class="err" id="eSiren"></div></div>'+
     '<div class="field" id="wTva"><label for="fTva">N° de TVA intracommunautaire</label><div class="row" style="flex-wrap:nowrap"><input type="text" id="fTva" value="'+esc(l.tva)+'" autocomplete="off"><button type="button" class="btn sm" data-act="calcTva" style="flex:none">Calculer</button></div><div class="err" id="eTva"></div></div>'+
-    '<div class="field" id="wMandat"><label class="check"><input type="checkbox" id="fMandat"'+(l.mandat?' checked':'')+'> Mandat de facturation signé (autofacturation)</label></div>'+
-    '<div class="field"><label for="fRate">Taux de commission</label><select id="fRate"><option'+(l.rate===15?' selected':'')+'>15</option><option'+(l.rate===18?' selected':'')+'>18</option><option'+(l.rate===12?' selected':'')+'>12</option></select></div>'+
-   '</div><div><div id="fRule" class="note"></div><dl class="kv" style="margin-top:14px"><dt>Exploitant</dt><dd>'+esc(l.contact)+'</dd><dt>Site</dt><dd>'+esc(l.hangar)+' · '+esc(l.commune)+' ('+l.dept+')</dd><dt>Compte Stripe</dt><dd class="mono">'+l.stripe+'</dd>'+(l.profile==="part"?'<dt>NIF (DAC7)</dt><dd class="mono">'+esc(l.nif)+'</dd>':'')+'</dl></div></div>',
+    '<div class="field" id="wMandat"><label class="check"><input type="checkbox" id="fMandat"'+(l.mandat?' checked':'')+'> Mandat de facturation signé (art. 6.5 des conditions)</label></div>'+
+   '</div><div><div id="fRule" class="note"></div><dl class="kv" style="margin-top:14px"><dt>Exploitant</dt><dd>'+esc(l.contact)+'</dd><dt>Espace</dt><dd>'+esc(l.space)+' · '+esc(l.commune)+' ('+l.dept+')</dd><dt>Compte Stripe</dt><dd class="mono">'+l.stripe+'</dd><dt>Contrats actifs</dt><dd>'+S.contracts.filter(c=>c.loueur===l.id&&active(c)).length+'</dd>'+(l.profile==="part"?'<dt>NIF (DAC7)</dt><dd class="mono">'+esc(l.nif)+'</dd>':'')+'</dl></div></div>',
    '<button type="button" class="btn" data-close>Annuler</button><button type="button" class="btn primary" data-act="saveLoueur" data-id="'+l.id+'">'+ic("check")+'Enregistrer</button>');
   const upd=()=>{const k=$("#fProfile").value;const pp=PROFILES[k];
     $("#wSiren").hidden=!pp.siren;$("#wTva").hidden=!pp.tvaNum;$("#wMandat").hidden=k==="part";
-    $("#fRule").innerHTML='<b>'+pp.label+'</b><br>'+({soc:"Autofacture avec TVA à 20 % (gardiennage de véhicules : exclu de l’exonération des locations nues). Factures B2B par la plateforme agréée, B2C en e-reporting.",rsa:"Autofacture avec TVA à 20 %. Les recettes de gardiennage restent accessoires à l’activité agricole : seuil surveillé par le back-office.",fb:"Autofacture sans TVA, mention « TVA non applicable, art. 293 B du CGI ». Alerte automatique à l’approche du seuil de franchise.",part:"Pas de facture : reçu de location. Revenus déclarés chaque année par la plateforme (DAC7). Hors facturation électronique."})[k]};
+    $("#fRule").innerHTML='<b>'+pp.label+'</b><br>'+({soc:"Autofacture du loyer avec TVA à 20 %. Factures aux locataires professionnels par la plateforme agréée, ventes aux particuliers en e-reporting.",rsa:"Autofacture avec TVA à 20 %. Les recettes de stockage restent accessoires à l’activité agricole : seuil surveillé par le back-office.",fb:"Autofacture sans TVA, mention « TVA non applicable, art. 293 B du CGI ». Alerte automatique à l’approche du seuil de franchise.",part:"Cas fréquent des agriculteurs retraités : pas de facture mais un reçu. Revenus déclarés chaque année par la plateforme (DAC7)."})[k]};
   $("#fProfile").onchange=upd;upd();
 }
 function saveLoueur(id){
@@ -742,122 +855,123 @@ function saveLoueur(id){
   const siren=$("#fSiren").value.replace(/\s/g,"");const tva=$("#fTva").value.replace(/\s/g,"").toUpperCase();let ok=true;
   $("#eSiren").textContent="";$("#eTva").textContent="";$("#fSiren").setAttribute("aria-invalid","false");$("#fTva").setAttribute("aria-invalid","false");
   if(pp.siren&&!luhnOk(siren)){$("#eSiren").textContent="SIREN invalide : 9 chiffres avec une clé de contrôle correcte.";$("#fSiren").setAttribute("aria-invalid","true");ok=false}
-  if(pp.tvaNum&&(!tva||tva!==tvaFor(siren))){$("#eTva").textContent=tva?"Ce numéro ne correspond pas au SIREN (clé attendue : "+(luhnOk(siren)?tvaFor(siren):"—")+").":"Numéro de TVA obligatoire pour ce profil.";$("#fTva").setAttribute("aria-invalid","true");ok=false}
-  if(!ok){($("[aria-invalid=true]")||{}).focus?.();return}
+  if(pp.tvaNum&&(!tva||tva!==tvaFor(siren))){$("#eTva").textContent=tva?"Ce numéro ne correspond pas au SIREN (attendu : "+(luhnOk(siren)?tvaFor(siren):"—")+").":"Numéro de TVA obligatoire pour ce profil.";$("#fTva").setAttribute("aria-invalid","true");ok=false}
+  if(!ok){const f=$("[aria-invalid=true]");if(f)f.focus();return}
   const before=PROFILES[l.profile].short;
-  l.profile=k;l.siren=pp.siren?siren:"";l.tva=pp.tvaNum?tva:"";l.rate=+$("#fRate").value;
-  if(k!=="part")l.mandat=$("#fMandat").checked?(l.mandat||"2026-10-18"):null;
+  l.profile=k;l.siren=pp.siren?siren:"";l.tva=pp.tvaNum?tva:"";
+  if(k!=="part")l.mandat=$("#fMandat").checked?(l.mandat||TODAY):null;
   const n=invoiceLoueur(l);
-  log("Profil fiscal modifié",l.name+" : "+before+" → "+pp.short+(n?" · "+n+" document(s) émis":""));
-  closeDlg();toast("Profil de "+l.name+" enregistré."+(n?" "+n+" document(s) en attente émis automatiquement.":""));render();
+  log("Profil fiscal modifié",l.name+" : "+before+" → "+pp.short+(n?" · "+n+" autofacture(s) émise(s)":""));
+  closeDlg();toast("Profil de "+l.name+" enregistré."+(n?" "+n+" autofacture(s) en attente émise(s) automatiquement.":""));render();
 }
 
 /* ---------- anomalies ---------- */
 function vAnom(){
-  const an=anomalies();const groups=[["profil","Profils fiscaux incomplets"],["mandat","Mandats de facturation"],["rappro","Paiements hors Stripe à rapprocher"],["orphelin","Paiements sans réservation"],["ecart","Écarts de montant"],["echec","Paiements échoués"],["rejet","Rejets de la plateforme agréée"],["kyc","Comptes Stripe Connect"]];
+  const an=anomalies();const groups=[["impaye","Impayés (prélèvements et cartes)"],["profil","Profils fiscaux incomplets"],["mandat","Mandats de facturation"],["kyc","Reversements suspendus"],["rappro","Virements à rapprocher"],["orphelin","Paiements sans contrat"],["ecart","Écarts de montant"],["rejet","Rejets de la plateforme agréée"]];
   return'<div class="head"><div><h1>Anomalies</h1><p class="muted">Tout ce qui empêche d’émettre une facture juste ou de reverser le bon montant. Chaque correction est tracée dans le journal d’audit.</p></div></div>'+
-  (an.length?groups.filter(g=>an.some(a=>a.type===g[0])).map(g=>'<section class="card" style="margin-bottom:14px"><div class="card-h"><h2>'+g[1]+'</h2><span class="badge b-gray">'+an.filter(a=>a.type===g[0]).length+'</span></div><div class="list">'+an.filter(a=>a.type===g[0]).map(anItem).join("")+'</div></section>').join(""):
-   '<section class="card empty"><p><b>Aucune anomalie.</b></p><p>Tous les paiements sont rapprochés et facturés.</p></section>');
+  (an.length?groups.filter(g=>an.some(a=>a.type===g[0])).map(g=>'<section class="card" style="margin-bottom:14px"><div class="card-h"><h2>'+g[1]+'</h2>'+B("b-gray",String(an.filter(a=>a.type===g[0]).length))+'</div><div class="list">'+an.filter(a=>a.type===g[0]).map(anItem).join("")+'</div></section>').join(""):
+   '<section class="card empty"><p><b>Aucune anomalie.</b></p><p>Tous les paiements sont rapprochés, facturés et reversables.</p></section>');
 }
 function openMatch(id){
   const b=S.bank.find(x=>x.id===id);
-  const cands=S.resas.filter(r=>r.pay.status==="en attente"&&r.pay.source!=="stripe"&&r.status==="active").sort((a,c)=>(Math.abs(a.due-b.amount)-Math.abs(c.due-b.amount))||(a.id===b.hint?-1:1));
+  const cands=S.contracts.filter(c=>c.e.status==="en attente"&&c.mode==="virement").sort((a,c)=>Math.abs(a.e.amount-b.amount)-Math.abs(c.e.amount-b.amount));
   openDlg("Rapprocher le virement "+b.id,'<dl class="kv" style="margin-bottom:14px"><dt>Libellé bancaire</dt><dd class="mono">'+esc(b.label)+'</dd><dt>Montant</dt><dd>'+eur(b.amount)+' · reçu le '+fd(b.date)+'</dd></dl>'+
-   '<p class="small muted" style="margin-bottom:8px">Suggestions classées par montant et nom du locataire :</p><fieldset style="border:0;padding:0;margin:0"><legend class="sr">Réservation à associer</legend>'+
-   cands.slice(0,6).map((r,i)=>'<label class="check" style="border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px"><input type="radio" name="mR" value="'+r.id+'"'+(i===0?' checked':'')+'><span><b class="mono">'+r.id+'</b> · '+esc(r.tenant.name)+' · '+eur(r.due)+(r.due===b.amount?' <span class="badge b-ok">montant exact</span>':'')+'<br><span class="muted small">'+esc(L(r.loueur).name)+'</span></span></label>').join("")+'</fieldset>',
+   '<p class="small muted" style="margin-bottom:8px">Contrats professionnels en attente de virement, classés par montant :</p><fieldset style="border:0;padding:0;margin:0"><legend class="sr">Contrat à associer</legend>'+
+   cands.slice(0,6).map((c,i)=>'<label class="check" style="border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px"><input type="radio" name="mR" value="'+c.id+'"'+(i===0?' checked':'')+'><span><b class="mono">'+c.id+'</b> · '+esc(c.tenant.name)+' · '+eur(c.e.amount)+(c.e.amount===b.amount?' '+B("b-ok","montant exact"):'')+'<br><span class="muted small">'+esc(L(c.loueur).name)+'</span></span></label>').join("")+'</fieldset>',
    '<button type="button" class="btn" data-close>Annuler</button><button type="button" class="btn primary" data-act="doMatch" data-id="'+b.id+'">'+ic("link")+'Rapprocher et facturer</button>');
 }
 function doMatch(id){
-  const b=S.bank.find(x=>x.id===id);const sel=document.querySelector('input[name="mR"]:checked');if(!sel)return;
-  const r=RS(sel.value);b.matched=r.id;r.pay={...r.pay,id:b.id,date:b.date,amount:b.amount,status:b.amount>=r.due?"payé":"partiel"};
-  r.history.push({t:nowStamp(),label:"Virement "+b.id+" rapproché manuellement ("+eur(b.amount)+")"});
-  const d=tryInvoice(S,r);log("Rapprochement bancaire",b.id+" → "+r.id+(d?" · "+d.num:""));
-  closeDlg();toast("Virement rapproché avec "+r.id+(d?", facture "+d.num+" émise.":"."));render();
+  const b=S.bank.find(x=>x.id===id);const s=document.querySelector('input[name="mR"]:checked');if(!s)return;
+  const c=C(s.value);b.matched=c.id;Object.assign(c.e,{payId:b.id,date:b.date,paid:b.amount,status:b.amount>=c.e.amount?"payé":"partiel"});
+  c.history.push({t:nowStamp(),label:"Virement "+b.id+" rapproché manuellement ("+eur(b.amount)+")"});
+  if(c.e.status==="payé")issueDocs(S,c);log("Rapprochement bancaire",b.id+" → "+c.id);
+  closeDlg();toast("Virement rapproché avec "+c.id+(c.e.status==="payé"?", factures émises.":"."));render();
 }
 function openOrphan(id){
   const o=S.orphans.find(x=>x.id===id);
-  const cands=S.resas.filter(r=>r.pay.status==="échoué"&&r.status==="active");
-  openDlg("Paiement Stripe orphelin",'<dl class="kv" style="margin-bottom:14px"><dt>Paiement</dt><dd class="mono">'+esc(o.id)+'</dd><dt>Montant</dt><dd>'+eur(o.amount)+' · '+fd(o.date)+'</dd><dt>Payeur</dt><dd>'+esc(o.tenant)+'</dd><dt>Contexte</dt><dd>'+esc(o.label)+'</dd></dl>'+
-   '<p class="note">L’argent est sur le compte de la plateforme mais aucune réservation ne lui correspond : on ne peut ni facturer, ni reverser. Deux sorties possibles.</p>'+
-   '<div class="field" style="margin-top:12px"><label for="oR">Associer à une réservation existante</label><select id="oR">'+cands.map(r=>'<option value="'+r.id+'">'+r.id+' · '+esc(r.tenant.name)+' · '+eur(r.due)+'</option>').join("")+'</select></div>',
-   '<button type="button" class="btn danger" data-act="orphRefund" data-id="'+o.id+'">'+ic("refund")+'Rembourser le payeur</button><button type="button" class="btn primary" data-act="orphLink" data-id="'+o.id+'">'+ic("link")+'Associer</button>');
+  const cands=S.contracts.filter(c=>c.e.status==="impayé"&&["en cours","renouvellement"].includes(c.status));
+  openDlg("Paiement Stripe sans contrat",'<dl class="kv" style="margin-bottom:14px"><dt>Paiement</dt><dd class="mono">'+esc(o.id)+'</dd><dt>Montant</dt><dd>'+eur(o.amount)+' · '+fd(o.date)+'</dd><dt>Payeur</dt><dd>'+esc(o.tenant)+'</dd><dt>Contexte</dt><dd>'+esc(o.label)+'</dd></dl>'+
+   '<p class="note">L’argent est sur le compte de la plateforme mais aucun contrat ne lui correspond : on ne peut ni facturer, ni reverser.</p>'+
+   (cands.length?'<div class="field" style="margin-top:12px"><label for="oR">Associer à un contrat impayé</label><select id="oR">'+cands.map(c=>'<option value="'+c.id+'">'+c.id+' · '+esc(c.tenant.name)+' · '+eur(c.e.amount)+'</option>').join("")+'</select></div>':''),
+   '<button type="button" class="btn danger" data-act="orphRefund" data-id="'+o.id+'">'+ic("refund")+'Rembourser le payeur</button>'+(cands.length?'<button type="button" class="btn primary" data-act="orphLink" data-id="'+o.id+'">'+ic("link")+'Associer</button>':''));
 }
 function openGap(id){
-  const r=RS(id);const gap=r.due-r.pay.amount;
-  openDlg("Régulariser l’écart · "+r.id,'<dl class="kv" style="margin-bottom:14px"><dt>Dû</dt><dd>'+eur(r.due)+'</dd><dt>Encaissé</dt><dd>'+eur(r.pay.amount)+' ('+SOURCES[r.pay.source]+' '+esc(r.pay.id)+')</dd><dt>Écart</dt><dd><b>'+eur(gap)+'</b></dd></dl>'+
+  const c=C(id);const gap=c.e.amount-c.e.paid;
+  openDlg("Régulariser l’écart · "+c.id,'<dl class="kv" style="margin-bottom:14px"><dt>Échéance</dt><dd>'+eur(c.e.amount)+'</dd><dt>Reçu</dt><dd>'+eur(c.e.paid)+' ('+esc(c.e.payId)+')</dd><dt>Écart</dt><dd><b>'+eur(gap)+'</b></dd></dl>'+
    '<fieldset style="border:0;padding:0;margin:0"><legend class="small muted" style="margin-bottom:8px">Choisissez la régularisation</legend>'+
-   '<label class="check" style="border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px"><input type="radio" name="gO" value="solde" checked><span><b>Facturer l’encaissé et réclamer le solde</b><br><span class="muted small">Facture de '+eur(r.pay.amount)+' maintenant, lien de paiement de '+eur(gap)+' envoyé au locataire.</span></span></label>'+
-   '<label class="check" style="border:1px solid var(--line);border-radius:10px;padding:8px 12px"><input type="radio" name="gO" value="remise"><span><b>Accorder une remise de '+eur(gap)+'</b><br><span class="muted small">La facture est émise sur le montant encaissé, la commission est calculée sur ce montant.</span></span></label></fieldset>',
-   '<button type="button" class="btn" data-close>Annuler</button><button type="button" class="btn primary" data-act="doGap" data-id="'+r.id+'">'+ic("check")+'Valider</button>');
+   '<label class="check" style="border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px"><input type="radio" name="gO" value="solde" checked><span><b>Facturer l’échéance et réclamer le solde</b><br><span class="muted small">Factures émises sur l’échéance complète, relance de '+eur(gap)+' au locataire (indemnité de 40 € si retard).</span></span></label>'+
+   '<label class="check" style="border:1px solid var(--line);border-radius:10px;padding:8px 12px"><input type="radio" name="gO" value="remise"><span><b>Prendre l’écart sur la commission</b><br><span class="muted small">Avoir de '+eur(Math.min(gap,c.com))+' sur la commission ; le loyer du loueur reste intact.</span></span></label></fieldset>',
+   '<button type="button" class="btn" data-close>Annuler</button><button type="button" class="btn primary" data-act="doGap" data-id="'+c.id+'">'+ic("check")+'Valider</button>');
 }
 function openRejet(id){
-  const d=D(id);const r=RS(d.resa);
+  const d=D(id);const c=C(d.contract);
   openDlg("Corriger le rejet · "+d.num,'<p class="note w" style="margin-bottom:14px">Motif du rejet : '+esc(d.paReason)+'. Le SIREN saisi par le locataire professionnel lors de la réservation est erroné.</p>'+
-   '<div class="field"><label for="rS">SIREN du destinataire ('+esc(r.tenant.name)+')</label><input type="text" id="rS" inputmode="numeric" value="'+fmtSiren(r.tenant.siren).slice(0,-1)+'" autocomplete="off"><p class="muted small">Indice : le SIREN valide est '+fmtSiren(r.tenant.siren)+'.</p><div class="err" id="erS"></div></div>'+
-   '<p class="muted small">La facture n’est pas modifiée sur le fond : seules les données du destinataire sont corrigées avant un nouveau dépôt, comme le permet le cycle de vie des factures électroniques.</p>',
+   '<div class="field"><label for="rS">SIREN du destinataire ('+esc(c.tenant.name)+')</label><input type="text" id="rS" inputmode="numeric" value="'+fmtSiren(c.tenant.siren).slice(0,-1)+'" autocomplete="off"><p class="muted small">Indice : le SIREN valide est '+fmtSiren(c.tenant.siren)+'.</p><div class="err" id="erS"></div></div>',
    '<button type="button" class="btn" data-close>Annuler</button><button type="button" class="btn primary" data-act="doRejet" data-id="'+d.id+'">'+ic("sync")+'Renvoyer à la plateforme agréée</button>');
 }
 
 /* ---------- conformité ---------- */
 function vConf(){
-  const b2b=S.docs.filter(d=>d.b2b);const cnt=s=>b2b.filter(d=>d.pa===s).length;
-  const b2c=S.docs.filter(d=>d.pa==="E-reporting");const ht=b2c.reduce((a,d)=>a+d.ht,0),tva=b2c.reduce((a,d)=>a+d.tva,0);
-  const parts=S.loueurs.filter(l=>l.profile==="part");const er=S.ereport.status;
+  const b2b=S.docs.filter(d=>d.b2b&&d.pa!=="Hors champ");const cnt=s=>b2b.filter(d=>d.pa===s).length;
+  const b2c=S.docs.filter(d=>d.pa==="E-reporting");const own=b2c.filter(d=>["HC","HCA","FS"].includes(d.kind));const mand=b2c.filter(d=>["AF","AV"].includes(d.kind));
+  const sum=(a,f)=>a.reduce((x,d)=>x+d[f],0);const parts=S.loueurs.filter(l=>l.profile==="part");const er=S.ereport.status;
   return'<div class="head"><div><h1>Conformité fiscale</h1><p class="muted">Facturation électronique, e-reporting et déclaration DAC7 des revenus des loueurs.</p></div></div>'+
   '<section class="card" style="margin-bottom:16px"><h2>Calendrier de la réforme</h2><div class="grid cols-3">'+
-   mile("b-ok","1er septembre 2026","Réception obligatoire pour toutes les entreprises","Fait : la plateforme reçoit les factures de ses fournisseurs via sa plateforme agréée. Les loueurs assujettis sont inscrits à l’annuaire.")+
-   mile("b-ok","1er septembre 2026","Émission obligatoire pour les grandes entreprises et ETI","Non concerné directement, mais les locataires professionnels concernés reçoivent déjà des factures électroniques.")+
-   mile("b-info","1er septembre 2027","Émission et e-reporting pour les PME et micro-entreprises","En avance : autofactures B2B et commissions déjà émises en Factur-X, lots d’e-reporting testés chaque mois.")+
+   mile("b-ok","1er septembre 2026","Réception obligatoire pour toutes les entreprises","La plateforme reçoit ses factures fournisseurs via sa plateforme agréée. Les loueurs assujettis sont inscrits à l’annuaire.")+
+   mile("b-ok","1er septembre 2026","Émission obligatoire pour les grandes entreprises et ETI","Certains locataires professionnels reçoivent déjà des factures électroniques.")+
+   mile("b-info","1er septembre 2027","Émission et e-reporting pour les PME et micro-entreprises","En avance : factures B2B déjà émises en Factur-X, lots d’e-reporting testés chaque mois.")+
   '</div></section>'+
   '<div class="grid cols-3">'+
-   '<section class="card"><h2>Factures électroniques B2B</h2><p class="muted small" style="margin-bottom:10px">Autofactures aux locataires professionnels et factures de commission aux loueurs.</p>'+
-    '<dl class="kv"><dt>Acceptées</dt><dd>'+cnt("Acceptée")+'</dd><dt>Déposées</dt><dd>'+cnt("Déposée")+'</dd><dt>Rejetées</dt><dd>'+(cnt("Rejetée")?'<span class="badge b-bad">'+cnt("Rejetée")+'</span>':'0')+'</dd></dl>'+
+   '<section class="card"><h2>Factures électroniques B2B</h2><p class="muted small" style="margin-bottom:10px">Loyers et commissions des locataires professionnels, frais de service des loueurs assujettis.</p>'+
+    '<dl class="kv"><dt>Acceptées</dt><dd>'+cnt("Acceptée")+'</dd><dt>Déposées</dt><dd>'+cnt("Déposée")+'</dd><dt>Rejetées</dt><dd>'+(cnt("Rejetée")?B("b-bad",String(cnt("Rejetée"))):'0')+'</dd></dl>'+
     (cnt("Rejetée")?'<button type="button" class="btn sm" style="margin-top:12px" data-nav="anomalies">Traiter les rejets</button>':'')+'</section>'+
-   '<section class="card"><h2>E-reporting B2C · octobre</h2><p class="muted small" style="margin-bottom:10px">Ventes aux particuliers des loueurs assujettis, transmises pour leur compte.</p>'+
-    '<dl class="kv"><dt>Opérations</dt><dd>'+b2c.length+'</dd><dt>Base HT</dt><dd>'+eur(ht)+'</dd><dt>TVA collectée</dt><dd>'+eur(tva)+'</dd><dt>Statut</dt><dd>'+({"à préparer":'<span class="badge b-gray">À préparer après la clôture</span>',"prêt":'<span class="badge b-info">Prêt</span>',"transmis":'<span class="badge b-info">Transmis</span>',"accepté":'<span class="badge b-ok">Accepté</span>'})[er]+'</dd></dl>'+
+   '<section class="card"><h2>E-reporting B2C · octobre</h2><p class="muted small" style="margin-bottom:10px">Ventes aux particuliers : celles de la plateforme, et celles des loueurs assujettis transmises pour leur compte.</p>'+
+    '<dl class="kv"><dt>Plateforme</dt><dd>'+own.length+' opérations · '+eur(sum(own,"ht"))+' HT · TVA '+eur(sum(own,"tva"))+'</dd><dt>Pour les loueurs</dt><dd>'+mand.length+' opérations · '+eur(sum(mand,"ht"))+' HT · TVA '+eur(sum(mand,"tva"))+'</dd><dt>Statut</dt><dd>'+({"à préparer":B("b-gray","À préparer après la clôture"),"prêt":B("b-info","Prêt"),"transmis":B("b-info","Transmis"),"accepté":B("b-ok","Accepté")})[er]+'</dd></dl>'+
     (er==="prêt"?'<button type="button" class="btn primary sm" style="margin-top:12px" data-act="sendEr">Transmettre le lot</button>':er==="à préparer"?'<button type="button" class="btn sm" style="margin-top:12px" data-nav="docs">Aller à la clôture</button>':'')+'</section>'+
-   '<section class="card"><h2>DAC7 · revenus 2026</h2><p class="muted small" style="margin-bottom:10px">Déclaration annuelle des revenus versés aux loueurs, avant le 31 janvier 2027.</p>'+
-    '<dl class="kv"><dt>Loueurs déclarés</dt><dd>'+S.loueurs.length+' (dont '+parts.length+' particuliers)</dd><dt>Identifiants</dt><dd>'+S.loueurs.filter(l=>l.siren||l.nif).length+' / '+S.loueurs.length+' complets</dd><dt>Revenus 2026</dt><dd>cumul tenu à jour à chaque reversement</dd></dl>'+
+   '<section class="card"><h2>DAC7 · revenus 2026</h2><p class="muted small" style="margin-bottom:10px">Déclaration annuelle des sommes versées aux loueurs, avant le 31 janvier 2027.</p>'+
+    '<dl class="kv"><dt>Loueurs déclarés</dt><dd>'+S.loueurs.length+' (dont '+parts.length+' particuliers)</dd><dt>Identifiants</dt><dd>'+S.loueurs.filter(l=>l.siren||l.nif).length+' / '+S.loueurs.length+' complets</dd><dt>Montants</dt><dd>loyers reversés, frais de service et commissions retenus</dd></dl>'+
     '<button type="button" class="btn sm" style="margin-top:12px" data-act="csvDac7">'+ic("dl")+'Exporter la pré-déclaration (CSV)</button></section>'+
   '</div>'+
-  '<section class="card" style="margin-top:16px"><h2>Règles fiscales appliquées</h2><div class="tbl"><table class="t-mid"><thead><tr><th>Profil du loueur</th><th>Document</th><th>TVA</th><th>Canal</th><th>Prérequis</th></tr></thead><tbody>'+
-   '<tr><td>Société agricole (GAEC, EARL, SCEA)</td><td>Autofacture</td><td>20 %</td><td>Plateforme agréée (B2B) ou e-reporting (B2C)</td><td>SIREN, TVA, mandat</td></tr>'+
-   '<tr><td>Exploitant au régime simplifié agricole</td><td>Autofacture</td><td>20 %</td><td>Plateforme agréée ou e-reporting</td><td>SIREN, TVA, mandat</td></tr>'+
-   '<tr><td>Micro-entrepreneur en franchise</td><td>Autofacture</td><td>Non applicable (293 B)</td><td>Plateforme agréée ou e-reporting</td><td>SIREN, mandat</td></tr>'+
-   '<tr><td>Particulier</td><td>Reçu</td><td>Hors champ</td><td>DAC7 uniquement</td><td>NIF, date de naissance</td></tr>'+
-   '<tr><td>Commission de la plateforme</td><td>Facture Hangarium</td><td>20 %</td><td>Plateforme agréée</td><td>—</td></tr>'+
-  '</tbody></table></div><p class="muted small" style="margin-top:10px">Ces règles sont paramétrables (table versionnée avec date d’effet) et à valider avec l’expert-comptable avant la mise en production.</p></section>';
+  '<section class="card" style="margin-top:16px"><h2>Règles fiscales appliquées</h2><div class="tbl"><table class="t-mid"><thead><tr><th>Flux</th><th>Document</th><th>TVA</th><th>Canal</th></tr></thead><tbody>'+
+   '<tr><td>Loyer · société agricole ou exploitant au RSA</td><td>Autofacture (mandat)</td><td>20 %</td><td>Plateforme agréée (B2B) ou e-reporting (B2C)</td></tr>'+
+   '<tr><td>Loyer · micro-entrepreneur en franchise</td><td>Autofacture (mandat)</td><td>Non applicable (293 B)</td><td>Plateforme agréée ou e-reporting</td></tr>'+
+   '<tr><td>Loyer · particulier, agriculteur retraité</td><td>Reçu</td><td>Hors champ</td><td>DAC7 uniquement</td></tr>'+
+   '<tr><td>Commission locataire</td><td>Facture Hangarium</td><td>20 %</td><td>Plateforme agréée ou e-reporting</td></tr>'+
+   '<tr><td>Frais de service loueur</td><td>Facture Hangarium</td><td>20 %</td><td>Plateforme agréée ou e-reporting</td></tr>'+
+   '<tr><td>Indemnité de résiliation</td><td>Note d’indemnité</td><td>Hors champ (à confirmer)</td><td>Comptabilité uniquement</td></tr>'+
+   '<tr><td>Compensations commerciales (impayés, franchise, avocat)</td><td>Pièce comptable</td><td>—</td><td>Comptabilité uniquement</td></tr>'+
+  '</tbody></table></div><p class="muted small" style="margin-top:10px">Règles paramétrables (table versionnée avec date d’effet), à valider avec l’expert-comptable avant la mise en production.</p></section>';
 }
 const mile=(b,d,t,s)=>'<div><span class="badge '+b+'">'+d+'</span><h3 style="margin:8px 0 4px">'+t+'</h3><p class="muted small">'+s+'</p></div>';
 
 /* ---------- architecture ---------- */
 function vArchi(){
   const box=(t,s)=>'<div class="box"><b>'+t+'</b><span>'+s+'</span></div>';
-  return'<div class="head"><div><h1>Architecture proposée</h1><p class="muted">Un back-office léger qui orchestre des services existants au lieu de reconstruire un ERP.</p></div></div>'+
+  return'<div class="head"><div><h1>Architecture proposée</h1><p class="muted">Un back-office léger, à côté de la plateforme existante, qui orchestre des services éprouvés au lieu de reconstruire un ERP.</p></div></div>'+
   '<section class="card"><h2 class="sr">Flux de données</h2><div class="arch">'+
-   '<div class="col"><p class="small muted"><b>Sources</b></p>'+box("Plateforme de réservation","Webhooks : réservation, modification, annulation")+box("Stripe Connect","payment_intent, refund, transfer, payout")+box("Banque via Pennylane","Virements et chèques hors Stripe")+'</div>'+
+   '<div class="col"><p class="small muted"><b>Sources</b></p>'+box("Plateforme de réservation (Bubble)","API Workflows : contrat signé, modifié, résilié")+box("Stripe","Acomptes carte, prélèvements SEPA, remboursements, comptes Connect")+box("Banque via Pennylane","Virements des contrats professionnels")+'</div>'+
    '<div class="arr" aria-hidden="true">'+ic("arrow")+'</div>'+
-   '<div class="core"><h3>Back-office facturation</h3>'+box("Collecte et rapprochement","Journal d’événements idempotent, rejouable")+box("Moteur fiscal","Profils, TVA, mentions, règles datées")+box("Émission","Numérotation par émetteur, Factur-X, avoirs")+box("Administration","Recherche, corrections, audit, rôles")+'</div>'+
+   '<div class="core"><h3>Back-office facturation</h3>'+box("Collecte et rapprochement","Journal d’événements idempotent, rejouable")+box("Moteur de règles","Grille de commission, pénalités, profils fiscaux, TVA")+box("Émission","Numérotation par émetteur, Factur-X, avoirs, reversements")+box("Administration","Recherche, corrections, audit, rôles")+'</div>'+
    '<div class="arr" aria-hidden="true">'+ic("arrow")+'</div>'+
-   '<div class="col"><p class="small muted"><b>Destinations</b></p>'+box("Pennylane","Comptabilité de la plateforme : commissions, comptes de tiers")+box("Plateforme agréée","Factures électroniques et e-reporting")+box("Espace loueur","Factures, relevés de reversement")+box("DGFiP","Déclaration DAC7 annuelle")+'</div>'+
+   '<div class="col"><p class="small muted"><b>Destinations</b></p>'+box("Pennylane","Comptabilité de la plateforme : commissions, frais, fonds de tiers")+box("Plateforme agréée","Factures électroniques et e-reporting")+box("Espaces loueur et locataire (Bubble)","Factures disponibles dès le paiement")+box("DGFiP","Déclaration DAC7 annuelle")+'</div>'+
   '</div></section>'+
   '<div class="grid cols-2" style="margin-top:16px"><section class="card"><h2>Points à challenger</h2><ol style="margin:0;padding-left:20px;display:grid;gap:12px;font-size:14.5px">'+
-   '<li><b>Pennylane ne remplace pas le moteur d’autofacturation.</b> Il gère la comptabilité d’une entité, pas l’émission au nom de 2 000 loueurs avec leurs propres séquences. Il reçoit donc les écritures de la plateforme (commissions, fonds encaissés pour compte de tiers), pas les factures des loueurs.</li>'+
-   '<li><b>Stripe Invoicing n’est pas adapté au multi-émetteur.</b> On garde Stripe pour l’encaissement et les reversements (charges séparées et transferts Connect), et la facture est produite par le back-office à partir des webhooks.</li>'+
-   '<li><b>Le mandat d’autofacturation est la pièce centrale.</b> Il est signé à l’inscription du loueur, versionné, et la plateforme agréée choisie doit savoir émettre pour le compte de tiers. C’est le premier critère de sélection.</li>'+
-   '<li><b>Les paiements hors Stripe passent par un rapprochement.</b> On importe les relevés via l’API Pennylane, on propose des correspondances automatiques et on traite le reste à la main, comme dans la démo.</li>'+
-   '<li><b>Une facture n’est jamais modifiée.</b> Toute correction passe par un avoir, et chaque action est historisée : c’est ce qui rend le système auditable par un contrôleur fiscal.</li>'+
-   '<li><b>Les loueurs particuliers sortent du périmètre facturation</b> mais entrent dans DAC7 : leurs identifiants sont collectés dès l’onboarding.</li>'+
+   '<li><b>Ne pas mettre la facturation dans Bubble.</b> Bubble reste l’outil des réservations, mais il n’offre ni transactions, ni numérotation sans trou, ni volumétrie confortable. Le back-office a sa propre base et lit Bubble par API ; Stripe reste la source de vérité des paiements.</li>'+
+   '<li><b>Des factures automatiques, plus « sur demande ».</b> Aujourd’hui la facture est envoyée sur demande, un mois après le paiement. Avec la réforme, chaque échéance payée doit produire ses documents tout de suite : autofacture du loyer et facture de commission.</li>'+
+   '<li><b>Pennylane ne remplace pas le moteur d’autofacturation.</b> Il tient la comptabilité d’une entité, pas l’émission au nom de 2 000 loueurs avec leurs propres séquences. Il reçoit les écritures de la plateforme et les fonds encaissés pour compte de tiers.</li>'+
+   '<li><b>Les règles métier sont des données.</b> Grille de commission (durée, saison, nombre de biens), frais de service, barème des pénalités : tables versionnées avec date d’effet, pour qu’un changement de conditions générales ne demande pas de déploiement.</li>'+
+   '<li><b>Indemnités et compensations ne sont pas des ventes.</b> Pénalités de résiliation, compensations d’impayés, de franchise ou d’avocat : leur traitement TVA et comptable est à trancher avec l’expert-comptable avant d’écrire le code.</li>'+
+   '<li><b>Le mandat d’autofacturation conditionne le choix de la plateforme agréée.</b> Elle doit savoir émettre pour le compte de tiers et gérer les rejets ; c’est le premier critère de sélection.</li>'+
   '</ol></section>'+
-  '<section class="card"><h2>Mise en œuvre</h2><dl class="kv"><dt>Back-end</dt><dd>PHP 8.3 et Laravel, PostgreSQL, files de traitement (Horizon) pour les webhooks et la clôture</dd><dt>Documents</dt><dd>Génération Factur-X (PDF/A-3 + XML CII), archivage immuable</dd><dt>Intégrations</dt><dd>API Stripe, API Pennylane, API de la plateforme agréée, webhooks de la plateforme existante</dd><dt>Fiabilité</dt><dd>Clés d’idempotence sur chaque événement, rejeu, alertes en cas d’écart entre Stripe et la base</dd><dt>Accès</dt><dd>Rôles comptabilité, support et lecture seule, journal d’audit</dd></dl>'+
-   '<h3 style="margin:18px 0 8px">Découpage en lots</h3><ol style="margin:0;padding-left:20px;display:grid;gap:6px;font-size:14.5px"><li>Collecte et modèle de données unifié, rapprochement Stripe</li><li>Moteur fiscal et autofacturation, avoirs</li><li>Commissions, clôture, export Pennylane</li><li>Hors Stripe, interface d’administration et corrections</li><li>Plateforme agréée, e-reporting, DAC7, mise en production</li></ol></section></div>';
+  '<section class="card"><h2>Mise en œuvre</h2><dl class="kv"><dt>Back-end</dt><dd>PHP 8.3 et Laravel, PostgreSQL, files de traitement (Horizon) pour les webhooks et la clôture</dd><dt>Documents</dt><dd>Génération Factur-X (PDF/A-3 + XML CII), archivage immuable</dd><dt>Intégrations</dt><dd>API Bubble (Data API, API Workflows), Stripe (PaymentIntents, SEPA Debit, Connect), Pennylane, plateforme agréée</dd><dt>Fiabilité</dt><dd>Clés d’idempotence, rejeu des événements, contrôle quotidien Stripe ↔ base ↔ Pennylane</dd><dt>Accès</dt><dd>Rôles comptabilité, support et lecture seule, journal d’audit</dd></dl>'+
+   '<h3 style="margin:18px 0 8px">Découpage en lots</h3><ol style="margin:0;padding-left:20px;display:grid;gap:6px;font-size:14.5px"><li>Collecte Bubble et Stripe, modèle contrat / échéance unifié</li><li>Autofacturation et commissions à chaque échéance, avoirs</li><li>Résiliations, pénalités, impayés et compensations selon les conditions générales</li><li>Clôture mensuelle : frais de service, reversements Connect, export Pennylane</li><li>Plateforme agréée, e-reporting, DAC7, mise en production</li></ol></section></div>';
 }
 
 /* ---------- journal ---------- */
 function vAudit(){
   return'<div class="head"><div><h1>Journal d’audit</h1><p class="muted">Chaque action manuelle ou automatique, avec son auteur. Non modifiable.</p></div></div>'+
   '<div class="tbl"><table class="t-mid"><thead><tr><th>Date</th><th>Auteur</th><th>Action</th><th>Détail</th></tr></thead><tbody>'+
-  S.audit.map(a=>'<tr><td>'+fdt(a.t)+'</td><td>'+esc(a.who)+'</td><td><b>'+esc(a.what)+'</b></td><td class="wrap">'+esc(a.detail)+'</td></tr>').join("")+'</tbody></table></div>';
+  S.audit.map(a=>'<tr><td class="dt">'+fdt(a.t)+'</td><td>'+esc(a.who)+'</td><td><b>'+esc(a.what)+'</b></td><td class="wrap">'+esc(a.detail)+'</td></tr>').join("")+'</tbody></table></div>';
 }
 
 /* ---------- dialogue ---------- */
@@ -873,6 +987,7 @@ $("#dlg").addEventListener("close",()=>{if(lastFocus&&document.contains(lastFocu
 /* ---------- CSV ---------- */
 function csv(name,rows){const s="﻿"+rows.map(r=>r.map(c=>'"'+String(c??"").replace(/"/g,'""')+'"').join(";")).join("\r\n");
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([s],{type:"text/csv;charset=utf-8"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+const cents=v=>(v/100).toFixed(2).replace(".",",");
 
 /* ---------- événements ---------- */
 document.addEventListener("click",e=>{
@@ -884,37 +999,37 @@ document.addEventListener("click",e=>{
   const a=t.dataset.act,id=t.dataset.id;
   if(!a){if(t.dataset.op){openOp(t.dataset.op);return}if(t.dataset.doc){openDoc(t.dataset.doc);return}if(t.dataset.loueur){openLoueur(t.dataset.loueur);return}return}
   const A={
-    reset(){if(!confirm("Réinitialiser toutes les données de la démo ?"))return;try{localStorage.removeItem(KEY)}catch(e){}RUN=rng(987);S=generate();save();cur={...cur,view:"dash",q:"",fs:"all",fsrc:"all",fl:"all",page:0,docKind:"all",lq:"",lp:"all"};closeDlg();render();toast("Démo réinitialisée.")},
-    syncPenny(){const n=S.docs.filter(d=>d.penny==="À synchroniser").length;S.docs.forEach(d=>d.penny="Synchronisé");S.penny.last=nowStamp();log("Synchronisation Pennylane",n+" document(s) exporté(s)");toast(n+" document(s) envoyés à Pennylane (simulation).");render()},
+    reset(){if(!confirm("Réinitialiser toutes les données de la démo ?"))return;try{localStorage.removeItem(KEY)}catch(e){}RUN=rng(987);S=generate();save();cur={view:"dash",q:"",fs:"all",fsrc:"all",fl:"all",page:0,docKind:"all",lq:"",lp:"all"};closeDlg();render();toast("Démo réinitialisée.")},
+    syncPenny(){const n=S.docs.filter(d=>d.penny==="À synchroniser").length;S.docs.forEach(d=>d.penny="Synchronisé");S.penny.last=nowStamp();log("Synchronisation Pennylane",n+" document(s) exporté(s)");toast(n+" document(s) envoyé(s) à Pennylane (simulation).");render()},
     clearF(){cur.q="";cur.fs="all";cur.fsrc="all";cur.fl="all";cur.page=0;render()},
     prev(){cur.page--;render()},next(){cur.page++;render();window.scrollTo(0,0)},
-    csvOps(){csv("operations-octobre-2026.csv",[["Réservation","Locataire","Loueur","Objet","Montant dû","Encaissé","Source","Référence paiement","Statut","Document"]].concat(filteredOps().map(r=>[r.id,r.tenant.name,L(r.loueur).name,r.object,(r.due/100).toFixed(2).replace(".",","),(r.pay.amount/100).toFixed(2).replace(".",","),SOURCES[r.pay.source],r.pay.id||"",r.status==="active"?r.pay.status:r.status,r.doc?D(r.doc).num:(r.block||"")])));toast("Export CSV téléchargé.")},
-    csvDac7(){csv("dac7-pre-declaration-2026.csv",[["Loueur","Type","SIREN","NIF","Commune","Revenus bruts 2026 (€)","Commissions retenues (€)","Nombre de locations"]].concat(S.loueurs.map(l=>{const ds=S.docs.filter(d=>d.loueur===l.id&&["AF","RC","AV"].includes(d.kind));return[l.name,l.profile==="part"?"Personne physique":"Entité",l.siren,l.nif,l.commune,(ds.reduce((a,d)=>a+d.ttc,0)/100).toFixed(2).replace(".",","),(ds.reduce((a,d)=>a+d.com,0)*1.2/100).toFixed(2).replace(".",","),ds.filter(d=>d.kind!=="AV").length]})));toast("Pré-déclaration DAC7 exportée.")},
+    csvOps(){csv("contrats-echeances-octobre-2026.csv",[["Contrat","Statut contrat","Locataire","Loueur","Biens","Période initiale (mois)","Échéance","Date","Loyer","Commission","Montant","Moyen","Statut paiement","Documents"]].concat(filteredOps().map(c=>[c.id,c.status,c.tenant.name,L(c.loueur).name,c.biens.map(b=>b.type).join(" + "),c.N,echLabel(c),fd(c.e.date),cents(c.loyer),cents(c.com),cents(c.e.amount),MODES[c.mode],c.e.status,c.e.docs.map(x=>D(x).num).join(" ")])));toast("Export CSV téléchargé.")},
+    csvDac7(){csv("dac7-pre-declaration-2026.csv",[["Loueur","Type","SIREN","NIF","Commune","Loyers 2026 (€)","Frais de service retenus (€)","Nombre de contrats"]].concat(S.loueurs.map(l=>{const cs=S.contracts.filter(c=>c.loueur===l.id);return[l.name,l.profile==="part"?"Personne physique":"Entité",l.siren,l.nif,l.commune,cents(cs.filter(c=>["payé","partiel"].includes(c.e.status)).reduce((x,c)=>x+c.loyer,0)),cents(cs.filter(active).length*FRAIS_SERVICE),cs.length]})));toast("Pré-déclaration DAC7 exportée.")},
     cancel(){openCancel(id)},doCancel(){doCancel(id)},
-    cancelSimple(){const r=RS(id);if(!confirm("Annuler la réservation "+r.id+" ? Aucun paiement n’a été facturé, aucun avoir n’est nécessaire."))return;r.status="annulée";r.history.push({t:nowStamp(),label:"Réservation annulée avant facturation",k:"w"});log("Annulation",r.id+" (non facturée)");toast("Réservation "+r.id+" annulée.");render();openOp(r.id)},
     viewDoc(){openDoc(id)},
     print(){const z=$("#printZone");z.innerHTML=docHtml(D(id));document.body.classList.add("printing");window.print();setTimeout(()=>{document.body.classList.remove("printing");z.innerHTML=""},400)},
     runClose(){t.disabled=true;runClose()},
-    fixLoueur(){openLoueur(id)},
-    saveLoueur(){saveLoueur(id)},
+    fixLoueur(){openLoueur(id)},saveLoueur(){saveLoueur(id)},
     calcTva(){const s=$("#fSiren").value.replace(/\s/g,"");if(luhnOk(s)){$("#fTva").value=tvaFor(s);$("#eTva").textContent=""}else{$("#eTva").textContent="Saisissez d’abord un SIREN valide."}},
-    kyc(){const l=L(id);l.kyc="actif";log("Stripe Connect",l.name+" : vérification d’identité terminée");toast("Lien envoyé à "+l.contact+". Vérification validée (simulation) : reversements réactivés.");render()},
+    kyc(){const l=L(id);l.kyc="actif";log("Stripe Connect",l.name+" : informations légales complétées, reversements réactivés");toast("Lien Stripe envoyé à "+l.contact+". Informations validées (simulation) : reversements réactivés.");render()},
     match(){openMatch(id)},doMatch(){doMatch(id)},
     orphan(){openOrphan(id)},
-    orphRefund(){const o=S.orphans.find(x=>x.id===id);o.resolved=true;log("Paiement orphelin remboursé",o.id+" · "+eur(o.amount));closeDlg();toast("Remboursement de "+eur(o.amount)+" envoyé à Stripe (simulation).");render()},
-    orphLink(){const o=S.orphans.find(x=>x.id===id);const r=RS($("#oR").value);if(!r){closeDlg();return}o.resolved=true;r.pay={...r.pay,id:o.id,date:o.date,amount:o.amount,status:o.amount>=r.due?"payé":"partiel"};r.history.push({t:nowStamp(),label:"Paiement "+o.id+" associé manuellement"});const d=tryInvoice(S,r);log("Paiement orphelin associé",o.id+" → "+r.id);closeDlg();toast("Paiement associé à "+r.id+(d?", facture "+d.num+" émise.":(r.pay.status==="partiel"?" : écart à régulariser.":".")));render()},
+    orphRefund(){const o=S.orphans.find(x=>x.id===id);o.resolved=true;log("Paiement sans contrat remboursé",o.id+" · "+eur(o.amount));closeDlg();toast("Remboursement de "+eur(o.amount)+" envoyé à Stripe (simulation).");render()},
+    orphLink(){const o=S.orphans.find(x=>x.id===id);const c=C($("#oR").value);if(!c){closeDlg();return}o.resolved=true;Object.assign(c.e,{payId:o.id,date:o.date,paid:o.amount,status:o.amount>=c.e.amount?"payé":"partiel",reason:null});c.history.push({t:nowStamp(),label:"Paiement "+o.id+" associé manuellement"});if(c.e.status==="payé")issueDocs(S,c);log("Paiement associé",o.id+" → "+c.id);closeDlg();toast("Paiement associé à "+c.id+(c.e.status==="partiel"?" : écart à régulariser.":", factures émises."));render()},
     gap(){openGap(id)},
-    doGap(){const r=RS(id);const opt=document.querySelector('input[name="gO"]:checked').value;const gap=r.due-r.pay.amount;r.pay.status="payé";
-      r.history.push({t:nowStamp(),label:opt==="solde"?"Lien de paiement du solde ("+eur(gap)+") envoyé au locataire":"Remise de "+eur(gap)+" accordée",k:"w"});
-      const d=tryInvoice(S,r);if(opt==="remise")r.due=r.pay.amount;log("Régularisation d’écart",r.id+" · "+(opt==="solde"?"solde réclamé":"remise")+" "+eur(gap));closeDlg();toast(d?"Facture "+d.num+" émise sur "+eur(d.ttc)+".":"Régularisation enregistrée.");render()},
-    retry(){const r=RS(id);toast("Lien de paiement envoyé à "+r.tenant.name+" (simulation).");r.history.push({t:nowStamp(),label:"Relance de paiement envoyée par e-mail"});
-      setTimeout(()=>{r.pay={...r.pay,status:"payé",amount:r.due,date:"2026-10-18",id:"pi_3Q"+alnum(RUN,18)};r.history.push({t:nowStamp(),label:"Webhook payment_intent.succeeded reçu"});const d=tryInvoice(S,r);log("Paiement reçu après relance",r.id+(d?" · "+d.num:""));save();toast("Paiement reçu pour "+r.id+(d?" : facture "+d.num+" émise.":"."));render()},1800);save();render()},
-    manualPay(){const r=RS(id);r.pay={...r.pay,status:"payé",amount:r.due,date:"2026-10-18",id:(r.pay.source==="cheque"?"CHQ-":"VIR-")+pad(Math.floor(RUN()*9999999),7)};r.history.push({t:nowStamp(),label:(r.pay.source==="cheque"?"Chèque":"Virement")+" enregistré manuellement"});const d=tryInvoice(S,r);log("Paiement hors Stripe saisi",r.id+" · "+eur(r.due));closeDlg();toast("Paiement enregistré"+(d?", facture "+d.num+" émise.":"."));render();openOp(r.id)},
+    doGap(){const c=C(id);const opt=document.querySelector('input[name="gO"]:checked').value;const gap=c.e.amount-c.e.paid;c.e.status="payé";
+      issueDocs(S,c);
+      if(opt==="remise"){const a=avoir(c,docOf(c,"HC"),"HCA",Math.min(gap,c.com),"Écart de virement");c.e.docs.push(a.id);c.history.push({t:nowStamp(),label:"Écart de "+eur(gap)+" pris sur la commission ("+a.num+")",k:"w"})}
+      else c.history.push({t:nowStamp(),label:"Relance du solde de "+eur(gap)+" envoyée au locataire",k:"w"});
+      log("Régularisation d’écart",c.id+" · "+(opt==="solde"?"solde réclamé":"avoir sur commission")+" "+eur(gap));closeDlg();toast("Écart régularisé, factures émises.");render()},
+    impaye(){openImpaye(id)},resilImpaye(){resilImpaye(id)},
+    retry(){const c=C(id);closeDlg();toast("Nouvelle tentative de paiement envoyée à Stripe (simulation).");c.history.push({t:nowStamp(),label:"Paiement représenté, relance e-mail envoyée"});
+      setTimeout(()=>{Object.assign(c.e,{status:"payé",paid:c.e.amount,date:TODAY,payId:"pi_3Q"+alnum(RUN,18),reason:null});c.history.push({t:nowStamp(),label:"Webhook payment_intent.succeeded reçu"});issueDocs(S,c);log("Impayé régularisé",c.id+" · "+eur(c.e.amount));save();toast("Paiement reçu pour "+c.id+" : factures émises.");render()},1800);save();render()},
+    manualPay(){const c=C(id);Object.assign(c.e,{status:"payé",paid:c.e.amount,date:TODAY,payId:"VIR-"+pad(Math.floor(RUN()*9999999),7)});c.history.push({t:nowStamp(),label:"Virement enregistré manuellement"});issueDocs(S,c);log("Virement saisi",c.id+" · "+eur(c.e.amount));closeDlg();toast("Virement enregistré, factures émises.");render();openOp(c.id)},
     rejet(){openRejet(id)},
-    doRejet(){const d=D(id);const r=RS(d.resa);const v=$("#rS").value.replace(/\s/g,"");if(v!==r.tenant.siren||!luhnOk(v)){$("#erS").textContent="SIREN invalide ou introuvable dans l’annuaire.";$("#rS").setAttribute("aria-invalid","true");$("#rS").focus();return}
-      d.pa="Déposée";d.paReason=null;r.history.push({t:nowStamp(),label:"SIREN destinataire corrigé, facture "+d.num+" redéposée"});log("Rejet corrigé",d.num+" redéposée à la plateforme agréée");closeDlg();toast("Facture redéposée. Statut « acceptée » attendu sous quelques secondes.");render();
-      setTimeout(()=>{d.pa="Acceptée";save();toast("Plateforme agréée : facture "+d.num+" acceptée.");render()},2500)},
-    sendEr(){S.ereport.status="transmis";log("E-reporting",'Lot d’octobre 2026 transmis');render();setTimeout(()=>{S.ereport.status="accepté";save();toast("Lot d’e-reporting d’octobre accepté par la plateforme agréée (simulation).");if(cur.view==="conformite")render()},2000)}
+    doRejet(){const d=D(id);const c=C(d.contract);const v=$("#rS").value.replace(/\s/g,"");if(v!==c.tenant.siren||!luhnOk(v)){$("#erS").textContent="SIREN invalide ou introuvable dans l’annuaire.";$("#rS").setAttribute("aria-invalid","true");$("#rS").focus();return}
+      d.pa="Déposée";d.paReason=null;c.history.push({t:nowStamp(),label:"SIREN destinataire corrigé, facture "+d.num+" redéposée"});log("Rejet corrigé",d.num+" redéposée à la plateforme agréée");closeDlg();toast("Facture redéposée. Statut « acceptée » attendu sous quelques secondes.");render()},
+    sendEr(){S.ereport.status="transmis";log("E-reporting","Lot d’octobre 2026 transmis");render();setTimeout(()=>{S.ereport.status="accepté";save();toast("Lot d’e-reporting d’octobre accepté par la plateforme agréée (simulation).");if(cur.view==="conformite")render()},2000)}
   };
   if(A[a])A[a]();save();
 });
@@ -927,6 +1042,7 @@ document.addEventListener("change",e=>{const id=e.target.id;if(["fs","fsrc","fl"
 window.addEventListener("afterprint",()=>document.body.classList.remove("printing"));
 
 load();render();
+
 </script>
 </body>
 </html>
