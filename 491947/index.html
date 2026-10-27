@@ -2,20 +2,915 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="30">
-<title>Démo en cours de déploiement</title>
+<title>Cabinet dentaire en ligne</title>
+<meta name="description" content="Site de cabinet dentaire avec prise de rendez-vous en ligne, assistant IA, soins et tarifs avec vidéos, dossier patient, rappels SMS et e-mail, et espace cabinet (agenda, patients, base de connaissances de l’assistant).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: light dark; }
-body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px;
-       font: 16px/1.5 system-ui, sans-serif; text-align: center; }
+:root{
+  --bg:#F6F4EF;--panel:#FFFFFF;--panel-2:#F1EEE7;--ink:#182A2C;--muted:#4F5F5D;--line:#E3DFD5;--line-2:#C3BDB0;
+  --accent:#0E6A64;--accent-ink:#FFFFFF;--accent-soft:#DCEFEB;--accent-text:#0A5550;
+  --hero:#123B39;--hero-ink:#F1F8F6;--hero-muted:#BFD8D3;
+  --band:#F7EBD3;--band-ink:#6E4708;
+  --ok:#1D6A3E;--ok-soft:#DDF0E3;--warn:#85500A;--warn-soft:#FAEBD3;--bad:#A3252E;--bad-soft:#FAE1E2;--info:#26508A;--info-soft:#E2EAF6;--gray:#505B5A;--gray-soft:#E9ECEA;
+  --p1:#0E6A64;--p2:#8A5A12;--p3:#6B4597;
+  --shadow:0 1px 2px rgba(24,42,44,.05),0 4px 16px rgba(24,42,44,.06);
+  --font:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;--head:"Fraunces",Georgia,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0D1615;--panel:#14201F;--panel-2:#1A2A28;--ink:#E5EEEC;--muted:#A2B3B0;--line:#253533;--line-2:#3B514E;
+  --accent:#5EC7BC;--accent-ink:#062320;--accent-soft:#143633;--accent-text:#8EDDD4;
+  --hero:#102D2B;--hero-ink:#EAF6F4;--hero-muted:#A9C9C3;
+  --band:#2D2412;--band-ink:#EFC77E;
+  --ok:#75D39E;--ok-soft:#15301F;--warn:#EFB866;--warn-soft:#352713;--bad:#FF959B;--bad-soft:#3B1B1E;--info:#9BC1F0;--info-soft:#172A40;--gray:#B6C2C0;--gray-soft:#222F2E;
+  --p1:#5EC7BC;--p2:#E3B266;--p3:#B9A0E6;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 4px 16px rgba(0,0,0,.25);color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.2;font-family:var(--head);font-weight:600;letter-spacing:-.01em}
+h1{font-size:clamp(24px,2.6vw,32px)}h2{font-size:21px}h3,.h3{font-size:17px}
+p{margin:0}ul,ol{margin:0;padding:0;list-style:none}
+.muted{color:var(--muted)}.small{font-size:13.5px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.min0{min-width:0}
+
+.demo-band{background:var(--band);font-size:13px;padding:4px 16px;display:flex;gap:6px 14px;justify-content:center;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.demo-band b{color:var(--band-ink)}
+.demo-band button{min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:2px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+
+.top{display:flex;align-items:center;gap:8px 18px;padding:8px clamp(16px,2vw,32px);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--head);font-weight:700;font-size:19px;min-width:0}
+.brand small{display:block;font-family:var(--font);font-weight:500;font-size:12px;color:var(--muted)}
+.mark{width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.mark svg{width:22px;height:22px}
+#nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.tab{min-height:44px;display:inline-flex;gap:8px;align-items:center;padding:0 14px;border-radius:10px;border:0;background:transparent;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--panel-2);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent-soft);color:var(--accent-text)}
+.cnt{font-size:12px;background:var(--bad);color:#fff;border-radius:999px;padding:0 7px;line-height:20px}
+@media (prefers-color-scheme:dark){.cnt{color:#2a0b0d}}
+.seg{margin-left:auto;display:flex;border:1px solid var(--line-2);border-radius:12px;padding:3px;background:var(--panel-2);min-width:0}
+.seg button{min-height:40px;border:0;background:transparent;border-radius:9px;padding:0 14px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+main{padding:20px clamp(16px,2vw,32px) 110px}
+@media (max-width:900px){.seg{margin-left:0;width:100%}.seg button{flex:1;justify-content:center;min-height:44px;padding:0 8px}#nav{order:3;width:100%}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;color:var(--ink);text-align:center;text-decoration:none}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent-text)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn.lg{min-height:50px;padding:0 20px;font-size:16px}
+.btn.sm{min-height:44px;padding:0 12px;font-size:14px}
+.btn.block{width:100%}
+.btn.on-dark{background:transparent;color:var(--hero-ink);border-color:var(--hero-muted)}
+.btn.on-dark:hover{background:rgba(255,255,255,.08)}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;flex:none;color:var(--ink)}
+.icon-btn:hover{background:var(--panel-2)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lnk{border:0;background:none;padding:0;min-height:44px;cursor:pointer;font:inherit;font-weight:600;color:var(--accent-text);text-align:left;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.flabel{font-weight:600;font-size:13.5px}
+.field.full{grid-column:1/-1}
+.hint{font-size:12.5px;color:var(--muted)}
+.err{font-size:13px;color:var(--bad);font-weight:600}
+.err:empty{display:none}
+input[type=text],input[type=email],input[type=tel],input[type=search],input[type=date],select,textarea{min-height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:8px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:88px}
+[aria-invalid="true"]{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:8px;font-weight:700;font-size:14px}
+.fgrid{display:grid;gap:12px 14px;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr))}
+.ck{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-weight:500}
+.ck input{width:20px;height:20px;accent-color:var(--accent);margin:0;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head>*{min-width:0}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.b-gray{background:var(--gray-soft);color:var(--gray)}.b-info{background:var(--info-soft);color:var(--info)}.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-acc{background:var(--accent-soft);color:var(--accent-text)}
+.note{display:flex;gap:10px;align-items:flex-start;background:var(--info-soft);color:var(--info);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.bad{background:var(--bad-soft);color:var(--bad)}
+.empty{text-align:center;padding:30px 16px;color:var(--muted);border:1px dashed var(--line-2);border-radius:14px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted);align-items:center}
+.meta span{display:inline-flex;gap:6px;align-items:center}
+.g2,.g3,.g4{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.sec{margin-top:34px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.dl{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr);gap:6px 14px;margin:0}
+.dl dt{color:var(--muted);font-size:14px}.dl dd{margin:0;overflow-wrap:anywhere;font-weight:500}
+.av{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:700;flex:none;background:var(--accent-soft);color:var(--accent-text);font-size:14px}
+.av.p1{background:color-mix(in srgb,var(--p1) 16%,var(--panel));color:var(--p1)}
+.av.p2{background:color-mix(in srgb,var(--p2) 16%,var(--panel));color:var(--p2)}
+.av.p3{background:color-mix(in srgb,var(--p3) 16%,var(--panel));color:var(--p3)}
+.av.big{width:60px;height:60px;font-size:20px;border-radius:16px}
+
+/* Accueil */
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:22px;padding:clamp(20px,3.4vw,44px);display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:980px){.hero{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:center}}
+.hero h1{font-size:clamp(28px,4vw,48px);margin:8px 0 14px;max-width:18ch}
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--hero-muted)}
+.lead{color:var(--hero-muted);font-size:17px;max-width:60ch;margin-bottom:22px}
+.next-card{background:var(--panel);color:var(--ink);border-radius:18px;padding:20px;display:grid;gap:10px}
+.next-when{font-family:var(--head);font-size:26px;font-weight:600;line-height:1.15}
+.facts{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:4px;font-size:14px}
+.facts li{display:flex;gap:9px;align-items:center}
+.facts svg{color:var(--accent-text)}
+.info-card{display:flex;gap:12px;align-items:flex-start}
+.info-card .ic{width:42px;height:42px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center;flex:none}
+.info-card p{font-size:14px;color:var(--muted)}
+.info-card b{display:block;font-size:15px;color:var(--ink)}
+.soin{display:flex;flex-direction:column;gap:10px;padding:0;overflow:hidden}
+.soin .body{padding:0 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.thumb{position:relative;height:132px;border:0;width:100%;cursor:pointer;background:var(--panel-2);display:grid;place-items:center;color:var(--accent-text);border-bottom:1px solid var(--line)}
+.thumb .tooth{width:86px;height:86px;opacity:.28;stroke-width:1.2}
+.thumb .pl{position:absolute;width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:var(--shadow)}
+.thumb .dur{position:absolute;right:10px;bottom:10px;font-size:12.5px;font-weight:700;background:var(--panel);color:var(--ink);padding:2px 8px;border-radius:6px}
+.thumb .lbl{position:absolute;left:10px;bottom:10px;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--panel);padding:2px 8px;border-radius:6px;display:inline-flex;gap:5px;align-items:center}
+.thumb .lbl svg{width:14px;height:14px}
+.thumb.novid{cursor:default}
+.soin .cat{padding:14px 18px 0}
+.price{font-family:var(--head);font-weight:700;font-size:20px}
+.soin-foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
+.team{display:flex;flex-direction:column;gap:12px}
+.team .top-row{display:flex;gap:12px;align-items:center}
+.feat{display:flex;flex-direction:column;gap:8px}
+.feat .ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);display:grid;place-items:center}
+.site-foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);display:flex;gap:10px 24px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+
+/* Tables */
+.tw{overflow-x:auto;position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+thead th{background:var(--panel-2);font-size:13px;color:var(--muted);font-weight:700}
+tbody tr:last-child>*{border-bottom:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* RDV */
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;counter-reset:s}
+.steps li{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--muted);padding:6px 12px 6px 6px;border-radius:999px;background:var(--panel);border:1px solid var(--line)}
+.steps li::before{counter-increment:s;content:counter(s);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--panel-2);font-size:13px}
+.steps li[aria-current="step"]{color:var(--accent-text);border-color:var(--accent)}
+.steps li[aria-current="step"]::before{background:var(--accent);color:var(--accent-ink)}
+.steps li.done::before{content:"✓";background:var(--accent-soft);color:var(--accent-text)}
+.book{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.book{grid-template-columns:minmax(0,1fr) minmax(0,360px);align-items:start}.book aside{position:sticky;top:90px}}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer;background:var(--panel);min-height:44px}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.opt b{display:block}.opt small{color:var(--muted);font-size:13.5px}
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;position:relative}
+.day{flex:none;width:78px;min-height:72px;border:1px solid var(--line-2);border-radius:12px;background:var(--panel);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:13px}
+.day b{font-size:19px;font-family:var(--head)}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.day:disabled{opacity:.5;cursor:not-allowed}
+.day .n{font-size:11.5px}
+.slots{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+.slot{min-height:48px;border:1px solid var(--accent);color:var(--accent-text);background:var(--panel);border-radius:10px;cursor:pointer;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15;padding:4px}
+.slot small{font-weight:600;font-size:11.5px;color:var(--muted)}
+.slot[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.slot[aria-pressed="true"] small{color:var(--accent-ink)}
+.sum{display:grid;gap:10px}
+.sum li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px}
+.sum li svg{color:var(--accent-text);margin-top:2px}
+.success{text-align:center;display:grid;gap:12px;justify-items:center;padding:20px 10px}
+.success .big{width:64px;height:64px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.success .big svg{width:32px;height:32px}
+
+/* Dossier */
+.dos{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));align-items:start}
+.rdv-item{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+.datebox{width:58px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);text-align:center;padding:6px 0;flex:none;line-height:1.15}
+.datebox b{display:block;font-size:22px;font-family:var(--head)}
+.datebox span{font-size:12px;font-weight:700;text-transform:uppercase}
+.rows{display:grid}
+.rows li{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rows li:last-child{border-bottom:0}
+.rows li>div{min-width:0;flex:1 1 200px}
+
+/* Agenda */
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .v{font-family:var(--head);font-size:28px;font-weight:700;line-height:1.1;margin:2px 0}
+.kpi .l{font-size:13.5px;font-weight:600;color:var(--muted)}
+.cols{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));align-items:start}
+.col{padding:12px}
+.col-h{display:flex;gap:10px;align-items:center;padding:4px 4px 12px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.col-h>div{min-width:0}
+.slist{display:grid;gap:6px}
+.appt,.free{width:100%;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;border-radius:10px;cursor:pointer;min-height:48px;padding:6px 10px}
+.appt{border:1px solid var(--line);border-left:4px solid var(--p1);background:var(--panel)}
+.appt.p2{border-left-color:var(--p2)}.appt.p3{border-left-color:var(--p3)}
+.appt:hover{background:var(--panel-2)}
+.appt.st-termine,.appt.st-absent{opacity:.78}
+.appt .who{min-width:0;display:flex;flex-direction:column}
+.appt .who b{overflow-wrap:anywhere;font-weight:600}
+.t{font-weight:700;font-variant-numeric:tabular-nums;font-size:14px}
+.free{border:1px dashed var(--line-2);background:transparent;color:var(--muted);font-size:14px}
+.free:hover{border-color:var(--accent);color:var(--accent-text);background:var(--accent-soft)}
+.daynav input{width:auto}
+
+/* Patients */
+.split{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:960px){.split{grid-template-columns:minmax(0,340px) minmax(0,1fr)}.split>aside{position:sticky;top:90px;max-height:calc(100vh - 110px);overflow:auto}}
+.plist{display:grid;gap:4px;margin-top:12px}
+.plist button{width:100%;display:flex;gap:10px;align-items:center;text-align:left;border:1px solid transparent;background:transparent;border-radius:10px;padding:6px 8px;cursor:pointer;min-height:52px}
+.plist button:hover{background:var(--panel-2)}
+.plist button[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.plist .av{width:36px;height:36px;font-size:13px}
+.plist span.nm{display:block;font-weight:600;overflow-wrap:anywhere}
+.pd-h{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.pd-h>div{min-width:0;flex:1 1 220px}
+.psec{margin-top:22px}
+.psec h3{margin-bottom:10px}
+.notes li{padding:10px 12px;border-radius:10px;background:var(--panel-2);margin-bottom:8px;font-size:14.5px}
+
+/* IA */
+.split2{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);align-items:start}
+@media (min-width:1100px){.split2{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
+.faq{display:grid;gap:10px}
+.faq li{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px}
+.faq .keys{display:flex;flex-wrap:wrap;gap:6px}
+.faq .keys span{font-size:12px;font-weight:600;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted)}
+.guard li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:14.5px}
+.guard svg{color:var(--ok);margin-top:3px}
+.prev{background:var(--panel-2);border-radius:12px;padding:12px 14px;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Dialog */
+dialog{border:0;border-radius:18px;padding:0;width:min(660px,calc(100vw - 24px));max-height:calc(100dvh - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:auto}
+dialog::backdrop{background:rgba(10,22,21,.55)}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.dlg-h h2{font-size:19px;min-width:0;overflow-wrap:anywhere}
+.dlg-b{padding:18px;display:grid;gap:14px}
+.dlg-f{padding:12px 18px 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;border-top:1px solid var(--line)}
+
+/* Player */
+.screen{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0F2E2C;color:#EAF6F4}
+.screen svg{width:100%;height:100%;display:block}
+.cap{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(0,0,0,.72);color:#fff;padding:4px 12px;border-radius:6px;font-size:14.5px;max-width:92%;text-align:center}
+.pctrl{display:flex;gap:10px;align-items:center}
+.pctrl input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:44px}
+.chap{display:grid;gap:4px}
+.chap button{width:100%;text-align:left;display:flex;gap:10px;min-height:44px;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:4px 12px;cursor:pointer}
+.chap button[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-text);font-weight:600}
+
+/* Chat */
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:50;min-height:56px;border-radius:999px;padding:0 20px 0 16px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;display:inline-flex;gap:10px;align-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.fab svg{width:22px;height:22px}
+.chat{position:fixed;right:16px;bottom:16px;z-index:60;width:min(400px,calc(100vw - 32px));height:min(620px,calc(100dvh - 32px));display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line-2);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.28);overflow:hidden}
+.chat-h{display:flex;gap:10px;align-items:center;padding:12px 12px 12px 16px;background:var(--hero);color:var(--hero-ink)}
+.chat-h>div{flex:1;min-width:0}
+.chat-h p{font-size:12.5px;color:var(--hero-muted)}
+.chat-h .icon-btn{background:transparent;border-color:var(--hero-muted);color:var(--hero-ink)}
+.chat-log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 13px;border-radius:14px;font-size:14.5px;display:grid;gap:8px;overflow-wrap:anywhere}
+.msg.bot{background:var(--panel-2);border-bottom-left-radius:4px;align-self:flex-start}
+.msg.me{background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px;align-self:flex-end}
+.msg .btn{justify-self:start}
+.typing{display:flex;gap:4px;flex-direction:row}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,100%{opacity:.3}50%{opacity:1}}
+.chat-sug{display:flex;gap:6px;overflow-x:auto;padding:0 12px 8px}
+.chat-sug button{flex:none;min-height:44px;border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:0 12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.chat-f{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.chat-f input{flex:1}
+.chat-disc{font-size:11.5px;color:var(--muted);padding:0 12px 10px;text-align:center}
+
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:100;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:14.5px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100vw - 32px);width:max-content;display:flex;gap:10px;align-items:center}
+
+#printArea{display:none}
+.doc{font-size:14.5px;display:grid;gap:14px}
+.doc-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--accent);padding-bottom:12px}
+.doc-h .r{text-align:right}
+.doc-f{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;padding:24px;color:#000}
+  body{background:#fff}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-<h1>Démo en cours de déploiement</h1>
-<p>Elle sera disponible ici dans quelques minutes : cette page se recharge toute seule.</p>
-</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-tooth" viewBox="0 0 24 24"><path d="M7 3c-2.2 0-4 1.8-4 4.3 0 2.3.9 3.6 1.5 5.3.6 1.8.8 3.6 1.3 5.7.3 1.4.8 2.7 1.8 2.7 1.3 0 1.4-2 1.9-4 .3-1.2.7-2 1.5-2s1.2.8 1.5 2c.5 2 .6 4 1.9 4 1 0 1.5-1.3 1.8-2.7.5-2.1.7-3.9 1.3-5.7.6-1.7 1.5-3 1.5-5.3C21 4.8 19.2 3 17 3c-2 0-3 1-5 1S9 3 7 3z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.7 3 2.5 3.5 5.2"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10.3 21a2 2 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8zM19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM8.5 12l2.5 2.5 4.5-4.5"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-chevl" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+  <symbol id="i-chevr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2zM12 10v4M12 17.5v.5"/></symbol>
+  <symbol id="i-euro" viewBox="0 0 24 24"><path d="M18 6.5A7 7 0 1 0 18 17.5M4 10h10M4 14h10"/></symbol>
+</svg>
+
+<div class="demo-band" role="note"><span><b>Démonstration</b> — données fictives</span><button type="button" data-act="reset"><svg class="i" aria-hidden="true"><use href="#i-reset"/></svg>Réinitialiser la démo</button></div>
+
+<header class="top">
+  <div class="brand"><span class="mark"><svg class="i" aria-hidden="true"><use href="#i-tooth"/></svg></span><span>Cabinet des Tilleuls<small id="brandSub">Chirurgiens-dentistes</small></span></div>
+  <nav id="nav" aria-label="Navigation principale"></nav>
+  <div class="seg" role="group" aria-label="Changer d’espace">
+    <button type="button" data-act="mode" data-m="patient" id="mPat"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Site patient</button>
+    <button type="button" data-act="mode" data-m="cabinet" id="mCab"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Espace cabinet</button>
+  </div>
+</header>
+
+<main id="main"><div id="view"></div></main>
+
+<button type="button" class="fab" id="fab" data-act="chat" aria-controls="chat" aria-expanded="false"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg><span>Une question ?</span></button>
+
+<section class="chat" id="chat" hidden aria-labelledby="chatT">
+  <div class="chat-h">
+    <span class="mark"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg></span>
+    <div><h2 id="chatT" class="h3">Assistant du cabinet</h2><p>Assistant IA · répond en quelques secondes</p></div>
+    <button type="button" class="icon-btn" data-act="chatClose" aria-label="Fermer l’assistant"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="chat-log" id="chatLog" aria-live="polite"></div>
+  <div class="chat-sug" id="chatSug"></div>
+  <form class="chat-f" data-form="chat"><label class="sr" for="chatIn">Votre question</label><input type="text" id="chatIn" autocomplete="off" placeholder="Posez votre question…"><button class="icon-btn" type="submit" aria-label="Envoyer" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg></button></form>
+  <p class="chat-disc">L’assistant ne remplace pas un avis médical. Urgence vitale : 15.</p>
+</section>
+
+<dialog id="dlg" aria-labelledby="dlgT"></dialog>
+<div id="toastZone" aria-live="polite" role="status"></div>
+<div id="printArea"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const I=(n,c='')=>`<svg class="i ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const pad=n=>String(n).padStart(2,'0');
+const TODAY=(()=>{const d=new Date();d.setHours(0,0,0,0);return d})();
+const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pk=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const TK=key(TODAY);
+const J=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const M=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const fLong=k=>{const d=pk(k);return `${J[d.getDay()]} ${d.getDate()} ${M[d.getMonth()]}`};
+const fRel=k=>k===TK?'aujourd’hui':k===key(add(TODAY,1))?'demain':fLong(k);
+const fShort=k=>{const d=pk(k);return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`};
+const hm=t=>t.replace(':','h');
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+const norm=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const eur=n=>n.toLocaleString('fr-FR',{style:'currency',currency:'EUR'});
+const mmss=s=>Math.floor(s/60)+':'+pad(Math.floor(s%60));
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- Référentiels ---------- */
+const PRACS=[
+ {id:'morvan',name:'Dr Claire Morvan',short:'Dr Morvan',ini:'CM',role:'Chirurgien-dentiste, omnipratique',bio:'Soins courants, prévention et esthétique du sourire. 14 ans d’exercice, attentive aux patients anxieux.',days:[1,2,3,4,5],c:'p1'},
+ {id:'ferrand',name:'Dr Julien Ferrand',short:'Dr Ferrand',ini:'JF',role:'Implantologie et prothèses',bio:'Diplôme universitaire d’implantologie. Remplacement des dents manquantes et réhabilitations complètes.',days:[1,2,4,5,6],c:'p2'},
+ {id:'haddad',name:'Dr Inès Haddad',short:'Dr Haddad',ini:'IH',role:'Orthodontie enfants et adultes',bio:'Orthodontie interceptive, appareils fixes et aligneurs transparents, dès 6 ans.',days:[2,3,5,6],c:'p3'}];
+const PR=Object.fromEntries(PRACS.map(p=>[p.id,p]));
+const MOTIFS=[
+ {id:'consult',name:'Consultation / bilan',desc:'Contrôle, carie, gêne ou première visite',pr:['morvan','ferrand'],on:1},
+ {id:'detartrage',name:'Détartrage',desc:'Nettoyage et polissage, 1 fois par an',pr:['morvan','ferrand'],on:1},
+ {id:'urgence',name:'Urgence / douleur',desc:'Créneaux réservés chaque jour',pr:['morvan','ferrand'],on:1},
+ {id:'implant',name:'Bilan implantaire',desc:'Remplacer une ou plusieurs dents',pr:['ferrand'],on:1},
+ {id:'ortho',name:'Bilan orthodontique',desc:'Enfant, adolescent ou adulte',pr:['haddad'],on:1},
+ {id:'esthetique',name:'Esthétique / blanchiment',desc:'Conseil et devis remis sur place',pr:['morvan','haddad'],on:1},
+ {id:'soins',name:'Séance de soins',desc:'Suite de traitement',pr:['morvan','ferrand'],on:0},
+ {id:'suiviortho',name:'Contrôle orthodontique',desc:'Suivi de traitement',pr:['haddad'],on:0}];
+const MO=Object.fromEntries(MOTIFS.map(m=>[m.id,m]));
+const CATS=[['all','Tous'],['prev','Prévention'],['cour','Soins courants'],['prot','Prothèses'],['impl','Implants'],['orth','Orthodontie'],['esth','Esthétique'],['urg','Urgences']];
+const SOINS=[
+ {id:'s1',cat:'prev',name:'Consultation et bilan bucco-dentaire',desc:'Examen complet des dents et des gencives, radiographies si nécessaire et plan de traitement expliqué.',price:'Dès 30 €',dur:'30 min',remb:['Pris en charge','ok'],motif:'consult',vid:{len:96,ch:[[0,'Accueil et questionnaire de santé'],[22,'Examen des dents et des gencives'],[55,'Radiographie si nécessaire'],[78,'Explication du plan de traitement']]}},
+ {id:'s2',cat:'prev',name:'Détartrage et polissage',desc:'Élimine le tartre et prévient les maladies des gencives. Recommandé une fois par an.',price:'Dès 45 €',dur:'30 min',remb:['Pris en charge','ok'],motif:'detartrage',vid:{len:84,ch:[[0,'Pourquoi le tartre se forme'],[25,'Détartrage aux ultrasons'],[55,'Polissage des surfaces'],[70,'Conseils de brossage']]}},
+ {id:'s3',cat:'cour',name:'Soin de carie (composite)',desc:'Restauration de la couleur de la dent, réalisée en une séance sous anesthésie locale.',price:'Dès 40 €',dur:'30 à 45 min',remb:['Pris en charge','ok'],motif:'consult',vid:{len:102,ch:[[0,'Diagnostic de la carie'],[24,'Anesthésie locale'],[45,'Nettoyage de la cavité'],[70,'Résine teintée et polissage']]}},
+ {id:'s4',cat:'prot',name:'Couronne céramique',desc:'Protège une dent fragilisée. Teinte sur mesure, empreinte numérique sans pâte.',price:'Dès 500 €',dur:'2 séances',remb:['Partiellement remboursé','warn'],motif:'consult',vid:{len:118,ch:[[0,'Quand poser une couronne ?'],[30,'Préparation de la dent'],[62,'Empreinte numérique'],[92,'Pose et réglage']]}},
+ {id:'s5',cat:'impl',name:'Implant dentaire',desc:'Remplace durablement une dent manquante sans toucher aux dents voisines.',price:'Dès 1 200 €',dur:'2 à 3 séances',remb:['Partiellement remboursé','warn'],motif:'implant',vid:{len:150,ch:[[0,'Bilan et scanner 3D'],[40,'Pose de l’implant'],[85,'Cicatrisation de 2 à 4 mois'],[120,'Pose de la couronne']]}},
+ {id:'s6',cat:'orth',name:'Aligneurs transparents',desc:'Correction discrète de l’alignement pour adultes et adolescents, gouttières amovibles.',price:'Dès 2 400 €',dur:'6 à 18 mois',remb:['Non remboursé (adulte)','gray'],motif:'ortho',vid:{len:110,ch:[[0,'Simulation du résultat'],[35,'Fabrication des gouttières'],[65,'Port 22 h par jour'],[90,'Contrôles réguliers']]}},
+ {id:'s7',cat:'esth',name:'Blanchiment au fauteuil',desc:'Éclaircissement de plusieurs teintes en une séance encadrée, après bilan.',price:'390 €',dur:'75 min',remb:['Non remboursé','gray'],motif:'esthetique',vid:{len:90,ch:[[0,'Contre-indications vérifiées'],[25,'Protection des gencives'],[45,'Application du gel'],[72,'Résultat et entretien']]}},
+ {id:'s8',cat:'urg',name:'Urgence dentaire',desc:'Créneaux réservés chaque jour pour les douleurs, abcès, dents cassées.',price:'Dès 30 €',dur:'30 min',remb:['Pris en charge','ok'],motif:'urgence'},
+ {id:'s9',cat:'cour',name:'Dévitalisation',desc:'Traitement de la racine pour conserver une dent infectée ou très abîmée.',price:'Dès 85 €',dur:'45 à 60 min',remb:['Pris en charge','ok'],motif:'consult'},
+ {id:'s10',cat:'cour',name:'Extraction, dent de sagesse',desc:'Extraction simple ou chirurgicale, avec consignes post-opératoires écrites.',price:'Dès 35 €',dur:'30 à 60 min',remb:['Pris en charge','ok'],motif:'consult'},
+ {id:'s11',cat:'orth',name:'Orthodontie enfant',desc:'Bilan dès 6 ans, appareil fixe ou amovible selon le besoin.',price:'Dès 600 € / semestre',dur:'Suivi mensuel',remb:['Pris en charge avant 16 ans','ok'],motif:'ortho'}];
+const SO=Object.fromEntries(SOINS.map(s=>[s.id,s]));
+const ST={confirme:['Confirmé','b-info'],arrive:['En salle d’attente','b-warn'],termine:['Terminé','b-ok'],absent:['Absent','b-bad'],annule:['Annulé','b-gray']};
+const badge=s=>`<span class="badge ${ST[s][1]}">${ST[s][0]}</span>`;
+const ACTL={'book:consult':'Prendre rendez-vous','book:urgence':'Voir les créneaux d’urgence','book:implant':'Réserver un bilan implantaire','book:ortho':'Réserver un bilan orthodontique','book:esthetique':'Réserver une consultation esthétique','book:detartrage':'Réserver un détartrage','view:soins':'Voir les soins et tarifs','view:dossier':'Ouvrir mon dossier'};
+const FAQ0=[
+ {id:'f1',q:'Urgence et douleur',keys:['urgence','douleur','mal','gonfl','abces','saign','cass','fievre'],a:'Nous gardons chaque jour des créneaux pour les urgences. Réservez le premier disponible ci-dessous. En cas de fièvre élevée, de gonflement important du visage ou de difficulté à respirer, appelez le 15.',act:'book:urgence'},
+ {id:'f2',q:'Horaires d’ouverture',keys:['horaire','ouvert','ouverture','heure','ferme','samedi','dimanche'],a:'Le cabinet est ouvert du lundi au vendredi de 8h30 à 12h et de 14h à 19h, et le samedi de 9h à 12h30.'},
+ {id:'f3',q:'Tarifs et remboursements',keys:['tarif','prix','cout','combien','rembours','mutuelle','secu','tiers payant','devis'],a:'Les soins courants (consultation, détartrage, caries) sont pris en charge par l’Assurance Maladie et nous pratiquons le tiers payant. Un devis détaillé vous est remis avant toute prothèse ou implant.',act:'view:soins'},
+ {id:'f4',q:'Implants dentaires',keys:['implant','dent manquante','remplacer'],a:'Un implant se pose en deux temps : bilan avec scanner 3D, pose, puis couronne après 2 à 4 mois de cicatrisation. Comptez à partir de 1 200 € hors couronne. Le Dr Ferrand vous reçoit pour un bilan.',act:'book:implant'},
+ {id:'f5',q:'Blanchiment',keys:['blanchi','jaune','esthetique','sourire','teinte'],a:'Le blanchiment au fauteuil (390 €) se fait après un bilan pour vérifier l’absence de caries ou de sensibilité. Le résultat dure en général 1 à 3 ans.',act:'book:esthetique'},
+ {id:'f6',q:'Orthodontie et aligneurs',keys:['ortho','appareil','aligneur','gouttiere','travers','bague'],a:'Le Dr Haddad suit enfants (dès 6 ans) et adultes, avec appareils fixes ou aligneurs transparents. Le premier bilan permet d’établir un plan et un devis.',act:'book:ortho'},
+ {id:'f7',q:'Annuler ou déplacer un rendez-vous',keys:['annul','deplac','decal','modifi','report','changer'],a:'Depuis votre dossier en ligne, vous pouvez annuler ou déplacer votre rendez-vous en un clic, idéalement au moins 24 h à l’avance pour libérer le créneau.',act:'view:dossier'},
+ {id:'f8',q:'Accès et adresse',keys:['adresse','acces','venir','parking','tram','metro','bus','handicap','pmr','fauteuil roulant'],a:'Nous sommes au 12 place des Tilleuls (rez-de-chaussée, accessible en fauteuil roulant). Parking public à 100 m, arrêt de tram « Tilleuls » à 2 minutes.'},
+ {id:'f9',q:'Prendre rendez-vous',keys:['rendez','rdv','reserver','disponib','creneau','consultation','controle'],a:'Vous pouvez réserver en ligne 24 h/24 : choisissez le motif, le praticien et le créneau. Vous recevrez une confirmation et un rappel avant le rendez-vous.',act:'book:consult'},
+ {id:'f10',q:'Enfants',keys:['enfant','fils','fille','bebe','ado'],a:'Nous recevons les enfants dès 3 ans. Les examens de prévention proposés par l’Assurance Maladie aux enfants et adolescents sont pris en charge à 100 %.',act:'book:consult'},
+ {id:'f11',q:'Que faut-il apporter ?',keys:['apporter','carte vitale','papiers','document','premiere visite'],a:'Pensez à votre carte Vitale, votre attestation de mutuelle, la liste de vos traitements et vos radiographies récentes si vous en avez.'},
+ {id:'f12',q:'Conseil médical (garde-fou)',keys:['medicament','antibiotique','dose','ibuprofene','paracetamol','diagnostic','ordonnance'],a:'Je ne peux pas donner d’avis médical ni de conseil sur un médicament. Un praticien doit vous examiner : réservez une consultation, ou appelez le cabinet si la douleur est forte.',act:'book:urgence'}];
+
+const PATS=[['Camille','Martin'],['Lucas','Bernard'],['Emma','Petit'],['Hugo','Durand'],['Léa','Moreau'],['Nathan','Lefèvre'],['Chloé','Girard'],['Louis','Roux'],['Manon','Fournier'],['Jules','Mercier'],['Inès','Blanc'],['Théo','Garnier'],['Sarah','Chevalier'],['Arthur','Robin'],['Zoé','Masson'],['Gabriel','Muller'],['Alice','Lambert'],['Raphaël','Fontaine'],['Juliette','Rousseau'],['Adam','Vincent'],['Lina','Faure'],['Paul','Henry'],['Jade','Perrin'],['Mathis','Gauthier']];
+const MUTS=['Mutuelle Horizon','Santé Plus','MutVie','Prévoyance Atlas','Complémentaire Azur'];
+const AM=['08:30','09:00','09:30','10:00','10:30','11:00','11:30'],PMs=['14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30'],SA=['09:00','09:30','10:00','10:30','11:00','11:30','12:00'];
+function slotsFor(k,p){const wd=pk(k).getDay();if(!PR[p].days.includes(wd))return[];return wd===6?SA:AM.concat(PMs)}
+
+/* ---------- État ---------- */
+function seed(){
+ const r=rng(491947),pick=a=>a[Math.floor(r()*a.length)];
+ const pats=PATS.map(([f,l],i)=>({id:'p'+(i+1),first:f,last:l,email:norm(f)+'.'+norm(l)+'@exemple.fr',tel:'06 '+[0,0,0,0].map(()=>pad(Math.floor(r()*100))).join(' '),by:1952+Math.floor(r()*64),mut:pick(MUTS),since:2012+Math.floor(r()*13),
+   med:{allergies:r()<.2?pick(['Pénicilline','Latex','Aspirine']):'',traitements:r()<.25?pick(['Hypertension (traitement en cours)','Diabète de type 2','Asthme']):'',anticoag:r()<.08,grossesse:false,anx:pick(['Aucune','Aucune','Légère','Forte']),upd:null},
+   prefs:{sms:true,email:r()<.7},notes:[],hist:[],docs:[]}));
+ const c=pats[0];
+ Object.assign(c,{tel:'06 12 34 56 78',by:1988,mut:'Mutuelle Horizon',since:2019,med:{allergies:'Pénicilline',traitements:'',anticoag:false,grossesse:false,anx:'Légère',upd:key(add(TODAY,-120))},prefs:{sms:true,email:true},
+  notes:[{d:key(add(TODAY,-120)),by:'Dr Morvan',t:'Composite 36 OK. Prévoir couronne 36 (devis transmis par Dr Ferrand). Patiente un peu anxieuse : bien expliquer chaque étape.'}],
+  hist:[{d:key(add(TODAY,-120)),soin:'Soin de carie (composite) — dent 36',prac:'morvan'},{d:key(add(TODAY,-127)),soin:'Consultation et radiographie panoramique',prac:'morvan'},{d:key(add(TODAY,-410)),soin:'Détartrage et polissage',prac:'morvan'}],
+  docs:[{id:'d1',type:'Devis',num:'DV-2026-0412',d:key(add(TODAY,-14)),title:'Devis — couronne céramique sur la dent 36',prac:'ferrand',lines:[['Couronne céramo-céramique (dent 36)',550],['Inlay-core',120]],text:'Montants fictifs. Le reste à charge dépend de votre complémentaire santé ; ce devis est valable 3 mois.'},
+   {id:'d2',type:'Note d’honoraires',num:'NH-2026-1187',d:key(add(TODAY,-120)),title:'Soin de carie (composite) — dent 36',prac:'morvan',lines:[['Restauration composite 2 faces',53.5]]},
+   {id:'d3',type:'Ordonnance',num:'OR-2026-0331',d:key(add(TODAY,-120)),title:'Ordonnance',prac:'morvan',text:'Bain de bouche sans alcool, 2 fois par jour pendant 7 jours. Brosse à dents souple.'}]});
+ const appts=[];let n=0;const nh=nowHM();
+ for(let i=-10;i<=21;i++){const k=key(add(TODAY,i));const dens=i<=2?.72:i<8?.5:.3;
+  PRACS.forEach(p=>slotsFor(k,p.id).forEach(t=>{if(r()<dens){const ms=MOTIFS.filter(m=>m.pr.includes(p.id));
+   let st='confirme';if(i<0||(i===0&&t<nh))st=r()<.06?'absent':'termine';
+   appts.push({id:'a'+(++n),date:k,time:t,prac:p.id,pat:'p'+(2+Math.floor(r()*(PATS.length-1))),motif:pick(ms).id,status:st,conf:r()<.6,sent:{},src:r()<.55?'En ligne':pick(['Téléphone','Secrétariat'])})}}))}
+ let i=2;while(!PRACS[0].days.includes(add(TODAY,i).getDay()))i++;
+ const ck=key(add(TODAY,i));
+ const keep=appts.filter(a=>!(a.date===ck&&a.time==='10:00'&&a.prac==='morvan'));
+ keep.push({id:'a'+(++n),date:ck,time:'10:00',prac:'morvan',pat:'p1',motif:'detartrage',status:'confirme',conf:false,sent:{},src:'En ligne'});
+ return {v:1,seedDay:TK,pats,appts:keep,seq:n,faq:['f1','f12','f4','f5','f6','f7','f10','f11','f2','f8','f3','f9'].map(id=>FAQ0.find(f=>f.id===id)).map(f=>({...f,keys:[...f.keys],hits:Math.floor(r()*40)+3})),me:'p1',
+  unans:[{q:'Est-ce que vous acceptez les paiements en plusieurs fois ?',d:key(add(TODAY,-1))},{q:'Faites-vous des gouttières contre le grincement des dents ?',d:key(add(TODAY,-3))}],
+  stats:{q:412,auto:371,rdv:58},rules:{sms:true,email:true},
+  tpl:{sms:'Cabinet des Tilleuls : bonjour {prenom}, rappel de votre RDV le {date} à {heure} avec {praticien}. Répondez OUI pour confirmer ou ANNULER pour libérer le créneau.',
+       email:'Bonjour {prenom},\n\nNous vous rappelons votre rendez-vous du {date} à {heure} avec {praticien}.\nPensez à votre carte Vitale et à votre attestation de mutuelle.\n\nPour déplacer ou annuler : rendez-vous dans votre dossier en ligne.\n\nL’équipe du Cabinet des Tilleuls'}};
+}
+const LS='demo-491947';
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&s.v===1&&s.seedDay===TK)return s}catch(e){}return seed()}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+let S=load();
+const newB=()=>({step:1,motif:null,newp:null,prac:'all',date:null,time:null,sp:null,form:{sms:true,mail:true,consent:false},done:null,moving:null,chat:false});
+let UI={mode:'patient',view:'accueil',cat:'all',soinQ:'',ag:TK,psel:'p1',pq:'',remF:'prog',remN:30};
+let B=newB();
+let NA={};
+
+const pat=id=>S.pats.find(p=>p.id===id);
+const AP=id=>S.appts.find(a=>a.id===id);
+const pname=p=>p.first+' '+p.last;
+const ini=p=>(p.first[0]+p.last[0]).toUpperCase();
+const taken=(d,t,p)=>S.appts.some(a=>a.date===d&&a.time===t&&a.prac===p&&a.status!=='annule');
+function freeSlots(d,motif,pf){const m=MO[motif];const prs=pf==='all'?m.pr:[pf];const nh=nowHM();const seen={};const out=[];
+ prs.forEach(p=>slotsFor(d,p).forEach(t=>{if(d===TK&&t<=nh)return;if(taken(d,t,p))return;out.push({t,p})}));
+ out.sort((a,b)=>a.t<b.t?-1:a.t>b.t?1:0);
+ return pf==='all'?out.filter(x=>seen[x.t]?0:(seen[x.t]=1)):out}
+function nextFree(motif){for(let i=0;i<30;i++){const k=key(add(TODAY,i));const f=freeSlots(k,motif,'all');if(f.length)return{date:k,...f[0]}}return null}
+
+/* ---------- Toast, dialog ---------- */
+let tT;
+function toast(msg){const z=$('#toastZone');z.innerHTML=`<div class="toast">${I('check')}<span>${msg}</span></div>`;clearTimeout(tT);tT=setTimeout(()=>z.innerHTML='',3800)}
+const dlg=$('#dlg');
+function openDlg(title,body,foot=''){dlg.innerHTML=`<div class="dlg-h"><h2 id="dlgT">${title}</h2><button type="button" class="icon-btn" data-act="dlgClose" aria-label="Fermer">${I('x')}</button></div><div class="dlg-b">${body}</div>${foot?`<div class="dlg-f">${foot}</div>`:''}`;if(!dlg.open)dlg.showModal()}
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+dlg.addEventListener('close',()=>{if(VID){clearInterval(VID.timer);VID=null}});
+
+/* ---------- Navigation ---------- */
+const NAV={patient:[['accueil','Accueil','home'],['soins','Soins et tarifs','tooth'],['rdv','Prendre rendez-vous','cal'],['dossier','Mon dossier','user']],
+ cabinet:[['agenda','Agenda','cal'],['patients','Patients','users'],['rappels','Rappels','bell'],['ia','Assistant IA','spark']]};
+function renderNav(){
+ $('#nav').innerHTML=NAV[UI.mode].map(([v,l,ic])=>{let c='';if(v==='ia'&&S.unans.length)c=`<span class="cnt" aria-label="${S.unans.length} questions sans réponse">${S.unans.length}</span>`;
+  return `<button type="button" class="tab" data-act="go" data-v="${v}" ${UI.view===v?'aria-current="page"':''}>${I(ic)}${l}${c}</button>`}).join('');
+ $('#mPat').setAttribute('aria-pressed',UI.mode==='patient');$('#mCab').setAttribute('aria-pressed',UI.mode==='cabinet');
+ $('#brandSub').textContent=UI.mode==='patient'?'Chirurgiens-dentistes':'Espace cabinet';
+ $('#fab').hidden=UI.mode!=='patient'||!$('#chat').hidden;
+}
+function renderView(fid){$('#view').innerHTML=VIEWS[UI.view]();renderNav();if(fid){const el=document.getElementById(fid);if(el)el.focus()}}
+function go(v,noFocus){UI.mode=NAV.patient.some(x=>x[0]===v)?'patient':'cabinet';UI.view=v;renderView();window.scrollTo(0,0);if(!noFocus){const h=$('#view h1');if(h)h.focus({preventScroll:true})}}
+
+/* ---------- Vues patient ---------- */
+function soinCard(s){
+ const th=s.vid?`<button type="button" class="thumb" data-act="video" data-id="${s.id}" aria-label="Voir la vidéo : ${esc(s.name)} (${mmss(s.vid.len)})"><svg class="i tooth" aria-hidden="true"><use href="#i-tooth"/></svg><span class="pl">${I('play')}</span><span class="lbl">${I('video')}Vidéo</span><span class="dur">${mmss(s.vid.len)}</span></button>`
+  :`<div class="thumb novid" aria-hidden="true"><svg class="i tooth"><use href="#i-tooth"/></svg></div>`;
+ return `<article class="card soin">${th}<div class="body"><span><span class="badge b-acc">${CATS.find(c=>c[0]===s.cat)[1]}</span></span><h3>${esc(s.name)}</h3><p class="muted small">${esc(s.desc)}</p>
+ <div class="meta"><span>${I('clock')}${s.dur}</span><span class="badge ${'b-'+s.remb[1]}">${s.remb[0]}</span></div>
+ <div class="soin-foot"><span class="price">${s.price}</span><button type="button" class="btn sm" data-act="bookMotif" data-m="${s.motif}">${I('cal')}Rendez-vous</button></div></div></article>`}
+function vAccueil(){
+ const nx=nextFree('consult');
+ return `<section class="hero" aria-labelledby="h1">
+  <div><p class="eyebrow">Cabinet dentaire · Centre-ville</p><h1 id="h1" tabindex="-1">Des soins attentifs, un rendez-vous en quelques clics.</h1>
+   <p class="lead">Trois praticiens pour toute la famille : prévention, soins courants, implants, orthodontie et esthétique. Réservez en ligne 24 h/24, recevez un rappel avant votre venue et retrouvez vos documents dans votre dossier.</p>
+   <div class="actions"><button type="button" class="btn primary lg" data-act="go" data-v="rdv">${I('cal')}Prendre rendez-vous</button><button type="button" class="btn on-dark lg" data-act="chat">${I('spark')}Poser une question</button></div></div>
+  <div class="next-card"><p class="small muted">Prochain créneau disponible · consultation</p>
+   ${nx?`<p class="next-when">${cap(fRel(nx.date))} à ${hm(nx.t)}</p><p>avec ${PR[nx.p].name}</p><button type="button" class="btn primary block" data-act="quickBook" data-d="${nx.date}" data-t="${nx.t}" data-p="${nx.p}">Réserver ce créneau ${I('arrow')}</button>`:'<p>Aucun créneau dans les 30 jours.</p>'}
+   <ul class="facts"><li>${I('bell')}Rappel par SMS et e-mail avant le rendez-vous</li><li>${I('shield')}Tiers payant, carte Vitale acceptée</li><li>${I('alert')}Créneaux d’urgence chaque jour</li></ul></div>
+ </section>
+ <div class="g4 sec" style="margin-top:18px">
+  <div class="card info-card"><span class="ic">${I('clock')}</span><p><b>Horaires</b>Lun–ven 8h30–12h, 14h–19h<br>Samedi 9h–12h30</p></div>
+  <div class="card info-card"><span class="ic">${I('pin')}</span><p><b>Adresse</b>12 place des Tilleuls<br>Accessible en fauteuil roulant</p></div>
+  <div class="card info-card"><span class="ic">${I('phone')}</span><p><b>Téléphone</b>01 23 45 67 89<br>Secrétariat jusqu’à 18h30</p></div>
+  <div class="card info-card"><span class="ic">${I('alert')}</span><p><b>Urgence dentaire</b><button type="button" class="lnk" data-act="bookMotif" data-m="urgence">Réserver un créneau d’urgence</button></p></div>
+ </div>
+ <section class="sec"><div class="sec-head"><h2>Nos soins, expliqués en vidéo</h2><button type="button" class="btn ghost" data-act="go" data-v="soins">Tous les soins et tarifs ${I('arrow')}</button></div>
+  <div class="g3">${SOINS.filter(s=>s.vid).slice(0,6).map(soinCard).join('')}</div></section>
+ <section class="sec"><h2 style="margin-bottom:14px">L’équipe</h2><div class="g3">${PRACS.map(p=>`<article class="card team"><div class="top-row"><span class="av big ${p.c}">${p.ini}</span><div class="min0"><h3>${p.name}</h3><p class="small muted">${p.role}</p></div></div><p class="small">${p.bio}</p><p class="small muted">Consulte le ${p.days.map(d=>J[d]).join(', ')}</p><button type="button" class="btn sm" data-act="bookPrac" data-p="${p.id}">${I('cal')}Prendre RDV avec ${p.short}</button></article>`).join('')}</div></section>
+ <section class="sec"><h2 style="margin-bottom:14px">Votre cabinet, aussi en ligne</h2><div class="g4">
+  ${[['cal','Rendez-vous 24 h/24','Choisissez le motif, le praticien et l’heure. Confirmation immédiate.'],['bell','Rappels automatiques','SMS deux jours avant, e-mail la veille. Moins d’oublis, moins de créneaux perdus.'],['file','Dossier patient','Rendez-vous, questionnaire médical, devis et ordonnances au même endroit.'],['spark','Assistant IA','Répond aux questions courantes et oriente vers le bon créneau, sans jamais poser de diagnostic.']].map(f=>`<div class="card feat"><span class="ic">${I(f[0])}</span><h3>${f[1]}</h3><p class="small muted">${f[2]}</p></div>`).join('')}
+ </div></section>
+ <footer class="site-foot"><span>Cabinet des Tilleuls — 12 place des Tilleuls</span><span>01 23 45 67 89</span><span>Conventionné secteur 1</span><span>Site d’exemple, données fictives</span></footer>`}
+
+function soinGrid(){const q=norm(UI.soinQ.trim());const l=SOINS.filter(s=>(UI.cat==='all'||s.cat===UI.cat)&&(!q||norm(s.name+' '+s.desc).includes(q)));
+ return l.length?`<div class="g3">${l.map(soinCard).join('')}</div>`:`<p class="empty">Aucun soin ne correspond. <button type="button" class="lnk" data-act="chat">Demandez à l’assistant</button></p>`}
+function vSoins(){
+ return `<div class="page-head"><div><h1 tabindex="-1">Soins et tarifs</h1><p class="muted">Chaque soin est expliqué simplement, avec une vidéo pour les plus fréquents.</p></div>
+  <div class="field" style="flex:0 1 320px"><label for="soinQ">Rechercher un soin</label><input type="search" id="soinQ" data-in="soinQ" value="${esc(UI.soinQ)}" placeholder="Ex. implant, carie, blanchiment"></div></div>
+  <div class="chips" role="group" aria-label="Filtrer par catégorie" style="margin-bottom:16px">${CATS.map(c=>`<button type="button" class="chip" id="cat-${c[0]}" data-act="cat" data-c="${c[0]}" aria-pressed="${UI.cat===c[0]}">${c[1]}</button>`).join('')}</div>
+  <div id="soinGrid">${soinGrid()}</div>
+  <section class="sec"><div class="sec-head"><h2>Grille tarifaire</h2><p class="small muted">Tarifs indicatifs et fictifs. Un devis est remis avant tout traitement prothétique.</p></div>
+  <div class="tw"><table style="min-width:600px"><thead><tr><th scope="col">Soin</th><th scope="col">Durée</th><th scope="col">Tarif</th><th scope="col">Prise en charge</th></tr></thead><tbody>
+  ${SOINS.map(s=>`<tr><th scope="row" style="font-weight:600">${esc(s.name)}</th><td>${s.dur}</td><td class="num">${s.price}</td><td><span class="badge b-${s.remb[1]}">${s.remb[0]}</span></td></tr>`).join('')}</tbody></table></div></section>`}
+
+function vRdv(){
+ const stepN=['Motif','Créneau','Coordonnées','Confirmation'];
+ let h=`<div class="page-head"><div><h1 tabindex="-1">${B.moving?'Déplacer mon rendez-vous':'Prendre rendez-vous'}</h1><p class="muted">Réservation en ligne, confirmation immédiate par e-mail et SMS.</p></div></div>
+ <ol class="steps" aria-label="Étapes">${stepN.map((s,i)=>`<li class="${i+1<B.step?'done':''}" ${i+1===B.step?'aria-current="step"':''}>${s}</li>`).join('')}</ol><div class="book"><div class="card min0">`;
+ if(B.step===1){
+  h+=`<fieldset><legend>Quel est le motif de votre rendez-vous ?</legend><div class="opts">${MOTIFS.filter(m=>m.on).map(m=>`<label class="opt"><input type="radio" name="motif" value="${m.id}" data-ch="bMotif" ${B.motif===m.id?'checked':''}><span><b>${m.name}</b><small>${m.desc} · ${m.pr.map(p=>PR[p].short).join(', ')}</small></span></label>`).join('')}</div></fieldset>
+  <fieldset style="margin-top:18px"><legend>Êtes-vous déjà venu au cabinet ?</legend><div class="opts">${[['oui','Oui, je suis déjà patient'],['non','Non, c’est ma première visite']].map(o=>`<label class="opt"><input type="radio" name="newp" value="${o[0]}" data-ch="bNewp" ${B.newp===o[0]?'checked':''}><span><b>${o[1]}</b></span></label>`).join('')}</div></fieldset>
+  <p class="err" id="e-step1" style="margin-top:12px"></p>
+  <div class="actions" style="margin-top:16px;justify-content:flex-end"><button type="button" class="btn primary" data-act="bNext1">Choisir un créneau ${I('arrow')}</button></div>`;
+ }else if(B.step===2){
+  const m=MO[B.motif];
+  const days=[...Array(14)].map((_,i)=>key(add(TODAY,i)));
+  const cnt=Object.fromEntries(days.map(d=>[d,freeSlots(d,B.motif,B.prac).length]));
+  if(!B.date||!cnt[B.date])B.date=days.find(d=>cnt[d])||days[0];
+  const fs=freeSlots(B.date,B.motif,B.prac);
+  const am=fs.filter(x=>x.t<'13:00'),pm=fs.filter(x=>x.t>='13:00');
+  const sl=l=>l.length?`<div class="slots">${l.map(x=>`<button type="button" class="slot" id="sl-${x.t.replace(':','')}" data-act="bSlot" data-t="${x.t}" data-p="${x.p}" aria-pressed="${B.time===x.t&&B.sp===x.p}">${hm(x.t)}${B.prac==='all'?`<small>${PR[x.p].short}</small>`:''}</button>`).join('')}</div>`:`<p class="small muted">Aucun créneau.</p>`;
+  h+=`${B.motif==='urgence'?`<p class="note warn" style="margin-bottom:14px">${I('alert')}<span>Fièvre, gonflement important du visage ou difficulté à respirer : appelez le 15.</span></p>`:''}
+  <div class="flabel" id="lp">Praticien</div><div class="chips" role="group" aria-labelledby="lp" style="margin:8px 0 18px">${(m.pr.length>1?[['all','Premier disponible']]:[]).concat(m.pr.map(p=>[p,PR[p].name])).map(o=>`<button type="button" class="chip" id="pr-${o[0]}" data-act="bPrac" data-p="${o[0]}" aria-pressed="${B.prac===o[0]||(m.pr.length===1&&o[0]===m.pr[0])}">${o[1]}</button>`).join('')}</div>
+  <div class="flabel" id="ld">Jour</div><div class="days" role="group" aria-labelledby="ld" style="margin-top:8px">${days.map(d=>{const x=pk(d);return `<button type="button" class="day" id="dy-${d}" data-act="bDay" data-d="${d}" aria-pressed="${B.date===d}" ${cnt[d]?'':'disabled'} aria-label="${fLong(d)}, ${cnt[d]?cnt[d]+' créneaux':'aucun créneau'}"><span>${J[x.getDay()].slice(0,3)}.</span><b>${x.getDate()}</b><span class="n">${cnt[d]?cnt[d]+' dispo':'complet'}</span></button>`}).join('')}</div>
+  <h2 class="h3" style="margin:16px 0 10px">${cap(fLong(B.date))}</h2>
+  <p class="flabel" style="margin-bottom:6px">Matin</p>${sl(am)}<p class="flabel" style="margin:14px 0 6px">Après-midi</p>${sl(pm)}
+  <div class="actions" style="margin-top:18px;justify-content:space-between"><button type="button" class="btn" data-act="bBack">${I('chevl')}Retour</button><button type="button" class="btn primary" data-act="bNext2" ${B.time?'':'aria-disabled="true"'}>Continuer ${I('arrow')}</button></div>`;
+ }else if(B.step===3){
+  const F=B.form;const fld=(id,l,type,ac,ph='')=>`<div class="field"><label for="f-${id}">${l}</label><input type="${type}" id="f-${id}" data-bf="${id}" autocomplete="${ac}" value="${esc(F[id]||'')}" placeholder="${ph}" aria-describedby="e-${id}"><span class="err" id="e-${id}"></span></div>`;
+  h+=`${B.newp!=='non'&&!B.moving?`<div class="note" style="margin-bottom:16px">${I('user')}<span>Déjà patient ? <button type="button" class="lnk" data-act="bLogin">Me connecter avec le compte de démonstration</button> pour pré-remplir.</span></div>`:''}
+  <form data-form="book" novalidate><div class="fgrid">${fld('first','Prénom','text','given-name')}${fld('last','Nom','text','family-name')}${fld('email','E-mail','email','email','nom@domaine.fr')}${fld('tel','Téléphone mobile','tel','tel','06 12 34 56 78')}
+  <div class="field full"><label for="f-msg">Message pour le praticien (facultatif)</label><textarea id="f-msg" data-bf="msg" placeholder="Ex. dent sensible au froid depuis une semaine">${esc(F.msg||'')}</textarea></div></div>
+  <fieldset style="margin-top:14px"><legend>Rappels de rendez-vous</legend><label class="ck"><input type="checkbox" data-bf="sms" ${F.sms?'checked':''}>SMS deux jours avant</label><label class="ck"><input type="checkbox" data-bf="mail" ${F.mail?'checked':''}>E-mail la veille</label></fieldset>
+  <label class="ck" style="margin-top:6px"><input type="checkbox" data-bf="consent" id="f-consent" ${F.consent?'checked':''} aria-describedby="e-consent">J’accepte que mes données soient utilisées pour la gestion de mes rendez-vous et de mon dossier.</label><span class="err" id="e-consent"></span>
+  <div class="actions" style="margin-top:18px;justify-content:space-between"><button type="button" class="btn" data-act="bBack">${I('chevl')}Retour</button><button type="submit" class="btn primary">${I('check')}Confirmer le rendez-vous</button></div></form>`;
+ }else{
+  const a=AP(B.done),p=pat(a.pat);
+  h+=`<div class="success"><span class="big">${I('check')}</span><h2>${B.moving?'Rendez-vous déplacé':'Rendez-vous confirmé'}</h2>
+  <p>${esc(p.first)}, nous vous attendons <b>${fRel(a.date)} à ${hm(a.time)}</b> avec ${PR[a.prac].name}.</p>
+  <p class="small muted">Confirmation envoyée à ${esc(p.email)} (simulation). ${p.prefs.sms?'Rappel SMS deux jours avant. ':''}${p.prefs.email?'E-mail la veille.':''}</p>
+  <div class="actions" style="justify-content:center"><button type="button" class="btn" data-act="ics" data-id="${a.id}">${I('download')}Ajouter à mon agenda</button><button type="button" class="btn primary" data-act="go" data-v="dossier">${I('user')}Voir mon dossier</button></div>
+  <p class="small muted">Côté cabinet, le rendez-vous apparaît déjà dans l’agenda : <button type="button" class="lnk" data-act="goAgenda" data-d="${a.date}">voir dans l’espace cabinet</button>.</p></div>`;
+ }
+ h+=`</div><aside class="card"><h2 class="h3" style="margin-bottom:12px">Récapitulatif</h2><ul class="sum">
+  <li>${I('tooth')}<span>${B.motif?MO[B.motif].name:'<span class="muted">Motif à choisir</span>'}</span></li>
+  <li>${I('user')}<span>${B.sp?PR[B.sp].name:B.prac!=='all'?PR[B.prac].name:'<span class="muted">Praticien à choisir</span>'}</span></li>
+  <li>${I('cal')}<span>${B.time?cap(fLong(B.date))+' à '+hm(B.time):'<span class="muted">Créneau à choisir</span>'}</span></li>
+  <li>${I('pin')}<span>12 place des Tilleuls</span></li></ul>
+  <p class="small muted" style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">Annulation gratuite depuis votre dossier jusqu’à 24 h avant. Apportez votre carte Vitale.</p></aside></div>`;
+ return h}
+
+function vDossier(){
+ const p=pat(S.me);
+ const up=S.appts.filter(a=>a.pat===p.id&&a.date>=TK&&['confirme','arrive'].includes(a.status)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ const past=S.appts.filter(a=>a.pat===p.id&&a.status==='termine').map(a=>({d:a.date,soin:MO[a.motif].name,prac:a.prac})).concat(p.hist).sort((a,b)=>b.d.localeCompare(a.d));
+ const m=p.med;
+ return `<div class="page-head"><div><h1 tabindex="-1">Bonjour ${esc(p.first)}</h1><p class="muted">Votre dossier patient · connecté en tant que ${esc(pname(p))} (compte de démonstration)</p></div><button type="button" class="btn primary" data-act="go" data-v="rdv">${I('plus')}Nouveau rendez-vous</button></div>
+ <div class="dos">
+  <section class="card"><div class="card-h"><h2>Mes prochains rendez-vous</h2></div>
+   ${up.length?up.map(a=>{const d=pk(a.date);return `<div class="rdv-item" style="margin-bottom:10px"><div class="datebox"><span>${J[d.getDay()].slice(0,3)}</span><b>${d.getDate()}</b><span>${M[d.getMonth()].slice(0,4)}</span></div><div class="min0" style="flex:1 1 180px"><b>${MO[a.motif].name}</b><p class="small muted">${cap(fRel(a.date))} à ${hm(a.time)} · ${PR[a.prac].name}</p><p class="small" style="margin-top:4px">${remLine(a)}</p></div>
+    <div class="actions" style="width:100%"><button type="button" class="btn sm" data-act="ics" data-id="${a.id}">${I('download')}Agenda</button><button type="button" class="btn sm" data-act="moveAppt" data-id="${a.id}">${I('cal')}Déplacer</button><button type="button" class="btn sm danger" data-act="cancelAppt" data-id="${a.id}">${I('x')}Annuler</button></div></div>`}).join('')
+   :`<p class="empty">Aucun rendez-vous à venir.<br><button type="button" class="lnk" data-act="go" data-v="rdv">Prendre rendez-vous</button></p>`}
+   <fieldset style="margin-top:12px"><legend>Mes rappels</legend><label class="ck"><input type="checkbox" data-ch="pref" data-k="sms" ${p.prefs.sms?'checked':''}>SMS deux jours avant au ${esc(p.tel)}</label><label class="ck"><input type="checkbox" data-ch="pref" data-k="email" ${p.prefs.email?'checked':''}>E-mail la veille à <span style="overflow-wrap:anywhere">${esc(p.email)}</span></label></fieldset>
+  </section>
+  <section class="card"><div class="card-h"><h2>Questionnaire médical</h2>${m.upd?`<span class="badge b-ok">À jour · ${fShort(m.upd)}</span>`:`<span class="badge b-warn">À compléter</span>`}</div>
+   <form data-form="med" class="fgrid" novalidate>
+    <div class="field"><label for="m-all">Allergies</label><input type="text" id="m-all" value="${esc(m.allergies)}" placeholder="Ex. pénicilline, latex"></div>
+    <div class="field"><label for="m-tr">Traitements en cours</label><input type="text" id="m-tr" value="${esc(m.traitements)}" placeholder="Aucun"></div>
+    <div class="field"><label for="m-anx">Appréhension des soins</label><select id="m-anx">${['Aucune','Légère','Forte'].map(o=>`<option ${m.anx===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    <div class="field full"><label class="ck"><input type="checkbox" id="m-ac" ${m.anticoag?'checked':''}>Je prends un traitement anticoagulant</label><label class="ck"><input type="checkbox" id="m-gr" ${m.grossesse?'checked':''}>Je suis enceinte ou j’allaite</label></div>
+    <div class="field full"><button type="submit" class="btn primary">${I('send')}Transmettre au cabinet</button><span class="hint">Ces informations sont visibles uniquement par l’équipe soignante.</span></div>
+   </form></section>
+  <section class="card"><div class="card-h"><h2>Historique des soins</h2></div>
+   ${past.length?`<ul class="rows">${past.map(h=>`<li><div><b>${esc(h.soin)}</b><p class="small muted">${PR[h.prac].name}</p></div><span class="small num">${fShort(h.d)}</span></li>`).join('')}</ul>`:'<p class="empty">Aucun soin enregistré pour l’instant.</p>'}</section>
+  <section class="card"><div class="card-h"><h2>Mes documents</h2></div>
+   ${p.docs.length?`<ul class="rows">${p.docs.map(d=>`<li><div><b>${esc(d.title)}</b><p class="small muted">${d.type} · ${fShort(d.d)}${d.lines?' · '+eur(d.lines.reduce((s,l)=>s+l[1],0)):''}</p></div><button type="button" class="btn sm" data-act="doc" data-p="${p.id}" data-id="${d.id}">${I('file')}Consulter</button></li>`).join('')}</ul>`:'<p class="empty">Vos devis, factures et ordonnances apparaîtront ici.</p>'}</section>
+ </div>`}
+
+/* ---------- Rappels ---------- */
+function reminders(){const now=new Date(),end=key(add(TODAY,3)),out=[];
+ S.appts.filter(a=>a.status==='confirme'&&a.date>=TK&&a.date<=end).forEach(a=>{const p=pat(a.pat),d=pk(a.date);
+  if(S.rules.sms&&p.prefs.sms){const at=add(d,-2);at.setHours(18,0,0,0);out.push({a,p,c:'SMS',at,sent:!!a.sent.SMS||at<=now})}
+  if(S.rules.email&&p.prefs.email){const at=add(d,-1);at.setHours(10,0,0,0);out.push({a,p,c:'E-mail',at,sent:!!a.sent['E-mail']||at<=now})}});
+ return out.sort((x,y)=>x.at-y.at||(x.a.date+x.a.time).localeCompare(y.a.date+y.a.time))}
+function remLine(a){const l=reminders().filter(r=>r.a===a);if(!l.length)return '<span class="muted">Rappel envoyé avant le rendez-vous</span>';
+ return l.map(r=>`${I(r.c==='SMS'?'phone':'send')} ${r.c} ${r.sent?'envoyé':'prévu le '+fShort(key(r.at))}`).join(' · ')}
+const fmtAt=d=>`${fRel(key(d))} ${pad(d.getHours())}h${pad(d.getMinutes())}`;
+const fill=(t,a)=>{const p=pat(a.pat);return t.replace(/\{prenom\}/g,p.first).replace(/\{date\}/g,fLong(a.date)).replace(/\{heure\}/g,hm(a.time)).replace(/\{praticien\}/g,PR[a.prac].name)};
+
+/* ---------- Vues cabinet ---------- */
+const kpi=(l,v,s)=>`<div class="card kpi"><p class="l">${l}</p><p class="v num">${v}</p><p class="small muted">${s}</p></div>`;
+function vAgenda(){
+ const k=UI.ag,list=S.appts.filter(a=>a.date===k),act=list.filter(a=>a.status!=='annule');
+ const tot=PRACS.reduce((n,p)=>n+slotsFor(k,p.id).length,0),fillr=tot?Math.round(act.length/tot*100):0;
+ const onl=act.filter(a=>a.src==='En ligne').length,abs=act.filter(a=>a.status==='absent').length,ann=list.length-act.length;
+ return `<div class="page-head"><div><h1 tabindex="-1">Agenda</h1><p class="muted">${cap(fLong(k))}${k===TK?' · aujourd’hui':''}</p></div>
+  <div class="actions daynav"><button type="button" class="icon-btn" id="agPrev" data-act="agDay" data-n="-1" aria-label="Jour précédent">${I('chevl')}</button><button type="button" class="btn" id="agTod" data-act="agToday">Aujourd’hui</button><button type="button" class="icon-btn" id="agNext" data-act="agDay" data-n="1" aria-label="Jour suivant">${I('chevr')}</button><label class="sr" for="agDate">Aller à la date</label><input type="date" id="agDate" data-ch="agDate" value="${k}"><button type="button" class="btn primary" data-act="newAppt">${I('plus')}Rendez-vous</button></div></div>
+ <div class="kpis">${kpi('Rendez-vous',act.length,`${ann} annulation${ann>1?'s':''}`)}${kpi('Taux de remplissage',fillr+' %',`${tot} créneaux ouverts`)}${kpi('Pris en ligne',act.length?Math.round(onl/act.length*100)+' %':'—',`${onl} réservation${onl>1?'s':''} via le site`)}${kpi('Absences',abs,'rappels SMS et e-mail actifs')}</div>
+ <div class="cols">${PRACS.map(p=>agCol(p,k)).join('')}</div>`}
+function agCol(p,k){const sl=slotsFor(k,p.id);
+ const items=sl.map(t=>{const a=S.appts.find(x=>x.date===k&&x.time===t&&x.prac===p.id&&x.status!=='annule');
+  if(a){const pt=pat(a.pat);return `<li><button type="button" class="appt ${p.c} st-${a.status}" id="ap-${a.id}" data-act="appt" data-id="${a.id}"><span class="t">${hm(t)}</span><span class="who"><b>${esc(pname(pt))}</b><span class="small muted">${MO[a.motif].name}${a.src==='En ligne'?' · en ligne':''}</span></span>${badge(a.status)}</button></li>`}
+  return `<li><button type="button" class="free" data-act="newAppt" data-p="${p.id}" data-d="${k}" data-t="${t}" aria-label="Créneau libre ${hm(t)} avec ${p.name}, ajouter un rendez-vous"><span class="t">${hm(t)}</span><span>Libre</span>${I('plus')}</button></li>`}).join('');
+ const n=S.appts.filter(x=>x.date===k&&x.prac===p.id&&x.status!=='annule').length;
+ return `<section class="card col" aria-labelledby="c-${p.id}"><header class="col-h"><span class="av ${p.c}">${p.ini}</span><div><h2 id="c-${p.id}" class="h3">${p.name}</h2><p class="small muted">${p.role}${sl.length?` · ${n}/${sl.length} créneaux`:''}</p></div></header>${sl.length?`<ul class="slist">${items}</ul>`:`<p class="empty">Pas de consultation ce jour.</p>`}</section>`}
+function openAppt(id){const a=AP(id),p=pat(a.pat),m=p.med;
+ const rl=reminders().filter(r=>r.a===a);
+ openDlg('Rendez-vous',`<dl class="dl"><dt>Patient</dt><dd><button type="button" class="lnk" data-act="goPat" data-id="${p.id}">${esc(pname(p))}</button><br><span class="small muted">${esc(p.tel)}</span></dd>
+  <dt>Date</dt><dd>${cap(fLong(a.date))} à ${hm(a.time)}</dd><dt>Praticien</dt><dd>${PR[a.prac].name}</dd><dt>Motif</dt><dd>${MO[a.motif].name}</dd><dt>Origine</dt><dd>${a.src}</dd>
+  <dt>Rappels</dt><dd>${rl.length?rl.map(r=>`${r.c} : ${r.sent?'envoyé':'programmé '+fmtAt(r.at)}`).join('<br>'):'—'}${a.conf?'<br><span class="badge b-ok">Présence confirmée par le patient</span>':''}</dd></dl>
+  ${medAlert(m)}
+  ${a.status!=='annule'?`<fieldset><legend>Statut</legend><div class="actions">${['confirme','arrive','termine','absent'].map(s=>`<button type="button" class="btn sm ${a.status===s?'primary':''}" aria-pressed="${a.status===s}" data-act="apptSt" data-id="${a.id}" data-s="${s}">${ST[s][0]}</button>`).join('')}</div></fieldset>`:badge('annule')}`,
+  `${a.status!=='annule'?`<button type="button" class="btn danger" data-act="apptSt" data-id="${a.id}" data-s="annule">${I('x')}Annuler le RDV</button>`:''}<button type="button" class="btn" data-act="dlgClose">Fermer</button>`)}
+function medAlert(m){const al=[];if(m.allergies)al.push('Allergie : '+esc(m.allergies));if(m.anticoag)al.push('Sous anticoagulant');if(m.grossesse)al.push('Grossesse ou allaitement');if(m.anx==='Forte')al.push('Forte appréhension des soins');
+ return al.length?`<p class="note bad">${I('alert')}<span>${al.join(' · ')}</span></p>`:''}
+function openNew(o){NA={pat:o.pat||'',prac:o.prac||'morvan',date:o.date||'',time:o.time||'',motif:o.motif||''};drawNew()}
+function drawNew(){
+ const ms=MOTIFS.filter(m=>m.pr.includes(NA.prac));if(!ms.some(m=>m.id===NA.motif))NA.motif=ms[0].id;
+ const days=[...Array(21)].map((_,i)=>key(add(TODAY,i))).filter(k=>slotsFor(k,NA.prac).length);
+ if(NA.date&&!days.includes(NA.date)&&slotsFor(NA.date,NA.prac).length)days.unshift(NA.date);
+ if(!days.includes(NA.date))NA.date=days[0];
+ const fr=slotsFor(NA.date,NA.prac).filter(t=>!taken(NA.date,t,NA.prac));if(!fr.includes(NA.time))NA.time=fr[0]||'';
+ const pl=[...S.pats].sort((a,b)=>a.last.localeCompare(b.last,'fr'));
+ const sel=(id,l,opts)=>`<div class="field"><label for="na-${id}">${l}</label><select id="na-${id}" data-na="${id}">${opts}</select></div>`;
+ openDlg('Nouveau rendez-vous',`<form id="naForm" data-form="newAppt" class="fgrid" novalidate>
+  <div class="field full"><label for="na-pat">Patient</label><select id="na-pat" data-na="pat" aria-describedby="naErr"><option value="">— Choisir un patient —</option>${pl.map(p=>`<option value="${p.id}" ${NA.pat===p.id?'selected':''}>${esc(p.last+' '+p.first)} · ${esc(p.tel)}</option>`).join('')}</select><span class="err" id="naErr"></span></div>
+  ${sel('prac','Praticien',PRACS.map(p=>`<option value="${p.id}" ${NA.prac===p.id?'selected':''}>${p.name}</option>`).join(''))}
+  ${sel('motif','Motif',ms.map(m=>`<option value="${m.id}" ${NA.motif===m.id?'selected':''}>${m.name}</option>`).join(''))}
+  ${sel('date','Jour',days.map(d=>`<option value="${d}" ${NA.date===d?'selected':''}>${cap(fLong(d))}</option>`).join(''))}
+  ${sel('time','Heure',fr.length?fr.map(t=>`<option value="${t}" ${NA.time===t?'selected':''}>${hm(t)}</option>`).join(''):'<option value="">Complet</option>')}
+  <p class="hint full field">Le patient reçoit une confirmation par SMS, puis les rappels automatiques.</p></form>`,
+  `<button type="button" class="btn" data-act="dlgClose">Annuler</button><button type="submit" form="naForm" class="btn primary">${I('check')}Enregistrer</button>`)}
+
+function patList(){const q=norm(UI.pq.trim());
+ const l=S.pats.filter(p=>!q||norm(pname(p)+' '+p.last+' '+p.first+' '+p.tel.replace(/\s/g,'')+' '+p.email).includes(q.replace(/\s(?=\d)/g,''))).sort((a,b)=>a.last.localeCompare(b.last,'fr'));
+ return l.length?l.map(p=>{const nx=S.appts.filter(a=>a.pat===p.id&&a.date>=TK&&a.status==='confirme').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0];
+  return `<li><button type="button" id="pl-${p.id}" data-act="patSel" data-id="${p.id}" aria-current="${UI.psel===p.id}"><span class="av">${ini(p)}</span><span class="min0"><span class="nm">${esc(p.last+' '+p.first)}</span><span class="small muted">${nx?'RDV '+fRel(nx.date)+' '+hm(nx.time):'Pas de RDV à venir'}</span></span></button></li>`}).join(''):`<li class="empty">Aucun patient trouvé.</li>`}
+function patDetail(id){const p=pat(id);if(!p)return '';const m=p.med;
+ const ap=S.appts.filter(a=>a.pat===p.id).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+ const up=ap.filter(a=>a.date>=TK&&a.status!=='annule'&&a.status!=='termine').reverse();
+ const past=ap.filter(a=>a.date<=TK&&['termine','absent'].includes(a.status)).map(a=>({d:a.date,soin:MO[a.motif].name,prac:a.prac,st:a.status})).concat(p.hist.map(h=>({...h,st:'termine'}))).sort((a,b)=>b.d.localeCompare(a.d)).slice(0,8);
+ return `<article class="card" aria-labelledby="pdn"><header class="pd-h"><span class="av big">${ini(p)}</span><div><h2 id="pdn" tabindex="-1">${esc(pname(p))}</h2><p class="muted small">${TODAY.getFullYear()-p.by} ans · patient depuis ${p.since} · ${esc(p.mut)}</p></div>
+  <div class="actions"><button type="button" class="btn sm primary" data-act="newAppt" data-pat="${p.id}">${I('plus')}Rendez-vous</button><button type="button" class="btn sm" data-act="remindOne" data-id="${p.id}">${I('send')}Envoyer un SMS</button></div></header>
+  ${medAlert(m)}
+  <div class="g2" style="margin-top:14px"><section><h3 style="margin-bottom:10px">Coordonnées</h3><dl class="dl"><dt>Téléphone</dt><dd>${esc(p.tel)}</dd><dt>E-mail</dt><dd>${esc(p.email)}</dd><dt>Rappels</dt><dd>${[p.prefs.sms?'SMS':'',p.prefs.email?'E-mail':''].filter(Boolean).join(' + ')||'Aucun'}</dd></dl></section>
+  <section><h3 style="margin-bottom:10px">Questionnaire médical</h3><dl class="dl"><dt>Allergies</dt><dd>${esc(m.allergies)||'Aucune déclarée'}</dd><dt>Traitements</dt><dd>${esc(m.traitements)||'Aucun'}</dd><dt>Appréhension</dt><dd>${m.anx}</dd><dt>Mise à jour</dt><dd>${m.upd?'par le patient le '+fShort(m.upd):'<span class="badge b-warn">Jamais remplie</span>'}</dd></dl></section></div>
+  <section class="psec"><h3>Rendez-vous à venir</h3>${up.length?`<ul class="rows">${up.map(a=>`<li><div><b>${MO[a.motif].name}</b><p class="small muted">${cap(fRel(a.date))} à ${hm(a.time)} · ${PR[a.prac].name}</p></div><button type="button" class="btn sm" data-act="appt" data-id="${a.id}">Ouvrir</button></li>`).join('')}</ul>`:'<p class="small muted">Aucun.</p>'}</section>
+  <section class="psec"><h3>Historique</h3>${past.length?`<div class="tw"><table style="min-width:460px"><thead><tr><th scope="col">Date</th><th scope="col">Acte</th><th scope="col">Praticien</th><th scope="col">Statut</th></tr></thead><tbody>${past.map(h=>`<tr><td class="num">${fShort(h.d)}</td><td>${esc(h.soin)}</td><td>${PR[h.prac].short}</td><td>${badge(h.st)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="small muted">Aucun historique.</p>'}</section>
+  <section class="psec"><h3>Documents</h3>${p.docs.length?`<ul class="rows">${p.docs.map(d=>`<li><div><b>${esc(d.title)}</b><p class="small muted">${d.type} · ${d.num} · ${fShort(d.d)}</p></div><button type="button" class="btn sm" data-act="doc" data-p="${p.id}" data-id="${d.id}">${I('file')}Aperçu</button></li>`).join('')}</ul>`:'<p class="small muted">Aucun document.</p>'}</section>
+  <section class="psec"><h3>Notes internes</h3><ul class="notes">${p.notes.map(n=>`<li><p class="small muted">${n.by} · ${fShort(n.d)}</p><p>${esc(n.t)}</p></li>`).join('')||'<li class="muted">Aucune note.</li>'}</ul>
+   <form data-form="note" data-id="${p.id}" style="display:grid;gap:8px"><label for="noteIn" class="flabel">Ajouter une note (visible par l’équipe uniquement)</label><textarea id="noteIn" required></textarea><span class="err" id="noteErr"></span><div><button type="submit" class="btn primary sm">${I('plus')}Ajouter la note</button></div></form></section>
+ </article>`}
+function vPatients(){if(!pat(UI.psel))UI.psel='p1';
+ return `<div class="page-head"><div><h1 tabindex="-1">Patients</h1><p class="muted">${S.pats.length} dossiers · questionnaires, historique, documents et notes</p></div></div>
+ <div class="split"><aside class="card"><div class="field"><label for="pq">Rechercher un patient</label><input type="search" id="pq" data-in="pq" value="${esc(UI.pq)}" placeholder="Nom, téléphone ou e-mail"></div><ul id="patList" class="plist">${patList()}</ul></aside><div id="patDetail" class="min0">${patDetail(UI.psel)}</div></div>`}
+
+function vRappels(){
+ const all=reminders(),prog=all.filter(r=>!r.sent),sent=all.filter(r=>r.sent);
+ const conf=S.appts.filter(a=>a.status==='confirme'&&a.date>TK&&a.date<=key(add(TODAY,3)));
+ const l=UI.remF==='prog'?prog:UI.remF==='sent'?sent:all;
+ const ex=S.appts.find(a=>a.pat===S.me&&a.date>=TK&&a.status==='confirme')||S.appts.find(a=>a.date>=TK&&a.status==='confirme');
+ return `<div class="page-head"><div><h1 tabindex="-1">Rappels de rendez-vous</h1><p class="muted">Envoi automatique pour les rendez-vous des 3 prochains jours</p></div><button type="button" class="btn primary" data-act="remAll" ${prog.length?'':'disabled'}>${I('send')}Envoyer les ${prog.length} rappels programmés</button></div>
+ <div class="kpis">${kpi('Programmés',prog.length,'dans les 72 h')}${kpi('Envoyés',sent.length,'SMS et e-mails')}${kpi('Présences confirmées',conf.length?Math.round(conf.filter(a=>a.conf).length/conf.length*100)+' %':'—','réponse « OUI » au SMS')}${kpi('Absences (30 j)','2,1 %','contre 6 % sans rappel')}</div>
+ <div class="split2"><section class="card min0"><div class="card-h"><h2>File d’envoi</h2><div class="chips" role="group" aria-label="Filtrer">${[['prog','Programmés',prog.length],['sent','Envoyés',sent.length],['all','Tous',all.length]].map(f=>`<button type="button" class="chip" id="rf-${f[0]}" data-act="remF" data-f="${f[0]}" aria-pressed="${UI.remF===f[0]}">${f[1]} (${f[2]})</button>`).join('')}</div></div>
+  ${l.length?`<div class="tw"><table style="min-width:640px"><thead><tr><th scope="col">Patient</th><th scope="col">Rendez-vous</th><th scope="col">Canal</th><th scope="col">Envoi</th><th scope="col">Statut</th><th scope="col"><span class="sr">Action</span></th></tr></thead><tbody>
+  ${l.slice(0,UI.remN).map(r=>`<tr><td><b>${esc(pname(r.p))}</b><br><span class="small muted">${esc(r.c==='SMS'?r.p.tel:r.p.email)}</span></td><td>${cap(fRel(r.a.date))} ${hm(r.a.time)}<br><span class="small muted">${PR[r.a.prac].short}</span></td><td>${r.c}</td><td class="small">${fmtAt(r.at)}</td><td>${r.sent?'<span class="badge b-ok">Envoyé</span>':'<span class="badge b-info">Programmé</span>'}${r.a.conf?'<br><span class="small" style="color:var(--ok);font-weight:600">Confirmé OUI</span>':''}</td><td><button type="button" class="btn sm" data-act="remSend" data-id="${r.a.id}" data-c="${r.c}">${r.sent?'Renvoyer':'Envoyer'}</button></td></tr>`).join('')}</tbody></table></div>
+  ${l.length>UI.remN?`<div style="margin-top:10px;text-align:center"><button type="button" class="btn" data-act="remMore">Afficher plus (${l.length-UI.remN} restants)</button></div>`:''}`:`<p class="empty">Aucun rappel dans cette liste.</p>`}</section>
+  <section class="card min0"><h2 style="margin-bottom:12px">Règles et modèles</h2>
+   <label class="ck"><input type="checkbox" id="rule-sms" data-ch="rule" data-k="sms" ${S.rules.sms?'checked':''}>SMS deux jours avant, à 18h</label>
+   <label class="ck"><input type="checkbox" id="rule-email" data-ch="rule" data-k="email" ${S.rules.email?'checked':''}>E-mail la veille, à 10h</label>
+   <div class="field" style="margin-top:12px"><label for="tpl-sms">Modèle SMS</label><textarea id="tpl-sms" data-in="tpl" data-k="sms" aria-describedby="tplh">${esc(S.tpl.sms)}</textarea><span class="hint" id="tplh">Variables : {prenom} {date} {heure} {praticien} · <span id="smsLen">${S.tpl.sms.length}</span> caractères</span></div>
+   <p class="flabel" style="margin:12px 0 6px">Aperçu SMS</p><div class="prev" id="prev-sms">${ex?esc(fill(S.tpl.sms,ex)):''}</div>
+   <div class="field" style="margin-top:12px"><label for="tpl-email">Modèle e-mail</label><textarea id="tpl-email" data-in="tpl" data-k="email" rows="7">${esc(S.tpl.email)}</textarea></div>
+   <p class="flabel" style="margin:12px 0 6px">Aperçu e-mail</p><div class="prev" id="prev-email">${ex?esc(fill(S.tpl.email,ex)):''}</div>
+  </section></div>`}
+
+function vIA(){const st=S.stats;
+ return `<div class="page-head"><div><h1 tabindex="-1">Assistant IA</h1><p class="muted">Base de connaissances, garde-fous et questions à traiter</p></div><div class="actions"><button type="button" class="btn" data-act="chat">${I('chat')}Tester l’assistant</button><button type="button" class="btn primary" data-act="faqEdit">${I('plus')}Nouvelle réponse</button></div></div>
+ <div class="kpis">${kpi('Questions reçues',st.q,'depuis la mise en ligne')}${kpi('Réponses automatiques',Math.round(st.auto/st.q*100)+' %',st.auto+' sans intervention')}${kpi('RDV initiés',st.rdv,'depuis l’assistant')}${kpi('Sans réponse',S.unans.length,'à compléter par l’équipe')}</div>
+ <div class="split2"><section class="card min0"><div class="card-h"><h2>Base de connaissances</h2><span class="small muted">${S.faq.length} réponses</span></div>
+  <ul class="faq">${S.faq.map(f=>`<li><div class="card-h" style="margin:0"><h3>${esc(f.q)}</h3><div class="actions"><span class="small muted">${f.hits||0} utilisations</span><button type="button" class="icon-btn" data-act="faqEdit" data-id="${f.id}" aria-label="Modifier « ${esc(f.q)} »">${I('edit')}</button><button type="button" class="icon-btn" data-act="faqDel" data-id="${f.id}" aria-label="Supprimer « ${esc(f.q)} »">${I('trash')}</button></div></div>
+   <p class="small">${esc(f.a)}</p><div class="keys">${f.keys.map(k=>`<span>${esc(k)}</span>`).join('')}${f.act?`<span style="color:var(--accent-text)">→ ${ACTL[f.act]}</span>`:''}</div></li>`).join('')}</ul></section>
+  <div style="display:grid;gap:16px" class="min0">
+  <section class="card"><div class="card-h"><h2>Questions sans réponse</h2></div>${S.unans.length?`<ul class="rows">${S.unans.map((u,i)=>`<li><div><b>« ${esc(u.q)} »</b><p class="small muted">${cap(fRel(u.d))}</p></div><div class="actions"><button type="button" class="btn sm primary" data-act="unAns" data-i="${i}">Répondre</button><button type="button" class="icon-btn" data-act="unDel" data-i="${i}" aria-label="Ignorer cette question">${I('x')}</button></div></li>`).join('')}</ul>`:'<p class="empty">Toutes les questions ont une réponse.</p>'}
+   <p class="hint" style="margin-top:10px">Posez une question inconnue dans l’assistant : elle apparaît ici, vous y répondez, et l’assistant la connaît aussitôt.</p></section>
+  <section class="card"><h2 style="margin-bottom:8px">Garde-fous</h2><ul class="guard">
+   <li>${I('shield')}<span>Aucun diagnostic ni conseil sur un médicament : orientation vers une consultation.</span></li>
+   <li>${I('shield')}<span>Mots d’alerte (gonflement, fièvre, saignement) : créneau d’urgence proposé et rappel du 15.</span></li>
+   <li>${I('shield')}<span>Répond uniquement à partir de cette base validée par le cabinet, sinon transmet à l’équipe.</span></li>
+   <li>${I('shield')}<span>Aucune donnée de santé conservée dans les conversations (RGPD, hébergement HDS côté dossier).</span></li></ul></section></div></div>`}
+function openFaq(id,pre){const f=id?S.faq.find(x=>x.id===id):{q:pre||'',keys:[],a:'',act:''};
+ openDlg(id?'Modifier la réponse':'Nouvelle réponse',`<form id="faqForm" data-form="faq" data-id="${id||''}" data-un="${pre!=null?pre:''}" class="fgrid" novalidate>
+  <div class="field full"><label for="fq">Sujet ou question</label><input type="text" id="fq" value="${esc(f.q)}" aria-describedby="fqe"><span class="err" id="fqe"></span></div>
+  <div class="field full"><label for="fk">Mots-clés déclencheurs</label><input type="text" id="fk" value="${esc(f.keys.join(', '))}" aria-describedby="fkh fke"><span class="hint" id="fkh">Séparés par des virgules. Le début du mot suffit (« rembours » couvre « remboursé », « remboursement »).</span><span class="err" id="fke"></span></div>
+  <div class="field full"><label for="fa">Réponse de l’assistant</label><textarea id="fa" rows="4" aria-describedby="fae">${esc(f.a)}</textarea><span class="err" id="fae"></span></div>
+  <div class="field full"><label for="fact">Action proposée</label><select id="fact"><option value="">Aucune</option>${Object.entries(ACTL).map(([k,v])=>`<option value="${k}" ${f.act===k?'selected':''}>${v}</option>`).join('')}</select></div></form>`,
+  `<button type="button" class="btn" data-act="dlgClose">Annuler</button><button type="submit" form="faqForm" class="btn primary">${I('check')}Enregistrer</button>`)}
+
+const VIEWS={accueil:vAccueil,soins:vSoins,rdv:vRdv,dossier:vDossier,agenda:vAgenda,patients:vPatients,rappels:vRappels,ia:vIA};
+
+/* ---------- Vidéo ---------- */
+let VID=null;
+function openVideo(id){const s=SO[id];VID={s,t:0,timer:null};
+ openDlg(esc(s.name),`<div class="screen"><svg viewBox="0 0 320 180" aria-hidden="true"><rect width="320" height="180" fill="#0F2E2C"/><circle cx="160" cy="88" r="64" fill="#164240"/>
+  <g transform="translate(112 40) scale(4)" fill="none" stroke="#BFE6E0" stroke-width=".9" stroke-linejoin="round"><path d="M7 3c-2.2 0-4 1.8-4 4.3 0 2.3.9 3.6 1.5 5.3.6 1.8.8 3.6 1.3 5.7.3 1.4.8 2.7 1.8 2.7 1.3 0 1.4-2 1.9-4 .3-1.2.7-2 1.5-2s1.2.8 1.5 2c.5 2 .6 4 1.9 4 1 0 1.5-1.3 1.8-2.7.5-2.1.7-3.9 1.3-5.7.6-1.7 1.5-3 1.5-5.3C21 4.8 19.2 3 17 3c-2 0-3 1-5 1S9 3 7 3z"/></g>
+  <circle id="vDot" cx="130" cy="70" r="10" fill="none" stroke="#F0C674" stroke-width="2.5"/><rect x="20" y="166" width="280" height="3" rx="1.5" fill="#2A5552"/><rect id="vBar" x="20" y="166" width="0" height="3" rx="1.5" fill="#5EC7BC"/></svg><div class="cap" id="vCap"></div></div>
+  <div class="pctrl"><button type="button" class="icon-btn" id="vPlay" data-act="vPlay" aria-label="Lecture">${I('play')}</button><label class="sr" for="vSeek">Position de lecture</label><input type="range" id="vSeek" data-in="vSeek" min="0" max="${s.vid.len}" step="1" value="0"><span class="small num" id="vTime" style="white-space:nowrap">0:00 / ${mmss(s.vid.len)}</span></div>
+  <p class="hint">Lecture simulée. Sur le site, vos vidéos (YouTube, Vimeo ou hébergées) s’intègrent ici, sous-titrées et chapitrées.</p>
+  <h3>Chapitres</h3><ol class="chap">${s.vid.ch.map((c,i)=>`<li><button type="button" data-act="vChap" data-t="${c[0]}" id="vc-${i}"><span class="num small">${mmss(c[0])}</span>${c[1]}</button></li>`).join('')}</ol>`,
+  `<button type="button" class="btn primary" data-act="bookMotif" data-m="${s.motif}">${I('cal')}Prendre rendez-vous pour ce soin</button>`);updVideo()}
+function updVideo(){if(!VID)return;const {s,t}=VID,ch=s.vid.ch;let ci=0;ch.forEach((c,i)=>{if(t>=c[0])ci=i});
+ const sk=$('#vSeek');if(sk&&document.activeElement!==sk)sk.value=t;
+ $('#vTime').textContent=mmss(t)+' / '+mmss(s.vid.len);$('#vCap').textContent=ch[ci][1];
+ $('#vBar').setAttribute('width',280*t/s.vid.len);const pos=[[130,70],[190,70],[140,120],[180,128]][ci%4];$('#vDot').setAttribute('cx',pos[0]);$('#vDot').setAttribute('cy',pos[1]);
+ ch.forEach((c,i)=>$('#vc-'+i).setAttribute('aria-current',i===ci));
+ const pb=$('#vPlay');pb.innerHTML=I(VID.timer?'pause':'play');pb.setAttribute('aria-label',VID.timer?'Pause':'Lecture')}
+function vToggle(){if(!VID)return;if(VID.timer){clearInterval(VID.timer);VID.timer=null}else{if(VID.t>=VID.s.vid.len)VID.t=0;VID.timer=setInterval(()=>{VID.t=Math.min(VID.s.vid.len,VID.t+.5);if(VID.t>=VID.s.vid.len){clearInterval(VID.timer);VID.timer=null}updVideo()},500)}updVideo()}
+
+/* ---------- Chat ---------- */
+const CH={msgs:[{from:'bot',html:'<p>Bonjour, je suis l’assistant du cabinet. Je peux vous renseigner sur nos soins, tarifs, horaires, ou vous aider à prendre rendez-vous.</p>'}],typing:false};
+const SUG=['Quels sont vos horaires ?','J’ai mal à une dent','Combien coûte un implant ?','Comment annuler mon RDV ?','Est-ce remboursé ?'];
+function renderChat(){const log=$('#chatLog');log.innerHTML=CH.msgs.map(m=>`<div class="msg ${m.from}">${m.from==='me'?'<span class="sr">Vous : </span>':'<span class="sr">Assistant : </span>'}${m.html}</div>`).join('')+(CH.typing?'<div class="msg bot typing"><span></span><span></span><span></span><b class="sr">L’assistant écrit…</b></div>':'');log.scrollTop=log.scrollHeight;
+ $('#chatSug').innerHTML=SUG.map(s=>`<button type="button" data-act="chatSug">${s}</button>`).join('')}
+function openChat(){$('#chat').hidden=false;$('#fab').hidden=true;$('#fab').setAttribute('aria-expanded','true');renderChat();$('#chatIn').focus()}
+function closeChat(){$('#chat').hidden=true;renderNav();$('#fab').setAttribute('aria-expanded','false');if(!$('#fab').hidden)$('#fab').focus()}
+const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function answer(q){const n=norm(q);
+ const best=S.faq.find(f=>f.keys.some(k=>norm(k).trim()&&new RegExp('(^|[^a-z])'+reEsc(norm(k).trim())).test(n)));
+ if(best){S.stats.auto++;best.hits=(best.hits||0)+1;return `<p>${esc(best.a)}</p>`+(best.act?`<button type="button" class="btn sm primary" data-act="chatAct" data-a="${best.act}">${ACTL[best.act]}</button>`:'')}
+ S.unans.unshift({q,d:TK});
+ return `<p>Je préfère ne pas vous répondre au hasard : je transmets votre question à l’équipe, qui vous recontactera. Vous pouvez aussi prendre rendez-vous directement.</p><button type="button" class="btn sm primary" data-act="chatAct" data-a="book:consult">${ACTL['book:consult']}</button>`}
+function ask(q){q=q.trim();if(!q||CH.typing)return;CH.msgs.push({from:'me',html:esc(q)});CH.typing=true;S.stats.q++;renderChat();
+ setTimeout(()=>{CH.typing=false;CH.msgs.push({from:'bot',html:answer(q)});save();renderChat();renderNav();if(UI.view==='ia')renderView()},700)}
+
+/* ---------- Divers ---------- */
+function ics(a){const p=PR[a.prac],d=a.date.replace(/-/g,''),[h,m]=a.time.split(':').map(Number),e=new Date(2000,0,1,h,m+30);
+ const st=d+'T'+pad(h)+pad(m)+'00',en=d+'T'+pad(e.getHours())+pad(e.getMinutes())+'00';
+ const txt=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Cabinet des Tilleuls//FR','BEGIN:VEVENT','UID:'+a.id+'@tilleuls.exemple','DTSTAMP:'+st,'DTSTART:'+st,'DTEND:'+en,'SUMMARY:Rendez-vous dentaire — '+MO[a.motif].name,'LOCATION:12 place des Tilleuls','DESCRIPTION:Avec '+p.name,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+ try{const url=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));const l=document.createElement('a');l.href=url;l.download='rendez-vous-dentaire.ics';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast('Fichier agenda (.ics) téléchargé')}catch(e){toast('Téléchargement indisponible dans ce navigateur')}}
+function docHTML(p,d){const tot=d.lines?d.lines.reduce((s,l)=>s+l[1],0):0;
+ return `<div class="doc"><div class="doc-h"><div><b>Cabinet dentaire des Tilleuls</b><br>12 place des Tilleuls<br>01 23 45 67 89</div><div class="r"><b>${d.type}</b><br>N° ${d.num}<br>${fShort(d.d)}</div></div>
+ <p><b>Patient :</b> ${esc(pname(p))} · né(e) en ${p.by}</p><h3>${esc(d.title)}</h3>
+ ${d.lines?`<div class="tw"><table><thead><tr><th scope="col">Acte</th><th scope="col">Montant</th></tr></thead><tbody>${d.lines.map(l=>`<tr><td>${esc(l[0])}</td><td class="num">${eur(l[1])}</td></tr>`).join('')}</tbody><tfoot><tr><th scope="row">Total</th><th class="num">${eur(tot)}</th></tr></tfoot></table></div>`:''}
+ ${d.text?`<p>${esc(d.text)}</p>`:''}<p class="doc-f">${PR[d.prac].name} · Document fictif généré pour la démonstration.</p></div>`}
+function openDoc(pid,id){const p=pat(pid),d=p.docs.find(x=>x.id===id);
+ openDlg(esc(d.type),docHTML(p,d),`<button type="button" class="btn" data-act="dlgClose">Fermer</button><button type="button" class="btn primary" data-act="print" data-p="${pid}" data-id="${id}">${I('print')}Imprimer / PDF</button>`)}
+
+/* ---------- Actions ---------- */
+function bookWith(o){B=Object.assign(newB(),o);if(UI.mode!=='patient')UI.mode='patient';if(dlg.open)dlg.close();go('rdv')}
+const ACT={
+ go:b=>{if(b.dataset.v==='rdv'&&(B.step===4||b.closest('#nav')))B=newB();go(b.dataset.v)},
+ mode:b=>go(b.dataset.m==='patient'?'accueil':'agenda'),
+ reset:()=>{try{localStorage.removeItem(LS)}catch(e){}S=seed();B=newB();UI={mode:'patient',view:'accueil',cat:'all',soinQ:'',ag:TK,psel:'p1',pq:'',remF:'prog',remN:30};CH.msgs=CH.msgs.slice(0,1);if(dlg.open)dlg.close();if(!$('#chat').hidden)closeChat();go('accueil');toast('Démo réinitialisée')},
+ chat:()=>openChat(),chatClose:()=>closeChat(),
+ chatSug:b=>ask(b.textContent),
+ chatAct:b=>{const [t,v]=b.dataset.a.split(':');if(innerWidth<700)closeChat();if(t==='book'){S.stats.rdv++;save();bookWith({motif:v,step:2,chat:true})}else{go(v)}},
+ dlgClose:()=>dlg.close(),
+ video:b=>openVideo(b.dataset.id),vPlay:()=>vToggle(),vChap:b=>{VID.t=+b.dataset.t;updVideo()},
+ cat:b=>{UI.cat=b.dataset.c;renderView('cat-'+UI.cat)},
+ bookMotif:b=>bookWith({motif:b.dataset.m,step:2}),
+ bookPrac:b=>{const p=b.dataset.p;const m=MOTIFS.find(x=>x.on&&x.pr.includes(p));bookWith({motif:m.id,prac:p,step:2})},
+ quickBook:b=>bookWith({motif:'consult',date:b.dataset.d,time:b.dataset.t,sp:b.dataset.p,step:3}),
+ bNext1:()=>{if(!B.motif){$('#e-step1').textContent='Choisissez un motif pour continuer.';return}B.step=2;if(!MO[B.motif].pr.includes(B.prac))B.prac='all';renderView();$('#view h1').focus()},
+ bPrac:b=>{B.prac=b.dataset.p;B.time=null;B.sp=null;renderView('pr-'+B.prac)},
+ bDay:b=>{B.date=b.dataset.d;B.time=null;B.sp=null;renderView('dy-'+B.date)},
+ bSlot:b=>{B.time=b.dataset.t;B.sp=b.dataset.p;renderView('sl-'+B.time.replace(':',''))},
+ bNext2:()=>{if(!B.time){toast('Choisissez un créneau horaire');return}if(B.moving&&!B.form.email){const p=pat(S.me);Object.assign(B.form,{first:p.first,last:p.last,email:p.email,tel:p.tel,sms:p.prefs.sms,mail:p.prefs.email,consent:true})}B.step=3;renderView();$('#f-first').focus()},
+ bBack:()=>{B.step--;renderView();$('#view h1').focus()},
+ bLogin:()=>{const p=pat('p1');Object.assign(B.form,{first:p.first,last:p.last,email:p.email,tel:p.tel,sms:p.prefs.sms,mail:p.prefs.email});renderView('f-consent');toast('Coordonnées pré-remplies')},
+ goAgenda:b=>{UI.ag=b.dataset.d;go('agenda')},
+ ics:b=>ics(AP(b.dataset.id)),
+ cancelAppt:b=>{const a=AP(b.dataset.id);openDlg('Annuler le rendez-vous ?',`<p>${MO[a.motif].name}, ${fRel(a.date)} à ${hm(a.time)} avec ${PR[a.prac].name}.</p><p class="small muted">Le créneau sera immédiatement proposé à d’autres patients.</p>`,`<button type="button" class="btn" data-act="dlgClose">Garder le rendez-vous</button><button type="button" class="btn danger" data-act="doCancel" data-id="${a.id}">${I('x')}Confirmer l’annulation</button>`)},
+ doCancel:b=>{AP(b.dataset.id).status='annule';save();dlg.close();renderView();toast('Rendez-vous annulé, e-mail de confirmation envoyé (simulation)')},
+ moveAppt:b=>{const a=AP(b.dataset.id);bookWith({motif:a.motif,prac:MO[a.motif].pr.length>1?'all':a.prac,step:2,moving:a.id})},
+ doc:b=>openDoc(b.dataset.p,b.dataset.id),
+ print:b=>{const p=pat(b.dataset.p);$('#printArea').innerHTML=docHTML(p,p.docs.find(x=>x.id===b.dataset.id));window.print()},
+ agDay:b=>{UI.ag=key(add(pk(UI.ag),+b.dataset.n));renderView(b.id)},
+ agToday:()=>{UI.ag=TK;renderView('agTod')},
+ appt:b=>openAppt(b.dataset.id),
+ apptSt:b=>{const a=AP(b.dataset.id);a.status=b.dataset.s;save();renderView();if(a.status==='annule'){dlg.close();toast('Rendez-vous annulé, SMS d’information envoyé au patient (simulation)')}else{openAppt(a.id);const f=dlg.querySelector(`[data-s="${a.status}"]`);if(f)f.focus();toast('Statut : '+ST[a.status][0])}},
+ newAppt:b=>openNew({prac:b.dataset.p,date:b.dataset.d,time:b.dataset.t,pat:b.dataset.pat}),
+ goPat:b=>{UI.psel=b.dataset.id;dlg.close();go('patients',true);$('#pdn').focus()},
+ patSel:b=>{UI.psel=b.dataset.id;$('#patDetail').innerHTML=patDetail(UI.psel);document.querySelectorAll('#patList button').forEach(x=>x.setAttribute('aria-current',x.dataset.id===UI.psel));if(innerWidth<960)$('#pdn').focus()},
+ remindOne:b=>toast('SMS envoyé à '+esc(pname(pat(b.dataset.id)))+' (simulation)'),
+ remF:b=>{UI.remF=b.dataset.f;UI.remN=30;renderView('rf-'+UI.remF)},
+ remMore:()=>{UI.remN+=30;renderView()},
+ remSend:b=>{const a=AP(b.dataset.id);a.sent[b.dataset.c]=1;if(Math.random()<.5)a.conf=true;save();renderView();toast(`${b.dataset.c} envoyé à ${esc(pname(pat(a.pat)))} (simulation)`)},
+ remAll:()=>{const l=reminders().filter(r=>!r.sent);l.forEach(r=>r.a.sent[r.c]=1);save();renderView();toast(`${l.length} rappels envoyés (simulation)`)},
+ faqEdit:b=>openFaq(b.dataset.id),
+ faqDel:b=>{S.faq=S.faq.filter(f=>f.id!==b.dataset.id);save();renderView();toast('Réponse supprimée')},
+ unAns:b=>openFaq(null,S.unans[+b.dataset.i].q),
+ unDel:b=>{S.unans.splice(+b.dataset.i,1);save();renderView();toast('Question ignorée')},
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.getAttribute('aria-disabled')==='true'&&b.dataset.act!=='bNext2')return;const f=ACT[b.dataset.act];if(f){e.preventDefault();f(b,e)}});
+
+const INP={
+ soinQ:t=>{UI.soinQ=t.value;$('#soinGrid').innerHTML=soinGrid()},
+ pq:t=>{UI.pq=t.value;$('#patList').innerHTML=patList()},
+ vSeek:t=>{if(VID){VID.t=+t.value;updVideo()}},
+ tpl:t=>{S.tpl[t.dataset.k]=t.value;save();const ex=S.appts.find(a=>a.pat===S.me&&a.date>=TK&&a.status==='confirme')||S.appts.find(a=>a.date>=TK&&a.status==='confirme');if(ex)$('#prev-'+t.dataset.k).textContent=fill(t.value,ex);if(t.dataset.k==='sms')$('#smsLen').textContent=t.value.length}};
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset.in&&INP[t.dataset.in])INP[t.dataset.in](t);if(t.dataset.bf){B.form[t.dataset.bf]=t.type==='checkbox'?t.checked:t.value;if(t.getAttribute('aria-invalid')){t.removeAttribute('aria-invalid');const er=$('#e-'+t.dataset.bf);if(er)er.textContent=''}}});
+const CHG={
+ bMotif:t=>{B.motif=t.value;B.prac='all';B.date=null;B.time=null;B.sp=null;$('#e-step1').textContent='';renderSummaryOnly()},
+ bNewp:t=>{B.newp=t.value},
+ pref:t=>{pat(S.me).prefs[t.dataset.k]=t.checked;save();toast('Préférence de rappel enregistrée')},
+ rule:t=>{S.rules[t.dataset.k]=t.checked;save();renderView('rule-'+t.dataset.k);toast(t.checked?'Règle activée':'Règle désactivée')},
+ agDate:t=>{if(t.value){UI.ag=t.value;renderView('agDate')}}};
+function renderSummaryOnly(){const s=$('.sum li span');if(s)s.innerHTML=MO[B.motif].name}
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.ch&&CHG[t.dataset.ch])CHG[t.dataset.ch](t);
+ if(t.dataset.na){NA[t.dataset.na]=t.value;if(t.dataset.na!=='pat'){drawNew();const el=document.getElementById('na-'+t.dataset.na);if(el)el.focus()}else $('#naErr').textContent=''}});
+
+const FORMS={
+ chat:f=>{const i=$('#chatIn');ask(i.value);i.value=''},
+ book:()=>{const F=B.form,er={};
+  if(!(F.first||'').trim())er.first='Indiquez votre prénom.';
+  if(!(F.last||'').trim())er.last='Indiquez votre nom.';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((F.email||'').trim()))er.email='Adresse e-mail invalide (ex. nom@domaine.fr).';
+  if(!/^(?:(?:\+|00)33\s?|0)[1-9](?:[\s.-]?\d{2}){4}$/.test((F.tel||'').trim()))er.tel='Numéro invalide (ex. 06 12 34 56 78).';
+  if(!F.consent)er.consent='Votre accord est nécessaire pour enregistrer le rendez-vous.';
+  ['first','last','email','tel','consent'].forEach(k=>{const el=$('#f-'+k),m=$('#e-'+k);m.textContent=er[k]||'';if(er[k])el.setAttribute('aria-invalid','true');else el.removeAttribute('aria-invalid')});
+  const ks=Object.keys(er);if(ks.length){$('#f-'+ks[0]).focus();return}
+  if(taken(B.date,B.time,B.sp)){toast('Ce créneau vient d’être pris, choisissez-en un autre');B.step=2;B.time=null;renderView();return}
+  const em=F.email.trim().toLowerCase();let p=S.pats.find(x=>x.email.toLowerCase()===em);
+  if(!p){p={id:'p'+(S.pats.length+1+Math.floor(Math.random()*1e4)),first:F.first.trim(),last:F.last.trim(),email:em,tel:F.tel.trim(),by:1990,mut:'Non renseignée',since:TODAY.getFullYear(),med:{allergies:'',traitements:'',anticoag:false,grossesse:false,anx:'Aucune',upd:null},prefs:{},notes:[],hist:[],docs:[]};S.pats.push(p)}
+  p.prefs={sms:!!F.sms,email:!!F.mail};
+  if((F.msg||'').trim())p.notes.unshift({d:TK,by:'Message du patient (réservation en ligne)',t:F.msg.trim()});
+  if(B.moving){const o=AP(B.moving);if(o)o.status='annule'}
+  const a={id:'a'+(++S.seq),date:B.date,time:B.time,prac:B.sp,pat:p.id,motif:B.motif,status:'confirme',conf:true,sent:{},src:'En ligne'};
+  S.appts.push(a);S.me=p.id;save();B.step=4;B.done=a.id;renderView();$('#view h1').focus();
+  toast('Confirmation envoyée par e-mail'+(p.prefs.sms?' et SMS':'')+' (simulation)')},
+ med:()=>{const p=pat(S.me);p.med={allergies:$('#m-all').value.trim(),traitements:$('#m-tr').value.trim(),anx:$('#m-anx').value,anticoag:$('#m-ac').checked,grossesse:$('#m-gr').checked,upd:TK};save();renderView();toast('Questionnaire transmis au cabinet')},
+ note:f=>{const t=$('#noteIn');if(!t.value.trim()){$('#noteErr').textContent='La note est vide.';t.setAttribute('aria-invalid','true');t.focus();return}
+  pat(f.dataset.id).notes.unshift({d:TK,by:'Secrétariat',t:t.value.trim()});save();$('#patDetail').innerHTML=patDetail(f.dataset.id);toast('Note ajoutée')},
+ newAppt:()=>{if(!NA.pat){$('#naErr').textContent='Choisissez un patient.';$('#na-pat').setAttribute('aria-invalid','true');$('#na-pat').focus();return}
+  if(!NA.time){toast('Aucun créneau libre ce jour');return}
+  S.appts.push({id:'a'+(++S.seq),date:NA.date,time:NA.time,prac:NA.prac,pat:NA.pat,motif:NA.motif,status:'confirme',conf:false,sent:{},src:'Secrétariat'});save();dlg.close();
+  if(UI.view==='agenda')UI.ag=NA.date;renderView();toast('Rendez-vous créé, SMS de confirmation envoyé (simulation)')},
+ faq:f=>{const q=$('#fq').value.trim(),keys=$('#fk').value.split(',').map(s=>s.trim()).filter(Boolean),a=$('#fa').value.trim(),act=$('#fact').value;
+  const er={fq:q?'':'Indiquez un sujet.',fk:keys.length?'':'Ajoutez au moins un mot-clé.',fa:a?'':'Rédigez la réponse.'};let first=null;
+  Object.entries(er).forEach(([k,v])=>{$('#'+k+'e').textContent=v;const el=$('#'+k);if(v){el.setAttribute('aria-invalid','true');first=first||el}else el.removeAttribute('aria-invalid')});
+  if(first){first.focus();return}
+  if(f.dataset.id){Object.assign(S.faq.find(x=>x.id===f.dataset.id),{q,keys,a,act})}else{S.faq.unshift({id:'f'+Date.now(),q,keys,a,act,hits:0})}
+  if(f.dataset.un){S.unans=S.unans.filter(u=>u.q!==f.dataset.un)}
+  save();dlg.close();renderView();toast('Réponse enregistrée : l’assistant l’utilise immédiatement')}};
+document.addEventListener('submit',e=>{const f=e.target;if(f.dataset.form&&FORMS[f.dataset.form]){e.preventDefault();FORMS[f.dataset.form](f)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#chat').hidden&&!dlg.open)closeChat()});
+
+go('accueil',true);
+</script>
 </body>
 </html>
